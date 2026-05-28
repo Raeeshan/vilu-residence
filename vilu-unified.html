@@ -2874,6 +2874,9 @@ Suite</textarea></div>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Select a date and view daily operations</div></div></div>
+<script></script>
+
+<div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Select a date and view daily operations</div></div></div>
 <script>
 
 const LOGO_SRC="data:
@@ -8061,9 +8064,9 @@ function startSession() {
 // ── PATCH doLogin WITH SECURITY ──
 var _origDoLoginSec = doLogin;
 doLogin = function() {
-  var email = document.getElementById('login-user').value.trim().toLowerCase();
+  var email = (document.getElementById('login-user')||{value:''}).value.trim().toLowerCase();
   var err = document.getElementById('login-err');
-  err.style.display = 'none';
+  if(err) err.style.display = 'none';
 
   var locked = isAccountLocked(email);
   if(locked) {
