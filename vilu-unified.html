@@ -577,13 +577,13 @@ body.pms-mode { overflow:hidden; }
     <div id="login-err" class="login-err"></div>
     <div class="login-field">
       <label>Email address</label>
-      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
     </div>
     <div class="login-field">
       <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
     </div>
-    <button class="login-btn" onclick="doLogin()">Sign in →</button>
+    <button class="login-btn" onclick="window._doLoginSafe&&window._doLoginSafe()">Sign in →</button>
     <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency-portal.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
@@ -1548,13 +1548,13 @@ Suite</textarea></div>
     <div id="login-err" class="login-err"></div>
     <div class="login-field">
       <label>Email address</label>
-      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
     </div>
     <div class="login-field">
       <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
     </div>
-    <button class="login-btn" onclick="doLogin()">Sign in →</button>
+    <button class="login-btn" onclick="window._doLoginSafe&&window._doLoginSafe()">Sign in →</button>
     <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency-portal.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
@@ -8091,6 +8091,8 @@ doLogin = function() {
     }
   }, 400);
 };
+window._doLoginSafe = doLogin;
+
 
 // ── SECURITY LOG VIEWER ──
 function showLoginLog() {
