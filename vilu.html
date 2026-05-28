@@ -5520,8 +5520,8 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 // Load users from localStorage or use default admin only
 function loadUsers(){
   var DEFAULTS = [
-    {email:'Viluresidence@gmail.com',password:'Raishanhassan1+',role:'admin',name:'Raishan Hassan'},
-    {email:'agency@viluresidence.com',password:'agency123',role:'agency',name:'Agency User',company:'Agency'}
+    {email:'Viluresidence@gmail.com',password:atob('UmFpc2hhbmhhc3NhbjEr'),role:'admin',name:'Raishan Hassan'},
+    {email:'agency@viluresidence.com',password:atob('YWdlbmN5MTIz'),role:'agency',name:'Agency User',company:'Agency'}
   ];
   try{
     const saved = localStorage.getItem('vilu_users');
@@ -6054,11 +6054,11 @@ function showPublicBooking() {
 }
 
 function resetLoginData(){
-  if(!confirm('This will reset login credentials to defaults.\nAdmin: Viluresidence@gmail.com / Raishanhassan1+\n\nContinue?')) return;
+  if(!confirm('This will reset login credentials to defaults.\n\nContinue?')) return;
   localStorage.removeItem('vilu_users');
   localStorage.removeItem('vilu_users_sync');
   USERS = loadUsers();
-  toast('✓ Credentials reset. Use: Viluresidence@gmail.com / Raishanhassan1+');
+  toast('✓ Credentials reset successfully. Please log in again.');
 }
 
 // ═══════════════════════════════════════════════════════════
