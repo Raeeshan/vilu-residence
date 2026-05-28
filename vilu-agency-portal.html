@@ -8,7 +8,7 @@
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--green:#1a6b5a;--navy:#1e3a5f;--border:#e5e7eb;--muted:#6b7280;--bg:#f9fafb;--text:#111827}
+:root{--green:#00b4d8;--navy:#1e3a5f;--border:#e5e7eb;--muted:#6b7280;--bg:#f9fafb;--text:#111827}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* LOGIN */
@@ -55,7 +55,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .pkg-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:box-shadow .2s}
 .pkg-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.1)}
-.pkg-card.selected{border-color:var(--green);box-shadow:0 0 0 3px #1a6b5a33}
+.pkg-card.selected{border-color:var(--green);box-shadow:0 0 0 3px #00b4d833}
 .pkg-hdr{padding:14px 16px;color:#fff}
 .pkg-body{padding:14px 16px}
 
@@ -64,7 +64,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .room-slot{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;text-align:center}
 .room-slot:hover{border-color:var(--green);background:#e8f5f2}
 .room-slot.blocked{background:#fee2e2;border-color:#fca5a5;cursor:not-allowed}
-.room-slot.mine{background:#dcfce7;border-color:#86efac}
+.room-slot.mine{background:#b8eef8;border-color:#90e0ef}
 .room-slot.selected{background:var(--green);border-color:var(--green);color:#fff}
 
 /* BOOKING FORM */
@@ -77,13 +77,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sum-row.total{font-weight:800;font-size:15px;color:var(--text);border-top:2px solid var(--text);margin-top:8px;padding-top:8px}
 .sum-row.total span:last-child{color:var(--green)}
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
-.badge.ok{background:#dcfce7;color:#15803d}
+.badge.ok{background:#b8eef8;color:#0096c7}
 .badge.pending{background:#fef3c7;color:#92400e}
 .badge.cancelled{background:#fee2e2;color:#b91c1c}
 .al{display:flex;gap:10px;padding:12px 14px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:12px}
 .al.info{background:#e0f2fe;color:#0c4a6e;border:1px solid #bae6fd}
 .al.warn{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
-.al.ok{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.al.ok{background:#b8eef8;color:#0096c7;border:1px solid #caf0f8}
 .tb{width:100%;border-collapse:collapse;font-size:13px}
 .tb th{text-align:left;padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--border)}
 .tb td{padding:10px 12px;border-bottom:1px solid #f3f4f6}
@@ -98,7 +98,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* ── AGENCY LOGIN SCREEN ── */
 .ag-login-bg {
-  position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#1a6b5a 100%);
+  position:fixed;inset:0;background:linear-gradient(135deg,#03045e 0%,#0077b6 50%,#00b4d8 100%);
   display:flex;align-items:center;justify-content:center;z-index:9999;
 }
 .ag-login-card {
@@ -109,7 +109,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   text-align:center;margin-bottom:28px;
 }
 .ag-login-logo img {
-  width:72px;height:72px;border-radius:50%;border:3px solid #1a6b5a;object-fit:cover;
+  width:72px;height:72px;border-radius:50%;border:3px solid #00b4d8;object-fit:cover;
 }
 .ag-login-title {
   font-size:22px;font-weight:700;color:#111827;text-align:center;margin-bottom:4px;
@@ -128,12 +128,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   width:100%;padding:11px 14px;border:1.5px solid #e5e7eb;border-radius:8px;
   font-family:inherit;font-size:14px;color:#111827;outline:none;transition:border .2s;box-sizing:border-box;
 }
-.ag-login-field input:focus {border-color:#1a6b5a;}
+.ag-login-field input:focus {border-color:#00b4d8;}
 .ag-login-btn {
-  width:100%;background:#1a6b5a;color:#fff;border:none;padding:13px;border-radius:8px;
+  width:100%;background:#00b4d8;color:#fff;border:none;padding:13px;border-radius:8px;
   font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .2s;
 }
-.ag-login-btn:hover{background:#2a8a74;}
+.ag-login-btn:hover{background:#48cae4;}
 .ag-login-err {
   background:#fee2e2;color:#dc2626;border-radius:8px;padding:10px 14px;
   font-size:13px;margin-bottom:16px;display:none;
@@ -141,7 +141,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ag-login-back {
   text-align:center;margin-top:16px;font-size:13px;color:#6b7280;
 }
-.ag-login-back a {color:#1a6b5a;text-decoration:none;font-weight:600;}
+.ag-login-back a {color:#00b4d8;text-decoration:none;font-weight:600;}
 </style>
 </head>
 <body>
@@ -184,8 +184,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="fg"><label>Agency email</label><input type="email" id="ag-email" placeholder="agency@example.com" onkeydown="if(event.key==='Enter')doAgencyLogin()"></div>
     <div class="fg"><label>Password</label><input type="password" id="ag-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doAgencyLogin()"></div>
     <button class="btn-login" onclick="doAgencyLogin()">Sign in →</button>
-    <div style="margin-top:16px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:11px;color:#15803d;text-align:center">
-      <strong>First time?</strong> Your login is created by Vilu Residence.<br>Contact us at <a href="mailto:Viluresidence@gmail.com" style="color:#15803d">Viluresidence@gmail.com</a>
+    <div style="margin-top:16px;padding:10px 12px;background:#e0f7fd;border:1px solid #caf0f8;border-radius:8px;font-size:11px;color:#0096c7;text-align:center">
+      <strong>First time?</strong> Your login is created by Vilu Residence.<br>Contact us at <a href="mailto:Viluresidence@gmail.com" style="color:#0096c7">Viluresidence@gmail.com</a>
     </div>
   </div>
 </div>
@@ -283,7 +283,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="modal-body">
       <!-- Package summary banner -->
-      <div id="bk-pkg-summary" style="background:linear-gradient(135deg,#1e3a5f,#1a6b5a);color:#fff;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px"></div>
+      <div id="bk-pkg-summary" style="background:linear-gradient(135deg,#1e3a5f,#00b4d8);color:#fff;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px"></div>
 
       <!-- Step 1: Dates & Room -->
       <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Stay details</div>
@@ -360,7 +360,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="font-size:64px;margin-bottom:12px">🎉</div>
       <h2 style="font-size:20px;font-weight:800;color:var(--green);margin-bottom:8px">Booking confirmed!</h2>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Your booking has been sent to Vilu Residence and will appear in our system immediately.</p>
-      <div style="background:#dcfce7;border:2px dashed var(--green);border-radius:10px;padding:14px;font-size:20px;font-weight:800;color:var(--green);letter-spacing:.1em;margin-bottom:16px" id="success-ref">AG-000000</div>
+      <div style="background:#b8eef8;border:2px dashed var(--green);border-radius:10px;padding:14px;font-size:20px;font-weight:800;color:var(--green);letter-spacing:.1em;margin-bottom:16px" id="success-ref">AG-000000</div>
       <div id="success-details" style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.8"></div>
       <button class="btn-outline" onclick="document.getElementById('m-success').classList.remove('on');showTab('mybookings',null)">View my bookings</button>
     </div>
@@ -593,7 +593,7 @@ function checkAvailability(){
     var slot=document.createElement('div');
     slot.className='room-slot'+(avail.available?'':avail.reason&&avail.reason.indexOf('Your')>-1?' mine':' blocked');
     slot.innerHTML='<div style="font-size:13px;font-weight:700">'+room.name+'</div>'
-      +'<div style="font-size:11px;margin-top:4px;color:'+(avail.available?'var(--green)':avail.reason&&avail.reason.indexOf('Your')>-1?'#15803d':'#b91c1c')+'">'+(avail.available?'✓ Available':avail.reason)+'</div>';
+      +'<div style="font-size:11px;margin-top:4px;color:'+(avail.available?'var(--green)':avail.reason&&avail.reason.indexOf('Your')>-1?'#0096c7':'#b91c1c')+'">'+(avail.available?'✓ Available':avail.reason)+'</div>';
     grid.appendChild(slot);
   });
 }
@@ -610,7 +610,7 @@ function drawPackages(){
     return;
   }
   el.innerHTML='';
-  var colors=['#1a6b5a','#2563eb','#7c3aed','#dc2626','#d97706','#0891b2'];
+  var colors=['#00b4d8','#2563eb','#7c3aed','#dc2626','#d97706','#0891b2'];
   pkgs.forEach(function(pkg,i){
     var col=pkg.color||colors[i%colors.length];
     var commission=pkg.commission||10;
@@ -865,7 +865,7 @@ function renderAddedExtras(){
   if(!customExtras.length){el.innerHTML='';return;}
   var h = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px">';
   customExtras.forEach(function(ex){
-    h += '<div style="display:flex;align-items:center;gap:5px;background:#e8f5f2;border:1px solid #1a6b5a;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#1a6b5a">'
+    h += '<div style="display:flex;align-items:center;gap:5px;background:#e8f5f2;border:1px solid #00b4d8;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#00b4d8">'
       + ex.name+(ex.type==='night'?' (extra night, room rate)'
         :ex.perNight&&ex.perPerson?' ($'+ex.price+'/pax/night)'
         :ex.perNight?' ($'+ex.price+'/night)'
@@ -958,7 +958,7 @@ function updateBkSummary(){
     +'<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
     +'<div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px">FINAL PACKAGE INCLUDES</div>'
     +finalIncludes.map(function(i){return '<span style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#374151"><i class="ti ti-check" style="color:var(--green)"></i>'+i+'</span>';}).join('')
-    +customExtras.map(function(e){return '<span style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#1a6b5a"><i class="ti ti-plus"></i>'+e.name+'</span>';}).join('')
+    +customExtras.map(function(e){return '<span style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#00b4d8"><i class="ti ti-plus"></i>'+e.name+'</span>';}).join('')
     +'</div>'
     +'<div style="font-size:11px;color:var(--muted);margin-top:6px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+' · All taxes included</div>';
 }
