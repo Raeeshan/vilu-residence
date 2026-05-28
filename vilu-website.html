@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vilu Residence Maamigili — Maldives</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1628;
+  --navy2: #12223d;
+  --teal: #1a6b5a;
+  --teal-light: #2a8a74;
+  --gold: #c9a84c;
+  --gold-light: #e8c97e;
+  --sand: #f5f0e8;
+  --sand2: #ede6d6;
+  --white: #ffffff;
+  --text: #1a1a2e;
+  --muted: #6b7a8d;
+  --ocean: #0891b2;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 5vw;display:flex;align-items:center;justify-content:space-between;height:72px;transition:all .4s}
+nav.scrolled{background:rgba(10,22,40,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.2)}
+.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-logo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)}
+.nav-logo-text{display:flex;flex-direction:column}
+.nav-logo-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;letter-spacing:.04em;color:var(--white);line-height:1}
+.nav-logo-sub{font-size:10px;font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-book{background:var(--gold);color:var(--navy);padding:10px 24px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.nav-book:hover{background:var(--gold-light)}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.nav-hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:all .3s}
+.mobile-menu{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(10,22,40,.98);backdrop-filter:blur(20px);padding:24px 5vw;flex-direction:column;gap:0;z-index:999;border-bottom:1px solid rgba(201,168,76,.2)}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:16px 0;font-size:14px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
+.mobile-menu a:hover{color:var(--gold)}
+.mobile-menu .m-book-btn{margin-top:20px;background:var(--gold);color:var(--navy);padding:14px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%}
+
+/* ── HERO ── */
+#home{position:relative;height:100vh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(160deg,#0a1628 0%,#0f3d4a 40%,#1a6b5a 100%);z-index:0}
+.hero-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 60%,rgba(8,145,178,.25) 0%,transparent 60%)}
+.hero-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+.hero-waves{position:absolute;bottom:0;left:0;right:0;height:120px;z-index:1}
+.hero-waves svg{width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 5vw;max-width:900px}
+.hero-badge{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.4);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,8vw,96px);font-weight:300;line-height:1;letter-spacing:-.01em;margin-bottom:8px;animation:fadeUp .8s .1s ease both}
+.hero-title em{font-style:italic;color:var(--gold-light)}
+.hero-subtitle{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,3vw,26px);font-weight:300;color:rgba(255,255,255,.7);margin-bottom:40px;letter-spacing:.04em;animation:fadeUp .8s .2s ease both}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s .3s ease both}
+.btn-primary{background:var(--gold);color:var(--navy);padding:16px 36px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--white);padding:16px 36px;border:1px solid rgba(255,255,255,.4);border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.hero-scroll{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2;animation:fadeUp .8s .5s ease both}
+.hero-scroll span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(201,168,76,.8),transparent);animation:scrollAnim 2s infinite}
+.hero-stats{position:absolute;bottom:140px;right:5vw;display:flex;flex-direction:column;gap:20px;z-index:2;animation:fadeUp .8s .4s ease both}
+.stat{text-align:right}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold-light);line-height:1}
+.stat-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:2px}
+
+/* ── SECTION BASE ── */
+section{position:relative}
+.section-inner{max-width:1200px;margin:0 auto;padding:0 5vw}
+.section-tag{font-size:10px;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,60px);font-weight:300;line-height:1.1;letter-spacing:-.01em}
+
+/* ── QUICK BOOKING BAR ── */
+.booking-bar{background:var(--navy2);border-top:2px solid var(--gold);border-bottom:1px solid rgba(255,255,255,.06);padding:0 5vw}
+.booking-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:stretch;gap:0;height:72px}
+.bb-field{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 20px;border-right:1px solid rgba(255,255,255,.08)}
+.bb-field:first-child{padding-left:0}
+.bb-label{font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.bb-input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);width:100%;cursor:pointer}
+.bb-input::placeholder{color:rgba(255,255,255,.4)}
+.bb-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+.bb-btn{background:var(--gold);color:var(--navy);border:none;padding:0 32px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s;white-space:nowrap}
+.bb-btn:hover{background:var(--gold-light)}
+
+/* ── ROOMS ── */
+#rooms{background:var(--sand);color:var(--text);padding:100px 0}
+#rooms .section-tag{color:var(--teal)}
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2px;margin-top:60px}
+.room-card{background:var(--white);overflow:hidden;cursor:pointer;transition:transform .3s;group:1}
+.room-card:hover{transform:translateY(-4px)}
+.room-card-img{height:260px;overflow:hidden;position:relative}
+.room-card-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .5s}
+.room-card:hover .room-card-img-bg{transform:scale(1.06)}
+.room-card-badge{position:absolute;top:16px;left:16px;background:var(--teal);color:var(--white);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:2px}
+.room-card-body{padding:24px}
+.room-card-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px}
+.room-card-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.room-card-features{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.room-feature{font-size:11px;color:var(--muted);background:var(--sand);padding:4px 10px;border-radius:20px}
+.room-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--sand2);padding-top:16px}
+.room-price{font-family:'Cormorant Garamond',serif}
+.room-price-amount{font-size:28px;font-weight:600;color:var(--teal)}
+.room-price-label{font-size:11px;color:var(--muted)}
+.room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s}
+.room-book-btn:hover{background:var(--teal-light)}
+
+/* ── ABOUT ── */
+#about{background:var(--navy2);padding:100px 0;overflow:hidden}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:60px}
+.about-visual{position:relative}
+.about-img-frame{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,var(--teal) 0%,var(--ocean) 100%);border-radius:2px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.about-img-frame::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.1) 0%,transparent 60%)}
+.about-logo-big{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.3);object-fit:cover}
+.about-float-card{position:absolute;bottom:-24px;right:-24px;background:var(--gold);padding:24px 28px;border-radius:2px}
+.about-float-num{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--navy);line-height:1}
+.about-float-text{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);opacity:.7;margin-top:4px}
+.about-text .section-tag{color:var(--gold)}
+.about-text .section-title{color:var(--white)}
+.about-desc{font-size:15px;color:rgba(255,255,255,.65);line-height:1.8;margin-top:24px;margin-bottom:32px}
+.about-features{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
+.about-feature{display:flex;align-items:flex-start;gap:12px}
+.af-icon{width:32px;height:32px;background:rgba(201,168,76,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.af-text{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5}
+.af-title{font-size:13px;font-weight:500;color:var(--white);margin-bottom:2px}
+
+/* ── GALLERY ── */
+#gallery{background:var(--navy);padding:100px 0}
+.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,220px);gap:4px;margin-top:60px}
+.g-item{overflow:hidden;border-radius:2px;position:relative;cursor:pointer}
+.g-item:hover .g-overlay{opacity:1}
+.g-item-1{grid-column:1/6;grid-row:1/3}
+.g-item-2{grid-column:6/9;grid-row:1/2}
+.g-item-3{grid-column:9/13;grid-row:1/2}
+.g-item-4{grid-column:6/10;grid-row:2/3}
+.g-item-5{grid-column:10/13;grid-row:2/3}
+.g-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .5s}
+.g-item:hover .g-bg{transform:scale(1.08)}
+.g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,.7) 0%,transparent 60%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:20px}
+.g-label{font-size:12px;font-weight:500;letter-spacing:.08em;color:var(--white)}
+
+/* ── BOOKING SECTION ── */
+#booking{background:linear-gradient(160deg,var(--navy2) 0%,#0a2a1e 100%);padding:100px 0}
+.booking-split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.booking-info .section-tag{color:var(--gold)}
+.booking-info .section-title{color:var(--white);margin-bottom:24px}
+.booking-info p{font-size:15px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:32px}
+.booking-perks{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.booking-perk{display:flex;align-items:center;gap:12px;font-size:13px;color:rgba(255,255,255,.7)}
+.bp-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0}
+.booking-widget-frame{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:32px;text-align:center}
+.bwf-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--white);margin-bottom:8px}
+.bwf-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:28px}
+.bwf-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.bwf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bwf-field{display:flex;flex-direction:column;gap:6px;text-align:left}
+.bwf-label{font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
+.bwf-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:2px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border .2s;width:100%}
+.bwf-input:focus{border-color:var(--gold)}
+.bwf-input::placeholder{color:rgba(255,255,255,.3)}
+.bwf-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+.bwf-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:2px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
+.bwf-btn{width:100%;background:var(--gold);color:var(--navy);border:none;padding:16px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .25s;margin-bottom:12px}
+.bwf-btn:hover{background:var(--gold-light)}
+.bwf-note{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em}
+
+/* ── CONTACT ── */
+#contact{background:var(--sand);color:var(--text);padding:100px 0}
+#contact .section-tag{color:var(--teal)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:60px}
+.contact-info h3{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:24px;color:var(--text)}
+.contact-details{display:flex;flex-direction:column;gap:20px}
+.cd-item{display:flex;gap:16px;align-items:flex-start}
+.cd-icon{width:40px;height:40px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.cd-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
+.cd-value{font-size:15px;color:var(--text)}
+.cd-value a{color:var(--text);text-decoration:none}
+.contact-form{background:var(--white);padding:40px;border-radius:2px;box-shadow:0 4px 40px rgba(0,0,0,.08)}
+.cf-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:24px;color:var(--text)}
+.cf-fields{display:flex;flex-direction:column;gap:16px}
+.cf-field label{display:block;font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.cf-field input,.cf-field textarea,.cf-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:2px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border .2s}
+.cf-field input:focus,.cf-field textarea:focus{border-color:var(--teal)}
+.cf-field textarea{height:100px;resize:vertical}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cf-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:16px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.cf-btn:hover{background:var(--teal-light)}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);border-top:1px solid rgba(201,168,76,.2);padding:60px 5vw 32px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.footer-brand-logo img{width:48px;height:48px;border-radius:50%;border:2px solid rgba(201,168,76,.4);object-fit:cover}
+.footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:var(--white)}
+.footer-brand-sub{font-size:10px;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+.footer-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:20px}
+.footer-col h4{font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col ul a{font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
+.footer-col ul a:hover{color:var(--white)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding-top:24px;display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.3)}
+.footer-pms-badge{font-size:11px;color:rgba(255,255,255,.25);display:flex;align-items:center;gap:6px}
+.footer-pms-badge span{color:var(--gold)}
+
+/* ── BOOKING POPUP ── */
+.booking-popup-overlay{position:fixed;inset:0;background:rgba(10,22,40,.85);backdrop-filter:blur(8px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.booking-popup-overlay.open{display:flex}
+.booking-popup{background:var(--navy2);border:1px solid rgba(201,168,76,.25);border-radius:4px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .3s ease}
+.popup-header{padding:28px 32px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.popup-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--white)}
+.popup-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:22px;cursor:pointer;line-height:1;transition:color .2s;padding:4px}
+.popup-close:hover{color:var(--white)}
+.popup-body{padding:28px 32px 32px}
+
+/* ── FULL BOOKING PAGE ── */
+#booking-full-page{display:none;position:fixed;inset:0;z-index:1500;background:var(--sand);overflow-y:auto}
+.bfp-header{background:var(--navy);padding:20px 5vw;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.bfp-logo{display:flex;align-items:center;gap:10px}
+.bfp-logo img{width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+.bfp-logo-text{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--white)}
+.bfp-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:8px 18px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.bfp-close:hover{background:rgba(255,255,255,.2)}
+.bfp-content{max-width:960px;margin:0 auto;padding:48px 5vw}
+.bfp-title{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--text);margin-bottom:8px}
+.bfp-sub{font-size:15px;color:var(--muted);margin-bottom:40px}
+.bfp-search{background:var(--white);border-radius:4px;padding:24px;box-shadow:0 4px 24px rgba(0,0,0,.08);margin-bottom:40px}
+.bfp-search-grid{display:grid;grid-template-columns:1fr 1fr 80px 80px auto;gap:16px;align-items:end}
+.bfp-field label{font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+.bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:2px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none}
+.bfp-search-btn{background:var(--teal);color:var(--white);border:none;padding:11px 24px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .2s}
+.bfp-search-btn:hover{background:var(--teal-light)}
+.bfp-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
+.bfp-room-card{background:var(--white);border-radius:4px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.06);transition:transform .25s,box-shadow .25s}
+.bfp-room-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.bfp-room-img{height:200px;overflow:hidden}
+.bfp-room-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .4s}
+.bfp-room-card:hover .bfp-room-img-bg{transform:scale(1.05)}
+.bfp-room-body{padding:20px}
+.bfp-room-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px}
+.bfp-room-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.bfp-room-footer{display:flex;align-items:center;justify-content:space-between}
+.bfp-room-price{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--teal);font-weight:600}
+.bfp-room-price span{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--muted);font-weight:400}
+.bfp-book-btn{background:var(--teal);color:var(--white);border:none;padding:9px 18px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.bfp-book-btn:hover{background:var(--teal-light)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scrollAnim{0%,100%{opacity:0;transform:translateY(-8px)}50%{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .nav-links,.nav-book{display:none}
+  .nav-hamburger{display:flex}
+  .hero-stats{display:none}
+  .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5{grid-column:auto;grid-row:auto}
+  .bb-field:nth-child(n+3){display:none}
+  .bfp-search-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .bfp-search-grid .bfp-field:nth-child(n+3){display:none}
+}
+@media(max-width:600px){
+  .footer-top{grid-template-columns:1fr}
+  .cf-row,.bwf-row{grid-template-columns:1fr}
+  .rooms-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAVIGATION ══ -->
+<nav id="nav">
+  <div class="nav-logo">
+    <img src="data:image/jpeg;base64,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" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#rooms">Rooms</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-book" onclick="openBookingPopup()">Book Now</button>
+  <div class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" onclick="closeMobileMenu()">Home</a>
+  <a href="#rooms" onclick="closeMobileMenu()">Rooms</a>
+  <a href="#about" onclick="closeMobileMenu()">About</a>
+  <a href="#gallery" onclick="closeMobileMenu()">Gallery</a>
+  <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+  <button class="m-book-btn" onclick="openBookingPopup();closeMobileMenu()">Book Your Stay</button>
+</div>
+
+<!-- ══ HERO ══ -->
+<section id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-waves">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <path d="M0,60 C240,120 480,0 720,60 C960,120 1200,0 1440,60 L1440,120 L0,120 Z" fill="#f5f0e8" opacity=".15"/>
+      <path d="M0,80 C360,20 720,120 1080,40 C1260,0 1360,80 1440,60 L1440,120 L0,120 Z" fill="#f5f0e8" opacity=".08"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">South Ari Atoll · Maldives</div>
+    <h1 class="hero-title">Vilu<br><em>Residence</em></h1>
+    <p class="hero-subtitle">A warm & welcoming guesthouse in the heart of the Maldives</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openBookingPage()">🏝️ Book Your Stay</button>
+      <button class="btn-outline" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">View Rooms</button>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Rooms</div></div>
+    <div class="stat"><div class="stat-num">5★</div><div class="stat-label">Service</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Memories</div></div>
+  </div>
+</section>
+
+<!-- ══ QUICK BOOKING BAR ══ -->
+<div class="booking-bar">
+  <div class="booking-bar-inner">
+    <div class="bb-field">
+      <div class="bb-label">Check-in</div>
+      <input type="date" class="bb-input" id="bb-ci">
+    </div>
+    <div class="bb-field">
+      <div class="bb-label">Check-out</div>
+      <input type="date" class="bb-input" id="bb-co">
+    </div>
+    <div class="bb-field">
+      <div class="bb-label">Guests</div>
+      <select class="bb-input" id="bb-guests" style="background:transparent;cursor:pointer">
+        <option value="1" style="color:#000">1 Guest</option>
+        <option value="2" style="color:#000" selected>2 Guests</option>
+        <option value="3" style="color:#000">3 Guests</option>
+      </select>
+    </div>
+    <div class="bb-field" style="border-right:none">
+      <div class="bb-label">Rooms</div>
+      <select class="bb-input" id="bb-rooms" style="background:transparent;cursor:pointer">
+        <option value="any" style="color:#000">Any room</option>
+        <option value="101" style="color:#000">Garden Room — $80/night</option>
+        <option value="102" style="color:#000">Garden Room — $80/night</option>
+        <option value="103" style="color:#000">Garden Deluxe — $85/night</option>
+        <option value="104" style="color:#000">Garden Deluxe — $85/night</option>
+        <option value="105" style="color:#000">Premium Room — $90/night</option>
+        <option value="106" style="color:#000">Premium Room — $90/night</option>
+      </select>
+    </div>
+    <button class="bb-btn" onclick="openBookingPageWithDates()">Check Availability</button>
+  </div>
+</div>
+
+<!-- ══ ROOMS ══ -->
+<section id="rooms">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Accommodation</div>
+      <h2 class="section-title" style="color:var(--text)">Our <em style="font-style:italic;color:var(--teal)">Rooms</em></h2>
+    </div>
+    <div class="rooms-grid reveal">
+      <div class="room-card" onclick="openBookingPage()">
+        <div class="room-card-img">
+          <div class="room-card-img-bg" style="background:linear-gradient(135deg,#1a6b5a,#0891b2)"></div>
+          <div class="room-card-badge">Garden View</div>
+        </div>
+        <div class="room-card-body">
+          <div class="room-card-name">Garden Room</div>
+          <div class="room-card-desc">Comfortable double rooms with garden views, air conditioning, hot shower, and en-suite bathroom. Ideal for couples.</div>
+          <div class="room-card-features">
+            <span class="room-feature">🌿 Garden view</span>
+            <span class="room-feature">❄️ Air con</span>
+            <span class="room-feature">🚿 En-suite</span>
+            <span class="room-feature">👥 Max 3</span>
+          </div>
+          <div class="room-card-footer">
+            <div class="room-price">
+              <div class="room-price-amount">$80</div>
+              <div class="room-price-label">per night</div>
+            </div>
+            <button class="room-book-btn">Book Now</button>
+          </div>
+        </div>
+      </div>
+      <div class="room-card" onclick="openBookingPage()">
+        <div class="room-card-img">
+          <div class="room-card-img-bg" style="background:linear-gradient(135deg,#0f4a3c,#1a6b5a)"></div>
+          <div class="room-card-badge">Garden View</div>
+        </div>
+        <div class="room-card-body">
+          <div class="room-card-name">Garden Deluxe Room</div>
+          <div class="room-card-desc">Spacious rooms with garden views, private balcony option and upgraded amenities for a more relaxing stay.</div>
+          <div class="room-card-features">
+            <span class="room-feature">🌿 Garden view</span>
+            <span class="room-feature">❄️ Air con</span>
+            <span class="room-feature">🚿 En-suite</span>
+            <span class="room-feature">👥 Max 3</span>
+          </div>
+          <div class="room-card-footer">
+            <div class="room-price">
+              <div class="room-price-amount">$85</div>
+              <div class="room-price-label">per night</div>
+            </div>
+            <button class="room-book-btn">Book Now</button>
+          </div>
+        </div>
+      </div>
+      <div class="room-card" onclick="openBookingPage()">
+        <div class="room-card-img">
+          <div class="room-card-img-bg" style="background:linear-gradient(135deg,#0891b2,#1e3a5f)"></div>
+          <div class="room-card-badge">Sea View</div>
+        </div>
+        <div class="room-card-body">
+          <div class="room-card-name">Premium Room</div>
+          <div class="room-card-desc">Our best rooms with beautiful sea views, comfortable furnishings and everything you need for a great stay.</div>
+          <div class="room-card-features">
+            <span class="room-feature">🌊 Sea view</span>
+            <span class="room-feature">❄️ Air con</span>
+            <span class="room-feature">🚿 En-suite</span>
+            <span class="room-feature">👥 Max 3</span>
+          </div>
+          <div class="room-card-footer">
+            <div class="room-price">
+              <div class="room-price-amount">$90</div>
+              <div class="room-price-label">per night</div>
+            </div>
+            <button class="room-book-btn">Book Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ABOUT ══ -->
+<section id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-img-frame">
+          <img src="data:image/jpeg;base64,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" alt="Vilu Residence" class="about-logo-big">
+        </div>
+        <div class="about-float-card">
+          <div class="about-float-num">6</div>
+          <div class="about-float-text">Cosy Rooms</div>
+        </div>
+      </div>
+      <div class="about-text reveal">
+        <div class="section-tag">About Us</div>
+        <h2 class="section-title">Your home <em style="font-style:italic">in paradise</em></h2>
+        <p class="about-desc">Nestled in the South Ari Atoll, Vilu Residence Maamigili offers an intimate boutique experience surrounded by the natural beauty of the Maldives. We believe every guest deserves personalised attention, authentic experiences, and a genuine connection with this remarkable corner of the world.</p>
+        <div class="about-features">
+          <div class="about-feature"><div class="af-icon">🐠</div><div><div class="af-title">Snorkeling & Diving</div><div class="af-text">World-class reef within minutes</div></div></div>
+          <div class="about-feature"><div class="af-icon">🚤</div><div><div class="af-title">Island Hopping</div><div class="af-text">Explore surrounding atolls</div></div></div>
+          <div class="about-feature"><div class="af-icon">🍽️</div><div><div class="af-title">Local Cuisine</div><div class="af-text">Fresh seafood & Maldivian dishes</div></div></div>
+          <div class="about-feature"><div class="af-icon">🌅</div><div><div class="af-title">Stunning Sunsets</div><div class="af-text">Unforgettable Indian Ocean views</div></div></div>
+        </div>
+        <button class="btn-primary" style="background:var(--gold);color:var(--navy)" onclick="openBookingPage()">Plan Your Stay</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GALLERY ══ -->
+<section id="gallery">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Gallery</div>
+      <h2 class="section-title">Moments <em style="font-style:italic;color:var(--gold-light)">in paradise</em></h2>
+    </div>
+    <div class="gallery-grid reveal">
+      <div class="g-item g-item-1"><div class="g-bg" style="background:linear-gradient(135deg,#0a1628,#1a6b5a);height:100%"></div><div class="g-overlay"><span class="g-label">The Ocean</span></div></div>
+      <div class="g-item g-item-2"><div class="g-bg" style="background:linear-gradient(135deg,#1a6b5a,#0891b2);height:100%"></div><div class="g-overlay"><span class="g-label">Our Rooms</span></div></div>
+      <div class="g-item g-item-3"><div class="g-bg" style="background:linear-gradient(135deg,#0891b2,#1e3a5f);height:100%"></div><div class="g-overlay"><span class="g-label">Maldives Life</span></div></div>
+      <div class="g-item g-item-4"><div class="g-bg" style="background:linear-gradient(135deg,#c9a84c,#1a6b5a);height:100%"></div><div class="g-overlay"><span class="g-label">Sunset Views</span></div></div>
+      <div class="g-item g-item-5"><div class="g-bg" style="background:linear-gradient(135deg,#0f3d4a,#1a6b5a);height:100%"></div><div class="g-overlay"><span class="g-label">Activities</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BOOKING SECTION ══ -->
+<section id="booking">
+  <div class="section-inner">
+    <div class="booking-split">
+      <div class="booking-info reveal">
+        <div class="section-tag">Reservations</div>
+        <h2 class="section-title">Reserve your <em style="font-style:italic">escape</em></h2>
+        <p>Book directly with us for the best rates and personalised service. No booking fees, flexible policies.</p>
+        <div class="booking-perks">
+          <div class="booking-perk"><div class="bp-dot"></div>Best rate guaranteed — book direct with us</div>
+          <div class="booking-perk"><div class="bp-dot"></div>Instant confirmation via email</div>
+          <div class="booking-perk"><div class="bp-dot"></div>Personalised welcome & local insights</div>
+          <div class="booking-perk"><div class="bp-dot"></div>Activities & transfers arrangeable</div>
+          <div class="booking-perk"><div class="bp-dot"></div>TGST 17% & Green Tax included in rates</div>
+        </div>
+        <button class="btn-primary" style="background:var(--gold);color:var(--navy)" onclick="openBookingPage()">View All Availability</button>
+      </div>
+      <div class="booking-widget-frame reveal">
+        <div class="bwf-title">Quick Reservation</div>
+        <div class="bwf-sub">Check availability in seconds</div>
+        <div class="bwf-fields">
+          <div class="bwf-row">
+            <div class="bwf-field"><div class="bwf-label">Check-in</div><input type="date" class="bwf-input" id="bwf-ci"></div>
+            <div class="bwf-field"><div class="bwf-label">Check-out</div><input type="date" class="bwf-input" id="bwf-co"></div>
+          </div>
+          <div class="bwf-row">
+            <div class="bwf-field"><div class="bwf-label">Adults</div>
+              <select class="bwf-select" id="bwf-ad"><option value="1">1 Adult</option><option value="2" selected>2 Adults</option><option value="3">3 Adults</option></select>
+            </div>
+            <div class="bwf-field"><div class="bwf-label">Children</div>
+              <select class="bwf-select" id="bwf-ch"><option value="0" selected>No children</option><option value="1">1 Child</option><option value="2">2 Children</option></select>
+            </div>
+          </div>
+        </div>
+        <button class="bwf-btn" onclick="openBookingPageWithDates()">Check Availability →</button>
+        <div class="bwf-note">Or <span style="color:var(--gold-light);cursor:pointer" onclick="openBookingPopup()">browse all rooms</span> · Direct bookings only</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT ══ -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Get In Touch</div>
+      <h2 class="section-title" style="color:var(--text)">We'd love to <em style="font-style:italic;color:var(--teal)">hear from you</em></h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <h3>Contact Vilu Residence</h3>
+        <div class="contact-details">
+          <div class="cd-item"><div class="cd-icon">📍</div><div><div class="cd-label">Address</div><div class="cd-value">Maamigili, South Ari Atoll, 00100<br>Republic of Maldives</div></div></div>
+          <div class="cd-item"><div class="cd-icon">📞</div><div><div class="cd-label">Phone / WhatsApp</div><div class="cd-value"><a href="tel:+9609903339">+960 9903339</a></div></div></div>
+          <div class="cd-item"><div class="cd-icon">✉️</div><div><div class="cd-label">Email</div><div class="cd-value"><a href="mailto:Viluresidence@gmail.com">Viluresidence@gmail.com</a></div></div></div>
+          <div class="cd-item"><div class="cd-icon">🕐</div><div><div class="cd-label">Response Time</div><div class="cd-value">Within 24 hours</div></div></div>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <div class="cf-title">Send us a message</div>
+        <div class="cf-fields">
+          <div class="cf-row">
+            <div class="cf-field"><label>Your Name</label><input type="text" placeholder="Full name"></div>
+            <div class="cf-field"><label>Email</label><input type="email" placeholder="your@email.com"></div>
+          </div>
+          <div class="cf-field"><label>Subject</label>
+            <select><option>Room Enquiry</option><option>Booking Question</option><option>Activities</option><option>Group Booking</option><option>Other</option></select>
+          </div>
+          <div class="cf-field"><label>Message</label><textarea placeholder="Tell us about your travel plans..."></textarea></div>
+          <button class="cf-btn" onclick="sendContactForm()">Send Message →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand-logo">
+          <img src="data:image/jpeg;base64,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" alt="Vilu Residence">
+          <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
+        </div>
+        <p class="footer-desc">A welcoming guesthouse in the South Ari Atoll offering genuine service and authentic Maldivian experiences.</p>
+        <div style="font-size:12px;color:rgba(255,255,255,.3)">+960 9903339 · Viluresidence@gmail.com</div>
+      </div>
+      <div class="footer-col"><h4>Navigate</h4><ul><li><a href="#home">Home</a></li><li><a href="#rooms">Rooms</a></li><li><a href="#about">About Us</a></li><li><a href="#gallery">Gallery</a></li><li><a href="#contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Rooms</h4><ul><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Premium Room — $90</a></li><li><a href="#rooms">Premium Room — $90</a></li></ul></div>
+      <div class="footer-col"><h4>Info</h4><ul><li><a href="#booking" onclick="openBookingPage()">Book Direct</a></li><li><a href="#contact">Enquiries</a></li><li><a href="#contact">Groups</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Vilu Residence Maamigili. All rights reserved.</div>
+      <div class="footer-pms-badge">Managed by <span>Vilu PMS</span></div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ BOOKING POPUP ══ -->
+<div class="booking-popup-overlay" id="bookingPopupOverlay" onclick="if(event.target===this)closeBookingPopup()">
+  <div class="booking-popup">
+    <div class="popup-header">
+      <div class="popup-title">Book Your Stay</div>
+      <button class="popup-close" onclick="closeBookingPopup()">×</button>
+    </div>
+    <div class="popup-body">
+      <div class="bwf-fields">
+        <div class="bwf-row">
+          <div class="bwf-field"><div class="bwf-label">Check-in</div><input type="date" class="bwf-input" id="popup-ci"></div>
+          <div class="bwf-field"><div class="bwf-label">Check-out</div><input type="date" class="bwf-input" id="popup-co"></div>
+        </div>
+        <div class="bwf-row">
+          <div class="bwf-field"><div class="bwf-label">Adults</div><select class="bwf-select" id="popup-ad"><option>1</option><option selected>2</option><option>3</option></select></div>
+          <div class="bwf-field"><div class="bwf-label">Children</div><select class="bwf-select" id="popup-ch"><option selected>0</option><option>1</option><option>2</option></select></div>
+        </div>
+      </div>
+      <button class="bwf-btn" style="margin-top:8px" onclick="openBookingPageWithDates();closeBookingPopup()">Search Availability →</button>
+      <div class="bwf-note">Best rates guaranteed · Direct booking only</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FULL BOOKING PAGE ══ -->
+<div id="booking-full-page">
+  <div class="bfp-header">
+    <div class="bfp-logo">
+      <img src="data:image/jpeg;base64,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" alt="Vilu Residence">
+      <span class="bfp-logo-text">Vilu Residence — Book Your Stay</span>
+    </div>
+    <button class="bfp-close" onclick="closeBookingPage()">✕ Close</button>
+  </div>
+  <div class="bfp-content">
+    <h1 class="bfp-title">Find your perfect room</h1>
+    <p class="bfp-sub">6 rooms available in South Ari Atoll, Maamigili · Direct booking, best rates guaranteed</p>
+    <div class="bfp-search">
+      <div class="bfp-search-grid">
+        <div class="bfp-field"><label>Check-in</label><input type="date" id="bfp-ci"></div>
+        <div class="bfp-field"><label>Check-out</label><input type="date" id="bfp-co"></div>
+        <div class="bfp-field"><label>Adults</label><select id="bfp-ad"><option>1</option><option selected>2</option><option>3</option></select></div>
+        <div class="bfp-field"><label>Children</label><select id="bfp-ch"><option selected>0</option><option>1</option><option>2</option></select></div>
+        <button class="bfp-search-btn" onclick="bfpSearch()">Search</button>
+      </div>
+    </div>
+    <div class="bfp-rooms-grid" id="bfp-rooms-grid">
+      <!-- Rooms populated by JS -->
+    </div>
+    <div style="margin-top:40px;padding:24px;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;text-align:center">
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px">To complete your booking, please contact us directly:</p>
+      <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
+        <a href="tel:+9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:15px">📞 +960 9903339</a>
+        <a href="mailto:Viluresidence@gmail.com" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:15px">✉️ Viluresidence@gmail.com</a>
+        <a href="https://wa.me/9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:15px">💬 WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// SUPABASE — Website live data connection
+// ═══════════════════════════════════════════════════════════
+const SUPA_URL = 'https://jlzmcijaqnzxlqpixbuc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impsem1jaWphcW56eGxxcGl4YnVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NDUxMDUsImV4cCI6MjA5NTUyMTEwNX0.3QCJwg9ILEockHwDMvqpfG8-B7mZauUnt-G5h6xJMWk';
+
+async function supaGet(table, query) {
+  try {
+    const url = SUPA_URL + '/rest/v1/' + table + (query ? '?' + query : '');
+    const resp = await fetch(url, {
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY
+      }
+    });
+    if(!resp.ok) return null;
+    return await resp.json();
+  } catch(e) { return null; }
+}
+
+async function supaPost(table, data, upsertOn) {
+  try {
+    const url = SUPA_URL + '/rest/v1/' + table + (upsertOn ? '?on_conflict=' + upsertOn : '');
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(data)
+    });
+    if(!resp.ok) return null;
+    const text = await resp.text();
+    return text ? JSON.parse(text) : null;
+  } catch(e) { return null; }
+}
+
+// Load rooms from Supabase (with live prices)
+async function loadRoomsFromSupabase() {
+  const rooms = await supaGet('rooms', 'select=*&order=id');
+  if(rooms && rooms.length) {
+    ROOMS = rooms.map(r => ({
+      id: r.id,
+      name: r.name,
+      type: r.type||'Standard',
+      rate: r.rate||80,
+      cap: r.cap||3,
+      view: r.view||'Garden view',
+      desc: r.description||''
+    }));
+  }
+}
+
+// Check availability from Supabase
+async function checkAvailabilityFromSupabase(ci, co) {
+  const res = await supaGet('reservations',
+    `select=room_id,check_in,check_out&status=neq.Cancelled`);
+  const blk = await supaGet('blocks',
+    `select=room_id,from_date,to_date`);
+  const all = [...(res||[]).map(r=>{return{rn:r.room_id,ci:r.check_in,co:r.check_out}})];
+  (blk||[]).forEach(b => all.push({rn:b.room_id,ci:b.from_date,co:b.to_date}));
+  return all;
+}
+
+// Load website content from Supabase
+async function loadWebsiteFromSupabase() {
+  const data = await supaGet('website_content', 'key=eq.main&select=value');
+  if(data && data[0] && data[0].value) {
+    return data[0].value;
+  }
+  return null;
+}
+
+// Submit booking request to Supabase
+async function submitDirectBooking(booking) {
+  const id = 'WEB' + Date.now();
+  const result = await supaPost('reservations', {
+    id: id,
+    room_id: booking.roomId,
+    guest_name: booking.name,
+    guest_email: booking.email,
+    guest_phone: booking.phone||'',
+    guest_country: booking.country||'',
+    check_in: booking.ci,
+    check_out: booking.co,
+    adults: booking.adults||2,
+    children: 0,
+    rate: booking.rate||0,
+    status: 'Pending',
+    source: 'Website'
+  }, 'id');
+  return result ? id : null;
+}
+
+// Override isRoomAvailable to use Supabase data
+var _supaBlocks = [];
+async function initSupaAvailability() {
+  _supaBlocks = await checkAvailabilityFromSupabase() || [];
+}
+
+var _origIsAvail = isRoomAvailable;
+isRoomAvailable = function(roomId, ci, co) {
+  // Check Supabase blocks first
+  const blocked = _supaBlocks.some(function(b) {
+    return b.rn === roomId && ci < b.co && co > b.ci;
+  });
+  if(blocked) return false;
+  // Fall back to localStorage check
+  return _origIsAvail(roomId, ci, co);
+};
+
+// Init on page load
+document.addEventListener('DOMContentLoaded', async function() {
+  // Load rooms from Supabase
+  await loadRoomsFromSupabase();
+  
+  // Load availability
+  await initSupaAvailability();
+  
+  // Load website content
+  const webContent = await loadWebsiteFromSupabase();
+  if(webContent) {
+    localStorage.setItem('vilu_website', JSON.stringify(webContent));
+    if(typeof applyWebsiteData === 'function') applyWebsiteData();
+  }
+  
+  // Update room cards with live rates
+  ROOMS.forEach(function(r, i) {
+    var priceEls = document.querySelectorAll('.room-price-amount');
+    if(priceEls[i]) priceEls[i].textContent = '$' + r.rate;
+  });
+  
+  // Update booking bar dropdown
+  if(typeof refreshRoomCards === 'function') refreshRoomCards();
+});
+// ══════════════════════════════════════════════════════
+// PRICING SYSTEM — reads live from PMS localStorage
+// Same keys as: vilu.html (PMS), vilu-unified.html
+// ══════════════════════════════════════════════════════
+
+// Default room data (fallback if PMS not yet opened)
+var DEFAULT_ROOMS = [
+  {id:'VR01',name:'Garden Room A',type:'Standard',rate:80,cap:3,view:'Garden view',
+   desc:'A comfortable double room with garden view, ideal for couples or solo travelers seeking a peaceful retreat.'},
+  {id:'VR02',name:'Garden Room B',type:'Standard',rate:80,cap:3,view:'Garden view',
+   desc:'A cozy double room with garden view, perfect for a relaxing Maldives getaway.'},
+  {id:'VR03',name:'Garden Deluxe A',type:'Premium',rate:85,cap:3,view:'Partial sea view',
+   desc:'Enjoy partial sea views from this bright double room with private balcony.'},
+  {id:'VR04',name:'Garden Deluxe B',type:'Premium',rate:85,cap:3,view:'Partial sea view',
+   desc:'Spacious premium room featuring a private balcony with partial sea views.'},
+  {id:'VR05',name:'Premium Room A',type:'Superior',rate:90,cap:3,view:'Sea view',
+   desc:'Our finest room with panoramic sea views and premium furnishings.'},
+  {id:'VR06',name:'Premium Room B',type:'Superior',rate:90,cap:3,view:'Sea view',
+   desc:'Superior room with stunning sea views and comfortable amenities.'},
+];
+
+// Load rooms from PMS localStorage (live sync)
+function loadPMSRooms() {
+  try {
+    var saved = localStorage.getItem('vilu_rooms');
+    var details = JSON.parse(localStorage.getItem('vilu_room_details') || '{}');
+    var base = saved ? JSON.parse(saved) : DEFAULT_ROOMS;
+    return base.map(function(r) {
+      var d = details[r.id] || {};
+      return {
+        id: r.id,
+        name: r.name,
+        type: r.type || 'Standard',
+        rate: r.rate,
+        cap: r.cap || 3,
+        view: d.view || r.view || 'Garden view',
+        desc: d.description || r.desc || '',
+        size: d.size || 22,
+        beds: d.beds || '1 Double bed',
+        amenities: d.amenities || [],
+        photo: d.photo || '',
+      };
+    });
+  } catch(e) { return DEFAULT_ROOMS; }
+}
+
+// Get price for a specific room on a specific date
+// Checks: bulk price matrix → seasonal → base rate
+function getRoomPrice(roomId, dateStr) {
+  // 1. Check bulk price matrix (vilu_room_prices set by Bulk Price Manager)
+  try {
+    var matrix = JSON.parse(localStorage.getItem('vilu_room_prices') || '{}');
+    if (matrix[roomId] && matrix[roomId][dateStr]) {
+      return +matrix[roomId][dateStr];
+    }
+  } catch(e) {}
+  // 2. Fallback to base rate from vilu_rooms
+  var rooms = loadPMSRooms();
+  var room = rooms.find(function(r){ return r.id === roomId; });
+  return room ? room.rate : 80;
+}
+
+// Get average price for a date range
+function getAvgPrice(roomId, ci, co) {
+  if (!ci || !co) {
+    var rooms = loadPMSRooms();
+    var r = rooms.find(function(x){ return x.id === roomId; });
+    return r ? r.rate : 80;
+  }
+  var total = 0, nights = 0;
+  var d = new Date(ci + 'T12:00');
+  var end = new Date(co + 'T12:00');
+  while (d < end) {
+    var ds = d.toISOString().slice(0,10);
+    total += getRoomPrice(roomId, ds);
+    nights++;
+    d.setDate(d.getDate() + 1);
+  }
+  return nights > 0 ? Math.round(total / nights) : 80;
+}
+
+// Load rooms fresh each time (reflects PMS changes)
+var ROOMS = loadPMSRooms();
+
+// Listen for PMS price updates via BroadcastChannel
+try {
+  var _bc = new BroadcastChannel('vilu_pms');
+  _bc.onmessage = function(e) {
+    if (e.data && (e.data.type === 'SETTINGS_UPDATE' || e.data.type === 'ROOM_DETAILS_UPDATE' || e.data.type === 'PRICE_UPDATE')) {
+      ROOMS = loadPMSRooms();
+      refreshRoomCards();
+    }
+  };
+} catch(e) {}
+
+// Refresh room cards when prices change
+function refreshRoomCards() {
+  // Update hero booking bar selects with latest rates
+  var sel = document.getElementById('bb-rooms');
+  if (sel) {
+    var opts = ['<option value="any">Any room</option>'];
+    ROOMS.forEach(function(r) {
+      opts.push('<option value="'+r.id+'">'+r.name+' — $'+r.rate+'/night</option>');
+    });
+    sel.innerHTML = opts.join('');
+  }
+}
+const COLORS = {
+  'Standard':'linear-gradient(135deg,#1a6b5a,#0891b2)',
+  'Premium':'linear-gradient(135deg,#0f4a3c,#1a6b5a)',
+  'Superior':'linear-gradient(135deg,#0891b2,#1e3a5f)',
+};
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll', function(){
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── MOBILE MENU ──
+function toggleMobileMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
+function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open');}
+
+// ── REVEAL ON SCROLL ──
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);});
+
+// ── SET DEFAULT DATES ──
+(function(){
+  var today = new Date();
+  var tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  var fmt = function(d){return d.toISOString().slice(0,10)};
+  ['bb-ci','bwf-ci','popup-ci','bfp-ci'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){el.value = fmt(today); el.min = fmt(today);}
+  });
+  ['bb-co','bwf-co','popup-co','bfp-co'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){el.value = fmt(tomorrow); el.min = fmt(tomorrow);}
+  });
+})();
+
+// ── BOOKING POPUP ──
+function openBookingPopup(){
+  document.getElementById('bookingPopupOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeBookingPopup(){
+  document.getElementById('bookingPopupOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ── FULL BOOKING PAGE ──
+function openBookingPage(){
+  document.getElementById('booking-full-page').style.display='block';
+  document.body.style.overflow='hidden';
+  bfpRenderRooms(ROOMS);
+}
+function closeBookingPage(){
+  document.getElementById('booking-full-page').style.display='none';
+  document.body.style.overflow='';
+}
+function openBookingPageWithDates(){
+  openBookingPage();
+  // Copy dates from whichever form triggered this
+  var ci = document.getElementById('bb-ci').value || document.getElementById('bwf-ci').value || document.getElementById('popup-ci').value;
+  var co = document.getElementById('bb-co').value || document.getElementById('bwf-co').value || document.getElementById('popup-co').value;
+  if(ci) document.getElementById('bfp-ci').value = ci;
+  if(co) document.getElementById('bfp-co').value = co;
+}
+
+// ── BFP SEARCH ──
+function bfpSearch(){
+  var ci = document.getElementById('bfp-ci').value;
+  var co = document.getElementById('bfp-co').value;
+  if(!ci || !co || co <= ci){alert('Please select valid dates'); return;}
+  // Reload rooms from PMS in case prices changed
+  ROOMS = loadPMSRooms();
+  var available = ROOMS.filter(function(r){return isRoomAvailable(r.id, ci, co);});
+  bfpRenderRooms(available, ci, co);
+}
+
+function isRoomAvailable(roomId, ci, co){
+  try{
+    var res = JSON.parse(localStorage.getItem('vilu_res') || '[]');
+    var blk = JSON.parse(localStorage.getItem('vilu_blk') || '[]');
+    var allBlocks = res.concat(blk).filter(function(r){
+      return r.rn === roomId && r.st !== 'Cancelled';
+    });
+    return !allBlocks.some(function(r){
+      var rci = r.ci || r.from; var rco = r.co || r.to;
+      return ci < rco && co > rci;
+    });
+  }catch(e){return true;}
+}
+
+function bfpRenderRooms(rooms, ci, co){
+  var grid = document.getElementById('bfp-rooms-grid');
+  grid.innerHTML = '';
+  if(!rooms.length){
+    var empty = document.createElement('div');
+    empty.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px;color:#6b7a8d';
+    empty.innerHTML = '<div style="font-size:48px;margin-bottom:16px">&#127965;</div><p>No rooms available. Try different dates or contact us.</p>';
+    grid.appendChild(empty);
+    return;
+  }
+  var nights = (ci && co) ? Math.max(1, Math.round((new Date(co)-new Date(ci))/86400000)) : 1;
+  rooms.forEach(function(r){
+    var nightlyRate = getAvgPrice(r.id, ci, co);
+    var total = nightlyRate * nights;
+    var r_rate = nightlyRate; // override display rate
+    var card = document.createElement('div');
+    card.className = 'bfp-room-card';
+    var bg = COLORS[r.type] || COLORS['Standard'];
+    card.innerHTML = '<div class="bfp-room-img"><div class="bfp-room-img-bg" style="background:'+bg+';height:100%"></div></div>'
+      + '<div class="bfp-room-body">'
+      + '<div class="bfp-room-name">'+r.name+'</div>'
+      + '<div class="bfp-room-desc">'+r.desc+'</div>'
+      + '<div class="bfp-room-footer">'
+      + '<div class="bfp-room-price">$'+r_rate+'<span> /night'+(nights>1?' &middot; $'+total+' total':'')+'</span></div>'
+      + '<button class="bfp-book-btn">Book</button>'
+      + '</div></div>';
+    (function(room){
+      card.querySelector('.bfp-book-btn').addEventListener('click', function(){ bfpBookRoom(room.name); });
+    })(r);
+    grid.appendChild(card);
+  });
+}
+
+function bfpBookRoom(roomName){
+  var ci = document.getElementById('bfp-ci').value;
+  var co = document.getElementById('bfp-co').value;
+  var msg = 'Hi, I would like to book '+roomName;
+  if(ci) msg += ' from '+ci;
+  if(co) msg += ' to '+co;
+  msg += '. Please confirm availability.';
+  window.open('mailto:Viluresidence@gmail.com?subject=Booking Request - '+roomName+'&body='+encodeURIComponent(msg));
+}
+
+// ── CONTACT FORM ──
+function sendContactForm(){
+  var name = document.querySelector('.cf-field input[type=text]').value;
+  var email = document.querySelector('.cf-field input[type=email]').value;
+  var msg = document.querySelector('.cf-field textarea').value;
+  if(!name||!email||!msg){alert('Please fill in all fields');return;}
+  var body = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\n\nMessage:\n'+msg);
+  window.location.href = 'mailto:Viluresidence@gmail.com?subject=Enquiry%20from%20'+encodeURIComponent(name)+'&body='+body;
+}
+
+// ── KEYBOARD ESC ──
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeBookingPopup();closeBookingPage();}
+});
+
+// ══════════════════════════════════════════════════════
+// WEBSITE CONTENT LOADER — reads from PMS vilu_website key
+// ══════════════════════════════════════════════════════
+function loadWebsiteData() {
+  try { return JSON.parse(localStorage.getItem('vilu_website') || '{}'); } catch(e) { return {}; }
+}
+
+function applyWebsiteData() {
+  var d = loadWebsiteData();
+
+  // Hero
+  if(d.hero) {
+    var h = d.hero;
+    if(h.badge) { var el=document.querySelector('.hero-badge'); if(el) el.textContent=h.badge; }
+    if(h.title) { var el=document.querySelector('.hero-title'); if(el) el.innerHTML=h.title; }
+    if(h.subtitle) { var el=document.querySelector('.hero-subtitle'); if(el) el.textContent=h.subtitle; }
+    if(h.btn1) { var el=document.querySelector('.btn-primary'); if(el) el.textContent='🏝️ '+h.btn1; }
+    if(h.btn2) { var el=document.querySelectorAll('.btn-outline')[0]; if(el) el.textContent=h.btn2; }
+    var stats = document.querySelectorAll('.stat');
+    if(stats[0]&&h.stat1num) { stats[0].querySelector('.stat-num').textContent=h.stat1num; stats[0].querySelector('.stat-label').textContent=h.stat1lbl||''; }
+    if(stats[1]&&h.stat2num) { stats[1].querySelector('.stat-num').textContent=h.stat2num; stats[1].querySelector('.stat-label').textContent=h.stat2lbl||''; }
+    if(stats[2]&&h.stat3num) { stats[2].querySelector('.stat-num').textContent=h.stat3num; stats[2].querySelector('.stat-label').textContent=h.stat3lbl||''; }
+  }
+
+  // About
+  if(d.about) {
+    var a = d.about;
+    if(a.title) { var el=document.querySelector('#about .section-title'); if(el) el.innerHTML=a.title; }
+    if(a.desc) { var el=document.querySelector('.about-desc'); if(el) el.textContent=a.desc; }
+    if(a.features && a.features.length) {
+      var feats = document.querySelectorAll('.about-feature');
+      a.features.forEach(function(f,i) {
+        if(feats[i]) {
+          var icon=feats[i].querySelector('.af-icon'); if(icon) icon.textContent=f.icon||'';
+          var title=feats[i].querySelector('.af-title'); if(title) title.textContent=f.title||'';
+          var desc=feats[i].querySelector('.af-text'); if(desc) desc.textContent=f.desc||'';
+        }
+      });
+    }
+  }
+
+  // Gallery
+  if(d.gallery && d.gallery.length) {
+    var gItems = document.querySelectorAll('.g-item .g-bg');
+    d.gallery.forEach(function(photo, i) {
+      if(photo && gItems[i]) {
+        gItems[i].style.backgroundImage = 'url('+photo+')';
+        gItems[i].style.backgroundSize = 'cover';
+        gItems[i].style.backgroundPosition = 'center';
+        // Remove the gradient background
+        gItems[i].style.background = 'url('+photo+') center/cover';
+      }
+    });
+  }
+
+  // Contact
+  if(d.contact) {
+    var ct = d.contact;
+    if(ct.name) { document.querySelectorAll('.nav-logo-name,.footer-brand-name,.bfp-logo-text').forEach(function(el){ if(el) el.textContent=ct.name; }); }
+    if(ct.tagline) { document.querySelectorAll('.nav-logo-sub,.footer-brand-sub').forEach(function(el){ if(el) el.textContent=ct.tagline; }); }
+    if(ct.address) { var el=document.querySelector('.cd-value'); if(el) el.innerHTML=ct.address.replace(/,\s*/g,'<br>'); }
+    if(ct.phone) {
+      var el=document.querySelectorAll('.cd-value a[href^="tel"]')[0];
+      if(el){el.textContent=ct.phone; el.href='tel:'+ct.phone.replace(/[^+\d]/g,'');}
+    }
+    if(ct.email) {
+      var el=document.querySelectorAll('.cd-value a[href^="mailto"]')[0];
+      if(el){el.textContent=ct.email; el.href='mailto:'+ct.email;}
+    }
+    if(ct.desc) { var el=document.querySelector('.footer-desc'); if(el) el.textContent=ct.desc; }
+  }
+
+  // Packages — render in booking section
+  if(d.packages && d.packages.length) {
+    renderWebsitePackages(d.packages);
+  }
+}
+
+function renderWebsitePackages(pkgs) {
+  // Find or create packages section before #booking
+  var existing = document.getElementById('packages-section');
+  if(!existing) {
+    existing = document.createElement('section');
+    existing.id = 'packages-section';
+    existing.style.cssText = 'background:var(--navy2);padding:80px 0';
+    var bookingSec = document.getElementById('booking');
+    if(bookingSec) bookingSec.parentNode.insertBefore(existing, bookingSec);
+  }
+  existing.innerHTML = '<div class="section-inner">'
+    +'<div class="reveal"><div class="section-tag">Packages</div>'
+    +'<h2 class="section-title" style="color:var(--white)">Our <em style="font-style:italic;color:var(--gold-light)">packages</em></h2></div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px">'
+    +pkgs.map(function(p){
+      return '<div class="reveal" style="background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px">'
+        +'<div style="font-size:36px;margin-bottom:12px">'+(p.emoji||'🎁')+'</div>'
+        +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;font-weight:600;color:var(--white);margin-bottom:6px">'+p.name+'</div>'
+        +'<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px">$'+p.price+' per person · '+p.nights+' night'+(p.nights>1?'s':'')+'</div>'
+        +'<div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:16px">'+p.desc+'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">'
+        +(p.includes||[]).map(function(inc){ return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.6)"><div style="width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0"></div>'+inc+'</div>'; }).join('')
+        +'</div>'
+        +'<button onclick="openBookingPopup()" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:12px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;cursor:pointer">Book This Package</button>'
+        +'</div>';
+    }).join('')
+    +'</div></div>';
+
+  // Add packages link to nav if not present
+  var navLinks = document.querySelector('.nav-links');
+  if(navLinks && !document.querySelector('.nav-packages-link')) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href='#packages-section'; a.textContent='Packages'; a.className='nav-packages-link';
+    li.appendChild(a); 
+    // Insert before Contact
+    var contactLi = navLinks.querySelector('li:last-child');
+    if(contactLi) navLinks.insertBefore(li, contactLi);
+  }
+
+  // Re-observe new reveal elements
+  document.querySelectorAll('#packages-section .reveal').forEach(function(el){ observer.observe(el); });
+}
+
+// Apply on load and on PMS updates
+document.addEventListener('DOMContentLoaded', function(){
+  applyWebsiteData();
+});
+
+// Listen for PMS website updates
+try {
+  var _wbc = new BroadcastChannel('vilu_pms');
+  _wbc.onmessage = function(e) {
+    if(e.data && e.data.type === 'WEBSITE_UPDATE') {
+      applyWebsiteData();
+    }
+  };
+} catch(e) {}
+</script>
+</body>
+</html>
