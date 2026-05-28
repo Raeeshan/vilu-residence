@@ -8064,36 +8064,37 @@ function startSession() {
 // ── PATCH doLogin WITH SECURITY ──
 var _origDoLoginSec = doLogin;
 doLogin = function() {
-  var email = (document.getElementById('login-user')||{value:''}).value.trim().toLowerCase();
+  var emailEl = document.getElementById('login-user');
+  var email = emailEl ? emailEl.value.trim().toLowerCase() : '';
   var err = document.getElementById('login-err');
-  if(err) err.style.display = 'none';
 
+  // Check lockout
   var locked = isAccountLocked(email);
   if(locked) {
-    err.style.display = 'block';
-    err.textContent = 'Account locked. Try again in ' + locked + ' minutes.';
-    logLoginActivity(email, 'locked');
+    if(err){err.style.display='block';err.textContent='Account locked. Try again in '+locked+' minutes.';}
+    logLoginActivity(email,'locked');
     return;
   }
 
+  // Call original login
   _origDoLoginSec();
 
+  // After login check result
   setTimeout(function() {
     if(currentUser) {
       recordSuccessfulLogin(currentUser.email);
       startSession();
-    } else {
+    } else if(email) {
       var remaining = recordFailedAttempt(email);
-      logLoginActivity(email, 'failed');
-      if(remaining > 0) {
-        err.style.display = 'block';
-        err.textContent = 'Incorrect email or password. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' left before lockout.';
-      } else {
-        err.style.display = 'block';
-        err.textContent = 'Account locked for 30 minutes.';
+      logLoginActivity(email,'failed');
+      if(err && remaining >= 0) {
+        err.style.display='block';
+        err.textContent = remaining > 0
+          ? 'Incorrect email or password. '+remaining+' attempt'+(remaining===1?'':'s')+' left.'
+          : 'Account locked for 30 minutes.';
       }
     }
-  }, 300);
+  }, 400);
 };
 
 // ── SECURITY LOG VIEWER ──
