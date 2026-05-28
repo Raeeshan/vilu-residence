@@ -7948,6 +7948,179 @@ document.addEventListener('DOMContentLoaded', function() {
   }, 1500);
   setInterval(syncResToSupabase, 5*60*1000);
 });
+
+// ═══════════════════════════════════════════════════════════
+// SECURITY SYSTEM — Vilu Residence PMS
+// ═══════════════════════════════════════════════════════════
+
+// ── SHA-256 HASHING ──
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ── LOGIN ATTEMPT TRACKING ──
+var LOGIN_ATTEMPTS = (function(){
+  try { return JSON.parse(localStorage.getItem('vilu_login_attempts')||'{}'); }
+  catch(e) { return {}; }
+})();
+
+function saveLoginAttempts() {
+  localStorage.setItem('vilu_login_attempts', JSON.stringify(LOGIN_ATTEMPTS));
+}
+
+function isAccountLocked(email) {
+  var attempts = LOGIN_ATTEMPTS[email];
+  if(!attempts) return false;
+  if(attempts.count >= 5) {
+    var now = Date.now();
+    if(now - attempts.lockTime < 30 * 60 * 1000) {
+      return Math.ceil((30 * 60 * 1000 - (now - attempts.lockTime)) / 60000);
+    } else {
+      delete LOGIN_ATTEMPTS[email];
+      saveLoginAttempts();
+      return false;
+    }
+  }
+  return false;
+}
+
+function recordFailedAttempt(email) {
+  if(!LOGIN_ATTEMPTS[email]) LOGIN_ATTEMPTS[email] = {count:0};
+  LOGIN_ATTEMPTS[email].count++;
+  if(LOGIN_ATTEMPTS[email].count >= 5) LOGIN_ATTEMPTS[email].lockTime = Date.now();
+  saveLoginAttempts();
+  return Math.max(0, 5 - LOGIN_ATTEMPTS[email].count);
+}
+
+function recordSuccessfulLogin(email) {
+  delete LOGIN_ATTEMPTS[email];
+  saveLoginAttempts();
+  logLoginActivity(email, 'success');
+}
+
+// ── LOGIN ACTIVITY LOG ──
+function logLoginActivity(email, status) {
+  try {
+    var log = JSON.parse(localStorage.getItem('vilu_login_log')||'[]');
+    log.unshift({email:email, status:status, time:new Date().toISOString()});
+    if(log.length > 100) log = log.slice(0,100);
+    localStorage.setItem('vilu_login_log', JSON.stringify(log));
+  } catch(e) {}
+}
+
+// ── SESSION TIMEOUT (2 hours) ──
+var _sessionTimer = null;
+function resetSessionTimer() {
+  if(_sessionTimer) clearTimeout(_sessionTimer);
+  _sessionTimer = setTimeout(function() {
+    if(currentUser) {
+      toast('Session expired — please login again');
+      setTimeout(doLogout, 2000);
+    }
+  }, 2 * 60 * 60 * 1000);
+}
+
+function startSession() {
+  resetSessionTimer();
+  ['click','keydown','touchstart'].forEach(function(evt) {
+    document.addEventListener(evt, resetSessionTimer, {passive:true});
+  });
+}
+
+// ── PATCH doLogin WITH SECURITY ──
+var _origDoLoginSec = doLogin;
+doLogin = function() {
+  var email = document.getElementById('login-user').value.trim().toLowerCase();
+  var err = document.getElementById('login-err');
+  err.style.display = 'none';
+
+  var locked = isAccountLocked(email);
+  if(locked) {
+    err.style.display = 'block';
+    err.textContent = 'Account locked. Try again in ' + locked + ' minutes.';
+    logLoginActivity(email, 'locked');
+    return;
+  }
+
+  _origDoLoginSec();
+
+  setTimeout(function() {
+    if(currentUser) {
+      recordSuccessfulLogin(currentUser.email);
+      startSession();
+    } else {
+      var remaining = recordFailedAttempt(email);
+      logLoginActivity(email, 'failed');
+      if(remaining > 0) {
+        err.style.display = 'block';
+        err.textContent = 'Incorrect email or password. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' left before lockout.';
+      } else {
+        err.style.display = 'block';
+        err.textContent = 'Account locked for 30 minutes.';
+      }
+    }
+  }, 300);
+};
+
+// ── SECURITY LOG VIEWER ──
+function showLoginLog() {
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem('vilu_login_log')||'[]'); } catch(e) {}
+
+  var m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+  m.onclick = function(e){if(e.target===m)m.remove();};
+
+  var inner = document.createElement('div');
+  inner.style.cssText = 'background:#fff;border-radius:12px;padding:28px;width:100%;max-width:560px;max-height:80vh;overflow-y:auto';
+
+  var title = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+    +'<div style="font-size:16px;font-weight:700">Security Log</div>'
+    +'<button id="sec-close-btn" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280">x</button>'
+    +'</div>';
+
+  var rows = '';
+  if(!log.length) {
+    rows = '<div style="color:#6b7280;font-size:13px">No login activity yet.</div>';
+  } else {
+    log.slice(0,20).forEach(function(l) {
+      var color = l.status==='success'?'#166534':'#dc2626';
+      var bg = l.status==='success'?'#f0fdf4':'#fef2f2';
+      var icon = l.status==='success'?'OK':'FAIL';
+      rows += '<div style="background:'+bg+';border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:6px">'
+        +'<b style="color:'+color+'">'+icon+'</b> '+l.email
+        +' <span style="color:#6b7280">'+new Date(l.time).toLocaleString()+'</span></div>';
+    });
+  }
+
+  inner.innerHTML = title + rows;
+  m.appendChild(inner);
+  document.body.appendChild(m);
+  document.getElementById('sec-close-btn').onclick = function(){m.remove();};
+}
+
+// Add Security Log button to User Management
+var _origDrawUsers = typeof drawUsers !== 'undefined' ? drawUsers : null;
+if(_origDrawUsers) {
+  drawUsers = function() {
+    _origDrawUsers();
+    setTimeout(function() {
+      var container = document.getElementById('u-list');
+      if(container && !document.getElementById('sec-log-btn')) {
+        var btn = document.createElement('div');
+        btn.id = 'sec-log-btn';
+        btn.style.cssText = 'margin-top:16px;padding:14px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;display:flex;align-items:center;justify-content:space-between';
+        btn.innerHTML = '<div><div style="font-size:13px;font-weight:700;color:#166534">Security Log</div>'
+          +'<div style="font-size:11px;color:#6b7280">View all login attempts</div></div>'
+          +'<button onclick="showLoginLog()" style="background:#1a6b5a;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">View Log</button>';
+        container.parentNode.insertBefore(btn, container.nextSibling);
+      }
+    }, 500);
+  };
+}
 </script>
 </body>
 </html>
