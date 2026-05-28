@@ -584,7 +584,7 @@ body.pms-mode { overflow:hidden; }
       <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="login-btn" onclick="doLogin()">Sign in →</button>
-    <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
+    <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency-portal.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
     </div>
@@ -1553,7 +1553,7 @@ Suite</textarea></div>
       <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="login-btn" onclick="doLogin()">Sign in →</button>
-    <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
+    <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency-portal.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
     </div>
@@ -6230,17 +6230,26 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 // Users database — change passwords here
 // Load users from localStorage or use default admin only
 function loadUsers(){
+  var DEFAULTS = [
+    {email:'Viluresidence@gmail.com',password:atob('UmFpc2hhbmhhc3NhbjEr'),role:'admin',name:'Raishan Hassan'},
+    {email:'agency@viluresidence.com',password:atob('YWdlbmN5MTIz'),role:'agency',name:'Agency User',company:'Agency'}
+  ];
   try{
     const saved = localStorage.getItem('vilu_users');
     if(saved){
       const arr = JSON.parse(saved);
-      if(arr && arr.length) return arr;
+      if(arr && arr.length){
+        // Always ensure agency user exists
+        DEFAULTS.forEach(function(def){
+          if(!arr.find(function(u){return u.email.toLowerCase()===def.email.toLowerCase();})){
+            arr.push(def);
+          }
+        });
+        return arr;
+      }
     }
   }catch(e){}
-  return [
-    {email:'Viluresidence@gmail.com',password:atob('UmFpc2hhbmhhc3NhbjEr'),role:'admin',name:'Raishan Hassan'},
-    {email:'agency@viluresidence.com',password:atob('YWdlbmN5MTIz'),role:'agency',name:'Agency User',company:'Agency'}
-  ];
+  return DEFAULTS;
 }
 function saveUsers(users){
   localStorage.setItem('vilu_users', JSON.stringify(users));
@@ -7844,24 +7853,8 @@ doLogout = function() {
 
 // On page load
 document.addEventListener('DOMContentLoaded', function(){
-  // Add Agency tab to login
-  var tabs = document.querySelector('.login-role-tabs');
-  if(tabs && !tabs.querySelector('[data-unified-agency]')){
-    var t = document.createElement('button');
-    t.className = 'lr-tab';
-    t.setAttribute('data-unified-agency','1');
-    t.onclick = function(){ setLoginRole('agency', this); };
-    t.textContent = '🏢 Agency';
-    tabs.appendChild(t);
-  }
-  // Add guest booking button
-  var card = document.querySelector('.login-card');
-  if(card && !document.getElementById('guest-book-btn')){
-    var d = document.createElement('div');
-    d.style.cssText = 'margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2)';
-    d.innerHTML = '<button id="guest-book-btn" onclick="showPublicBooking()" style="width:100%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;padding:12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">🏝️ Guest room booking</button>';
-    card.appendChild(d);
-  }
+  // Agency portal has its own separate URL - no tab on main login
+  // Guest booking available at vilu-website.html
   // Refresh preview when engine section is opened
   setTimeout(refreshInlinePreview, 1200);
 });
