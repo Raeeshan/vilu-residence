@@ -6256,6 +6256,26 @@ function saveUsers(users){
   localStorage.setItem('vilu_users_sync', JSON.stringify(users));
   localStorage.setItem('vilu_agency_users', JSON.stringify(users));
   syncPackagesToAgency();
+  // Sync all users to Supabase
+  syncAllUsersToSupabase(users);
+}
+
+async function syncAllUsersToSupabase(users) {
+  try {
+    for(var i=0; i<users.length; i++) {
+      var u = users[i];
+      await supaFetch('POST', 'users', {
+        id: u.email,
+        email: u.email,
+        password: u.password,
+        name: u.name||u.email,
+        role: u.role||'staff',
+        company: u.company||'',
+        commission: u.commission||0,
+        active: true
+      }, 'on_conflict=id');
+    }
+  } catch(e) { console.warn('User sync error:', e); }
 }
 let USERS = loadUsers();
 
