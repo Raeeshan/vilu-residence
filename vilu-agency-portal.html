@@ -379,15 +379,17 @@ var currentAgency = null;
 // Load users from Supabase or fallback
 async function agLoadUsers() {
   try {
-    const resp = await fetch(SUPA_URL+'/rest/v1/users?select=*&role=eq.agency', {
+    const resp = await fetch(SUPA_URL+'/rest/v1/users?select=*', {
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
     });
     if(resp.ok) {
       const data = await resp.json();
-      if(data && data.length) return data;
+      if(data && data.length) {
+        var agencyUsers = data.filter(function(u){ return u.role==='agency'; });
+        if(agencyUsers.length) return agencyUsers;
+      }
     }
   } catch(e) {}
-  // Fallback defaults
   return [
     {email:'agency@viluresidence.com',password:atob('YWdlbmN5MTIz'),name:'Agency User',role:'agency',company:'Agency'}
   ];
@@ -432,7 +434,7 @@ async function agLogin() {
 
 // ══ AGENCY PORTAL ══
 const TD = new Date(), tS = TD.toISOString().slice(0,10);
-let currentAgency = null;
+var currentAgency = null;
 let selectedPkg = null;
 let myBookings = [];
 let myBlocks = [];
