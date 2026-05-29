@@ -651,7 +651,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" onclick="go('price',this)"><i class="ti ti-currency-dollar"></i>Bulk price manager</div>
   <div class="sl" onclick="go('seasons',this)"><i class="ti ti-sun"></i>Seasonal rates</div>
   <div class="sg">Operations</div>
-  <div class="sl" onclick="go('ops',this)"><i class="ti ti-calendar-event"></i>Daily Operations</div>
+  <div class="sl" onclick="go('ops',this);setTimeout(drawOps,300)"><i class="ti ti-calendar-event"></i>Daily Operations</div>
   <div class="sg">Channels</div>
   <div class="sl" onclick="go('ota',this)"><i class="ti ti-plug"></i>OTA channels</div>
   <div class="sl" onclick="go('log',this)"><i class="ti ti-refresh"></i>Sync log</div>
@@ -7971,6 +7971,17 @@ saveRES = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Auto-render ops if needed
+  document.querySelectorAll('.sl').forEach(function(el){
+    if(el.textContent.includes('Daily Operations')){
+      el.addEventListener('click', function(){
+        setTimeout(function(){
+          var el2 = document.getElementById('ops-content');
+          if(el2 && el2.children.length <= 1) drawOps();
+        }, 500);
+      });
+    }
+  });
   setTimeout(async function() {
     await loadAllFromSupabase();
     try{drawDash();}catch(e){}
