@@ -8579,6 +8579,42 @@ function printOps() {
   win.document.close();
   setTimeout(function(){win.print();}, 500);
 }
+
+function addTripToRes(resId) {
+  var res = RES.find(function(r){return r.id===resId;});
+  if(!res) return;
+  if(!res.trips) res.trips = [];
+  var tripId = document.getElementById('trip-sel').value;
+  var date = document.getElementById('trip-date').value;
+  if(!date) { toast('Please select a date'); return; }
+  res.trips.push({tripId:tripId, date:date, status:'pending'});
+  saveRES();
+  openTripsModal(resId);
+  toast('Trip added!');
+}
+
+function removeTripFromRes(resId, idx) {
+  var res = RES.find(function(r){return r.id===resId;});
+  if(!res || !res.trips) return;
+  res.trips.splice(idx, 1);
+  saveRES();
+  openTripsModal(resId);
+  toast('Trip removed');
+}
+
+function saveTransport(resId) {
+  var res = RES.find(function(r){return r.id===resId;});
+  if(!res) return;
+  res.arrTime = document.getElementById('tr-arr-time').value;
+  res.arrTransport = document.getElementById('tr-arr-transport').value;
+  res.arrFrom = document.getElementById('tr-arr-from').value;
+  res.depTime = document.getElementById('tr-dep-time').value;
+  res.depTransport = document.getElementById('tr-dep-transport').value;
+  res.depTo = document.getElementById('tr-dep-to').value;
+  saveRES();
+  closeModal();
+  toast('Transport details saved!');
+}
 </script>
 </body>
 </html>
