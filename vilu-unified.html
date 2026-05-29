@@ -577,13 +577,13 @@ body.pms-mode { overflow:hidden; }
     <div id="login-err" class="login-err"></div>
     <div class="login-field">
       <label>Email address</label>
-      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
+      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="login-field">
       <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
+      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="login-btn" onclick="window._doLoginSafe&&window._doLoginSafe()">Sign in →</button>
+    <button class="login-btn" onclick="doLogin()">Sign in →</button>
     <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency-portal.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
@@ -1548,13 +1548,13 @@ Suite</textarea></div>
     <div id="login-err" class="login-err"></div>
     <div class="login-field">
       <label>Email address</label>
-      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
+      <input type="email" id="login-user" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="login-field">
       <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')window._doLoginSafe&&window._doLoginSafe()">
+      <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="login-btn" onclick="window._doLoginSafe&&window._doLoginSafe()">Sign in →</button>
+    <button class="login-btn" onclick="doLogin()">Sign in →</button>
     <div style="text-align:center;margin-top:14px;font-size:11px;color:#9ca3af">Agency? <a href="vilu-agency-portal.html" style="color:#0891b2;font-weight:700;text-decoration:none">Open Agency Portal →</a></div>
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
@@ -2873,6 +2873,7 @@ Suite</textarea></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script></script>
+
 <div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Select a date and view daily operations</div></div></div>
 <script>
 
@@ -8056,42 +8057,9 @@ function startSession() {
   });
 }
 
-// ── PATCH doLogin WITH SECURITY ──
-var _origDoLoginSec = doLogin;
-doLogin = function() {
-  var emailEl = document.getElementById('login-user');
-  var email = emailEl ? emailEl.value.trim().toLowerCase() : '';
-  var err = document.getElementById('login-err');
 
-  // Check lockout
-  var locked = isAccountLocked(email);
-  if(locked) {
-    if(err){err.style.display='block';err.textContent='Account locked. Try again in '+locked+' minutes.';}
-    logLoginActivity(email,'locked');
-    return;
-  }
-
-  // Call original login
-  _origDoLoginSec();
-
-  // After login check result
-  setTimeout(function() {
-    if(currentUser) {
-      recordSuccessfulLogin(currentUser.email);
-      startSession();
-    } else if(email) {
-      var remaining = recordFailedAttempt(email);
-      logLoginActivity(email,'failed');
-      if(err && remaining >= 0) {
-        err.style.display='block';
-        err.textContent = remaining > 0
-          ? 'Incorrect email or password. '+remaining+' attempt'+(remaining===1?'':'s')+' left.'
-          : 'Account locked for 30 minutes.';
-      }
-    }
-  }, 400);
-};
 window._doLoginSafe = doLogin;
+
 
 
 // ── SECURITY LOG VIEWER ──
