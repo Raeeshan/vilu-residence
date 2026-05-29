@@ -3010,7 +3010,7 @@ function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>
 
 // NAV
 const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',ops:'Daily Operations'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){if(typeof drawOps==="function")drawOps();else setTimeout(drawOps,500);}};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){setTimeout(function(){drawOps&&drawOps();},200);}};
 function go(id,el){
   // Block non-admins from accessing user management
   if(id==='users' && (!currentUser || currentUser.role!=='admin')){
@@ -8150,8 +8150,22 @@ function saveTripsConfig() {
 function drawOps() {
   var today = new Date().toISOString().slice(0,10);
   var dateEl = document.getElementById('ops-date');
-  // Auto-set today if no date selected
-  if(dateEl && !dateEl.value) dateEl.value = today;
+  
+  // Auto-set to nearest active date if today has no activity
+  if(dateEl && !dateEl.value) {
+    var hasToday = RES.some(function(r){
+      return (r.ci===today || r.co===today || (r.ci<=today && r.co>today)) && r.st!=='Cancelled';
+    });
+    if(!hasToday && RES.length) {
+      // Find nearest upcoming date with activity
+      var dates = [];
+      RES.forEach(function(r){ if(r.st!=='Cancelled'){dates.push(r.ci);dates.push(r.co);} });
+      var future = dates.filter(function(d){return d>=today;}).sort();
+      dateEl.value = future.length ? future[0] : today;
+    } else {
+      dateEl.value = today;
+    }
+  }
   var selDate = dateEl ? dateEl.value || today : today;
   
   var sel = new Date(selDate);
