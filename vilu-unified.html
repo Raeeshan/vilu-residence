@@ -8150,6 +8150,8 @@ function saveTripsConfig() {
 function drawOps() {
   var today = new Date().toISOString().slice(0,10);
   var dateEl = document.getElementById('ops-date');
+  // Auto-set today if no date selected
+  if(dateEl && !dateEl.value) dateEl.value = today;
   var selDate = dateEl ? dateEl.value || today : today;
   
   var sel = new Date(selDate);
