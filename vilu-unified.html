@@ -1047,6 +1047,85 @@ body.pms-mode { overflow:hidden; }
 
 <div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Loading operations...</div></div></div>
 
+<!-- TRIPS MODAL -->
+<div class="mbg" id="m-trips" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:620px;max-height:90vh;overflow-y:auto">
+    <div class="mhd">
+      <h3 id="trips-modal-title">Manage Trips</h3>
+      <button class="ab" onclick="document.getElementById('m-trips').classList.remove('on')"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:20px">
+
+      <!-- ADD TRIP FORM -->
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;color:#0077b6;margin-bottom:12px">➕ Add a Trip</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TRIP TYPE</label>
+            <select id="trip-sel" style="width:100%;padding:8px 10px;border:1.5px solid #cce0f5;border-radius:8px;font-family:inherit;font-size:13px"></select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">DATE FOR THIS TRIP</label>
+            <input type="date" id="trip-date" style="width:100%;padding:8px 10px;border:1.5px solid #cce0f5;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <button onclick="addTripToRes(_tripsResId)" style="background:#0077b6;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+          ➕ Add This Trip
+        </button>
+      </div>
+
+      <!-- CURRENT TRIPS LIST -->
+      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">📋 Trips for this reservation</div>
+      <div id="trips-list-body"></div>
+
+      <!-- TRANSPORT DETAILS -->
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:20px">
+        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">🚤 Transport Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">ARRIVAL TIME</label>
+            <input type="time" id="tr-arr-time" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TRANSPORT</label>
+            <select id="tr-arr-transport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+              <option value="">— Select —</option>
+              <option>Speedboat</option><option>Dhoni</option><option>Seaplane</option>
+              <option>Domestic Flight</option><option>Private Transfer</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">FROM</label>
+            <input type="text" id="tr-arr-from" placeholder="e.g. Malé Airport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">DEPARTURE TIME</label>
+            <input type="time" id="tr-dep-time" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TRANSPORT</label>
+            <select id="tr-dep-transport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+              <option value="">— Select —</option>
+              <option>Speedboat</option><option>Dhoni</option><option>Seaplane</option>
+              <option>Domestic Flight</option><option>Private Transfer</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TO</label>
+            <input type="text" id="tr-dep-to" placeholder="e.g. Malé Airport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <button onclick="saveTransport(_tripsResId)" style="background:#059669;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+          💾 Save Transport Details
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- MODALS -->
 <div class="mbg" id="m-det" onclick="if(event.target===this)this.classList.remove('on')">
   <div class="mdl" style="width:660px">
@@ -1989,6 +2068,86 @@ Suite</textarea></div>
   <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
 </div>
 
+<div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Loading operations...</div></div></div>
+
+<!-- TRIPS MODAL -->
+<div class="mbg" id="m-trips" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:620px;max-height:90vh;overflow-y:auto">
+    <div class="mhd">
+      <h3 id="trips-modal-title">Manage Trips</h3>
+      <button class="ab" onclick="document.getElementById('m-trips').classList.remove('on')"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:20px">
+
+      <!-- ADD TRIP FORM -->
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;color:#0077b6;margin-bottom:12px">➕ Add a Trip</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TRIP TYPE</label>
+            <select id="trip-sel" style="width:100%;padding:8px 10px;border:1.5px solid #cce0f5;border-radius:8px;font-family:inherit;font-size:13px"></select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">DATE FOR THIS TRIP</label>
+            <input type="date" id="trip-date" style="width:100%;padding:8px 10px;border:1.5px solid #cce0f5;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <button onclick="addTripToRes(_tripsResId)" style="background:#0077b6;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+          ➕ Add This Trip
+        </button>
+      </div>
+
+      <!-- CURRENT TRIPS LIST -->
+      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">📋 Trips for this reservation</div>
+      <div id="trips-list-body"></div>
+
+      <!-- TRANSPORT DETAILS -->
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:20px">
+        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">🚤 Transport Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">ARRIVAL TIME</label>
+            <input type="time" id="tr-arr-time" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TRANSPORT</label>
+            <select id="tr-arr-transport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+              <option value="">— Select —</option>
+              <option>Speedboat</option><option>Dhoni</option><option>Seaplane</option>
+              <option>Domestic Flight</option><option>Private Transfer</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">FROM</label>
+            <input type="text" id="tr-arr-from" placeholder="e.g. Malé Airport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">DEPARTURE TIME</label>
+            <input type="time" id="tr-dep-time" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TRANSPORT</label>
+            <select id="tr-dep-transport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+              <option value="">— Select —</option>
+              <option>Speedboat</option><option>Dhoni</option><option>Seaplane</option>
+              <option>Domestic Flight</option><option>Private Transfer</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">TO</label>
+            <input type="text" id="tr-dep-to" placeholder="e.g. Malé Airport" style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <button onclick="saveTransport(_tripsResId)" style="background:#059669;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+          💾 Save Transport Details
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <!-- MODALS -->
 <div class="mbg" id="m-det" onclick="if(event.target===this)this.classList.remove('on')">
@@ -2943,9 +3102,110 @@ let RES=[
 ];
 (function(){try{var s=localStorage.getItem('vilu_res');if(s){RES=JSON.parse(s);}}catch(e){}})();
 
+
+// ── BOAT BUILDER FUNCTIONS ──
+var BOATS_KEY = 'vilu_boats';
+
+function getBoats() {
+  try { return JSON.parse(localStorage.getItem(BOATS_KEY)||'{}'); } catch(e) { return {}; }
+}
+function saveBoats(boats) {
+  localStorage.setItem(BOATS_KEY, JSON.stringify(boats));
+}
+
+function addBoat(dateStr) {
+  var boats = getBoats();
+  if(!boats[dateStr]) boats[dateStr] = [];
+  boats[dateStr].push({time:'', guests:[], createdAt: new Date().toISOString()});
+  saveBoats(boats);
+  drawOps();
+  toast('🚤 Boat '+ boats[dateStr].length +' created!');
+}
+
+function removeBoat(dateStr, boatIdx) {
+  if(!confirm('Remove this boat and all its assigned guests?')) return;
+  var boats = getBoats();
+  if(!boats[dateStr]) return;
+  boats[dateStr].splice(boatIdx, 1);
+  saveBoats(boats);
+  drawOps();
+  toast('Boat removed');
+}
+
+function updateBoatTime(dateStr, boatIdx, time) {
+  var boats = getBoats();
+  if(!boats[dateStr] || !boats[dateStr][boatIdx]) return;
+  boats[dateStr][boatIdx].time = time;
+  saveBoats(boats);
+  toast('⏰ Departure time set to '+time);
+}
+
+function addGuestToBoat(dateStr, boatIdx, val) {
+  if(!val) { toast('Please select a guest and trip'); return; }
+  var parts = val.split('|');
+  if(parts.length < 6) { toast('Invalid selection'); return; }
+  var resId=parts[0], tripId=parts[1], tripDate=parts[2], guestName=parts[3], room=parts[4], pax=parseInt(parts[5]);
+  var boats = getBoats();
+  if(!boats[dateStr] || !boats[dateStr][boatIdx]) return;
+  // Check not already on a boat today
+  var alreadyOn = false;
+  boats[dateStr].forEach(function(b){ (b.guests||[]).forEach(function(g){ if(g.resId===resId&&g.tripId===tripId) alreadyOn=true; }); });
+  if(alreadyOn) { toast('This guest is already assigned to a boat today'); return; }
+  boats[dateStr][boatIdx].guests.push({resId:resId, tripId:tripId, tripDate:tripDate, guestName:guestName, room:room, pax:pax});
+  saveBoats(boats);
+  drawOps();
+  toast('✅ '+guestName+' added to Boat '+(boatIdx+1));
+}
+
+function removeBoatGuest(dateStr, boatIdx, guestIdx) {
+  var boats = getBoats();
+  if(!boats[dateStr] || !boats[dateStr][boatIdx]) return;
+  var guest = boats[dateStr][boatIdx].guests[guestIdx];
+  boats[dateStr][boatIdx].guests.splice(guestIdx, 1);
+  saveBoats(boats);
+  drawOps();
+  toast(guest.guestName+' removed from boat');
+}
+
+function markBoatGuestDone(dateStr, boatIdx, guestIdx) {
+  var boats = getBoats();
+  if(!boats[dateStr] || !boats[dateStr][boatIdx]) return;
+  var g = boats[dateStr][boatIdx].guests[guestIdx];
+  // Mark trip as done in RES
+  updateTripStatus(g.resId, g.tripId, g.tripDate, 'done');
+  // Remove from boat
+  boats[dateStr][boatIdx].guests.splice(guestIdx, 1);
+  saveBoats(boats);
+  toast('✅ Trip marked done for '+g.guestName);
+}
+
+
+// ── TRIPS BACKUP — stored separately so they survive Supabase overwrites ──
+function saveTripsBackup() {
+  var backup = {};
+  RES.forEach(function(r) { if(r.trips && r.trips.length) backup[r.id] = r.trips; });
+  try { localStorage.setItem('vilu_trips_backup', JSON.stringify(backup)); } catch(e) {}
+}
+function restoreTripsFromBackup() {
+  try {
+    var backup = JSON.parse(localStorage.getItem('vilu_trips_backup') || '{}');
+    var restored = 0;
+    RES.forEach(function(r) {
+      if(backup[r.id] && (!r.trips || !r.trips.length)) {
+        r.trips = backup[r.id];
+        restored++;
+      }
+    });
+    if(restored > 0) { localStorage.setItem('vilu_res', JSON.stringify(RES)); }
+  } catch(e) {}
+}
+
 function saveRES(){
   try{localStorage.setItem('vilu_res',JSON.stringify(RES));}catch(e){}
   syncAvailability();
+  // Sync immediately to Supabase so trips are never lost on reload
+  clearTimeout(saveRES._timer);
+  saveRES._timer = setTimeout(syncResToSupabase, 2000);
 }
 function syncAvailability(){
   // Write all reservations+blocks to shared key for booking engine & agency portal
@@ -3012,7 +3272,15 @@ function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>
 
 // NAV
 const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',ops:'Daily Operations'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){setTimeout(function(){drawOps&&drawOps();},200);}};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){
+    setTimeout(function(){
+      // Reset date picker to tomorrow when opening Daily Operations
+      var dp=document.getElementById('ops-date');
+      var tom=(function(){var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);})();
+      if(dp && (!dp.value || dp.value < new Date().toISOString().slice(0,10))) dp.value=tom;
+      if(drawOps) drawOps();
+    },200);
+  }};
 function go(id,el){
   // Block non-admins from accessing user management
   if(id==='users' && (!currentUser || currentUser.role!=='admin')){
@@ -3696,11 +3964,12 @@ function openEdit(id){
   const r=RES.find(x=>x.id===id);if(!r)return;editId=id;
   const sel=document.getElementById('ed-rm');
   sel.innerHTML=VR.map(rm=>`<option value="${rm.n}"${rm.n===r.rn?' selected':''}>${rm.nm} — $${rm.rate}/night</option>`).join('');
-  ['ed-fn','ed-ln','ed-em','ed-ph'].forEach((el,i)=>document.getElementById(el).value=[r.fn,r.ln,r.em||'',r.ph||''][i]);
-  document.getElementById('ed-ci').value=r.ci;document.getElementById('ed-co').value=r.co;
-  document.getElementById('ed-ad').value=r.ad||2;document.getElementById('ed-ch').value=r.ch||0;document.getElementById('ed-inf').value=r.inf||0;
-  document.getElementById('ed-st').value=r.st;document.getElementById('ed-pay').value=r.pay;
-  document.getElementById('ed-rate').value=r.rate||0;
+  ['ed-fn','ed-ln','ed-em','ed-ph'].forEach((el,i)=>{var e=document.getElementById(el);if(e)e.value=[r.fn,r.ln,r.em||'',r.ph||''][i];});
+  ['ed-ci','ed-co','ed-ad','ed-ch','ed-inf','ed-st','ed-pay','ed-rate'].forEach(function(id){var e=document.getElementById(id);if(!e)return;
+    if(id==='ed-ci')e.value=r.ci;else if(id==='ed-co')e.value=r.co;else if(id==='ed-ad')e.value=r.ad||2;
+    else if(id==='ed-ch')e.value=r.ch||0;else if(id==='ed-inf')e.value=r.inf||0;
+    else if(id==='ed-st')e.value=r.st;else if(id==='ed-pay')e.value=r.pay||'';else if(id==='ed-rate')e.value=r.rate||0;
+  });
   const bedValEl=document.getElementById('ed-bed-val');
   if(bedValEl) bedValEl.textContent=(r.extraBeds||0);
   document.getElementById('ed-cf').style.display='none';
@@ -5533,9 +5802,12 @@ function addFolioCharge(resId){
   var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   FOLIOS[resId].charges.push({id:Date.now(),date:tS,desc:desc,cat:cat,price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now});
   saveFolios();
-  document.getElementById('fc-desc-'+resId).value='';
-  document.getElementById('fc-price-'+resId).value='';
-  document.getElementById('fc-qty-'+resId).value='1';
+  var fcDesc=document.getElementById('fc-desc-'+resId);
+  var fcPrice=document.getElementById('fc-price-'+resId);
+  var fcPax=document.getElementById('fc-pax-'+resId);
+  if(fcDesc) fcDesc.value='';
+  if(fcPrice) fcPrice.value='';
+  if(fcPax) fcPax.value='1';
   renderFolioChargesById(resId);
   // Update just the header total without collapsing cards
   var hEl=document.querySelector('[data-folio-rid="'+resId+'"]');
@@ -7931,6 +8203,9 @@ async function syncResToSupabase() {
       rate:r.rate||0, status:r.st||'Confirmed',
       source:r.src||'Direct', notes:r.notes||'',
       extra_beds:r.extraBeds||0,
+      trips: JSON.stringify(r.trips||[]),
+      arr_time:r.arrTime||'', arr_transport:r.arrTransport||'', arr_from:r.arrFrom||'',
+      dep_time:r.depTime||'', dep_transport:r.depTransport||'', dep_to:r.depTo||'',
       updated_at:new Date().toISOString()
     }, 'on_conflict=id');
   }
@@ -7939,27 +8214,85 @@ async function syncResToSupabase() {
 async function loadResFromSupabase() {
   const data = await supaFetch('GET','reservations',null,'select=*&order=created_at.desc');
   if(!data||!data.length) return null;
-  return data.map(r=>({
-    id:r.id, fn:r.guest_name.split(' ')[0]||'',
-    ln:r.guest_name.split(' ').slice(1).join(' ')||'',
-    em:r.guest_email||'', ph:r.guest_phone||'',
-    nat:r.guest_country||'', rn:r.room_id,
-    rate:r.rate||0, ci:r.check_in, co:r.check_out,
-    ad:r.adults||2, ch:r.children||0,
-    st:r.status||'Confirmed', src:r.source||'Direct',
-    notes:r.notes||'', extraBeds:r.extra_beds||0, nlog:[]
-  }));
+  // Get existing local reservations so we can MERGE and not lose local-only fields
+  var localRes = [];
+  try { var s=localStorage.getItem('vilu_res'); if(s) localRes=JSON.parse(s); } catch(e) {}
+  function ymd(v){ if(!v)return ''; try{ return new Date(v).toISOString().slice(0,10); }catch(e){ return String(v).slice(0,10); } }
+  return data.map(r=>{
+    // Find matching local record to preserve fields Supabase doesn't store
+    var local = localRes.find(function(l){ return l.id===r.id; }) || {};
+    return {
+      id:r.id,
+      fn:r.guest_name ? r.guest_name.split(' ')[0]||'' : (local.fn||''),
+      ln:r.guest_name ? r.guest_name.split(' ').slice(1).join(' ')||'' : (local.ln||''),
+      em:r.guest_email||local.em||'',
+      ph:r.guest_phone||local.ph||'',
+      nat:r.guest_country||local.nat||'',
+      pid:local.pid||'',
+      rn:r.room_id||local.rn,
+      rate:r.rate||local.rate||0,
+      ci:ymd(r.check_in)||local.ci,   // normalize to YYYY-MM-DD
+      co:ymd(r.check_out)||local.co,  // normalize to YYYY-MM-DD
+      ad:r.adults||local.ad||2,
+      ch:r.children||local.ch||0,
+      inf:local.inf||0,
+      st:r.status||local.st||'Confirmed',
+      src:r.source||local.src||'Direct',
+      pay:local.pay||'',
+      ref:local.ref||'',
+      notes:r.notes||local.notes||'',
+      extraBeds:r.extra_beds||local.extraBeds||0,
+      prop:local.prop||'vilu',
+      nlog:local.nlog||[],
+      trips:(function(){
+        // Prefer local trips (most up to date), fall back to Supabase trips column
+        if(local.trips && local.trips.length) return local.trips;
+        try { var t=r.trips; if(typeof t==='string') t=JSON.parse(t); return t||[]; } catch(e) { return []; }
+      })(),
+      arrTime:local.arrTime||r.arr_time||'',
+      arrTransport:local.arrTransport||r.arr_transport||'',
+      arrFrom:local.arrFrom||r.arr_from||'',
+      depTime:local.depTime||r.dep_time||'',
+      depTransport:local.depTransport||r.dep_transport||'',
+      depTo:local.depTo||r.dep_to||'',
+      pkgId:local.pkgId||'',         // preserve package link
+      pkgName:local.pkgName||''
+    };
+  });
 }
 
 async function loadAllFromSupabase() {
   const sRes = await loadResFromSupabase();
   if(sRes && sRes.length) {
     RES = sRes;
+    restoreTripsFromBackup();
     localStorage.setItem('vilu_res', JSON.stringify(RES));
   }
   const sUsers = await supaFetch('GET','users',null,'select=*');
   if(sUsers && sUsers.length) {
-    USERS = sUsers.map(u=>({email:u.email,password:u.password,name:u.name,role:u.role,company:u.company||'',commission:u.commission||0}));
+    // Merge Supabase users but NEVER overwrite local passwords for existing accounts.
+    // This prevents Supabase from wiping out passwords that were changed locally.
+    var localUsers = [];
+    try { localUsers = JSON.parse(localStorage.getItem('vilu_users')||'[]'); } catch(e) {}
+    var merged = sUsers.map(function(u) {
+      var local = localUsers.find(function(l){ return l.email.toLowerCase()===u.email.toLowerCase(); });
+      return {
+        email: u.email,
+        // Keep local password if it exists — never let Supabase overwrite it
+        password: (local && local.password) ? local.password : u.password,
+        name: u.name,
+        role: u.role,
+        company: u.company||'',
+        commission: u.commission||0
+      };
+    });
+    // Also keep any local-only users not in Supabase yet
+    localUsers.forEach(function(lu) {
+      if(!merged.find(function(m){ return m.email.toLowerCase()===lu.email.toLowerCase(); })) {
+        merged.push(lu);
+      }
+    });
+    USERS = merged;
     localStorage.setItem('vilu_users', JSON.stringify(USERS));
   }
   const wdata = await supaFetch('GET','website_content',null,'key=eq.main&select=value');
@@ -7973,17 +8306,7 @@ saveRES = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Auto-render ops if needed
-  document.querySelectorAll('.sl').forEach(function(el){
-    if(el.textContent.includes('Daily Operations')){
-      el.addEventListener('click', function(){
-        setTimeout(function(){
-          var el2 = document.getElementById('ops-content');
-          if(el2 && el2.children.length <= 1) drawOps();
-        }, 500);
-      });
-    }
-  });
+  // Daily Operations rendered via FMAP when section is selected
   setTimeout(async function() {
     await loadAllFromSupabase();
     try{drawDash();}catch(e){}
@@ -8163,55 +8486,49 @@ function saveTripsConfig() {
 function drawOps() {
   var today = new Date().toISOString().slice(0,10);
   var dateEl = document.getElementById('ops-date');
-  
-  // Auto-set to nearest active date if today has no activity
-  if(dateEl && !dateEl.value) {
-    var hasToday = RES.some(function(r){
-      return (r.ci===today || r.co===today || (r.ci<=today && r.co>today)) && r.st!=='Cancelled';
-    });
-    if(!hasToday && RES.length) {
-      // Find nearest upcoming date with activity
-      var dates = [];
-      RES.forEach(function(r){ if(r.st!=='Cancelled'){dates.push(r.ci);dates.push(r.co);} });
-      var future = dates.filter(function(d){return d>=today;}).sort();
-      dateEl.value = future.length ? future[0] : today;
-    } else {
-      dateEl.value = today;
+
+  // Normalize any date value to YYYY-MM-DD
+  function ymd(v){ if(!v)return ''; try{ return new Date(v).toISOString().slice(0,10); }catch(e){ return String(v).slice(0,10); } }
+
+  // Default to TOMORROW — always reset to tomorrow unless user manually changed date
+  var tomorrow = (function(){ var d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); })();
+  if (dateEl) {
+    // Reset if empty OR if the stored date is in the past (stale from old session)
+    if (!dateEl.value || dateEl.value < today) {
+      dateEl.value = tomorrow;
     }
   }
-  var selDate = dateEl ? dateEl.value || today : today;
-  
-  var sel = new Date(selDate);
-  var selStr = selDate;
+  var selStr = dateEl ? (dateEl.value || tomorrow) : tomorrow;
 
-  // Get all relevant reservations
-  var arrivals   = RES.filter(r => r.ci === selStr && r.st !== 'Cancelled');
-  var departures = RES.filter(r => r.co === selStr && r.st !== 'Cancelled');
-  var inhouse    = RES.filter(r => r.ci <= selStr && r.co > selStr && r.st !== 'Cancelled');
-  var allActive  = RES.filter(r => r.ci <= selStr && r.co >= selStr && r.st !== 'Cancelled');
+  // ── GET RELEVANT RESERVATIONS ──
+  var arrivals   = RES.filter(function(r){ return ymd(r.ci)===selStr && r.st!=='Cancelled'; });
+  var departures = RES.filter(function(r){ return ymd(r.co)===selStr && r.st!=='Cancelled'; });
+  var inhouse    = RES.filter(function(r){ return ymd(r.ci)<selStr && ymd(r.co)>selStr && r.st!=='Cancelled'; });
+  var allActive  = RES.filter(function(r){ return ymd(r.ci)<=selStr && ymd(r.co)>=selStr && r.st!=='Cancelled'; });
 
-  // Build trip groups for selected date
-  // Count trips booked for this date across all in-house + arriving guests
-  var tripCounts = {};
-  var tripGuests = {};
-  
+  // ── BUILD TRIP SCHEDULE FROM r.trips ──
+  var tripCounts = {}, tripGuests = {};
   allActive.forEach(function(r) {
-    var trips = r.trips || [];
-    trips.forEach(function(t) {
-      if(t.date === selStr) {
-        if(!tripCounts[t.tripId]) { tripCounts[t.tripId] = 0; tripGuests[t.tripId] = []; }
+    (r.trips||[]).forEach(function(t) {
+      if (ymd(t.date) === selStr) {
+        if (!tripCounts[t.tripId]) { tripCounts[t.tripId]=0; tripGuests[t.tripId]=[]; }
         tripCounts[t.tripId]++;
-        tripGuests[t.tripId].push({res: r, tripData: t});
+        tripGuests[t.tripId].push({res:r, tripData:t});
       }
     });
   });
+  var sortedTrips = Object.keys(tripCounts).sort(function(a,b){ return tripCounts[b]-tripCounts[a]; });
 
-  // Sort trips by count (most popular first)
-  var sortedTrips = Object.keys(tripCounts).sort(function(a,b) {
-    return tripCounts[b] - tripCounts[a];
-  });
+  // ── ALSO COLLECT PACKAGE INCLUDED ITEMS FOR EACH GUEST ──
+  // Packages store their includes as text strings in PACKAGES array
+  // We match reservation's package field to show what's included in their stay
+  var PKGS = (function(){ try{var s=localStorage.getItem('vilu_packages');if(s)return JSON.parse(s);}catch(e){} return []; })();
 
-  // Render
+  function getResPkg(r) {
+    if (!r.pkg && !r.pkgId && !r.pkgName) return null;
+    return PKGS.find(function(p){ return p.id===r.pkgId || p.id===r.pkg || p.name===r.pkgName; }) || null;
+  }
+
   var html = '';
 
   // ── DATE PICKER ──
@@ -8224,13 +8541,11 @@ function drawOps() {
 
   // ── SUMMARY STATS ──
   html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
-  var stats = [
-    {label:'Arrivals', val:arrivals.length, color:'#0096c7', icon:'🛬'},
-    {label:'In-House', val:inhouse.length, color:'#7c3aed', icon:'🏠'},
-    {label:'Departures', val:departures.length, color:'#dc2626', icon:'🛫'},
-    {label:'Trips Today', val:sortedTrips.length, color:'#059669', icon:'🚤'},
-  ];
-  stats.forEach(function(s) {
+  [{label:'Arrivals',val:arrivals.length,color:'#0096c7',icon:'🛬'},
+   {label:'In-House',val:inhouse.length,color:'#7c3aed',icon:'🏠'},
+   {label:'Departures',val:departures.length,color:'#dc2626',icon:'🛫'},
+   {label:'Trips Today',val:sortedTrips.length,color:'#059669',icon:'🚤'}
+  ].forEach(function(s) {
     html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center">'
       + '<div style="font-size:22px">'+s.icon+'</div>'
       + '<div style="font-size:24px;font-weight:800;color:'+s.color+'">'+s.val+'</div>'
@@ -8242,22 +8557,34 @@ function drawOps() {
   // ── ARRIVALS ──
   html += '<div class="card" style="margin-bottom:14px">';
   html += '<div style="font-size:14px;font-weight:800;color:#0096c7;margin-bottom:12px">🛬 Arrivals ('+arrivals.length+')</div>';
-  if(!arrivals.length) {
+  if (!arrivals.length) {
     html += '<div style="color:#6b7280;font-size:13px">No arrivals today</div>';
   } else {
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#e0f7fd"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Pax</th><th>Arrival Time</th><th>Transport</th><th>From</th><th>Notes</th></tr>';
+    html += '<tr style="background:#e0f7fd"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Pax</th><th>Package</th><th>Arrival Time</th><th>Transport</th><th>From</th><th>Notes</th></tr>';
     arrivals.forEach(function(r) {
-      var room = VR.find(function(v){return v.n===r.rn;});
+      var pkg = getResPkg(r);
+      var pkgCell = pkg
+        ? '<span style="background:#e0f7fd;color:#0096c7;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+pkg.emoji+' '+pkg.name+'</span>'
+        : '<span style="color:#9ca3af;font-size:11px">Direct</span>';
       html += '<tr style="border-bottom:1px solid #f3f4f6">'
         + '<td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td>'
         + '<td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td>'
         + '<td style="padding:8px;text-align:center">'+(r.ad||2)+'A '+(r.ch>0?r.ch+'C':'')+'</td>'
+        + '<td style="padding:8px">'+pkgCell+'</td>'
         + '<td style="padding:8px;text-align:center;font-weight:700;color:#0096c7">'+(r.arrTime||'—')+'</td>'
         + '<td style="padding:8px;font-weight:600;color:#7c3aed">'+(r.arrTransport||'—')+'</td>'
         + '<td style="padding:8px">'+(r.arrFrom||'—')+'</td>'
         + '<td style="padding:8px;color:#6b7280">'+(r.notes||'—')+'</td>'
         + '</tr>';
+      // Show package includes if they have a package
+      if (pkg && pkg.includes && pkg.includes.length) {
+        html += '<tr style="border-bottom:1px solid #f3f4f6;background:#f0fbff">'
+          + '<td colspan="8" style="padding:6px 8px 8px 24px;font-size:11px;color:#374151">'
+          + '<b style="color:#0096c7">Package includes:</b> '
+          + pkg.includes.map(function(i){ return '✓ '+i; }).join(' &nbsp;|&nbsp; ')
+          + '</td></tr>';
+      }
     });
     html += '</table>';
   }
@@ -8266,24 +8593,30 @@ function drawOps() {
   // ── IN-HOUSE ──
   html += '<div class="card" style="margin-bottom:14px">';
   html += '<div style="font-size:14px;font-weight:800;color:#7c3aed;margin-bottom:12px">🏠 In-House ('+inhouse.length+')</div>';
-  if(!inhouse.length) {
+  if (!inhouse.length) {
     html += '<div style="color:#6b7280;font-size:13px">No in-house guests</div>';
   } else {
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#f5f3ff"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Nights Left</th><th>Pending Trips</th></tr>';
+    html += '<tr style="background:#f5f3ff"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Package</th><th>Nights Left</th><th>Pending Trips</th></tr>';
     inhouse.forEach(function(r) {
       var nightsLeft = Math.ceil((new Date(r.co) - new Date(selStr)) / 86400000);
-      var pendingTrips = (r.trips||[]).filter(function(t){return t.status==='pending' && t.date >= selStr;});
-      var urgentTrips = (r.trips||[]).filter(function(t){return t.status==='pending' && t.date < selStr;});
-      html += '<tr style="border-bottom:1px solid #f3f4f6'+(urgentTrips.length?' background:#fff7ed;':'')+'">'
+      var allTrips     = (r.trips||[]);
+      var pendingTrips = allTrips.filter(function(t){ return t.status==='pending' && t.date>=selStr; });
+      var urgentTrips  = allTrips.filter(function(t){ return t.status==='pending' && t.date<selStr; });
+      var pkg = getResPkg(r);
+      var pkgCell = pkg
+        ? '<span style="background:#ede9fe;color:#7c3aed;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+pkg.emoji+' '+pkg.name+'</span>'
+        : '<span style="color:#9ca3af;font-size:11px">Direct</span>';
+      html += '<tr style="border-bottom:1px solid #f3f4f6'+(urgentTrips.length?';background:#fff7ed':'')+'">'
         + '<td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td>'
         + '<td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td>'
         + '<td style="padding:8px;text-align:center">'+r.ci+'</td>'
         + '<td style="padding:8px;text-align:center">'+r.co+'</td>'
+        + '<td style="padding:8px">'+pkgCell+'</td>'
         + '<td style="padding:8px;text-align:center"><b style="color:'+(nightsLeft<=1?'#dc2626':nightsLeft<=2?'#d97706':'#059669')+'">'+nightsLeft+' night'+(nightsLeft!==1?'s':'')+'</b></td>'
         + '<td style="padding:8px">'
-          + (urgentTrips.length ? '<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">⚠️ '+urgentTrips.length+' OVERDUE</span> ' : '')
-          + (pendingTrips.length ? '<span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">'+pendingTrips.length+' pending</span>' : '<span style="color:#059669;font-size:11px">✅ All done</span>')
+          + (urgentTrips.length?'<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">⚠️ '+urgentTrips.length+' OVERDUE</span> ':'')
+          + (pendingTrips.length?'<span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">'+pendingTrips.length+' pending</span>':allTrips.length?'<span style="color:#059669;font-size:11px">✅ All done</span>':'<span style="color:#9ca3af;font-size:11px">No trips added</span>')
         + '</td>'
         + '</tr>';
     });
@@ -8294,21 +8627,26 @@ function drawOps() {
   // ── DEPARTURES ──
   html += '<div class="card" style="margin-bottom:14px">';
   html += '<div style="font-size:14px;font-weight:800;color:#dc2626;margin-bottom:12px">🛫 Departures ('+departures.length+')</div>';
-  if(!departures.length) {
+  if (!departures.length) {
     html += '<div style="color:#6b7280;font-size:13px">No departures today</div>';
   } else {
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#fef2f2"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Departure Time</th><th>Transport</th><th>To</th><th>Incomplete Trips</th></tr>';
+    html += '<tr style="background:#fef2f2"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Package</th><th>Departure Time</th><th>Transport</th><th>To</th><th>Incomplete Trips</th></tr>';
     departures.forEach(function(r) {
-      var incompTrips = (r.trips||[]).filter(function(t){return t.status==='pending';});
+      var incompTrips = (r.trips||[]).filter(function(t){ return t.status==='pending'; });
+      var pkg = getResPkg(r);
+      var pkgCell = pkg
+        ? '<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+pkg.emoji+' '+pkg.name+'</span>'
+        : '<span style="color:#9ca3af;font-size:11px">Direct</span>';
       html += '<tr style="border-bottom:1px solid #f3f4f6">'
         + '<td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td>'
         + '<td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td>'
+        + '<td style="padding:8px">'+pkgCell+'</td>'
         + '<td style="padding:8px;text-align:center;font-weight:700;color:#dc2626">'+(r.depTime||'—')+'</td>'
         + '<td style="padding:8px;font-weight:600;color:#7c3aed">'+(r.depTransport||'—')+'</td>'
         + '<td style="padding:8px">'+(r.depTo||'—')+'</td>'
         + '<td style="padding:8px">'
-          + (incompTrips.length ? '<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">⚠️ '+incompTrips.length+' incomplete!</span>' : '<span style="color:#059669;font-size:11px">✅ All done</span>')
+          + (incompTrips.length?'<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">⚠️ '+incompTrips.length+' incomplete!</span>':'<span style="color:#059669;font-size:11px">✅ All done</span>')
         + '</td>'
         + '</tr>';
     });
@@ -8316,127 +8654,279 @@ function drawOps() {
   }
   html += '</div>';
 
-  // ── TRIPS TODAY (sorted by most popular) ──
+  // ── BOAT MANIFEST — MORNING (makeup) + AFTERNOON (scheduled) ──
   html += '<div class="card" style="margin-bottom:14px">';
-  html += '<div style="font-size:14px;font-weight:800;color:#059669;margin-bottom:12px">🚤 Today\'s Trip Schedule</div>';
-  
-  if(!sortedTrips.length) {
-    html += '<div style="color:#6b7280;font-size:13px">No trips scheduled today</div>';
-    // Show pending trips that need to be scheduled
-    var pendingAll = [];
-    allActive.forEach(function(r) {
-      (r.trips||[]).filter(function(t){return t.status==='pending';}).forEach(function(t) {
-        pendingAll.push({res:r, trip:t});
-      });
-    });
-    if(pendingAll.length) {
-      html += '<div style="margin-top:12px;font-size:13px;font-weight:700;color:#b45309;margin-bottom:8px">⚠️ Pending Trips to Schedule ('+pendingAll.length+')</div>';
-      pendingAll.forEach(function(p) {
-        var tc = TRIPS_CONFIG.find(function(t){return t.id===p.trip.tripId;}) || {name:p.trip.tripId, icon:'🚤'};
-        html += '<div style="background:#fef3c7;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:12px">'
-          + tc.icon + ' <b>' + tc.name + '</b> — ' + p.res.fn + ' ' + p.res.ln + ' ('+p.res.rn+')'
-          + ' | Check-out: <b style="color:#dc2626">'+p.res.co+'</b>'
-          + '</div>';
-      });
+  html += '<div style="font-size:14px;font-weight:800;color:#059669;margin-bottom:4px">🚤 Boat Schedule — ' + selStr + '</div>';
+  html += '<div style="font-size:11px;color:#6b7280;margin-bottom:14px">🌅 Morning = makeup from weather cancellation &nbsp;·&nbsp; 🌊 Afternoon = today\'s scheduled trips</div>';
+
+  function btnStyle(bg) {
+    return 'background:'+bg+';color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px';
+  }
+  function tripBtn(resId, tripId, date, status, label, bg) {
+    var fn;
+    if(status==='reschedule') fn='rescheduleTrip("'+resId+'","'+tripId+'","'+date+'")';
+    else if(status==='cancelweather') fn='cancelWeatherTrip("'+tripId+'","'+date+'","'+resId+'")';
+    else if(status==='dotoday') fn='moveTripToAfternoon("'+resId+'","'+tripId+'","'+date+'")';
+    else fn='updateTripStatus("'+resId+'","'+tripId+'","'+date+'","'+status+'")';
+    return '<button onclick="'+fn+'" style="'+btnStyle(bg)+'">'+label+'</button>';
+  }
+
+  function renderBoatGroup(sortedList, guestMap, countMap, slotLabel, slotColor, slotIcon, slotBg) {
+    if(!sortedList.length) {
+      return '<div style="color:#9ca3af;font-size:12px;padding:8px 12px;background:#f9fafb;border-radius:8px">No '+slotLabel+' trips today</div>';
     }
-  } else {
-    sortedTrips.forEach(function(tripId, idx) {
-      var tc = TRIPS_CONFIG.find(function(t){return t.id===tripId;}) || {name:tripId, icon:'🚤', time:'—'};
-      var guests = tripGuests[tripId];
-      var count = tripCounts[tripId];
-      
-      html += '<div style="background:'+(idx===0?'#f0fdf4':'#f9fafb')+';border:1px solid '+(idx===0?'#a0eeff':'#e5e7eb')+';border-radius:10px;padding:14px;margin-bottom:10px">';
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-        + '<div style="display:flex;align-items:center;gap:8px">'
-        + '<span style="font-size:20px">'+tc.icon+'</span>'
-        + '<div><div style="font-size:14px;font-weight:800;color:#111827">'+tc.name+'</div>'
-        + '<div style="font-size:11px;color:#6b7280">⏰ '+tc.time+' &nbsp;|&nbsp; '+count+' guest'+(count!==1?'s':'')+' booked</div></div>'
-        + '</div>'
-        + (idx===0?'<span style="background:#059669;color:#fff;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">⭐ MOST POPULAR</span>':'')
-        + '</div>';
-      
-      // Guest list for this trip
-      html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-      html += '<tr style="background:rgba(0,0,0,.04)"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Pax</th><th>Status</th><th>Action</th></tr>';
+    var out = '';
+    sortedList.forEach(function(tripId) {
+      var tc = TRIPS_CONFIG.find(function(t){ return t.id===tripId; }) || {name:tripId, icon:'🚤', time:'—'};
+      var guests = guestMap[tripId];
+      var count = countMap[tripId];
+      var totalPax = guests.reduce(function(s,g){ return s+(parseInt(g.res.ad)||2)+(parseInt(g.res.ch)||0); },0);
+      var isSolo = count===1;
+      out += '<div style="background:'+slotBg+';border:1.5px solid '+(isSolo?'#fca5a5':slotColor)+';border-radius:10px;padding:14px;margin-bottom:10px">';
+      out += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span style="font-size:22px">'+tc.icon+'</span>'
+        + '<div>'
+        + '<div style="font-size:14px;font-weight:800;color:#111827">'+tc.name+'</div>'
+        + '<div style="font-size:11px;color:#6b7280">'+slotIcon+' '+slotLabel+' · '+count+' room'+(count!==1?'s':'')+' · <b>'+totalPax+' pax</b></div>'
+        + '</div></div>'
+        + '<div style="display:flex;gap:6px;align-items:center">'
+        + '<span style="background:'+slotColor+';color:#fff;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">🚤 1 Boat</span>'
+        + (isSolo
+          ? '<span style="background:#fee2e2;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">⚠️ Solo — extra boat</span>'
+          : '<span style="background:#f0fdf4;color:#059669;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">✅ Combined</span>')
+        + '</div></div>';
+      out += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+      out += '<tr style="background:rgba(0,0,0,.04)"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Pax</th><th>Status</th><th>Action</th></tr>';
       guests.forEach(function(g) {
-        var statusColor = g.tripData.status==='done' ? '#059669' : g.tripData.status==='missed' ? '#dc2626' : '#d97706';
-        var statusBg = g.tripData.status==='done' ? '#f0fdf4' : g.tripData.status==='missed' ? '#fee2e2' : '#fef3c7';
-        var statusLabel = g.tripData.status==='done' ? '✅ Completed' : g.tripData.status==='missed' ? '❌ Missed' : '⏳ Pending';
-        html += '<tr style="border-bottom:1px solid rgba(0,0,0,.06)">'
-          + '<td style="padding:6px 8px;font-weight:600">'+g.res.fn+' '+g.res.ln+'</td>'
+        var sCols={done:'#059669',missed:'#dc2626',pending:'#d97706',cancelled:'#6b7280',weather:'#0077b6',rescheduled:'#7c3aed'};
+        var sBgs={done:'#f0fdf4',missed:'#fee2e2',pending:'#fef3c7',cancelled:'#f3f4f6',weather:'#e0f7fd',rescheduled:'#ede9fe'};
+        var sLbls={done:'✅ Done',missed:'❌ Missed',pending:'⏳ Pending',cancelled:'🚫 Cancelled',weather:'🌊 Weather',rescheduled:'📅 Rescheduled'};
+        var sc=sCols[g.tripData.status]||'#d97706';
+        var sb=sBgs[g.tripData.status]||'#fef3c7';
+        var sl=sLbls[g.tripData.status]||'⏳ Pending';
+        var rid=g.res.id, tid=g.tripData.tripId, tdt=g.tripData.date;
+        var fromTag = g.tripData.rescheduledFrom
+          ? '<span style="background:#ede9fe;color:#7c3aed;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px">from '+g.tripData.rescheduledFrom+'</span>'
+          : '';
+        out += '<tr style="border-bottom:1px solid rgba(0,0,0,.06)">'
+          + '<td style="padding:6px 8px;font-weight:600">'+g.res.fn+' '+g.res.ln+fromTag+'</td>'
           + '<td style="padding:6px 8px;text-align:center"><b>'+g.res.rn+'</b></td>'
-          + '<td style="padding:6px 8px;text-align:center">'+(g.res.ad||2)+'A</td>'
-          + '<td style="padding:6px 8px">'
-            + '<span style="background:'+statusBg+';color:'+statusColor+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">'+statusLabel+'</span>'
-          + '</td>'
-          + '<td style="padding:6px 8px">'
-            + '<button onclick="updateTripStatus(\''+g.res.id+'\',\''+g.tripData.tripId+'\',\''+g.tripData.date+'\',\'done\')" style="background:#059669;color:#fff;border:none;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:4px">✅ Done</button>'
-            + '<button onclick="updateTripStatus(\''+g.res.id+'\',\''+g.tripData.tripId+'\',\''+g.tripData.date+'\',\'missed\')" style="background:#dc2626;color:#fff;border:none;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:4px">❌ Missed</button>'
-            + '<button onclick="rescheduleTrip(\''+g.res.id+'\',\''+g.tripData.tripId+'\',\''+g.tripData.date+'\')" style="background:#7c3aed;color:#fff;border:none;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">📅 Reschedule</button>'
-          + '</td>'
-          + '</tr>';
+          + '<td style="padding:6px 8px;text-align:center">'+(parseInt(g.res.ad)||2)+'A'+(g.res.ch>0?' '+g.res.ch+'C':'')+'</td>'
+          + '<td style="padding:6px 8px"><span style="background:'+sb+';color:'+sc+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">'+sl+'</span></td>'
+          + '<td style="padding:6px 8px;white-space:nowrap">'
+          + (g.tripData.slot==='morning'||g.tripData.rescheduledFrom
+              ? tripBtn(rid,tid,tdt,'dotoday','☀️ Do Today','#f59e0b')
+              : '')
+          + tripBtn(rid,tid,tdt,'done','✅','#059669')
+          + tripBtn(rid,tid,tdt,'missed','❌','#dc2626')
+          + tripBtn(rid,tid,tdt,'cancelled','🚫','#6b7280')
+          + tripBtn(rid,tid,tdt,'cancelweather','🌊','#0077b6')
+          + tripBtn(rid,tid,tdt,'reschedule','📅','#7c3aed')
+          + '</td></tr>';
       });
-      html += '</table>';
-      
-      // Show rooms NOT joining this trip today
-      var joiningRooms = guests.map(function(g){return g.res.rn;});
-      var inHouseRooms = inhouse.map(function(r){return r.rn;});
-      var notJoining = inHouseRooms.filter(function(rn){return joiningRooms.indexOf(rn)<0;});
+      out += '</table>';
+      var joiningRooms = guests.map(function(g){ return g.res.rn; });
+      var notJoining = inhouse.concat(arrivals).filter(function(r){ return joiningRooms.indexOf(r.rn)<0; }).map(function(r){ return r.rn; });
       if(notJoining.length) {
-        html += '<div style="margin-top:8px;padding:8px 10px;background:rgba(0,0,0,.04);border-radius:6px;font-size:11px;color:#6b7280">'
-          + '🚫 Not joining: <b>' + notJoining.join(', ') + '</b>'
-          + '</div>';
+        out += '<div style="margin-top:8px;padding:7px 10px;background:rgba(0,0,0,.04);border-radius:6px;font-size:11px;color:#6b7280">🚫 Not joining: <b>'+notJoining.join(', ')+'</b></div>';
       }
+      out += '</div>';
+    });
+    return out;
+  }
+
+  if(!sortedMorning.length && !sortedAfternoon.length) {
+    html += '<div style="color:#6b7280;font-size:13px;padding:8px 0">No trips scheduled for this day</div>';
+  } else {
+    // MORNING slot — makeup trips from yesterday\'s weather cancellation
+    html += '<div style="margin-bottom:18px">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+      + '<span style="background:#7c3aed;color:#fff;border-radius:6px;padding:4px 14px;font-size:12px;font-weight:800">🌅 MORNING</span>'
+      + '<span style="font-size:11px;color:#7c3aed;font-weight:600">Makeup trips — rescheduled from weather cancellation</span>'
+      + '</div>';
+    html += renderBoatGroup(sortedMorning, morningGuests, morningCounts, 'Morning makeup', '#7c3aed', '🌅', '#faf5ff');
+    html += '</div>';
+
+    // AFTERNOON slot — today\'s regular scheduled trips
+    html += '<div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+      + '<span style="background:#059669;color:#fff;border-radius:6px;padding:4px 14px;font-size:12px;font-weight:800">🌊 AFTERNOON</span>'
+      + '<span style="font-size:11px;color:#059669;font-weight:600">Today\'s scheduled boat trips</span>'
+      + '</div>';
+    html += renderBoatGroup(sortedAfternoon, afternoonGuests, afternoonCounts, 'Afternoon', '#059669', '🌊', '#f0fdf4');
+    html += '</div>';
+  }
+  html += '</div>';
+
+
+  // ── BOAT BUILDER ──
+  // Load boats for this date from localStorage
+  var BOATS_KEY = 'vilu_boats';
+  var allBoats = (function(){ try{ return JSON.parse(localStorage.getItem(BOATS_KEY)||'{}'); }catch(e){return {};} })();
+  if(!allBoats[selStr]) allBoats[selStr] = [];
+  var dayBoats = allBoats[selStr];
+
+  html += '<div class="card" style="margin-bottom:14px">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
+    + '<div>'
+    + '<div style="font-size:14px;font-weight:800;color:#0077b6">🚤 Boat Builder</div>'
+    + '<div style="font-size:11px;color:#6b7280;margin-top:2px">Create boats for the day · assign trips and guests · set departure time</div>'
+    + '</div>'
+    + '<button onclick="addBoat(\''+selStr+'\')" style="background:#0077b6;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Add Boat</button>'
+    + '</div>';
+
+  if(!dayBoats.length) {
+    html += '<div style="color:#9ca3af;font-size:13px;padding:12px;background:#f9fafb;border-radius:8px;text-align:center">'
+      + 'No boats created yet for this day.<br>'
+      + '<span style="font-size:12px">Click <b>Add Boat</b> to create your first boat, then assign trips and guests from the list below.</span>'
+      + '</div>';
+  } else {
+    dayBoats.forEach(function(boat, bi) {
+      var boatPax = boat.guests ? boat.guests.reduce(function(s,g){ return s+(g.pax||0); },0) : 0;
+      var isSolo = boat.guests && boat.guests.length === 1;
+      html += '<div style="background:#f0f9ff;border:1.5px solid #0077b6;border-radius:10px;padding:14px;margin-bottom:12px">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span style="background:#0077b6;color:#fff;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:800">🚤 Boat '+(bi+1)+'</span>'
+        + '<input type="time" value="'+(boat.time||'')+'" onchange="updateBoatTime(\''+selStr+'\','+bi+',this.value)" style="padding:5px 10px;border:1.5px solid #bae6fd;border-radius:7px;font-family:inherit;font-size:13px;font-weight:700;color:#0077b6">'
+        + '<span style="font-size:12px;color:#6b7280">'+boatPax+' pax total</span>'
+        + (isSolo ? '<span style="background:#fee2e2;color:#dc2626;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">⚠️ Solo — extra cost</span>' : (boat.guests&&boat.guests.length>1?'<span style="background:#f0fdf4;color:#059669;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">✅ Combined</span>':''))
+        + '</div>'
+        + '<button onclick="removeBoat(\''+selStr+'\','+bi+')" style="background:#fee2e2;color:#dc2626;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ Remove Boat</button>'
+        + '</div>';
+
+      // Guest manifest for this boat
+      if(boat.guests && boat.guests.length) {
+        html += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">';
+        html += '<tr style="background:#e0f7fd"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Trip</th><th>Pax</th><th>Action</th></tr>';
+        boat.guests.forEach(function(g, gi) {
+          var tc = TRIPS_CONFIG.find(function(t){ return t.id===g.tripId; }) || {name:g.tripId||'Trip', icon:'🚤'};
+          html += '<tr style="border-bottom:1px solid #bae6fd">'
+            + '<td style="padding:6px 8px;font-weight:600">'+g.guestName+'</td>'
+            + '<td style="padding:6px 8px;text-align:center"><b>'+g.room+'</b></td>'
+            + '<td style="padding:6px 8px">'+tc.icon+' '+tc.name+'</td>'
+            + '<td style="padding:6px 8px;text-align:center">'+g.pax+'</td>'
+            + '<td style="padding:6px 8px">'
+            + '<button onclick="markBoatGuestDone(\''+selStr+'\','+bi+','+gi+')" style="background:#059669;color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px">✅ Done</button>'
+            + '<button onclick="removeBoatGuest(\''+selStr+'\','+bi+','+gi+')" style="background:#e5e7eb;color:#374151;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">✕ Remove</button>'
+            + '</td></tr>';
+        });
+        html += '</table>';
+      } else {
+        html += '<div style="color:#9ca3af;font-size:12px;padding:8px;background:#fff;border-radius:6px;margin-bottom:10px">No guests assigned yet — add from pending trips below ↓</div>';
+      }
+
+      // Add pending trip to this boat
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border-radius:8px;padding:8px">'
+        + '<span style="font-size:11px;font-weight:700;color:#0077b6;white-space:nowrap">Add to Boat '+(bi+1)+':</span>'
+        + '<select id="boat-res-'+bi+'" style="flex:1;min-width:140px;padding:5px 8px;border:1.5px solid #bae6fd;border-radius:6px;font-family:inherit;font-size:12px">';
+
+      // Populate with pending trip guests
+      var pendingOptions = [];
+      allActive.forEach(function(r) {
+        (r.trips||[]).forEach(function(t) {
+          if((t.status==='pending'||t.status==='rescheduled')) {
+            var tc2 = TRIPS_CONFIG.find(function(x){ return x.id===t.tripId; }) || {name:t.tripId, icon:'🚤'};
+            var pax = (parseInt(r.ad)||2)+(parseInt(r.ch)||0);
+            pendingOptions.push({
+              val: r.id+'|'+t.tripId+'|'+t.date+'|'+(r.fn+' '+r.ln)+'|'+r.rn+'|'+pax,
+              label: r.fn+' '+r.ln+' ('+r.rn+') — '+tc2.icon+' '+tc2.name+' — '+pax+' pax'
+            });
+          }
+        });
+      });
+
+      html += '<option value="">— Select guest + trip —</option>';
+      pendingOptions.forEach(function(o){
+        html += '<option value="'+o.val+'">'+o.label+'</option>';
+      });
+      html += '</select>'
+        + '<button onclick="addGuestToBoat(\''+selStr+'\','+bi+',document.getElementById(\'boat-res-'+bi+'\').value)" style="background:#0077b6;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">➕ Add</button>'
+        + '</div>';
+
       html += '</div>';
     });
   }
   html += '</div>';
 
-  // ── PENDING TRIPS FOR ALL IN-HOUSE (by priority) ──
-  var allPending = [];
-  allActive.forEach(function(r) {
-    (r.trips||[]).filter(function(t){return t.status==='pending';}).forEach(function(t) {
-      var daysLeft = Math.ceil((new Date(r.co) - new Date(selStr)) / 86400000);
-      allPending.push({res:r, trip:t, daysLeft:daysLeft});
-    });
-  });
-  allPending.sort(function(a,b){return a.daysLeft - b.daysLeft;});
 
-  if(allPending.length) {
-    html += '<div class="card">';
-    html += '<div style="font-size:14px;font-weight:800;color:#b45309;margin-bottom:12px">⚠️ All Pending Trips — By Priority ('+allPending.length+')</div>';
-    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#fef3c7"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Trip</th><th>Scheduled Date</th><th>Check-Out</th><th>Days Left</th><th>Action</th></tr>';
-    allPending.forEach(function(p) {
-      var tc = TRIPS_CONFIG.find(function(t){return t.id===p.trip.tripId;}) || {name:p.trip.tripId||'Trip', icon:'🚤'};
-      var urgent = p.daysLeft <= 1;
-      html += '<tr style="border-bottom:1px solid #fde68a;'+(urgent?'background:#fff7ed;':'')+'">'
-        + '<td style="padding:8px;font-weight:600">'+p.res.fn+' '+p.res.ln+'</td>'
-        + '<td style="padding:8px;text-align:center"><b>'+p.res.rn+'</b></td>'
-        + '<td style="padding:8px">'+tc.icon+' '+tc.name+'</td>'
-        + '<td style="padding:8px;text-align:center">'+(p.trip.date||'Not set')+'</td>'
-        + '<td style="padding:8px;text-align:center">'+p.res.co+'</td>'
-        + '<td style="padding:8px;text-align:center"><b style="color:'+(urgent?'#dc2626':'#d97706')+'">'+p.daysLeft+' day'+(p.daysLeft!==1?'s':'')+'</b>'+(urgent?' ⚠️':'')+'</td>'
-        + '<td style="padding:8px">'
-          + '<button onclick="rescheduleTrip(\''+p.res.id+'\',\''+p.trip.tripId+'\',\''+p.trip.date+'\')" style="background:#7c3aed;color:#fff;border:none;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">📅 Reschedule</button>'
-        + '</td>'
-        + '</tr>';
+  // ── REMAINING TRIPS PER IN-HOUSE GUEST BEFORE DEPARTURE ──
+  var inhouseAndArriving = inhouse.concat(arrivals);
+  inhouseAndArriving.sort(function(a,b){ return ymd(a.co) < ymd(b.co) ? -1 : 1; });
+  var guestsWithPending = inhouseAndArriving.filter(function(r){
+    return (r.trips||[]).some(function(t){ return t.status==='pending'; });
+  });
+
+  html += '<div class="card">';
+  html += '<div style="font-size:14px;font-weight:800;color:#b45309;margin-bottom:4px">⚠️ Remaining Trips to Complete Before Departure</div>';
+  html += '<div style="font-size:11px;color:#6b7280;margin-bottom:14px">In-house guests only · sorted by earliest check-out · pending trips only</div>';
+
+  // Separate guests with no trips from guests whose trips are all done
+  var guestsWithNoTrips = inhouseAndArriving.filter(function(r){ return !r.trips || !r.trips.length; });
+  var guestsAllDone = inhouseAndArriving.filter(function(r){ return r.trips && r.trips.length && !r.trips.some(function(t){ return t.status==='pending'; }); });
+
+  if (!guestsWithPending.length) {
+    if (guestsAllDone.length) {
+      html += '<div style="color:#059669;font-size:13px;font-weight:700;padding:8px 0">✅ All trips completed for all in-house guests!</div>';
+    } else {
+      html += '<div style="color:#9ca3af;font-size:13px;padding:8px 0">No trips have been added to any in-house reservation yet.</div>';
+      if (guestsWithNoTrips.length) {
+        html += '<div style="margin-top:8px;font-size:12px;color:#6b7280">Open a reservation → click <b>Trips</b> to schedule trips for your guests.</div>';
+      }
+    }
+  } else {
+    guestsWithPending.forEach(function(r) {
+      var pendingTrips = (r.trips||[]).filter(function(t){ return t.status==='pending'; });
+      var daysLeft = Math.ceil((new Date(ymd(r.co)) - new Date(selStr)) / 86400000);
+      var urgentColor = daysLeft<=1?'#dc2626':daysLeft<=2?'#d97706':'#059669';
+      var isArriving = ymd(r.ci)===selStr;
+      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid '+urgentColor+'">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
+        + '<div>'
+        + '<span style="font-size:14px;font-weight:800">'+r.fn+' '+r.ln+'</span>'
+        + ' <span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">'+r.rn+'</span>'
+        + (isArriving?' <span style="background:#e0f7fd;color:#0096c7;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700">🛬 Arriving today</span>':'')
+        + '</div>'
+        + '<div>'
+        + '<span style="font-size:11px;color:#6b7280">Checks out: <b>'+ymd(r.co)+'</b></span> '
+        + '<span style="background:'+(daysLeft<=1?'#fee2e2':daysLeft<=2?'#fef3c7':'#f0fdf4')+';color:'+urgentColor+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:800">'
+        + daysLeft+' day'+(daysLeft!==1?'s':'')+' left'+(daysLeft<=1?' ⚠️':'')+'</span>'
+        + '</div></div>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+      html += '<tr style="background:#fef3c7"><th style="padding:6px 8px;text-align:left">Trip</th><th>Scheduled</th><th>Status</th><th>Action</th></tr>';
+      pendingTrips.forEach(function(t) {
+        var tc = TRIPS_CONFIG.find(function(x){ return x.id===t.tripId; }) || {name:t.tripId||'Trip', icon:'🚤'};
+        var isToday = ymd(t.date)===selStr;
+        var isOverdue = t.date && ymd(t.date)<selStr;
+        var rowBg = isOverdue?'#fff5f5':isToday?'#f0fdf4':'#fff';
+        var rid=r.id, tid=t.tripId, tdt=t.date||'';
+        html += '<tr style="border-bottom:1px solid #fde68a;background:'+rowBg+'">'
+          + '<td style="padding:6px 8px">'+tc.icon+' <b>'+tc.name+'</b></td>'
+          + '<td style="padding:6px 8px;text-align:center">'
+          + (t.date
+            ? '<span style="font-weight:600;color:'+(isToday?'#059669':isOverdue?'#dc2626':'#374151')+'">'+ymd(t.date)+(isToday?' ← today':isOverdue?' ⚠️ overdue':'')+'</span>'
+            : '<span style="color:#9ca3af">Not scheduled yet</span>')
+          + '</td>'
+          + '<td style="padding:6px 8px"><span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">⏳ Pending</span></td>'
+          + '<td style="padding:6px 8px">'
+          + tripBtn(rid,tid,tdt,'done','✅ Done','#059669')
+          + tripBtn(rid,tid,tdt,'reschedule','📅 Reschedule','#7c3aed')
+          + '</td></tr>';
+      });
+      html += '</table></div>';
     });
-    html += '</table>';
-    html += '</div>';
   }
+  html += '</div>';
+
 
   var opsEl = document.getElementById('ops-content');
-  if(opsEl) {
+  if (opsEl) {
     opsEl.innerHTML = html;
-    // Make sure parent section is visible
-    var sec = document.getElementById('s-ops');
-    if(sec) { sec.style.display = 'block'; sec.classList.add('on'); }
   } else {
-    console.error('ops-content div not found!');
+    console.error('ops-content not found');
   }
 }
-
 // ── UPDATE TRIP STATUS ──
 function updateTripStatus(resId, tripId, tripDate, newStatus) {
   var res = RES.find(function(r){return r.id===resId;});
@@ -8445,8 +8935,45 @@ function updateTripStatus(resId, tripId, tripDate, newStatus) {
   if(trip) {
     trip.status = newStatus;
     saveRES();
-    drawOps();
+    saveTripsBackup();
+    if(typeof drawOps==='function') drawOps();
     toast('Trip marked as ' + newStatus);
+  }
+}
+
+
+// ── WEATHER CANCEL — cancels a trip for ALL guests on that day ──
+function cancelWeatherTrip(tripId, date, callerResId) {
+  var affected = [];
+  RES.forEach(function(r) {
+    (r.trips||[]).forEach(function(t) {
+      if(t.tripId===tripId && t.date===date && t.status==='pending') {
+        t.status = 'weather';
+        affected.push(r.fn+' '+r.ln);
+      }
+    });
+  });
+  if(!affected.length){toast('No pending trips to cancel for this day');return;}
+  saveRES(); saveTripsBackup();
+  if(typeof drawOps==='function') drawOps();
+  if(callerResId){var r2=RES.find(function(r){return r.id===callerResId;});if(r2)renderTripsList(r2);}
+  toast('🌊 Weather cancel — '+affected.length+' guest(s): '+affected.join(', '));
+}
+
+// ── MOVE MORNING MAKEUP TRIP TO AFTERNOON (same day) ──
+function moveTripToAfternoon(resId, tripId, date) {
+  var res = RES.find(function(r){ return r.id===resId; });
+  if(!res || !res.trips) return;
+  var trip = res.trips.find(function(t){ return t.tripId===tripId && t.date===date; });
+  if(trip) {
+    // Remove morning/makeup flags — it becomes a regular afternoon trip
+    delete trip.slot;
+    delete trip.rescheduledFrom;
+    trip.status = 'pending';
+    saveRES();
+    saveTripsBackup();
+    if(typeof drawOps==='function') drawOps();
+    toast('☀️ Moved to today\'s afternoon schedule!');
   }
 }
 
@@ -8615,17 +9142,119 @@ function printOps() {
   setTimeout(function(){win.print();}, 500);
 }
 
+var _tripsResId = null;
+
+function openTripsModal(resId) {
+  _tripsResId = resId;
+  var res = RES.find(function(r){ return r.id===resId; });
+  if (!res) return;
+
+  var modal = document.getElementById('m-trips');
+  if (!modal) { console.error('Trips modal not found'); return; }
+
+  // Set title
+  var title = document.getElementById('trips-modal-title');
+  if (title) title.textContent = '🚤 Trips — ' + res.fn + ' ' + res.ln + ' (' + res.rn + ')';
+
+  // Populate trip type dropdown
+  var sel = document.getElementById('trip-sel');
+  if (sel) {
+    sel.innerHTML = TRIPS_CONFIG.map(function(t){
+      return '<option value="'+t.id+'">'+t.icon+' '+t.name+' ('+t.time+')</option>';
+    }).join('');
+  }
+
+  // Set date field — default to checkin, locked to stay dates
+  var dateEl = document.getElementById('trip-date');
+  if (dateEl) {
+    var ciDate = res.ci ? String(res.ci).slice(0,10) : '';
+    var coDate = res.co ? String(res.co).slice(0,10) : '';
+    dateEl.min = ciDate;
+    dateEl.max = coDate;
+    if (!dateEl.value || dateEl.value < ciDate || dateEl.value > coDate) {
+      dateEl.value = ciDate;
+    }
+  }
+
+  // Pre-fill transport details
+  var transport = {
+    'tr-arr-time': res.arrTime||'',
+    'tr-arr-transport': res.arrTransport||'',
+    'tr-arr-from': res.arrFrom||'',
+    'tr-dep-time': res.depTime||'',
+    'tr-dep-transport': res.depTransport||'',
+    'tr-dep-to': res.depTo||''
+  };
+  Object.keys(transport).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = transport[id];
+  });
+
+  // Render existing trips list
+  renderTripsList(res);
+
+  // Show modal
+  modal.classList.add('on');
+}
+
+function renderTripsList(res) {
+  var body = document.getElementById('trips-list-body');
+  if (!body) return;
+  var trips = res.trips || [];
+  if (!trips.length) {
+    body.innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:12px 0;text-align:center">No trips added yet. Use the form above to add trips.</div>';
+    return;
+  }
+  var sCols={done:'#059669',missed:'#dc2626',pending:'#d97706',cancelled:'#6b7280',weather:'#0077b6',rescheduled:'#7c3aed'};
+  var sBgs={done:'#f0fdf4',missed:'#fee2e2',pending:'#fef3c7',cancelled:'#f3f4f6',weather:'#e0f7fd',rescheduled:'#ede9fe'};
+  var sLbls={done:'✅ Done',missed:'❌ Missed',pending:'⏳ Pending',cancelled:'🚫 Cancelled',weather:'🌊 Weather',rescheduled:'📅 Rescheduled'};
+  body.innerHTML = trips.map(function(t, idx) {
+    var tc = TRIPS_CONFIG.find(function(x){ return x.id===t.tripId; }) || {name:t.tripId, icon:'🚤'};
+    var sc = sCols[t.status]||'#d97706';
+    var sb = sBgs[t.status]||'#fef3c7';
+    var sl = sLbls[t.status]||'⏳ Pending';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;gap:10px;flex-wrap:wrap">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+      + '<span style="font-size:18px">'+tc.icon+'</span>'
+      + '<div>'
+      + '<div style="font-size:13px;font-weight:700">'+tc.name+'</div>'
+      + '<div style="font-size:11px;color:#6b7280">📅 '+t.date+'</div>'
+      + '</div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<span style="background:'+sb+';color:'+sc+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">'+sl+'</span>'
+      + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"done\")" title="Mark done" style="background:#059669;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:11px;cursor:pointer">✅</button>'
+      + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"done\")" title="Mark done" style="background:#059669;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:11px;cursor:pointer">✅</button>'
+      + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"missed\")" title="Mark missed" style="background:#dc2626;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:11px;cursor:pointer">❌</button>'
+      + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"cancelled\")" title="Guest cancelled" style="background:#6b7280;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:11px;cursor:pointer">🚫 Cancel</button>'
+      + '<button onclick="removeTripFromRes(\"'+res.id+'\",'+idx+')" title="Remove" style="background:#6b7280;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:11px;cursor:pointer">🗑️</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+
+
 function addTripToRes(resId) {
   var res = RES.find(function(r){return r.id===resId;});
   if(!res) return;
   if(!res.trips) res.trips = [];
-  var tripId = document.getElementById('trip-sel').value;
-  var date = document.getElementById('trip-date').value;
-  if(!date) { toast('Please select a date'); return; }
+  var selEl = document.getElementById('trip-sel');
+  var dateEl = document.getElementById('trip-date');
+  if(!selEl || !dateEl) { toast('Error: modal not ready'); return; }
+  var tripId = selEl.value;
+  var date = dateEl.value;
+  if(!tripId) { toast('Please select a trip type'); return; }
+  if(!date) { toast('Please select a date for this trip'); return; }
+  // Check not already added for same date
+  var exists = res.trips.find(function(t){ return t.tripId===tripId && t.date===date; });
+  if(exists) { toast('This trip is already added for '+date); return; }
   res.trips.push({tripId:tripId, date:date, status:'pending'});
   saveRES();
-  openTripsModal(resId);
-  toast('Trip added!');
+  saveTripsBackup();
+  renderTripsList(res);
+  dateEl.value = '';
+  toast('✅ Trip added for '+date+'!');
 }
 
 function removeTripFromRes(resId, idx) {
@@ -8633,7 +9262,8 @@ function removeTripFromRes(resId, idx) {
   if(!res || !res.trips) return;
   res.trips.splice(idx, 1);
   saveRES();
-  openTripsModal(resId);
+  saveTripsBackup();
+  renderTripsList(res);
   toast('Trip removed');
 }
 
