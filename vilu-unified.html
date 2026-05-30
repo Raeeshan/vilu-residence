@@ -8920,9 +8920,10 @@ function drawOps() {
   html += '</div>';
 
 
-  var opsEl = document.getElementById('ops-content');
-  if (opsEl) {
-    opsEl.innerHTML = html;
+  // Write to ALL ops-content elements (page has two layouts)
+  var opsEls = document.querySelectorAll('#ops-content');
+  if(opsEls.length) {
+    opsEls.forEach(function(el){ el.innerHTML = html; });
   } else {
     console.error('ops-content not found');
   }
