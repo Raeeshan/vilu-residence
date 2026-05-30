@@ -3279,6 +3279,9 @@ const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();
       var tom=(function(){var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);})();
       if(dp && (!dp.value || dp.value < new Date().toISOString().slice(0,10))) dp.value=tom;
       if(drawOps) drawOps();
+      // Scroll to top
+      var sOps=document.getElementById('s-ops');
+      if(sOps) sOps.scrollTop=0;
     },200);
   }};
 function go(id,el){
@@ -8924,6 +8927,9 @@ function drawOps() {
   var opsEls = document.querySelectorAll('#ops-content');
   if(opsEls.length) {
     opsEls.forEach(function(el){ el.innerHTML = html; });
+    // Scroll section to top so content is visible
+    var sOps = document.getElementById('s-ops');
+    if(sOps) sOps.scrollTop = 0;
   } else {
     console.error('ops-content not found');
   }
