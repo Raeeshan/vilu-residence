@@ -16,7 +16,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .topbar h1{font-size:14px;font-weight:700;white-space:nowrap}
 .tr{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
 .scrl{flex:1;min-width:0;overflow-y:auto;padding:16px}
-.sec{display:none;overflow-y:auto;height:100%}.sec.on{display:block!important;overflow-y:auto;height:calc(100vh - 56px);padding-bottom:40px}
+.sec{display:none}.sec.on{display:block!important;padding-bottom:60px}
 #s-cal.on{display:flex!important;flex-direction:column;padding:0!important}
 .sg{font-size:9px;font-weight:700;color:#9ca3af;padding:10px 14px 3px;letter-spacing:.08em;text-transform:uppercase}
 .sl{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:#374151;cursor:pointer;border-left:3px solid transparent;white-space:nowrap}
@@ -442,7 +442,7 @@ body.pms-mode { overflow:hidden; }
 .app { display:flex; height:100vh; overflow:hidden; flex-direction:row; }
 .app.be-hidden { display:none !important; }
 .app.pms-visible { display:flex !important; }
-.main { flex:1 !important; min-width:0 !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; padding:0 !important; max-width:unset !important; margin:0 !important; }
+.main { flex:1 !important; min-width:0 !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; } .scrl { flex:1 !important; overflow-y:auto !important; } .sec.on { display:block !important; padding-bottom:60px !important; height:auto !important; overflow:visible !important; }
 .sec.on { display:block !important; overflow-y:auto !important; height:calc(100vh - 56px) !important; padding-bottom:60px !important; }
 #agency-portal { height:100vh; overflow-y:auto; background:#f8fafc; }
 #booking-engine { background:#fff; }
@@ -791,6 +791,43 @@ body.pms-mode { overflow:hidden; }
   <div class="pm-leg-item"><div class="pm-leg-dot" style="background:#dbeafe;border:1px solid #93c5fd"></div>Selected</div>
   <div style="margin-left:auto;font-size:10px;color:#9ca3af"><i class="ti ti-hand-click"></i> Click cell to edit · Click date to select column · Shift+click for range</div>
 </div>
+</div>
+
+<!-- FIXED PRICES EDITOR -->
+<div style="margin-top:28px;padding:0 16px 20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div>
+      <div style="font-size:16px;font-weight:800;color:#111827">Fixed Prices</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">Set prices for trips, food, transfers and extras — used in guest folios and invoices</div>
+    </div>
+    <button onclick="saveFP()" style="background:#059669;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 Save Prices</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px" id="fp-grid">
+    <!-- Rendered by drawFP() -->
+  </div>
+
+  <div style="margin-top:16px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px">
+    <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">➕ Add Custom Item</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px">CATEGORY</label>
+        <select id="fp-new-cat" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:12px">
+          <option value="Trips & Activities">Trips & Activities</option>
+          <option value="Food & Beverage">Food & Beverage</option>
+          <option value="Transport">Transport</option>
+          <option value="Accommodation">Accommodation</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px">ITEM NAME</label>
+        <input type="text" id="fp-new-name" placeholder="e.g. Night Snorkeling" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:12px;width:180px">
+      </div>
+      <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px">PRICE ($/pax)</label>
+        <input type="number" id="fp-new-price" placeholder="0" min="0" step="0.5" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:12px;width:100px">
+      </div>
+      <button onclick="addFPItem()" style="background:#0077b6;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -3043,7 +3080,8 @@ Suite</textarea></div>
 
 const LOGO_SRC="data:image/jpeg;base64,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";
 document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.logo-img').forEach(function(i){i.src=LOGO_SRC;});try{localStorage.setItem('vilu_logo',LOGO_SRC);}catch(e){}});
-const TD=new Date(),tS=TD.toISOString().slice(0,10);
+const TD=new Date();
+const tS=(function(){var d=TD;var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;})();
 const D=n=>{const d=new Date(TD);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 const D2=(b,n)=>{const d=new Date(b+'T12:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 const fd=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{day:'numeric',month:'short'});
@@ -3180,6 +3218,104 @@ function markBoatGuestDone(dateStr, boatIdx, guestIdx) {
 }
 
 
+// ── FIXED PRICES ──
+var FP_KEY = 'vilu_fixed_prices';
+var FP_DEFAULTS = [
+  {cat:'Trips & Activities', name:'Snorkeling',         price:25,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Dolphin Cruise',     price:30,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Sandbank Visit',     price:20,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Sunset Cruise',      price:35,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Fishing Trip',       price:40,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Island Hopping',     price:45,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Manta Ray Tour',     price:50,  unit:'$/pax'},
+  {cat:'Trips & Activities', name:'Night Snorkeling',   price:30,  unit:'$/pax'},
+  {cat:'Food & Beverage',    name:'Breakfast',          price:12,  unit:'$/pax'},
+  {cat:'Food & Beverage',    name:'Lunch',              price:15,  unit:'$/pax'},
+  {cat:'Food & Beverage',    name:'Dinner',             price:18,  unit:'$/pax'},
+  {cat:'Food & Beverage',    name:'Welcome Drink',      price:5,   unit:'$/pax'},
+  {cat:'Food & Beverage',    name:'BBQ Night',          price:25,  unit:'$/pax'},
+  {cat:'Transport',          name:'Speedboat Transfer', price:40,  unit:'$/trip'},
+  {cat:'Transport',          name:'Dhoni Transfer',     price:20,  unit:'$/trip'},
+  {cat:'Transport',          name:'Airport Transfer',   price:60,  unit:'$/trip'},
+  {cat:'Accommodation',      name:'Extra Bed',          price:20,  unit:'$/night'},
+  {cat:'Accommodation',      name:'Early Check-in',     price:30,  unit:'$/room'},
+  {cat:'Accommodation',      name:'Late Check-out',     price:30,  unit:'$/room'},
+];
+
+function loadFP() {
+  try { var s=localStorage.getItem(FP_KEY); if(s) return JSON.parse(s); } catch(e) {}
+  return JSON.parse(JSON.stringify(FP_DEFAULTS));
+}
+function saveFP() {
+  var items = loadFP();
+  // Read all current values from inputs
+  document.querySelectorAll('.fp-price-input').forEach(function(input) {
+    var idx = parseInt(input.getAttribute('data-idx'));
+    if(!isNaN(idx) && items[idx]) items[idx].price = parseFloat(input.value)||0;
+  });
+  localStorage.setItem(FP_KEY, JSON.stringify(items));
+  if(typeof toast==='function') toast('✅ Prices saved!');
+}
+function drawFP() {
+  var grid = document.getElementById('fp-grid');
+  if(!grid) return;
+  var items = loadFP();
+  // Group by category
+  var cats = {};
+  items.forEach(function(item, idx) {
+    if(!cats[item.cat]) cats[item.cat]=[];
+    cats[item.cat].push({item:item, idx:idx});
+  });
+  var catColors = {
+    'Trips & Activities':'#0077b6',
+    'Food & Beverage':'#059669',
+    'Transport':'#7c3aed',
+    'Accommodation':'#dc2626',
+    'Other':'#6b7280'
+  };
+  var html = '';
+  Object.keys(cats).forEach(function(cat) {
+    var color = catColors[cat]||'#374151';
+    html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">';
+    html += '<div style="background:'+color+';color:#fff;padding:10px 16px;font-size:13px;font-weight:800">'+cat+'</div>';
+    html += '<div style="padding:12px">';
+    cats[cat].forEach(function(entry) {
+      var item = entry.item;
+      var idx = entry.idx;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">'
+        + '<div style="font-size:13px;font-weight:600;color:#374151">'+item.name+'<span style="font-size:10px;color:#9ca3af;margin-left:6px">'+item.unit+'</span></div>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+        + '<span style="color:#6b7280;font-size:12px">$</span>'
+        + '<input type="number" class="fp-price-input" data-idx="'+idx+'" value="'+item.price+'" min="0" step="0.5" style="width:70px;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-weight:700;text-align:right;font-family:inherit">'
+        + '<button onclick="deleteFPItem('+idx+')" title="Remove" style="background:none;border:none;color:#d1d5db;font-size:14px;cursor:pointer;padding:2px 4px">✕</button>'
+        + '</div></div>';
+    });
+    html += '</div></div>';
+  });
+  grid.innerHTML = html;
+}
+function addFPItem() {
+  var cat = document.getElementById('fp-new-cat').value;
+  var name = document.getElementById('fp-new-name').value.trim();
+  var price = parseFloat(document.getElementById('fp-new-price').value)||0;
+  if(!name){if(typeof toast==='function')toast('Enter an item name');return;}
+  var items = loadFP();
+  var unitMap = {'Trips & Activities':'$/pax','Food & Beverage':'$/pax','Transport':'$/trip','Accommodation':'$/night','Other':'$/unit'};
+  items.push({cat:cat, name:name, price:price, unit:unitMap[cat]||'$/unit'});
+  localStorage.setItem(FP_KEY, JSON.stringify(items));
+  document.getElementById('fp-new-name').value='';
+  document.getElementById('fp-new-price').value='';
+  drawFP();
+  if(typeof toast==='function') toast('✅ '+name+' added!');
+}
+function deleteFPItem(idx) {
+  var items = loadFP();
+  items.splice(idx,1);
+  localStorage.setItem(FP_KEY, JSON.stringify(items));
+  drawFP();
+}
+
+
 // ── TRIPS BACKUP — stored separately so they survive Supabase overwrites ──
 function saveTripsBackup() {
   var backup = {};
@@ -3272,7 +3408,7 @@ function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>
 
 // NAV
 const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',ops:'Daily Operations'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -3420,7 +3556,7 @@ function drawCal(){
   let prevMo = -1;
   dates.forEach((d,i)=>{
     const ds=d.toISOString().slice(0,10);
-    const dw=d.getDay(), isWk=dw===0||dw===6, isTd=ds===today;
+    const dw=d.getDay(), isWk=dw===5, isTd=ds===today;
     const moSep=d.getMonth()!==prevMo&&prevMo!==-1?'month-sep':'';
     const cls=isTd?'today':isWk?'weekend':'';
     const occCount=occ[ds]||0;
@@ -3943,6 +4079,13 @@ function _showDetLegacy(id){
     // Generate invoice button
     var invBtn=document.createElement('button');
     invBtn.textContent='🧾 Generate invoice from folio';
+    // Add partial invoice button next to it
+    var partBtn=document.createElement('button');
+    partBtn.className='btn sm';
+    partBtn.style.cssText='flex:1;background:#7c3aed;color:#fff;border:none;padding:8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit';
+    partBtn.innerHTML='<i class="ti ti-receipt-2"></i> Custom invoice';
+    partBtn.onclick=function(){ openPartialInvoice(id); };
+    invBtn.parentElement.appendChild(partBtn);
     invBtn.style.cssText='width:100%;margin-top:10px;background:#2563eb;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit';
     invBtn.addEventListener('click',function(){
       document.getElementById('m-det').classList.remove('on');
@@ -5726,6 +5869,7 @@ function drawFolios(){
       '<div id="fitems-'+r.id+'" style="display:flex;flex-wrap:wrap;gap:5px"></div>'+
       '<div style="display:flex;gap:8px;margin-top:10px">'+
         '<button data-rid="'+r.id+'" onclick="folioToInvoiceById(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-invoice"></i> Generate invoice</button>'+
+        '<button data-rid="'+r.id+'" onclick="openPartialInvoice(this.dataset.rid)" style="flex:1;background:#7c3aed;color:#fff;border:none;padding:8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-receipt-2"></i> Custom invoice</button>'+
       '</div>';
 
     // Charges list
@@ -5869,6 +6013,112 @@ function renderFolioChargesById(resId){
   h+='</div>';
   el.innerHTML=h;
 }
+
+// ── PARTIAL INVOICE — let staff select which charges to include ──
+function piSelectAll(cb){document.querySelectorAll(".pi-chk").forEach(function(c){c.checked=cb.checked;});}
+function closePartialInv(){var b=document.getElementById("partial-inv-bg");if(b)b.remove();}
+function openPartialInvoice(resId) {
+  var res = RES.find(function(r){ return r.id===resId; });
+  var folio = FOLIOS[resId] || {charges:[]};
+  if(!folio.charges.length) { toast('No charges in folio yet'); return; }
+
+  // Build selection modal
+  var html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center" id="partial-inv-bg" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;padding:28px;width:580px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">'
+    + '<div><div style="font-size:18px;font-weight:800;color:#111827">Select Charges for Invoice</div>'
+    + '<div style="font-size:12px;color:#6b7280;margin-top:2px">'+(res?res.fn+' '+res.ln:'')+' — tick the charges to include</div></div>'
+    + '<button onclick="closePartialInv()" style="background:#f3f4f6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px">✕ Close</button>'
+    + '</div>';
+
+  // Group charges by date
+  var byDate = {};
+  folio.charges.forEach(function(ch, idx) {
+    var d = ch.date || 'Other';
+    if(!byDate[d]) byDate[d] = [];
+    byDate[d].push({ch:ch, idx:idx});
+  });
+
+  html += '<div style="margin-bottom:16px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:#374151"><input type="checkbox" id="pi-select-all" onchange="piSelectAll(this)" style="width:16px;height:16px"> Select All</label></div>';
+
+  Object.keys(byDate).sort().forEach(function(date) {
+    html += '<div style="margin-bottom:14px">'
+      + '<div style="font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #f3f4f6">'
+      + (date !== 'Other' ? new Date(date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) : 'Other Charges')
+      + '</div>';
+    byDate[date].forEach(function(entry) {
+      var ch = entry.ch;
+      var pax = ch.pax||ch.qty||1;
+      var total = (ch.price * pax).toFixed(2);
+      var isTrip = ch.cat==='Trips & Activities';
+      html += '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f9fafb;border:1px solid #e5e7eb">'
+        + '<input type="checkbox" class="pi-chk" data-idx="'+entry.idx+'" style="width:16px;height:16px;cursor:pointer"'+(isTrip?' checked':'')+' >'
+        + '<div style="flex:1">'
+        + '<div style="font-size:13px;font-weight:600;color:#111827">'+ch.desc+(pax>1?' (×'+pax+' pax)':'')+'</div>'
+        + '<div style="font-size:11px;color:#6b7280">'+ch.cat+'</div>'
+        + '</div>'
+        + '<div style="font-size:13px;font-weight:700;color:#059669">$'+total+'</div>'
+        + '</label>';
+    });
+    html += '</div>';
+  });
+
+  // Invoice type selector
+  html += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:16px">'
+    + '<div style="font-size:12px;font-weight:700;color:#0077b6;margin-bottom:8px">INCLUDE ROOM CHARGE?</div>'
+    + '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px"><input type="checkbox" id="pi-include-room" style="width:16px;height:16px"> Include room charge ($'+(res?((res.rate||0)*Math.ceil((new Date(res.co)-new Date(res.ci))/86400000)).toFixed(2):'0.00')+')</label>'
+    + '</div>';
+
+  window._piResId = resId;
+  html += '<button onclick="generatePartialInvoice(window._piResId)" style="background:#0077b6;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">🧾 Generate Selected Invoice</button>'
+    + '</div></div>';
+
+  var el = document.createElement('div');
+  el.innerHTML = html;
+  document.body.appendChild(el.firstChild);
+}
+
+function generatePartialInvoice(resId) {
+  var res = RES.find(function(r){ return r.id===resId; });
+  var folio = FOLIOS[resId] || {charges:[]};
+  var checked = Array.from(document.querySelectorAll('.pi-chk:checked'));
+  var includeRoom = document.getElementById('pi-include-room') && document.getElementById('pi-include-room').checked;
+
+  if(!checked.length && !includeRoom) { toast('Select at least one charge'); return; }
+
+  var selectedCharges = checked.map(function(el) {
+    var idx = parseInt(el.getAttribute('data-idx'));
+    return folio.charges[idx];
+  }).filter(Boolean);
+
+  // Close the modal
+  var bg = document.getElementById('partial-inv-bg');
+  if(bg) bg.remove();
+
+  // Open invoice modal with selected charges
+  openIM(resId);
+  setTimeout(function(){
+    invItems = [];
+
+    // Add room charge if selected
+    if(includeRoom && res) {
+      var nights = Math.ceil((new Date(res.co) - new Date(res.ci)) / 86400000);
+      invItems.push({id:Date.now(), desc:'Room '+res.rn+' ('+nights+' nights)', qty:nights, unit:res.rate||0, tax:true, cat:'Accommodation', pax:1});
+    }
+
+    // Add selected folio charges
+    selectedCharges.forEach(function(ch) {
+      var pax = ch.pax||ch.qty||1;
+      invItems.push({id:Date.now()+Math.random(), desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:+(ch.price*pax).toFixed(2), tax:ch.tax!==false, cat:ch.cat, pax:pax});
+    });
+
+    if(typeof renderInvItems==='function') renderInvItems();
+    if(typeof renderCatButtons==='function') renderCatButtons();
+    if(typeof niPrev==='function') niPrev();
+    toast('✓ '+invItems.length+' item'+(invItems.length>1?'s':'')+' loaded — review and print');
+  }, 200);
+}
+
 
 function folioToInvoiceById(resId){
   var folio=FOLIOS[resId]||{charges:[]};
@@ -8487,453 +8737,49 @@ function saveTripsConfig() {
 
 // ── DAILY OPERATIONS ──
 function drawOps() {
-  var today = new Date().toISOString().slice(0,10);
-  var dateEl = document.getElementById('ops-date');
-
-  // Normalize any date value to YYYY-MM-DD
-  function ymd(v){ if(!v)return ''; try{ return new Date(v).toISOString().slice(0,10); }catch(e){ return String(v).slice(0,10); } }
-
-  // Default to TOMORROW — always reset to tomorrow unless user manually changed date
-  var tomorrow = (function(){ var d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); })();
-  if (dateEl) {
-    // Reset if empty OR if the stored date is in the past (stale from old session)
-    if (!dateEl.value || dateEl.value < today) {
-      dateEl.value = tomorrow;
-    }
-  }
-  var selStr = dateEl ? (dateEl.value || tomorrow) : tomorrow;
-
-  // ── GET RELEVANT RESERVATIONS ──
-  var arrivals   = RES.filter(function(r){ return ymd(r.ci)===selStr && r.st!=='Cancelled'; });
-  var departures = RES.filter(function(r){ return ymd(r.co)===selStr && r.st!=='Cancelled'; });
-  var inhouse    = RES.filter(function(r){ return ymd(r.ci)<selStr && ymd(r.co)>selStr && r.st!=='Cancelled'; });
-  var allActive  = RES.filter(function(r){ return ymd(r.ci)<=selStr && ymd(r.co)>=selStr && r.st!=='Cancelled'; });
-
-  // ── BUILD TRIP SCHEDULE FROM r.trips ──
-  var tripCounts = {}, tripGuests = {};
-  allActive.forEach(function(r) {
-    (r.trips||[]).forEach(function(t) {
-      if (ymd(t.date) === selStr) {
-        if (!tripCounts[t.tripId]) { tripCounts[t.tripId]=0; tripGuests[t.tripId]=[]; }
-        tripCounts[t.tripId]++;
-        tripGuests[t.tripId].push({res:r, tripData:t});
-      }
-    });
-  });
-  var sortedTrips = Object.keys(tripCounts).sort(function(a,b){ return tripCounts[b]-tripCounts[a]; });
-
-  // ── ALSO COLLECT PACKAGE INCLUDED ITEMS FOR EACH GUEST ──
-  // Packages store their includes as text strings in PACKAGES array
-  // We match reservation's package field to show what's included in their stay
-  var PKGS = (function(){ try{var s=localStorage.getItem('vilu_packages');if(s)return JSON.parse(s);}catch(e){} return []; })();
-
-  function getResPkg(r) {
-    if (!r.pkg && !r.pkgId && !r.pkgName) return null;
-    return PKGS.find(function(p){ return p.id===r.pkgId || p.id===r.pkg || p.name===r.pkgName; }) || null;
-  }
-
-  var html = '';
-
-  // ── DATE PICKER ──
-  html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">'
-    + '<div style="font-size:20px;font-weight:800;color:#111827">Daily Operations</div>'
-    + '<input type="date" id="ops-date" value="'+selStr+'" onchange="drawOps()" style="padding:7px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;color:#111827">'
-    + '<button onclick="drawOps()" style="background:#0096c7;color:#fff;border:none;padding:7px 16px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">Refresh</button>'
-    + '<button onclick="printOps()" style="background:#374151;color:#fff;border:none;padding:7px 16px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">🖨️ Print</button>'
-    + '</div>';
-
-  // ── SUMMARY STATS ──
-  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
-  [{label:'Arrivals',val:arrivals.length,color:'#0096c7',icon:'🛬'},
-   {label:'In-House',val:inhouse.length,color:'#7c3aed',icon:'🏠'},
-   {label:'Departures',val:departures.length,color:'#dc2626',icon:'🛫'},
-   {label:'Trips Today',val:sortedTrips.length,color:'#059669',icon:'🚤'}
-  ].forEach(function(s) {
-    html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center">'
-      + '<div style="font-size:22px">'+s.icon+'</div>'
-      + '<div style="font-size:24px;font-weight:800;color:'+s.color+'">'+s.val+'</div>'
-      + '<div style="font-size:11px;color:#6b7280;font-weight:600">'+s.label+'</div>'
-      + '</div>';
-  });
-  html += '</div>';
-
-  // ── ARRIVALS ──
-  html += '<div class="card" style="margin-bottom:14px">';
-  html += '<div style="font-size:14px;font-weight:800;color:#0096c7;margin-bottom:12px">🛬 Arrivals ('+arrivals.length+')</div>';
-  if (!arrivals.length) {
-    html += '<div style="color:#6b7280;font-size:13px">No arrivals today</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#e0f7fd"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Pax</th><th>Package</th><th>Arrival Time</th><th>Transport</th><th>From</th><th>Notes</th></tr>';
-    arrivals.forEach(function(r) {
-      var pkg = getResPkg(r);
-      var pkgCell = pkg
-        ? '<span style="background:#e0f7fd;color:#0096c7;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+pkg.emoji+' '+pkg.name+'</span>'
-        : '<span style="color:#9ca3af;font-size:11px">Direct</span>';
-      html += '<tr style="border-bottom:1px solid #f3f4f6">'
-        + '<td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td>'
-        + '<td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td>'
-        + '<td style="padding:8px;text-align:center">'+(r.ad||2)+'A '+(r.ch>0?r.ch+'C':'')+'</td>'
-        + '<td style="padding:8px">'+pkgCell+'</td>'
-        + '<td style="padding:8px;text-align:center;font-weight:700;color:#0096c7">'+(r.arrTime||'—')+'</td>'
-        + '<td style="padding:8px;font-weight:600;color:#7c3aed">'+(r.arrTransport||'—')+'</td>'
-        + '<td style="padding:8px">'+(r.arrFrom||'—')+'</td>'
-        + '<td style="padding:8px;color:#6b7280">'+(r.notes||'—')+'</td>'
-        + '</tr>';
-      // Show package includes if they have a package
-      if (pkg && pkg.includes && pkg.includes.length) {
-        html += '<tr style="border-bottom:1px solid #f3f4f6;background:#f0fbff">'
-          + '<td colspan="8" style="padding:6px 8px 8px 24px;font-size:11px;color:#374151">'
-          + '<b style="color:#0096c7">Package includes:</b> '
-          + pkg.includes.map(function(i){ return '✓ '+i; }).join(' &nbsp;|&nbsp; ')
-          + '</td></tr>';
-      }
-    });
-    html += '</table>';
-  }
-  html += '</div>';
-
-  // ── IN-HOUSE ──
-  html += '<div class="card" style="margin-bottom:14px">';
-  html += '<div style="font-size:14px;font-weight:800;color:#7c3aed;margin-bottom:12px">🏠 In-House ('+inhouse.length+')</div>';
-  if (!inhouse.length) {
-    html += '<div style="color:#6b7280;font-size:13px">No in-house guests</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#f5f3ff"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Package</th><th>Nights Left</th><th>Pending Trips</th></tr>';
-    inhouse.forEach(function(r) {
-      var nightsLeft = Math.ceil((new Date(r.co) - new Date(selStr)) / 86400000);
-      var allTrips     = (r.trips||[]);
-      var pendingTrips = allTrips.filter(function(t){ return t.status==='pending' && t.date>=selStr; });
-      var urgentTrips  = allTrips.filter(function(t){ return t.status==='pending' && t.date<selStr; });
-      var pkg = getResPkg(r);
-      var pkgCell = pkg
-        ? '<span style="background:#ede9fe;color:#7c3aed;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+pkg.emoji+' '+pkg.name+'</span>'
-        : '<span style="color:#9ca3af;font-size:11px">Direct</span>';
-      html += '<tr style="border-bottom:1px solid #f3f4f6'+(urgentTrips.length?';background:#fff7ed':'')+'">'
-        + '<td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td>'
-        + '<td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td>'
-        + '<td style="padding:8px;text-align:center">'+r.ci+'</td>'
-        + '<td style="padding:8px;text-align:center">'+r.co+'</td>'
-        + '<td style="padding:8px">'+pkgCell+'</td>'
-        + '<td style="padding:8px;text-align:center"><b style="color:'+(nightsLeft<=1?'#dc2626':nightsLeft<=2?'#d97706':'#059669')+'">'+nightsLeft+' night'+(nightsLeft!==1?'s':'')+'</b></td>'
-        + '<td style="padding:8px">'
-          + (urgentTrips.length?'<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">⚠️ '+urgentTrips.length+' OVERDUE</span> ':'')
-          + (pendingTrips.length?'<span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">'+pendingTrips.length+' pending</span>':allTrips.length?'<span style="color:#059669;font-size:11px">✅ All done</span>':'<span style="color:#9ca3af;font-size:11px">No trips added</span>')
-        + '</td>'
-        + '</tr>';
-    });
-    html += '</table>';
-  }
-  html += '</div>';
-
-  // ── DEPARTURES ──
-  html += '<div class="card" style="margin-bottom:14px">';
-  html += '<div style="font-size:14px;font-weight:800;color:#dc2626;margin-bottom:12px">🛫 Departures ('+departures.length+')</div>';
-  if (!departures.length) {
-    html += '<div style="color:#6b7280;font-size:13px">No departures today</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-    html += '<tr style="background:#fef2f2"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Package</th><th>Departure Time</th><th>Transport</th><th>To</th><th>Incomplete Trips</th></tr>';
-    departures.forEach(function(r) {
-      var incompTrips = (r.trips||[]).filter(function(t){ return t.status==='pending'; });
-      var pkg = getResPkg(r);
-      var pkgCell = pkg
-        ? '<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">'+pkg.emoji+' '+pkg.name+'</span>'
-        : '<span style="color:#9ca3af;font-size:11px">Direct</span>';
-      html += '<tr style="border-bottom:1px solid #f3f4f6">'
-        + '<td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td>'
-        + '<td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td>'
-        + '<td style="padding:8px">'+pkgCell+'</td>'
-        + '<td style="padding:8px;text-align:center;font-weight:700;color:#dc2626">'+(r.depTime||'—')+'</td>'
-        + '<td style="padding:8px;font-weight:600;color:#7c3aed">'+(r.depTransport||'—')+'</td>'
-        + '<td style="padding:8px">'+(r.depTo||'—')+'</td>'
-        + '<td style="padding:8px">'
-          + (incompTrips.length?'<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">⚠️ '+incompTrips.length+' incomplete!</span>':'<span style="color:#059669;font-size:11px">✅ All done</span>')
-        + '</td>'
-        + '</tr>';
-    });
-    html += '</table>';
-  }
-  html += '</div>';
-
-  // ── BOAT MANIFEST — MORNING (makeup) + AFTERNOON (scheduled) ──
-  html += '<div class="card" style="margin-bottom:14px">';
-  html += '<div style="font-size:14px;font-weight:800;color:#059669;margin-bottom:4px">🚤 Boat Schedule — ' + selStr + '</div>';
-  html += '<div style="font-size:11px;color:#6b7280;margin-bottom:14px">🌅 Morning = makeup from weather cancellation &nbsp;·&nbsp; 🌊 Afternoon = today\'s scheduled trips</div>';
-
-  function btnStyle(bg) {
-    return 'background:'+bg+';color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px';
-  }
-  function tripBtn(resId, tripId, date, status, label, bg) {
-    var fn;
-    if(status==='reschedule') fn='rescheduleTrip("'+resId+'","'+tripId+'","'+date+'")';
-    else if(status==='cancelweather') fn='cancelWeatherTrip("'+tripId+'","'+date+'","'+resId+'")';
-    else if(status==='dotoday') fn='moveTripToAfternoon("'+resId+'","'+tripId+'","'+date+'")';
-    else fn='updateTripStatus("'+resId+'","'+tripId+'","'+date+'","'+status+'")';
-    return '<button onclick="'+fn+'" style="'+btnStyle(bg)+'">'+label+'</button>';
-  }
-
-  function renderBoatGroup(sortedList, guestMap, countMap, slotLabel, slotColor, slotIcon, slotBg) {
-    if(!sortedList.length) {
-      return '<div style="color:#9ca3af;font-size:12px;padding:8px 12px;background:#f9fafb;border-radius:8px">No '+slotLabel+' trips today</div>';
-    }
-    var out = '';
-    sortedList.forEach(function(tripId) {
-      var tc = TRIPS_CONFIG.find(function(t){ return t.id===tripId; }) || {name:tripId, icon:'🚤', time:'—'};
-      var guests = guestMap[tripId];
-      var count = countMap[tripId];
-      var totalPax = guests.reduce(function(s,g){ return s+(parseInt(g.res.ad)||2)+(parseInt(g.res.ch)||0); },0);
-      var isSolo = count===1;
-      out += '<div style="background:'+slotBg+';border:1.5px solid '+(isSolo?'#fca5a5':slotColor)+';border-radius:10px;padding:14px;margin-bottom:10px">';
-      out += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
-        + '<div style="display:flex;align-items:center;gap:10px">'
-        + '<span style="font-size:22px">'+tc.icon+'</span>'
-        + '<div>'
-        + '<div style="font-size:14px;font-weight:800;color:#111827">'+tc.name+'</div>'
-        + '<div style="font-size:11px;color:#6b7280">'+slotIcon+' '+slotLabel+' · '+count+' room'+(count!==1?'s':'')+' · <b>'+totalPax+' pax</b></div>'
-        + '</div></div>'
-        + '<div style="display:flex;gap:6px;align-items:center">'
-        + '<span style="background:'+slotColor+';color:#fff;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">🚤 1 Boat</span>'
-        + (isSolo
-          ? '<span style="background:#fee2e2;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">⚠️ Solo — extra boat</span>'
-          : '<span style="background:#f0fdf4;color:#059669;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700">✅ Combined</span>')
-        + '</div></div>';
-      out += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-      out += '<tr style="background:rgba(0,0,0,.04)"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Pax</th><th>Status</th><th>Action</th></tr>';
-      guests.forEach(function(g) {
-        var sCols={done:'#059669',missed:'#dc2626',pending:'#d97706',cancelled:'#6b7280',weather:'#0077b6',rescheduled:'#7c3aed'};
-        var sBgs={done:'#f0fdf4',missed:'#fee2e2',pending:'#fef3c7',cancelled:'#f3f4f6',weather:'#e0f7fd',rescheduled:'#ede9fe'};
-        var sLbls={done:'✅ Done',missed:'❌ Missed',pending:'⏳ Pending',cancelled:'🚫 Cancelled',weather:'🌊 Weather',rescheduled:'📅 Rescheduled'};
-        var sc=sCols[g.tripData.status]||'#d97706';
-        var sb=sBgs[g.tripData.status]||'#fef3c7';
-        var sl=sLbls[g.tripData.status]||'⏳ Pending';
-        var rid=g.res.id, tid=g.tripData.tripId, tdt=g.tripData.date;
-        var fromTag = g.tripData.rescheduledFrom
-          ? '<span style="background:#ede9fe;color:#7c3aed;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px">from '+g.tripData.rescheduledFrom+'</span>'
-          : '';
-        out += '<tr style="border-bottom:1px solid rgba(0,0,0,.06)">'
-          + '<td style="padding:6px 8px;font-weight:600">'+g.res.fn+' '+g.res.ln+fromTag+'</td>'
-          + '<td style="padding:6px 8px;text-align:center"><b>'+g.res.rn+'</b></td>'
-          + '<td style="padding:6px 8px;text-align:center">'+(parseInt(g.res.ad)||2)+'A'+(g.res.ch>0?' '+g.res.ch+'C':'')+'</td>'
-          + '<td style="padding:6px 8px"><span style="background:'+sb+';color:'+sc+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">'+sl+'</span></td>'
-          + '<td style="padding:6px 8px;white-space:nowrap">'
-          + (g.tripData.slot==='morning'||g.tripData.rescheduledFrom
-              ? tripBtn(rid,tid,tdt,'dotoday','☀️ Do Today','#f59e0b')
-              : '')
-          + tripBtn(rid,tid,tdt,'done','✅','#059669')
-          + tripBtn(rid,tid,tdt,'missed','❌','#dc2626')
-          + tripBtn(rid,tid,tdt,'cancelled','🚫','#6b7280')
-          + tripBtn(rid,tid,tdt,'cancelweather','🌊','#0077b6')
-          + tripBtn(rid,tid,tdt,'reschedule','📅','#7c3aed')
-          + '</td></tr>';
-      });
-      out += '</table>';
-      var joiningRooms = guests.map(function(g){ return g.res.rn; });
-      var notJoining = inhouse.concat(arrivals).filter(function(r){ return joiningRooms.indexOf(r.rn)<0; }).map(function(r){ return r.rn; });
-      if(notJoining.length) {
-        out += '<div style="margin-top:8px;padding:7px 10px;background:rgba(0,0,0,.04);border-radius:6px;font-size:11px;color:#6b7280">🚫 Not joining: <b>'+notJoining.join(', ')+'</b></div>';
-      }
-      out += '</div>';
-    });
-    return out;
-  }
-
-  if(!sortedMorning.length && !sortedAfternoon.length) {
-    html += '<div style="color:#6b7280;font-size:13px;padding:8px 0">No trips scheduled for this day</div>';
-  } else {
-    // MORNING slot — makeup trips from yesterday\'s weather cancellation
-    html += '<div style="margin-bottom:18px">';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-      + '<span style="background:#7c3aed;color:#fff;border-radius:6px;padding:4px 14px;font-size:12px;font-weight:800">🌅 MORNING</span>'
-      + '<span style="font-size:11px;color:#7c3aed;font-weight:600">Makeup trips — rescheduled from weather cancellation</span>'
-      + '</div>';
-    html += renderBoatGroup(sortedMorning, morningGuests, morningCounts, 'Morning makeup', '#7c3aed', '🌅', '#faf5ff');
-    html += '</div>';
-
-    // AFTERNOON slot — today\'s regular scheduled trips
-    html += '<div>';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-      + '<span style="background:#059669;color:#fff;border-radius:6px;padding:4px 14px;font-size:12px;font-weight:800">🌊 AFTERNOON</span>'
-      + '<span style="font-size:11px;color:#059669;font-weight:600">Today\'s scheduled boat trips</span>'
-      + '</div>';
-    html += renderBoatGroup(sortedAfternoon, afternoonGuests, afternoonCounts, 'Afternoon', '#059669', '🌊', '#f0fdf4');
-    html += '</div>';
-  }
-  html += '</div>';
-
-
-  // ── BOAT BUILDER ──
-  // Load boats for this date from localStorage
-  var BOATS_KEY = 'vilu_boats';
-  var allBoats = (function(){ try{ return JSON.parse(localStorage.getItem(BOATS_KEY)||'{}'); }catch(e){return {};} })();
-  if(!allBoats[selStr]) allBoats[selStr] = [];
-  var dayBoats = allBoats[selStr];
-
-  html += '<div class="card" style="margin-bottom:14px">';
-  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
-    + '<div>'
-    + '<div style="font-size:14px;font-weight:800;color:#0077b6">🚤 Boat Builder</div>'
-    + '<div style="font-size:11px;color:#6b7280;margin-top:2px">Create boats for the day · assign trips and guests · set departure time</div>'
-    + '</div>'
-    + '<button onclick="addBoat(\''+selStr+'\')" style="background:#0077b6;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">➕ Add Boat</button>'
-    + '</div>';
-
-  if(!dayBoats.length) {
-    html += '<div style="color:#9ca3af;font-size:13px;padding:12px;background:#f9fafb;border-radius:8px;text-align:center">'
-      + 'No boats created yet for this day.<br>'
-      + '<span style="font-size:12px">Click <b>Add Boat</b> to create your first boat, then assign trips and guests from the list below.</span>'
-      + '</div>';
-  } else {
-    dayBoats.forEach(function(boat, bi) {
-      var boatPax = boat.guests ? boat.guests.reduce(function(s,g){ return s+(g.pax||0); },0) : 0;
-      var isSolo = boat.guests && boat.guests.length === 1;
-      html += '<div style="background:#f0f9ff;border:1.5px solid #0077b6;border-radius:10px;padding:14px;margin-bottom:12px">';
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">'
-        + '<div style="display:flex;align-items:center;gap:10px">'
-        + '<span style="background:#0077b6;color:#fff;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:800">🚤 Boat '+(bi+1)+'</span>'
-        + '<input type="time" value="'+(boat.time||'')+'" onchange="updateBoatTime(\''+selStr+'\','+bi+',this.value)" style="padding:5px 10px;border:1.5px solid #bae6fd;border-radius:7px;font-family:inherit;font-size:13px;font-weight:700;color:#0077b6">'
-        + '<span style="font-size:12px;color:#6b7280">'+boatPax+' pax total</span>'
-        + (isSolo ? '<span style="background:#fee2e2;color:#dc2626;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">⚠️ Solo — extra cost</span>' : (boat.guests&&boat.guests.length>1?'<span style="background:#f0fdf4;color:#059669;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">✅ Combined</span>':''))
-        + '</div>'
-        + '<button onclick="removeBoat(\''+selStr+'\','+bi+')" style="background:#fee2e2;color:#dc2626;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ Remove Boat</button>'
-        + '</div>';
-
-      // Guest manifest for this boat
-      if(boat.guests && boat.guests.length) {
-        html += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">';
-        html += '<tr style="background:#e0f7fd"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Trip</th><th>Pax</th><th>Action</th></tr>';
-        boat.guests.forEach(function(g, gi) {
-          var tc = TRIPS_CONFIG.find(function(t){ return t.id===g.tripId; }) || {name:g.tripId||'Trip', icon:'🚤'};
-          html += '<tr style="border-bottom:1px solid #bae6fd">'
-            + '<td style="padding:6px 8px;font-weight:600">'+g.guestName+'</td>'
-            + '<td style="padding:6px 8px;text-align:center"><b>'+g.room+'</b></td>'
-            + '<td style="padding:6px 8px">'+tc.icon+' '+tc.name+'</td>'
-            + '<td style="padding:6px 8px;text-align:center">'+g.pax+'</td>'
-            + '<td style="padding:6px 8px">'
-            + '<button onclick="markBoatGuestDone(\''+selStr+'\','+bi+','+gi+')" style="background:#059669;color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px">✅ Done</button>'
-            + '<button onclick="removeBoatGuest(\''+selStr+'\','+bi+','+gi+')" style="background:#e5e7eb;color:#374151;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">✕ Remove</button>'
-            + '</td></tr>';
-        });
-        html += '</table>';
-      } else {
-        html += '<div style="color:#9ca3af;font-size:12px;padding:8px;background:#fff;border-radius:6px;margin-bottom:10px">No guests assigned yet — add from pending trips below ↓</div>';
-      }
-
-      // Add pending trip to this boat
-      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border-radius:8px;padding:8px">'
-        + '<span style="font-size:11px;font-weight:700;color:#0077b6;white-space:nowrap">Add to Boat '+(bi+1)+':</span>'
-        + '<select id="boat-res-'+bi+'" style="flex:1;min-width:140px;padding:5px 8px;border:1.5px solid #bae6fd;border-radius:6px;font-family:inherit;font-size:12px">';
-
-      // Populate with pending trip guests
-      var pendingOptions = [];
-      allActive.forEach(function(r) {
-        (r.trips||[]).forEach(function(t) {
-          if((t.status==='pending'||t.status==='rescheduled')) {
-            var tc2 = TRIPS_CONFIG.find(function(x){ return x.id===t.tripId; }) || {name:t.tripId, icon:'🚤'};
-            var pax = (parseInt(r.ad)||2)+(parseInt(r.ch)||0);
-            pendingOptions.push({
-              val: r.id+'|'+t.tripId+'|'+t.date+'|'+(r.fn+' '+r.ln)+'|'+r.rn+'|'+pax,
-              label: r.fn+' '+r.ln+' ('+r.rn+') — '+tc2.icon+' '+tc2.name+' — '+pax+' pax'
-            });
-          }
-        });
-      });
-
-      html += '<option value="">— Select guest + trip —</option>';
-      pendingOptions.forEach(function(o){
-        html += '<option value="'+o.val+'">'+o.label+'</option>';
-      });
-      html += '</select>'
-        + '<button onclick="addGuestToBoat(\''+selStr+'\','+bi+',document.getElementById(\'boat-res-'+bi+'\').value)" style="background:#0077b6;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">➕ Add</button>'
-        + '</div>';
-
-      html += '</div>';
-    });
-  }
-  html += '</div>';
-
-
-  // ── REMAINING TRIPS PER IN-HOUSE GUEST BEFORE DEPARTURE ──
-  var inhouseAndArriving = inhouse.concat(arrivals);
-  inhouseAndArriving.sort(function(a,b){ return ymd(a.co) < ymd(b.co) ? -1 : 1; });
-  var guestsWithPending = inhouseAndArriving.filter(function(r){
-    return (r.trips||[]).some(function(t){ return t.status==='pending'; });
-  });
-
-  html += '<div class="card">';
-  html += '<div style="font-size:14px;font-weight:800;color:#b45309;margin-bottom:4px">⚠️ Remaining Trips to Complete Before Departure</div>';
-  html += '<div style="font-size:11px;color:#6b7280;margin-bottom:14px">In-house guests only · sorted by earliest check-out · pending trips only</div>';
-
-  // Separate guests with no trips from guests whose trips are all done
-  var guestsWithNoTrips = inhouseAndArriving.filter(function(r){ return !r.trips || !r.trips.length; });
-  var guestsAllDone = inhouseAndArriving.filter(function(r){ return r.trips && r.trips.length && !r.trips.some(function(t){ return t.status==='pending'; }); });
-
-  if (!guestsWithPending.length) {
-    if (guestsAllDone.length) {
-      html += '<div style="color:#059669;font-size:13px;font-weight:700;padding:8px 0">✅ All trips completed for all in-house guests!</div>';
-    } else {
-      html += '<div style="color:#9ca3af;font-size:13px;padding:8px 0">No trips have been added to any in-house reservation yet.</div>';
-      if (guestsWithNoTrips.length) {
-        html += '<div style="margin-top:8px;font-size:12px;color:#6b7280">Open a reservation → click <b>Trips</b> to schedule trips for your guests.</div>';
-      }
-    }
-  } else {
-    guestsWithPending.forEach(function(r) {
-      var pendingTrips = (r.trips||[]).filter(function(t){ return t.status==='pending'; });
-      var daysLeft = Math.ceil((new Date(ymd(r.co)) - new Date(selStr)) / 86400000);
-      var urgentColor = daysLeft<=1?'#dc2626':daysLeft<=2?'#d97706':'#059669';
-      var isArriving = ymd(r.ci)===selStr;
-      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid '+urgentColor+'">';
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
-        + '<div>'
-        + '<span style="font-size:14px;font-weight:800">'+r.fn+' '+r.ln+'</span>'
-        + ' <span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">'+r.rn+'</span>'
-        + (isArriving?' <span style="background:#e0f7fd;color:#0096c7;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700">🛬 Arriving today</span>':'')
-        + '</div>'
-        + '<div>'
-        + '<span style="font-size:11px;color:#6b7280">Checks out: <b>'+ymd(r.co)+'</b></span> '
-        + '<span style="background:'+(daysLeft<=1?'#fee2e2':daysLeft<=2?'#fef3c7':'#f0fdf4')+';color:'+urgentColor+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:800">'
-        + daysLeft+' day'+(daysLeft!==1?'s':'')+' left'+(daysLeft<=1?' ⚠️':'')+'</span>'
-        + '</div></div>';
-      html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
-      html += '<tr style="background:#fef3c7"><th style="padding:6px 8px;text-align:left">Trip</th><th>Scheduled</th><th>Status</th><th>Action</th></tr>';
-      pendingTrips.forEach(function(t) {
-        var tc = TRIPS_CONFIG.find(function(x){ return x.id===t.tripId; }) || {name:t.tripId||'Trip', icon:'🚤'};
-        var isToday = ymd(t.date)===selStr;
-        var isOverdue = t.date && ymd(t.date)<selStr;
-        var rowBg = isOverdue?'#fff5f5':isToday?'#f0fdf4':'#fff';
-        var rid=r.id, tid=t.tripId, tdt=t.date||'';
-        html += '<tr style="border-bottom:1px solid #fde68a;background:'+rowBg+'">'
-          + '<td style="padding:6px 8px">'+tc.icon+' <b>'+tc.name+'</b></td>'
-          + '<td style="padding:6px 8px;text-align:center">'
-          + (t.date
-            ? '<span style="font-weight:600;color:'+(isToday?'#059669':isOverdue?'#dc2626':'#374151')+'">'+ymd(t.date)+(isToday?' ← today':isOverdue?' ⚠️ overdue':'')+'</span>'
-            : '<span style="color:#9ca3af">Not scheduled yet</span>')
-          + '</td>'
-          + '<td style="padding:6px 8px"><span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">⏳ Pending</span></td>'
-          + '<td style="padding:6px 8px">'
-          + tripBtn(rid,tid,tdt,'done','✅ Done','#059669')
-          + tripBtn(rid,tid,tdt,'reschedule','📅 Reschedule','#7c3aed')
-          + '</td></tr>';
-      });
-      html += '</table></div>';
-    });
-  }
-  html += '</div>';
-
-
-  // Write to ALL ops-content elements (page has two layouts)
-  var opsEls = document.querySelectorAll('#ops-content');
-  if(opsEls.length) {
-    opsEls.forEach(function(el){ el.innerHTML = html; });
-    // Scroll section to top so content is visible
-    var sOps = document.getElementById('s-ops');
-    if(sOps) sOps.scrollTop = 0;
-  } else {
-    console.error('ops-content not found');
-  }
+  var today=new Date().toISOString().slice(0,10);
+  var dateEl=document.getElementById('ops-date');
+  function ymd(v){if(!v)return '';try{return new Date(v).toISOString().slice(0,10);}catch(e){return String(v).slice(0,10);}}
+  var tom=(function(){var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);})();
+  if(dateEl&&(!dateEl.value||dateEl.value<today))dateEl.value=tom;
+  window._opsDate=dateEl?(dateEl.value||tom):tom;
+  var selStr=window._opsDate;
+  var arrivals=RES.filter(function(r){return ymd(r.ci)===selStr&&r.st!=='Cancelled';});
+  var departures=RES.filter(function(r){return ymd(r.co)===selStr&&r.st!=='Cancelled';});
+  var inhouse=RES.filter(function(r){return ymd(r.ci)<selStr&&ymd(r.co)>selStr&&r.st!=='Cancelled';});
+  var allActive=RES.filter(function(r){return ymd(r.ci)<=selStr&&ymd(r.co)>=selStr&&r.st!=='Cancelled';});
+  function bStyle(bg){return 'background:'+bg+';color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px';}
+  function tBtn(rid,tid,tdt,status,label,bg){var fn;if(status==='reschedule')fn='rescheduleTrip("'+rid+'","'+tid+'","'+tdt+'")';else if(status==='cancelweather')fn='cancelWeatherTrip("'+tid+'","'+tdt+'","'+rid+'")';else if(status==='dotoday')fn='moveTripToAfternoon("'+rid+'","'+tid+'","'+tdt+'")';else fn='updateTripStatus("'+rid+'","'+tid+'","'+tdt+'","'+status+'")';return '<button onclick="'+fn+'" style="'+bStyle(bg)+'">'+label+'</button>';}
+  function resCard(r,label,color){return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+'</div>';}
+  var tripsOnDay=allActive.reduce(function(s,r){return s+(r.trips||[]).filter(function(t){return ymd(t.date)===selStr&&(t.status==='pending'||t.status==='rescheduled');}).length;},0);
+  var html='';
+  html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div style="font-size:20px;font-weight:800;color:#111827">Daily Operations</div><input type="date" id="ops-date" value="'+selStr+'" onchange="drawOps()" style="padding:7px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600"><button onclick="drawOps()" style="'+bStyle('#0096c7')+'padding:7px 16px;font-size:12px">Refresh</button><button onclick="window.print()" style="'+bStyle('#374151')+'padding:7px 16px;font-size:12px">Print</button></div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+  [{l:'Arrivals',v:arrivals.length,c:'#0096c7',i:'Arrivals'},{l:'In-House',v:inhouse.length,c:'#7c3aed',i:'In-House'},{l:'Departures',v:departures.length,c:'#dc2626',i:'Departures'},{l:'Trips Today',v:tripsOnDay,c:'#059669',i:'Trips'}].forEach(function(s){html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><div style="font-size:24px;font-weight:800;color:'+s.c+'">'+s.v+'</div><div style="font-size:11px;color:#6b7280;font-weight:600">'+s.l+'</div></div>';});
+  html+='</div>';
+  html+='<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:800;color:#0096c7;margin-bottom:10px">Arrivals ('+arrivals.length+')</div>'+( arrivals.length?arrivals.map(function(r){return resCard(r,'Arriving','#0096c7');}).join(''):'<p style="color:#aaa;font-size:13px">No arrivals today</p>')+'</div>';
+  html+='<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:800;color:#7c3aed;margin-bottom:10px">In-House ('+inhouse.length+')</div>';
+  if(inhouse.length){html+='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f5f3ff"><th style="padding:8px;text-align:left">Guest</th><th>Room</th><th>Check-Out</th><th>Nights Left</th><th>Pending Trips</th></tr>';inhouse.forEach(function(r){var dl=Math.ceil((new Date(ymd(r.co))-new Date(selStr))/86400000);var allT=r.trips||[];var pend=allT.filter(function(t){return t.status==='pending'||t.status==='rescheduled';});var urg=allT.filter(function(t){return t.status==='pending'&&t.date&&ymd(t.date)<selStr;});var col=dl<=1?'#dc2626':dl<=2?'#d97706':'#059669';html+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:8px;font-weight:600">'+r.fn+' '+r.ln+'</td><td style="padding:8px;text-align:center"><b>'+r.rn+'</b></td><td style="padding:8px;text-align:center">'+ymd(r.co)+'</td><td style="padding:8px;text-align:center"><b style="color:'+col+'">'+dl+' night'+(dl!==1?'s':'')+'</b></td><td style="padding:8px">'+(urg.length?'<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">OVERDUE '+urg.length+'</span> ':'')+  (pend.length?'<span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">'+pend.length+' pending</span>':allT.length?'<span style="color:#059669;font-size:11px">All done</span>':'<span style="color:#9ca3af;font-size:11px">No trips added</span>')+'</td></tr>';});html+='</table>';}else html+='<p style="color:#aaa;font-size:13px">No in-house guests</p>';
+  html+='</div>';
+  html+='<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:800;color:#dc2626;margin-bottom:10px">Departures ('+departures.length+')</div>'+(departures.length?departures.map(function(r){return resCard(r,'Departing','#dc2626');}).join(''):'<p style="color:#aaa;font-size:13px">No departures today</p>')+'</div>';
+  var BOATS_KEY='vilu_boats';
+  var allBoats=(function(){try{return JSON.parse(localStorage.getItem(BOATS_KEY)||'{}');}catch(e){return {};}})();
+  if(!allBoats[selStr])allBoats[selStr]=[];
+  var dayBoats=allBoats[selStr];
+  html+='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px"><div><div style="font-size:14px;font-weight:800;color:#0077b6">Boat Builder</div><div style="font-size:11px;color:#6b7280;margin-top:2px">Create boats and assign trips</div></div><button onclick="addBoat(window._opsDate)" style="background:#0077b6;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ Add Boat</button></div>';
+  if(!dayBoats.length){html+='<div style="color:#9ca3af;font-size:13px;padding:16px;background:#f9fafb;border-radius:8px;text-align:center">No boats yet. Click Add Boat then assign guests from pending trips below.</div>';}
+  else{dayBoats.forEach(function(boat,bi){var boatPax=(boat.guests||[]).reduce(function(s,g){return s+(g.pax||0);},0);var ng=(boat.guests||[]).length;html+='<div style="background:#f0f9ff;border:1.5px solid #0077b6;border-radius:10px;padding:14px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px"><div style="display:flex;align-items:center;gap:10px"><span style="background:#0077b6;color:#fff;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:800">Boat '+(bi+1)+'</span><input type="time" value="'+(boat.time||'')+'" onchange="updateBoatTime(window._opsDate,'+bi+',this.value)" style="padding:5px 10px;border:1.5px solid #bae6fd;border-radius:7px;font-family:inherit;font-size:13px;font-weight:700;color:#0077b6"><span style="font-size:12px;color:#6b7280;font-weight:600">'+boatPax+' pax</span>'+(ng===1?'<span style="background:#fee2e2;color:#dc2626;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">Solo</span>':ng>1?'<span style="background:#f0fdf4;color:#059669;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">Combined</span>':'')+'</div><button onclick="removeBoat(window._opsDate,'+bi+')" style="background:#fee2e2;color:#dc2626;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Remove</button></div>';if(ng){html+='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px"><tr style="background:#e0f7fd"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Trip</th><th>Pax</th><th>Action</th></tr>';(boat.guests||[]).forEach(function(g,gi){var tc=TRIPS_CONFIG.find(function(t){return t.id===g.tripId;})||{name:g.tripId||'Trip'};html+='<tr style="border-bottom:1px solid #bae6fd"><td style="padding:6px 8px;font-weight:600">'+g.guestName+'</td><td style="padding:6px 8px;text-align:center"><b>'+g.room+'</b></td><td style="padding:6px 8px">'+tc.name+'</td><td style="padding:6px 8px;text-align:center">'+g.pax+'</td><td style="padding:6px 8px"><button onclick="markBoatGuestDone(window._opsDate,'+bi+','+gi+')" style="'+bStyle('#059669')+'">Done</button><button onclick="removeBoatGuest(window._opsDate,'+bi+','+gi+')" style="background:#e5e7eb;color:#374151;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">X</button></td></tr>';});html+='</table>';}else{html+='<div style="color:#9ca3af;font-size:12px;padding:8px;background:#fff;border-radius:6px;margin-bottom:10px">No guests assigned yet</div>';}html+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border-radius:8px;padding:8px"><span style="font-size:11px;font-weight:700;color:#0077b6;white-space:nowrap">Add to Boat '+(bi+1)+':</span><select id="boat-sel-'+bi+'" style="flex:1;min-width:180px;padding:6px 8px;border:1.5px solid #bae6fd;border-radius:6px;font-family:inherit;font-size:12px"><option value="">Select guest + trip</option>';allActive.forEach(function(r){(r.trips||[]).forEach(function(t){if(t.status==='pending'||t.status==='rescheduled'){var tc2=TRIPS_CONFIG.find(function(x){return x.id===t.tripId;})||{name:t.tripId};var pax=(parseInt(r.ad)||2)+(parseInt(r.ch)||0);var val=r.id+'|'+t.tripId+'|'+(t.date||'')+'|'+(r.fn+' '+r.ln)+'|'+r.rn+'|'+pax;html+='<option value="'+val+'">'+r.fn+' '+r.ln+' ('+r.rn+') - '+tc2.name+'</option>';}});});html+='</select><button onclick="addGuestToBoat(window._opsDate,'+bi+',document.getElementById(\'boat-sel-'+bi+'\').value)" style="background:#0077b6;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Add</button></div></div>';});}
+  html+='</div>';
+  var inh2=inhouse.concat(arrivals);inh2.sort(function(a,b){return ymd(a.co)<ymd(b.co)?-1:1;});
+  var gwp=inh2.filter(function(r){return (r.trips||[]).some(function(t){return t.status==='pending'||t.status==='rescheduled';});});
+  html+='<div class="card"><div style="font-size:14px;font-weight:800;color:#b45309;margin-bottom:4px">Pending Trips - All In-House Guests</div><div style="font-size:11px;color:#6b7280;margin-bottom:14px">Sorted by earliest check-out - assign to a boat above</div>';
+  if(!gwp.length){html+='<div style="color:#059669;font-size:13px;font-weight:700;padding:8px 0">All trips completed!</div>';}
+  else{gwp.forEach(function(r){var pend=(r.trips||[]).filter(function(t){return t.status==='pending'||t.status==='rescheduled';});var dl=Math.ceil((new Date(ymd(r.co))-new Date(selStr))/86400000);var uc=dl<=1?'#dc2626':dl<=2?'#d97706':'#059669';html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid '+uc+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px"><div><span style="font-size:14px;font-weight:800">'+r.fn+' '+r.ln+'</span> <span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">'+r.rn+'</span></div><span style="background:'+(dl<=1?'#fee2e2':dl<=2?'#fef3c7':'#f0fdf4')+';color:'+uc+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:800">'+dl+' day'+(dl!==1?'s':'')+' left</span></div><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#fef3c7"><th style="padding:6px 8px;text-align:left">Trip</th><th>Date</th><th>Status</th><th>Action</th></tr>';pend.forEach(function(t){var tc3=TRIPS_CONFIG.find(function(x){return x.id===t.tripId;})||{name:t.tripId||'Trip'};var isToday=ymd(t.date)===selStr,isOD=t.date&&ymd(t.date)<selStr;var rid=r.id,tid=t.tripId,tdt=t.date||'';html+='<tr style="border-bottom:1px solid #fde68a;background:'+(isOD?'#fff5f5':isToday?'#f0fdf4':'#fff')+'"><td style="padding:6px 8px">'+tc3.name+'</td><td style="padding:6px 8px;text-align:center">'+(t.date?'<span style="font-weight:600;color:'+(isToday?'#059669':isOD?'#dc2626':'#374151')+'">'+ymd(t.date)+(isOD?' OVERDUE':'')+'</span>':'<span style="color:#9ca3af">No date</span>')+'</td><td style="padding:6px 8px"><span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Pending</span></td><td style="padding:6px 8px">'+tBtn(rid,tid,tdt,'done','Done','#059669')+tBtn(rid,tid,tdt,'cancelled','Cancel','#6b7280')+tBtn(rid,tid,tdt,'cancelweather','Weather','#0077b6')+tBtn(rid,tid,tdt,'reschedule','Reschedule','#7c3aed')+'</td></tr>';});html+='</table></div>';});}
+  html+='</div>';
+  document.querySelectorAll('#ops-content').forEach(function(el){el.innerHTML=html;});
+  var sc=document.querySelector('.scrl');if(sc)sc.scrollTop=0;
 }
+
 // ── UPDATE TRIP STATUS ──
 function updateTripStatus(resId, tripId, tripDate, newStatus) {
   var res = RES.find(function(r){return r.id===resId;});
