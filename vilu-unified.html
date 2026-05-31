@@ -3465,7 +3465,7 @@ const DOW_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SRC_BAR={'Booking.com':'#2563eb','Airbnb':'#e11d48','Agoda':'#d97706','Expedia':'#b45309','Google Hotels':'#4285f4','Direct':'#059669','Phone':'#7c3aed','Walk-in':'#0891b2'};
 
-let calD = new Date(); calD.setDate(calD.getDate()-2); calD.setHours(0,0,0,0);
+let calD = new Date(); calD.setHours(12,0,0,0); calD.setDate(calD.getDate()-2);
 let calDays = 30;
 let calSlid = false;
 let sR=null,sS=null,sE=null,sOn=false,bDrg=false;
@@ -3478,7 +3478,7 @@ function calNav(d){
   drawCal();
 }
 function calNavToday(){
-  calD = new Date(); calD.setDate(calD.getDate()-2); calD.setHours(0,0,0,0);
+  calD = new Date(); calD.setHours(12,0,0,0); calD.setDate(calD.getDate()-2);
   drawCal();
 }
 function setCalView(n){
@@ -3555,7 +3555,7 @@ function drawCal(){
   let gridHTML = '<div class="cb-date-header-row">';
   let prevMo = -1;
   dates.forEach((d,i)=>{
-    const ds=d.toISOString().slice(0,10);
+    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const dw=d.getDay(), isWk=dw===5, isTd=ds===today;
     const moSep=d.getMonth()!==prevMo&&prevMo!==-1?'month-sep':'';
     const cls=isTd?'today':isWk?'weekend':'';
