@@ -7014,7 +7014,7 @@ function syncAgencyAccounts(){
 }
 
 function processIncomingBookings(){
-  // Import agency bookings
+  // Import agency bookings from queue
   try{
     var agQ=localStorage.getItem('vilu_agency_new_bk');
     if(agQ){
@@ -7028,6 +7028,18 @@ function processIncomingBookings(){
       });
       if(added>0){localStorage.removeItem('vilu_agency_new_bk');saveRES();drawRes();drawCal();drawDash();showBookingNotif(added,RES[0]);}
     }
+  }catch(e){}
+  // Also sync directly from vilu_res (agency writes there directly)
+  try{
+    var directRes=JSON.parse(localStorage.getItem('vilu_res')||'[]');
+    var added2=0;
+    directRes.forEach(function(bk){
+      if(bk.src==='Agency'&&!RES.find(function(r){return r.id===bk.id;})){
+        RES.unshift(bk); added2++;
+        aLog('ok','Agency booking synced: '+bk.fn+' '+bk.ln+' ('+bk.id+')');
+      }
+    });
+    if(added2>0){saveRES();drawRes();drawCal();drawDash();}
   }catch(e){}
   // Import block requests  
   try{
@@ -9113,6 +9125,16 @@ function drawOps() {
   function bStyle(bg){return 'background:'+bg+';color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px';}
   function tBtn(rid,tid,tdt,status,label,bg){var fn;if(status==='reschedule')fn='rescheduleTrip("'+rid+'","'+tid+'","'+tdt+'")';else if(status==='cancelweather')fn='cancelWeatherTrip("'+tid+'","'+tdt+'","'+rid+'")';else if(status==='dotoday')fn='moveTripToAfternoon("'+rid+'","'+tid+'","'+tdt+'")';else fn='updateTripStatus("'+rid+'","'+tid+'","'+tdt+'","'+status+'")';return '<button onclick="'+fn+'" style="'+bStyle(bg)+'">'+label+'</button>';}
   function resCard(r,label,color){
+    // Package info for agency bookings
+    var pkgHtml='';
+    if(r.src==='Agency'&&r.packageName){
+      var incl=r.packageIncludes?r.packageIncludes.join(', '):'';
+      pkgHtml='<div style="margin-top:6px;background:#f0f9ff;border-radius:6px;padding:6px 10px;font-size:11px">'
+        +'<span style="font-weight:700;color:#0369a1">📦 '+r.packageName+'</span>'
+        +(incl?'<span style="color:#6b7280;margin-left:6px">'+incl+'</span>':'')
+        +'<span style="margin-left:8px;background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:1px 6px;font-weight:700">Agency: '+(r.agency||'')+'</span>'
+        +'</div>';
+    }
     var isArr=label==='Arriving';
     var routes=isArr?ARR_ROUTES:DEP_ROUTES;
     var tr=getTR()[r.id]||{};
@@ -9136,7 +9158,7 @@ function drawOps() {
       +'<input type="time" value="'+bt+'" id="tr-time-'+rid+'" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit"></div>'
       +'<button onclick="trSave(this)" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
       +'</div>'+summary+'</div>';
-    return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+trHtml+'</div>';
+    return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+pkgHtml+trHtml+'</div>';
   }
   var tripsOnDay=allActive.reduce(function(s,r){return s+(r.trips||[]).filter(function(t){return ymd(t.date)===selStr&&(t.status==='pending'||t.status==='rescheduled');}).length;},0);
   var html='';
