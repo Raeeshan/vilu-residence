@@ -678,7 +678,7 @@ function doAgencyLogin(){
   try{var mb=localStorage.getItem('vilu_agency_bk_'+user.email);myBookings=mb?JSON.parse(mb):[];}catch(e){myBookings=[];}
   try{var bl=localStorage.getItem('vilu_agency_blk_'+user.email);myBlocks=bl?JSON.parse(bl):[];}catch(e){myBlocks=[];}
   document.getElementById('login-screen').style.display='none';
-  document.getElementById('agency-app').className='app on';
+  var _aa=document.getElementById('agency-app');_aa.className='app on';_aa.style.display='flex';
   document.getElementById('hdr-agent').textContent=user.name||user.email;
   document.getElementById('hdr-agency-name').textContent=user.name||'Agency';
   loadLogo();
