@@ -3973,257 +3973,63 @@ function updSel(){
 }
 
 function drawCal(){
-  const today=tS;
-  const dates=[];
+  sR=null;sS=null;sE=null;sOn=false;
+  const today=tS;const dates=[];
   for(let i=0;i<calDays;i++){const d=new Date(calD);d.setHours(12,0,0,0);d.setDate(d.getDate()+i);dates.push(new Date(d));}
-  const startMo=MON_NAMES[dates[0].getMonth()]+' '+dates[0].getFullYear();
-  const endD=dates[dates.length-1];
-  const endMo=MON_NAMES[endD.getMonth()]+' '+endD.getFullYear();
-  document.getElementById('cb-lbl').textContent=startMo===endMo?startMo:MON_NAMES[dates[0].getMonth()]+' – '+MON_NAMES[endD.getMonth()]+' '+endD.getFullYear();
-
   function localDs(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-  function getResForRoom(rn,ds){return RES.find(r=>r.rn===rn&&r.st!=='Cancelled'&&r.ci<=ds&&r.co>ds);}
-
-  const colW=72;
-  let html='<table style="border-collapse:collapse;font-size:11px;table-layout:fixed">';
-
-  // Header row
-  html+='<thead><tr><th style="width:130px;min-width:130px;background:#f8fafc;border:1px solid #e2e8f0;padding:6px 8px;text-align:left">Room</th>';
-  dates.forEach(d=>{
-    const ds=localDs(d),dw=d.getDay(),isFri=dw===5,isTd=ds===today;
-    const bg=isTd?'#1e40af':isFri?'#fef9c3':'#f8fafc';
-    const col=isTd?'#fff':isFri?'#92400e':'#374151';
-    const dowCol=isTd?'#93c5fd':isFri?'#b45309':'#9ca3af';
-    html+=`<th style="width:${colW}px;min-width:${colW}px;background:${bg};border:1px solid #e2e8f0;padding:4px 2px;text-align:center">
-      <div style="font-size:9px;font-weight:600;color:${dowCol}">${DOW_SHORT[dw]}</div>
-      <div style="font-size:15px;font-weight:800;color:${col}">${d.getDate()}</div>
-    </th>`;
-  });
-  html+='</tr>';
-
-  // Occupancy row
-  html+='<tr><td style="background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;font-weight:700;color:#64748b;font-size:10px">OCCUPANCY</td>';
-  dates.forEach(d=>{
-    const ds=localDs(d),dw=d.getDay(),isFri=dw===5,isTd=ds===today;
-    const occ=RES.filter(r=>r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds).length;
-    const pct=VR.length?Math.round(occ/VR.length*100):0;
-    const bg=isTd?'#dbeafe':isFri?'#fef9c3':'#f8fafc';
-    html+=`<td style="background:${bg};border:1px solid #e2e8f0;padding:4px 2px;text-align:center">
-      <div style="background:${occ>0?'#0077b6':'#e5e7eb'};color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;margin:0 auto;font-weight:800;font-size:11px">${occ}</div>
-      <div style="font-size:9px;color:#9ca3af;margin-top:1px">${pct}%</div>
-    </td>`;
-  });
-  html+='</tr></thead><tbody>';
-
-  // Vilu Residence section
-  html+=`<tr><td colspan="${dates.length+1}" style="background:#e0e7ff;border:1px solid #c7d2fe;padding:5px 10px;font-weight:800;font-size:11px;color:#3730a3">VILU RESIDENCE</td></tr>`;
-  VR.forEach(rm=>{
-    html+='<tr>';
-    html+=`<td style="background:#fff;border:1px solid #e2e8f0;padding:6px 8px;font-weight:700;color:#374151;white-space:nowrap">
-      <div style="font-size:12px;font-weight:700">${rm.nm}</div>
-      <div style="font-size:10px;color:#9ca3af">$${rm.rate}/night</div>
-    </td>`;
-    dates.forEach(d=>{
-      const ds=localDs(d),dw=d.getDay(),isFri=dw===5,isTd=ds===today;
-      const res=getResForRoom(rm.n,ds);
-      const isCheckIn=res&&res.ci===ds;
-      let bg=isTd?'#eff6ff':isFri?'#fefce8':'#fff';
-      if(res) bg=isTd?'#dbeafe':isFri?'#fef3c7':'#f0f9ff';
-      html+=`<td style="background:${bg};border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" 
-        onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='${rm.n}'&&x.st!=='Cancelled'&&x.ci<='${ds}'&&x.co>'${ds}';});if(r)showDet(r.id);else{sR='${rm.n}';sS='${ds}';sE='${ds}';openNewBookingFromSel();}})()" 
-        data-rn="${rm.n}" data-d="${ds}">`;
-      if(res){
-        html+=`<div style="font-size:10px;font-weight:700;color:#0077b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${colW-4}px;margin:0 auto" title="${res.fn} ${res.ln}">${isCheckIn?'→ ':''}${res.fn} ${res.ln}</div>`;
-        html+=`<div style="font-size:9px;color:#64748b">$${res.rate||rm.rate}</div>`;
-      }
-      html+='</td>';
+  const endD=dates[dates.length-1];
+  document.getElementById('cb-lbl').textContent=MON_NAMES[dates[0].getMonth()]+' '+dates[0].getFullYear()+' – '+MON_NAMES[endD.getMonth()]+' '+endD.getFullYear();
+  const occ={};dates.forEach(d=>{const ds=localDs(d);occ[ds]=RES.filter(r=>r.prop==='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds).length;});
+  let fixedHTML='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
+  VR.forEach(rm=>{fixedHTML+='<div class="cb-room-row-lbl vilu-room"><div><div class="rn">'+rm.nm+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
+  PH.forEach(hotel=>{const hrs=getHR().filter(r=>r.prop===hotel.id);fixedHTML+='<div class="cb-section-lbl" style="background:'+hotel.color+'22"><span style="color:'+hotel.color+'">'+hotel.nm+'</span></div>';hrs.forEach(rm=>{fixedHTML+='<div class="cb-room-row-lbl partner-room" style="border-left-color:'+hotel.color+'"><div><div class="rn">'+rm.nm+'</div><div class="rt">'+hotel.nm+'</div></div></div>';});});
+  document.getElementById('cb-fixed-rows').innerHTML=fixedHTML;
+  let gridHTML='<div class="cb-date-header-row">';let prevMo=-1;
+  dates.forEach(d=>{const ds=localDs(d),dw=d.getDay(),isWk=dw===5,isTd=ds===today;const cls=isTd?'today':isWk?'weekend':'';const moSep=d.getMonth()!==prevMo&&prevMo!==-1?'month-sep':'';const pct=VR.length?Math.round((occ[ds]||0)/VR.length*100):0;gridHTML+='<div class="cb-date-col '+cls+' '+moSep+'" data-date="'+ds+'" onclick="calColClick(\"'+ds+'\",event)"><span class="cb-dow">'+DOW_SHORT[dw]+'</span><span class="cb-day">'+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span></div>';prevMo=d.getMonth();});
+  gridHTML+='</div>';
+  const makeRow=(rm,ip,c)=>{const rn=rm.n;let row='<div class="cb-booking-row" data-rn="'+rn+'" style="position:relative;'+(ip?'background:'+c+'11':'')+'">'; dates.forEach(d=>{const ds=localDs(d),dw=d.getDay(),isTd=ds===today,isWk=dw===5;const cls=isTd?'today-cell':isWk?'weekend':'';row+='<div class="cb-cell '+cls+'" data-rn="'+rn+'" data-d="'+ds+'"></div>';});row+='</div>';return row;};
+  gridHTML+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*72)+'px;background:#e0e7ff;border-bottom:1px solid #c7d2fe"></div></div>';
+  VR.forEach(rm=>{gridHTML+=makeRow(rm,false,null);});
+  PH.forEach(hotel=>{const hrs=getHR().filter(r=>r.prop===hotel.id);const c=hotel.color;gridHTML+='<div class="cb-section-row" style="background:'+c+'22"><div class="cb-section-cell" style="width:'+(dates.length*72)+'px;background:'+c+'22;border-bottom:1px solid '+c+'44"></div></div>';hrs.forEach(rm=>{gridHTML+=makeRow(rm,true,c);});});
+  document.getElementById('cb-grid').innerHTML=gridHTML;
+  const sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
+  if(sa)sa.onscroll=()=>{fr.scrollTop=sa.scrollTop;};
+  const tip=document.getElementById('cb-tip');bDrg=false;
+  setTimeout(()=>{
+    const dsl=dates.map(d=>localDs(d));
+    RES.filter(r=>r.st!=='Cancelled').forEach(res=>{
+      const row=document.querySelector('.cb-booking-row[data-rn="'+res.rn+'"]');if(!row)return;
+      const vs=res.ci<dsl[0]?dsl[0]:res.ci,ld=dsl[dsl.length-1];
+      if(vs>ld||res.co<=dsl[0])return;
+      const si=dsl.indexOf(vs);let ei=dsl.findIndex(d=>d>=res.co)-1;
+      if(ei<0)ei=dsl.length-1;if(si<0)return;
+      const startsInView=res.ci>=dsl[0];
+      const half=36,coIdx=dsl.indexOf(res.co);
+      const left=startsInView?si*72+half:si*72;
+      const rightEdge=coIdx>=0?coIdx*72+half:(ei+1)*72;
+      const width=rightEdge-left-2;if(width<4)return;
+      const bar=document.createElement('div');bar.className='cb-bar';
+      bar.style.left=left+'px';bar.style.width=width+'px';
+      bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+res.fn+' '+res.ln+'</span>';
+      bar.addEventListener('click',e=>{e.stopPropagation();showPopup(res.id,bar);});
+      bar.addEventListener('mousedown',e=>{e.stopPropagation();bDrg=true;sOn=false;});
+      bar.setAttribute('draggable','true');
+      bar.addEventListener('dragstart',e=>{bDrg=true;sOn=false;clrSel();e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',res.id+'|'+res.rn);bar.style.opacity='.6';closePopup();});
+      bar.addEventListener('dragend',()=>{bar.style.opacity='1';setTimeout(()=>{bDrg=false;},80);});
+      row.appendChild(bar);
     });
-    html+='</tr>';
-  });
-
-  // Partner hotel sections
-  PH.forEach(hotel=>{
-    const hrs=getHR().filter(r=>r.prop===hotel.id);
-    if(!hrs.length)return;
-    html+=`<tr><td colspan="${dates.length+1}" style="background:${hotel.color}22;border:1px solid ${hotel.color}44;padding:5px 10px;font-weight:800;font-size:11px;color:${hotel.color}">${hotel.nm.toUpperCase()}</td></tr>`;
-    hrs.forEach(rm=>{
-      html+='<tr>';
-      html+=`<td style="background:#fff;border:1px solid #e2e8f0;padding:6px 8px;font-weight:700;white-space:nowrap;border-left:3px solid ${hotel.color}">
-        <div style="font-size:12px;font-weight:700;color:#374151">${rm.nm}</div>
-        <div style="font-size:10px;color:#9ca3af">${hotel.nm}</div>
-      </td>`;
-      dates.forEach(d=>{
-        const ds=localDs(d),dw=d.getDay(),isFri=dw===5,isTd=ds===today;
-        const res=getResForRoom(rm.n,ds);
-        const isCheckIn=res&&res.ci===ds;
-        let bg=isTd?'#eff6ff':isFri?'#fefce8':'#fff';
-        if(res) bg=isTd?'#dbeafe':isFri?'#fef3c7':'#f0f9ff';
-        html+=`<td style="background:${bg};border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden"
-          onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='${rm.n}'&&x.st!=='Cancelled'&&x.ci<='${ds}'&&x.co>'${ds}';});if(r)showDet(r.id);else{sR='${rm.n}';sS='${ds}';sE='${ds}';openNewBookingFromSel();}})()"
-          data-rn="${rm.n}" data-d="${ds}">`;
-        if(res){
-          html+=`<div style="font-size:10px;font-weight:700;color:${hotel.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${colW-4}px;margin:0 auto">${isCheckIn?'→ ':''}${res.fn} ${res.ln}</div>`;
-          html+=`<div style="font-size:9px;color:#64748b">$${res.rate||60}</div>`;
-        }
-        html+='</td>';
-      });
-      html+='</tr>';
+    document.querySelectorAll('.cb-cell').forEach(cell=>{
+      const rn=cell.dataset.rn,ds=cell.dataset.d;
+      cell.addEventListener('mousedown',e=>{if(e.button!==0||e.target.closest('.cb-bar'))return;e.preventDefault();clrSel();sR=rn;sS=ds;sE=ds;sOn=true;updSel();closePopup();});
+      cell.addEventListener('mousemove',e=>{if(!sOn||bDrg||!sR)return;const brow=cell.closest('.cb-booking-row');if(!brow||brow.dataset.rn!==sR)return;if(ds!==sE){sE=ds;updSel();}});
+      cell.addEventListener('mouseup',()=>{if(bDrg)return;if(tip)tip.classList.remove('on');if(!sOn)return;const savedR=sR,savedS=sS,savedE=sE;sR=null;sS=null;sE=null;sOn=false;clrSel();if(savedR&&savedS&&savedE&&savedR===rn&&savedS!==savedE){const s2=savedS<=savedE?savedS:savedE,en=savedS<=savedE?savedE:savedS;if(typeof openNewBookingFromSel==='function')openNewBookingFromSel(savedR,s2,en);}});
+      cell.addEventListener('dragover',e=>{e.preventDefault();});
+      cell.addEventListener('drop',e=>{e.preventDefault();const data=e.dataTransfer.getData('text/plain').split('|');const res=RES.find(x=>x.id===data[0]);if(!res)return;const dur=nt(res.ci,res.co),newCo=D2(ds,dur);if(isOcc(rn,ds,newCo,data[0])){toast('Cannot move!');return;}showMv('Move?','Move '+res.fn+' '+res.ln+'?',()=>{res.rn=rn;res.ci=ds;res.co=newCo;saveRES();drawCal();});});
     });
-  });
-
-  html+='</tbody></table>';
-
-  // Replace both fixed and scrollable areas with new table
-  const fixedRows=document.getElementById('cb-fixed-rows');
-  const grid=document.getElementById('cb-grid');
-  if(fixedRows)fixedRows.innerHTML='';
-  if(grid)grid.innerHTML=html;
-
-  // Make scroll area work
-  const scrollArea=document.getElementById('cb-scroll-area');
-  if(scrollArea){scrollArea.style.overflowX='auto';scrollArea.style.overflowY='auto';}
+    document.addEventListener('mouseup',()=>{if(sOn){sR=null;sS=null;sE=null;sOn=false;if(tip)tip.classList.remove('on');clrSel();}});
+  },50);
 }
 
-
-function calColClick(ds,e){
-  // visual only — could pre-fill BE form later
-  const col=e.currentTarget;
-  col.classList.toggle('col-selected');
-}
-
-// ── BOOKING POPUP ──
-function showPopup(id, barEl){ _showDetLegacy(id); }
-function _showPopupLegacy(id, barEl){
-  closePopup();
-  popupResId=id;
-  const r=RES.find(x=>x.id===id);if(!r)return;
-  const x=calcTax(r);
-  document.getElementById('cbp-name').textContent=r.fn+' '+r.ln+' — '+stStr(r.st);
-  document.getElementById('cbp-ref').textContent=r.id+(r.ref?' · '+r.ref:'');
-  const popup=document.getElementById('cb-popup');
-  popup.style.display='block';
-  // Position popup near bar
-  const rect=barEl.getBoundingClientRect();
-  let top=rect.bottom+6, left=rect.left;
-  if(top+420>window.innerHeight)top=rect.top-420;
-  if(left+330>window.innerWidth)left=window.innerWidth-340;
-  popup.style.top=Math.max(10,top)+'px';
-  popup.style.left=Math.max(10,left)+'px';
-  popTab(0, document.querySelector('.cb-popup-tab'));
-}
-function stStr(s){const m={Confirmed:'✓ Confirmed',Pending:'⏳ Pending','Checked in':'🏨 Checked in','Checked out':'↗ Checked out',Cancelled:'✗ Cancelled'};return m[s]||s;}
-function popTab(n, el){
-  document.querySelectorAll('.cb-popup-tab').forEach(t=>t.classList.remove('on'));
-  if(el)el.classList.add('on');
-  const r=RES.find(x=>x.id===popupResId);if(!r)return;
-  const x=calcTax(r);
-  const body=document.getElementById('cbp-body');
-  const acts=document.getElementById('cbp-acts')||document.getElementById('cbp-actions');
-  if(n===0){
-    body.innerHTML=`
-      <div class="cb-prow"><span class="cb-plbl">Check-in / Out</span><span class="cb-pval">${fd(r.ci)} / ${fd(r.co)}</span></div>
-      <div class="cb-prow"><span class="cb-plbl">Room</span><span class="cb-pval">${rNm(r.rn)}</span></div>
-      <div class="cb-prow"><span class="cb-plbl">Guests</span><span class="cb-pval">${r.ad} adult${r.ad>1?'s':''}${r.ch>0?', '+r.ch+' child':''}${r.inf>0?', '+r.inf+' infant':''}</span></div>
-      <div class="cb-prow"><span class="cb-plbl">Source</span><span class="cb-pval">${r.src}${r.ref?' ('+r.ref+')':''}</span></div>
-      <div class="cb-prow"><span class="cb-plbl">Grand total</span><span class="cb-pval" style="color:#1e40af;font-size:14px">$${x.total.toFixed(2)}</span></div>
-      <div class="cb-prow"><span class="cb-plbl">Balance due</span><span class="cb-pval" style="color:${r.pay==='Fully paid'?'#00b4d8':'#dc2626'}">$${r.pay==='Fully paid'?'0.00':x.total.toFixed(2)}</span></div>
-      <div class="cb-prow"><span class="cb-plbl">Payment</span><span class="cb-pval">${r.pay}</span></div>
-    `;
-    if(acts){
-      acts.innerHTML='';
-      function mkB(lbl,fn,col){
-        const b=document.createElement('button');
-        b.className='btn sm';
-        if(col)b.style.cssText='background:'+col+';color:#fff;border-color:'+col;
-        b.innerHTML=lbl;
-        b.onclick=fn;
-        acts.appendChild(b);
-      }
-      mkB('<i class="ti ti-edit"></i> Edit',function(){closePopup();setTimeout(function(){openEdit(popupResId);},80);});
-      if(r.st==='Confirmed'||r.st==='Pending'){
-        mkB('<i class="ti ti-login"></i> Check in',function(){const res=RES.find(function(x){return x.id===popupResId;});res.st='Checked in';closePopup();toast('Checked in ✓');drawCal();drawDash();},'#1e40af');
-      }
-      if(r.st==='Checked in'){
-        mkB('<i class="ti ti-logout"></i> Check out',function(){const res=RES.find(function(x){return x.id===popupResId;});res.st='Checked out';closePopup();toast('Checked out ✓');drawCal();drawDash();},'#1e40af');
-      }
-      if(!canViewOnly()){
-        mkB('<i class="ti ti-file-invoice"></i> Invoice',function(){closePopup();openIM(popupResId);});
-      }
-      if(!canViewOnly()&&r.st!=='Cancelled'&&r.st!=='Checked out'){
-        mkB('<i class="ti ti-x"></i> Cancel',function(){
-          const res=RES.find(function(x){return x.id===popupResId;});
-          closePopup();
-          showConfirm({title:'Cancel this reservation?',msg:res.fn+' '+res.ln+' · '+rNm(res.rn)+' · '+fd(res.ci)+' to '+fd(res.co),warn:'The reservation will be moved to the Deleted items bin. You can restore it anytime.',icon:'🗑️',btnLabel:'Yes, cancel & move to bin',btnColor:'#dc2626',onYes:function(){softDelete(res);}});
-        });
-      }
-      if(!canViewOnly()){
-        mkB('<i class="ti ti-trash"></i> Delete',function(){
-          const res=RES.find(function(x){return x.id===popupResId;});
-          closePopup();
-          showConfirm({title:'Delete this reservation?',msg:res.fn+' '+res.ln+' · '+rNm(res.rn)+' · '+fd(res.ci)+' to '+fd(res.co),warn:'Reservation will be moved to Deleted items bin. You can restore it anytime from Deleted items in the sidebar.',icon:'🗑️',btnLabel:'Yes, delete',btnColor:'#dc2626',onYes:function(){softDelete(res);}});
-        },'#dc2626');
-      }
-    }
-  } else {
-    body.innerHTML=`
-      ${r.notes?`<div style="background:#fefce8;border:1px solid #fde68a;border-radius:7px;padding:9px 12px;font-size:12px;color:#713f12;line-height:1.7;margin-bottom:10px">⭐ ${r.notes}</div>`:'<p style="font-size:12px;color:#9ca3af;margin-bottom:10px">No notes.</p>'}
-      <textarea id="pop-note-ta" style="width:100%;font-family:inherit;font-size:12px;padding:8px;border:1px solid #d1d5db;border-radius:6px;resize:vertical;min-height:70px" placeholder="Add note...">${r.notes||''}</textarea>
-      <button class="btn p sm" style="margin-top:6px" onclick="savePopNote()"><i class="ti ti-device-floppy"></i> Save note</button>
-    `;
-    if(acts)acts.innerHTML='';
-  }
-}
-function savePopNote(){
-  const r=RES.find(x=>x.id===popupResId);if(!r)return;
-  const ta=document.getElementById('pop-note-ta');
-  r.notes=ta.value.trim();
-  const now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  r.nlog.push({t:'"'+r.notes+'"',time:now});
-  toast('Note saved ✓');
-}
-function closePopup(){
-  document.getElementById('cb-popup').style.display='none';
-  popupResId=null;
-}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
-
-
-// QUICK BOOK
-let qbR=null,qbCi=null,qbCo=null;
-function openQB(rn,ci,co){
-  if(canViewOnly()){toast('⚠️ Agency access — cannot make bookings');clrSel();return;}
-  clrSel();qbR=rn;qbCi=ci;qbCo=co;
-  const rm=getR(rn);
-  document.getElementById('qb-info').innerHTML=`<i class="ti ti-calendar" style="font-size:14px"></i><div><strong>${rm?.nm}</strong> · ${fd(ci)} → ${fd(co)} · ${nt(ci,co)} night${nt(ci,co)>1?'s':''}</div>`;
-  ['qb-fn','qb-ln','qb-em','qb-ph','qb-notes'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('qb-ad').value='2';document.getElementById('qb-ch').value='0';document.getElementById('qb-inf').value='0';
-  // Set source options based on room type
-  const qbSrc=document.getElementById('qb-src');
-  if(rm&&rm.prop){
-    qbSrc.innerHTML='<option>Direct</option><option>Phone</option><option>Walk-in</option>';
-  } else {
-    qbSrc.innerHTML='<option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Agoda</option><option>Expedia</option><option>Google Hotels</option><option>Phone</option><option>Walk-in</option>';
-  }
-  qbC();document.getElementById('m-qb').classList.add('on');
-}
-function qbC(){
-  if(!qbR)return;
-  const rm=getR(qbR);
-  document.getElementById('qb-pr').innerHTML=pbd({ci:qbCi,co:qbCo,rate:rm?.rate||80,ad:+document.getElementById('qb-ad').value||1,ch:+document.getElementById('qb-ch').value||0,inf:+document.getElementById('qb-inf').value||0});
-}
-function submitQB(){
-  const fn=document.getElementById('qb-fn').value.trim(),ln=document.getElementById('qb-ln').value.trim();
-  if(!fn||!ln){toast('Enter guest name');return;}
-  if(isOcc(qbR,qbCi,qbCo)){toast('⚠️ Conflict');return;}
-  const rm=getR(qbR),id='BK'+String(Date.now()).slice(-5);
-  const qbProp=rm&&rm.prop?rm.prop:'vilu';
-  RES.unshift({id,fn,ln,em:document.getElementById('qb-em').value,ph:document.getElementById('qb-ph').value,nat:'',pid:'',rn:qbR,rate:rm.rate,ci:qbCi,co:qbCo,ad:+document.getElementById('qb-ad').value||1,ch:+document.getElementById('qb-ch').value||0,inf:+document.getElementById('qb-inf').value||0,src:document.getElementById('qb-src').value,pay:'Unpaid',st:'Confirmed',ref:'',notes:document.getElementById('qb-notes').value,nlog:[],prop:qbProp});
-  aLog('ok','Quick booking '+id+': '+fn+' '+ln+', '+rm.nm);
-  closeQB();toast('✓ Booking confirmed — '+fn+' '+ln);drawCal();
-}
-function closeQB(){document.getElementById('m-qb').classList.remove('on');clrSel();qbR=null;qbCi=null;qbCo=null;}
-
-// RESERVATIONS
 function drawRes(){
   const q=(document.getElementById('rq')?.value||'').toLowerCase();
   const sf=document.getElementById('rst')?.value||'';
