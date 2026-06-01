@@ -3972,6 +3972,17 @@ function updSel(){
   });
 }
 
+function openNewBookingFromSel(rn,ci,co){
+  if(ci===co)return;
+  sR=null;sS=null;sE=null;sOn=false;clrSel();
+  go('newbk',document.querySelector('.sl[onclick*="newbk"]'));
+  setTimeout(function(){
+    var a=document.getElementById('nb-ci'),b=document.getElementById('nb-co'),c=document.getElementById('nb-rn');
+    if(a)a.value=ci;if(b)b.value=D2(co,1);if(c)c.value=rn;
+    if(typeof nbCalc==='function')nbCalc();
+  },200);
+}
+
 function drawCal(){
   sR=null;sS=null;sE=null;sOn=false;
   const today=tS;const dates=[];
@@ -3985,7 +3996,7 @@ function drawCal(){
   PH.forEach(hotel=>{const hrs=getHR().filter(r=>r.prop===hotel.id);fixedHTML+='<div class="cb-section-lbl" style="background:'+hotel.color+'22"><span style="color:'+hotel.color+'">'+hotel.nm+'</span></div>';hrs.forEach(rm=>{fixedHTML+='<div class="cb-room-row-lbl partner-room" style="border-left-color:'+hotel.color+'"><div><div class="rn">'+rm.nm+'</div><div class="rt">'+hotel.nm+'</div></div></div>';});});
   document.getElementById('cb-fixed-rows').innerHTML=fixedHTML;
   let gridHTML='<div class="cb-date-header-row">';let prevMo=-1;
-  dates.forEach(d=>{const ds=localDs(d),dw=d.getDay(),isWk=dw===5,isTd=ds===today;const cls=isTd?'today':isWk?'weekend':'';const moSep=d.getMonth()!==prevMo&&prevMo!==-1?'month-sep':'';const pct=VR.length?Math.round((occ[ds]||0)/VR.length*100):0;gridHTML+='<div class="cb-date-col '+cls+' '+moSep+'" data-date="'+ds+'" onclick="calColClick(\"'+ds+'\",event)"><span class="cb-dow">'+DOW_SHORT[dw]+'</span><span class="cb-day">'+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span></div>';prevMo=d.getMonth();});
+  dates.forEach(d=>{const ds=localDs(d),dw=d.getDay(),isWk=dw===5,isTd=ds===today;const cls=isTd?'today':isWk?'weekend':'';const moSep=d.getMonth()!==prevMo&&prevMo!==-1?'month-sep':'';const pct=VR.length?Math.round((occ[ds]||0)/VR.length*100):0;gridHTML+='<div class="cb-date-col '+cls+' '+moSep+'" data-date="'+ds+'" onclick="calColClick(\'"+ds+"\',event)"><span class="cb-dow">'+DOW_SHORT[dw]+'</span><span class="cb-day">'+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span></div>';prevMo=d.getMonth();});
   gridHTML+='</div>';
   const makeRow=(rm,ip,c)=>{const rn=rm.n;let row='<div class="cb-booking-row" data-rn="'+rn+'" style="position:relative;'+(ip?'background:'+c+'11':'')+'">'; dates.forEach(d=>{const ds=localDs(d),dw=d.getDay(),isTd=ds===today,isWk=dw===5;const cls=isTd?'today-cell':isWk?'weekend':'';row+='<div class="cb-cell '+cls+'" data-rn="'+rn+'" data-d="'+ds+'"></div>';});row+='</div>';return row;};
   gridHTML+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*72)+'px;background:#e0e7ff;border-bottom:1px solid #c7d2fe"></div></div>';
@@ -4010,7 +4021,9 @@ function drawCal(){
       const width=rightEdge-left-2;if(width<4)return;
       const bar=document.createElement('div');bar.className='cb-bar';
       bar.style.left=left+'px';bar.style.width=width+'px';
-      bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+res.fn+' '+res.ln+'</span>';
+      const isBlock=res.isBlock||res.src==='Agency Block';
+      bar.style.background=isBlock?'#f59e0b':'#7dd3fc';
+      bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+(isBlock?'[BLOCK] ':'')+res.fn+' '+res.ln+'</span>';
       bar.addEventListener('click',e=>{e.stopPropagation();showPopup(res.id,bar);});
       bar.addEventListener('mousedown',e=>{e.stopPropagation();bDrg=true;sOn=false;});
       bar.setAttribute('draggable','true');
@@ -6820,7 +6833,7 @@ function syncAgencyAccounts(){
 }
 
 function processIncomingBookings(){
-  // Import agency bookings from queue
+  // Import agency bookings
   try{
     var agQ=localStorage.getItem('vilu_agency_new_bk');
     if(agQ){
@@ -6834,18 +6847,6 @@ function processIncomingBookings(){
       });
       if(added>0){localStorage.removeItem('vilu_agency_new_bk');saveRES();drawRes();drawCal();drawDash();showBookingNotif(added,RES[0]);}
     }
-  }catch(e){}
-  // Also sync directly from vilu_res (agency writes there directly)
-  try{
-    var directRes=JSON.parse(localStorage.getItem('vilu_res')||'[]');
-    var added2=0;
-    directRes.forEach(function(bk){
-      if(bk.src==='Agency'&&!RES.find(function(r){return r.id===bk.id;})){
-        RES.unshift(bk); added2++;
-        aLog('ok','Agency booking synced: '+bk.fn+' '+bk.ln+' ('+bk.id+')');
-      }
-    });
-    if(added2>0){saveRES();drawRes();drawCal();drawDash();}
   }catch(e){}
   // Import block requests  
   try{
@@ -8930,42 +8931,7 @@ function drawOps() {
   var allActive=RES.filter(function(r){return ymd(r.ci)<=selStr&&ymd(r.co)>=selStr&&r.st!=='Cancelled';});
   function bStyle(bg){return 'background:'+bg+';color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px';}
   function tBtn(rid,tid,tdt,status,label,bg){var fn;if(status==='reschedule')fn='rescheduleTrip("'+rid+'","'+tid+'","'+tdt+'")';else if(status==='cancelweather')fn='cancelWeatherTrip("'+tid+'","'+tdt+'","'+rid+'")';else if(status==='dotoday')fn='moveTripToAfternoon("'+rid+'","'+tid+'","'+tdt+'")';else fn='updateTripStatus("'+rid+'","'+tid+'","'+tdt+'","'+status+'")';return '<button onclick="'+fn+'" style="'+bStyle(bg)+'">'+label+'</button>';}
-  function resCard(r,label,color){
-    // Package info for agency bookings
-    var pkgHtml='';
-    if(r.src==='Agency'&&r.packageName){
-      var incl=r.packageIncludes?r.packageIncludes.join(', '):'';
-      pkgHtml='<div style="margin-top:6px;background:#f0f9ff;border-radius:6px;padding:6px 10px;font-size:11px">'
-        +'<span style="font-weight:700;color:#0369a1">📦 '+r.packageName+'</span>'
-        +(incl?'<span style="color:#6b7280;margin-left:6px">'+incl+'</span>':'')
-        +'<span style="margin-left:8px;background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:1px 6px;font-weight:700">Agency: '+(r.agency||'')+'</span>'
-        +'</div>';
-    }
-    var isArr=label==='Arriving';
-    var routes=isArr?ARR_ROUTES:DEP_ROUTES;
-    var tr=getTR()[r.id]||{};
-    var bn=tr.boat||'',bt=tr.time||'',brt=tr.route||'';
-    var routeOpts=routes.map(function(rt){return '<option value="'+rt+'"'+(brt===rt?' selected':'')+'>'+rt+'</option>';}).join('');
-    routeOpts+='<option value="custom"'+(brt&&routes.indexOf(brt)<0?' selected':'')+'>Other (type below)</option>';
-    var customShow=brt&&routes.indexOf(brt)<0?'':'display:none';
-    var rid=r.id;
-    var summary=bn||brt?'<div style="margin-top:8px;background:#f0fdf4;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:700;color:#059669">'+(brt?brt+' ':'')+( bn?'via '+bn:'')+( bt?' @ '+bt:'')+'</div>':'<div style="margin-top:8px;background:#fef3c7;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:700;color:#b45309">Transfer not set</div>';
-    var trHtml='<div style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:10px 12px">'
-      +'<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px">Transfer Details</div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'
-      +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">ROUTE</label>'
-      +'<select id="tr-route-'+rid+'" onchange="trRouteChange(this.id.slice(9))" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;min-width:200px">'+routeOpts+'</select></div>'
-      +'<div id="tr-custom-wrap-'+rid+'" style="'+customShow+'">'
-      +'<label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">CUSTOM ROUTE</label>'
-      +'<input type="text" id="tr-custom-'+rid+'" placeholder="Custom route" value="'+(routes.indexOf(brt)<0&&brt?brt:'')+'" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;width:160px"></div>'
-      +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">SPEEDBOAT</label>'
-      +'<input type="text" placeholder="Speedboat name" value="'+bn+'" id="tr-boat-'+rid+'" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;width:120px"></div>'
-      +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">TIME</label>'
-      +'<input type="time" value="'+bt+'" id="tr-time-'+rid+'" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit"></div>'
-      +'<button onclick="trSave(this)" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
-      +'</div>'+summary+'</div>';
-    return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+pkgHtml+trHtml+'</div>';
-  }
+  function resCard(r,label,color){return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+'</div>';}
   var tripsOnDay=allActive.reduce(function(s,r){return s+(r.trips||[]).filter(function(t){return ymd(t.date)===selStr&&(t.status==='pending'||t.status==='rescheduled');}).length;},0);
   var html='';
   html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div style="font-size:20px;font-weight:800;color:#111827">Daily Operations</div><input type="date" id="ops-date" value="'+selStr+'" onchange="drawOps()" style="padding:7px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600"><button onclick="drawOps()" style="'+bStyle('#0096c7')+'padding:7px 16px;font-size:12px">Refresh</button><button onclick="window.print()" style="'+bStyle('#374151')+'padding:7px 16px;font-size:12px">Print</button></div>';
@@ -8994,17 +8960,6 @@ function drawOps() {
   document.querySelectorAll('#ops-content').forEach(function(el){el.innerHTML=html;});
   var sc=document.querySelector('.scrl');if(sc)sc.scrollTop=0;
 }
-
-
-// ── TRANSFER INFO ──
-var DEP_ROUTES=['Maamigili Airport to Male Airport (Domestic Flight)','Maamigili to Male (Speedboat)','Maamigili to Airport (Speedboat)','Maamigili to Dhigurah (Speedboat)','Maamigili to Other'];
-var ARR_ROUTES=['Male Airport to Maamigili Airport (Domestic Flight)','Male to Maamigili (Speedboat)','Airport to Maamigili (Speedboat)','Dhigurah to Maamigili (Speedboat)','Other to Maamigili'];
-function getTR(){try{return JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){return {};}}
-function trRouteChange(resId){var sel=document.getElementById('tr-route-'+resId);var wrap=document.getElementById('tr-custom-wrap-'+resId);if(wrap)wrap.style.display=sel&&sel.value==='custom'?'':'none';}
-function trSave(btn){var inp=btn.parentElement.querySelector('input[id^="tr-boat-"]');if(!inp)return;saveTransfer(inp.id.replace('tr-boat-',''));}
-function saveTransfer(resId){var boat=document.getElementById('tr-boat-'+resId);var time=document.getElementById('tr-time-'+resId);var routeSel=document.getElementById('tr-route-'+resId);var customInp=document.getElementById('tr-custom-'+resId);if(!boat)return;var route=routeSel?routeSel.value:'';if(route==='custom'&&customInp)route=customInp.value.trim();var data={};try{data=JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){}data[resId]={boat:boat.value.trim(),time:time?time.value:'',route:route};localStorage.setItem('vilu_transfers',JSON.stringify(data));if(typeof toast==='function')toast('Transfer saved!');drawOps();}
-function updateBoatType(dateStr,boatIdx,type){var boats=getBoats();if(!boats[dateStr]||!boats[dateStr][boatIdx])return;boats[dateStr][boatIdx].type=type;saveBoats(boats);}
-function updateBoatDest(dateStr,boatIdx,dest){var boats=getBoats();if(!boats[dateStr]||!boats[dateStr][boatIdx])return;boats[dateStr][boatIdx].dest=dest;saveBoats(boats);}
 
 // ── UPDATE TRIP STATUS ──
 function updateTripStatus(resId, tripId, tripDate, newStatus) {
