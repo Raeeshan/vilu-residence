@@ -163,7 +163,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <label>Password</label>
       <input type="password" id="ag-login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')agLogin()">
     </div>
-    <button class="ag-login-btn" onclick="agLogin()">Sign In →</button>
+    <button type="button" class="ag-login-btn" onclick="agLogin()">Sign In →</button>
     <div class="ag-login-back">
       <a href="vilu.html">← Back to PMS</a>
     </div>
@@ -173,7 +173,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- ── AGENCY APP ── -->
 <div id="ag-app" style="display:none">
 <!-- LOGIN -->
-<div class="login-bg" id="login-screen">
+<div class="login-bg" id="login-screen" style="display:none">
   <div class="login-card">
     <div class="login-logo">
       <img id="agency-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADIAMgDASIAAhEBAxEB/8QAHQABAAICAwEBAAAAAAAAAAAAAAMHAQgFBgkEAv/EAD0QAAEDAwMBBgUDAwEGBwAAAAEAAgMEBREGBxIhCBMxNEFxFCIyUWFCgZEVUqEzFiNikrHBCRclU3LR8P/EABoBAQADAQEBAAAAAAAAAAAAAAABAgQFAwb/xAArEQEAAgIBAwIFAwUAAAAAAAAAAQIDEQQSITETYQVBUZHxMqHwM3GxwdH/2gAMAwEAAhEDEQA/APU6m8vH7KVRUvl4/ZSoCIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIghqvLv8AZEq/LSeyIM0vl4/ZSqKl8vH7KVAREQEREBERB1LW+4Eeh2MlqLfU1NOepkhx0/nxXH6S3n07q8tbTVPdSF5YWS/K4HiXDp49QHfuMeoz2PV1hh1FZKmllYXEtJaW+IP4Wh+5NluegtRCvtdeY5oJQ/vOHEEtdkcuPQHIHUgBcbm8rNxb1tEbrKJ7PQeOVkzGvY4Pa4Agg9CF+1qR2eu0cJKyG03adxppA5jAcExua4hv7ceI/YLbKlqoqynZNC8SRPGWuHgQt/H5FORTqqlKi/LnBjS5xAA6klVnrff7Tej2PZ8QKycdGiN3y59T+QP+4HqvXJlphjqyTqBZyLUO6dra+3i4CksdNEHnoHP6Bv8A9n/8Pubj2mvuutRtE93NG2hGMv4nvCfXA6LJi52LPbpx7k8rZREXQBERAREQEREENX5aT2RKvy0nsiDNL5eP2UqipfLx+ylQEREBYccAnGfwsogpzdPcrXmlY5pbNpy3vpWeE9XM97iPAfI3HU+gGVTdV2u9xbAWsuulrW15fwDCyaN7j/aBy8f+i3EfEyQguaHEHIyM4K6Pq/aGwarZK+an4VTm8RO0B7mNzktaHdG56/jJyQSuXn4/ImerFkmPZE+ylNP9u2zPnjg1Jp6qtXP5TNSTCdoPrlpDTj+V+tyGac3Gsx1HpqrhrqSQfM6mqWtmjd4lr4n4LT7H+V0Ddjsv3S3PnntkU74nuyWQszHC0+AMh+eeTHjgNY30BWs9dcb5tvWT1tjqn00cfJj52Z7mcA4c0jwkGehI6Z8CuTkzZv6PJjau5jy+zVdbVaO1IK6B5hkjeS4BnDI9XFv38OoyDjxW9vZd3ji1dpl9DVzgPooBN3jvpbH6kn0Gc/yvNHU2tpdTUxqp3HvQ7EtNIMujd45af7T18eo8CuZ2p3eqdH0mo6Zk5eKunNNgHBDeoGPzh3+Sqca1uPbrhWJ1LdftH9qdlvqazT9lkGIpOEjuWOXHmCSfRvIN/j8rXXR1pvG7l+cecr4HOPzAtaT+ByPToq90Tpy87saxdTUznSufMJKmQtkdk565c1pwAc+PrkrenRl82p2Kt8FNedT0c14jaM00FS6rka4emG8g09PuFf055V/UzTqP54T58u7bOdn/AE/pe3U9ZPQ1Rrm+Iq3gj/lHRXXHG2JjWMaGtaMAAdAFr5P24du4X8I4L1N6chRtaPz4vBH8LmbH2w9s7xJFHPdp7TLL9La+le0f8zeTf8rs4c3Fxx0Y7RC+4XYi+O1XihvlFHWW+sgraWQAsmp5A9jh+CF9i6ETE94SIiKQREQEREENX5aT2RKvy0nsiDNL5eP2UqipfLx+ylQEREBYJwMlZXy3OgZdKGakke9kUzSx5YcEtPiM+mR0UT7Cldze0RNbK6ptOkaIXCpp2udV3OZpNNTtaCXcQPrd0P4z06rW3XWpNz9Rsjmu12u0EEkfxDqaOQxNawgEHgzAH1NAB6lbz0OhLFbqR9NBbYGQvHFzePiMYx/AXA7nah0nt/p+e43qlp3iQ/JTBre8qH+gGf8Ar6Licni5ckTfLl1H7R/1Ext543XRuuYRU91V3SnhhiM08jKmXlgDLhnPU5PED1OVWeprvqq3TT01ZUSV4oWiMU1ZxmYxwDg1jPXDMnGOnI5Vtby9oK77h3Sa207xb7ewu7qjoiRGMDOP+M4/UfzjCpyh0pqHVtZBTx0r421EnOGV/o3GfmP9px4+y4lZjeqd493lP0hX1S832rMZgZY5CAwNeS2E59C49f3Pqc5XzSaVu1qvE1I5pbc2HuXQEglr8Y6nOD065zjwOcLtVJVQup7xZGzRQVg+SaqnaJXFozgMB6MOQBkdenoq/wBKamtthvV1juBfcKp7GsppC0ktGMOGB+P8LXEzMT0tmLjddeq06WDZJ9WWqjltduD6ChdhlQ+gIaZW5GQ+QYL2/wDD9PurB0HtzW6kLKFlTb5XVj+5+HqKhsUjSfA4djpkYyM4XRNvpptWW+ahtUpnr5CTHTSAtm+wIB+oDPLp+Mhdst7nQRyNnid8I0ujEErfneW9MEH1JwPfK8MtrV/VDHMalsJZ+xnrGC1UMsjWyYbgMkz3gGCQHD1x4f49crnYexfqGCr+IZLK6ly3FO/DniN4w4Z9XMJOD05BrT+o46Fs92itVbPVsMLas3nThHF9or6t2IuuCYnuyWjPQen4XoHt5r627k6Xpb3bC5sMow+GTHOF48WOxkZH3HQjBXR42HiciO29/ReIiWrGkthtyNq7tDc9L1j6afOJqVx5QSj9THtPRwyDxd44LT6nG1+jL3X32yRT3O3vtlwHyzQOBwD9xn0XO4H2WV18HHrx+1JnX0X1oREWsEREBERBDV+Wk9kSr8tJ7IgzS+Xj9lKoqXy8fspUBERAREQYcQ0Ek4A9V599qLXc2rdeVreb/hqNvdxxxnHGFrm96c/3OBP+V6A1DS6B4AyS0gA+y1H0N2f5Naauv1TeWPZB30zGyOHiDzYR+euCuJ8Tpky9GKkeZ/wie6k9nezDetZ6xldUMMFLRShwmf8ALy4S8T/LMEeh8PVdu7Yv9F2i0la9F6fYGV0rXSSTs+WSKnLiRGX+Ib1AwOvqSOgO9NjsNHp6hZS0cIijYAOnicDHitEu2lbDe95WUz6cd22miHJpyXNxl2c+vhj2XjnwV4fH3Hme20a1HZqntrtC7WeqIWQh1U+aTD4nDi4u/Uw+mfUfcf5sLth7K2nafUejr5bLXHaqF1sppJ6WkhDYxxJjmzjr1aAT1OcnqcrZ3srbMzAmproWmnic0OcWkFzR1jcD45HofEDLTkeHc+3JoGDVW3VJVSRh3wz5IHEHDiHtyAOhJ6t8B91WlLRxpyz/ACGnjfq6Z8S8x7hpm77a6/aGzGKoilEtNURP/V9THgj0IIH5yVv1pLa2g382qtmqrdSwx3ykjmZUU8OGmSrxgEt/T1PLH36qgarRUm4vZ40pqWlou9u9nEtjucjWHvC6n6Me4/mHu/t6fbruP2ILHPaNsZ5J2nlUzNPMj6+LePj64xjPj0CthpF8vpXjcTH4Z5rNLTWWmW4e1N50LXzQ1sRjp6TMby7Pz8WcnD26ge4V+dhjXNQ28VFkEwkgkb1pnnhIwDJDwPBwHgR6ZyPULbDcDbKybi2iehudM0mRrmiZoHIZGP3Wtu0HZ9u22u/LJpYf/TGOkmgmYct4EOAH46gf4+ytXi34uetq96yjWp7NwEWB4LK76wiIgIiICIiCGr8tJ7IlX5aT2RBml8vH7KVRUvl4/ZSoCIiAiIgKGmpIaRrmwxtjDnF5AHiSckqZEBUHujs9Jq/eS13ENcIpKXJnIy1pYeJafcEH+Vfi/JY1zg4gEjwP2Xhmw1z1itvrsfDZLJSWGgipaSBkMbGgYYPFdL3/ALObxtTfI2tc6SNjJmBjcklrh6evQlWIuC1zB8Toy+Rjlk0U2OIBOQwkYBz16KctItitT2XpOrRLS3sHzxDV26G31yj50lXHDc2QvAA8TFJgZIz1j/hbtaZ01QaSs1Pa7bCIKSAENYDnxOSf5XnnsRqpmmO2nZ8vrxBeqae2vNWwAlzo+8ZnAH6ox6eq9IAcjKycGYthrPzjs9uRGsksrHEZzgZ+6yi6LMIiICIiAiIgIiIIavy0nsiVflpPZEGaXy8fspVFS+Xj9lKgIiICIiAiIgIi/E0ogifI4OLWAuIa0uP7AdSg/a+G9sElnrmO+l0EgOftxK4mh1tp7VD57dQ3uA1pzG6nZL3VSw46/I7DgR7KntX771e2V7vWjdYgSyT0Ek1lvLGBjazk1wZFK0dGycgW8gOJIGQOQz4ZMtK13M9kx5hpPqyspdDdoLRN3pXsYaS7UcruNLEzp3jQ76ST4EherYcPD1+y8Y9+NRyQ6ut9RLF3ckMsbxh7RjDwf/bH2XpBtZvdb9dah13rOsuMdDpCzGO2UU0z8RuAJdJJj1c9wGAOpHEBcvgZIpTU/Nr5WuqF/Iup6D16NfW6S7UtunorI7PwlVW/JJUtHjII/FrOnQuOT9gPHm6DUVrutTLT0VxpayeL/Ujp5myOZ/8AIAnH7rsxaLREwxuRREVgREQEREBERBDV+Wk9kSr8tJ7IgzS+Xj9lKoqXy8fspUBERAREQEREBcHqen1BNSl2n66gpqpo6R3CmfLG8/Ylj2ub7jPsucXRNe6NorxBNNWT6kqgcltNaa6SIewa1zW/zleeTtWfwNZO0NrOpo2iLdHRcmnKxh40Wr9MymZoI6jIeG943wJYXh49MFaubldoeXcDQ7rDfLhHfKuzyGW03yPkZJITgSwSFwDiCA17S4BzTHg5ByLe7R2lKqC3T0tktmsWGX66e5Td/DK0fcNHj9gcrSm9aGvdmqZZnUFdR46vhnpXhufQg4wPZfOzfqtO/wA/38ffSlqXj5ORvMj7/pyvvNZKXGjdEyJznZJAILyP2ICsTQe9dutdo0xZr0Z3aYtLn18tqo3cZLlWvxy5H9IxwiDz9DQ8gFxwqXqquqOn5qCCNzo3SOyMYwDxPX26/wAKXS9ubT1jJu5qLhWud0Y1hja37AEjoP2JURGq91Jte89+70F0rrqHeR1LeN19as09pePHweibE98bXMHRolbGMtZjAHM8negYMZ23271fpH+lQ0Wl7RWUFrYAI+5s08MB/PLhg+/+VoF2db1q+wVEHwmn7LFMXcm1c1klrZmHPo5zhx9xgr0B231XqS9QNF+p6N7nDIno4ZoP5Y/kP4d+y28TLFrd57/f99/6esVtEbmHfgsoi7SRERAREQEREENX5aT2RKvy0nsiDNL5eP2UhOPTKjpfLx+ylQYBysr8+BR7Q9pac4Ix0OCgzn8JkrVSrul37PPa5tkV6vl1uu3O5MXwNqN0r5qiOy3eP5vh2c3ENjnbniP7hgdArD3wiuu4GrNJaB03eLnZan4yK8364Wqrkp30trjcf90XMI+apkAiaD+lszh9CC1v9pbSNRNsBuVJ/XDSmuFt75vxHw4eGGXu88uHIhvLGM9FFp7V9j1abkLLdqK6m21b6Cs+DnbL8PUMxzifg/K9uRlp6jK6LorWdj1HvnuNZafS7aHUGnKa2U9Zf3CJzq2Kdkk0UQcPnDWfMeLvV+cdVUXYZuppNl9x9Tx0zq59w1xqG5CKN7WOlDagtADnENHSPxJwg2vWDj1VJ2ntSWer7LDt8K+zV9uswtct1Frc9j6lzGvc1jQQQ0ufhuOuPnC5jdjdmt0btPQ36ntr4LrdWwQxQSO5CjlljLyXlrTngA7wHUgeC8suSuGk5L+I7r0pbJaKV8ysouo698sJ7modEQJI/leWHGQCPQ469V8VZpGyV/mLVSTZ/uhBWje0+5V10tvJS3WjdNX0la5tJe28pJGNge7l8S/r9bMEgluSC4eqs7/xFYaO47BWmccZJajUtmp4KiNxBDJatgeGuB8HMyD9wVz+Dy8fxDF19OvaWvlca3Ev0b2vifZbQdS8uk0naS5x5FwpWjJ+/RfXb9q9IWpvGk03bYBnPy07VrxZ9Jaaqe1laodpbnDpZ+lW1A13Z6SSSngrIpIwKWIUbsNe7mS/v2N4tAxyJIAsHdHtD3GyatrNGaA09T6z1jQGj+MoZ600rIviHfK3k2N5y2Jr5nudxYxgblxc9rTv9DF56Y+zH1T9VyU1moKPHcUVPDjwLImj/svpZJG6R0bXNL2Y5NB6tz4ZHoqi05vjLrvd6/6Jsv8ASaOo0xWtp7vRXaeSO4TQuhbIKilhDcOhLnhgeTglrvDpnrG229OnbTpLcjWVTphljqRrWqsb4rfUGrqL3WxyRUkJY5wbl8jg2NrOjWBviACV6xWI7RCqzdUbvWzSe6WitCVdvuElx1ZHWPoayFjDTM+GjEkjZCXhwPEjGGkdfFd7WpN/uWptQduvaCiv1HaqGS16cvt0jpLbVyVD445RDADK58bBkuyBxGOjupwF3W39ovUG4mv7ZbtutP0N90vFfZ7XeLvVVMjXQQQZbPURhrOAHegxRtc7lI4OcGhg5qRsCi120l2kdWa9uu6WnbJo63u1Hou7TUBlqbnIy3SRNibJG983c8hI7Lh3bWHHEkuAIzyOgO1NR6n2C2+19c7Q6ivGs5YaC22GmnEjp62SR7GxtkcAOGI3SF5HysaT1IwQvhFUWo93L7tPp263vcSjsdNTS11Nb7FS2KukmmrZpncGRPM8cbWOLiPmzxDWuc4gBcnstuBq3cOm1BW6j0tTact0Fe6Cz1FPWvqBcqYAZqAHxRuawuyGktHIDkPlIJCykWMoCgiq/LSeyJV+Wk9kQZpfLx+ylUVL5eP2UqDBGQgWUQVv2g9k7b2gNrrnpG4VUltnldHU0F0gbylt9ZE7lDUMGR1a4eGRkEjIyuw6E0RDou2SMkq5rveKwtluV4qmtE9dMGBveODQA0ANAaxoDWgAAffs6IKi0jsld9K7x691lHq977Xquqo6uW0st7GyxOp6dsIZ35c7LCG5wGA9fqHXPXthOzFctl9BXPRk+uJ7zp+apr56aOG3MpZmCqc8uEsnJ/eFpeSMBgz4g4AF/Ig1cr+xfcrz2XRs3c9wpqumoqWKjtdwitbYGwsika6IzRNkPfuaG8erg3PzceQBV52zQRqdImy6tuA1W+VrO/kmpmU8XJoHExRt/wBMAtDh8ziD15eGJ90K6923Qd5qdOwyT3eOHMLIIxJIByAe5jT9Twzk5reuSAMHOFRmjrZq+91lxukctb3MNNIJpbfWv51IfSzMMLA4hxkE/cyMe/D2Bpy4F5YImItGpTEzE7h3i1dmyzWC93Kvt1c9puDuUz6uPv5h0xhry4Dp4DLTgdOvTGO0LsJUbz6K0vpy33ims1LZbzRXY/GUr6kTilPKOI8ZGEAuxyOc4GBjOVUtRp/eCm0o+aml1rJfI9KWWqZHLXscHXxk7hWtIL+Jb3fDkz/ScMkAu6rtd5rt0Y9z5LlbtM34WQOu1JNSNuQLaoGnD6GRrnyFkPKRpALIh3XLDy7JK8MWDFh36ddbWte1+9pdr3n7OMW6klk1Hb9QTaO3PsTcW7WFpgAe0Hq+GaFziJqd5zmJ7jjPQ+Oeu7fbBa60TuBrbU9z3CtZo9Xw0lTe22+0OppoqqCEQufTSvmeImOjaCeQeWnOMdCurQ027EtPcYXUOrqKCou1huFAKarLnQ0xcxtzic6WZ78Bokyxx6nDmAZwPv05YtzbZeqF1QdX1VqdddRUVTHV1wmItpZI62uALyS/Pdhsn+oOoeceGhR3qx7R/wC3+s9K7haruOnb5XWGSap0/ctNUj4DJTTMc1glndNIZmd2/PFpDHOw/r0CqSHYR9v05adJ/wDm1Z477SbjT6iszobb3rDXiaWsfSVTe+y+QRSuPEOjIaAcHxXC3bWes6KyacsV9uuprK2xaUskupa22zBk1nqviCagysieDOZ4o3MHHIYPmbkuwLHfYNaS68tdRV2O81Vuotx6u5RzP4P7q2utb4GStPPPEzSEAfUMk4ACDmbZsa+9b5af3esGtaG4D+kVVquM8dK2p+OD54yO5kbJwibGYXMDcPxl2cuLivo7P3Z71Jsvpyo0rVa0Zc9K093qbjbYaOgNLV93LMZu5nm7x3Noc4/Q1pcOhODxXbezpT6hodpbTSappa+kvcEtS2ZlyLTMWmokdGS5pId/u3M659+uVZSCo9sNhn7eWzcxrr46tuWt77X3qWoEHBtKZ2COONreRLgxrW9SRk56AYVVQ9i/UdDs1tXp2j1/Twar25uFPX2i4m0ZoXd217HRyQd5zdzbIeTuecjoBkrbJEFE7z7Bao3Z0bplg1lTUusNPahpNRUldLauVB3sAc3ufhu85d2Q93jI52fX7W3pqz3G2xTTXa6vutwqOJlcyPuaePAxxhiy4sb4nq5zj6k4AHNogx4HKLKIIavy0nsiVflpPZEGaXy8fspVFS+Xj9lKgIiICIiAiIgwDlMIRnwOFjJHplBnA+yYH2QflZQY4j7BMD7LKIOMq9MWevucNyqbVQ1FwhAbFVy0zHysAOQGvIyMEk9CuSwPsFlEGMYRZRBgLKIgIiICIiCGr8tJ7IlX5aT2RBml8vH7KVRUvl4/ZSoCIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIghq/LSeyJV+Wk9kQZpfLx+ylREBERAREQEREBERAREQEREBERAREQEREBERAREQQ1flpPZERB/9k=" alt="Vilu Residence">
@@ -378,34 +378,32 @@ var currentAgency = null;
 
 // Load users from Supabase or fallback
 async function agLoadUsers() {
+  var users = [];
   // 1. Try localStorage first (shared with PMS on same domain)
   try {
     var saved = localStorage.getItem('vilu_users');
     if(saved) {
       var all = JSON.parse(saved);
-      var agencyUsers = all.filter(function(u){ return u.role==='agency'; });
-      if(agencyUsers.length) return agencyUsers;
+      users = all.filter(function(u){ return u.role==='agency'; });
     }
-  } catch(e) {}
-
-  // 2. Try Supabase
-  try {
-    const resp = await fetch(SUPA_URL+'/rest/v1/users?select=*', {
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
-    });
-    if(resp.ok) {
-      const data = await resp.json();
-      if(data && data.length) {
-        var agencyUsers = data.filter(function(u){ return u.role==='agency'; });
-        if(agencyUsers.length) return agencyUsers;
+  } catch(e){}
+  // 2. Also check vilu_users_sync
+  if(!users.length) {
+    try {
+      var saved2 = localStorage.getItem('vilu_users_sync');
+      if(saved2) {
+        var all2 = JSON.parse(saved2);
+        users = all2.filter(function(u){ return u.role==='agency'; });
       }
-    }
-  } catch(e) {}
-
-  // 3. Hardcoded fallback
-  return [
-    {email:'agency@viluresidence.com',password:atob('YWdlbmN5MTIz'),name:'Agency User',role:'agency',company:'Agency'}
-  ];
+    } catch(e){}
+  }
+  // 3. Always merge with embedded users (so built-in accounts always work)
+  var embedded = EMBEDDED_AGENCY_USERS||[];
+  embedded.forEach(function(eu){
+    var exists = users.find(function(u){ return u.email.toLowerCase()===eu.email.toLowerCase(); });
+    if(!exists) users.push(eu);
+  });
+  return users;
 }
 
 async function agLogin() {
@@ -429,6 +427,9 @@ async function agLogin() {
   
   document.getElementById('ag-login-screen').style.display='none';
   document.getElementById('ag-app').style.display='block';
+  document.getElementById('login-screen').style.display='none';
+  var agencyApp=document.getElementById('agency-app');
+  if(agencyApp)agencyApp.style.display='block';
   
   // Set user info
   var n=document.getElementById('ag-user-name'),e=document.getElementById('ag-user-email');
@@ -465,7 +466,10 @@ function loadLogo(){
 // Agency accounts stored in localStorage by PMS User Management
 // Agency credentials can be embedded here by the PMS
 // Format: {email, password, name, role:'agency'}
-var EMBEDDED_AGENCY_USERS = [];
+var EMBEDDED_AGENCY_USERS = [
+  {email:'agency@viluresidence.com', password:'agency123', name:'Agency User', role:'agency', company:'', commission:0},
+  {email:'angelica@gmail.com', password:'Angelica1234', name:'Angelica', role:'agency', company:'', commission:0}
+];
 
 function loadAgencyUsers(){
   // 1. Try all localStorage keys
