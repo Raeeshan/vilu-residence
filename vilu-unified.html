@@ -8917,7 +8917,32 @@ function drawOps() {
   var allActive=RES.filter(function(r){return ymd(r.ci)<=selStr&&ymd(r.co)>=selStr&&r.st!=='Cancelled';});
   function bStyle(bg){return 'background:'+bg+';color:#fff;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:3px';}
   function tBtn(rid,tid,tdt,status,label,bg){var fn;if(status==='reschedule')fn='rescheduleTrip("'+rid+'","'+tid+'","'+tdt+'")';else if(status==='cancelweather')fn='cancelWeatherTrip("'+tid+'","'+tdt+'","'+rid+'")';else if(status==='dotoday')fn='moveTripToAfternoon("'+rid+'","'+tid+'","'+tdt+'")';else fn='updateTripStatus("'+rid+'","'+tid+'","'+tdt+'","'+status+'")';return '<button onclick="'+fn+'" style="'+bStyle(bg)+'">'+label+'</button>';}
-  function resCard(r,label,color){return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+'</div>';}
+  function resCard(r,label,color){
+  var isArr=label==='Arriving';
+  var routes=isArr?ARR_ROUTES:DEP_ROUTES;
+  var trd=getTR()[r.id]||{};
+  var bn=trd.boat||'',bt=trd.time||'',brt=trd.route||'';
+  var routeOpts=routes.map(function(rt){return '<option value="'+rt+'"'+(brt===rt?' selected':'')+'>'+rt+'</option>';}).join('');
+  routeOpts+='<option value="custom"'+(brt&&routes.indexOf(brt)<0?' selected':'')+'>Other (type below)</option>';
+  var customShow=brt&&routes.indexOf(brt)<0?'':'display:none';
+  var trHtml='<div style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:10px 12px">'
+    +'<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px">Transfer Details</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'
+    +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">ROUTE</label>'
+    +'<select id="tr-route-'+r.id+'" onchange="trRouteChange(\'"+r.id+"\')" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;min-width:200px">'+routeOpts+'</select></div>'
+    +'<div id="tr-custom-wrap-'+r.id+'" style="'+customShow+'">'
+    +'<label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">CUSTOM ROUTE</label>'
+    +'<input type="text" id="tr-custom-'+r.id+'" value="'+(routes.indexOf(brt)<0&&brt?brt:'')+'" placeholder="Custom route" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;width:160px;font-family:inherit"></div>'
+    +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">SPEEDBOAT</label>'
+    +'<input type="text" id="tr-boat-'+r.id+'" value="'+bn+'" placeholder="Speedboat name" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;width:120px;font-family:inherit"></div>'
+    +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">TIME</label>'
+    +'<input type="time" id="tr-time-'+r.id+'" value="'+bt+'" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit"></div>'
+    +'<button onclick="saveTransfer(\'"+r.id+"\')" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
+    +'</div>'
+    +(bn||brt?'<div style="margin-top:6px;background:#f0fdf4;border-radius:5px;padding:4px 8px;font-size:11px;font-weight:700;color:#059669">'+(brt?brt+' ':'')+( bn?'via '+bn:'')+( bt?' @ '+bt:'')+'</div>':'<div style="margin-top:6px;background:#fef3c7;border-radius:5px;padding:4px 8px;font-size:11px;font-weight:700;color:#b45309">Transfer not set</div>')
+    +'</div>';
+  return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+trHtml+'</div>';
+}
   var tripsOnDay=allActive.reduce(function(s,r){return s+(r.trips||[]).filter(function(t){return ymd(t.date)===selStr&&(t.status==='pending'||t.status==='rescheduled');}).length;},0);
   var html='';
   html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div style="font-size:20px;font-weight:800;color:#111827">Daily Operations</div><input type="date" id="ops-date" value="'+selStr+'" onchange="drawOps()" style="padding:7px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600"><button onclick="drawOps()" style="'+bStyle('#0096c7')+'padding:7px 16px;font-size:12px">Refresh</button><button onclick="window.print()" style="'+bStyle('#374151')+'padding:7px 16px;font-size:12px">Print</button></div>';
@@ -9428,6 +9453,28 @@ window.addEventListener('storage',function(e){
     if(addedBk2>0){saveRES();localStorage.removeItem('vilu_agency_new_bk');try{drawCal();}catch(e){}try{drawDash();}catch(e){}toast(addedBk2+' new agency booking'+(addedBk2>1?'s':'')+' received!');}
   }
 });
+
+// ── TRANSFER DETAILS FOR DAILY OPS ──
+var DEP_ROUTES=['Maamigili Airport \u2192 Male Airport (Domestic)','Maamigili \u2192 Male (Speedboat)','Maamigili \u2192 Airport (Speedboat)','Maamigili \u2192 Dhigurah (Speedboat)','Other'];
+var ARR_ROUTES=['Male Airport \u2192 Maamigili Airport (Domestic)','Male \u2192 Maamigili (Speedboat)','Airport \u2192 Maamigili (Speedboat)','Dhigurah \u2192 Maamigili (Speedboat)','Other'];
+function getTR(){try{return JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){return {};}}
+function trRouteChange(id){var s=document.getElementById('tr-route-'+id),w=document.getElementById('tr-cw-'+id);if(w)w.style.display=s&&s.value==='Other'?'':'none';}
+function saveTransfer(id){
+  var boat=(document.getElementById('tr-boat-'+id)||{}).value||'';
+  var time=(document.getElementById('tr-time-'+id)||{}).value||'';
+  var routeSel=document.getElementById('tr-route-'+id);
+  var route=routeSel?routeSel.value:'';
+  if(route==='Other'){route=(document.getElementById('tr-cust-'+id)||{}).value||'';}
+  var d={};try{d=JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){}
+  d[id]={boat:boat,time:time,route:route};
+  localStorage.setItem('vilu_transfers',JSON.stringify(d));
+  if(typeof toast==='function')toast('Transfer saved!');
+  injectTransferCards();
+}
+
+if(typeof FMAP!=='undefined') FMAP['ops']=function(){setTimeout(function(){drawOps();},200);};
+// Also inject on page load if already on ops
+setTimeout(function(){if(document.getElementById('s-ops')&&document.getElementById('s-ops').classList.contains('on'))injectTransferCards();},1000);
 </script>
 
 </div></div></div></div></div></div></div></div></div></div></div></body></html>
