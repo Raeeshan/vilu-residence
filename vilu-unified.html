@@ -3934,12 +3934,14 @@ let popupResId = null;
 
 function calNav(d){
   calD = new Date(calD);
-  calD.setDate(calD.getDate() + d * calDays);
+  calD.setDate(calD.getDate() + d * 7);
   drawCal();
+  setTimeout(drawCal, 100);
 }
 function calNavToday(){
   calD = new Date(); calD.setHours(12,0,0,0); calD.setDate(calD.getDate()-2);
   drawCal();
+  setTimeout(drawCal, 100);
 }
 function setCalView(n){
   calDays=n;
@@ -8903,6 +8905,21 @@ function saveTripsConfig() {
 }
 
 // ── DAILY OPERATIONS ──
+function getRoomName(rn){
+  if(!rn) return rn;
+  // Check Vilu rooms first
+  var vr = (typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});
+  if(vr) return vr.nm;
+  // Check partner hotel rooms
+  if(typeof getHR==='function'){
+    var hr = getHR().find(function(r){return r.n===rn;});
+    if(hr){
+      var hotel = (typeof PH!=='undefined'?PH:[]).find(function(h){return h.id===hr.prop;});
+      return (hotel?hotel.nm+' - ':'')+hr.nm;
+    }
+  }
+  return rn;
+}
 function drawOps() {
   var today=new Date().toISOString().slice(0,10);
   var dateEl=document.getElementById('ops-date');
@@ -8929,19 +8946,19 @@ function drawOps() {
     +'<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px">Transfer Details</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'
     +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">ROUTE</label>'
-    +'<select id="tr-route-'+r.id+'" onchange="trRouteChange(\'"+r.id+"\')" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;min-width:200px">'+routeOpts+'</select></div>'
+    +'<select id="tr-route-'+r.id+'" onchange="trRouteChange(this.id.slice(9))" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;min-width:200px">'+routeOpts+'</select></div>'
     +'<div id="tr-custom-wrap-'+r.id+'" style="'+customShow+'">'
     +'<label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">CUSTOM ROUTE</label>'
     +'<input type="text" id="tr-custom-'+r.id+'" value="'+(routes.indexOf(brt)<0&&brt?brt:'')+'" placeholder="Custom route" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;width:160px;font-family:inherit"></div>'
-    +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">SPEEDBOAT</label>'
-    +'<input type="text" id="tr-boat-'+r.id+'" value="'+bn+'" placeholder="Speedboat name" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;width:120px;font-family:inherit"></div>'
+    +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">SPEEDBOAT / FLIGHT</label>'
+    +'<input type="text" id="tr-boat-'+r.id+'" value="'+bn+'" placeholder="Speedboat or flight no." style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;width:120px;font-family:inherit"></div>'
     +'<div><label style="font-size:10px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">TIME</label>'
     +'<input type="time" id="tr-time-'+r.id+'" value="'+bt+'" style="padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit"></div>'
-    +'<button onclick="saveTransfer(\'"+r.id+"\')" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
+    +'<button onclick="saveTransfer(this.dataset.id)" data-id="'+r.id+'" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
     +'</div>'
     +(bn||brt?'<div style="margin-top:6px;background:#f0fdf4;border-radius:5px;padding:4px 8px;font-size:11px;font-weight:700;color:#059669">'+(brt?brt+' ':'')+( bn?'via '+bn:'')+( bt?' @ '+bt:'')+'</div>':'<div style="margin-top:6px;background:#fef3c7;border-radius:5px;padding:4px 8px;font-size:11px;font-weight:700;color:#b45309">Transfer not set</div>')
     +'</div>';
-  return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — Room '+r.rn+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+trHtml+'</div>';
+  return '<div style="background:#fff;border-left:4px solid '+color+';border-radius:10px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)"><b>'+r.fn+' '+r.ln+'</b> — '+getRoomName(r.rn)+' <span style="color:'+color+';font-weight:700">'+label+'</span>'+(r.notes?'<div style="color:#999;font-size:12px;margin-top:3px">'+r.notes+'</div>':'')+trHtml+'</div>';
 }
   var tripsOnDay=allActive.reduce(function(s,r){return s+(r.trips||[]).filter(function(t){return ymd(t.date)===selStr&&(t.status==='pending'||t.status==='rescheduled');}).length;},0);
   var html='';
@@ -8963,10 +8980,10 @@ function drawOps() {
   else{dayBoats.forEach(function(boat,bi){var boatPax=(boat.guests||[]).reduce(function(s,g){return s+(g.pax||0);},0);var ng=(boat.guests||[]).length;html+='<div style="background:#f0f9ff;border:1.5px solid #0077b6;border-radius:10px;padding:14px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px"><div style="display:flex;align-items:center;gap:10px"><span style="background:#0077b6;color:#fff;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:800">Boat '+(bi+1)+'</span><input type="time" value="'+(boat.time||'')+'" onchange="updateBoatTime(window._opsDate,'+bi+',this.value)" style="padding:5px 10px;border:1.5px solid #bae6fd;border-radius:7px;font-family:inherit;font-size:13px;font-weight:700;color:#0077b6"><span style="font-size:12px;color:#6b7280;font-weight:600">'+boatPax+' pax</span>'+(ng===1?'<span style="background:#fee2e2;color:#dc2626;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">Solo</span>':ng>1?'<span style="background:#f0fdf4;color:#059669;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700">Combined</span>':'')+'</div><button onclick="removeBoat(window._opsDate,'+bi+')" style="background:#fee2e2;color:#dc2626;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Remove</button></div>';if(ng){html+='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px"><tr style="background:#e0f7fd"><th style="padding:6px 8px;text-align:left">Guest</th><th>Room</th><th>Trip</th><th>Pax</th><th>Action</th></tr>';(boat.guests||[]).forEach(function(g,gi){var tc=TRIPS_CONFIG.find(function(t){return t.id===g.tripId;})||{name:g.tripId||'Trip'};html+='<tr style="border-bottom:1px solid #bae6fd"><td style="padding:6px 8px;font-weight:600">'+g.guestName+'</td><td style="padding:6px 8px;text-align:center"><b>'+g.room+'</b></td><td style="padding:6px 8px">'+tc.name+'</td><td style="padding:6px 8px;text-align:center">'+g.pax+'</td><td style="padding:6px 8px"><button onclick="markBoatGuestDone(window._opsDate,'+bi+','+gi+')" style="'+bStyle('#059669')+'">Done</button><button onclick="removeBoatGuest(window._opsDate,'+bi+','+gi+')" style="background:#e5e7eb;color:#374151;border:none;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">X</button></td></tr>';});html+='</table>';}else{html+='<div style="color:#9ca3af;font-size:12px;padding:8px;background:#fff;border-radius:6px;margin-bottom:10px">No guests assigned yet</div>';}html+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border-radius:8px;padding:8px"><span style="font-size:11px;font-weight:700;color:#0077b6;white-space:nowrap">Add to Boat '+(bi+1)+':</span><select id="boat-sel-'+bi+'" style="flex:1;min-width:180px;padding:6px 8px;border:1.5px solid #bae6fd;border-radius:6px;font-family:inherit;font-size:12px"><option value="">Select guest + trip</option>';allActive.forEach(function(r){(r.trips||[]).forEach(function(t){if(t.status==='pending'||t.status==='rescheduled'){var tc2=TRIPS_CONFIG.find(function(x){return x.id===t.tripId;})||{name:t.tripId};var pax=(parseInt(r.ad)||2)+(parseInt(r.ch)||0);var val=r.id+'|'+t.tripId+'|'+(t.date||'')+'|'+(r.fn+' '+r.ln)+'|'+r.rn+'|'+pax;html+='<option value="'+val+'">'+r.fn+' '+r.ln+' ('+r.rn+') - '+tc2.name+'</option>';}});});html+='</select><button onclick="addGuestToBoat(window._opsDate,'+bi+',document.getElementById(\'boat-sel-'+bi+'\').value)" style="background:#0077b6;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Add</button></div></div>';});}
   html+='</div>';
   var inh2=inhouse.concat(arrivals);inh2.sort(function(a,b){return ymd(a.co)<ymd(b.co)?-1:1;});
-  var gwp=inh2.filter(function(r){return (r.trips||[]).some(function(t){return t.status==='pending'||t.status==='rescheduled';});});
+  var gwp=inh2; // show ALL in-house guests so you can add/assign trips
   html+='<div class="card"><div style="font-size:14px;font-weight:800;color:#b45309;margin-bottom:4px">Pending Trips - All In-House Guests</div><div style="font-size:11px;color:#6b7280;margin-bottom:14px">Sorted by earliest check-out - assign to a boat above</div>';
-  if(!gwp.length){html+='<div style="color:#059669;font-size:13px;font-weight:700;padding:8px 0">All trips completed!</div>';}
-  else{gwp.forEach(function(r){var pend=(r.trips||[]).filter(function(t){return t.status==='pending'||t.status==='rescheduled';});var dl=Math.ceil((new Date(ymd(r.co))-new Date(selStr))/86400000);var uc=dl<=1?'#dc2626':dl<=2?'#d97706':'#059669';html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid '+uc+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px"><div><span style="font-size:14px;font-weight:800">'+r.fn+' '+r.ln+'</span> <span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">'+r.rn+'</span></div><span style="background:'+(dl<=1?'#fee2e2':dl<=2?'#fef3c7':'#f0fdf4')+';color:'+uc+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:800">'+dl+' day'+(dl!==1?'s':'')+' left</span></div><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#fef3c7"><th style="padding:6px 8px;text-align:left">Trip</th><th>Date</th><th>Status</th><th>Action</th></tr>';pend.forEach(function(t){var tc3=TRIPS_CONFIG.find(function(x){return x.id===t.tripId;})||{name:t.tripId||'Trip'};var isToday=ymd(t.date)===selStr,isOD=t.date&&ymd(t.date)<selStr;var rid=r.id,tid=t.tripId,tdt=t.date||'';html+='<tr style="border-bottom:1px solid #fde68a;background:'+(isOD?'#fff5f5':isToday?'#f0fdf4':'#fff')+'"><td style="padding:6px 8px">'+tc3.name+'</td><td style="padding:6px 8px;text-align:center">'+(t.date?'<span style="font-weight:600;color:'+(isToday?'#059669':isOD?'#dc2626':'#374151')+'">'+ymd(t.date)+(isOD?' OVERDUE':'')+'</span>':'<span style="color:#9ca3af">No date</span>')+'</td><td style="padding:6px 8px"><span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Pending</span></td><td style="padding:6px 8px">'+tBtn(rid,tid,tdt,'done','Done','#059669')+tBtn(rid,tid,tdt,'cancelled','Cancel','#6b7280')+tBtn(rid,tid,tdt,'cancelweather','Weather','#0077b6')+tBtn(rid,tid,tdt,'reschedule','Reschedule','#7c3aed')+'</td></tr>';});html+='</table></div>';});}
+  if(!gwp.length){html+='<div style="color:#6b7280;font-size:13px;padding:8px 0">No in-house guests</div>';}
+  else{gwp.sort(function(a,b){return a.co>b.co?1:-1;}).forEach(function(r){var pend=(r.trips||[]).filter(function(t){return t.status==='pending'||t.status==='rescheduled';});var dl=Math.ceil((new Date(ymd(r.co))-new Date(selStr))/86400000);var uc=dl<=1?'#dc2626':dl<=2?'#d97706':'#059669';html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid '+uc+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px"><div><span style="font-size:14px;font-weight:800">'+r.fn+' '+r.ln+'</span> <span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">'+getRoomName(r.rn)+'</span></div><span style="background:'+(dl<=1?'#fee2e2':dl<=2?'#fef3c7':'#f0fdf4')+';color:'+uc+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:800">'+dl+' day'+(dl!==1?'s':'')+' left</span></div><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#fef3c7"><th style="padding:6px 8px;text-align:left">Trip</th><th>Date</th><th>Status</th><th>Action</th></tr>';pend.forEach(function(t){var tc3=TRIPS_CONFIG.find(function(x){return x.id===t.tripId;})||{name:t.tripId||'Trip'};var isToday=ymd(t.date)===selStr,isOD=t.date&&ymd(t.date)<selStr;var rid=r.id,tid=t.tripId,tdt=t.date||'';html+='<tr style="border-bottom:1px solid #fde68a;background:'+(isOD?'#fff5f5':isToday?'#f0fdf4':'#fff')+'"><td style="padding:6px 8px">'+tc3.name+'</td><td style="padding:6px 8px;text-align:center">'+(t.date?'<span style="font-weight:600;color:'+(isToday?'#059669':isOD?'#dc2626':'#374151')+'">'+ymd(t.date)+(isOD?' OVERDUE':'')+'</span>':'<span style="color:#9ca3af">No date</span>')+'</td><td style="padding:6px 8px"><span style="background:#fef3c7;color:#b45309;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">Pending</span></td><td style="padding:6px 8px">'+tBtn(rid,tid,tdt,'done','Done','#059669')+tBtn(rid,tid,tdt,'cancelled','Cancel','#6b7280')+tBtn(rid,tid,tdt,'cancelweather','Weather','#0077b6')+tBtn(rid,tid,tdt,'reschedule','Reschedule','#7c3aed')+'</td></tr>';});if(!pend.length){html+='<tr><td colspan="4" style="padding:10px 8px;text-align:center"><span style="color:#9ca3af;font-size:12px">No trips added yet</span> <button onclick="openTripsModal(\''+r.id+'\')" style="background:#0096c7;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-left:8px">+ Add Trip</button></td></tr>';}html+='</table></div>';});}
   html+='</div>';
   document.querySelectorAll('#ops-content').forEach(function(el){el.innerHTML=html;});
   var sc=document.querySelector('.scrl');if(sc)sc.scrollTop=0;
@@ -9469,12 +9486,12 @@ function saveTransfer(id){
   d[id]={boat:boat,time:time,route:route};
   localStorage.setItem('vilu_transfers',JSON.stringify(d));
   if(typeof toast==='function')toast('Transfer saved!');
-  injectTransferCards();
+  if(typeof drawOps==="function")drawOps();
 }
 
 if(typeof FMAP!=='undefined') FMAP['ops']=function(){setTimeout(function(){drawOps();},200);};
 // Also inject on page load if already on ops
-setTimeout(function(){if(document.getElementById('s-ops')&&document.getElementById('s-ops').classList.contains('on'))injectTransferCards();},1000);
+
 </script>
 
 </div></div></div></div></div></div></div></div></div></div></div></body></html>
