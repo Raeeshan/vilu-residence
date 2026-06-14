@@ -9406,12 +9406,69 @@ window.rebuildPendingTrips=function(){
   });
 };
 var _origDO=drawOps;window.drawOps=function(){_origDO();setTimeout(rebuildPendingTrips,800);};
+
+
+// END OF DAY REPORT
+window.showEODReport=function(dateStr){
+  dateStr=dateStr||tS;
+  var fmt=function(d){return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});};
+  var money=function(n){return '$'+parseFloat(n||0).toFixed(2);};
+  var allRes=RES.filter(function(r){return r.st!=='Cancelled'&&r.prop==='vilu';});
+  var arrivals=allRes.filter(function(r){return r.ci===dateStr;});
+  var departures=allRes.filter(function(r){return r.co===dateStr;});
+  var inhouse=allRes.filter(function(r){return r.ci<=dateStr&&r.co>dateStr&&r.st!=='Checked out';});
+  var roomRev=inhouse.reduce(function(s,r){return s+(parseFloat(r.rate)||0);},0);
+  var totalRooms=(typeof VR!=='undefined'?VR:[]).filter(function(r){return r.n&&r.n.startsWith('VR');}).length||6;
+  var occPct=totalRooms?Math.round(inhouse.length/totalRooms*100):0;
+  var tripsToday=[];
+  allRes.forEach(function(r){(r.trips||[]).forEach(function(t){if(String(t.date||'').slice(0,10)===dateStr&&t.status==='done'){var tc=(typeof TRIPS_CONFIG!=='undefined'?TRIPS_CONFIG:[]).find(function(x){return x.id===t.tripId;})||{name:t.tripId,icon:'?',price:0};tripsToday.push({guest:r.fn+' '+r.ln,room:getRoomName(r.rn),trip:tc.name,icon:tc.icon||'?',price:tc.price||0});}});});
+  var tripRev=tripsToday.reduce(function(s,t){return s+t.price;},0);
+  var totalRev=roomRev+tripRev;
+  var sources={};
+  inhouse.forEach(function(r){var s=r.src||'Direct';sources[s]=(sources[s]||0)+(parseFloat(r.rate)||0);});
+  var transfers=JSON.parse(localStorage.getItem('vilu_transfers')||'{}');
+  var badge=function(t,cl){var cols={green:'#d1fae5;color:#059669',blue:'#dbeafe;color:#1d4ed8',orange:'#fef3c7;color:#d97706',gray:'#f3f4f6;color:#6b7280'};return'<span style="background:'+cols[cl]+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+t+'</span>';};
+  var tbl=function(headers,rows){var h='<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px"><tr>';headers.forEach(function(h2){h+='<th style="background:#f3f4f6;padding:7px 9px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase">'+h2+'</th>';});h+='</tr>';rows.forEach(function(r2){h+='<tr>'+r2.map(function(c2){return'<td style="padding:8px 9px;border-bottom:1px solid #f3f4f6">'+c2+'</td>';}).join('')+'</tr>';});return h+'</table>';};
+  var sec=function(title,content){return'<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb">'+title+'</div>'+content+'</div>';};
+  var inner='<div style="background:#fff;max-width:760px;margin:0 auto;padding:28px;border-radius:16px;max-height:90vh;overflow-y:auto">';
+  inner+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e5e7eb"><div><div style="font-size:20px;font-weight:800;color:#0096c7">Vilu Residence</div><div style="font-size:12px;color:#6b7280;margin-top:3px">End of Day Report - Maamigili PMS</div></div><div style="text-align:right"><div style="font-size:16px;font-weight:700;color:#1f2937">'+fmt(dateStr)+'</div><div style="font-size:12px;color:#6b7280">'+new Date().toLocaleTimeString()+'</div></div></div>';
+  inner+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">';
+  [[''+inhouse.length+'/'+totalRooms,'Rooms Occupied','#0096c7'],[occPct+'%','Occupancy','#0096c7'],[arrivals.length+' / '+departures.length,'Arr / Dep','#d97706'],[money(totalRev),'Revenue','#059669']].forEach(function(k){inner+='<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;text-align:center"><div style="font-size:24px;font-weight:800;color:'+k[2]+'">'+k[0]+'</div><div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-top:3px">'+k[1]+'</div></div>';});
+  inner+='</div>';
+  var ihRows=inhouse.map(function(r){var dl=Math.ceil((new Date(r.co)-new Date(dateStr))/86400000);return['<strong>'+r.fn+' '+r.ln+'</strong>',getRoomName(r.rn),r.co,badge(dl+' night'+(dl!==1?'s':''),dl<=1?'orange':'green'),'<strong>'+money(r.rate)+'</strong>',badge(r.src||'Direct','gray')];});
+  inner+=sec('In-House Guests ('+inhouse.length+')',inhouse.length?tbl(['Guest','Room','Check-Out','Nights Left','Rate/Night','Source'],ihRows):'<p style="color:#9ca3af;font-size:13px;padding:4px 0">No guests</p>');
+  var arrRows=arrivals.map(function(r){var tr2=transfers[r.id]||{};var pax=(parseInt(r.ad)||0)+(parseInt(r.ch)||0)+(parseInt(r.inf)||0);return['<strong>'+r.fn+' '+r.ln+'</strong>',getRoomName(r.rn),pax,r.co,badge(r.src||'Direct','blue'),tr2.route?'<span style="font-size:11px">'+tr2.route+(tr2.time?' @ '+tr2.time:'')+'</span>':'<span style="color:#9ca3af">-</span>'];});
+  inner+=sec('Arrivals Today ('+arrivals.length+')',arrivals.length?tbl(['Guest','Room','Pax','Check-Out','Source','Transfer'],arrRows):'<p style="color:#9ca3af;font-size:13px;padding:4px 0">No arrivals</p>');
+  var depRows=departures.map(function(r){var nights=Math.ceil((new Date(r.co)-new Date(r.ci))/86400000);return['<strong>'+r.fn+' '+r.ln+'</strong>',getRoomName(r.rn),nights+' night'+(nights!==1?'s':''),'<strong>'+money(nights*(parseFloat(r.rate)||0))+'</strong>',badge(r.src||'Direct','blue')];});
+  inner+=sec('Departures Today ('+departures.length+')',departures.length?tbl(['Guest','Room','Nights','Total','Source'],depRows):'<p style="color:#9ca3af;font-size:13px;padding:4px 0">No departures</p>');
+  if(tripsToday.length){inner+=sec('Activity Trips ('+tripsToday.length+')',tbl(['Guest','Room','Activity'],tripsToday.map(function(t){return[t.guest,t.room,t.icon+' '+t.trip];})));}
+  var revHtml='';
+  Object.keys(sources).forEach(function(s){revHtml+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>'+s+'</span><strong>'+money(sources[s])+'</strong></div>';});
+  if(tripRev>0)revHtml+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Activity Trips</span><strong>'+money(tripRev)+'</strong></div>';
+  revHtml+='<div style="display:flex;justify-content:space-between;padding:12px;background:#f0fdf4;border-radius:8px;font-weight:800;font-size:16px;color:#059669;margin-top:8px"><span>TOTAL REVENUE</span><span>'+money(totalRev)+'</span></div>';
+  inner+=sec('Revenue Summary',revHtml);
+  inner+='<div style="display:flex;justify-content:center;gap:10px;margin-top:16px" id="eod-action-btns"></div>';
+  inner+='<div style="margin-top:14px;text-align:center;font-size:11px;color:#9ca3af">Vilu Residence PMS - End of Day Report - '+dateStr+'</div></div>';
+  var ov=document.getElementById('eod-overlay');if(ov)ov.remove();
+  var overlay=document.createElement('div');overlay.id='eod-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:9999;overflow-y:auto;padding:24px';
+  overlay.innerHTML=inner;document.body.appendChild(overlay);
+  var btnDiv=document.getElementById('eod-action-btns');
+  if(btnDiv){
+    var pb=document.createElement('button');pb.textContent='Print / Save PDF';pb.style.cssText='background:#0096c7;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer';pb.onclick=function(){print();};
+    var cb=document.createElement('button');cb.textContent='Close';cb.style.cssText='background:#f3f4f6;color:#374151;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer';cb.onclick=function(){var el=document.getElementById('eod-overlay');if(el)el.remove();};
+    btnDiv.appendChild(pb);btnDiv.appendChild(cb);
+  }
+};
+
+
 window.approveBlock=function(ref){RES.filter(function(r){return r.blockRef===ref||r.id===ref;}).forEach(function(r){r.blockSt='Confirmed';r.st='Confirmed';});saveRES();drawCal();if(typeof toast==='function')toast('Block approved!');};
 window.rejectBlock=function(ref){RES=RES.filter(function(r){return r.blockRef!==ref&&r.id!==ref;});saveRES();drawCal();if(typeof toast==='function')toast('Block rejected.');};
 // Override FMAP so calendar page always uses floating bar drawCal
 // Override calNavToday and calNav permanently
 window.calNav=function(d){calD=new Date(calD);calD.setDate(calD.getDate()+d*7);drawCal();setTimeout(drawCal,100);};
 window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);calD.setDate(calD.getDate()-14);drawCal();setTimeout(drawCal,100);};
+window.getRoomName=function(rn){if(!rn)return rn;var vr=(typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});if(vr)return vr.nm;if(typeof getHR==='function'){var hr=getHR().find(function(r){return r.n===rn;});if(hr){var h=(typeof PH!=='undefined'?PH:[]).find(function(x){return x.id===hr.prop;});return(h?h.nm+' - ':'')+hr.nm;}}return rn;};
 // Set FMAP so clicking Calendar in menu works correctly
 FMAP['cal']=function(){setTimeout(function(){calNavToday();},200);};
 })();
