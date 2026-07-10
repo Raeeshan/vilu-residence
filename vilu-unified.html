@@ -3587,6 +3587,14 @@ function getR(n){return [...VR,...getHR()].find(r=>r.n===n);}
 function rNm(n){const r=getR(n);if(!r)return n;return r.prop?r.hNm+' — '+r.nm:r.nm;}
 function isVR(n){return n&&n.startsWith('VR');}
 function phNm(p){if(p==='vilu')return PROP.nm;const h=PH.find(x=>x.id===p);return h?h.nm:'Partner hotel';}
+// Derive which property a reservation belongs to from its room_id, since
+// Supabase's reservations table doesn't store a property column — used as
+// the source of truth when no local cache says otherwise.
+function propFromRoomId(rn){
+  if(isVR(rn)) return 'vilu';
+  const h=PH.find(function(x){return rn && rn.indexOf(x.id+'-R')===0;});
+  return h ? h.id : 'vilu';
+}
 
 let RES=[
   {id:'BK001',fn:'James',ln:'Wilson',em:'james@e.com',ph:'+1 555-111',nat:'USA',pid:'US123',rn:'VR01',rate:80,ci:D(-3),co:D(2),ad:2,ch:0,inf:0,src:'Booking.com',pay:'Fully paid',st:'Checked in',ref:'BDC-881',notes:'Honeymoon — flower decoration requested.',nlog:[],prop:'vilu'},
@@ -4572,6 +4580,9 @@ function pmSaveAll() {
     localStorage.setItem('vilu_room_prices', JSON.stringify(roomPrices));
     try{new BroadcastChannel('vilu_pms').postMessage({type:'PRICE_UPDATE'});}catch(e){}
   }catch(e){}
+  // Also push current base rates to Supabase so guests on other devices/browsers
+  // (not just an admin's own open tabs) see the latest prices, not just same-browser sync.
+  if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
   aLog('ok','Saved & pushed '+count+' price overrides to all channels + website');
   pmHasChanges=false;
   document.getElementById('pm-save-badge').style.display='none';
@@ -5026,7 +5037,19 @@ function submitNB(){
 function clearNB(){['nb-fn','nb-ln','nb-em','nb-ph','nb-nat','nb-pid','nb-notes'].forEach(i=>document.getElementById(i).value='');document.getElementById('nb-rm').value='';document.getElementById('nb-cf').style.display='none';document.getElementById('nb-pr').innerHTML='';}
 
 // BLOCK ROOMS
-function saveBLK(){try{localStorage.setItem('vilu_blk',JSON.stringify(BLK));syncAvailability();}catch(e){}}
+function saveBLK(){
+  try{localStorage.setItem('vilu_blk',JSON.stringify(BLK));syncAvailability();}catch(e){}
+  // Push to Supabase so the website's calendar sees manual blocks too
+  clearTimeout(saveBLK._timer);
+  saveBLK._timer = setTimeout(function(){ if(typeof syncBlksToSupabase==='function') syncBlksToSupabase(); }, 2000);
+}
+function removeBlk(id){
+  BLK=BLK.filter(function(x){return x.id!==id;});
+  saveBLK();
+  drawBlkLst();
+  toast('Block removed');
+  if(typeof supaFetch==='function') supaFetch('DELETE','blocks',null,'id=eq.'+encodeURIComponent(id)).catch(function(){});
+}
 function drawBlk(){
   const sel=document.getElementById('bl-r');
   sel.innerHTML=VR.map(r=>`<option value="${r.n}">${r.nm}</option>`).join('');
@@ -5045,7 +5068,7 @@ function addBlk(){
 function drawBlkLst(){
   document.getElementById('bl-lst').innerHTML=BLK.length?BLK.map(b=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3f4f6">
     <div><div style="font-size:12px;font-weight:600">${rNm(b.rn)}</div><div style="font-size:10px;color:#6b7280;margin-top:2px">${b.type} · ${fd(b.from)}–${fd(b.to)}${b.note?' · '+b.note:''}</div></div>
-    <button class="ab" onclick="BLK=BLK.filter(x=>x.id!=='${b.id}');drawBlkLst();toast('Block removed')"><i class="ti ti-trash"></i></button>
+    <button class="ab" onclick="removeBlk('${b.id}')"><i class="ti ti-trash"></i></button>
   </div>`).join(''):'<p style="font-size:12px;color:#9ca3af">No active blocks.</p>';
 }
 
@@ -8663,6 +8686,26 @@ async function syncResToSupabase() {
   }
 }
 
+// Manual "Block Rooms" entries — pushed so the website's calendar treats
+// them the same as a real reservation when deciding a date is unavailable.
+async function syncBlksToSupabase() {
+  for(const b of BLK) {
+    await supaFetch('POST', 'blocks',
+      {id:b.id, room_id:b.rn, from_date:b.from, to_date:b.to, reason:b.note||b.type||'Blocked'},
+      'on_conflict=id');
+  }
+}
+
+// VR base rates only — Vilu Residence rooms exclusively, never partner hotel
+// rooms, so the website can never pick up a partner rate/room via this table.
+async function syncRoomRatesToSupabase() {
+  for(const r of VR) {
+    await supaFetch('POST', 'rooms',
+      {id:r.n, name:r.nm, type:r.type, rate:r.rate, cap:r.cap},
+      'on_conflict=id');
+  }
+}
+
 async function loadResFromSupabase() {
   const data = await supaFetch('GET','reservations',null,'select=*&order=created_at.desc');
   if(!data||!data.length) return null;
@@ -8694,7 +8737,7 @@ async function loadResFromSupabase() {
       ref:local.ref||'',
       notes:r.notes||local.notes||'',
       extraBeds:r.extra_beds||local.extraBeds||0,
-      prop:local.prop||'vilu',
+      prop:local.prop||propFromRoomId(r.room_id),
       nlog:local.nlog||[],
       trips:(function(){
         // Prefer local trips (most up to date), fall back to Supabase trips column
@@ -8757,6 +8800,31 @@ saveRES = function() {
   syncResToSupabase().catch(()=>{});
 };
 
+// Pull in reservations that exist in Supabase but not yet locally (e.g. a
+// guest booked directly on the website) without touching any reservation
+// already known here — never overwrites, only appends.
+async function pollNewReservationsFromSupabase() {
+  try {
+    const sRes = await loadResFromSupabase();
+    if (!sRes || !sRes.length) return;
+    var added = 0;
+    sRes.forEach(function(r) {
+      if (!RES.find(function(x){ return x.id === r.id; })) {
+        RES.unshift(r);
+        added++;
+      }
+    });
+    if (added > 0) {
+      _uOrigSaveRES();
+      try{ drawRes(); }catch(e){}
+      try{ drawCal(); }catch(e){}
+      try{ drawDash(); }catch(e){}
+      if(typeof aLog==='function') aLog('ok', added+' new reservation'+(added>1?'s':'')+' synced from Supabase');
+      if(typeof toast==='function') toast('✓ '+added+' new booking'+(added>1?'s':'')+' received');
+    }
+  } catch(e) {}
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Daily Operations rendered via FMAP when section is selected
   setTimeout(async function() {
@@ -8765,6 +8833,9 @@ document.addEventListener('DOMContentLoaded', function() {
     try{drawCal();}catch(e){}
   }, 1500);
   setInterval(syncResToSupabase, 5*60*1000);
+  setInterval(pollNewReservationsFromSupabase, 60*1000);
+  if(typeof syncBlksToSupabase==='function') syncBlksToSupabase().catch(()=>{});
+  if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
 });
 
 // ═══════════════════════════════════════════════════════════

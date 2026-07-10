@@ -796,6 +796,26 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   </div>
 </div>
 
+<!-- ══ GUEST DETAILS (booking confirmation) ══ -->
+<div class="booking-popup-overlay" id="guestDetailsOverlay" onclick="if(event.target===this)closeGuestDetails()">
+  <div class="booking-popup">
+    <div class="popup-header">
+      <div class="popup-title">Your Details</div>
+      <button class="popup-close" onclick="closeGuestDetails()">×</button>
+    </div>
+    <div class="popup-body">
+      <div id="gd-summary" style="font-size:13px;color:var(--muted);margin-bottom:20px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:6px"></div>
+      <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label">Full Name</div><input type="text" class="bwf-input" id="gd-name"></div>
+      <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label">Email</div><input type="email" class="bwf-input" id="gd-email"></div>
+      <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label">Phone</div><input type="tel" class="bwf-input" id="gd-phone"></div>
+      <div class="bwf-field" style="margin-bottom:20px"><div class="bwf-label">Country</div><input type="text" class="bwf-input" id="gd-country"></div>
+      <div id="gd-error" style="display:none;color:#f87171;font-size:12px;margin-bottom:14px;line-height:1.5"></div>
+      <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()">Confirm Booking</button>
+      <div class="bwf-note">We'll email your confirmation. No payment is taken now.</div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════
 // SUPABASE — Website live data connection
@@ -837,10 +857,14 @@ async function supaPost(table, data, upsertOn) {
 }
 
 // Load rooms from Supabase (with live prices)
+// Only Vilu Residence's own rooms (VR01-VR06) are ever shown on the website —
+// partner hotel rooms are never eligible for online booking, so anything
+// else returned by this query is filtered out as a safety net.
 async function loadRoomsFromSupabase() {
   const rooms = await supaGet('rooms', 'select=*&order=id');
-  if(rooms && rooms.length) {
-    ROOMS = rooms.map(r => ({
+  const viluRooms = (rooms||[]).filter(r => r.id && /^VR0[1-6]$/.test(r.id));
+  if(viluRooms.length) {
+    ROOMS = viluRooms.map(r => ({
       id: r.id,
       name: r.name,
       type: r.type||'Standard',
@@ -862,7 +886,11 @@ async function loadWebsiteFromSupabase() {
 }
 
 // Submit booking request to Supabase
+// Vilu Residence rooms only — this is the single choke point that writes a
+// reservation for the website, so the VR-only guard lives here as well as
+// in the room list itself.
 async function submitDirectBooking(booking) {
+  if (!booking || !/^VR0[1-6]$/.test(booking.roomId)) return null;
   const id = 'WEB' + Date.now();
   const result = await supaPost('reservations', {
     id: id,
@@ -897,14 +925,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     if(typeof applyWebsiteData === 'function') applyWebsiteData();
   }
   
-  // Update room cards with live rates
-  ROOMS.forEach(function(r, i) {
-    var priceEls = document.querySelectorAll('.room-price-amount');
-    if(priceEls[i]) priceEls[i].textContent = '$' + r.rate;
-  });
-  
-  // Update booking bar dropdown
-  if(typeof refreshRoomCards === 'function') refreshRoomCards();
+  // Update room cards, price displays, and booking bar dropdown with live rates
+  refreshRoomCards();
 });
 // ══════════════════════════════════════════════════════
 // PRICING SYSTEM — reads live from PMS localStorage
@@ -928,11 +950,14 @@ var DEFAULT_ROOMS = [
 ];
 
 // Load rooms from PMS localStorage (live sync)
+// Vilu Residence only — never surface partner hotel rooms here either.
 function loadPMSRooms() {
   try {
     var saved = localStorage.getItem('vilu_rooms');
     var details = JSON.parse(localStorage.getItem('vilu_room_details') || '{}');
     var base = saved ? JSON.parse(saved) : DEFAULT_ROOMS;
+    base = base.filter(function(r) { return r.id && /^VR0[1-6]$/.test(r.id); });
+    if (!base.length) base = DEFAULT_ROOMS;
     return base.map(function(r) {
       var d = details[r.id] || {};
       return {
@@ -1064,8 +1089,23 @@ loadBookedRangesFromLocalStorage(); // instant paint from last-known local data
 loadBookedRangesFromSupabase();     // authoritative refresh from Supabase
 setInterval(loadBookedRangesFromSupabase, 5 * 60 * 1000);
 
+// Keep prices fresh for guests on other devices too (BroadcastChannel only
+// reaches tabs in the same browser as the PMS admin)
+setInterval(async function(){ await loadRoomsFromSupabase(); if(typeof refreshRoomCards==='function') refreshRoomCards(); }, 5 * 60 * 1000);
+
 // Refresh room cards when prices change
 function refreshRoomCards() {
+  // The #rooms section shows 3 marketing cards, one per room type (Garden Room,
+  // Garden Deluxe Room, Premium Room), each representing a pair of VR rooms that
+  // share the same rate. Map by id, not array index — ROOMS has 6 entries but
+  // there are only 3 price elements on the page.
+  var priceEls = document.querySelectorAll('.room-price-amount');
+  ['VR01', 'VR03', 'VR05'].forEach(function(id, i) {
+    if (!priceEls[i]) return;
+    var r = ROOMS.find(function(x) { return x.id === id; });
+    if (r) priceEls[i].textContent = '$' + r.rate;
+  });
+
   // Update hero booking bar selects with latest rates
   var sel = document.getElementById('bb-rooms');
   if (sel) {
@@ -1074,6 +1114,13 @@ function refreshRoomCards() {
       opts.push('<option value="'+r.id+'">'+r.name+' — $'+r.rate+'/night</option>');
     });
     sel.innerHTML = opts.join('');
+  }
+
+  // If the full booking page is open, refresh its live listing too
+  var bfp = document.getElementById('booking-full-page');
+  if (bfp && bfp.style.display === 'block' && typeof bfpSearch === 'function') {
+    var ci = document.getElementById('bfp-ci');
+    if (ci && ci.value) bfpSearch(); else bfpRenderRooms(ROOMS);
   }
 }
 const COLORS = {
@@ -1317,20 +1364,85 @@ function bfpRenderRooms(rooms, ci, co){
       + '<button class="bfp-book-btn">Book</button>'
       + '</div></div>';
     (function(room){
-      card.querySelector('.bfp-book-btn').addEventListener('click', function(){ bfpBookRoom(room.name); });
+      card.querySelector('.bfp-book-btn').addEventListener('click', function(){ bfpBookRoom(room.id); });
     })(r);
     grid.appendChild(card);
   });
 }
 
-function bfpBookRoom(roomName){
+// ── BOOK A ROOM: collect guest details, then submit a real reservation ──
+var _pendingBooking = null;
+
+function bfpBookRoom(roomId){
   var ci = document.getElementById('bfp-ci').value;
   var co = document.getElementById('bfp-co').value;
-  var msg = 'Hi, I would like to book '+roomName;
-  if(ci) msg += ' from '+ci;
-  if(co) msg += ' to '+co;
-  msg += '. Please confirm availability.';
-  window.open('mailto:Viluresidence@gmail.com?subject=Booking Request - '+roomName+'&body='+encodeURIComponent(msg));
+  if(!ci || !co || co <= ci){ alert('Please select valid check-in and check-out dates first.'); return; }
+  var room = ROOMS.find(function(r){ return r.id === roomId; });
+  if(!room){ return; }
+  var nights = Math.max(1, Math.round((new Date(co)-new Date(ci))/86400000));
+  var rate = getAvgPrice(room.id, ci, co);
+  _pendingBooking = {
+    roomId: room.id, roomName: room.name, ci: ci, co: co,
+    adults: +document.getElementById('bfp-ad').value || 2,
+    rate: rate, nights: nights
+  };
+  document.getElementById('gd-summary').innerHTML =
+    '<strong>'+room.name+'</strong><br>'+ci+' &rarr; '+co+' &middot; '+nights+' night'+(nights>1?'s':'')+' &middot; $'+(rate*nights)+' total';
+  document.getElementById('gd-error').style.display = 'none';
+  document.getElementById('gd-name').value = '';
+  document.getElementById('gd-email').value = '';
+  document.getElementById('gd-phone').value = '';
+  document.getElementById('gd-country').value = '';
+  document.getElementById('guestDetailsOverlay').classList.add('open');
+}
+
+function closeGuestDetails(){
+  document.getElementById('guestDetailsOverlay').classList.remove('open');
+}
+
+function showGuestError(html){
+  var errEl = document.getElementById('gd-error');
+  errEl.innerHTML = html;
+  errEl.style.display = 'block';
+}
+
+async function confirmGuestBooking(){
+  if(!_pendingBooking) return;
+  var name = document.getElementById('gd-name').value.trim();
+  var email = document.getElementById('gd-email').value.trim();
+  var phone = document.getElementById('gd-phone').value.trim();
+  var country = document.getElementById('gd-country').value.trim();
+  if(!name || !email){ showGuestError('Please enter your name and email.'); return; }
+
+  var btn = document.getElementById('gd-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  // Re-check availability right before submitting to reduce double-booking races
+  await loadBookedRangesFromSupabase();
+  if(!isRoomAvailable(_pendingBooking.roomId, _pendingBooking.ci, _pendingBooking.co)){
+    btn.disabled = false; btn.textContent = 'Confirm Booking';
+    showGuestError('Sorry, this room was just booked for those dates. Please choose another room or dates.');
+    return;
+  }
+
+  var id = await submitDirectBooking({
+    roomId: _pendingBooking.roomId, name: name, email: email, phone: phone, country: country,
+    ci: _pendingBooking.ci, co: _pendingBooking.co, adults: _pendingBooking.adults, rate: _pendingBooking.rate
+  });
+
+  btn.disabled = false; btn.textContent = 'Confirm Booking';
+
+  if(id){
+    closeGuestDetails();
+    loadBookedRangesFromSupabase();
+    alert('✓ Booking request received! Reference: '+id+'. We will confirm shortly by email.');
+    closeBookingPage();
+    _pendingBooking = null;
+  } else {
+    showGuestError('We could not submit your booking automatically. Please contact us directly: '
+      + '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)">Viluresidence@gmail.com</a> or '
+      + '<a href="https://wa.me/9609903339" style="color:var(--teal)">WhatsApp</a>.');
+  }
 }
 
 // ── CONTACT FORM ──
@@ -1345,7 +1457,7 @@ function sendContactForm(){
 
 // ── KEYBOARD ESC ──
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){closeBookingPopup();closeBookingPage();}
+  if(e.key==='Escape'){closeBookingPopup();closeBookingPage();closeGuestDetails();}
 });
 
 // ══════════════════════════════════════════════════════
