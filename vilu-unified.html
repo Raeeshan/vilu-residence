@@ -9465,10 +9465,6 @@ window.showEODReport=function(dateStr){
 window.approveBlock=function(ref){RES.filter(function(r){return r.blockRef===ref||r.id===ref;}).forEach(function(r){r.blockSt='Confirmed';r.st='Confirmed';});saveRES();drawCal();if(typeof toast==='function')toast('Block approved!');};
 window.rejectBlock=function(ref){RES=RES.filter(function(r){return r.blockRef!==ref&&r.id!==ref;});saveRES();drawCal();if(typeof toast==='function')toast('Block rejected.');};
 // Override FMAP so calendar page always uses floating bar drawCal
-// Override calNavToday and calNav permanently
-window.calNav=function(d){calD=new Date(calD);calD.setDate(calD.getDate()+d*7);drawCal();setTimeout(drawCal,100);};
-window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);calD.setDate(calD.getDate()-14);drawCal();setTimeout(drawCal,100);};
-window.getRoomName=function(rn){if(!rn)return rn;var vr=(typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});if(vr)return vr.nm;if(typeof getHR==='function'){var hr=getHR().find(function(r){return r.n===rn;});if(hr){var h=(typeof PH!=='undefined'?PH:[]).find(function(x){return x.id===hr.prop;});return(h?h.nm+' - ':'')+hr.nm;}}return rn;};
 // Set FMAP so clicking Calendar in menu works correctly
 FMAP['cal']=function(){setTimeout(function(){calNavToday();},200);};
 })();
