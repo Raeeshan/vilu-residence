@@ -4966,13 +4966,18 @@ function nbCalc(){
   const rm=getR(rn);if(!rm)return;
   pr.innerHTML=pbd({ci,co,rate:rm.rate,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0});
 }
-function submitNB(){
+async function submitNB(){
   if(canViewOnly()){toast('⚠️ Agency access — cannot make bookings');return;}
   const fn=document.getElementById('nb-fn').value.trim(),ln=document.getElementById('nb-ln').value.trim();
   const rn=document.getElementById('nb-rm').value,ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
   const prop=document.getElementById('nb-prop').value,src=document.getElementById('nb-src').value;
   if(!fn||!ln){toast('Enter guest name');return;}if(!rn){toast('Select a room');return;}
-  if(!ci||!co||co<=ci){toast('Invalid dates');return;}if(isOcc(rn,ci,co)){toast('⚠️ Conflict');return;}
+  if(!ci||!co||co<=ci){toast('Invalid dates');return;}
+  // Pull in any reservation made elsewhere (website, another admin session)
+  // since this page loaded, so the conflict check below isn't working off a
+  // stale local snapshot — this is what let two double-bookings through.
+  if(typeof pollNewReservationsFromSupabase==='function') await pollNewReservationsFromSupabase();
+  if(isOcc(rn,ci,co)){toast('⚠️ Conflict');return;}
   if(prop!=='vilu'&&['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'].includes(src)){toast('⚠️ OTA bookings cannot go to partner hotels');return;}
   const rm=getR(rn),id='BK'+String(Date.now()).slice(-5);
   RES.unshift({id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn,rate:rm.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop});
