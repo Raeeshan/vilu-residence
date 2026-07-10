@@ -138,7 +138,7 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .btn-primary:hover{background-position:100% 0;transform:translateY(-2px);box-shadow:0 10px 30px rgba(34,211,238,.4)}
 .btn-outline{background:rgba(255,255,255,.03);backdrop-filter:blur(6px);color:var(--white);padding:16px 36px;border:1px solid rgba(255,255,255,.4);border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .btn-outline:hover{border-color:var(--ocean);color:var(--ocean);box-shadow:0 0 24px var(--glow)}
-.hero-scroll{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;animation:fadeUp .8s .5s ease both}
+.hero-scroll{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;animation:fadeUpCenter .8s .5s ease both}
 .hero-scroll span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5)}
 .scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(34,211,238,.9),transparent);animation:scrollAnim 2s infinite}
 .hero-stats{position:absolute;bottom:140px;right:5vw;display:flex;flex-direction:column;gap:20px;z-index:5;animation:fadeUp .8s .4s ease both}
@@ -355,6 +355,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUpCenter{from{opacity:0;transform:translate(-50%,24px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes scrollAnim{0%,100%{opacity:0;transform:translateY(-8px)}50%{opacity:1;transform:translateY(0)}}
 @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 @keyframes causticDrift{0%{background-position:0 0}100%{background-position:120px 60px}}
