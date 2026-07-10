@@ -5208,6 +5208,7 @@ function openAddUser(){
   document.getElementById('au-name').value = '';
   document.getElementById('au-email').value = '';
   document.getElementById('au-pass').value = '';
+  document.getElementById('au-pass').placeholder = 'Minimum 6 characters';
   document.getElementById('au-err').style.display = 'none';
   setAURole('staff');
   document.getElementById('m-adduser').classList.add('on');
@@ -5221,7 +5222,8 @@ function openEditUser(email){
   document.getElementById('adduser-title').innerHTML = '<i class="ti ti-edit" style="color:#00b4d8;margin-right:6px"></i>Edit user';
   document.getElementById('au-name').value = u.name;
   document.getElementById('au-email').value = u.email;
-  document.getElementById('au-pass').value = u.password;
+  document.getElementById('au-pass').value = '';
+  document.getElementById('au-pass').placeholder = 'Leave blank to keep current password';
   document.getElementById('au-err').style.display = 'none';
   setAURole(u.role);
   document.getElementById('m-adduser').classList.add('on');
@@ -5260,7 +5262,7 @@ function togglePassVis(inputId, btn){
   else{inp.type='password';btn.innerHTML='<i class="ti ti-eye"></i>';}
 }
 
-function saveAddUser(){
+async function saveAddUser(){
   if(!currentUser||currentUser.role!=="admin"){toast("⛔ Admin access only");return;}
   const name  = document.getElementById('au-name').value.trim();
   const email = document.getElementById('au-email').value.trim().toLowerCase();
@@ -5271,27 +5273,49 @@ function saveAddUser(){
   // Validate
   if(!name){err.style.display='block';err.textContent='Please enter the full name.';return;}
   if(!email||!email.includes('@')){err.style.display='block';err.textContent='Please enter a valid email address.';return;}
-  if(pass.length < 6){err.style.display='block';err.textContent='Password must be at least 6 characters.';return;}
   if(!auRoleSelected){err.style.display='block';err.textContent='Please select a role.';return;}
 
   if(editingUserEmail){
     // Editing existing user
     const idx = USERS.findIndex(u=>u.email===editingUserEmail);
     if(idx===-1)return;
-    // Check email not taken by another user
-    if(email !== editingUserEmail && USERS.find(u=>u.email===email)){
-      err.style.display='block';err.textContent='That email is already used by another account.';return;
+    // Firebase Auth accounts can't be renamed by an admin client-side —
+    // only the account owner can change their own email while signed in.
+    if(email !== editingUserEmail){
+      err.style.display='block';err.textContent="Changing a user's email isn't supported — remove them and add a new account instead.";return;
     }
-    USERS[idx] = {email, password:pass, role:USERS[idx].role==='admin'?'admin':auRoleSelected, name};
+    USERS[idx] = {email, role:USERS[idx].role==='admin'?'admin':auRoleSelected, name};
     saveUsers(USERS);
     closeAddUser();
-    toast('✓ User updated successfully');
+    if (pass) {
+      if (pass.length < 6) { toast('User updated — password unchanged (must be 6+ characters to reset it)'); }
+      else {
+        try {
+          await firebase.auth().sendPasswordResetEmail(email);
+          toast('✓ User updated — password reset email sent to '+email);
+        } catch(e) {
+          toast('✓ User updated (could not send password reset email: '+(e.message||'unknown error')+')');
+        }
+      }
+    } else {
+      toast('✓ User updated successfully');
+    }
   } else {
     // Adding new user
+    if(pass.length < 6){err.style.display='block';err.textContent='Password must be at least 6 characters.';return;}
     if(USERS.find(u=>u.email===email)){
       err.style.display='block';err.textContent='An account with this email already exists.';return;
     }
-    USERS.push({email, password:pass, role:auRoleSelected, name});
+    try {
+      await createAuthUserWithoutSignIn(email, pass);
+    } catch(authErr) {
+      err.style.display='block';
+      err.textContent = authErr.code === 'auth/email-already-in-use'
+        ? 'An account with this email already exists.'
+        : 'Could not create account: '+(authErr.message||'unknown error');
+      return;
+    }
+    USERS.push({email, role:auRoleSelected, name});
     saveUsers(USERS);
     closeAddUser();
     toast('✓ '+name+' added as '+auRoleSelected);
@@ -5308,6 +5332,9 @@ function deleteUser(email){
   if(!confirm('Remove '+u.name+' ('+u.email+')? They will no longer be able to log in.'))return;
   USERS = USERS.filter(x=>x.email!==email);
   saveUsers(USERS);
+  // Explicitly remove their Firestore profile doc — without it, authenticateUser()
+  // rejects them on next sign-in even though their underlying Auth account remains
+  if (typeof supaFetch==='function') supaFetch('DELETE','users',null,'id=eq.'+encodeURIComponent(email)).catch(function(){});
   toast('User removed');
   drawUsers();
 }
@@ -7024,7 +7051,10 @@ async function syncAllUsersToSupabase(users) {
       await supaFetch('POST', 'users', {
         id: u.email,
         email: u.email,
-        password: u.password,
+        // Passwords live in Firebase Auth now, never in Firestore. Explicitly
+        // delete the field (rather than omit it) so a merge write actually
+        // scrubs any plaintext password left over from before this change.
+        password: (typeof firebase!=='undefined' && firebase.firestore) ? firebase.firestore.FieldValue.delete() : undefined,
         name: u.name||u.email,
         role: u.role||'staff',
         company: u.company||'',
@@ -7054,7 +7084,42 @@ function setLoginRole(role, el) {
   document.getElementById('login-hint').textContent = hints[role];
 }
 
-function doLogin() {
+// Authenticates against Firebase Auth. If no Auth account exists yet for
+// this email (a legacy account from before this app used real auth), and
+// the password matches what was previously stored in plain text, silently
+// creates the real Auth account with that password and strips the plaintext
+// field — so every account migrates itself the first time it's used after
+// this change ships, with no separate migration step and no UX change.
+async function authenticateUser(email, pass) {
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, pass);
+  } catch(authErr) {
+    if (authErr.code === 'auth/user-not-found') {
+      var migrated = await migrateLegacyUser(email, pass);
+      if (!migrated) return null;
+    } else {
+      return null;
+    }
+  }
+  var fbUser = firebase.auth().currentUser;
+  var profileDoc = await fsDb.collection('users').doc(fbUser.email).get();
+  if (!profileDoc.exists) { firebase.auth().signOut(); return null; } // removed/deactivated account
+  var d = profileDoc.data();
+  return { email: fbUser.email, name: d.name, role: d.role, company: d.company||'', commission: d.commission||0 };
+}
+
+async function migrateLegacyUser(email, pass) {
+  try {
+    var legacy = USERS.find(function(u){ return u.email.toLowerCase()===email && u.password===pass; });
+    if (!legacy) return false;
+    await firebase.auth().createUserWithEmailAndPassword(email, pass);
+    delete legacy.password;
+    saveUsers(USERS); // persists locally + re-syncs profile to Firestore, password field now gone
+    return true;
+  } catch(e) { return false; }
+}
+
+async function doLogin() {
   const email = document.getElementById('login-user').value.trim().toLowerCase();
   const pass  = document.getElementById('login-pass').value.trim();
   const err   = document.getElementById('login-err');
@@ -7063,32 +7128,37 @@ function doLogin() {
   if(!email){err.style.display='block';err.textContent='Please enter your email address.';return;}
   if(!pass){err.style.display='block';err.textContent='Please enter your password.';return;}
 
-  if(loginRole==='agency'){
-    const agU=USERS.find(u=>u.email.toLowerCase()===email&&u.password===pass&&u.role==='agency');
-    if(!agU){err.style.display='block';err.textContent='Incorrect email or password.';return;}
-    currentUser={email:agU.email,name:agU.name,role:'agency',company:agU.company||agU.name};
-    document.getElementById('login-screen').style.display='none';
-    setTimeout(function(){routeByRole('agency');},50);
-    return;
-  }
-  const user = USERS.find(u => u.email.toLowerCase() === email && u.password === pass && u.role === loginRole);
-  if (!user) {
-    // Check if email exists but wrong role selected
-    const emailExists = USERS.find(u => u.email.toLowerCase() === email && u.password === pass);
-    if(emailExists) {
-      err.style.display = 'block';
-      err.textContent = 'Wrong role selected. Your account is: ' + emailExists.role.charAt(0).toUpperCase() + emailExists.role.slice(1) + '.';
-    } else {
-      err.style.display = 'block';
-      err.textContent = 'Incorrect email or password. Please try again.';
-    }
+  const profile = await authenticateUser(email, pass);
+  if (!profile) {
+    err.style.display = 'block';
+    err.textContent = 'Incorrect email or password. Please try again.';
     document.getElementById('login-pass').value = '';
     return;
   }
 
-  currentUser = user;
+  if(loginRole==='agency'){
+    if (profile.role !== 'agency') {
+      firebase.auth().signOut();
+      err.style.display='block';err.textContent='Incorrect email or password.';
+      return;
+    }
+    currentUser={email:profile.email,name:profile.name,role:'agency',company:profile.company||profile.name};
+    document.getElementById('login-screen').style.display='none';
+    setTimeout(function(){routeByRole('agency');},50);
+    return;
+  }
+
+  if (profile.role !== loginRole) {
+    firebase.auth().signOut();
+    err.style.display = 'block';
+    err.textContent = 'Wrong role selected. Your account is: ' + profile.role.charAt(0).toUpperCase() + profile.role.slice(1) + '.';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+
+  currentUser = profile;
   document.getElementById('login-screen').style.display = 'none';
-  applyRoleUI(user.role, user.name);
+  applyRoleUI(profile.role, profile.name);
   applyUserMgmtVisibility();
   drawDash(); drawCal(); drawLog(); drawPM();
 }
@@ -7096,6 +7166,7 @@ function doLogin() {
 function doLogout() {
   currentUser = null;
   loginRole = 'admin';
+  try { firebase.auth().signOut(); } catch(e) {}
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-user').value = '';
   document.getElementById('login-pass').value = '';
@@ -8611,10 +8682,13 @@ function initAgencyPortal() {
 }
 
 // Patch doLogin
+// doLogin is now async (Firebase Auth), so this wrapper must await it
+// rather than fire-and-forget — otherwise routeByRole (and any login error
+// message) would race against the still-pending authentication call.
 var _origLogin = doLogin;
-doLogin = function() {
-  _origLogin();
-  setTimeout(function(){ if(currentUser) routeByRole(currentUser.role); }, 200);
+doLogin = async function() {
+  await _origLogin();
+  if (currentUser) routeByRole(currentUser.role);
 };
 
 // Patch doLogout
@@ -8643,6 +8717,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script>
 var firebaseConfig = {
   apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
@@ -8654,6 +8729,20 @@ var firebaseConfig = {
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
+
+// Creates a Firebase Auth account without disturbing the currently signed-in
+// admin's own session — uses a throwaway secondary App instance, since the
+// primary instance's createUser call would otherwise sign the admin out and
+// sign in as the newly created user.
+async function createAuthUserWithoutSignIn(email, pass) {
+  var secondaryApp = firebase.initializeApp(firebaseConfig, 'UserCreation_' + Date.now());
+  try {
+    await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+  } finally {
+    try { await secondaryApp.auth().signOut(); } catch(e) {}
+    try { await secondaryApp.delete(); } catch(e) {}
+  }
+}
 
 // supaFetch keeps its original name/signature (kept from the old Supabase
 // integration) so every call site elsewhere in this file works unchanged —
