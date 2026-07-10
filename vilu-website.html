@@ -38,13 +38,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 
 /* ── AMBIENT UNDERWATER LAYERS ── */
 .ocean-bubbles{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:hidden}
-.bubble{position:absolute;bottom:-10vh;border-radius:50%;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.95),rgba(180,235,255,.3) 55%,rgba(180,235,255,0) 78%);box-shadow:0 0 5px rgba(180,235,255,.55),inset 0 0 4px rgba(255,255,255,.5);opacity:0;animation-name:bubbleRise;animation-timing-function:linear;animation-iteration-count:infinite}
+.bubble{position:absolute;bottom:-10vh;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.85) 0%,rgba(255,255,255,.25) 18%,rgba(190,240,255,.12) 40%,rgba(190,240,255,.04) 65%,rgba(190,240,255,0) 80%);box-shadow:0 0 4px rgba(180,235,255,.3),inset -2px -3px 4px rgba(4,20,35,.35),inset 2px 3px 3px rgba(255,255,255,.5);opacity:0;will-change:transform,opacity;animation-name:bubbleRise;animation-timing-function:linear;animation-iteration-count:infinite}
+.bubble.bubble--soft{filter:blur(.7px)}
 @keyframes bubbleRise{
-  0%{transform:translate(0,0);opacity:0}
-  6%{opacity:.65}
-  50%{transform:translate(10px,-58vh)}
-  92%{opacity:.4}
-  100%{transform:translate(-14px,-112vh);opacity:0}
+  0%{transform:translate(0,0) scale(.8,.85);opacity:0}
+  5%{opacity:.6}
+  14%{transform:translate(calc(var(--wobble) * .5),-13vh) scale(1,.94)}
+  27%{transform:translate(calc(var(--wobble) * -1),-29vh) scale(.96,1.05)}
+  38%{opacity:.55}
+  41%{transform:translate(calc(var(--wobble) * .7),-46vh) scale(1.04,.93)}
+  56%{transform:translate(calc(var(--wobble) * -.9),-63vh) scale(.94,1.06)}
+  70%{transform:translate(calc(var(--wobble) * .8),-80vh) scale(1.06,.92)}
+  84%{opacity:.42;transform:translate(calc(var(--wobble) * -.6),-97vh) scale(.96,1.08)}
+  100%{transform:translate(calc(var(--wobble) * .4),-113vh) scale(1.12,.9);opacity:0}
 }
 .light-rays{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none;mix-blend-mode:screen;opacity:.6}
 .light-rays::before,.light-rays::after{content:'';position:absolute;top:-25%;left:50%;width:160%;height:170%;transform:translateX(-50%) rotate(-6deg);background:conic-gradient(from 100deg at 50% 0%,transparent 0deg,rgba(190,245,255,.16) 5deg,transparent 13deg,transparent 42deg,rgba(190,245,255,.12) 48deg,transparent 56deg,transparent 92deg,rgba(190,245,255,.14) 98deg,transparent 106deg,transparent 180deg);animation:raySway 20s ease-in-out infinite}
@@ -56,7 +62,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 .hero-slide{position:absolute;inset:0;overflow:hidden;opacity:0;animation:heroSlideFade 20s ease-in-out infinite}
 .hero-slide:nth-child(1){animation-delay:0s}
 .hero-slide:nth-child(2){animation-delay:-10s}
-.hero-slide-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1);will-change:transform;animation:heroKenBurns 10s ease-in-out infinite}
+.hero-slide-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1);will-change:transform;animation:heroKenBurns 10s ease-in-out infinite;filter:contrast(1.06) saturate(1.12)}
 .hero-slide:nth-child(1) .hero-slide-img{animation-delay:0s}
 .hero-slide:nth-child(2) .hero-slide-img{animation-delay:-10s}
 .hero-slide:nth-child(odd) .hero-slide-img{animation-direction:alternate}
@@ -70,7 +76,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 }
 @keyframes heroKenBurns{
   0%{transform:scale(1)}
-  100%{transform:scale(1.08)}
+  100%{transform:scale(1.03)}
 }
 .hero-ocean-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:
@@ -369,22 +375,24 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 
 <!-- ══ AMBIENT BUBBLE PARTICLES ══ -->
 <div class="ocean-bubbles" aria-hidden="true">
-  <span class="bubble" style="left:4%;width:8px;height:8px;animation-duration:17s;animation-delay:-2s"></span>
-  <span class="bubble" style="left:11%;width:5px;height:5px;animation-duration:14s;animation-delay:-9s"></span>
-  <span class="bubble" style="left:18%;width:12px;height:12px;animation-duration:22s;animation-delay:-5s"></span>
-  <span class="bubble" style="left:25%;width:6px;height:6px;animation-duration:16s;animation-delay:-12s"></span>
-  <span class="bubble" style="left:33%;width:9px;height:9px;animation-duration:19s;animation-delay:-1s"></span>
-  <span class="bubble" style="left:40%;width:4px;height:4px;animation-duration:13s;animation-delay:-7s"></span>
-  <span class="bubble" style="left:47%;width:14px;height:14px;animation-duration:25s;animation-delay:-14s"></span>
-  <span class="bubble" style="left:54%;width:7px;height:7px;animation-duration:15s;animation-delay:-4s"></span>
-  <span class="bubble" style="left:61%;width:10px;height:10px;animation-duration:20s;animation-delay:-10s"></span>
-  <span class="bubble" style="left:68%;width:5px;height:5px;animation-duration:14s;animation-delay:-6s"></span>
-  <span class="bubble" style="left:75%;width:13px;height:13px;animation-duration:23s;animation-delay:-16s"></span>
-  <span class="bubble" style="left:82%;width:6px;height:6px;animation-duration:16s;animation-delay:-3s"></span>
-  <span class="bubble" style="left:88%;width:9px;height:9px;animation-duration:18s;animation-delay:-11s"></span>
-  <span class="bubble" style="left:93%;width:4px;height:4px;animation-duration:12s;animation-delay:-8s"></span>
-  <span class="bubble" style="left:97%;width:11px;height:11px;animation-duration:21s;animation-delay:-15s"></span>
-  <span class="bubble" style="left:57%;width:8px;height:8px;animation-duration:17s;animation-delay:-13s"></span>
+  <span class="bubble bubble--soft" style="left:4%;width:8px;height:8px;animation-duration:16s;animation-delay:-2.3s;--wobble:19px"></span>
+  <span class="bubble" style="left:11%;width:5px;height:5px;animation-duration:12.5s;animation-delay:-9.7s;--wobble:11px"></span>
+  <span class="bubble" style="left:18%;width:12px;height:12px;animation-duration:20s;animation-delay:-5.4s;--wobble:27px"></span>
+  <span class="bubble bubble--soft" style="left:25%;width:6px;height:6px;animation-duration:14.5s;animation-delay:-12.8s;--wobble:14px"></span>
+  <span class="bubble" style="left:33%;width:9px;height:9px;animation-duration:17.5s;animation-delay:-1.6s;--wobble:22px"></span>
+  <span class="bubble bubble--soft" style="left:40%;width:4px;height:4px;animation-duration:11.5s;animation-delay:-7.2s;--wobble:9px"></span>
+  <span class="bubble" style="left:47%;width:14px;height:14px;animation-duration:23s;animation-delay:-14.4s;--wobble:31px"></span>
+  <span class="bubble" style="left:54%;width:7px;height:7px;animation-duration:13.8s;animation-delay:-4.1s;--wobble:16px"></span>
+  <span class="bubble" style="left:61%;width:10px;height:10px;animation-duration:18.5s;animation-delay:-10.6s;--wobble:24px"></span>
+  <span class="bubble bubble--soft" style="left:68%;width:5px;height:5px;animation-duration:12.8s;animation-delay:-6.3s;--wobble:12px"></span>
+  <span class="bubble" style="left:75%;width:13px;height:13px;animation-duration:21.5s;animation-delay:-16.2s;--wobble:29px"></span>
+  <span class="bubble" style="left:82%;width:6px;height:6px;animation-duration:14.8s;animation-delay:-3.5s;--wobble:15px"></span>
+  <span class="bubble" style="left:88%;width:9px;height:9px;animation-duration:16.8s;animation-delay:-11.4s;--wobble:21px"></span>
+  <span class="bubble bubble--soft" style="left:93%;width:4px;height:4px;animation-duration:10.8s;animation-delay:-8.6s;--wobble:8px"></span>
+  <span class="bubble" style="left:97%;width:11px;height:11px;animation-duration:19.5s;animation-delay:-15.1s;--wobble:26px"></span>
+  <span class="bubble" style="left:57%;width:8px;height:8px;animation-duration:15.6s;animation-delay:-13.3s;--wobble:18px"></span>
+  <span class="bubble" style="left:29%;width:15px;height:15px;animation-duration:24s;animation-delay:-3.9s;--wobble:33px"></span>
+  <span class="bubble bubble--soft" style="left:72%;width:5px;height:5px;animation-duration:13.2s;animation-delay:-9.1s;--wobble:10px"></span>
 </div>
 
 <!-- ══ NAVIGATION ══ -->
@@ -1120,7 +1128,7 @@ function attachViluCalendar(inputId, pairId, mode) {
   if (!input) return;
   input.setAttribute('readonly', 'readonly');
   input.setAttribute('autocomplete', 'off');
-  input.addEventListener('click', function() { calOpen(inputId, pairId, mode); });
+  input.addEventListener('click', function(e) { e.stopPropagation(); calOpen(inputId, pairId, mode); });
 }
 
 function calOpen(inputId, pairId, mode) {
