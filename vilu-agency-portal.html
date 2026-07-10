@@ -163,8 +163,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="fg"><label>Agency email</label><input type="email" id="ag-email" placeholder="agency@example.com" onkeydown="if(event.key==='Enter')doAgencyLogin()"></div>
     <div class="fg"><label>Password</label><input type="password" id="ag-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doAgencyLogin()"></div>
     <button class="btn-login" onclick="doAgencyLogin()">Sign in →</button>
+    <div style="text-align:center;margin-top:12px">
+      <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0096c7;font-size:12px;font-family:inherit;text-decoration:underline">Forgot password?</button>
+    </div>
     <div style="margin-top:16px;padding:10px 12px;background:#e0f7fd;border:1px solid #caf0f8;border-radius:8px;font-size:11px;color:#0096c7;text-align:center">
       <strong>First time?</strong> Your login is created by Vilu Residence.<br>Contact us at <a href="mailto:Viluresidence@gmail.com" style="color:#0096c7">Viluresidence@gmail.com</a>
+    </div>
+  </div>
+  <div id="forgot-card" class="login-card" style="display:none">
+    <div id="fp-step1">
+      <div style="font-size:32px;text-align:center;margin-bottom:8px">🔑</div>
+      <h2>Reset your password</h2>
+      <p>Enter your account email and we'll send you a link to reset your password.</p>
+      <div class="fg"><label>Email address</label><input type="email" id="fp-email" placeholder="agency@example.com" onkeydown="if(event.key==='Enter')sendPasswordReset()"></div>
+      <div class="err" id="fp-err1"></div>
+      <button class="btn-login" id="fp-send-btn" onclick="sendPasswordReset()">Send reset link →</button>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="hideForgot()" style="background:none;border:none;cursor:pointer;color:#0096c7;font-size:12px;font-family:inherit">← Back to sign in</button>
+      </div>
+    </div>
+    <div id="fp-step-done" style="display:none">
+      <div style="font-size:48px;text-align:center;margin-bottom:12px">✅</div>
+      <h2>Check your email</h2>
+      <p>If an account exists for <strong id="fp-email-sent"></strong>, a password reset link is on its way. Check your inbox (and spam folder).</p>
+      <button class="btn-login" onclick="hideForgot()">Back to sign in</button>
     </div>
   </div>
 </div>
@@ -473,6 +495,47 @@ firebase.auth().onAuthStateChanged(async function(fbUser){
     if (profile && profile.role === 'agency') await enterAgencyPortal(profile);
   }
 });
+
+// ── FORGOT PASSWORD — Firebase Auth's own reset email ──
+function showForgot(){
+  document.querySelector('#login-screen .login-card').style.display = 'none';
+  document.getElementById('forgot-card').style.display = 'block';
+  document.getElementById('fp-step1').style.display = 'block';
+  document.getElementById('fp-step-done').style.display = 'none';
+  var emailInput = document.getElementById('fp-email');
+  if(emailInput) emailInput.value = document.getElementById('ag-email').value || '';
+  var err = document.getElementById('fp-err1');
+  if(err) err.style.display = 'none';
+}
+
+function hideForgot(){
+  document.getElementById('forgot-card').style.display = 'none';
+  document.querySelector('#login-screen .login-card').style.display = 'block';
+}
+
+async function sendPasswordReset(){
+  var err = document.getElementById('fp-err1');
+  err.style.display = 'none';
+  var email = (document.getElementById('fp-email').value||'').trim().toLowerCase();
+  if(!email||!email.includes('@')){err.textContent='Please enter a valid email address.';err.style.display='block';return;}
+
+  var btn = document.getElementById('fp-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+  } catch(e) {
+    // Don't reveal whether the email exists — same confirmation either way,
+    // except for genuinely malformed input, which is already caught above.
+    if (e.code !== 'auth/user-not-found') {
+      console.warn('sendPasswordResetEmail error:', e);
+    }
+  }
+  btn.disabled = false; btn.textContent = 'Send reset link →';
+
+  document.getElementById('fp-email-sent').textContent = email;
+  document.getElementById('fp-step1').style.display = 'none';
+  document.getElementById('fp-step-done').style.display = 'block';
+}
 
 function doSignout(){
   currentAgency=null; selectedPkg=null;

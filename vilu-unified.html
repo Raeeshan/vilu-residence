@@ -197,11 +197,6 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .login-err{background:#fee2e2;color:#b91c1c;border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none;border:1px solid #fca5a5}
 .login-hint{font-size:11px;color:#6b7280;text-align:center;margin-top:12px;line-height:1.6}
 .forgot-back{background:none;border:none;cursor:pointer;color:#0891b2;font-size:12px;font-family:inherit;margin-bottom:16px;padding:0;display:flex;align-items:center;gap:5px;font-weight:600}
-.reset-code-box{background:#e0f7fd;border:2px dashed #00b4d8;border-radius:10px;padding:16px;text-align:center;margin:14px 0}
-.reset-code{font-size:28px;font-weight:800;color:#00b4d8;letter-spacing:6px;font-family:monospace}
-.step-indicator{display:flex;gap:0;margin-bottom:20px}
-.step-dot{flex:1;height:4px;border-radius:2px;background:#e5e7eb;margin:0 2px}
-.step-dot.done{background:#0891b2}
 @media print{.sb,.topbar{display:none!important}}
 
 
@@ -590,44 +585,20 @@ body.pms-mode { overflow:hidden; }
   </div>
   <div id="forgot-card" class="forgot-card" style="display:none">
     <button class="forgot-back" onclick="hideForgot()"><i class="ti ti-arrow-left"></i> Back to sign in</button>
-    <div class="step-indicator">
-      <div class="step-dot done" id="fp-step1-dot"></div>
-      <div class="step-dot" id="fp-step2-dot"></div>
-      <div class="step-dot" id="fp-step3-dot"></div>
-    </div>
     <div id="fp-step1">
       <div style="text-align:center;margin-bottom:20px">
         <div style="font-size:32px;margin-bottom:8px">🔑</div>
         <h2 style="font-size:17px;font-weight:800;color:#111827">Reset your password</h2>
-        <p style="font-size:12px;color:#6b7280;margin-top:6px">Enter your account email to get a reset code.</p>
+        <p style="font-size:12px;color:#6b7280;margin-top:6px">Enter your account email and we'll send you a link to reset your password.</p>
       </div>
-      <div class="login-field"><label>Email address</label><input type="email" id="fp-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')fpStep1()"></div>
+      <div class="login-field"><label>Email address</label><input type="email" id="fp-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendPasswordReset()"></div>
       <div id="fp-err1" class="login-err"></div>
-      <button class="login-btn" onclick="fpStep1()">Generate reset code →</button>
+      <button class="login-btn" id="fp-send-btn" onclick="sendPasswordReset()">Send reset link →</button>
     </div>
-    <div id="fp-step2" style="display:none">
-      <div style="text-align:center;margin-bottom:14px"><div style="font-size:24px;margin-bottom:8px">📋</div><h2 style="font-size:16px;font-weight:800">Reset code</h2></div>
-      <div id="fp-sent-msg" style="display:none;background:#e0f7fd;border:1px solid #caf0f8;border-radius:8px;padding:10px 12px;font-size:12px;color:#374151;margin-bottom:12px"></div>
-      <div class="reset-code-box" id="fp-code-box">
-        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:6px">Reset code for <span id="fp-email-show"></span></div>
-        <div class="reset-code" id="fp-code-display"></div>
-        <button onclick="copyResetCode()" style="margin-top:10px;background:none;border:1px solid #00b4d8;color:#00b4d8;border-radius:6px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Copy code</button>
-      </div>
-      <div class="login-field" style="margin-top:14px"><label>Enter the reset code</label><input type="text" id="fp-code-input" placeholder="6-digit code" maxlength="6" style="text-align:center;font-size:20px;font-weight:700;letter-spacing:6px" onkeydown="if(event.key==='Enter')fpStep2()"></div>
-      <div id="fp-err2" class="login-err"></div>
-      <button class="login-btn" onclick="fpStep2()">Verify code →</button>
-    </div>
-    <div id="fp-step3" style="display:none">
-      <div style="text-align:center;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔒</div><h2 style="font-size:16px;font-weight:800">Set new password</h2><p style="font-size:12px;color:#6b7280;margin-top:6px">Choose a new password for <strong id="fp-name-show"></strong>.</p></div>
-      <div class="login-field"><label>New password</label><input type="password" id="fp-newpass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')fpStep3()"></div>
-      <div class="login-field"><label>Confirm password</label><input type="password" id="fp-confirm" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')fpStep3()"></div>
-      <div id="fp-err3" class="login-err"></div>
-      <button class="login-btn" onclick="fpStep3()">Save new password →</button>
-    </div>
-    <div id="fp-step4" style="display:none;text-align:center;padding:20px 0">
+    <div id="fp-step-done" style="display:none;text-align:center;padding:20px 0">
       <div style="font-size:48px;margin-bottom:12px">✅</div>
-      <h2 style="font-size:17px;font-weight:800;margin-bottom:8px">Password updated!</h2>
-      <p style="font-size:12px;color:#6b7280;margin-bottom:20px">You can now sign in with your new password.</p>
+      <h2 style="font-size:17px;font-weight:800;margin-bottom:8px">Check your email</h2>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:20px">If an account exists for <strong id="fp-email-sent"></strong>, a password reset link is on its way. Check your inbox (and spam folder).</p>
       <button class="login-btn" onclick="hideForgot()">Back to sign in</button>
     </div>
   </div>
@@ -2137,44 +2108,20 @@ Snorkelling trip"></textarea>
   </div>
   <div id="forgot-card" class="forgot-card" style="display:none">
     <button class="forgot-back" onclick="hideForgot()"><i class="ti ti-arrow-left"></i> Back to sign in</button>
-    <div class="step-indicator">
-      <div class="step-dot done" id="fp-step1-dot"></div>
-      <div class="step-dot" id="fp-step2-dot"></div>
-      <div class="step-dot" id="fp-step3-dot"></div>
-    </div>
     <div id="fp-step1">
       <div style="text-align:center;margin-bottom:20px">
         <div style="font-size:32px;margin-bottom:8px">🔑</div>
         <h2 style="font-size:17px;font-weight:800;color:#111827">Reset your password</h2>
-        <p style="font-size:12px;color:#6b7280;margin-top:6px">Enter your account email to get a reset code.</p>
+        <p style="font-size:12px;color:#6b7280;margin-top:6px">Enter your account email and we'll send you a link to reset your password.</p>
       </div>
-      <div class="login-field"><label>Email address</label><input type="email" id="fp-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')fpStep1()"></div>
+      <div class="login-field"><label>Email address</label><input type="email" id="fp-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendPasswordReset()"></div>
       <div id="fp-err1" class="login-err"></div>
-      <button class="login-btn" onclick="fpStep1()">Generate reset code →</button>
+      <button class="login-btn" id="fp-send-btn" onclick="sendPasswordReset()">Send reset link →</button>
     </div>
-    <div id="fp-step2" style="display:none">
-      <div style="text-align:center;margin-bottom:14px"><div style="font-size:24px;margin-bottom:8px">📋</div><h2 style="font-size:16px;font-weight:800">Reset code</h2></div>
-      <div id="fp-sent-msg" style="display:none;background:#e0f7fd;border:1px solid #caf0f8;border-radius:8px;padding:10px 12px;font-size:12px;color:#374151;margin-bottom:12px"></div>
-      <div class="reset-code-box" id="fp-code-box">
-        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:6px">Reset code for <span id="fp-email-show"></span></div>
-        <div class="reset-code" id="fp-code-display"></div>
-        <button onclick="copyResetCode()" style="margin-top:10px;background:none;border:1px solid #00b4d8;color:#00b4d8;border-radius:6px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Copy code</button>
-      </div>
-      <div class="login-field" style="margin-top:14px"><label>Enter the reset code</label><input type="text" id="fp-code-input" placeholder="6-digit code" maxlength="6" style="text-align:center;font-size:20px;font-weight:700;letter-spacing:6px" onkeydown="if(event.key==='Enter')fpStep2()"></div>
-      <div id="fp-err2" class="login-err"></div>
-      <button class="login-btn" onclick="fpStep2()">Verify code →</button>
-    </div>
-    <div id="fp-step3" style="display:none">
-      <div style="text-align:center;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔒</div><h2 style="font-size:16px;font-weight:800">Set new password</h2><p style="font-size:12px;color:#6b7280;margin-top:6px">Choose a new password for <strong id="fp-name-show"></strong>.</p></div>
-      <div class="login-field"><label>New password</label><input type="password" id="fp-newpass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')fpStep3()"></div>
-      <div class="login-field"><label>Confirm password</label><input type="password" id="fp-confirm" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')fpStep3()"></div>
-      <div id="fp-err3" class="login-err"></div>
-      <button class="login-btn" onclick="fpStep3()">Save new password →</button>
-    </div>
-    <div id="fp-step4" style="display:none;text-align:center;padding:20px 0">
+    <div id="fp-step-done" style="display:none;text-align:center;padding:20px 0">
       <div style="font-size:48px;margin-bottom:12px">✅</div>
-      <h2 style="font-size:17px;font-weight:800;margin-bottom:8px">Password updated!</h2>
-      <p style="font-size:12px;color:#6b7280;margin-bottom:20px">You can now sign in with your new password.</p>
+      <h2 style="font-size:17px;font-weight:800;margin-bottom:8px">Check your email</h2>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:20px">If an account exists for <strong id="fp-email-sent"></strong>, a password reset link is on its way. Check your inbox (and spam folder).</p>
       <button class="login-btn" onclick="hideForgot()">Back to sign in</button>
     </div>
   </div>
@@ -3529,7 +3476,6 @@ Snorkelling trip"></textarea>
   </div>
 </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script></script>
 
 
@@ -5353,211 +5299,46 @@ function applyUserMgmtVisibility(){
 
 
 // ═══════════════════════════════════════════════
-// EMAIL RESET — EmailJS CONFIG
+// FORGOT PASSWORD — Firebase Auth's own reset email
 // ═══════════════════════════════════════════════
-// ── HOW TO ACTIVATE EMAIL RESET ──────────────────
-// 1. Go to https://www.emailjs.com and sign up free
-// 2. Add an Email Service (Gmail recommended) → copy Service ID
-// 3. Create an Email Template with these variables:
-//    {{to_email}}  {{to_name}}  {{reset_code}}  {{expiry_time}}
-// 4. Copy your Public Key from Account → API Keys
-// 5. Replace the three values below with your real ones
-// ─────────────────────────────────────────────────
-const EMAILJS_SERVICE  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
-const EMAILJS_TEMPLATE = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz789'
-const EMAILJS_KEY      = 'YOUR_PUBLIC_KEY';   // e.g. 'aBcDeFgHiJkLmNoP'
-
-// Admin email — reset link goes here
-const ADMIN_EMAIL = 'Viluresidence@gmail.com';
-const ADMIN_NAME  = 'Raishan Hassan';
-
-let emailJSReady = false;
-(function initEJS(){
-  try {
-    if(typeof emailjs !== 'undefined' && EMAILJS_KEY !== 'YOUR_PUBLIC_KEY'){
-      emailjs.init({publicKey: EMAILJS_KEY});
-      emailJSReady = true;
-    }
-  } catch(e){ emailJSReady = false; }
-})();
-
-// ═══════════════════════════════════════════════
-// FORGOT PASSWORD FLOW
-// ═══════════════════════════════════════════════
-let fpResetCode   = null;
-let fpTargetEmail = null;
-let fpTargetName  = null;
-let fpCodeExpiry  = null;
-let fpIsAdmin     = false;
-
 function showForgot(){
   document.querySelector('.login-card').style.display = 'none';
   document.getElementById('forgot-card').style.display = 'block';
-  resetFPSteps();
-  ['fp-email','fp-code-input','fp-newpass','fp-confirm'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.value='';
-  });
-  ['fp-err1','fp-err2','fp-err3'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.style.display='none';
-  });
+  document.getElementById('fp-step1').style.display = 'block';
+  document.getElementById('fp-step-done').style.display = 'none';
+  const emailInput = document.getElementById('fp-email');
+  if(emailInput) emailInput.value = document.getElementById('login-user').value || '';
+  const err = document.getElementById('fp-err1');
+  if(err) err.style.display = 'none';
 }
 
 function hideForgot(){
   document.getElementById('forgot-card').style.display = 'none';
   document.querySelector('.login-card').style.display = 'block';
-  fpResetCode=null;fpTargetEmail=null;fpCodeExpiry=null;fpIsAdmin=false;
 }
 
-function resetFPSteps(){
-  ['fp-step1','fp-step2','fp-step3','fp-step4'].forEach((id,i)=>{
-    const el=document.getElementById(id);
-    if(el)el.style.display=i===0?'block':'none';
-  });
-  updateStepDots(1);
-}
-
-function updateStepDots(step){
-  [1,2,3].forEach(i=>{
-    const dot=document.getElementById('fp-step'+i+'-dot');
-    if(dot)dot.className='step-dot'+(i<=step?' done':'');
-  });
-}
-
-function showFPErr(n,msg){
-  const el=document.getElementById('fp-err'+n);
-  if(el){el.textContent=msg;el.style.display='block';}
-}
-function hideFPErr(n){
-  const el=document.getElementById('fp-err'+n);
-  if(el)el.style.display='none';
-}
-
-// ── STEP 1: Enter email ──
-async function fpStep1(){
-  hideFPErr(1);
+async function sendPasswordReset(){
+  const err = document.getElementById('fp-err1');
+  err.style.display = 'none';
   const email = (document.getElementById('fp-email').value||'').trim().toLowerCase();
-  if(!email||!email.includes('@')){showFPErr(1,'Please enter a valid email address.');return;}
+  if(!email||!email.includes('@')){err.textContent='Please enter a valid email address.';err.style.display='block';return;}
 
-  const user = USERS.find(u=>u.email===email);
-  if(!user){showFPErr(1,'No account found with that email address.');return;}
-
-  fpTargetEmail = email;
-  fpTargetName  = user.name;
-  fpIsAdmin     = user.role==='admin';
-
-  // Generate 6-digit code
-  fpResetCode  = String(Math.floor(100000+Math.random()*900000));
-  fpCodeExpiry = Date.now()+10*60*1000;
-
-  // Show email info on step 2
-  const emailShow = document.getElementById('fp-email-show');
-  const codeDisp  = document.getElementById('fp-code-display');
-  const nameShow  = document.getElementById('fp-name-show');
-  if(emailShow) emailShow.textContent = email;
-  if(codeDisp)  codeDisp.textContent  = fpResetCode;
-  if(nameShow)  nameShow.textContent  = user.name;
-
-  // ── If admin email → try to send real email via EmailJS ──
-  if(fpIsAdmin && emailJSReady){
-    const btn = document.querySelector('#fp-step1 .login-btn');
-    if(btn){btn.textContent='Sending email…';btn.disabled=true;}
-    try {
-      await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-        to_email:   email,
-        to_name:    user.name,
-        reset_code: fpResetCode,
-        expiry_time:'10 minutes',
-        from_name:  'Vilu Residence PMS',
-      });
-      // Update step 2 to show "email sent" message
-      const sentMsg = document.getElementById('fp-sent-msg');
-      if(sentMsg){
-        sentMsg.style.display='block';
-        sentMsg.innerHTML = `<i class="ti ti-mail-check" style="color:#00b4d8;font-size:16px"></i> Reset code sent to <strong>${email}</strong>. Check your inbox (and spam folder).`;
-      }
-      // Hide the on-screen code for admin (they get it by email)
-      const codeBox = document.getElementById('fp-code-box');
-      if(codeBox) codeBox.style.display='none';
-    } catch(err){
-      // Email failed — fall back to showing code on screen
-      console.warn('EmailJS failed:', err);
-      const codeBox = document.getElementById('fp-code-box');
-      if(codeBox) codeBox.style.display='block';
-      const sentMsg = document.getElementById('fp-sent-msg');
-      if(sentMsg){
-        sentMsg.style.display='block';
-        sentMsg.innerHTML='<span style="color:#d97706">⚠️ Could not send email — EmailJS not configured. Use the code shown below instead.</span>';
-      }
-    }
-    if(btn){btn.textContent='Generate reset code →';btn.disabled=false;}
-  } else {
-    // Staff/agency or EmailJS not set up — show code on screen
-    const codeBox = document.getElementById('fp-code-box');
-    const sentMsg = document.getElementById('fp-sent-msg');
-    if(codeBox) codeBox.style.display='block';
-    if(sentMsg){
-      sentMsg.style.display='block';
-      if(fpIsAdmin && !emailJSReady){
-        sentMsg.innerHTML='<span style="color:#d97706">⚠️ Email not configured yet — see setup guide below. Use the code shown above.</span>';
-      } else {
-        sentMsg.innerHTML='Share this code securely with <strong>'+user.name+'</strong> so they can reset their password.';
-      }
+  const btn = document.getElementById('fp-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+  } catch(e) {
+    // Don't reveal whether the email exists — same confirmation either way,
+    // except for genuinely malformed input, which Firebase already caught above.
+    if (e.code !== 'auth/user-not-found') {
+      console.warn('sendPasswordResetEmail error:', e);
     }
   }
+  btn.disabled = false; btn.textContent = 'Send reset link →';
 
-  document.getElementById('fp-step1').style.display='none';
-  document.getElementById('fp-step2').style.display='block';
-  updateStepDots(2);
-  const codeInput=document.getElementById('fp-code-input');
-  if(codeInput)codeInput.focus();
-}
-
-function copyResetCode(){
-  if(!fpResetCode)return;
-  navigator.clipboard?.writeText(fpResetCode)
-    .then(()=>toast('Reset code copied ✓'))
-    .catch(()=>{
-      const ta=document.createElement('textarea');
-      ta.value=fpResetCode;document.body.appendChild(ta);ta.select();
-      document.execCommand('copy');document.body.removeChild(ta);
-      toast('Reset code copied ✓');
-    });
-}
-
-// ── STEP 2: Verify code ──
-function fpStep2(){
-  hideFPErr(2);
-  const entered=(document.getElementById('fp-code-input').value||'').trim();
-  if(!entered){showFPErr(2,'Please enter the reset code.');return;}
-  if(Date.now()>fpCodeExpiry){
-    showFPErr(2,'This code has expired (10 min). Go back and generate a new one.');
-    fpResetCode=null;return;
-  }
-  if(entered!==fpResetCode){showFPErr(2,'Incorrect code. Please check and try again.');return;}
-  document.getElementById('fp-step2').style.display='none';
-  document.getElementById('fp-step3').style.display='block';
-  updateStepDots(3);
-  document.getElementById('fp-newpass').focus();
-}
-
-// ── STEP 3: New password ──
-function fpStep3(){
-  hideFPErr(3);
-  const p1=(document.getElementById('fp-newpass').value||'').trim();
-  const p2=(document.getElementById('fp-confirm').value||'').trim();
-  if(p1.length<6){showFPErr(3,'Password must be at least 6 characters.');return;}
-  if(p1!==p2){showFPErr(3,'Passwords do not match. Please try again.');return;}
-  const idx=USERS.findIndex(u=>u.email===fpTargetEmail);
-  if(idx===-1){showFPErr(3,'Account not found. Please start over.');return;}
-  USERS[idx].password=p1;
-  saveUsers(USERS);
-  fpResetCode=null;fpTargetEmail=null;fpCodeExpiry=null;
-  document.getElementById('fp-step3').style.display='none';
-  document.getElementById('fp-step4').style.display='block';
-  [1,2,3].forEach(i=>{
-    const dot=document.getElementById('fp-step'+i+'-dot');
-    if(dot)dot.className='step-dot done';
-  });
+  document.getElementById('fp-email-sent').textContent = email;
+  document.getElementById('fp-step1').style.display = 'none';
+  document.getElementById('fp-step-done').style.display = 'block';
 }
 
 
