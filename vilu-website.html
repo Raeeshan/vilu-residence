@@ -816,43 +816,45 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
-// SUPABASE — Website live data connection
+// FIREBASE FIRESTORE — Website live data connection
 // ═══════════════════════════════════════════════════════════
-const SUPA_URL = 'https://jlzmcijaqnzxlqpixbuc.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impsem1jaWphcW56eGxxcGl4YnVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NDUxMDUsImV4cCI6MjA5NTUyMTEwNX0.3QCJwg9ILEockHwDMvqpfG8-B7mZauUnt-G5h6xJMWk';
+var firebaseConfig = {
+  apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
+  authDomain: "vilu-residence.firebaseapp.com",
+  projectId: "vilu-residence",
+  storageBucket: "vilu-residence.firebasestorage.app",
+  messagingSenderId: "751046104531",
+  appId: "1:751046104531:web:c8af85f37c42a1c3c84b26"
+};
+firebase.initializeApp(firebaseConfig);
+var fsDb = firebase.firestore();
 
+// supaGet/supaPost keep their original names and signatures (kept from the
+// old Supabase integration) so every call site elsewhere in this file works
+// unchanged — only the underlying transport is now Firestore instead of a
+// REST fetch.
 async function supaGet(table, query) {
   try {
-    const url = SUPA_URL + '/rest/v1/' + table + (query ? '?' + query : '');
-    const resp = await fetch(url, {
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + SUPA_KEY
-      }
-    });
-    if(!resp.ok) return null;
-    return await resp.json();
+    if (table === 'website_content') {
+      var docSnap = await fsDb.collection('website_content').doc('main').get();
+      return docSnap.exists ? [{ value: docSnap.data().value }] : [];
+    }
+    var snap = await fsDb.collection(table).get();
+    var out = [];
+    snap.forEach(function(d){ out.push(d.data()); });
+    return out;
   } catch(e) { return null; }
 }
 
 async function supaPost(table, data, upsertOn) {
   try {
-    const url = SUPA_URL + '/rest/v1/' + table + (upsertOn ? '?on_conflict=' + upsertOn : '');
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + SUPA_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify(data)
-    });
-    if(!resp.ok) return null;
-    const text = await resp.text();
-    return text ? JSON.parse(text) : null;
+    var id = String(data.id || (upsertOn && data[upsertOn]) || Date.now());
+    await fsDb.collection(table).doc(id).set(data, { merge: true });
+    return [data];
   } catch(e) { return null; }
 }
 
@@ -1030,9 +1032,9 @@ try {
 } catch(e) {}
 
 // ══════════════════════════════════════════════════════
-// CALENDAR AVAILABILITY — live from Supabase reservations + blocks
-// Same Supabase project vilu-unified.html (PMS) syncs to
-// (SUPA_URL/SUPA_KEY/supaGet defined earlier in this script)
+// CALENDAR AVAILABILITY — live from Firestore reservations + blocks
+// Same Firebase project vilu-unified.html (PMS) syncs to
+// (fsDb/supaGet defined earlier in this script)
 // ══════════════════════════════════════════════════════
 var BOOKED_RANGES = {}; // roomId -> [{from,to}], "to" is checkout day (exclusive)
 

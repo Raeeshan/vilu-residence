@@ -3807,9 +3807,8 @@ function restoreTripsFromBackup() {
 function saveRES(){
   try{localStorage.setItem('vilu_res',JSON.stringify(RES));}catch(e){}
   syncAvailability();
-  // Sync immediately to Supabase so trips are never lost on reload
-  clearTimeout(saveRES._timer);
-  saveRES._timer = setTimeout(syncResToSupabase, 2000);
+  // Sync immediately to Firestore so nothing is ever lost on reload
+  syncResToSupabase().catch(function(){});
 }
 function syncAvailability(){
   // Write all reservations+blocks to shared key for booking engine & agency portal
@@ -5039,9 +5038,8 @@ function clearNB(){['nb-fn','nb-ln','nb-em','nb-ph','nb-nat','nb-pid','nb-notes'
 // BLOCK ROOMS
 function saveBLK(){
   try{localStorage.setItem('vilu_blk',JSON.stringify(BLK));syncAvailability();}catch(e){}
-  // Push to Supabase so the website's calendar sees manual blocks too
-  clearTimeout(saveBLK._timer);
-  saveBLK._timer = setTimeout(function(){ if(typeof syncBlksToSupabase==='function') syncBlksToSupabase(); }, 2000);
+  // Push to Firestore immediately so the website's calendar sees manual blocks too
+  if(typeof syncBlksToSupabase==='function') syncBlksToSupabase().catch(function(){});
 }
 function removeBlk(id){
   BLK=BLK.filter(function(x){return x.id!==id;});
@@ -8640,29 +8638,49 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 // ═══════════════════════════════════════════════════════
-// SUPABASE INTEGRATION — Unified System
+// FIREBASE FIRESTORE INTEGRATION — Unified System
 // ═══════════════════════════════════════════════════════
-const SUPA_URL = 'https://jlzmcijaqnzxlqpixbuc.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impsem1jaWphcW56eGxxcGl4YnVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NDUxMDUsImV4cCI6MjA5NTUyMTEwNX0.3QCJwg9ILEockHwDMvqpfG8-B7mZauUnt-G5h6xJMWk';
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
+  authDomain: "vilu-residence.firebaseapp.com",
+  projectId: "vilu-residence",
+  storageBucket: "vilu-residence.firebasestorage.app",
+  messagingSenderId: "751046104531",
+  appId: "1:751046104531:web:c8af85f37c42a1c3c84b26"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+var fsDb = firebase.firestore();
 
+// supaFetch keeps its original name/signature (kept from the old Supabase
+// integration) so every call site elsewhere in this file works unchanged —
+// only the underlying transport is now Firestore instead of a REST fetch.
 async function supaFetch(method, table, data, query) {
   try {
-    let url = SUPA_URL + '/rest/v1/' + table;
-    if(query) url += '?' + query;
-    const opts = {
-      method: method,
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + SUPA_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+    if (method === 'GET') {
+      if (table === 'website_content') {
+        var docSnap = await fsDb.collection('website_content').doc('main').get();
+        return docSnap.exists ? [{ value: docSnap.data().value }] : [];
       }
-    };
-    if(data && (method==='POST'||method==='PATCH')) opts.body = JSON.stringify(data);
-    const resp = await fetch(url, opts);
-    if(!resp.ok) return null;
-    const text = await resp.text();
-    return text ? JSON.parse(text) : null;
+      var snap = await fsDb.collection(table).get();
+      var out = [];
+      snap.forEach(function(d){ out.push(d.data()); });
+      return out;
+    }
+    if (method === 'POST' || method === 'PATCH') {
+      var id = String((data && data.id) || Date.now());
+      await fsDb.collection(table).doc(id).set(data, { merge: true });
+      return [data];
+    }
+    if (method === 'DELETE') {
+      var m = /id=eq\.(.+)/.exec(query || '');
+      if (m) await fsDb.collection(table).doc(decodeURIComponent(m[1])).delete();
+      return null;
+    }
+    return null;
   } catch(e) { return null; }
 }
 
