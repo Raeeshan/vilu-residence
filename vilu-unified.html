@@ -5333,8 +5333,9 @@ function deleteUser(email){
   USERS = USERS.filter(x=>x.email!==email);
   saveUsers(USERS);
   // Explicitly remove their Firestore profile doc — without it, authenticateUser()
-  // rejects them on next sign-in even though their underlying Auth account remains
-  if (typeof supaFetch==='function') supaFetch('DELETE','users',null,'id=eq.'+encodeURIComponent(email)).catch(function(){});
+  // rejects them on next sign-in even though their underlying Auth account remains.
+  // Doc IDs are always lowercase (Firebase Auth normalizes emails), so match that.
+  if (typeof supaFetch==='function') supaFetch('DELETE','users',null,'id=eq.'+encodeURIComponent(email.toLowerCase())).catch(function(){});
   toast('User removed');
   drawUsers();
 }
@@ -7048,9 +7049,13 @@ async function syncAllUsersToSupabase(users) {
   try {
     for(var i=0; i<users.length; i++) {
       var u = users[i];
+      // Firebase Auth always normalizes sign-in emails to lowercase, so the
+      // Firestore profile doc ID must be lowercase too or authenticateUser's
+      // post-sign-in lookup silently fails to find it.
+      var idEmail = (u.email||'').toLowerCase();
       await supaFetch('POST', 'users', {
-        id: u.email,
-        email: u.email,
+        id: idEmail,
+        email: idEmail,
         // Passwords live in Firebase Auth now, never in Firestore. Explicitly
         // delete the field (rather than omit it) so a merge write actually
         // scrubs any plaintext password left over from before this change.
