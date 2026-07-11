@@ -1122,15 +1122,23 @@ function loadBookedRangesFromLocalStorage() {
   } catch (e) {}
 }
 
-// Primary source: reservations + blocks tables in the same Supabase project as the PMS
+// Primary source: room_availability (per-room booked date ranges, no guest
+// PII at all) + blocks. This used to read the full `reservations` collection
+// — every guest's name, email, phone, ID number — into any anonymous
+// visitor's browser, since supaGet() ignores its query filter and the
+// reservations rule was fully public. room_availability already has
+// everything needed for an availability check with nothing sensitive in it.
 async function loadBookedRangesFromSupabase() {
   try {
-    var res = await supaGet('reservations', 'select=room_id,check_in,check_out,status&status=neq.Cancelled');
+    var roomIds = ['VR01','VR02','VR03','VR04','VR05','VR06'];
+    var combined = [];
+    for (var i=0;i<roomIds.length;i++) {
+      var snap = await fsDb.collection('room_availability').doc(roomIds[i]).get();
+      var bookings = (snap.exists && snap.data().bookings) || [];
+      bookings.forEach(function(b){ combined.push({ rn: roomIds[i], ci: b.from, co: b.to, st: 'Confirmed' }); });
+    }
     var blk = await supaGet('blocks', 'select=room_id,from_date,to_date');
-    if (!res && !blk) throw new Error('Supabase fetch failed');
-    var combined = (res || []).map(function(r) {
-      return { rn: r.room_id, ci: (r.check_in || '').slice(0, 10), co: (r.check_out || '').slice(0, 10), st: r.status };
-    }).concat((blk || []).map(function(b) {
+    combined = combined.concat((blk || []).map(function(b) {
       return { rn: b.room_id, ci: (b.from_date || '').slice(0, 10), co: (b.to_date || '').slice(0, 10), st: 'Confirmed' };
     }));
     applyReservationsToBookedRanges(combined);

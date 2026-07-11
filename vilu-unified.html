@@ -1147,6 +1147,10 @@ body.pms-mode { overflow:hidden; }
     </div>
     <div class="card"><h3>Active blocks</h3><div id="bl-lst"><p style="font-size:12px;color:#9ca3af">No active blocks.</p></div></div>
   </div>
+  <div class="card">
+    <h3>Pending block requests (from agencies)</h3>
+    <div id="block-requests-list"><p style="font-size:12px;color:#9ca3af">No pending requests.</p></div>
+  </div>
 </div>
 
 <div class="sec" id="s-cfg">
@@ -1180,6 +1184,12 @@ body.pms-mode { overflow:hidden; }
     <div class="al am"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><div>Recomputes every room's availability lock from the reservations collection (the source of truth) and repairs any drift. Runs automatically once every 24h on load — use this to run it immediately.</div></div>
     <button class="btn p" onclick="runReconciliationNow()"><i class="ti ti-refresh"></i>Run reconciliation now</button>
     <div id="recon-result" style="margin-top:10px;font-size:12px;color:#6b7280"></div>
+  </div>
+  <div class="card">
+    <h3><i class="ti ti-shield-lock" style="margin-right:6px"></i>Cancellation Override Code</h3>
+    <div class="al am"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><div>Staff cannot cancel a reservation without this code. Share it only with staff you trust to cancel bookings, and change it any time here.</div></div>
+    <div class="fg"><label>Override code</label><input type="text" id="st-cancel-code" placeholder="Set a code staff will enter to cancel a booking"></div>
+    <button class="btn p" onclick="saveCancellationOverrideCode()"><i class="ti ti-device-floppy"></i>Save override code</button>
   </div>
 </div>
 
@@ -1545,6 +1555,30 @@ body.pms-mode { overflow:hidden; }
       <!-- CURRENT TRIPS LIST -->
       <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">📋 Trips for this reservation</div>
       <div id="trips-list-body"></div>
+
+      <!-- FOOD ORDERS -->
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px;margin-top:20px">
+        <div style="font-size:13px;font-weight:700;color:#c2410c;margin-bottom:12px">🍽️ Add a Food Order</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">ITEM</label>
+            <input type="text" id="food-item" placeholder="e.g. Grilled fish, Club sandwich" style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">QTY</label>
+            <input type="number" id="food-qty" min="1" value="1" style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">PRICE ($)</label>
+            <input type="number" id="food-price" min="0" step="0.01" style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <button onclick="addFoodOrderToRes(_tripsResId)" style="background:#c2410c;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+          🍽️ Add This Order
+        </button>
+        <div style="font-size:13px;font-weight:700;color:#374151;margin:16px 0 10px">📋 Food orders for this reservation</div>
+        <div id="food-orders-list-body"></div>
+      </div>
 
       <!-- TRANSPORT DETAILS -->
       <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:20px">
@@ -2374,6 +2408,10 @@ Snorkelling trip"></textarea>
     </div>
     <div class="card"><h3>Active blocks</h3><div id="bl-lst"><p style="font-size:12px;color:#9ca3af">No active blocks.</p></div></div>
   </div>
+  <div class="card">
+    <h3>Pending block requests (from agencies)</h3>
+    <div id="block-requests-list"><p style="font-size:12px;color:#9ca3af">No pending requests.</p></div>
+  </div>
 </div>
 
 <div class="sec" id="s-cfg">
@@ -2407,6 +2445,12 @@ Snorkelling trip"></textarea>
     <div class="al am"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><div>Recomputes every room's availability lock from the reservations collection (the source of truth) and repairs any drift. Runs automatically once every 24h on load — use this to run it immediately.</div></div>
     <button class="btn p" onclick="runReconciliationNow()"><i class="ti ti-refresh"></i>Run reconciliation now</button>
     <div id="recon-result" style="margin-top:10px;font-size:12px;color:#6b7280"></div>
+  </div>
+  <div class="card">
+    <h3><i class="ti ti-shield-lock" style="margin-right:6px"></i>Cancellation Override Code</h3>
+    <div class="al am"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><div>Staff cannot cancel a reservation without this code. Share it only with staff you trust to cancel bookings, and change it any time here.</div></div>
+    <div class="fg"><label>Override code</label><input type="text" id="st-cancel-code" placeholder="Set a code staff will enter to cancel a booking"></div>
+    <button class="btn p" onclick="saveCancellationOverrideCode()"><i class="ti ti-device-floppy"></i>Save override code</button>
   </div>
 </div>
 
@@ -2553,6 +2597,30 @@ Snorkelling trip"></textarea>
       <!-- CURRENT TRIPS LIST -->
       <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">📋 Trips for this reservation</div>
       <div id="trips-list-body"></div>
+
+      <!-- FOOD ORDERS -->
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px;margin-top:20px">
+        <div style="font-size:13px;font-weight:700;color:#c2410c;margin-bottom:12px">🍽️ Add a Food Order</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">ITEM</label>
+            <input type="text" id="food-item" placeholder="e.g. Grilled fish, Club sandwich" style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">QTY</label>
+            <input type="number" id="food-qty" min="1" value="1" style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:4px">PRICE ($)</label>
+            <input type="number" id="food-price" min="0" step="0.01" style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;font-size:13px">
+          </div>
+        </div>
+        <button onclick="addFoodOrderToRes(_tripsResId)" style="background:#c2410c;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+          🍽️ Add This Order
+        </button>
+        <div style="font-size:13px;font-weight:700;color:#374151;margin:16px 0 10px">📋 Food orders for this reservation</div>
+        <div id="food-orders-list-body"></div>
+      </div>
 
       <!-- TRANSPORT DETAILS -->
       <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:20px">
@@ -3075,7 +3143,7 @@ Snorkelling trip"></textarea>
   <button onclick="qbOpenDrawer()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600"><i class="ti ti-eye"></i> Open</button>
   <button onclick="qbAddFolio()" style="background:#00b4d8;border:1px solid #00b4d8;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600"><i class="ti ti-notebook"></i> Add to folio</button>
   <button onclick="qbInvoice()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600"><i class="ti ti-file-invoice"></i> Invoice</button>
-  <button onclick="openTripsModal(_qbResId);closeQuickBar()" style="background:rgba(0,200,150,.25);border:1px solid rgba(0,200,150,.4);color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-sailing"></i> Trips</button>
+  <button onclick="openTripsModal(_qbResId);closeQuickBar()" style="background:rgba(0,200,150,.25);border:1px solid rgba(0,200,150,.4);color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-sailing"></i> Trips & Food</button>
   <button onclick="closeQuickBar()" style="background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:18px;padding:0 4px;line-height:1">✕</button>
 &lt;
 
@@ -3111,7 +3179,7 @@ Snorkelling trip"></textarea>
   <button onclick="qbOpenDrawer()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap"><i class="ti ti-eye"></i> Open</button>
   <button onclick="qbAddFolio()" style="background:#00b4d8;border:1px solid #00b4d8;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap"><i class="ti ti-notebook"></i> Add to folio</button>
   <button onclick="qbInvoice()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap"><i class="ti ti-file-invoice"></i> Invoice</button>
-  <button onclick="openTripsModal(_qbResId);closeQuickBar()" style="background:rgba(0,200,150,.25);border:1px solid rgba(0,200,150,.4);color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-sailing"></i> Trips</button>
+  <button onclick="openTripsModal(_qbResId);closeQuickBar()" style="background:rgba(0,200,150,.25);border:1px solid rgba(0,200,150,.4);color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-sailing"></i> Trips & Food</button>
   <button onclick="closeQuickBar()" style="background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:18px;padding:0 4px;line-height:1">✕</button>
 &lt;
 
@@ -5057,6 +5125,76 @@ function drawBlk(){
   if(!document.getElementById('bl-f').value)document.getElementById('bl-f').value=D(1);
   if(!document.getElementById('bl-to2').value)document.getElementById('bl-to2').value=D(3);
   drawBlkLst();
+  drawBlockRequests();
+}
+
+// ── AGENCY BLOCK REQUESTS (pending approval) ──
+async function drawBlockRequests(){
+  var el = document.getElementById('block-requests-list');
+  if (!el) return;
+  var reqs = [];
+  try {
+    var snap = await fsDb.collection('block_requests').where('status','==','pending').get();
+    snap.forEach(function(d){ reqs.push(d.data()); });
+    reqs.sort(function(a,b){ return (a.createdAt||'').localeCompare(b.createdAt||''); });
+  } catch(e) { console.error('drawBlockRequests failed', e); }
+  if (!reqs.length) { el.innerHTML = '<p style="font-size:12px;color:#9ca3af">No pending requests.</p>'; return; }
+  el.innerHTML = reqs.map(function(r){
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap">'
+      + '<div><div style="font-size:12px;font-weight:700">'+(r.agencyName||r.agencyEmail)+'</div>'
+      + '<div style="font-size:11px;color:#6b7280;margin-top:2px">'+(r.rooms||[]).map(function(rn){return rNm(rn);}).join(', ')+' · '+fd(r.ci)+'–'+fd(r.co)+(r.note?' · '+r.note:'')+'</div></div>'
+      + '<div style="display:flex;gap:6px">'
+      + '<button class="ab" title="Approve" style="color:#059669" onclick="approveBlockRequest(\''+r.id+'\')"><i class="ti ti-check"></i></button>'
+      + '<button class="ab" title="Reject" style="color:#dc2626" onclick="rejectBlockRequest(\''+r.id+'\')"><i class="ti ti-x"></i></button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function approveBlockRequest(id){
+  try {
+    var reqRef = fsDb.collection('block_requests').doc(id);
+    var snap = await reqRef.get();
+    if (!snap.exists) { toast('⚠️ Request no longer exists'); drawBlockRequests(); return; }
+    var req = snap.data();
+    if (req.status !== 'pending') { toast('⚠️ Already '+req.status); drawBlockRequests(); return; }
+
+    // Re-check conflicts against current reservations + existing blocks
+    // before creating the real block — same discipline as writeReservation,
+    // implemented separately here since blocks aren't reservations.
+    var conflicts = [];
+    for (var i=0;i<req.rooms.length;i++) {
+      var rn = req.rooms[i];
+      if (isOcc(rn, req.ci, req.co)) conflicts.push(rNm(rn));
+    }
+    if (conflicts.length) {
+      toast('⚠️ Conflict — '+conflicts.join(', ')+' now booked for those dates. Reject and ask the agency to resubmit.');
+      return;
+    }
+
+    for (var j=0;j<req.rooms.length;j++) {
+      var roomId = req.rooms[j];
+      var blk = { id:'BL'+Date.now()+'-'+roomId, type:'hold', rn:roomId, from:req.ci, to:req.co, note:'Agency: '+(req.agencyName||req.agencyEmail)+(req.note?' — '+req.note:'') };
+      BLK.push(blk);
+    }
+    saveBLK();
+    drawBlkLst();
+    await reqRef.set({ status:'approved', decidedAt:new Date().toISOString(), decidedBy:currentUser?.email||'admin' }, { merge:true });
+    toast('✓ Block request approved');
+    drawBlockRequests();
+  } catch(e) {
+    console.error('approveBlockRequest failed', e);
+    toast('⚠️ Could not approve — please try again');
+  }
+}
+
+async function rejectBlockRequest(id){
+  try {
+    await fsDb.collection('block_requests').doc(id).set({ status:'rejected', decidedAt:new Date().toISOString(), decidedBy:currentUser?.email||'admin' }, { merge:true });
+    toast('Block request rejected');
+    drawBlockRequests();
+  } catch(e) {
+    toast('⚠️ Could not reject — please try again');
+  }
 }
 function addBlk(){
   const rn=document.getElementById('bl-r').value,from=document.getElementById('bl-f').value,to=document.getElementById('bl-to2').value;
@@ -5081,6 +5219,7 @@ function drawCfg(){
   document.getElementById('st-ph').value=PROP.ph;document.getElementById('st-em').value=PROP.em;
   document.getElementById('st-gst').value=PROP.gst;document.getElementById('st-bk').value=PROP.bk;
   drawTaxSum();
+  loadCancellationOverrideCodeField();
 }
 function drawTaxSum(){
   const el=document.getElementById('tax-sum');if(!el)return;
@@ -5170,6 +5309,18 @@ function drawUsers(){
   document.getElementById('u-cnt-staff').textContent  = USERS.filter(u=>u.role==='staff').length;
   document.getElementById('u-cnt-agency').textContent = USERS.filter(u=>u.role==='agency').length;
 
+  renderUsersTable();
+  refreshStaffPermissions();
+}
+
+// email -> canModifyBookings, read directly from staff_permissions/{uid}
+// (admin-only read/write per the Firestore rules — a staff account can
+// never write its own permission doc, only read it via the security-rule
+// checks used elsewhere, never through the client).
+let STAFF_PERMS = {};
+let _staffPermsLoading = false;
+
+function renderUsersTable(){
   const tbody = document.getElementById('users-tbody');
   const roleInfo = {
     admin:  {label:'🔑 Admin',  cls:'ok',   desc:'Full access'},
@@ -5179,6 +5330,12 @@ function drawUsers(){
   tbody.innerHTML = USERS.map((u,i)=>{
     const ri = roleInfo[u.role]||{label:u.role,cls:'ot',desc:''};
     const isMe = u.email === currentUser?.email;
+    const accessCell = u.role==='staff'
+      ? `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;cursor:pointer">
+           <input type="checkbox" ${STAFF_PERMS[u.email]?'checked':''} onchange="toggleStaffPermission('${u.email}',this.checked)">
+           Can modify bookings
+         </label>`
+      : `<span style="font-size:11px;color:#6b7280">${ri.desc}</span>`;
     return `<tr>
       <td>
         <div style="display:flex;align-items:center;gap:8px">
@@ -5190,7 +5347,7 @@ function drawUsers(){
       </td>
       <td style="font-size:12px;color:#6b7280">${u.email}</td>
       <td><span class="bx ${ri.cls}">${ri.label}</span></td>
-      <td style="font-size:11px;color:#6b7280">${ri.desc}</td>
+      <td>${accessCell}</td>
       <td>
         <div style="display:flex;gap:4px">
           <button class="ab" title="Edit" onclick="openEditUser('${u.email}')"><i class="ti ti-edit"></i></button>
@@ -5199,6 +5356,48 @@ function drawUsers(){
       </td>
     </tr>`;
   }).join('');
+}
+
+async function refreshStaffPermissions(){
+  if (_staffPermsLoading) return;
+  const staffWithUid = USERS.filter(u=>u.role==='staff' && u.uid);
+  if (!staffWithUid.length) return;
+  _staffPermsLoading = true;
+  try {
+    const results = await Promise.all(staffWithUid.map(function(u){
+      // Existence of the doc (with role:'staff') IS the permission — there's
+      // no separate on/off field. Toggling off deletes the doc entirely.
+      return fsDb.collection('staff_permissions').doc(u.uid).get()
+        .then(function(snap){ return { email: u.email, canModifyBookings: !!(snap.exists && snap.data().role === 'staff') }; })
+        .catch(function(){ return { email: u.email, canModifyBookings: false }; });
+    }));
+    results.forEach(function(r){ STAFF_PERMS[r.email] = r.canModifyBookings; });
+    renderUsersTable();
+  } catch(e) { console.error('refreshStaffPermissions failed', e); }
+  _staffPermsLoading = false;
+}
+
+async function toggleStaffPermission(email, checked){
+  const u = USERS.find(function(x){ return x.email === email; });
+  if (!u || !u.uid) {
+    toast('⚠️ '+email+' needs to log in at least once before permissions can be set');
+    renderUsersTable();
+    return;
+  }
+  try {
+    // Existence of the doc IS the permission (per the Firestore rule's
+    // isStaff() check) — there's no separate boolean field to flip.
+    if (checked) {
+      await fsDb.collection('staff_permissions').doc(u.uid).set({ role: 'staff' });
+    } else {
+      await fsDb.collection('staff_permissions').doc(u.uid).delete();
+    }
+    STAFF_PERMS[email] = checked;
+    toast('✓ '+email+' can '+(checked?'now':'no longer')+' modify bookings');
+  } catch(e) {
+    toast('⚠️ Could not update permission — please try again');
+    renderUsersTable(); // revert the checkbox to last known state
+  }
 }
 
 // ── ADD / EDIT USER ──
@@ -5287,7 +5486,11 @@ async function saveAddUser(){
     if(email !== editingUserEmail){
       err.style.display='block';err.textContent="Changing a user's email isn't supported — remove them and add a new account instead.";return;
     }
-    USERS[idx] = {email, role:USERS[idx].role==='admin'?'admin':auRoleSelected, name};
+    // Merge rather than replace — a full replacement here used to silently
+    // drop uid (and any other stored fields) on every edit, which would
+    // break staff_permissions/{uid} lookups the next time this user was
+    // saved.
+    USERS[idx] = Object.assign({}, USERS[idx], {email, role:USERS[idx].role==='admin'?'admin':auRoleSelected, name});
     saveUsers(USERS);
     closeAddUser();
     if (pass) {
@@ -5309,8 +5512,9 @@ async function saveAddUser(){
     if(USERS.find(u=>u.email===email)){
       err.style.display='block';err.textContent='An account with this email already exists.';return;
     }
+    var newUid;
     try {
-      await createAuthUserWithoutSignIn(email, pass);
+      newUid = await createAuthUserWithoutSignIn(email, pass);
     } catch(authErr) {
       err.style.display='block';
       err.textContent = authErr.code === 'auth/email-already-in-use'
@@ -5318,7 +5522,7 @@ async function saveAddUser(){
         : 'Could not create account: '+(authErr.message||'unknown error');
       return;
     }
-    USERS.push({email, role:auRoleSelected, name});
+    USERS.push({email, role:auRoleSelected, name, uid:newUid});
     saveUsers(USERS);
     closeAddUser();
     toast('✓ '+name+' added as '+auRoleSelected);
@@ -5603,7 +5807,40 @@ function confirmNo(){
 }
 
 // ── BIN ──
-function softDelete(res){
+async function softDelete(res){
+  // Staff (not admin) can only cancel by submitting the admin-set override
+  // code. The code itself never touches the reservation document — it's
+  // checked via a short-lived cancellation_attempts reference doc so it can
+  // never be read back off a (publicly readable) reservation.
+  var isAdmin = currentUser && currentUser.role === 'admin';
+  var fields = resToFirestoreFields(Object.assign({}, res, { st: 'Cancelled' }));
+
+  if (!isAdmin) {
+    var code = prompt('Enter the cancellation override code:');
+    if (code === null) return;
+    if (!code.trim()) { toast('⚠️ Override code required'); return; }
+    var attemptRef = fsDb.collection('cancellation_attempts').doc();
+    try {
+      await attemptRef.set({ overrideCode: code.trim(), uid: firebase.auth().currentUser.uid, createdAt: new Date().toISOString() });
+    } catch(e) {
+      toast('⚠️ Could not submit override code — please try again');
+      return;
+    }
+    fields.cancellationAttemptId = attemptRef.id;
+  }
+
+  // Write to Firestore FIRST and only reflect the cancellation locally on
+  // success — otherwise a wrong override code (or any other write failure)
+  // would show "cancelled" in the PMS while Firestore silently kept the
+  // reservation active, the exact kind of drift this system exists to
+  // prevent.
+  try {
+    await writeReservation(res.id, fields);
+  } catch(e) {
+    toast(isAdmin ? '⚠️ Could not cancel — please try again' : '⚠️ Incorrect override code, or could not cancel — please try again');
+    return;
+  }
+
   // Move reservation to bin
   const idx = RES.findIndex(r=>r.id===res.id);
   if(idx===-1) return;
@@ -5613,11 +5850,6 @@ function softDelete(res){
   aLog('warn','Reservation '+res.id+' ('+res.fn+' '+res.ln+') moved to bin by '+(currentUser?.name||'Admin'));
   toast('Reservation moved to bin · Undo from Deleted items');
   drawRes(); drawCal(); drawDash();
-  // Cancelling releases the lock and marks the Firestore status in the SAME
-  // transaction — this never used to touch Firestore at all, so the room
-  // stayed "locked" forever and the website's calendar never saw it.
-  writeReservation(res.id, resToFirestoreFields(Object.assign({},res,{st:'Cancelled'})))
-    .catch(function(e){ console.error('softDelete Firestore sync failed', res.id, e); });
 }
 
 async function restoreFromBin(id){
@@ -6627,7 +6859,20 @@ function loadPackages(){
      active:true,description:'Full board with activities and speedboat transfer. Taxes included.'},
   ];
 }
-function savePackages(){localStorage.setItem('vilu_packages',JSON.stringify(PACKAGES));}
+function savePackages(){
+  localStorage.setItem('vilu_packages',JSON.stringify(PACKAGES));
+  syncPackagesToFirestore();
+}
+// Packages used to only reach the agency portal via a same-device
+// localStorage broadcast — invisible from any separate device. This is the
+// live source agency portals now read from directly.
+async function syncPackagesToFirestore(){
+  try {
+    var batch = fsDb.batch();
+    PACKAGES.forEach(function(p){ batch.set(fsDb.collection('packages').doc(p.id), p); });
+    await batch.commit();
+  } catch(e) { console.error('syncPackagesToFirestore failed', e); }
+}
 let PACKAGES=loadPackages();
 
 // Agency bookings tracking
@@ -6745,6 +6990,7 @@ function deletePkg(pid){
   showConfirm({title:'Delete this package?',msg:'Agencies will no longer see this package.',icon:'🗑️',btnLabel:'Yes, delete',btnColor:'#dc2626',onYes:function(){
     PACKAGES = PACKAGES.filter(function(p){return p.id!==pid;});
     savePackages();
+    fsDb.collection('packages').doc(pid).delete().catch(function(){});
     syncPackagesToAgency();
     drawPkgs();
     toast('Package deleted');
@@ -6783,22 +7029,11 @@ function processIncomingBookings(){
       if(added>0){localStorage.removeItem('vilu_agency_new_bk');saveRES();drawRes();drawCal();drawDash();showBookingNotif(added,RES[0]);}
     }
   }catch(e){}
-  // Import block requests  
-  try{
-    var blkQ=localStorage.getItem('vilu_agency_blk_queue');
-    if(blkQ){
-      var blks=JSON.parse(blkQ);
-      blks.forEach(function(b){
-        if(!BLK.find(function(x){return x.id===b.id;})){
-          BLK.push({id:b.id,rn:b.rn,from:b.ci,to:b.co,type:'Agency hold',note:b.note,agency:b.agency});
-          aLog('info','Agency block request: '+b.rn+' '+b.ci+' to '+b.co+' by '+b.agency);
-        }
-      });
-      localStorage.removeItem('vilu_agency_blk_queue');
-      try{saveBLK();}catch(e){}
-      drawCal();
-    }
-  }catch(e){}
+  // Agency block requests now go through the block_requests collection with
+  // real admin/staff approval (see drawBlockRequests/approveBlockRequest) —
+  // this used to auto-import an unreviewed localStorage queue straight into
+  // real blocks, which bypassed approval entirely and only ever worked
+  // same-device anyway.
   // Import web bookings
   try{
     var webQ=localStorage.getItem('vilu_pms_new_reservations');
@@ -6855,6 +7090,8 @@ function syncPackagesToAgency(){
 
 // Sync on load
 try{syncPackagesToAgency();}catch(e){console.error('syncPkg',e);}
+// syncPackagesToFirestore() runs later, once fsDb exists — see the Firebase
+// init section below (this script block runs before that one).
 try{syncAvailability();}catch(e){console.error('syncAvail',e);}
 // Real-time: listen for all incoming bookings
 window.addEventListener('storage', function(e){
@@ -6932,6 +7169,7 @@ async function syncAllUsersToSupabase(users) {
         role: u.role||'staff',
         company: u.company||'',
         commission: u.commission||0,
+        uid: u.uid||null,
         active: true
       }, 'on_conflict=id');
     }
@@ -6978,6 +7216,13 @@ async function authenticateUser(email, pass) {
   var profileDoc = await fsDb.collection('users').doc(fbUser.email).get();
   if (!profileDoc.exists) { firebase.auth().signOut(); return null; } // removed/deactivated account
   var d = profileDoc.data();
+  if (d.uid !== fbUser.uid) {
+    // Lazy backfill: accounts created before staff_permissions existed have
+    // no stored uid. Self-write it now (their own doc, own uid) so the
+    // admin's Staff Permissions panel can key a permission doc to this
+    // account without needing a Cloud Function to look it up.
+    fsDb.collection('users').doc(fbUser.email).set({ uid: fbUser.uid }, { merge: true }).catch(function(){});
+  }
   return { email: fbUser.email, name: d.name, role: d.role, company: d.company||'', commission: d.commission||0 };
 }
 
@@ -8639,6 +8884,7 @@ function resToFirestoreFields(r) {
     source:r.src||'Direct', notes:r.notes||'',
     extra_beds:r.extraBeds||0,
     trips: JSON.stringify(r.trips||[]),
+    food_orders: JSON.stringify(r.foodOrders||[]),
     arr_time:r.arrTime||'', arr_transport:r.arrTransport||'', arr_from:r.arrFrom||'',
     dep_time:r.depTime||'', dep_transport:r.depTransport||'', dep_to:r.depTo||'',
     updated_at:new Date().toISOString()
@@ -8751,6 +8997,10 @@ async function reconcileIfDue() {
   } catch(e) { console.error('reconcileIfDue failed', e); }
 }
 try { reconcileIfDue(); } catch(e) {}
+// fsDb only exists from this point on — this is the correct place for the
+// packages-on-load sync (the earlier "Sync on load" block runs before
+// Firebase itself has initialized).
+try { syncPackagesToFirestore(); } catch(e) { console.error('syncPkgFirestore', e); }
 
 async function runReconciliationNow() {
   var btn = document.querySelector('button[onclick="runReconciliationNow()"]');
@@ -8772,6 +9022,27 @@ async function runReconciliationNow() {
   if (btn) btn.disabled = false;
 }
 
+async function saveCancellationOverrideCode() {
+  var input = document.getElementById('st-cancel-code');
+  var code = (input && input.value || '').trim();
+  if (!code) { toast('⚠️ Enter a code first'); return; }
+  try {
+    await fsDb.collection('admin_settings').doc('security').set({ cancellationOverrideCode: code }, { merge: true });
+    toast('✓ Override code saved');
+  } catch(e) {
+    toast('⚠️ Could not save override code — please try again');
+  }
+}
+
+async function loadCancellationOverrideCodeField() {
+  var input = document.getElementById('st-cancel-code');
+  if (!input || !currentUser || currentUser.role !== 'admin') return;
+  try {
+    var snap = await fsDb.collection('admin_settings').doc('security').get();
+    if (snap.exists && snap.data().cancellationOverrideCode) input.value = snap.data().cancellationOverrideCode;
+  } catch(e) {}
+}
+
 // Creates a Firebase Auth account without disturbing the currently signed-in
 // admin's own session — uses a throwaway secondary App instance, since the
 // primary instance's createUser call would otherwise sign the admin out and
@@ -8779,7 +9050,8 @@ async function runReconciliationNow() {
 async function createAuthUserWithoutSignIn(email, pass) {
   var secondaryApp = firebase.initializeApp(firebaseConfig, 'UserCreation_' + Date.now());
   try {
-    await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+    var cred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+    return cred.user.uid;
   } finally {
     try { await secondaryApp.auth().signOut(); } catch(e) {}
     try { await secondaryApp.delete(); } catch(e) {}
@@ -8873,6 +9145,10 @@ async function loadResFromSupabase() {
         if(local.trips && local.trips.length) return local.trips;
         try { var t=r.trips; if(typeof t==='string') t=JSON.parse(t); return t||[]; } catch(e) { return []; }
       })(),
+      foodOrders:(function(){
+        if(local.foodOrders && local.foodOrders.length) return local.foodOrders;
+        try { var fo=r.food_orders; if(typeof fo==='string') fo=JSON.parse(fo); return fo||[]; } catch(e) { return []; }
+      })(),
       arrTime:local.arrTime||r.arr_time||'',
       arrTransport:local.arrTransport||r.arr_transport||'',
       arrFrom:local.arrFrom||r.arr_from||'',
@@ -8907,7 +9183,8 @@ async function loadAllFromSupabase() {
         name: u.name,
         role: u.role,
         company: u.company||'',
-        commission: u.commission||0
+        commission: u.commission||0,
+        uid: u.uid || (local && local.uid) || null
       };
     });
     // Also keep any local-only users not in Supabase yet
@@ -9446,6 +9723,7 @@ function openTripsModal(resId) {
 
   // Render existing trips list
   renderTripsList(res);
+  renderFoodOrdersList(res);
 
   // Show modal
   modal.classList.add('on');
@@ -9488,6 +9766,50 @@ function renderTripsList(res) {
 }
 
 
+
+function renderFoodOrdersList(res) {
+  var body = document.getElementById('food-orders-list-body');
+  if (!body) return;
+  var orders = res.foodOrders || [];
+  if (!orders.length) {
+    body.innerHTML = '<div style="color:#9ca3af;font-size:13px;padding:12px 0;text-align:center">No food orders added yet.</div>';
+    return;
+  }
+  body.innerHTML = orders.map(function(o, idx) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;gap:10px;flex-wrap:wrap">'
+      + '<div><div style="font-size:13px;font-weight:700">'+o.item+'</div><div style="font-size:11px;color:#6b7280">Qty '+o.qty+' × $'+(+o.price).toFixed(2)+' = $'+(o.qty*o.price).toFixed(2)+'</div></div>'
+      + '<button onclick="removeFoodOrderFromRes(\''+res.id+'\','+idx+')" title="Remove" style="background:#6b7280;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:11px;cursor:pointer">🗑️</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addFoodOrderToRes(resId) {
+  var res = RES.find(function(r){return r.id===resId;});
+  if(!res) return;
+  if(!res.foodOrders) res.foodOrders = [];
+  var itemEl = document.getElementById('food-item');
+  var qtyEl = document.getElementById('food-qty');
+  var priceEl = document.getElementById('food-price');
+  if(!itemEl || !qtyEl || !priceEl) { toast('Error: modal not ready'); return; }
+  var item = itemEl.value.trim();
+  var qty = +qtyEl.value || 1;
+  var price = +priceEl.value || 0;
+  if(!item) { toast('Enter a food item'); return; }
+  res.foodOrders.push({ item: item, qty: qty, price: price });
+  saveRES(res);
+  renderFoodOrdersList(res);
+  itemEl.value = ''; qtyEl.value = '1'; priceEl.value = '';
+  toast('✅ Food order added!');
+}
+
+function removeFoodOrderFromRes(resId, idx) {
+  var res = RES.find(function(r){return r.id===resId;});
+  if(!res || !res.foodOrders) return;
+  res.foodOrders.splice(idx, 1);
+  saveRES(res);
+  renderFoodOrdersList(res);
+  toast('Food order removed');
+}
 
 function addTripToRes(resId) {
   var res = RES.find(function(r){return r.id===resId;});

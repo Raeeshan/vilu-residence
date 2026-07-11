@@ -227,6 +227,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
     <!-- AVAILABILITY TAB -->
     <div id="tab-availability" class="hidden">
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <h3 style="margin:0">Live calendar</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn-outline" onclick="calGridShift(-1)"><i class="ti ti-chevron-left"></i></button>
+            <span id="cal-grid-range" style="font-size:12px;color:var(--muted);font-weight:600"></span>
+            <button class="btn-outline" onclick="calGridShift(1)"><i class="ti ti-chevron-right"></i></button>
+            <button class="btn-outline" onclick="renderAgencyCalendarGrid()"><i class="ti ti-refresh"></i></button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
+          <span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border:1px solid #86efac;border-radius:2px;margin-right:4px"></span>Available
+          <span style="display:inline-block;width:10px;height:10px;background:#dbeafe;border:1px solid #93c5fd;border-radius:2px;margin:0 4px 0 12px"></span>Your booking
+          <span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:2px;margin:0 4px 0 12px"></span>Booked (other)
+          <span style="display:inline-block;width:10px;height:10px;background:#fef3c7;border:1px solid #fde68a;border-radius:2px;margin:0 4px 0 12px"></span>Blocked
+        </div>
+        <div style="overflow-x:auto"><div id="cal-grid-body"></div></div>
+      </div>
       <div class="card">
         <h3>Check availability</h3>
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:16px">
@@ -436,17 +454,33 @@ async function writeReservation(docId, fields, opts) {
 // getAvailability()/isRoomAvailable() which only read a PMS-only localStorage
 // key ('vilu_res') that never exists on a device where the PMS was never
 // opened, so every room silently looked available regardless of real bookings.
-var _availCache = { reservations: [], fetchedAt: 0 };
+//
+// This also used to read the full `reservations` collection directly — every
+// guest's name, email, phone, ID number, across every agency's and every
+// OTA's bookings — into this browser, even though the UI only ever used it
+// to check availability. room_availability holds the exact same date-range
+// info with zero guest data, so general availability now comes from there;
+// this agency's OWN bookings are fetched separately via a query the
+// Firestore rules only allow when scoped to this agency's own uid.
+var _availCache = { reservations: [], myReservations: [], blocks: [], fetchedAt: 0 };
 async function fetchLiveAvailability() {
   try {
-    var snap = await fsDb.collection('reservations').get();
+    var roomIds = ROOMS_LIST.map(function(r){ return r.id; });
     var res = [];
-    snap.forEach(function(d) {
-      var r = d.data();
-      if (!r.room_id || !r.check_in || !r.check_out) return;
-      res.push({ id: d.id, rn: r.room_id, ci: r.check_in, co: r.check_out, st: r.status||'Confirmed' });
-    });
-    _availCache = { reservations: res, fetchedAt: Date.now() };
+    for (var i=0;i<roomIds.length;i++) {
+      var snap = await fsDb.collection('room_availability').doc(roomIds[i]).get();
+      var bookings = (snap.exists && snap.data().bookings) || [];
+      bookings.forEach(function(b){ res.push({ id: b.id, rn: roomIds[i], ci: b.from, co: b.to, st: 'Confirmed' }); });
+    }
+    var myRes = [];
+    if (currentAgency && currentAgency.uid) {
+      var mySnap = await fsDb.collection('reservations').where('agencyId','==',currentAgency.uid).get();
+      mySnap.forEach(function(d){ myRes.push(Object.assign({ id: d.id }, d.data())); });
+    }
+    var blks = [];
+    var blkSnap = await fsDb.collection('blocks').get();
+    blkSnap.forEach(function(d){ var b=d.data(); blks.push({ id:d.id, rn:b.room_id, ci:(b.from_date||'').slice(0,10), co:(b.to_date||'').slice(0,10), reason:b.reason||'Blocked' }); });
+    _availCache = { reservations: res, myReservations: myRes, blocks: blks, fetchedAt: Date.now() };
   } catch(e) {}
   return _availCache;
 }
@@ -509,7 +543,7 @@ async function migrateLegacyAgency(email, pass){
 }
 
 async function enterAgencyPortal(profile){
-  currentAgency = {name:profile.name, email:profile.email, company:profile.company||profile.name, commission:profile.commission||0};
+  currentAgency = {name:profile.name, email:profile.email, company:profile.company||profile.name, commission:profile.commission||0, uid:firebase.auth().currentUser.uid};
   try{var mb=localStorage.getItem('vilu_agency_bk_'+currentAgency.email);myBookings=mb?JSON.parse(mb):[];}catch(e){myBookings=[];}
   try{var bl=localStorage.getItem('vilu_agency_blk_'+currentAgency.email);myBlocks=bl?JSON.parse(bl):[];}catch(e){myBlocks=[];}
   document.getElementById('login-screen').style.display='none';
@@ -632,43 +666,90 @@ function showTab(name, el){
     document.getElementById('av-ci').value=today.toISOString().slice(0,10);
     document.getElementById('av-co').value=tom.toISOString().slice(0,10);
     checkAvailability();
+    renderAgencyCalendarGrid();
   }
 }
 
-// ── AVAILABILITY ──
-function getAvailability(){
-  try{var a=localStorage.getItem('vilu_availability');return a?JSON.parse(a):{reservations:[],blocks:[]};}
-  catch(e){return {reservations:[],blocks:[]};}
-}
-
-function isRoomAvailable(rn, ci, co, excludeId){
-  var av = getAvailability();
-  var res = av.reservations||[];
-  var blks = av.blocks||[];
-  for(var i=0;i<res.length;i++){
-    var r=res[i];
-    if(r.id===excludeId||r.rn!==rn) continue;
-    if(r.ci<co && r.co>ci) return {available:false,reason:'Booked ('+r.st+')'};
-  }
-  for(var j=0;j<blks.length;j++){
-    var b=blks[j];
-    if(b.id===excludeId||b.rn!==rn) continue;
-    if(b.from<co && b.to>ci) return {available:false,reason:'Blocked'};
-  }
-  // Check my own blocks
-  for(var k=0;k<myBlocks.length;k++){
-    var mb=myBlocks[k];
-    if(mb.rn!==rn) continue;
-    if(mb.ci<co && mb.co>ci) return {available:false,reason:'Your block',mine:true};
-  }
-  return {available:true};
-}
+// ── AVAILABILITY ── (see window.getAvailability/window.isRoomAvailable
+// below — the real implementations, reading live Firestore data)
 
 var ROOMS_LIST = [
   {id:'VR01',name:'Room 101'},{id:'VR02',name:'Room 102'},
   {id:'VR03',name:'Room 103'},{id:'VR04',name:'Room 104'},
   {id:'VR05',name:'Room 105'},{id:'VR06',name:'Room 106'},
 ];
+
+// ── LIVE CALENDAR GRID ──
+// Mirrors the PMS's own drawCal() layout (rooms as rows, dates as columns),
+// but built entirely from data this agency is actually permitted to see:
+// room_availability (no PII, so any occupied slot from another party shows
+// only as "Booked") plus this agency's own scoped reservations query (full
+// detail for their own bookings). Nothing here comes from a raw, unscoped
+// reservations read.
+var _calGridStart = new Date();
+var _calGridDays = 14;
+
+function calGridShift(dir){
+  _calGridStart.setDate(_calGridStart.getDate() + dir*_calGridDays);
+  renderAgencyCalendarGrid();
+}
+
+function ymdStr(d){ return d.toISOString().slice(0,10); }
+
+async function renderAgencyCalendarGrid(){
+  await fetchLiveAvailability();
+  var body = document.getElementById('cal-grid-body');
+  var rangeEl = document.getElementById('cal-grid-range');
+  if(!body) return;
+
+  var days = [];
+  for(var i=0;i<_calGridDays;i++){
+    var d = new Date(_calGridStart); d.setDate(d.getDate()+i);
+    days.push(d);
+  }
+  if(rangeEl) rangeEl.textContent = fd(ymdStr(days[0])) + ' → ' + fd(ymdStr(days[days.length-1]));
+
+  var myIds = {};
+  (_availCache.myReservations||[]).forEach(function(r){ myIds[r.id] = r; });
+
+  var html = '<table style="border-collapse:collapse;font-size:11px;min-width:900px">';
+  html += '<tr><th style="text-align:left;padding:6px 10px;position:sticky;left:0;background:#fff">Room</th>';
+  days.forEach(function(d){
+    html += '<th style="padding:6px 6px;text-align:center;font-weight:600;color:#6b7280;min-width:56px">'+d.toLocaleDateString('en-US',{weekday:'short',day:'numeric'})+'</th>';
+  });
+  html += '</tr>';
+
+  ROOMS_LIST.forEach(function(room){
+    html += '<tr><td style="padding:6px 10px;font-weight:700;position:sticky;left:0;background:#fff;border-right:1px solid var(--border)">'+room.name+'</td>';
+    days.forEach(function(d){
+      var ds = ymdStr(d);
+      var cellStyle = 'background:#dcfce7;border:1px solid #86efac'; // available
+      var title = 'Available';
+
+      var block = (_availCache.blocks||[]).find(function(b){ return b.rn===room.id && ds>=b.ci && ds<b.co; });
+      var occ = (_availCache.reservations||[]).find(function(b){ return b.rn===room.id && ds>=b.ci && ds<b.co; });
+
+      if (occ) {
+        var mine = myIds[occ.id];
+        if (mine) {
+          cellStyle = 'background:#dbeafe;border:1px solid #93c5fd';
+          title = mine.guest_name+' · '+mine.check_in+' → '+mine.check_out;
+        } else {
+          cellStyle = 'background:#fee2e2;border:1px solid #fca5a5';
+          title = 'Booked';
+        }
+      } else if (block) {
+        cellStyle = 'background:#fef3c7;border:1px solid #fde68a';
+        title = 'Blocked'+(block.reason?': '+block.reason:'');
+      }
+
+      html += '<td title="'+title.replace(/"/g,'&quot;')+'" style="'+cellStyle+';height:30px;text-align:center;font-size:10px;color:#374151;cursor:default">'+(occ&&myIds[occ.id]?'★':'')+'</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</table>';
+  body.innerHTML = html;
+}
 
 async function checkAvailability(){
   var ci=document.getElementById('av-ci').value;
@@ -692,7 +773,22 @@ async function checkAvailability(){
 function fd(d){return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 
 // ── PACKAGES ──
-function drawPackages(){
+// Packages used to only reach this portal via a same-device localStorage
+// broadcast from the PMS — invisible from any separate device. Now read
+// live from Firestore, same pattern as fetchLiveAvailability().
+var _pkgCache = [];
+async function fetchPackagesFromFirestore() {
+  try {
+    var snap = await fsDb.collection('packages').get();
+    var out = [];
+    snap.forEach(function(d){ out.push(d.data()); });
+    _pkgCache = out;
+  } catch(e) {}
+  return _pkgCache;
+}
+
+async function drawPackages(){
+  await fetchPackagesFromFirestore();
   var pkgs=loadPMS_Packages().filter(function(p){return p.active;});
   var el=document.getElementById('pkg-cards');
   if(!el)return;
@@ -730,7 +826,7 @@ function drawPackages(){
 }
 
 function loadPMS_Packages(){
-  try{var s=localStorage.getItem('vilu_packages');return s?JSON.parse(s):[]; }catch(e){return [];}
+  return _pkgCache;
 }
 
 // ── BOOKING MODAL ──
@@ -743,7 +839,7 @@ function drawMyBookings(){
     el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">📋</div><p>No bookings yet.</p></div>';
     return;
   }
-  var h='<table class="tb"><thead><tr><th>Ref</th><th>Guest</th><th>Package</th><th>Room</th><th>Dates</th><th>Net</th><th>Status</th></tr></thead><tbody>';
+  var h='<table class="tb"><thead><tr><th>Ref</th><th>Guest</th><th>Package</th><th>Room</th><th>Dates</th><th>Net</th><th>Status</th><th>Documents</th></tr></thead><tbody>';
   myBookings.forEach(function(bk){
     var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
     h+='<tr>';
@@ -754,55 +850,74 @@ function drawMyBookings(){
     h+='<td style="font-size:12px">'+fd(bk.ci)+' → '+fd(bk.co)+'<br><span style="color:var(--muted)">'+nights+' nights</span></td>';
     h+='<td style="font-weight:700;color:var(--green)">$'+bk.netRate+'</td>';
     h+='<td><span class="badge '+(bk.st==='Confirmed'?'ok':'pending')+'">'+bk.st+'</span></td>';
+    h+='<td><div style="display:flex;gap:4px"><button class="btn-outline" style="font-size:11px;padding:4px 8px" onclick="generateBookingConfirmation(\''+bk.id+'\')">Confirmation</button><button class="btn-outline" style="font-size:11px;padding:4px 8px" onclick="generateAgencyInvoice(\''+bk.id+'\')">Invoice</button></div></td>';
     h+='</tr>';
   });
   h+='</tbody></table>';
   el.innerHTML=h;
 }
 
-// ── BLOCK ROOMS ──
-function submitBlock(){
-  if(!currentAgency)return;
-  var ci=document.getElementById('blk-ci').value;
-  var co=document.getElementById('blk-co').value;
-  var rm=document.getElementById('blk-rm').value;
-  var note=(document.getElementById('blk-note').value||'').trim();
-  if(!ci||!co||co<=ci){alert('Select valid dates');return;}
-  if(!rm){alert('Select a room');return;}
-  var avail=isRoomAvailable(rm,ci,co);
-  if(!avail.available&&!avail.mine){alert('Room not available for this period: '+avail.reason);return;}
-  var nights=Math.round((new Date(co)-new Date(ci))/864e5);
-  var blk={
-    id:'BLK-'+Date.now().toString().slice(-6),
-    rn:rm, ci:ci, co:co, nights:nights, note:note,
-    agency:currentAgency.name||currentAgency.email,
-    agencyEmail:currentAgency.email,
-    status:'Pending', createdAt:new Date().toISOString()
-  };
-  myBlocks.push(blk);
-  localStorage.setItem('vilu_agency_blk_'+currentAgency.email, JSON.stringify(myBlocks));
-  // Push to PMS as a block request
-  try{
-    var queue=localStorage.getItem('vilu_agency_blk_queue');
-    var arr=queue?JSON.parse(queue):[];
-    arr.push(blk);
-    localStorage.setItem('vilu_agency_blk_queue', JSON.stringify(arr));
-  }catch(e){}
-  try{var bc=new BroadcastChannel('vilu_pms');bc.postMessage({type:'BLOCK_REQUEST',block:blk});bc.close();}catch(e){}
-  alert('Block request sent! Reference: '+blk.id+'\nVilu Residence will confirm shortly.');
-  document.getElementById('blk-ci').value='';
-  document.getElementById('blk-co').value='';
-  document.getElementById('blk-rm').value='';
-  document.getElementById('blk-note').value='';
-  drawMyBlocks();
+// Two separate guest-facing documents. Confirmation never shows a price;
+// Invoice is the only one that does.
+function _openDocWindow(title, bodyHtml){
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><title>'+title+'</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;padding:30px;color:#111827}h1{font-size:20px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:14px}td,th{padding:7px 10px;border:1px solid #e5e7eb;text-align:left;font-size:13px}@media print{@page{margin:15mm}}</style>'
+    +'</head><body>'+bodyHtml+'</body></html>');
 }
 
-function drawMyBlocks(){
+function generateBookingConfirmation(bkId){
+  var bk=myBookings.find(function(b){return b.id===bkId;});
+  if(!bk) return;
+  var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
+  var html='<h1>Booking Confirmation</h1><div style="color:#6b7280;font-size:13px;margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
+    +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
+    +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
+    +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
+    +'<tr><th>Check-in</th><td>'+fd(bk.ci)+'</td></tr>'
+    +'<tr><th>Check-out</th><td>'+fd(bk.co)+' ('+nights+' nights)</td></tr>'
+    +'<tr><th>Adults</th><td>'+(bk.ad||2)+'</td></tr>'
+    +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
+    +'<tr><th>Included</th><td>'+((bk.packageIncludes||[]).join(', ')||'—')+'</td></tr>'
+    +'<tr><th>Booked via</th><td>'+(bk.agency||currentAgency.name)+'</td></tr>'
+    +'</table><div style="margin-top:20px;font-size:11px;color:#9ca3af">This document confirms the booking details only. It does not include pricing.</div>';
+  _openDocWindow('Booking Confirmation - '+bk.id, html);
+}
+
+function generateAgencyInvoice(bkId){
+  var bk=myBookings.find(function(b){return b.id===bkId;});
+  if(!bk) return;
+  var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
+  var html='<h1>Invoice</h1><div style="color:#6b7280;font-size:13px;margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
+    +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
+    +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
+    +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
+    +'<tr><th>Dates</th><td>'+fd(bk.ci)+' → '+fd(bk.co)+' ('+nights+' nights)</td></tr>'
+    +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
+    +'<tr><th>Rack total</th><td>$'+bk.rackTotal+'</td></tr>'
+    +'<tr><th>Commission ('+bk.commission+'%)</th><td>-$'+(bk.rackTotal-bk.netRate).toFixed(2)+'</td></tr>'
+    +'<tr><th><strong>Net amount due</strong></th><td><strong>$'+bk.netRate+'</strong></td></tr>'
+    +'<tr><th>Payment status</th><td>'+(bk.pay||'Unpaid')+'</td></tr>'
+    +'</table>';
+  _openDocWindow('Invoice - '+bk.id, html);
+}
+
+// ── BLOCK ROOMS ── (see window.submitBlock below — the real implementation)
+async function drawMyBlocks(){
   var el=document.getElementById('my-blocks-list');
-  if(!myBlocks.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">No block requests yet.</div>';return;}
-  var h='<h3 style="font-size:14px;font-weight:700;margin-bottom:10px">My block requests</h3><table class="tb"><thead><tr><th>Ref</th><th>Room</th><th>Dates</th><th>Nights</th><th>Note</th><th>Status</th></tr></thead><tbody>';
-  myBlocks.forEach(function(b){
-    h+='<tr><td style="font-weight:700">'+b.id+'</td><td>'+b.rn+'</td><td>'+fd(b.ci)+' → '+fd(b.co)+'</td><td>'+b.nights+'</td><td style="font-size:12px;color:var(--muted)">'+b.note+'</td><td><span class="badge pending">'+b.status+'</span></td></tr>';
+  if(!el || !currentAgency) return;
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Loading...</div>';
+  var reqs=[];
+  try{
+    var snap=await fsDb.collection('block_requests').where('agencyId','==',currentAgency.uid).get();
+    snap.forEach(function(d){ reqs.push(d.data()); });
+    reqs.sort(function(a,b){ return (b.createdAt||'').localeCompare(a.createdAt||''); });
+  }catch(e){}
+  if(!reqs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">No block requests yet.</div>';return;}
+  var badgeCls={pending:'pending',approved:'ok',rejected:'wn'};
+  var h='<h3 style="font-size:14px;font-weight:700;margin-bottom:10px">My block requests</h3><table class="tb"><thead><tr><th>Ref</th><th>Rooms</th><th>Dates</th><th>Note</th><th>Status</th></tr></thead><tbody>';
+  reqs.forEach(function(r){
+    h+='<tr><td style="font-weight:700">'+r.id+'</td><td>'+(r.rooms||[]).join(', ')+'</td><td>'+fd(r.ci)+' → '+fd(r.co)+'</td><td style="font-size:12px;color:var(--muted)">'+(r.note||'')+'</td><td><span class="badge '+(badgeCls[r.status]||'pending')+'">'+r.status+'</span></td></tr>';
   });
   h+='</tbody></table>';
   el.innerHTML=h;
@@ -1126,7 +1241,8 @@ async function submitAgencyBooking(){
       adults: ad||2, children: 0,
       rate: selectedPkg.pricePerRoom||0, status: 'Confirmed',
       source: 'Agency', notes: bk.notes,
-      extra_beds: 0, trips: '[]',
+      agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
+      extra_beds: 0, trips: '[]', food_orders: '[]',
       arr_time:'', arr_transport:'', arr_from:'',
       dep_time:'', dep_transport:'', dep_to:'',
       updated_at: new Date().toISOString()
@@ -1211,29 +1327,26 @@ window.submitBlock=async function(){
   var numRooms=parseInt(rmEl?rmEl.value:1)||1;
   var note=(document.getElementById('blk-note').value||'').trim();
   if(!ci||!co||co<=ci){alert('Select valid dates');return;}
-  var nights=Math.round((new Date(co)-new Date(ci))/864e5);
   await fetchLiveAvailability();
   var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});
   if(!availRooms.length){alert('No rooms available for these dates');return;}
   var toBlock=availRooms.slice(0,Math.min(numRooms,availRooms.length));
-  var added=[];
-  for(var bi=0;bi<toBlock.length;bi++){
-    var room=toBlock[bi];
-    var ref='BLK-'+Date.now().toString().slice(-6)+'-'+room.id;
-    var blk={id:ref,rn:room.id,roomName:room.name,ci:ci,co:co,nights:nights,note:note,agency:currentAgency.name||currentAgency.email,agencyEmail:currentAgency.email,status:'Pending',createdAt:new Date().toISOString()};
-    if(typeof myBlocks!=='undefined')myBlocks.push(blk);
-    added.push(blk);
-    // Write straight to the real Firestore blocks collection so the PMS and
-    // website calendars see this hold immediately — the old localStorage/
-    // BroadcastChannel queue below never reached Firestore on a separate device.
-    try{
-      await fsDb.collection('blocks').doc(ref).set({id:ref, room_id:room.id, from_date:ci, to_date:co, reason:note||'Agency hold ('+(currentAgency.name||currentAgency.email)+')'});
-    }catch(e){}
+  // This does NOT block the room immediately — it creates a pending request
+  // that admin or staff must approve in the PMS before any real block is
+  // created, so an agency can never hold a room just by asking for it.
+  var ref='BR-'+Date.now().toString().slice(-6);
+  var reqDoc={
+    id:ref, agencyId:currentAgency.uid, agencyEmail:currentAgency.email, agencyName:currentAgency.name||currentAgency.email,
+    rooms:toBlock.map(function(r){return r.id;}), ci:ci, co:co, note:note,
+    status:'pending', createdAt:new Date().toISOString(), decidedAt:null, decidedBy:null
+  };
+  try{
+    await fsDb.collection('block_requests').doc(ref).set(reqDoc);
+  }catch(e){
+    alert('Could not submit block request — please try again.');
+    return;
   }
-  try{if(typeof myBlocks!=='undefined')localStorage.setItem('vilu_agency_blk_'+currentAgency.email,JSON.stringify(myBlocks));}catch(e){}
-  try{var q=JSON.parse(localStorage.getItem('vilu_agency_blk_queue')||'[]');added.forEach(function(b){q.push(b);});localStorage.setItem('vilu_agency_blk_queue',JSON.stringify(q));}catch(e){}
-  try{var bc=new BroadcastChannel('vilu_pms');added.forEach(function(b){bc.postMessage({type:'BLOCK_REQUEST',block:b});});bc.close();}catch(e){}
-  alert('Block request sent!\n'+toBlock.map(function(r){return r.name;}).join(', ')+'\n'+ci+' to '+co);
+  alert('Block request sent for admin/staff approval!\n'+toBlock.map(function(r){return r.name;}).join(', ')+'\n'+ci+' to '+co);
   document.getElementById('blk-ci').value='';document.getElementById('blk-co').value='';if(rmEl)rmEl.value=1;document.getElementById('blk-note').value='';
   if(typeof drawMyBlocks==='function')drawMyBlocks();
 };
