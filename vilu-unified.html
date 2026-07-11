@@ -3622,17 +3622,11 @@ function propFromRoomId(rn){
   return h ? h.id : 'vilu';
 }
 
-let RES=[
-  {id:'BK001',fn:'James',ln:'Wilson',em:'james@e.com',ph:'+1 555-111',nat:'USA',pid:'US123',rn:'VR01',rate:80,ci:D(-3),co:D(2),ad:2,ch:0,inf:0,src:'Booking.com',pay:'Fully paid',st:'Checked in',ref:'BDC-881',notes:'Honeymoon — flower decoration requested.',nlog:[],prop:'vilu'},
-  {id:'BK002',fn:'Sophie',ln:'Martin',em:'sophie@e.com',ph:'+33 6-111',nat:'France',pid:'FR789',rn:'VR03',rate:85,ci:D(1),co:D(5),ad:2,ch:1,inf:0,src:'Airbnb',pay:'Fully paid',st:'Confirmed',ref:'AIR-774',notes:'Child age 8. Vegetarian meals.',nlog:[],prop:'vilu'},
-  {id:'BK003',fn:'Raj',ln:'Patel',em:'raj@e.com',ph:'+91 98-111',nat:'India',pid:'IN334',rn:'VR05',rate:90,ci:D(0),co:D(4),ad:2,ch:0,inf:1,src:'Expedia',pay:'Deposit paid',st:'Confirmed',ref:'EXP-112',notes:'Early check-in 10am.',nlog:[],prop:'vilu'},
-  {id:'BK004',fn:'Anna',ln:'Schmidt',em:'anna@e.com',ph:'+49 171-111',nat:'Germany',pid:'DE554',rn:'VR02',rate:80,ci:D(-8),co:D(-5),ad:1,ch:0,inf:0,src:'Google Hotels',pay:'Fully paid',st:'Checked out',ref:'GGL-998',notes:'',nlog:[],prop:'vilu'},
-  {id:'BK005',fn:'Ali',ln:'Hassan',em:'ali@e.com',ph:'+960 777-111',nat:'Maldives',pid:'MV112',rn:'VR04',rate:85,ci:D(0),co:D(3),ad:3,ch:0,inf:0,src:'Direct',pay:'Unpaid',st:'Pending',ref:'',notes:'Late check-out requested.',nlog:[],prop:'vilu'},
-  {id:'BK006',fn:'Chen',ln:'Wei',em:'chen@e.com',ph:'+86 138-111',nat:'China',pid:'CN998',rn:'VR06',rate:90,ci:D(3),co:D(7),ad:2,ch:2,inf:0,src:'Agoda',pay:'Fully paid',st:'Confirmed',ref:'AGO-772',notes:'Children ages 6 & 9.',nlog:[],prop:'vilu'},
-  {id:'BK007',fn:'Mark',ln:'Johnson',em:'mark@e.com',ph:'+44 7911',nat:'UK',pid:'GB223',rn:'ha-R1',rate:70,ci:D(0),co:D(4),ad:2,ch:0,inf:0,src:'Direct',pay:'Fully paid',st:'Confirmed',ref:'',notes:'Overflow from Vilu.',nlog:[],prop:'ha'},
-  {id:'BK008',fn:'Maria',ln:'Garcia',em:'maria@e.com',ph:'+34 611',nat:'Spain',pid:'ES445',rn:'hb-R2',rate:65,ci:D(1),co:D(5),ad:2,ch:1,inf:0,src:'Direct',pay:'Deposit paid',st:'Confirmed',ref:'',notes:'Transferred from Vilu.',nlog:[],prop:'hb'},
-];
-(function(){try{var s=localStorage.getItem('vilu_res');if(s){RES=JSON.parse(s);}}catch(e){}})();
+// Reservations only ever come from an authenticated Firestore read (see
+// doLogin() and loadAllFromSupabase()) — never from a hardcoded seed array
+// or an unconditional localStorage read, both of which used to let stale
+// or placeholder data sit on screen indistinguishably from real data.
+let RES=[];
 
 
 // ── BOAT BUILDER FUNCTIONS ──
@@ -7275,6 +7269,20 @@ async function doLogin() {
   }
 
   currentUser = profile;
+
+  // Reservations require an authenticated read now — the pre-login load
+  // attempt (fired unconditionally on page load, before anyone is signed
+  // in) always fails permission-denied and is silently swallowed. This is
+  // the first point a real fetch is actually possible; without it the
+  // calendar would draw from whatever RES held before login (empty) and
+  // never correct itself.
+  const loginBtns = document.querySelectorAll('.login-btn');
+  loginBtns.forEach(function(b){ b.disabled = true; b.textContent = 'Loading your data...'; });
+  try {
+    await loadAllFromSupabase();
+  } catch(e) { console.error('post-login loadAllFromSupabase failed', e); }
+  loginBtns.forEach(function(b){ b.disabled = false; b.textContent = 'Sign in →'; });
+
   document.getElementById('login-screen').style.display = 'none';
   applyRoleUI(profile.role, profile.name);
   applyUserMgmtVisibility();
@@ -9866,7 +9874,11 @@ window.autoBackup=function(){var res=localStorage.getItem('vilu_res');if(!res)re
 window.exportPMSData=function(){var d={vilu_res:localStorage.getItem('vilu_res')||'[]',vilu_transfers:localStorage.getItem('vilu_transfers')||'{}',savedAt:new Date().toISOString()};var n=0;try{n=JSON.parse(d.vilu_res).length;}catch(e){}var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download='vilu-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();if(typeof toast==='function')toast('Exported '+n+' bookings!');};
 window.importPMSData=function(){var inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){var file=e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(ev){try{var d=JSON.parse(ev.target.result);var n=0;try{n=JSON.parse(d.vilu_res||'[]').length;}catch(e){}if(!confirm('Import '+n+' bookings? Replaces current data.'))return;if(d.vilu_res)localStorage.setItem('vilu_res',d.vilu_res);if(d.vilu_transfers)localStorage.setItem('vilu_transfers',d.vilu_transfers);location.reload();}catch(e){alert('Invalid backup file');}};reader.readAsText(file);};inp.click();};
 var _t=setInterval(function(){if(typeof window.saveRES==='function'){clearInterval(_t);var o=window.saveRES;window.saveRES=function(){o.apply(this,arguments);autoBackup();};}},300);
-window.addEventListener('load',function(){setTimeout(function(){var res=localStorage.getItem('vilu_res');var n=0;try{n=JSON.parse(res||'[]').length;}catch(e){}if(n===0){var bk=localStorage.getItem(BK);if(bk){try{var b=JSON.parse(bk);if(b.n>0&&confirm('Found backup of '+b.n+' bookings ('+b.dt.slice(0,10)+'). Restore?')){localStorage.setItem('vilu_res',b.r);if(b.t)localStorage.setItem('vilu_transfers',b.t);location.reload();}}catch(e){}}}else{autoBackup();}},2500);});
+// Deliberately no longer auto-prompting "Found backup — Restore?" on load:
+// that path could silently reintroduce an old local snapshot disconnected
+// from Firestore, the same class of bug as the hardcoded demo data. The
+// backup itself (autoBackup) and manual Export/Import buttons still work —
+// only the automatic on-load restore prompt is removed.
 window.calNav=function(d){calD=new Date(calD);calD.setDate(calD.getDate()+d*7);drawCal();setTimeout(drawCal,100);};
 window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);calD.setDate(calD.getDate()-14);drawCal();setTimeout(drawCal,100);};
 window.getRoomName=function(rn){if(!rn)return rn;var vr=(typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});if(vr)return vr.nm;if(typeof getHR==='function'){var hr=getHR().find(function(r){return r.n===rn;});if(hr){var h=(typeof PH!=='undefined'?PH:[]).find(function(x){return x.id===hr.prop;});return(h?h.nm+' - ':'')+hr.nm;}}return rn;};

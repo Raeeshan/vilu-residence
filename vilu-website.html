@@ -1110,17 +1110,7 @@ function applyReservationsToBookedRanges(list) {
   BOOKED_RANGES = ranges;
 }
 
-// Fallback only: last-known PMS data if Supabase can't be reached (offline, CORS, etc.)
-function loadBookedRangesFromLocalStorage() {
-  try {
-    var res = JSON.parse(localStorage.getItem('vilu_res') || '[]');
-    var blk = JSON.parse(localStorage.getItem('vilu_blk') || '[]');
-    var combined = res.concat(blk.map(function(b) {
-      return { rn: b.rn, ci: b.from, co: b.to, st: 'Confirmed' };
-    }));
-    applyReservationsToBookedRanges(combined);
-  } catch (e) {}
-}
+var availabilityLoadFailed = false;
 
 // Primary source: room_availability (per-room booked date ranges, no guest
 // PII at all) + blocks. This used to read the full `reservations` collection
@@ -1142,10 +1132,30 @@ async function loadBookedRangesFromSupabase() {
       return { rn: b.room_id, ci: (b.from_date || '').slice(0, 10), co: (b.to_date || '').slice(0, 10), st: 'Confirmed' };
     }));
     applyReservationsToBookedRanges(combined);
+    if (availabilityLoadFailed) { availabilityLoadFailed = false; hideAvailabilityWarning(); }
   } catch (e) {
-    loadBookedRangesFromLocalStorage();
+    // Never fall back to stale local data here — a guest seeing a room as
+    // "available" from an old cache, when it might not be, is worse than
+    // an honest "couldn't verify" message. The retry interval below will
+    // clear this automatically once the fetch succeeds.
+    console.error('loadBookedRangesFromSupabase failed', e);
+    availabilityLoadFailed = true;
+    showAvailabilityWarning();
   }
   if (typeof calRefreshIfOpen === 'function') calRefreshIfOpen();
+}
+
+function showAvailabilityWarning() {
+  if (document.getElementById('avail-warning-banner')) return;
+  var b = document.createElement('div');
+  b.id = 'avail-warning-banner';
+  b.textContent = "⚠️ We're having trouble loading live availability right now — dates shown may not be accurate. Please contact us to confirm before booking.";
+  b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#fef3c7;color:#92400e;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.1)';
+  document.body.appendChild(b);
+}
+function hideAvailabilityWarning() {
+  var b = document.getElementById('avail-warning-banner');
+  if (b) b.remove();
 }
 
 // A calendar date is fully booked when every current room has an overlapping reservation/block
@@ -1157,8 +1167,7 @@ function isDateFullyBooked(dateStr) {
   });
 }
 
-loadBookedRangesFromLocalStorage(); // instant paint from last-known local data
-loadBookedRangesFromSupabase();     // authoritative refresh from Supabase
+loadBookedRangesFromSupabase();     // sole source of truth, no stale local pre-paint
 setInterval(loadBookedRangesFromSupabase, 5 * 60 * 1000);
 
 // Keep prices fresh for guests on other devices too (BroadcastChannel only
