@@ -1175,6 +1175,12 @@ body.pms-mode { overflow:hidden; }
     </div>
   </div>
   <div class="card"><h3>Current tax summary</h3><div id="tax-sum"></div></div>
+  <div class="card">
+    <h3><i class="ti ti-refresh-alert" style="margin-right:6px"></i>Data Integrity</h3>
+    <div class="al am"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><div>Recomputes every room's availability lock from the reservations collection (the source of truth) and repairs any drift. Runs automatically once every 24h on load — use this to run it immediately.</div></div>
+    <button class="btn p" onclick="runReconciliationNow()"><i class="ti ti-refresh"></i>Run reconciliation now</button>
+    <div id="recon-result" style="margin-top:10px;font-size:12px;color:#6b7280"></div>
+  </div>
 </div>
 
 <div class="sec" id="s-htls">
@@ -2396,6 +2402,12 @@ Snorkelling trip"></textarea>
     </div>
   </div>
   <div class="card"><h3>Current tax summary</h3><div id="tax-sum"></div></div>
+  <div class="card">
+    <h3><i class="ti ti-refresh-alert" style="margin-right:6px"></i>Data Integrity</h3>
+    <div class="al am"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><div>Recomputes every room's availability lock from the reservations collection (the source of truth) and repairs any drift. Runs automatically once every 24h on load — use this to run it immediately.</div></div>
+    <button class="btn p" onclick="runReconciliationNow()"><i class="ti ti-refresh"></i>Run reconciliation now</button>
+    <div id="recon-result" style="margin-top:10px;font-size:12px;color:#6b7280"></div>
+  </div>
 </div>
 
 <div class="sec" id="s-htls">
@@ -3750,11 +3762,15 @@ function restoreTripsFromBackup() {
   } catch(e) {}
 }
 
-function saveRES(){
+// changedRes (optional): when a single reservation was just modified, sync
+// ONLY that record to Firestore via writeReservation — never a blind push of
+// the whole RES array (that used to let a stale browser tab's cached status
+// silently overwrite another browser's more recent change to an unrelated
+// reservation). Pass oldRoomId when that reservation's room just changed.
+function saveRES(changedRes, oldRoomId){
   try{localStorage.setItem('vilu_res',JSON.stringify(RES));}catch(e){}
   syncAvailability();
-  // Sync immediately to Firestore so nothing is ever lost on reload
-  syncResToSupabase().catch(function(){});
+  if(changedRes && typeof syncOneReservation==='function') syncOneReservation(changedRes, oldRoomId);
 }
 function syncAvailability(){
   // Write all reservations+blocks to shared key for booking engine & agency portal
@@ -4008,7 +4024,7 @@ function drawCal(){
       cell.addEventListener('mousemove',function(e){if(!sOn||bDrg||!sR)return;var brow=cell.closest('.cb-booking-row');if(!brow||brow.dataset.rn!==sR)return;if(ds!==sE){sE=ds;updSel();}});
       cell.addEventListener('mouseup',function(){if(bDrg)return;if(!sOn)return;var sR2=sR,sS2=sS,sE2=sE;sR=null;sS=null;sE=null;sOn=false;clrSel();if(sR2&&sS2&&sE2&&sR2===rn&&sS2!==sE2){var s2=sS2<=sE2?sS2:sE2,en=sS2<=sE2?sE2:sS2;if(typeof openNewBookingFromSel==='function')openNewBookingFromSel(sR2,s2,en);}});
       cell.addEventListener('dragover',function(e){e.preventDefault();});
-      cell.addEventListener('drop',function(e){e.preventDefault();var data=e.dataTransfer.getData('text/plain').split('|');var res=RES.find(function(x){return x.id===data[0];});if(!res||res.isBlock)return;var dur=nt(res.ci,res.co),newCo=D2(ds,dur);if(isOcc(rn,ds,newCo,data[0])){toast('Cannot move!');return;}showMv('Move?','Move '+res.fn+' '+res.ln+'?',function(){res.rn=rn;res.ci=ds;res.co=newCo;saveRES();drawCal();});});
+      cell.addEventListener('drop',function(e){e.preventDefault();var data=e.dataTransfer.getData('text/plain').split('|');var res=RES.find(function(x){return x.id===data[0];});if(!res||res.isBlock)return;var dur=nt(res.ci,res.co),newCo=D2(ds,dur);if(isOcc(rn,ds,newCo,data[0])){toast('Cannot move!');return;}showMv('Move?','Move '+res.fn+' '+res.ln+'?',function(){res.rn=rn;res.ci=ds;res.co=newCo;saveRES(res);drawCal();});});
     });
     document.addEventListener('mouseup',function(){if(sOn){sR=null;sS=null;sE=null;sOn=false;clrSel();}});
   },50);
@@ -4080,7 +4096,7 @@ function detSaveRate(id){
     var v=+document.getElementById('det-rate-inp')?.value;
     if(!v||v<1){toast('Invalid rate');return;}
     r.rate=v;
-    saveRES();
+    saveRES(r);
     toast('Rate updated to $'+v+'/night ✓');
     setTimeout(function(){_showDetLegacy(id);},100);
   }catch(e){console.error('detSaveRate:',e);}
@@ -4322,41 +4338,39 @@ async function saveEdit(){
   const rn=document.getElementById('ed-rm').value,ci=document.getElementById('ed-ci').value,co=document.getElementById('ed-co').value;
   if(!ci||!co||co<=ci){toast('Invalid dates');return;}
 
-  // Keep room_availability in sync with whatever this edit changes: a room/date
-  // change needs a fresh, atomically-checked lock (not the old stale isOcc()
-  // check); becoming/leaving an "active" status needs the slot released or
-  // re-acquired accordingly. 'Cancelled' can't reach here (handled above).
-  const wasActive = r.st!=='Cancelled' && r.st!=='Checked out';
-  const willBeActive = newSt!=='Cancelled' && newSt!=='Checked out';
-  const roomChanged = r.rn !== rn;
-
-  if (willBeActive) {
-    const btn=document.querySelectorAll('button[onclick="saveEdit()"]');
-    btn.forEach(function(b){b.disabled=true;});
-    try {
-      await acquireRoomSlot(rn, ci, co, editId);
-    } catch(e) {
-      btn.forEach(function(b){b.disabled=false;});
-      if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
-      toast('⚠️ Could not save changes — please try again'); return;
-    }
-    btn.forEach(function(b){b.disabled=false;});
-    if (wasActive && roomChanged) await releaseRoomSlot(r.rn, editId);
-  } else if (wasActive && !willBeActive) {
-    await releaseRoomSlot(r.rn, editId);
-  }
-
-  r.fn=document.getElementById('ed-fn').value.trim()||r.fn;r.ln=document.getElementById('ed-ln').value.trim()||r.ln;
-  r.em=document.getElementById('ed-em').value;r.ph=document.getElementById('ed-ph').value;
+  const oldRn=r.rn, roomChanged=oldRn!==rn;
   const customRate=+document.getElementById('ed-rate')?.value||0;
-  r.rn=rn;r.rate=customRate||getR(rn)?.rate||r.rate;r.ci=ci;r.co=co;
-  r.ad=+document.getElementById('ed-ad').value||1;
+  const rate=customRate||getR(rn)?.rate||r.rate;
   const savedBeds=+(document.getElementById('ed-bed-val')?.textContent||0);
-  r.extraBeds=savedBeds;
-  const savedRate2=+document.getElementById('ed-rate')?.value||0;
-  const nights2=nt(r.ci,r.co);
-  r.bedCharge=savedBeds>0?+(savedBeds*(savedRate2||getR(r.rn)?.rate||r.rate)*nights2).toFixed(2):0;r.ch=+document.getElementById('ed-ch').value||0;r.inf=+document.getElementById('ed-inf').value||0;
-  r.st=document.getElementById('ed-st').value;r.pay=document.getElementById('ed-pay').value;
+  const nights2=nt(ci,co);
+  // Compute the edit as a candidate object first — only merge it into the
+  // live RES entry after Firestore accepts the write, so a rejected
+  // ROOM_CONFLICT never leaves r showing a room/dates that were never saved.
+  const updated=Object.assign({},r,{
+    fn:document.getElementById('ed-fn').value.trim()||r.fn,
+    ln:document.getElementById('ed-ln').value.trim()||r.ln,
+    em:document.getElementById('ed-em').value,ph:document.getElementById('ed-ph').value,
+    rn,rate,ci,co,
+    ad:+document.getElementById('ed-ad').value||1,
+    extraBeds:savedBeds,
+    bedCharge:savedBeds>0?+(savedBeds*rate*nights2).toFixed(2):0,
+    ch:+document.getElementById('ed-ch').value||0,
+    inf:+document.getElementById('ed-inf').value||0,
+    st:newSt,pay:document.getElementById('ed-pay').value
+  });
+
+  const btn=document.querySelectorAll('button[onclick="saveEdit()"]');
+  btn.forEach(function(b){b.disabled=true;});
+  try {
+    await writeReservation(r.id, resToFirestoreFields(updated), roomChanged?{oldRoomId:oldRn}:undefined);
+  } catch(e) {
+    btn.forEach(function(b){b.disabled=false;});
+    if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
+    toast('⚠️ Could not save changes — please try again'); return;
+  }
+  btn.forEach(function(b){b.disabled=false;});
+  Object.assign(r, updated);
+
   aLog('ok','Edited: '+r.fn+' '+r.ln+' — '+rNm(rn)+' '+fd(ci)+'–'+fd(co));
   document.getElementById('m-edit').classList.remove('on');toast('✓ Booking updated');saveRES();drawRes();drawCal();drawDash();
 }
@@ -5008,20 +5022,7 @@ async function submitNB(){
     // The atomic transaction is the real conflict guarantee — it checks
     // fresh Firestore data and writes in one step, so even two submissions
     // at the exact same instant can't both land on the same room/dates.
-    await createReservationAtomic(rn, ci, co, id, {
-      id, room_id: rn,
-      guest_name: fn+' '+ln,
-      guest_email: newRes.em||'', guest_phone: newRes.ph||'',
-      guest_country: newRes.nat||'',
-      check_in: ci, check_out: co,
-      adults: newRes.ad||2, children: newRes.ch||0,
-      rate: rm.rate||0, status: 'Confirmed',
-      source: src||'Direct', notes: newRes.notes||'',
-      extra_beds: 0, trips: '[]',
-      arr_time:'', arr_transport:'', arr_from:'',
-      dep_time:'', dep_transport:'', dep_to:'',
-      updated_at: new Date().toISOString()
-    });
+    await writeReservation(id, resToFirestoreFields(newRes));
   } catch(e) {
     btns.forEach(function(b){b.disabled=false;});
     if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
@@ -5612,11 +5613,11 @@ function softDelete(res){
   aLog('warn','Reservation '+res.id+' ('+res.fn+' '+res.ln+') moved to bin by '+(currentUser?.name||'Admin'));
   toast('Reservation moved to bin · Undo from Deleted items');
   drawRes(); drawCal(); drawDash();
-  // This never used to touch Firestore at all — the room stayed "locked"
-  // forever and the website's own calendar never saw the cancellation.
-  // Free the slot and mark it Cancelled there too, without blocking the UI.
-  if(typeof releaseRoomSlot==='function') releaseRoomSlot(res.rn, res.id).catch(function(){});
-  if(typeof supaFetch==='function') supaFetch('POST','reservations',{id:res.id,status:'Cancelled'},'on_conflict=id').catch(function(){});
+  // Cancelling releases the lock and marks the Firestore status in the SAME
+  // transaction — this never used to touch Firestore at all, so the room
+  // stayed "locked" forever and the website's calendar never saw it.
+  writeReservation(res.id, resToFirestoreFields(Object.assign({},res,{st:'Cancelled'})))
+    .catch(function(e){ console.error('softDelete Firestore sync failed', res.id, e); });
 }
 
 async function restoreFromBin(id){
@@ -5626,14 +5627,14 @@ async function restoreFromBin(id){
   delete res.deletedAt; delete res.deletedBy;
 
   // Someone may have booked this room/dates while it sat cancelled in the
-  // bin — re-check and re-lock atomically rather than assuming it's free.
-  if (res.st!=='Cancelled' && res.st!=='Checked out') {
-    try {
-      await acquireRoomSlot(res.rn, res.ci, res.co, res.id);
-    } catch(e) {
-      if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Cannot restore — '+rNm(res.rn)+' is now booked for those dates'); return; }
-      toast('⚠️ Could not restore — please try again'); return;
-    }
+  // bin — writeReservation re-checks and re-locks atomically rather than
+  // assuming it's free, and restores the Firestore status in the same
+  // transaction (this never used to sync back to Firestore at all).
+  try {
+    await writeReservation(res.id, resToFirestoreFields(res));
+  } catch(e) {
+    if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Cannot restore — '+rNm(res.rn)+' is now booked for those dates'); return; }
+    toast('⚠️ Could not restore — please try again'); return;
   }
 
   RES.unshift(res);
@@ -5641,7 +5642,7 @@ async function restoreFromBin(id){
   aLog('ok','Reservation '+res.id+' restored from bin');
   toast('✓ Reservation restored');
   drawBin(); drawRes(); drawCal();
-  saveRES(); // this never used to sync back to Firestore at all
+  saveRES();
 }
 
 function permDelete(id){
@@ -5830,7 +5831,7 @@ function rdUpdateTotal(){
   if(totalEl)totalEl.innerHTML=pbd({ci:ci,co:co,rate:rm?rm.rate:80,ad:ad,ch:ch,inf:inf,src:r?r.src:'Direct'});
 }
 
-function rdSave(){
+async function rdSave(){
   var r=RES.find(function(x){return x.id===drawerResId;});if(!r)return;
   var fn=(document.getElementById('rde-fn')?.value||'').trim();
   var ln=(document.getElementById('rde-ln')?.value||'').trim();
@@ -5839,18 +5840,30 @@ function rdSave(){
   var rmN=document.getElementById('rde-rm')?.value;
   if(!fn||!ln){toast('Enter guest name');return;}
   if(!ci||!co||co<=ci){toast('Invalid dates');return;}
-  if(isOcc(rmN,ci,co,drawerResId)){toast('⚠️ Room conflict — choose different dates or room');return;}
-  r.fn=fn;r.ln=ln;
-  r.em=document.getElementById('rde-em')?.value||r.em;
-  r.ph=document.getElementById('rde-ph')?.value||r.ph;
-  r.nat=document.getElementById('rde-nat')?.value||r.nat;
-  r.pid=document.getElementById('rde-pid')?.value||r.pid;
-  r.ci=ci;r.co=co;r.rn=rmN;r.rate=getR(rmN)?.rate||r.rate;
-  r.ad=+(document.getElementById('rde-ad')?.value||1);
-  r.ch=+(document.getElementById('rde-ch')?.value||0);
-  r.inf=+(document.getElementById('rde-inf')?.value||0);
-  r.src=document.getElementById('rde-src')?.value||r.src;
-  r.pay=document.getElementById('rde-pay')?.value||r.pay;
+  var oldRn=r.rn, roomChanged=oldRn!==rmN;
+  // Candidate object only — merged into the live RES entry after Firestore
+  // accepts the write, same reasoning as saveEdit(): a rejected ROOM_CONFLICT
+  // must never leave r showing a room/dates that were never actually saved.
+  var updated=Object.assign({},r,{
+    fn:fn,ln:ln,
+    em:document.getElementById('rde-em')?.value||r.em,
+    ph:document.getElementById('rde-ph')?.value||r.ph,
+    nat:document.getElementById('rde-nat')?.value||r.nat,
+    pid:document.getElementById('rde-pid')?.value||r.pid,
+    ci:ci,co:co,rn:rmN,rate:getR(rmN)?.rate||r.rate,
+    ad:+(document.getElementById('rde-ad')?.value||1),
+    ch:+(document.getElementById('rde-ch')?.value||0),
+    inf:+(document.getElementById('rde-inf')?.value||0),
+    src:document.getElementById('rde-src')?.value||r.src,
+    pay:document.getElementById('rde-pay')?.value||r.pay
+  });
+  try {
+    await writeReservation(r.id, resToFirestoreFields(updated), roomChanged?{oldRoomId:oldRn}:undefined);
+  } catch(e) {
+    if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Room conflict — choose different dates or room'); return; }
+    toast('⚠️ Could not save changes — please try again'); return;
+  }
+  Object.assign(r, updated);
   aLog('ok','Updated: '+r.fn+' '+r.ln+' — '+rNm(rmN)+' '+fd(ci)+'–'+fd(co));
   toast('✓ Reservation saved');
   openDrawer(r.id);saveRES();drawRes();drawCal();drawDash();
@@ -8590,49 +8603,16 @@ var firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
 
-// ── ATOMIC ROOM LOCKING ──
-// This Firestore SDK build's transaction.get() only supports single document
-// references, not queries — so conflict-checking can't read "all
-// reservations for this room" transactionally. Instead, each room has one
-// room_availability/{roomId} doc holding its current booked date ranges as
-// an array. A transaction reads that ONE document, checks for overlap, and
-// writes the updated array back — a single-document read+write, which
-// Firestore transactions DO guarantee atomically. If two bookings race for
-// the same room/dates, only one transaction's write can win; the other sees
-// the first one's array update and throws ROOM_CONFLICT. This holds even
-// under a true simultaneous race, not just a "re-check before submit."
-async function acquireRoomSlot(roomId, checkIn, checkOut, resId) {
-  var availRef = fsDb.collection('room_availability').doc(roomId);
-  await fsDb.runTransaction(async function(transaction) {
-    var snap = await transaction.get(availRef);
-    var bookings = ((snap.exists && snap.data().bookings) || []).filter(function(b){ return b.id !== resId; });
-    var conflict = bookings.some(function(b){ return checkIn < b.to && checkOut > b.from; });
-    if (conflict) throw new Error('ROOM_CONFLICT');
-    bookings.push({ id: resId, from: checkIn, to: checkOut });
-    transaction.set(availRef, { bookings: bookings }, { merge: true });
-  });
-}
-
-// Frees a reservation's slot — call whenever a reservation is cancelled,
-// checked out, or moved to a different room/dates, or the lock document
-// accumulates stale entries forever and starts blocking dates that are
-// actually free.
-async function releaseRoomSlot(roomId, resId) {
-  if (!roomId) return;
-  try {
-    var availRef = fsDb.collection('room_availability').doc(roomId);
-    await fsDb.runTransaction(async function(transaction) {
-      var snap = await transaction.get(availRef);
-      if (!snap.exists) return;
-      var bookings = (snap.data().bookings || []).filter(function(b){ return b.id !== resId; });
-      transaction.set(availRef, { bookings: bookings }, { merge: true });
-    });
-  } catch(e) {}
-}
-
-// Manual room blocks are admin-only and much lower-frequency, so a
-// non-transactional pre-check is a reasonable (not airtight) trade-off
-// versus folding them into the same atomic lock document.
+// ── SINGLE ATOMIC RESERVATION WRITE ──
+// writeReservation() is the ONLY function in this file allowed to write to
+// the `reservations` collection. Every create/edit/cancel/restore path (and
+// every smaller field-only change — notes, trips, rate, transport) funnels
+// through here so the reservation document and its room_availability lock
+// can never drift apart the way a separate lock-then-sync-later flow used to
+// allow. Firestore's transaction.get() only supports single-document
+// references, not queries, but reservations/{docId} and
+// room_availability/{roomId} are both known single docs, so this genuinely
+// runs as one transaction across both collections.
 async function hasBlockConflict(roomId, checkIn, checkOut) {
   try {
     var snap = await fsDb.collection('blocks').where('room_id', '==', roomId).get();
@@ -8643,15 +8623,153 @@ async function hasBlockConflict(roomId, checkIn, checkOut) {
   } catch(e) { return false; }
 }
 
-async function createReservationAtomic(roomId, checkIn, checkOut, docId, data) {
-  if (await hasBlockConflict(roomId, checkIn, checkOut)) throw new Error('ROOM_CONFLICT');
-  await acquireRoomSlot(roomId, checkIn, checkOut, docId);
-  try {
-    await fsDb.collection('reservations').doc(docId).set(data, { merge: true });
-  } catch(e) {
-    await releaseRoomSlot(roomId, docId); // roll back the slot if the reservation write itself failed
-    throw e;
+// Maps the PMS's in-memory reservation shape (fn/ln/rn/ci/co/st/...) to the
+// Firestore document shape. Single source of truth for that mapping so every
+// write path (new/edit/cancel/restore/field-only changes) produces the same
+// document shape the old syncResToSupabase() loop used to.
+function resToFirestoreFields(r) {
+  return {
+    id:r.id, room_id:r.rn,
+    guest_name:(r.fn||'')+' '+(r.ln||''),
+    guest_email:r.em||'', guest_phone:r.ph||'',
+    guest_country:r.nat||'',
+    check_in:r.ci, check_out:r.co,
+    adults:r.ad||2, children:r.ch||0,
+    rate:r.rate||0, status:r.st||'Confirmed',
+    source:r.src||'Direct', notes:r.notes||'',
+    extra_beds:r.extraBeds||0,
+    trips: JSON.stringify(r.trips||[]),
+    arr_time:r.arrTime||'', arr_transport:r.arrTransport||'', arr_from:r.arrFrom||'',
+    dep_time:r.depTime||'', dep_transport:r.depTransport||'', dep_to:r.depTo||'',
+    updated_at:new Date().toISOString()
+  };
+}
+
+// docId/fields describe the reservation as it should end up. Pass
+// opts.oldRoomId when the room is changing so the old room's lock entry is
+// released in the SAME transaction as the new one is acquired.
+async function writeReservation(docId, fields, opts) {
+  opts = opts || {};
+  var roomId = fields.room_id;
+  var oldRoomId = (opts.oldRoomId && opts.oldRoomId !== roomId) ? opts.oldRoomId : null;
+  var isActive = fields.status !== 'Cancelled' && fields.status !== 'Checked out';
+
+  if (isActive && await hasBlockConflict(roomId, fields.check_in, fields.check_out)) {
+    throw new Error('ROOM_CONFLICT');
   }
+
+  var resRef = fsDb.collection('reservations').doc(docId);
+  var newAvailRef = fsDb.collection('room_availability').doc(roomId);
+  var oldAvailRef = oldRoomId ? fsDb.collection('room_availability').doc(oldRoomId) : null;
+
+  await fsDb.runTransaction(async function(transaction) {
+    // All reads must happen before any writes in a Firestore transaction.
+    var newAvailSnap = await transaction.get(newAvailRef);
+    var oldAvailSnap = oldAvailRef ? await transaction.get(oldAvailRef) : null;
+
+    var newBookings = ((newAvailSnap.exists && newAvailSnap.data().bookings) || [])
+      .filter(function(b){ return b.id !== docId; });
+
+    if (isActive) {
+      var conflict = newBookings.some(function(b){ return fields.check_in < b.to && fields.check_out > b.from; });
+      if (conflict) throw new Error('ROOM_CONFLICT');
+      newBookings.push({ id: docId, from: fields.check_in, to: fields.check_out });
+    }
+
+    transaction.set(resRef, fields, { merge: true });
+    transaction.set(newAvailRef, { bookings: newBookings }, { merge: true });
+
+    if (oldAvailRef) {
+      var oldBookings = ((oldAvailSnap.exists && oldAvailSnap.data().bookings) || [])
+        .filter(function(b){ return b.id !== docId; });
+      transaction.set(oldAvailRef, { bookings: oldBookings }, { merge: true });
+    }
+  });
+}
+
+// Single-record Firestore sync used by saveRES(r) for field-only changes
+// (notes, trips, rate, transport, drag-to-move) — never a blind full-array
+// push, always this one reservation, always through writeReservation.
+function syncOneReservation(r, oldRoomId) {
+  if (!r || !r.id) return;
+  writeReservation(r.id, resToFirestoreFields(r), oldRoomId ? { oldRoomId: oldRoomId } : undefined)
+    .catch(function(e){ console.error('Firestore sync failed for', r.id, e); });
+}
+
+// ── SELF-HEALING RECONCILIATION ──
+// Reservations are the source of truth; room_availability is just a cache
+// used for fast conflict-checking. This recomputes each room's lock from the
+// actual `reservations` collection and repairs it if it has drifted —
+// exactly the manual repair done during the 2026-07-11 VR01/VR02/VR03
+// incident, but automatic and logged. Never touches `reservations` itself.
+async function reconcileAllRooms(triggeredBy) {
+  var results = [];
+  try {
+    var snap = await fsDb.collection('reservations').get();
+    var byRoom = {};
+    snap.forEach(function(d) {
+      var r = d.data();
+      if (!r.room_id || !r.check_in || !r.check_out) return;
+      if (r.status === 'Cancelled' || r.status === 'Checked out') return;
+      (byRoom[r.room_id] = byRoom[r.room_id] || []).push({ id: d.id, from: r.check_in, to: r.check_out });
+    });
+    var roomIds = VR.map(function(r){ return r.n; });
+    for (var i=0;i<roomIds.length;i++) {
+      var roomId = roomIds[i];
+      var correct = byRoom[roomId] || [];
+      var availRef = fsDb.collection('room_availability').doc(roomId);
+      var availSnap = await availRef.get();
+      var current = (availSnap.exists && availSnap.data().bookings) || [];
+      var correctIds = correct.map(function(b){ return b.id; }).sort();
+      var currentIds = current.map(function(b){ return b.id; }).sort();
+      var same = correctIds.length===currentIds.length && correctIds.every(function(id,i){ return id===currentIds[i]; });
+      if (same) continue;
+      var missingAdded = correct.filter(function(b){ return currentIds.indexOf(b.id)===-1; }).map(function(b){ return b.id; });
+      var staleRemoved = current.filter(function(b){ return correctIds.indexOf(b.id)===-1; }).map(function(b){ return b.id; });
+      await availRef.set({ bookings: correct }, { merge: true });
+      var logEntry = { roomId: roomId, timestamp: new Date().toISOString(), missingAdded: missingAdded, staleRemoved: staleRemoved, triggeredBy: triggeredBy||'manual' };
+      results.push(logEntry);
+      try { await fsDb.collection('reconciliation_log').add(logEntry); } catch(e) {}
+    }
+  } catch(e) { console.error('reconcileAllRooms failed', e); }
+  return results;
+}
+
+// Runs automatically at most once per 24h (client-side, on PMS load) using a
+// timestamp stored in a shared settings doc — no Cloud Scheduler needed.
+async function reconcileIfDue() {
+  try {
+    var settingsRef = fsDb.collection('settings').doc('reconciliation');
+    var snap = await settingsRef.get();
+    var last = snap.exists ? snap.data().lastRun : null;
+    if (last && (Date.now() - new Date(last).getTime()) < 24*60*60*1000) return;
+    var results = await reconcileAllRooms('scheduled');
+    await settingsRef.set({ lastRun: new Date().toISOString() }, { merge: true });
+    if (results.length && typeof aLog==='function') {
+      aLog('warn', 'Daily reconciliation repaired '+results.length+' room(s): '+results.map(function(r){return r.roomId;}).join(', '));
+    }
+  } catch(e) { console.error('reconcileIfDue failed', e); }
+}
+try { reconcileIfDue(); } catch(e) {}
+
+async function runReconciliationNow() {
+  var btn = document.querySelector('button[onclick="runReconciliationNow()"]');
+  var out = document.getElementById('recon-result');
+  if (btn) btn.disabled = true;
+  if (out) out.textContent = 'Checking every room against its reservations...';
+  try {
+    var results = await reconcileAllRooms('manual');
+    if (out) {
+      out.textContent = results.length
+        ? '✓ Repaired '+results.length+' room(s): '+results.map(function(r){return r.roomId;}).join(', ')
+        : '✓ All rooms already match their reservations — nothing to repair.';
+    }
+    toast(results.length ? '✓ Reconciliation repaired '+results.length+' room(s)' : '✓ All rooms already in sync');
+  } catch(e) {
+    if (out) out.textContent = '⚠️ Reconciliation failed — see console for details.';
+    toast('⚠️ Reconciliation failed');
+  }
+  if (btn) btn.disabled = false;
 }
 
 // Creates a Firebase Auth account without disturbing the currently signed-in
@@ -8695,26 +8813,6 @@ async function supaFetch(method, table, data, query) {
     }
     return null;
   } catch(e) { return null; }
-}
-
-async function syncResToSupabase() {
-  for(const r of RES) {
-    await supaFetch('POST', 'reservations', {
-      id:r.id, room_id:r.rn,
-      guest_name:(r.fn||'')+' '+(r.ln||''),
-      guest_email:r.em||'', guest_phone:r.ph||'',
-      guest_country:r.nat||'',
-      check_in:r.ci, check_out:r.co,
-      adults:r.ad||2, children:r.ch||0,
-      rate:r.rate||0, status:r.st||'Confirmed',
-      source:r.src||'Direct', notes:r.notes||'',
-      extra_beds:r.extraBeds||0,
-      trips: JSON.stringify(r.trips||[]),
-      arr_time:r.arrTime||'', arr_transport:r.arrTransport||'', arr_from:r.arrFrom||'',
-      dep_time:r.depTime||'', dep_transport:r.depTransport||'', dep_to:r.depTo||'',
-      updated_at:new Date().toISOString()
-    }, 'on_conflict=id');
-  }
 }
 
 // Manual "Block Rooms" entries — pushed so the website's calendar treats
@@ -8825,12 +8923,6 @@ async function loadAllFromSupabase() {
   if(wdata&&wdata[0]&&wdata[0].value) localStorage.setItem('vilu_website',JSON.stringify(wdata[0].value));
 }
 
-var _uOrigSaveRES = saveRES;
-saveRES = function() {
-  _uOrigSaveRES();
-  syncResToSupabase().catch(()=>{});
-};
-
 // Pull in reservations that exist in Supabase but not yet locally (e.g. a
 // guest booked directly on the website) without touching any reservation
 // already known here — never overwrites, only appends.
@@ -8851,7 +8943,7 @@ async function pollNewReservationsFromSupabase() {
       }
     });
     if (added > 0) {
-      _uOrigSaveRES();
+      saveRES();
       try{ drawRes(); }catch(e){}
       try{ drawCal(); }catch(e){}
       try{ drawDash(); }catch(e){}
@@ -8868,7 +8960,6 @@ document.addEventListener('DOMContentLoaded', function() {
     try{drawDash();}catch(e){}
     try{drawCal();}catch(e){}
   }, 1500);
-  setInterval(syncResToSupabase, 5*60*1000);
   setInterval(pollNewReservationsFromSupabase, 60*1000);
   if(typeof syncBlksToSupabase==='function') syncBlksToSupabase().catch(()=>{});
   if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
@@ -9093,7 +9184,7 @@ function updateTripStatus(resId, tripId, tripDate, newStatus) {
   var trip = res.trips.find(function(t){return t.tripId===tripId && t.date===tripDate;});
   if(trip) {
     trip.status = newStatus;
-    saveRES();
+    saveRES(res);
     saveTripsBackup();
     if(typeof drawOps==='function') drawOps();
     toast('Trip marked as ' + newStatus);
@@ -9104,16 +9195,20 @@ function updateTripStatus(resId, tripId, tripDate, newStatus) {
 // ── WEATHER CANCEL — cancels a trip for ALL guests on that day ──
 function cancelWeatherTrip(tripId, date, callerResId) {
   var affected = [];
+  var affectedRes = [];
   RES.forEach(function(r) {
     (r.trips||[]).forEach(function(t) {
       if(t.tripId===tripId && t.date===date && t.status==='pending') {
         t.status = 'weather';
         affected.push(r.fn+' '+r.ln);
+        affectedRes.push(r);
       }
     });
   });
   if(!affected.length){toast('No pending trips to cancel for this day');return;}
-  saveRES(); saveTripsBackup();
+  saveRES();
+  affectedRes.forEach(function(r){ syncOneReservation(r); });
+  saveTripsBackup();
   if(typeof drawOps==='function') drawOps();
   if(callerResId){var r2=RES.find(function(r){return r.id===callerResId;});if(r2)renderTripsList(r2);}
   toast('🌊 Weather cancel — '+affected.length+' guest(s): '+affected.join(', '));
@@ -9129,7 +9224,7 @@ function moveTripToAfternoon(resId, tripId, date) {
     delete trip.slot;
     delete trip.rescheduledFrom;
     trip.status = 'pending';
-    saveRES();
+    saveRES(res);
     saveTripsBackup();
     if(typeof drawOps==='function') drawOps();
     toast('☀️ Moved to today\'s afternoon schedule!');
@@ -9146,7 +9241,7 @@ function rescheduleTrip(resId, tripId, oldDate) {
   if(trip) {
     trip.date = newDate;
     trip.status = 'pending';
-    saveRES();
+    saveRES(res);
     drawOps();
     toast('Trip rescheduled to ' + newDate);
   }
@@ -9409,7 +9504,7 @@ function addTripToRes(resId) {
   var exists = res.trips.find(function(t){ return t.tripId===tripId && t.date===date; });
   if(exists) { toast('This trip is already added for '+date); return; }
   res.trips.push({tripId:tripId, date:date, status:'pending'});
-  saveRES();
+  saveRES(res);
   saveTripsBackup();
   renderTripsList(res);
   dateEl.value = '';
@@ -9420,7 +9515,7 @@ function removeTripFromRes(resId, idx) {
   var res = RES.find(function(r){return r.id===resId;});
   if(!res || !res.trips) return;
   res.trips.splice(idx, 1);
-  saveRES();
+  saveRES(res);
   saveTripsBackup();
   renderTripsList(res);
   toast('Trip removed');
@@ -9435,7 +9530,7 @@ function saveTransport(resId) {
   res.depTime = document.getElementById('tr-dep-time').value;
   res.depTransport = document.getElementById('tr-dep-transport').value;
   res.depTo = document.getElementById('tr-dep-to').value;
-  saveRES();
+  saveRES(res);
   closeModal();
   toast('Transport details saved!');
 }

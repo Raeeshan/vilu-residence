@@ -833,42 +833,12 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
 
-// ── ATOMIC ROOM LOCKING ──
-// This Firestore SDK build's transaction.get() only supports single document
-// references, not queries — so conflict-checking can't read "all
-// reservations for this room" transactionally. Instead, each room has one
-// room_availability/{roomId} doc holding its current booked date ranges as
-// an array. A transaction reads that ONE document, checks for overlap, and
-// writes the updated array back — a single-document read+write, which
-// Firestore transactions DO guarantee atomically. If two bookings race for
-// the same room/dates, only one transaction's write can win; the other sees
-// the first one's array update and throws ROOM_CONFLICT. This holds even
-// under a true simultaneous race, not just a "re-check before submit."
-async function acquireRoomSlot(roomId, checkIn, checkOut, resId) {
-  var availRef = fsDb.collection('room_availability').doc(roomId);
-  await fsDb.runTransaction(async function(transaction) {
-    var snap = await transaction.get(availRef);
-    var bookings = ((snap.exists && snap.data().bookings) || []).filter(function(b){ return b.id !== resId; });
-    var conflict = bookings.some(function(b){ return checkIn < b.to && checkOut > b.from; });
-    if (conflict) throw new Error('ROOM_CONFLICT');
-    bookings.push({ id: resId, from: checkIn, to: checkOut });
-    transaction.set(availRef, { bookings: bookings }, { merge: true });
-  });
-}
-
-async function releaseRoomSlot(roomId, resId) {
-  if (!roomId) return;
-  try {
-    var availRef = fsDb.collection('room_availability').doc(roomId);
-    await fsDb.runTransaction(async function(transaction) {
-      var snap = await transaction.get(availRef);
-      if (!snap.exists) return;
-      var bookings = (snap.data().bookings || []).filter(function(b){ return b.id !== resId; });
-      transaction.set(availRef, { bookings: bookings }, { merge: true });
-    });
-  } catch(e) {}
-}
-
+// ── SINGLE ATOMIC RESERVATION WRITE ──
+// writeReservation() is the ONLY function in this file allowed to write to
+// the `reservations` collection — mirrors vilu-unified.html exactly, so the
+// PMS, website, and agency portal all share one write path and can never
+// drift out of sync with room_availability. See that file for the full
+// design note on why this works as one Firestore transaction.
 async function hasBlockConflict(roomId, checkIn, checkOut) {
   try {
     var snap = await fsDb.collection('blocks').where('room_id', '==', roomId).get();
@@ -879,15 +849,42 @@ async function hasBlockConflict(roomId, checkIn, checkOut) {
   } catch(e) { return false; }
 }
 
-async function createReservationAtomic(roomId, checkIn, checkOut, docId, data) {
-  if (await hasBlockConflict(roomId, checkIn, checkOut)) throw new Error('ROOM_CONFLICT');
-  await acquireRoomSlot(roomId, checkIn, checkOut, docId);
-  try {
-    await fsDb.collection('reservations').doc(docId).set(data, { merge: true });
-  } catch(e) {
-    await releaseRoomSlot(roomId, docId);
-    throw e;
+async function writeReservation(docId, fields, opts) {
+  opts = opts || {};
+  var roomId = fields.room_id;
+  var oldRoomId = (opts.oldRoomId && opts.oldRoomId !== roomId) ? opts.oldRoomId : null;
+  var isActive = fields.status !== 'Cancelled' && fields.status !== 'Checked out';
+
+  if (isActive && await hasBlockConflict(roomId, fields.check_in, fields.check_out)) {
+    throw new Error('ROOM_CONFLICT');
   }
+
+  var resRef = fsDb.collection('reservations').doc(docId);
+  var newAvailRef = fsDb.collection('room_availability').doc(roomId);
+  var oldAvailRef = oldRoomId ? fsDb.collection('room_availability').doc(oldRoomId) : null;
+
+  await fsDb.runTransaction(async function(transaction) {
+    var newAvailSnap = await transaction.get(newAvailRef);
+    var oldAvailSnap = oldAvailRef ? await transaction.get(oldAvailRef) : null;
+
+    var newBookings = ((newAvailSnap.exists && newAvailSnap.data().bookings) || [])
+      .filter(function(b){ return b.id !== docId; });
+
+    if (isActive) {
+      var conflict = newBookings.some(function(b){ return fields.check_in < b.to && fields.check_out > b.from; });
+      if (conflict) throw new Error('ROOM_CONFLICT');
+      newBookings.push({ id: docId, from: fields.check_in, to: fields.check_out });
+    }
+
+    transaction.set(resRef, fields, { merge: true });
+    transaction.set(newAvailRef, { bookings: newBookings }, { merge: true });
+
+    if (oldAvailRef) {
+      var oldBookings = ((oldAvailSnap.exists && oldAvailSnap.data().bookings) || [])
+        .filter(function(b){ return b.id !== docId; });
+      transaction.set(oldAvailRef, { bookings: oldBookings }, { merge: true });
+    }
+  });
 }
 
 // supaGet/supaPost keep their original names and signatures (kept from the
@@ -955,7 +952,7 @@ async function submitDirectBooking(booking) {
   if (!booking || !/^VR0[1-6]$/.test(booking.roomId)) return null;
   const id = 'WEB' + Date.now();
   try {
-    await createReservationAtomic(booking.roomId, booking.ci, booking.co, id, {
+    await writeReservation(id, {
       id: id,
       room_id: booking.roomId,
       guest_name: booking.name,

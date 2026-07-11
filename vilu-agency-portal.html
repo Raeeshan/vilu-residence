@@ -378,6 +378,79 @@ var firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
 
+// ── SINGLE ATOMIC RESERVATION WRITE ──
+// Mirrors vilu-unified.html / vilu-website.html exactly — the ONLY function
+// allowed to write to `reservations` here too, so an agency booking lands in
+// Firestore and room_availability together, in one transaction, instead of
+// the old localStorage/BroadcastChannel-only flow that never reached
+// Firestore at all when the PMS wasn't open in the same browser.
+async function hasBlockConflict(roomId, checkIn, checkOut) {
+  try {
+    var snap = await fsDb.collection('blocks').where('room_id', '==', roomId).get();
+    return snap.docs.some(function(doc) {
+      var b = doc.data();
+      return checkIn < b.to_date && checkOut > b.from_date;
+    });
+  } catch(e) { return false; }
+}
+
+async function writeReservation(docId, fields, opts) {
+  opts = opts || {};
+  var roomId = fields.room_id;
+  var oldRoomId = (opts.oldRoomId && opts.oldRoomId !== roomId) ? opts.oldRoomId : null;
+  var isActive = fields.status !== 'Cancelled' && fields.status !== 'Checked out';
+
+  if (isActive && await hasBlockConflict(roomId, fields.check_in, fields.check_out)) {
+    throw new Error('ROOM_CONFLICT');
+  }
+
+  var resRef = fsDb.collection('reservations').doc(docId);
+  var newAvailRef = fsDb.collection('room_availability').doc(roomId);
+  var oldAvailRef = oldRoomId ? fsDb.collection('room_availability').doc(oldRoomId) : null;
+
+  await fsDb.runTransaction(async function(transaction) {
+    var newAvailSnap = await transaction.get(newAvailRef);
+    var oldAvailSnap = oldAvailRef ? await transaction.get(oldAvailRef) : null;
+
+    var newBookings = ((newAvailSnap.exists && newAvailSnap.data().bookings) || [])
+      .filter(function(b){ return b.id !== docId; });
+
+    if (isActive) {
+      var conflict = newBookings.some(function(b){ return fields.check_in < b.to && fields.check_out > b.from; });
+      if (conflict) throw new Error('ROOM_CONFLICT');
+      newBookings.push({ id: docId, from: fields.check_in, to: fields.check_out });
+    }
+
+    transaction.set(resRef, fields, { merge: true });
+    transaction.set(newAvailRef, { bookings: newBookings }, { merge: true });
+
+    if (oldAvailRef) {
+      var oldBookings = ((oldAvailSnap.exists && oldAvailSnap.data().bookings) || [])
+        .filter(function(b){ return b.id !== docId; });
+      transaction.set(oldAvailRef, { bookings: oldBookings }, { merge: true });
+    }
+  });
+}
+
+// Live availability, read straight from Firestore — replaces the old
+// getAvailability()/isRoomAvailable() which only read a PMS-only localStorage
+// key ('vilu_res') that never exists on a device where the PMS was never
+// opened, so every room silently looked available regardless of real bookings.
+var _availCache = { reservations: [], fetchedAt: 0 };
+async function fetchLiveAvailability() {
+  try {
+    var snap = await fsDb.collection('reservations').get();
+    var res = [];
+    snap.forEach(function(d) {
+      var r = d.data();
+      if (!r.room_id || !r.check_in || !r.check_out) return;
+      res.push({ id: d.id, rn: r.room_id, ci: r.check_in, co: r.check_out, st: r.status||'Confirmed' });
+    });
+    _availCache = { reservations: res, fetchedAt: Date.now() };
+  } catch(e) {}
+  return _availCache;
+}
+
 const AG_LOGO = 'data:image/jpeg;base64,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';
 
 var currentAgency = null;
@@ -445,6 +518,7 @@ async function enterAgencyPortal(profile){
   document.getElementById('hdr-agency-name').textContent=currentAgency.name||'Agency';
   loadLogo();
   drawPackages();
+  fetchLiveAvailability();
 }
 
 async function doAgencyLogin(){
@@ -596,11 +670,12 @@ var ROOMS_LIST = [
   {id:'VR05',name:'Room 105'},{id:'VR06',name:'Room 106'},
 ];
 
-function checkAvailability(){
+async function checkAvailability(){
   var ci=document.getElementById('av-ci').value;
   var co=document.getElementById('av-co').value;
   var el=document.getElementById('av-results');
   if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:13px">Select valid dates to check availability.</p>';return;}
+  await fetchLiveAvailability();
   var nights=Math.round((new Date(co)-new Date(ci))/864e5);
   el.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+'</div><div class="avail-grid" id="av-grid"></div>';
   var grid=document.getElementById('av-grid');
@@ -979,7 +1054,7 @@ function updateBkSummary(){
     +'<div style="font-size:11px;color:var(--muted);margin-top:6px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+' · All taxes included</div>';
 }
 
-function submitAgencyBooking(){
+async function submitAgencyBooking(){
   if(!selectedPkg||!currentAgency) return;
   var ci=document.getElementById('bk-ci').value;
   var co=document.getElementById('bk-co').value;
@@ -991,9 +1066,14 @@ function submitAgencyBooking(){
   var nat=(document.getElementById('bk-nat').value||'').trim();
   var pid=(document.getElementById('bk-pid')?.value||'').trim();
   var notes=(document.getElementById('bk-notes').value||'').trim();
+  var ad=+document.getElementById('bk-ad').value;
   if(!ci||!co||co<=ci){alert('Select valid dates');return;}
   if(!rm){alert('Select a room');return;}
   if(!fn||!ln){alert('Enter guest name');return;}
+  // Re-check against live Firestore data right before submitting — fast
+  // feedback, though the real guarantee is writeReservation's own
+  // transaction below, same pattern as the website's confirmGuestBooking().
+  await fetchLiveAvailability();
   var avail=isRoomAvailable(rm,ci,co);
   if(!avail.available){alert('Room not available: '+avail.reason);return;}
   var nights=Math.round((new Date(co)-new Date(ci))/864e5);
@@ -1012,7 +1092,6 @@ function submitAgencyBooking(){
   var finalIncludes=(selectedPkg.includes||[]).filter(function(i){return removedIncludes.indexOf(i)<0;});
   var allIncludes=finalIncludes.concat(customExtras.map(function(e){return e.name;}));
   var ref='AG-'+Date.now().toString().slice(-6);
-  var ad=+document.getElementById('bk-ad').value;
   var bk={
     id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,
     rn:rm,rate:selectedPkg.pricePerRoom,
@@ -1031,6 +1110,35 @@ function submitAgencyBooking(){
     netRate:netTotal,
     bookedAt:new Date().toISOString()
   };
+
+  var btn=document.querySelector('button[onclick="submitAgencyBooking()"]');
+  if(btn) btn.disabled=true;
+  try {
+    // The write that actually reaches Firestore — the old version only ever
+    // wrote to this browser's localStorage and a BroadcastChannel message,
+    // neither of which crosses devices, so a booking made from a real
+    // agency laptop never reached the PMS or room_availability at all.
+    await writeReservation(ref, {
+      id: ref, room_id: rm,
+      guest_name: fn+' '+ln,
+      guest_email: em, guest_phone: ph, guest_country: nat,
+      check_in: ci, check_out: co,
+      adults: ad||2, children: 0,
+      rate: selectedPkg.pricePerRoom||0, status: 'Confirmed',
+      source: 'Agency', notes: bk.notes,
+      extra_beds: 0, trips: '[]',
+      arr_time:'', arr_transport:'', arr_from:'',
+      dep_time:'', dep_transport:'', dep_to:'',
+      updated_at: new Date().toISOString()
+    });
+  } catch(e) {
+    if(btn) btn.disabled=false;
+    if(e.message==='ROOM_CONFLICT'){ alert('Sorry, this room was just booked for those dates. Please choose another room.'); return; }
+    alert('Could not submit booking — please try again or contact Vilu Residence directly.');
+    return;
+  }
+  if(btn) btn.disabled=false;
+
   myBookings.unshift(bk);
   localStorage.setItem('vilu_agency_bk_'+currentAgency.email, JSON.stringify(myBookings));
   try{
@@ -1090,9 +1198,45 @@ function doSignout(){
 })();
 
 // ── PORTAL FIXES ──
-window.getAvailability=function(){var res=[];try{var r=localStorage.getItem('vilu_res');if(r)res=JSON.parse(r);}catch(e){}return{reservations:res,blocks:[]};};
+// Reads the Firestore-backed cache populated by fetchLiveAvailability() —
+// replaces the old localStorage.getItem('vilu_res') read, which only ever
+// had data on a device where the PMS itself had been opened.
+window.getAvailability=function(){return {reservations:_availCache.reservations, blocks:[]};};
 window.isRoomAvailable=function(rn,ci,co,excludeId){var res=getAvailability().reservations;for(var i=0;i<res.length;i++){var r=res[i];if(r.id===excludeId||r.st==='Cancelled'||r.st==='Checked out')continue;if(r.rn!==rn)continue;if(r.ci<co&&r.co>ci)return{available:false,reason:'Booked'};}if(typeof myBlocks!=='undefined'){for(var k=0;k<myBlocks.length;k++){var mb=myBlocks[k];if(mb.rn!==rn)continue;if(mb.ci<co&&mb.co>ci)return{available:false,reason:'Your block',mine:true};}}return{available:true};};
-window.submitBlock=function(){if(!currentAgency)return;var ci=document.getElementById('blk-ci').value;var co=document.getElementById('blk-co').value;var rmEl=document.getElementById('blk-rm');var numRooms=parseInt(rmEl?rmEl.value:1)||1;var note=(document.getElementById('blk-note').value||'').trim();if(!ci||!co||co<=ci){alert('Select valid dates');return;}var nights=Math.round((new Date(co)-new Date(ci))/864e5);var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});if(!availRooms.length){alert('No rooms available for these dates');return;}var toBlock=availRooms.slice(0,Math.min(numRooms,availRooms.length));var added=[];toBlock.forEach(function(room){var ref='BLK-'+Date.now().toString().slice(-6)+'-'+room.id;var blk={id:ref,rn:room.id,roomName:room.name,ci:ci,co:co,nights:nights,note:note,agency:currentAgency.name||currentAgency.email,agencyEmail:currentAgency.email,status:'Pending',createdAt:new Date().toISOString()};if(typeof myBlocks!=='undefined')myBlocks.push(blk);added.push(blk);});try{if(typeof myBlocks!=='undefined')localStorage.setItem('vilu_agency_blk_'+currentAgency.email,JSON.stringify(myBlocks));}catch(e){}try{var q=JSON.parse(localStorage.getItem('vilu_agency_blk_queue')||'[]');added.forEach(function(b){q.push(b);});localStorage.setItem('vilu_agency_blk_queue',JSON.stringify(q));}catch(e){}try{var bc=new BroadcastChannel('vilu_pms');added.forEach(function(b){bc.postMessage({type:'BLOCK_REQUEST',block:b});});bc.close();}catch(e){}alert('Block request sent!\n'+toBlock.map(function(r){return r.name;}).join(', ')+'\n'+ci+' to '+co);document.getElementById('blk-ci').value='';document.getElementById('blk-co').value='';if(rmEl)rmEl.value=1;document.getElementById('blk-note').value='';if(typeof drawMyBlocks==='function')drawMyBlocks();};
+window.submitBlock=async function(){
+  if(!currentAgency)return;
+  var ci=document.getElementById('blk-ci').value;
+  var co=document.getElementById('blk-co').value;
+  var rmEl=document.getElementById('blk-rm');
+  var numRooms=parseInt(rmEl?rmEl.value:1)||1;
+  var note=(document.getElementById('blk-note').value||'').trim();
+  if(!ci||!co||co<=ci){alert('Select valid dates');return;}
+  var nights=Math.round((new Date(co)-new Date(ci))/864e5);
+  await fetchLiveAvailability();
+  var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});
+  if(!availRooms.length){alert('No rooms available for these dates');return;}
+  var toBlock=availRooms.slice(0,Math.min(numRooms,availRooms.length));
+  var added=[];
+  for(var bi=0;bi<toBlock.length;bi++){
+    var room=toBlock[bi];
+    var ref='BLK-'+Date.now().toString().slice(-6)+'-'+room.id;
+    var blk={id:ref,rn:room.id,roomName:room.name,ci:ci,co:co,nights:nights,note:note,agency:currentAgency.name||currentAgency.email,agencyEmail:currentAgency.email,status:'Pending',createdAt:new Date().toISOString()};
+    if(typeof myBlocks!=='undefined')myBlocks.push(blk);
+    added.push(blk);
+    // Write straight to the real Firestore blocks collection so the PMS and
+    // website calendars see this hold immediately — the old localStorage/
+    // BroadcastChannel queue below never reached Firestore on a separate device.
+    try{
+      await fsDb.collection('blocks').doc(ref).set({id:ref, room_id:room.id, from_date:ci, to_date:co, reason:note||'Agency hold ('+(currentAgency.name||currentAgency.email)+')'});
+    }catch(e){}
+  }
+  try{if(typeof myBlocks!=='undefined')localStorage.setItem('vilu_agency_blk_'+currentAgency.email,JSON.stringify(myBlocks));}catch(e){}
+  try{var q=JSON.parse(localStorage.getItem('vilu_agency_blk_queue')||'[]');added.forEach(function(b){q.push(b);});localStorage.setItem('vilu_agency_blk_queue',JSON.stringify(q));}catch(e){}
+  try{var bc=new BroadcastChannel('vilu_pms');added.forEach(function(b){bc.postMessage({type:'BLOCK_REQUEST',block:b});});bc.close();}catch(e){}
+  alert('Block request sent!\n'+toBlock.map(function(r){return r.name;}).join(', ')+'\n'+ci+' to '+co);
+  document.getElementById('blk-ci').value='';document.getElementById('blk-co').value='';if(rmEl)rmEl.value=1;document.getElementById('blk-note').value='';
+  if(typeof drawMyBlocks==='function')drawMyBlocks();
+};
 window.checkAvailability=function(){var ci=document.getElementById('av-ci').value;var co=document.getElementById('av-co').value;var el=document.getElementById('av-results');if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:13px">Select valid dates.</p>';return;}var nights=Math.round((new Date(co)-new Date(ci))/864e5);var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});var total=ROOMS_LIST.length;el.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:12px">'+fd(ci)+' \u2192 '+fd(co)+' \u00b7 '+nights+' night'+(nights>1?'s':'')+'</div><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:16px"><div style="font-size:22px;font-weight:800;color:#15803d">'+availRooms.length+'<span style="font-size:14px;font-weight:600;margin-left:6px">of '+total+' rooms available</span></div><div style="font-size:12px;color:#6b7280;margin-top:4px">'+fd(ci)+' \u2192 '+fd(co)+'</div></div>'+(availRooms.length>0?'<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px 20px"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:10px">HOW MANY ROOMS DO YOU WANT?</label><div style="display:flex;align-items:center;gap:12px"><input type="number" id="av-room-count" min="1" max="'+availRooms.length+'" value="1" style="width:80px;padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:18px;font-weight:700;text-align:center;font-family:inherit"><span style="font-size:13px;color:#6b7280">rooms (max '+availRooms.length+')</span></div><div style="display:flex;gap:8px;margin-top:14px"><button type="button" onclick="goBlockRooms(\''+ci+'\',\''+co+'\')" style="background:#f59e0b;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Lock Block rooms</button><button type="button" onclick="goBookPackage(\''+ci+'\',\''+co+'\')" style="background:#0096c7;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Book a package</button></div></div>':'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;color:#b91c1c;font-size:13px;font-weight:600">No rooms available for these dates.</div>');};
 window.goBlockRooms=function(ci,co){var count=parseInt(document.getElementById('av-room-count').value)||1;showTab('blockroom',document.querySelector('.tab'));setTimeout(function(){var a=document.getElementById('blk-ci'),b=document.getElementById('blk-co'),c=document.getElementById('blk-rm');if(a)a.value=ci;if(b)b.value=co;if(c)c.value=count;},300);};
 window.goBookPackage=function(ci,co){var count=parseInt(document.getElementById('av-room-count').value)||1;window._selectedRoomCount=count;showTab('packages',document.querySelector('.tab'));setTimeout(function(){var ex=document.getElementById('pkg-notice');if(ex)ex.remove();var n=document.createElement('div');n.id='pkg-notice';n.style.cssText='background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#1d4ed8;font-weight:600';n.innerHTML='Booking '+count+' room'+(count>1?'s':'')+' \u00b7 '+fd(ci)+' \u2192 '+fd(co);var p=document.getElementById('pkg-cards');if(p&&p.parentElement)p.parentElement.insertBefore(n,p);},300);};
