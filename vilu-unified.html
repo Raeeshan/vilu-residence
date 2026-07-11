@@ -4308,7 +4308,7 @@ function edC(){
   const fake={ci,co,rate:baseRate,ad:+document.getElementById('ed-ad').value||1,ch:+document.getElementById('ed-ch').value||0,inf:+document.getElementById('ed-inf').value||0,bedCount,bedCharge:+(bedCount*baseRate*nights).toFixed(2)};
   document.getElementById('ed-pr').innerHTML=pbd(fake);
 }
-function saveEdit(){
+async function saveEdit(){
   if(canViewOnly()){toast('⚠️ Agency access — read only');return;}
   // If trying to set status to Cancelled, route through the confirm+bin flow
   const newSt=document.getElementById('ed-st')?.value;
@@ -4321,7 +4321,31 @@ function saveEdit(){
   const r=RES.find(x=>x.id===editId);if(!r)return;
   const rn=document.getElementById('ed-rm').value,ci=document.getElementById('ed-ci').value,co=document.getElementById('ed-co').value;
   if(!ci||!co||co<=ci){toast('Invalid dates');return;}
-  if(isOcc(rn,ci,co,editId)){toast('⚠️ Conflict');return;}
+
+  // Keep room_availability in sync with whatever this edit changes: a room/date
+  // change needs a fresh, atomically-checked lock (not the old stale isOcc()
+  // check); becoming/leaving an "active" status needs the slot released or
+  // re-acquired accordingly. 'Cancelled' can't reach here (handled above).
+  const wasActive = r.st!=='Cancelled' && r.st!=='Checked out';
+  const willBeActive = newSt!=='Cancelled' && newSt!=='Checked out';
+  const roomChanged = r.rn !== rn;
+
+  if (willBeActive) {
+    const btn=document.querySelectorAll('button[onclick="saveEdit()"]');
+    btn.forEach(function(b){b.disabled=true;});
+    try {
+      await acquireRoomSlot(rn, ci, co, editId);
+    } catch(e) {
+      btn.forEach(function(b){b.disabled=false;});
+      if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
+      toast('⚠️ Could not save changes — please try again'); return;
+    }
+    btn.forEach(function(b){b.disabled=false;});
+    if (wasActive && roomChanged) await releaseRoomSlot(r.rn, editId);
+  } else if (wasActive && !willBeActive) {
+    await releaseRoomSlot(r.rn, editId);
+  }
+
   r.fn=document.getElementById('ed-fn').value.trim()||r.fn;r.ln=document.getElementById('ed-ln').value.trim()||r.ln;
   r.em=document.getElementById('ed-em').value;r.ph=document.getElementById('ed-ph').value;
   const customRate=+document.getElementById('ed-rate')?.value||0;
@@ -5588,18 +5612,36 @@ function softDelete(res){
   aLog('warn','Reservation '+res.id+' ('+res.fn+' '+res.ln+') moved to bin by '+(currentUser?.name||'Admin'));
   toast('Reservation moved to bin · Undo from Deleted items');
   drawRes(); drawCal(); drawDash();
+  // This never used to touch Firestore at all — the room stayed "locked"
+  // forever and the website's own calendar never saw the cancellation.
+  // Free the slot and mark it Cancelled there too, without blocking the UI.
+  if(typeof releaseRoomSlot==='function') releaseRoomSlot(res.rn, res.id).catch(function(){});
+  if(typeof supaFetch==='function') supaFetch('POST','reservations',{id:res.id,status:'Cancelled'},'on_conflict=id').catch(function(){});
 }
 
-function restoreFromBin(id){
+async function restoreFromBin(id){
   const idx = BIN.findIndex(r=>r.id===id);
   if(idx===-1) return;
   const res = {...BIN[idx]};
   delete res.deletedAt; delete res.deletedBy;
+
+  // Someone may have booked this room/dates while it sat cancelled in the
+  // bin — re-check and re-lock atomically rather than assuming it's free.
+  if (res.st!=='Cancelled' && res.st!=='Checked out') {
+    try {
+      await acquireRoomSlot(res.rn, res.ci, res.co, res.id);
+    } catch(e) {
+      if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Cannot restore — '+rNm(res.rn)+' is now booked for those dates'); return; }
+      toast('⚠️ Could not restore — please try again'); return;
+    }
+  }
+
   RES.unshift(res);
   BIN.splice(idx,1);
   aLog('ok','Reservation '+res.id+' restored from bin');
   toast('✓ Reservation restored');
   drawBin(); drawRes(); drawCal();
+  saveRES(); // this never used to sync back to Firestore at all
 }
 
 function permDelete(id){
@@ -8798,7 +8840,12 @@ async function pollNewReservationsFromSupabase() {
     if (!sRes || !sRes.length) return;
     var added = 0;
     sRes.forEach(function(r) {
-      if (!RES.find(function(x){ return x.id === r.id; })) {
+      // Also skip anything sitting in the local bin — otherwise a reservation
+      // this browser just soft-deleted (which still exists in Firestore,
+      // correctly marked Cancelled, since cancelling never deletes it) looks
+      // like "a reservation nobody knows about yet" and gets resurrected
+      // right back into the active list a moment after being cancelled.
+      if (!RES.find(function(x){ return x.id === r.id; }) && !BIN.find(function(x){ return x.id === r.id; })) {
         RES.unshift(r);
         added++;
       }
