@@ -4973,14 +4973,41 @@ async function submitNB(){
   const prop=document.getElementById('nb-prop').value,src=document.getElementById('nb-src').value;
   if(!fn||!ln){toast('Enter guest name');return;}if(!rn){toast('Select a room');return;}
   if(!ci||!co||co<=ci){toast('Invalid dates');return;}
-  // Pull in any reservation made elsewhere (website, another admin session)
-  // since this page loaded, so the conflict check below isn't working off a
-  // stale local snapshot — this is what let two double-bookings through.
-  if(typeof pollNewReservationsFromSupabase==='function') await pollNewReservationsFromSupabase();
-  if(isOcc(rn,ci,co)){toast('⚠️ Conflict');return;}
   if(prop!=='vilu'&&['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'].includes(src)){toast('⚠️ OTA bookings cannot go to partner hotels');return;}
+
   const rm=getR(rn),id='BK'+String(Date.now()).slice(-5);
-  RES.unshift({id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn,rate:rm.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop});
+  const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn,rate:rm.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop};
+
+  const btns=document.querySelectorAll('button[onclick="submitNB()"]');
+  btns.forEach(function(b){b.disabled=true;});
+  try {
+    // The atomic transaction is the real conflict guarantee — it checks
+    // fresh Firestore data and writes in one step, so even two submissions
+    // at the exact same instant can't both land on the same room/dates.
+    await createReservationAtomic(rn, ci, co, id, {
+      id, room_id: rn,
+      guest_name: fn+' '+ln,
+      guest_email: newRes.em||'', guest_phone: newRes.ph||'',
+      guest_country: newRes.nat||'',
+      check_in: ci, check_out: co,
+      adults: newRes.ad||2, children: newRes.ch||0,
+      rate: rm.rate||0, status: 'Confirmed',
+      source: src||'Direct', notes: newRes.notes||'',
+      extra_beds: 0, trips: '[]',
+      arr_time:'', arr_transport:'', arr_from:'',
+      dep_time:'', dep_transport:'', dep_to:'',
+      updated_at: new Date().toISOString()
+    });
+  } catch(e) {
+    btns.forEach(function(b){b.disabled=false;});
+    if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
+    toast('⚠️ Could not save booking — please try again');
+    return;
+  }
+  btns.forEach(function(b){b.disabled=false;});
+
+  RES.unshift(newRes);
+  saveRES();
   aLog('ok','New booking '+id+': '+fn+' '+ln+', '+rNm(rn)+', '+fd(ci)+'–'+fd(co));
   toast('✓ Reservation confirmed!');clearNB();go('cal',document.querySelectorAll('.sl')[1]);
 }
@@ -8520,6 +8547,70 @@ var firebaseConfig = {
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
+
+// ── ATOMIC ROOM LOCKING ──
+// This Firestore SDK build's transaction.get() only supports single document
+// references, not queries — so conflict-checking can't read "all
+// reservations for this room" transactionally. Instead, each room has one
+// room_availability/{roomId} doc holding its current booked date ranges as
+// an array. A transaction reads that ONE document, checks for overlap, and
+// writes the updated array back — a single-document read+write, which
+// Firestore transactions DO guarantee atomically. If two bookings race for
+// the same room/dates, only one transaction's write can win; the other sees
+// the first one's array update and throws ROOM_CONFLICT. This holds even
+// under a true simultaneous race, not just a "re-check before submit."
+async function acquireRoomSlot(roomId, checkIn, checkOut, resId) {
+  var availRef = fsDb.collection('room_availability').doc(roomId);
+  await fsDb.runTransaction(async function(transaction) {
+    var snap = await transaction.get(availRef);
+    var bookings = ((snap.exists && snap.data().bookings) || []).filter(function(b){ return b.id !== resId; });
+    var conflict = bookings.some(function(b){ return checkIn < b.to && checkOut > b.from; });
+    if (conflict) throw new Error('ROOM_CONFLICT');
+    bookings.push({ id: resId, from: checkIn, to: checkOut });
+    transaction.set(availRef, { bookings: bookings }, { merge: true });
+  });
+}
+
+// Frees a reservation's slot — call whenever a reservation is cancelled,
+// checked out, or moved to a different room/dates, or the lock document
+// accumulates stale entries forever and starts blocking dates that are
+// actually free.
+async function releaseRoomSlot(roomId, resId) {
+  if (!roomId) return;
+  try {
+    var availRef = fsDb.collection('room_availability').doc(roomId);
+    await fsDb.runTransaction(async function(transaction) {
+      var snap = await transaction.get(availRef);
+      if (!snap.exists) return;
+      var bookings = (snap.data().bookings || []).filter(function(b){ return b.id !== resId; });
+      transaction.set(availRef, { bookings: bookings }, { merge: true });
+    });
+  } catch(e) {}
+}
+
+// Manual room blocks are admin-only and much lower-frequency, so a
+// non-transactional pre-check is a reasonable (not airtight) trade-off
+// versus folding them into the same atomic lock document.
+async function hasBlockConflict(roomId, checkIn, checkOut) {
+  try {
+    var snap = await fsDb.collection('blocks').where('room_id', '==', roomId).get();
+    return snap.docs.some(function(doc) {
+      var b = doc.data();
+      return checkIn < b.to_date && checkOut > b.from_date;
+    });
+  } catch(e) { return false; }
+}
+
+async function createReservationAtomic(roomId, checkIn, checkOut, docId, data) {
+  if (await hasBlockConflict(roomId, checkIn, checkOut)) throw new Error('ROOM_CONFLICT');
+  await acquireRoomSlot(roomId, checkIn, checkOut, docId);
+  try {
+    await fsDb.collection('reservations').doc(docId).set(data, { merge: true });
+  } catch(e) {
+    await releaseRoomSlot(roomId, docId); // roll back the slot if the reservation write itself failed
+    throw e;
+  }
+}
 
 // Creates a Firebase Auth account without disturbing the currently signed-in
 // admin's own session — uses a throwaway secondary App instance, since the
