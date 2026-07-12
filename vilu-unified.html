@@ -1115,7 +1115,12 @@ body.pms-mode { overflow:hidden; }
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
         <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
-        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()" disabled><option value="">Select dates first...</option></select></div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Rooms</label>
+          <div id="nb-suggest" style="display:none;background:#fef3c7;color:#92400e;border-radius:6px;padding:10px 12px;font-size:12px;margin-bottom:8px;border:1px solid #fde68a"></div>
+          <div id="nb-selected-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+          <table class="tb"><thead><tr><th>Room</th><th>Price/night</th><th></th></tr></thead><tbody id="nb-avail-tb"><tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">Select dates first...</td></tr></tbody></table>
+        </div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:10px">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -1656,7 +1661,11 @@ body.pms-mode { overflow:hidden; }
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
       <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
-      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)" disabled><option value="">Select dates first...</option></select></div>
+      <div class="fg" style="grid-column:1/-1">
+        <label>Room</label>
+        <input type="hidden" id="ed-rm">
+        <table class="tb"><thead><tr><th>Room</th><th>Price/night</th><th></th></tr></thead><tbody id="ed-avail-tb"><tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">Select dates first...</td></tr></tbody></table>
+      </div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -2388,7 +2397,12 @@ Snorkelling trip"></textarea>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
         <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
-        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()" disabled><option value="">Select dates first...</option></select></div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Rooms</label>
+          <div id="nb-suggest" style="display:none;background:#fef3c7;color:#92400e;border-radius:6px;padding:10px 12px;font-size:12px;margin-bottom:8px;border:1px solid #fde68a"></div>
+          <div id="nb-selected-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+          <table class="tb"><thead><tr><th>Room</th><th>Price/night</th><th></th></tr></thead><tbody id="nb-avail-tb"><tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">Select dates first...</td></tr></tbody></table>
+        </div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:10px">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -2710,7 +2724,11 @@ Snorkelling trip"></textarea>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
       <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
-      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)" disabled><option value="">Select dates first...</option></select></div>
+      <div class="fg" style="grid-column:1/-1">
+        <label>Room</label>
+        <input type="hidden" id="ed-rm">
+        <table class="tb"><thead><tr><th>Room</th><th>Price/night</th><th></th></tr></thead><tbody id="ed-avail-tb"><tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">Select dates first...</td></tr></tbody></table>
+      </div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -4400,24 +4418,39 @@ function edUpdateBedCount(){
 let _edRefreshGen=0;
 async function edRefreshRoomOptions(ci,co,selectRn){
   const myGen=++_edRefreshGen;
-  const sel=document.getElementById('ed-rm');
-  const prevVal=selectRn||sel.value;
+  const hidden=document.getElementById('ed-rm');
+  const prevVal=selectRn||hidden.value;
   _dateWatchLast.ed=ci+'|'+co;
+  const tb=document.getElementById('ed-avail-tb');
   if(!ci||!co||co<=ci){
-    sel.disabled=true;
-    sel.innerHTML='<option value="">Select dates first...</option>';
+    tb.innerHTML='<tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">Select dates first...</td></tr>';
+    hidden.value='';
     return;
   }
   const available=await getAvailableRoomsWithRates(VR,ci,co,editId);
   if(myGen!==_edRefreshGen) return;
-  sel.disabled=false;
-  sel.innerHTML='';
   if(!available.length){
-    sel.add(new Option('No rooms available for these dates',''));
+    tb.innerHTML='<tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">No rooms available for these dates</td></tr>';
+    hidden.value='';
   } else {
-    available.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
+    const stillThere=prevVal&&available.some(r=>r.n===prevVal);
+    hidden.value=stillThere?prevVal:'';
+    tb.innerHTML=available.map(function(rm){
+      const isSel=stillThere&&rm.n===prevVal;
+      return '<tr data-rn="'+rm.n+'" style="'+(isSel?'background:#e0f7fa':'')+'"><td>'+rm.nm+'</td><td>$'+rm.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="edSelectRoom(\''+rm.n+'\')">'+(isSel?'Selected':'Select')+'</button></td></tr>';
+    }).join('');
   }
-  if(prevVal && Array.from(sel.options).some(o=>o.value===prevVal)) sel.value=prevVal;
+  edC();
+}
+function edSelectRoom(rn){
+  document.getElementById('ed-rm').value=rn;
+  document.querySelectorAll('#ed-avail-tb tr[data-rn]').forEach(function(tr){
+    const isSel=tr.dataset.rn===rn;
+    tr.style.background=isSel?'#e0f7fa':'';
+    const btn=tr.querySelector('button');
+    if(btn)btn.textContent=isSel?'Selected':'Select';
+  });
+  edC();
 }
 async function edDatesChanged(){
   const ci=document.getElementById('ed-ci').value,co=document.getElementById('ed-co').value;
@@ -5104,6 +5137,10 @@ function nbSC(){
   const otas=['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'];
   if(prop!=='vilu'&&otas.includes(src)){document.getElementById('nb-src').value='Direct';toast('⚠️ OTA bookings are Vilu Residence only');}
 }
+// Selected rooms for the New Booking form: {n,nm,rate}. One reservation is
+// created per entry on submit, all sharing the same guest details.
+let nbSelectedRooms=[];
+
 // Opens New Booking pre-filled from a calendar click/drag-select. Called
 // either with explicit (rn,ci,en) args (drag-select) or with no args, in
 // which case it falls back to the sR/sS/sE globals the calendar click
@@ -5115,6 +5152,7 @@ async function openNewBookingFromSel(rn,ci,en){
   if(!rn||!start||!last)return;
   const co=D2(last,1);
   go('newbk',null);
+  nbSelectedRooms=[];
   document.getElementById('nb-ci').value=start;
   document.getElementById('nb-co').value=co;
   const prop=getR(rn)?.prop||'vilu';
@@ -5122,8 +5160,9 @@ async function openNewBookingFromSel(rn,ci,en){
   if(prop!=='vilu'){
     document.getElementById('nb-src').innerHTML='<option>Direct</option><option>Phone</option><option>Walk-in</option>';
   }
-  await nbRefreshRoomOptions(rn);
-  nbCalc();
+  await nbRenderRooms();
+  nbAddRoom(rn);
+  nbCheckSuggestion(start,co);
 }
 async function nbPC(){
   const prop=document.getElementById('nb-prop').value;
@@ -5131,43 +5170,96 @@ async function nbPC(){
     const ss=document.getElementById('nb-src');
     ss.innerHTML='<option>Direct</option><option>Phone</option><option>Walk-in</option>';
   }
-  await nbRefreshRoomOptions();
-  nbCalc();
+  if(nbSelectedRooms.length){nbSelectedRooms=[];toast('Room selection cleared — property changed');}
+  await nbRenderRooms();
 }
 
-// Rebuilds the room dropdown from whichever rooms are actually available for
-// the currently-entered dates (checked against the same room_availability
+// Rebuilds the available-rooms table from whichever rooms are actually free
+// for the currently-entered dates (checked against the same room_availability
 // locks and blocks writeReservation() itself enforces), covering both Vilu
-// Residence and partner hotel rooms. Falls back to an unfiltered list with
-// flat rates if no valid dates have been entered yet.
+// Residence and partner hotel rooms, minus whatever's already in
+// nbSelectedRooms. Falls back to a placeholder if no valid dates are entered.
 let _nbRefreshGen=0;
-async function nbRefreshRoomOptions(forceRn){
+async function nbRenderRooms(){
   const myGen=++_nbRefreshGen;
-  const prop=document.getElementById('nb-prop').value,sel=document.getElementById('nb-rm');
+  const prop=document.getElementById('nb-prop').value;
   const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
-  const prevVal=forceRn||sel.value;
   const candidates = prop==='vilu' ? VR : getHR().filter(r=>r.prop===prop);
   _dateWatchLast.nb=ci+'|'+co+'|'+prop;
+  const tb=document.getElementById('nb-avail-tb');
   if(!ci||!co||co<=ci){
-    sel.disabled=true;
-    sel.innerHTML='<option value="">Select dates first...</option>';
+    tb.innerHTML='<tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">Select dates first...</td></tr>';
+    nbRenderSelectedList();
     return;
   }
   const available = await getAvailableRoomsWithRates(candidates,ci,co,null);
   if(myGen!==_nbRefreshGen) return;
-  sel.disabled=false;
-  sel.innerHTML='<option value="">Select room...</option>';
-  if(!available.length){
-    sel.add(new Option('No rooms available for these dates',''));
+  const selectedIds=nbSelectedRooms.map(r=>r.n);
+  const rows=available.filter(r=>!selectedIds.includes(r.n));
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="3" style="color:#9ca3af;font-size:12px;padding:8px">'+(available.length?'All available rooms added':'No rooms available for these dates')+'</td></tr>';
   } else {
-    available.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
+    tb.innerHTML=rows.map(r=>'<tr><td>'+r.nm+'</td><td>$'+r.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="nbAddRoom(\''+r.n+'\')">Add</button></td></tr>').join('');
   }
-  if(prevVal && Array.from(sel.options).some(o=>o.value===prevVal)) sel.value=prevVal;
+  nbRenderSelectedList();
+}
+function nbAddRoom(rn){
+  const rm=getR(rn);if(!rm)return;
+  const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
+  const rate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
+  nbSelectedRooms.push({n:rn,nm:rm.nm,rate});
+  nbRenderRooms();
+}
+function nbRemoveRoom(rn){
+  nbSelectedRooms=nbSelectedRooms.filter(r=>r.n!==rn);
+  nbRenderRooms();
+}
+function nbRenderSelectedList(){
+  const list=document.getElementById('nb-selected-list');
+  if(!nbSelectedRooms.length){
+    list.innerHTML='<div style="font-size:12px;color:#9ca3af">No rooms selected yet</div>';
+  } else {
+    list.innerHTML=nbSelectedRooms.map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:6px;padding:6px 10px;font-size:12px"><span>'+r.nm+' — $'+r.rate+'/night</span><button class="btn sm" onclick="nbRemoveRoom(\''+r.n+'\')" aria-label="Remove"><i class="ti ti-x"></i></button></div>').join('');
+  }
+  nbCalc();
 }
 
 async function nbDatesChanged(){
-  await nbRefreshRoomOptions();
-  nbCalc();
+  if(nbSelectedRooms.length){nbSelectedRooms=[];toast('Room selection cleared — dates changed');}
+  await nbRenderRooms();
+  nbCheckSuggestion(document.getElementById('nb-ci').value,document.getElementById('nb-co').value);
+}
+
+// Checks whether ANY room across the whole portfolio (Vilu + every partner
+// hotel, regardless of the currently selected Property tab) is free for the
+// exact requested dates; if not, surfaces the nearest same-length range that
+// has something free. Non-blocking — purely informational.
+let _nbSuggestGen=0;
+async function nbCheckSuggestion(ci,co){
+  const myGen=++_nbSuggestGen;
+  const el=document.getElementById('nb-suggest');
+  if(!el)return;
+  if(!ci||!co||co<=ci){el.style.display='none';return;}
+  const allRooms=[...VR,...getHR()];
+  const roomsWithRanges=await fetchRoomIntervals(allRooms);
+  if(myGen!==_nbSuggestGen)return;
+  const exactFree=roomsWithRanges.some(r=>isRangeFree(r.ranges,ci,co));
+  if(exactFree){el.style.display='none';return;}
+  const nearest=findNearestAvailability(roomsWithRanges,ci,co,90);
+  if(myGen!==_nbSuggestGen)return;
+  if(!nearest){
+    el.style.display='block';
+    el.innerHTML='No rooms available for these exact dates. No availability found in the near term — please contact us directly.';
+    return;
+  }
+  const label=nearest.rooms.length===1?nearest.rooms[0].nm:nearest.rooms.length+' rooms available';
+  el.style.display='block';
+  el.innerHTML='No rooms available for these exact dates.<br>Nearest availability: <strong>'+label+'</strong> — '+fd(nearest.ci)+' to '+fd(nearest.co)+' <button class="btn sm" style="margin-left:8px" onclick="nbApplySuggestedDates(\''+nearest.ci+'\',\''+nearest.co+'\')">Use these dates</button>';
+}
+function nbApplySuggestedDates(ci,co){
+  document.getElementById('nb-ci').value=ci;
+  document.getElementById('nb-co').value=co;
+  nbDatesChanged();
 }
 
 async function initNB(){
@@ -5175,54 +5267,83 @@ async function initNB(){
   ps.innerHTML='<option value="vilu">Vilu Residence (own rooms)</option>'+PH.map(h=>`<option value="${h.id}">${h.nm} (partner)</option>`).join('');
   if(!document.getElementById('nb-ci').value)document.getElementById('nb-ci').value=D(1);
   if(!document.getElementById('nb-co').value)document.getElementById('nb-co').value=D(2);
-  await nbRefreshRoomOptions();
-  nbCalc();
+  nbSelectedRooms=[];
+  await nbRenderRooms();
+  nbCheckSuggestion(document.getElementById('nb-ci').value,document.getElementById('nb-co').value);
 }
 function nbCalc(){
-  const rn=document.getElementById('nb-rm').value,ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
-  const cf=document.getElementById('nb-cf'),pr=document.getElementById('nb-pr');
-  cf.style.display='none';pr.innerHTML='';
-  if(!rn||!ci||!co||co<=ci)return;
-  const c=isOcc(rn,ci,co);
-  if(c){cf.style.display='block';cf.textContent='⚠️ Conflict: '+rNm(rn)+' booked '+fd(c.ci||c.from)+'–'+fd(c.co||c.to);return;}
-  const rm=getR(rn);if(!rm)return;
-  const rate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
-  pr.innerHTML=pbd({ci,co,rate,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0});
+  const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
+  const pr=document.getElementById('nb-pr');
+  pr.innerHTML='';
+  if(!ci||!co||co<=ci||!nbSelectedRooms.length)return;
+  const ad=+document.getElementById('nb-ad').value||1,ch=+document.getElementById('nb-ch').value||0,inf=+document.getElementById('nb-inf').value||0;
+  let grandTotal=0,html='';
+  nbSelectedRooms.forEach(function(r){
+    const x=calcTax({ci,co,rate:r.rate,ad,ch,inf});
+    grandTotal+=x.total;
+    html+='<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb"><div style="font-weight:700;font-size:12px;margin-bottom:4px">'+r.nm+'</div>'+pbd({ci,co,rate:r.rate,ad,ch,inf})+'</div>';
+  });
+  if(nbSelectedRooms.length>1){
+    html+='<div style="display:flex;justify-content:space-between;font-weight:700;font-size:14px;padding-top:6px"><span>Grand total ('+nbSelectedRooms.length+' rooms)</span><span style="color:#00b4d8">$'+grandTotal.toFixed(2)+'</span></div>';
+  }
+  pr.innerHTML=html;
 }
 async function submitNB(){
   if(canViewOnly()){toast('⚠️ Agency access — cannot make bookings');return;}
   const fn=document.getElementById('nb-fn').value.trim(),ln=document.getElementById('nb-ln').value.trim();
-  const rn=document.getElementById('nb-rm').value,ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
+  const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
   const prop=document.getElementById('nb-prop').value,src=document.getElementById('nb-src').value;
-  if(!fn||!ln){toast('Enter guest name');return;}if(!rn){toast('Select a room');return;}
+  const cf=document.getElementById('nb-cf');
+  cf.style.display='none';
+  if(!fn||!ln){toast('Enter guest name');return;}
+  if(!nbSelectedRooms.length){toast('Add at least one room');return;}
   if(!ci||!co||co<=ci){toast('Invalid dates');return;}
   if(prop!=='vilu'&&['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'].includes(src)){toast('⚠️ OTA bookings cannot go to partner hotels');return;}
 
-  const rm=getR(rn),id='BK'+String(Date.now()).slice(-5);
-  const bookedRate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
-  const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn,rate:bookedRate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop};
-
   const btns=document.querySelectorAll('button[onclick="submitNB()"]');
   btns.forEach(function(b){b.disabled=true;});
-  try {
-    // The atomic transaction is the real conflict guarantee — it checks
-    // fresh Firestore data and writes in one step, so even two submissions
-    // at the exact same instant can't both land on the same room/dates.
-    await writeReservation(id, resToFirestoreFields(newRes));
-  } catch(e) {
-    btns.forEach(function(b){b.disabled=false;});
-    if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
-    toast('⚠️ Could not save booking — please try again');
-    return;
+
+  // The atomic transaction inside writeReservation() is the real conflict
+  // guarantee per room — each room's write is independent, so rooms run
+  // sequentially and a failure on one doesn't affect the others.
+  const succeeded=[],failed=[];
+  for(let i=0;i<nbSelectedRooms.length;i++){
+    const room=nbSelectedRooms[i];
+    const id='BK'+String(Date.now()).slice(-5)+'-'+i;
+    const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn:room.n,rate:room.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop};
+    try{
+      await writeReservation(id,resToFirestoreFields(newRes));
+      RES.unshift(newRes);
+      succeeded.push(room);
+      aLog('ok','New booking '+id+': '+fn+' '+ln+', '+rNm(room.n)+', '+fd(ci)+'–'+fd(co));
+    }catch(e){
+      failed.push({room,reason:e.message==='ROOM_CONFLICT'?'already booked':'error'});
+    }
   }
   btns.forEach(function(b){b.disabled=false;});
+  if(succeeded.length)saveRES();
 
-  RES.unshift(newRes);
-  saveRES();
-  aLog('ok','New booking '+id+': '+fn+' '+ln+', '+rNm(rn)+', '+fd(ci)+'–'+fd(co));
-  toast('✓ Reservation confirmed!');clearNB();go('cal',document.querySelectorAll('.sl')[1]);
+  if(!failed.length){
+    toast('✓ '+succeeded.length+' reservation'+(succeeded.length>1?'s':'')+' confirmed!');
+    clearNB();go('cal',document.querySelectorAll('.sl')[1]);
+  } else if(succeeded.length){
+    cf.style.display='block';
+    cf.textContent='⚠️ '+succeeded.length+' of '+(succeeded.length+failed.length)+' reservations created. Failed: '+failed.map(function(f){return f.room.nm+' ('+f.reason+')';}).join(', ');
+    nbSelectedRooms=failed.map(function(f){return f.room;});
+    await nbRenderRooms();
+  } else {
+    cf.style.display='block';
+    cf.textContent='⚠️ Could not save booking(s): '+failed.map(function(f){return f.room.nm+' ('+f.reason+')';}).join(', ');
+  }
 }
-function clearNB(){['nb-fn','nb-ln','nb-em','nb-ph','nb-nat','nb-pid','nb-notes'].forEach(i=>document.getElementById(i).value='');document.getElementById('nb-rm').value='';document.getElementById('nb-cf').style.display='none';document.getElementById('nb-pr').innerHTML='';}
+function clearNB(){
+  ['nb-fn','nb-ln','nb-em','nb-ph','nb-nat','nb-pid','nb-notes'].forEach(i=>document.getElementById(i).value='');
+  nbSelectedRooms=[];
+  nbRenderSelectedList();
+  document.getElementById('nb-cf').style.display='none';
+  document.getElementById('nb-pr').innerHTML='';
+  const sg=document.getElementById('nb-suggest');if(sg)sg.style.display='none';
+}
 
 // BLOCK ROOMS
 function saveBLK(){
@@ -6217,7 +6338,7 @@ setInterval(function(){
     const nbSec=document.getElementById('s-newbk');
     if(nbSec&&nbSec.classList.contains('on')){
       const k=(document.getElementById('nb-ci')?.value||'')+'|'+(document.getElementById('nb-co')?.value||'')+'|'+(document.getElementById('nb-prop')?.value||'');
-      if(k!==_dateWatchLast.nb){_dateWatchLast.nb=k;nbRefreshRoomOptions();}
+      if(k!==_dateWatchLast.nb){_dateWatchLast.nb=k;nbRenderRooms();}
     }
     if(document.getElementById('m-edit')?.classList.contains('on')){
       const eci=document.getElementById('ed-ci')?.value,eco=document.getElementById('ed-co')?.value;
@@ -9121,6 +9242,48 @@ async function hasBlockConflict(roomId, checkIn, checkOut) {
       return checkIn < b.to_date && checkOut > b.from_date;
     });
   } catch(e) { return false; }
+}
+
+// Bulk-fetches each room's booked/blocked date ranges ONCE (one
+// room_availability read + one blocks query per room), instead of
+// re-querying Firestore per candidate offset day. The nearest-availability
+// search below then runs entirely in memory against this data, so its cost
+// is O(rooms), not O(rooms x search radius).
+async function fetchRoomIntervals(rooms) {
+  return Promise.all(rooms.map(async function(r) {
+    var ranges = [];
+    try {
+      var availSnap = await fsDb.collection('room_availability').doc(r.n).get();
+      var bookings = (availSnap.exists && availSnap.data().bookings) || [];
+      bookings.forEach(function(b) { ranges.push({from: b.from, to: b.to}); });
+    } catch(e) {}
+    try {
+      var blkSnap = await fsDb.collection('blocks').where('room_id', '==', r.n).get();
+      blkSnap.docs.forEach(function(doc) {
+        var b = doc.data();
+        ranges.push({from: b.from_date, to: b.to_date});
+      });
+    } catch(e) {}
+    return {n: r.n, nm: r.nm, ranges: ranges};
+  }));
+}
+function isRangeFree(ranges, ci, co) {
+  return !ranges.some(function(rg) { return ci < rg.to && co > rg.from; });
+}
+// Given rooms with pre-fetched ranges, steps outward by day (checking both
+// forward and backward at each offset, forward wins on a tie) for the
+// nearest same-length date range where at least one room is free. Returns
+// null if nothing is found within capDays.
+function findNearestAvailability(roomsWithRanges, ci, co, capDays) {
+  for (var offset = 1; offset <= capDays; offset++) {
+    var laterCi = D2(ci, offset), laterCo = D2(co, offset);
+    var laterFree = roomsWithRanges.filter(function(r) { return isRangeFree(r.ranges, laterCi, laterCo); });
+    if (laterFree.length) return {ci: laterCi, co: laterCo, rooms: laterFree};
+    var earlierCi = D2(ci, -offset), earlierCo = D2(co, -offset);
+    var earlierFree = roomsWithRanges.filter(function(r) { return isRangeFree(r.ranges, earlierCi, earlierCo); });
+    if (earlierFree.length) return {ci: earlierCi, co: earlierCo, rooms: earlierFree};
+  }
+  return null;
 }
 
 // Average nightly rate for a Vilu room over a date range, using the Bulk

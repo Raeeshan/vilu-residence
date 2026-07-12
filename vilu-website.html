@@ -782,6 +782,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
         <button class="bfp-search-btn" onclick="bfpSearch()">Search</button>
       </div>
     </div>
+    <div id="bfp-suggest" style="display:none;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--muted)"></div>
     <div class="bfp-rooms-grid" id="bfp-rooms-grid">
       <!-- Rooms populated by JS -->
     </div>
@@ -1421,6 +1422,7 @@ async function bfpSearch(){
   await Promise.all([loadBookedRangesFromSupabase(), fetchRoomPricesFromFirestore()]);
   var available = ROOMS.filter(function(r){return isRoomAvailable(r.id, ci, co);});
   bfpRenderRooms(available, ci, co);
+  bfpCheckSuggestion(available.length, ci, co);
 }
 
 function isRoomAvailable(roomId, ci, co){
@@ -1428,6 +1430,48 @@ function isRoomAvailable(roomId, ci, co){
   return !ranges.some(function(rg){
     return ci < rg.to && co > rg.from;
   });
+}
+
+function addDaysISO(dateStr, n){
+  var d = new Date(dateStr+'T12:00');
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+function fdShort(dateStr){
+  return new Date(dateStr+'T12:00').toLocaleDateString('en-US',{day:'numeric',month:'short'});
+}
+// Searches forward/backward day-by-day (same night length, cap 90 days) for
+// the nearest dates where at least one room is free. Reuses BOOKED_RANGES,
+// already bulk-fetched once by loadBookedRangesFromSupabase() above — so
+// this whole search runs in memory with zero extra Firestore reads.
+function findNearestAvailabilityWeb(ci, co, capDays){
+  for(var offset=1; offset<=capDays; offset++){
+    var laterCi=addDaysISO(ci,offset), laterCo=addDaysISO(co,offset);
+    var laterFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,laterCi,laterCo);});
+    if(laterFree.length) return {ci:laterCi, co:laterCo, rooms:laterFree};
+    var earlierCi=addDaysISO(ci,-offset), earlierCo=addDaysISO(co,-offset);
+    var earlierFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,earlierCi,earlierCo);});
+    if(earlierFree.length) return {ci:earlierCi, co:earlierCo, rooms:earlierFree};
+  }
+  return null;
+}
+function bfpCheckSuggestion(availableCount, ci, co){
+  var el = document.getElementById('bfp-suggest');
+  if(availableCount > 0){ el.style.display='none'; return; }
+  var nearest = findNearestAvailabilityWeb(ci, co, 90);
+  if(!nearest){
+    el.style.display='block';
+    el.innerHTML = 'No rooms available for these exact dates. No availability found in the near term — please contact us directly.';
+    return;
+  }
+  var label = nearest.rooms.length===1 ? nearest.rooms[0].name : nearest.rooms.length+' rooms available';
+  el.style.display='block';
+  el.innerHTML = 'No rooms available for these exact dates.<br>Nearest availability: <strong>'+label+'</strong> — '+fdShort(nearest.ci)+' to '+fdShort(nearest.co)+' <button class="bfp-search-btn" style="padding:6px 14px;font-size:11px;margin-left:8px" onclick="bfpApplySuggestedDates(\''+nearest.ci+'\',\''+nearest.co+'\')">Use these dates</button>';
+}
+function bfpApplySuggestedDates(ci, co){
+  document.getElementById('bfp-ci').value = ci;
+  document.getElementById('bfp-co').value = co;
+  bfpSearch();
 }
 
 function bfpRenderRooms(rooms, ci, co){
