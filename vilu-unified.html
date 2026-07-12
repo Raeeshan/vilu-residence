@@ -1113,9 +1113,9 @@ body.pms-mode { overflow:hidden; }
         <div class="fg"><label>Phone</label><input type="tel" id="nb-ph" placeholder="+960 300-0000"></div>
         <div class="fg"><label>Nationality</label><input type="text" id="nb-nat" placeholder="USA"></div>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
-        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()"><option value="">Select room...</option></select></div>
         <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
+        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()" disabled><option value="">Select dates first...</option></select></div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:10px">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -1654,9 +1654,9 @@ body.pms-mode { overflow:hidden; }
       <div class="fg"><label>Last name</label><input type="text" id="ed-ln"></div>
       <div class="fg"><label>Email</label><input type="email" id="ed-em"></div>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
-      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)"></select></div>
       <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)" disabled><option value="">Select dates first...</option></select></div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -2386,9 +2386,9 @@ Snorkelling trip"></textarea>
         <div class="fg"><label>Phone</label><input type="tel" id="nb-ph" placeholder="+960 300-0000"></div>
         <div class="fg"><label>Nationality</label><input type="text" id="nb-nat" placeholder="USA"></div>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
-        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()"><option value="">Select room...</option></select></div>
         <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
+        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()" disabled><option value="">Select dates first...</option></select></div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:10px">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -2708,9 +2708,9 @@ Snorkelling trip"></textarea>
       <div class="fg"><label>Last name</label><input type="text" id="ed-ln"></div>
       <div class="fg"><label>Email</label><input type="email" id="ed-em"></div>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
-      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)"></select></div>
       <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)" disabled><option value="">Select dates first...</option></select></div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -4403,13 +4403,16 @@ async function edRefreshRoomOptions(ci,co,selectRn){
   const sel=document.getElementById('ed-rm');
   const prevVal=selectRn||sel.value;
   _dateWatchLast.ed=ci+'|'+co;
-  let available=null;
-  if(ci&&co&&co>ci) available=await getAvailableRoomsWithRates(VR,ci,co,editId);
+  if(!ci||!co||co<=ci){
+    sel.disabled=true;
+    sel.innerHTML='<option value="">Select dates first...</option>';
+    return;
+  }
+  const available=await getAvailableRoomsWithRates(VR,ci,co,editId);
   if(myGen!==_edRefreshGen) return;
+  sel.disabled=false;
   sel.innerHTML='';
-  if(!available){
-    VR.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
-  } else if(!available.length){
+  if(!available.length){
     sel.add(new Option('No rooms available for these dates',''));
   } else {
     available.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
@@ -5145,13 +5148,16 @@ async function nbRefreshRoomOptions(forceRn){
   const prevVal=forceRn||sel.value;
   const candidates = prop==='vilu' ? VR : getHR().filter(r=>r.prop===prop);
   _dateWatchLast.nb=ci+'|'+co+'|'+prop;
-  let available=null;
-  if(ci&&co&&co>ci) available = await getAvailableRoomsWithRates(candidates,ci,co,null);
+  if(!ci||!co||co<=ci){
+    sel.disabled=true;
+    sel.innerHTML='<option value="">Select dates first...</option>';
+    return;
+  }
+  const available = await getAvailableRoomsWithRates(candidates,ci,co,null);
   if(myGen!==_nbRefreshGen) return;
+  sel.disabled=false;
   sel.innerHTML='<option value="">Select room...</option>';
-  if(!available){
-    candidates.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
-  } else if(!available.length){
+  if(!available.length){
     sel.add(new Option('No rooms available for these dates',''));
   } else {
     available.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
@@ -6179,13 +6185,16 @@ async function rdRefreshRoomOptions(ci,co){
   var myGen=++_rdRefreshGen;
   var prevVal=sel.value;
   _dateWatchLast.rd=ci+'|'+co;
-  var available=null;
-  if(ci&&co&&co>ci) available=await getAvailableRoomsWithRates(VR,ci,co,drawerResId);
+  if(!ci||!co||co<=ci){
+    sel.disabled=true;
+    sel.innerHTML='<option value="">Select dates first...</option>';
+    return;
+  }
+  var available=await getAvailableRoomsWithRates(VR,ci,co,drawerResId);
   if(myGen!==_rdRefreshGen) return;
+  sel.disabled=false;
   sel.innerHTML='';
-  if(!available){
-    VR.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
-  } else if(!available.length){
+  if(!available.length){
     sel.add(new Option('No rooms available for these dates',''));
   } else {
     available.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
