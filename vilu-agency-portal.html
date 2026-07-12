@@ -300,17 +300,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <!-- Step 1: Dates & Room -->
       <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Stay details</div>
       <div class="form-grid" style="margin-bottom:12px">
-        <div class="fg" style="margin:0"><label>Check-in *</label><input type="date" id="bk-ci" onchange="autoSetCheckout();updateBkSummary()"></div>
+        <div class="fg" style="margin:0"><label>Check-in *</label><input type="date" id="bk-ci" onchange="bkDatesChanged()"></div>
         <div class="fg" style="margin:0"><label>Check-out <span style="font-size:10px;color:var(--muted)">(fixed by package)</span></label><input type="date" id="bk-co" readonly style="background:#f9fafb;color:var(--muted)"></div>
         <div class="fg" style="margin:0"><label>Room *</label>
           <select id="bk-rm" onchange="updateBkSummary()">
             <option value="">-- Select room --</option>
-            <option value="VR01">Room 101</option>
-            <option value="VR02">Room 102</option>
-            <option value="VR03">Room 103</option>
-            <option value="VR04">Room 104</option>
-            <option value="VR05">Room 105</option>
-            <option value="VR06">Room 106</option>
           </select>
         </div>
         <div class="fg" style="margin:0"><label>Adults</label>
@@ -777,13 +771,24 @@ function fd(d){return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:
 // broadcast from the PMS — invisible from any separate device. Now read
 // live from Firestore, same pattern as fetchLiveAvailability().
 var _pkgCache = [];
+// Two separate, narrowly-constrained queries, not one open collection.get()
+// — Firestore validates a list query's security rule using only that
+// query's own where() filters, so a rule that depends on document data
+// (visibleToAgencies) needs a matching filter to be provable at all. One
+// query for packages visible to everyone, one for packages specifically
+// shared with this agency's own email; merged and de-duped here.
 async function fetchPackagesFromFirestore() {
   try {
-    var snap = await fsDb.collection('packages').get();
     var out = [];
-    snap.forEach(function(d){ out.push(d.data()); });
+    var seen = {};
+    var snapAll = await fsDb.collection('packages').where('visibleToAgencies', '==', 'all').get();
+    snapAll.forEach(function(d){ if(!seen[d.id]){ out.push(d.data()); seen[d.id]=true; } });
+    if (currentAgency && currentAgency.email) {
+      var snapMine = await fsDb.collection('packages').where('visibleToAgencies', 'array-contains', currentAgency.email.toLowerCase()).get();
+      snapMine.forEach(function(d){ if(!seen[d.id]){ out.push(d.data()); seen[d.id]=true; } });
+    }
     _pkgCache = out;
-  } catch(e) {}
+  } catch(e) { console.error('fetchPackagesFromFirestore failed', e); }
   return _pkgCache;
 }
 
@@ -947,7 +952,7 @@ var EXTRA_OPTIONS = [
   {name:'Extra light / electricity',price:10,type:'room',perNight:true,perPerson:false,emoji:'💡',desc:'Additional electricity charge per night'},
 ];
 
-function openBookingModal(pid){
+async function openBookingModal(pid){
   var pkgs = loadPMS_Packages();
   selectedPkg = pkgs.find(function(p){return p.id===pid;});
   if(!selectedPkg) return;
@@ -1018,7 +1023,36 @@ function openBookingModal(pid){
   document.getElementById('bk-co').style.background = '#f9fafb';
   document.getElementById('bk-co').title = 'Auto-calculated from fixed package nights';
 
+  await bkRefreshRoomOptions();
   document.getElementById('m-bk').classList.add('on');
+  updateBkSummary();
+}
+
+// Rebuilds the room dropdown from actual availability for the current
+// dates — replaces the old static hardcoded VR01-06 option list, which
+// never checked availability at all.
+async function bkRefreshRoomOptions(){
+  var sel = document.getElementById('bk-rm');
+  if(!sel) return;
+  var ci = document.getElementById('bk-ci').value, co = document.getElementById('bk-co').value;
+  var prevVal = sel.value;
+  sel.innerHTML = '<option value="">-- Select room --</option>';
+  if(!ci || !co || co<=ci){
+    ROOMS_LIST.forEach(function(r){ sel.add(new Option(r.name, r.id)); });
+  } else {
+    await fetchLiveAvailability();
+    var available = ROOMS_LIST.filter(function(r){ return isRoomAvailable(r.id, ci, co).available; });
+    if(!available.length){
+      sel.add(new Option('No rooms available for these dates',''));
+    } else {
+      available.forEach(function(r){ sel.add(new Option(r.name, r.id)); });
+    }
+  }
+  if(prevVal && Array.from(sel.options).some(function(o){return o.value===prevVal;})) sel.value = prevVal;
+}
+async function bkDatesChanged(){
+  autoSetCheckout();
+  await bkRefreshRoomOptions();
   updateBkSummary();
 }
 

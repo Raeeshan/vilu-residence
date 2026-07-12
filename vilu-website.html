@@ -1041,17 +1041,29 @@ function loadPMSRooms() {
   } catch(e) { return DEFAULT_ROOMS; }
 }
 
-// Get price for a specific room on a specific date
-// Checks: bulk price matrix → seasonal → base rate
-function getRoomPrice(roomId, dateStr) {
-  // 1. Check bulk price matrix (vilu_room_prices set by Bulk Price Manager)
+// Per-room date-specific overrides, read live from Firestore (see
+// fetchRoomPricesFromFirestore) — replaces a localStorage read that only
+// ever had data on a device where the PMS itself had been opened, so a real
+// guest's browser never actually saw bulk-price overrides before this.
+var _roomPricesCache = {};
+async function fetchRoomPricesFromFirestore() {
   try {
-    var matrix = JSON.parse(localStorage.getItem('vilu_room_prices') || '{}');
-    if (matrix[roomId] && matrix[roomId][dateStr]) {
-      return +matrix[roomId][dateStr];
-    }
-  } catch(e) {}
-  // 2. Fallback to base rate from vilu_rooms
+    var roomIds = ['VR01','VR02','VR03','VR04','VR05','VR06'];
+    var cache = {};
+    var snaps = await Promise.all(roomIds.map(function(id){ return fsDb.collection('room_prices').doc(id).get(); }));
+    snaps.forEach(function(snap, i){ cache[roomIds[i]] = (snap.exists && snap.data().prices) || {}; });
+    _roomPricesCache = cache;
+  } catch(e) { console.error('fetchRoomPricesFromFirestore failed', e); }
+}
+
+// Get price for a specific room on a specific date
+// Checks: bulk price matrix (Firestore) → base rate
+function getRoomPrice(roomId, dateStr) {
+  var overrides = _roomPricesCache[roomId];
+  if (overrides && overrides[dateStr] != null) {
+    return +overrides[dateStr];
+  }
+  // Fallback to base rate from vilu_rooms
   var rooms = loadPMSRooms();
   var room = rooms.find(function(r){ return r.id === roomId; });
   return room ? room.rate : 80;
@@ -1404,9 +1416,9 @@ async function bfpSearch(){
   var ci = document.getElementById('bfp-ci').value;
   var co = document.getElementById('bfp-co').value;
   if(!ci || !co || co <= ci){alert('Please select valid dates'); return;}
-  // Reload rooms from PMS in case prices changed, and refresh availability from Supabase
+  // Reload rooms from PMS in case prices changed, and refresh availability + prices from Firestore
   ROOMS = loadPMSRooms();
-  await loadBookedRangesFromSupabase();
+  await Promise.all([loadBookedRangesFromSupabase(), fetchRoomPricesFromFirestore()]);
   var available = ROOMS.filter(function(r){return isRoomAvailable(r.id, ci, co);});
   bfpRenderRooms(available, ci, co);
 }

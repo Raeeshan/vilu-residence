@@ -1114,8 +1114,8 @@ body.pms-mode { overflow:hidden; }
         <div class="fg"><label>Nationality</label><input type="text" id="nb-nat" placeholder="USA"></div>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
         <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()"><option value="">Select room...</option></select></div>
-        <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbCalc()"></div>
-        <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbCalc()"></div>
+        <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
+        <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:10px">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -1518,8 +1518,12 @@ body.pms-mode { overflow:hidden; }
       <h2 style="font-size:16px;font-weight:700">Package manager</h2>
       <p style="font-size:12px;color:#6b7280;margin-top:3px">Create and manage packages for agencies. All prices are tax-inclusive.</p>
     </div>
-    <button class="btn p" onclick="openPkgForm(null)"><i class="ti ti-plus"></i>New package</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="syncAllPackagesNow()" style="border-color:#00b4d8;color:#00b4d8"><i class="ti ti-refresh"></i>Sync all packages to Firestore now</button>
+      <button class="btn p" onclick="openPkgForm(null)"><i class="ti ti-plus"></i>New package</button>
+    </div>
   </div>
+  <div id="pkg-sync-result" style="font-size:12px;color:#6b7280;margin-bottom:10px"></div>
   <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
 </div>
 
@@ -1651,8 +1655,8 @@ body.pms-mode { overflow:hidden; }
       <div class="fg"><label>Email</label><input type="email" id="ed-em"></div>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
       <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()"></select></div>
-      <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edC()"></div>
-      <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edC()"></div>
+      <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
+      <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -2007,6 +2011,14 @@ Daily breakfast
 Snorkelling trip"></textarea>
     </div>
     <div class="al bl" style="margin-bottom:12px"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0"></i><div>All package prices are <strong>tax-inclusive</strong>.</div></div>
+    <div class="fg">
+      <label>Visible to</label>
+      <div style="display:flex;gap:16px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="all" checked onchange="pkgVisibilityChanged()"> All agencies</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="specific" onchange="pkgVisibilityChanged()"> Specific agencies only</label>
+      </div>
+      <div id="pkg-agency-checklist" style="display:none;max-height:140px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px"></div>
+    </div>
     <div style="display:flex;gap:8px">
       <button class="btn p" style="flex:1" onclick="savePkg()"><i class="ti ti-device-floppy"></i>Save package</button>
       <button class="btn" onclick="document.getElementById('m-pkg').classList.remove('on')">Cancel</button>
@@ -2375,8 +2387,8 @@ Snorkelling trip"></textarea>
         <div class="fg"><label>Nationality</label><input type="text" id="nb-nat" placeholder="USA"></div>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
         <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()"><option value="">Select room...</option></select></div>
-        <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbCalc()"></div>
-        <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbCalc()"></div>
+        <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
+        <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:10px">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -2560,8 +2572,12 @@ Snorkelling trip"></textarea>
       <h2 style="font-size:16px;font-weight:700">Package manager</h2>
       <p style="font-size:12px;color:#6b7280;margin-top:3px">Create and manage packages for agencies. All prices are tax-inclusive.</p>
     </div>
-    <button class="btn p" onclick="openPkgForm(null)"><i class="ti ti-plus"></i>New package</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="syncAllPackagesNow()" style="border-color:#00b4d8;color:#00b4d8"><i class="ti ti-refresh"></i>Sync all packages to Firestore now</button>
+      <button class="btn p" onclick="openPkgForm(null)"><i class="ti ti-plus"></i>New package</button>
+    </div>
   </div>
+  <div id="pkg-sync-result" style="font-size:12px;color:#6b7280;margin-bottom:10px"></div>
   <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
 </div>
 
@@ -2693,8 +2709,8 @@ Snorkelling trip"></textarea>
       <div class="fg"><label>Email</label><input type="email" id="ed-em"></div>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
       <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()"></select></div>
-      <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edC()"></div>
-      <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edC()"></div>
+      <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
+      <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
@@ -3049,6 +3065,14 @@ Daily breakfast
 Snorkelling trip"></textarea>
     </div>
     <div class="al bl" style="margin-bottom:12px"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0"></i><div>All package prices are <strong>tax-inclusive</strong>.</div></div>
+    <div class="fg">
+      <label>Visible to</label>
+      <div style="display:flex;gap:16px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="all" checked onchange="pkgVisibilityChanged()"> All agencies</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="specific" onchange="pkgVisibilityChanged()"> Specific agencies only</label>
+      </div>
+      <div id="pkg-agency-checklist" style="display:none;max-height:140px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px"></div>
+    </div>
     <div style="display:flex;gap:8px">
       <button class="btn p" style="flex:1" onclick="savePkg()"><i class="ti ti-device-floppy"></i>Save package</button>
       <button class="btn" onclick="document.getElementById('m-pkg').classList.remove('on')">Cancel</button>
@@ -4335,11 +4359,10 @@ function saveNote(id){
 
 // EDIT BOOKING
 let editId=null;
-function openEdit(id){
+async function openEdit(id){
   if(canViewOnly()){toast('⚠️ Agency access — read only');return;}
   const r=RES.find(x=>x.id===id);if(!r)return;editId=id;
-  const sel=document.getElementById('ed-rm');
-  sel.innerHTML=VR.map(rm=>`<option value="${rm.n}"${rm.n===r.rn?' selected':''}>${rm.nm} — $${rm.rate}/night</option>`).join('');
+  await edRefreshRoomOptions(r.ci,r.co,r.rn);
   ['ed-fn','ed-ln','ed-em','ed-ph'].forEach((el,i)=>{var e=document.getElementById(el);if(e)e.value=[r.fn,r.ln,r.em||'',r.ph||''][i];});
   ['ed-ci','ed-co','ed-ad','ed-ch','ed-inf','ed-st','ed-pay','ed-rate'].forEach(function(id){var e=document.getElementById(id);if(!e)return;
     if(id==='ed-ci')e.value=r.ci;else if(id==='ed-co')e.value=r.co;else if(id==='ed-ad')e.value=r.ad||2;
@@ -4371,6 +4394,31 @@ function edUpdateBedCount(){
   else el.innerHTML = '<span style="color:#00b4d8">🛏️ '+extra+' extra bed'+(extra>1?'s':'')+'</span>';
 }
 
+// Rebuilds the edit modal's room dropdown from actual availability for the
+// given dates (excluding this reservation's own lock entry, so its current
+// room always still appears), instead of listing every VR room unconditionally.
+async function edRefreshRoomOptions(ci,co,selectRn){
+  const sel=document.getElementById('ed-rm');
+  const prevVal=selectRn||sel.value;
+  sel.innerHTML='';
+  if(!ci||!co||co<=ci){
+    VR.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
+  } else {
+    const available=await getAvailableRoomsWithRates(VR,ci,co,editId);
+    if(!available.length){
+      sel.add(new Option('No rooms available for these dates',''));
+    } else {
+      available.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
+    }
+  }
+  if(prevVal && Array.from(sel.options).some(o=>o.value===prevVal)) sel.value=prevVal;
+}
+async function edDatesChanged(){
+  const ci=document.getElementById('ed-ci').value,co=document.getElementById('ed-co').value;
+  await edRefreshRoomOptions(ci,co,null);
+  edC();
+}
+
 function edC(){
   if(!editId)return;
   const rn=document.getElementById('ed-rm').value,ci=document.getElementById('ed-ci').value,co=document.getElementById('ed-co').value;
@@ -4382,7 +4430,7 @@ function edC(){
   const rateVal=+document.getElementById('ed-rate')?.value||0;
   const bedCount=+(document.getElementById('ed-bed-val')?.textContent||0);
   const nights=nt(ci,co);
-  const baseRate=rateVal||rm.rate;
+  const baseRate=rateVal||(isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate);
   const fake={ci,co,rate:baseRate,ad:+document.getElementById('ed-ad').value||1,ch:+document.getElementById('ed-ch').value||0,inf:+document.getElementById('ed-inf').value||0,bedCount,bedCharge:+(bedCount*baseRate*nights).toFixed(2)};
   document.getElementById('ed-pr').innerHTML=pbd(fake);
 }
@@ -4402,7 +4450,7 @@ async function saveEdit(){
 
   const oldRn=r.rn, roomChanged=oldRn!==rn;
   const customRate=+document.getElementById('ed-rate')?.value||0;
-  const rate=customRate||getR(rn)?.rate||r.rate;
+  const rate=customRate||(isVR(rn)?getDateRangeRate(rn,ci,co):getR(rn)?.rate)||r.rate;
   const savedBeds=+(document.getElementById('ed-bed-val')?.textContent||0);
   const nights2=nt(ci,co);
   // Compute the edit as a candidate object first — only merge it into the
@@ -4628,10 +4676,24 @@ function pmSaveAll() {
   // Also push current base rates to Supabase so guests on other devices/browsers
   // (not just an admin's own open tabs) see the latest prices, not just same-browser sync.
   if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
+  // Date-specific overrides used to only ever reach localStorage — invisible
+  // to any guest not on the same browser as this PMS session. One document
+  // per room, individual writes (not batched — the packages batch write hit
+  // Firestore's per-request rules-evaluation cap once enough documents were
+  // bundled together; this avoids that entirely).
+  syncRoomPricesToFirestore().catch(function(){});
   aLog('ok','Saved & pushed '+count+' price overrides to all channels + website');
   pmHasChanges=false;
   document.getElementById('pm-save-badge').style.display='none';
   toast('✓ All prices saved & pushed to all OTAs + website');
+}
+
+async function syncRoomPricesToFirestore(){
+  var roomIds = Object.keys(roomPrices);
+  await Promise.all(roomIds.map(function(rn){
+    return fsDb.collection('room_prices').doc(rn).set({ prices: roomPrices[rn] || {} })
+      .catch(function(e){ console.error('syncRoomPricesToFirestore failed for', rn, e); });
+  }));
 }
 
 // ── BULK EDIT MODAL ──
@@ -5036,24 +5098,51 @@ function nbSC(){
   const otas=['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'];
   if(prop!=='vilu'&&otas.includes(src)){document.getElementById('nb-src').value='Direct';toast('⚠️ OTA bookings are Vilu Residence only');}
 }
-function nbPC(){
-  const prop=document.getElementById('nb-prop').value,sel=document.getElementById('nb-rm');
-  sel.innerHTML='<option value="">Select room...</option>';
-  if(prop==='vilu'){
-    VR.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
-  } else {
-    getHR().filter(r=>r.prop===prop).forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
+async function nbPC(){
+  const prop=document.getElementById('nb-prop').value;
+  if(prop!=='vilu'){
     const ss=document.getElementById('nb-src');
     ss.innerHTML='<option>Direct</option><option>Phone</option><option>Walk-in</option>';
   }
+  await nbRefreshRoomOptions();
   nbCalc();
 }
-function initNB(){
+
+// Rebuilds the room dropdown from whichever rooms are actually available for
+// the currently-entered dates (checked against the same room_availability
+// locks and blocks writeReservation() itself enforces), covering both Vilu
+// Residence and partner hotel rooms. Falls back to an unfiltered list with
+// flat rates if no valid dates have been entered yet.
+async function nbRefreshRoomOptions(){
+  const prop=document.getElementById('nb-prop').value,sel=document.getElementById('nb-rm');
+  const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
+  const prevVal=sel.value;
+  const candidates = prop==='vilu' ? VR : getHR().filter(r=>r.prop===prop);
+  sel.innerHTML='<option value="">Select room...</option>';
+  if(!ci||!co||co<=ci){
+    candidates.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
+  } else {
+    const available = await getAvailableRoomsWithRates(candidates,ci,co,null);
+    if(!available.length){
+      sel.add(new Option('No rooms available for these dates',''));
+    } else {
+      available.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
+    }
+  }
+  if(prevVal && Array.from(sel.options).some(o=>o.value===prevVal)) sel.value=prevVal;
+}
+
+async function nbDatesChanged(){
+  await nbRefreshRoomOptions();
+  nbCalc();
+}
+
+async function initNB(){
   const ps=document.getElementById('nb-prop');
   ps.innerHTML='<option value="vilu">Vilu Residence (own rooms)</option>'+PH.map(h=>`<option value="${h.id}">${h.nm} (partner)</option>`).join('');
-  nbPC();
   if(!document.getElementById('nb-ci').value)document.getElementById('nb-ci').value=D(1);
   if(!document.getElementById('nb-co').value)document.getElementById('nb-co').value=D(2);
+  await nbRefreshRoomOptions();
   nbCalc();
 }
 function nbCalc(){
@@ -5064,7 +5153,8 @@ function nbCalc(){
   const c=isOcc(rn,ci,co);
   if(c){cf.style.display='block';cf.textContent='⚠️ Conflict: '+rNm(rn)+' booked '+fd(c.ci||c.from)+'–'+fd(c.co||c.to);return;}
   const rm=getR(rn);if(!rm)return;
-  pr.innerHTML=pbd({ci,co,rate:rm.rate,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0});
+  const rate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
+  pr.innerHTML=pbd({ci,co,rate,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0});
 }
 async function submitNB(){
   if(canViewOnly()){toast('⚠️ Agency access — cannot make bookings');return;}
@@ -5076,7 +5166,8 @@ async function submitNB(){
   if(prop!=='vilu'&&['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'].includes(src)){toast('⚠️ OTA bookings cannot go to partner hotels');return;}
 
   const rm=getR(rn),id='BK'+String(Date.now()).slice(-5);
-  const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn,rate:rm.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop};
+  const bookedRate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
+  const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn,rate:bookedRate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop};
 
   const btns=document.querySelectorAll('button[onclick="submitNB()"]');
   btns.forEach(function(b){b.disabled=true;});
@@ -5975,8 +6066,8 @@ function rdRenderTab(n, r){
     h += '</div>';
     h += '<div class="rd-section">Stay details</div>';
     h += '<div class="rd-grid">';
-    h += '<div class="rd-field"><label>Check-in</label><input type="date" id="rde-ci" value="'+r.ci+'" onchange="rdUpdateTotal()"></div>';
-    h += '<div class="rd-field"><label>Check-out</label><input type="date" id="rde-co" value="'+r.co+'" onchange="rdUpdateTotal()"></div>';
+    h += '<div class="rd-field"><label>Check-in</label><input type="date" id="rde-ci" value="'+r.ci+'" onchange="rdDatesChanged()"></div>';
+    h += '<div class="rd-field"><label>Check-out</label><input type="date" id="rde-co" value="'+r.co+'" onchange="rdDatesChanged()"></div>';
     h += '<div class="rd-field"><label>Room</label><select id="rde-rm" onchange="rdUpdateTotal()">'+vrOpts+'</select></div>';
     h += '<div class="rd-field"><label>Source</label><select id="rde-src">'+srcOpts+'</select></div>';
     h += '<div class="rd-field"><label>Adults</label><select id="rde-ad" onchange="rdUpdateTotal()">'+adOpts+'</select></div>';
@@ -6040,6 +6131,32 @@ function rdRenderTab(n, r){
   }
 }
 
+// Rebuilds the drawer's room dropdown from actual availability for the
+// given dates (excluding this reservation's own lock entry), same pattern
+// as the edit modal's edRefreshRoomOptions.
+async function rdRefreshRoomOptions(ci,co){
+  var sel=document.getElementById('rde-rm');
+  if(!sel) return;
+  var prevVal=sel.value;
+  sel.innerHTML='';
+  if(!ci||!co||co<=ci){
+    VR.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
+  } else {
+    var available=await getAvailableRoomsWithRates(VR,ci,co,drawerResId);
+    if(!available.length){
+      sel.add(new Option('No rooms available for these dates',''));
+    } else {
+      available.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
+    }
+  }
+  if(prevVal && Array.from(sel.options).some(function(o){return o.value===prevVal;})) sel.value=prevVal;
+}
+async function rdDatesChanged(){
+  var ci=document.getElementById('rde-ci')?.value, co=document.getElementById('rde-co')?.value;
+  await rdRefreshRoomOptions(ci,co);
+  rdUpdateTotal();
+}
+
 function rdUpdateTotal(){
   var ci=document.getElementById('rde-ci')?.value;
   var co=document.getElementById('rde-co')?.value;
@@ -6054,7 +6171,8 @@ function rdUpdateTotal(){
   if(conflict){if(c2){conflict.style.display='block';conflict.textContent='⚠️ Conflict: '+rNm(rmN)+' booked '+fd(c2.ci||c2.from)+' – '+fd(c2.co||c2.to);}else{conflict.style.display='none';}}
   var rm=getR(rmN);
   var r=RES.find(function(x){return x.id===drawerResId;});
-  if(totalEl)totalEl.innerHTML=pbd({ci:ci,co:co,rate:rm?rm.rate:80,ad:ad,ch:ch,inf:inf,src:r?r.src:'Direct'});
+  var rate=rm?(isVR(rmN)?getDateRangeRate(rmN,ci,co):rm.rate):80;
+  if(totalEl)totalEl.innerHTML=pbd({ci:ci,co:co,rate:rate,ad:ad,ch:ch,inf:inf,src:r?r.src:'Direct'});
 }
 
 async function rdSave(){
@@ -6076,7 +6194,7 @@ async function rdSave(){
     ph:document.getElementById('rde-ph')?.value||r.ph,
     nat:document.getElementById('rde-nat')?.value||r.nat,
     pid:document.getElementById('rde-pid')?.value||r.pid,
-    ci:ci,co:co,rn:rmN,rate:getR(rmN)?.rate||r.rate,
+    ci:ci,co:co,rn:rmN,rate:(isVR(rmN)?getDateRangeRate(rmN,ci,co):getR(rmN)?.rate)||r.rate,
     ad:+(document.getElementById('rde-ad')?.value||1),
     ch:+(document.getElementById('rde-ch')?.value||0),
     inf:+(document.getElementById('rde-inf')?.value||0),
@@ -6860,14 +6978,26 @@ function savePackages(){
 // Packages used to only reach the agency portal via a same-device
 // localStorage broadcast — invisible from any separate device. This is the
 // live source agency portals now read from directly.
+//
+// Individual per-document writes, not a single batch — every other
+// Firestore write in this app (blocks, staff_permissions, reservations)
+// already writes one document per call, and a batch bundles the security
+// rule evaluation for every document into the SAME request, which can run
+// into Firestore's per-request cap on get()/exists() lookups (isStaff()
+// does one) once there are enough packages. Individual writes sidestep
+// that entirely and match every other working write path in this file.
 async function syncPackagesToFirestore(){
-  try {
-    var batch = fsDb.batch();
-    PACKAGES.forEach(function(p){ batch.set(fsDb.collection('packages').doc(p.id), p); });
-    await batch.commit();
-  } catch(e) { console.error('syncPackagesToFirestore failed', e); }
+  await Promise.all(PACKAGES.map(function(p){
+    return fsDb.collection('packages').doc(p.id).set(p)
+      .catch(function(e){ console.error('syncPackagesToFirestore failed for', p.id, e); });
+  }));
 }
 let PACKAGES=loadPackages();
+// Backfill for packages saved before visibleToAgencies existed — defaults
+// to "all" so nothing silently disappears from agency portals once the
+// restricted read rule ships. The next "Sync all packages to Firestore
+// now" click (or any edit/re-save) writes this default through.
+PACKAGES.forEach(function(p){ if(!p.visibleToAgencies) p.visibleToAgencies='all'; });
 
 // Agency bookings tracking
 function loadAgencyBookings(){
@@ -6936,7 +7066,45 @@ function openPkgForm(pid){
   document.getElementById('pkg-price').value = pkg ? pkg.pricePerRoom : '';
   document.getElementById('pkg-nights').value = pkg ? pkg.nights : 1;
   document.getElementById('pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : 'Accommodation\n2-way speedboat transfer';
+
+  // Visibility: default to "all" for new packages and any existing package
+  // saved before this feature existed (visibleToAgencies missing entirely).
+  var vis = pkg ? (pkg.visibleToAgencies || 'all') : 'all';
+  var isSpecific = Array.isArray(vis);
+  var radios = document.getElementsByName('pkg-vis');
+  radios.forEach(function(r){ r.checked = (r.value === (isSpecific ? 'specific' : 'all')); });
+  renderPkgAgencyChecklist(isSpecific ? vis : []);
+  document.getElementById('pkg-agency-checklist').style.display = isSpecific ? 'block' : 'none';
+
   document.getElementById('m-pkg').classList.add('on');
+}
+
+function pkgVisibilityChanged(){
+  var specific = document.querySelector('input[name="pkg-vis"]:checked').value === 'specific';
+  document.getElementById('pkg-agency-checklist').style.display = specific ? 'block' : 'none';
+  if (specific) renderPkgAgencyChecklist(_pkgChecklistSelected());
+}
+
+// Preserves whatever's currently checked when re-rendering (e.g. switching
+// the radio back and forth shouldn't lose selections already made).
+function _pkgChecklistSelected(){
+  var checked = [];
+  document.querySelectorAll('#pkg-agency-checklist input[type="checkbox"]:checked').forEach(function(c){ checked.push(c.value); });
+  return checked;
+}
+
+function renderPkgAgencyChecklist(selectedEmails){
+  var el = document.getElementById('pkg-agency-checklist');
+  if (!el) return;
+  var agencies = USERS.filter(function(u){ return u.role === 'agency'; });
+  if (!agencies.length) { el.innerHTML = '<div style="font-size:12px;color:#9ca3af">No agency accounts yet.</div>'; return; }
+  el.innerHTML = agencies.map(function(a){
+    var email = a.email.toLowerCase();
+    var checked = selectedEmails.indexOf(email) > -1;
+    return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;padding:4px 0;cursor:pointer">'
+      + '<input type="checkbox" value="'+email+'"'+(checked?' checked':'')+'> '+a.name+' ('+email+')'
+      + '</label>';
+  }).join('');
 }
 
 function savePkg(){
@@ -6945,6 +7113,8 @@ function savePkg(){
   if(!name){toast('Enter a package name');return;}
   if(!price){toast('Enter a price');return;}
   var includes = (document.getElementById('pkg-includes').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var visSpecific = document.querySelector('input[name="pkg-vis"]:checked').value === 'specific';
+  var visibleToAgencies = visSpecific ? _pkgChecklistSelected() : 'all';
   var pkg = {
     id: _editPkgId || ('PKG'+Date.now()),
     name: name,
@@ -6952,10 +7122,10 @@ function savePkg(){
     description: (document.getElementById('pkg-desc').value||'').trim(),
     pricePerRoom: price,
     nights: +(document.getElementById('pkg-nights').value||1),
-    
     includes: includes,
     color: '#00b4d8',
     active: true,
+    visibleToAgencies: visibleToAgencies,
   };
   if(_editPkgId){
     var idx = PACKAGES.findIndex(function(p){return p.id===_editPkgId;});
@@ -8876,6 +9046,42 @@ async function hasBlockConflict(roomId, checkIn, checkOut) {
   } catch(e) { return false; }
 }
 
+// Average nightly rate for a Vilu room over a date range, using the Bulk
+// Price Manager's local data directly (no Firestore round trip needed —
+// this file is the same session that owns that data). Partner hotel rooms
+// don't have per-date pricing, so callers just use the room's flat rate.
+function getDateRangeRate(rn, ci, co) {
+  var d = new Date(ci+'T12:00'), end = new Date(co+'T12:00');
+  var total = 0, nights = 0;
+  while (d < end) {
+    var ds = d.toISOString().slice(0,10);
+    total += pmGetPrice(rn, ds);
+    nights++;
+    d.setDate(d.getDate()+1);
+  }
+  return nights>0 ? Math.round(total/nights) : (getR(rn)?.rate||80);
+}
+
+// Rebuilds the list of rooms actually available for a date range — checked
+// against the same room_availability locks and blocks that writeReservation()
+// itself enforces at submit time, covering both Vilu Residence and partner
+// hotel rooms. excludeId lets the reservation currently being edited keep
+// its own room in the list without counting its own lock entry as a conflict.
+async function getAvailableRoomsWithRates(candidateRooms, ci, co, excludeId) {
+  var results = await Promise.all(candidateRooms.map(async function(rm){
+    try {
+      var availSnap = await fsDb.collection('room_availability').doc(rm.n).get();
+      var bookings = (availSnap.exists && availSnap.data().bookings) || [];
+      var occupied = bookings.some(function(b){ return b.id!==excludeId && ci<b.to && co>b.from; });
+      if (occupied) return null;
+      if (await hasBlockConflict(rm.n, ci, co)) return null;
+      var rate = isVR(rm.n) ? getDateRangeRate(rm.n, ci, co) : rm.rate;
+      return { n: rm.n, nm: rm.nm, rate: rate };
+    } catch(e) { return null; }
+  }));
+  return results.filter(Boolean);
+}
+
 // Maps the PMS's in-memory reservation shape (fn/ln/rn/ci/co/st/...) to the
 // Firestore document shape. Single source of truth for that mapping so every
 // write path (new/edit/cancel/restore/field-only changes) produces the same
@@ -9040,6 +9246,32 @@ async function saveCancellationOverrideCode() {
   } catch(e) {
     toast('⚠️ Could not save override code — please try again');
   }
+}
+
+// One-time recovery tool: pushes every currently-known local package to
+// Firestore individually and reports exactly how many succeeded/failed.
+// Needed because every save before the batch-write fix silently failed
+// permission-denied, so packages that looked "saved" in the PMS may never
+// have actually reached Firestore at all.
+async function syncAllPackagesNow(){
+  var btn = document.querySelector('button[onclick="syncAllPackagesNow()"]');
+  var out = document.getElementById('pkg-sync-result');
+  if (btn) btn.disabled = true;
+  if (out) out.textContent = 'Syncing ' + PACKAGES.length + ' package(s) to Firestore...';
+  var results = await Promise.all(PACKAGES.map(function(p){
+    return fsDb.collection('packages').doc(p.id).set(p)
+      .then(function(){ return { id: p.id, ok: true }; })
+      .catch(function(e){ return { id: p.id, ok: false, error: e.message }; });
+  }));
+  var okCount = results.filter(function(r){ return r.ok; }).length;
+  var failed = results.filter(function(r){ return !r.ok; });
+  if (out) {
+    out.textContent = failed.length
+      ? '⚠️ Synced ' + okCount + '/' + results.length + ' — failed: ' + failed.map(function(r){ return r.id; }).join(', ')
+      : '✓ All ' + okCount + ' package(s) synced to Firestore successfully.';
+  }
+  toast(failed.length ? '⚠️ ' + failed.length + ' package(s) failed to sync — see details below the buttons' : '✓ All packages synced to Firestore');
+  if (btn) btn.disabled = false;
 }
 
 async function loadCancellationOverrideCodeField() {
