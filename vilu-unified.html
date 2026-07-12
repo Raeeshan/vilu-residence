@@ -633,9 +633,9 @@ body.pms-mode { overflow:hidden; }
   <div class="sg">System</div>
   <div class="sl" onclick="go('pkgs',this)"><i class="ti ti-package"></i>Package manager</div>
   <div class="sl" onclick="go('engine',this)"><i class="ti ti-world"></i>Booking engine</div>
-  <div class="sl" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
+  <div class="sl" id="sl-bin" style="display:none" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
-  <div class="sl" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
+  <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
   <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
 
@@ -2206,9 +2206,9 @@ Snorkelling trip"></textarea>
   <div class="sg">System</div>
   <div class="sl" onclick="go('pkgs',this)"><i class="ti ti-package"></i>Package manager</div>
   <div class="sl" onclick="go('engine',this)"><i class="ti ti-world"></i>Booking engine</div>
-  <div class="sl" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
+  <div class="sl" id="sl-bin" style="display:none" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
-  <div class="sl" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
+  <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
   <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
 
@@ -5336,6 +5336,14 @@ function saveProp(){
 
 // PARTNER HOTELS
 function drawHtls(){
+  if(!currentUser || currentUser.role !== 'admin'){
+    document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+    document.getElementById('s-dash').classList.add('on');
+    document.getElementById('ptitle').textContent='Dashboard';
+    drawDash();
+    toast('⛔ Admin access only');
+    return;
+  }
   document.getElementById('ht-grid').innerHTML=PH.length?PH.map(h=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:10px">
@@ -5634,13 +5642,15 @@ function deleteUser(email){
 
 // Hide user management link for non-admins
 function applyUserMgmtVisibility(){
-  const sl = document.getElementById('sl-users');
-  if(!sl)return;
-  if(currentUser?.role === 'admin'){
-    sl.style.display = '';
-  } else {
-    sl.style.display = 'none';
-  }
+  const isAdmin = currentUser?.role === 'admin';
+  // Deleted Items and Partner Hotels management are admin-only — staff
+  // never sees the nav entries at all, not just a disabled/blocked screen.
+  // Partner hotel *reservations* still show on the calendar for everyone;
+  // this only hides the management/add-hotel section itself.
+  ['sl-users','sl-bin','sl-htls'].forEach(function(id){
+    const sl = document.getElementById(id);
+    if(sl) sl.style.display = isAdmin ? '' : 'none';
+  });
 }
 
 
@@ -5979,6 +5989,7 @@ function permDelete(id){
 }
 
 function openBin(){
+  if(!currentUser || currentUser.role !== 'admin'){ toast('⛔ Admin access only'); return; }
   drawBin();
   document.getElementById('m-bin').classList.add('on');
 }
