@@ -1113,7 +1113,7 @@ body.pms-mode { overflow:hidden; }
         <div class="fg"><label>Phone</label><input type="tel" id="nb-ph" placeholder="+960 300-0000"></div>
         <div class="fg"><label>Nationality</label><input type="text" id="nb-nat" placeholder="USA"></div>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
-        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()"><option value="">Select room...</option></select></div>
+        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()"><option value="">Select room...</option></select></div>
         <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
@@ -1654,7 +1654,7 @@ body.pms-mode { overflow:hidden; }
       <div class="fg"><label>Last name</label><input type="text" id="ed-ln"></div>
       <div class="fg"><label>Email</label><input type="email" id="ed-em"></div>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
-      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()"></select></div>
+      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)"></select></div>
       <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
@@ -2386,7 +2386,7 @@ Snorkelling trip"></textarea>
         <div class="fg"><label>Phone</label><input type="tel" id="nb-ph" placeholder="+960 300-0000"></div>
         <div class="fg"><label>Nationality</label><input type="text" id="nb-nat" placeholder="USA"></div>
         <div class="fg"><label>Passport / ID</label><input type="text" id="nb-pid" placeholder="A12345678"></div>
-        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()"><option value="">Select room...</option></select></div>
+        <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="nb-rm" onchange="nbCalc()" onfocus="nbRefreshRoomOptions()"><option value="">Select room...</option></select></div>
         <div class="fg"><label>Check-in</label><input type="date" id="nb-ci" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Check-out</label><input type="date" id="nb-co" onchange="nbDatesChanged()"></div>
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
@@ -2708,7 +2708,7 @@ Snorkelling trip"></textarea>
       <div class="fg"><label>Last name</label><input type="text" id="ed-ln"></div>
       <div class="fg"><label>Email</label><input type="email" id="ed-em"></div>
       <div class="fg"><label>Phone</label><input type="tel" id="ed-ph"></div>
-      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()"></select></div>
+      <div class="fg" style="grid-column:1/-1"><label>Room</label><select id="ed-rm" onchange="edC()" onfocus="edRefreshRoomOptions(document.getElementById('ed-ci').value,document.getElementById('ed-co').value,null)"></select></div>
       <div class="fg"><label>Check-in</label><input type="date" id="ed-ci" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Check-out</label><input type="date" id="ed-co" onchange="edDatesChanged()"></div>
       <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
@@ -4397,19 +4397,22 @@ function edUpdateBedCount(){
 // Rebuilds the edit modal's room dropdown from actual availability for the
 // given dates (excluding this reservation's own lock entry, so its current
 // room always still appears), instead of listing every VR room unconditionally.
+let _edRefreshGen=0;
 async function edRefreshRoomOptions(ci,co,selectRn){
+  const myGen=++_edRefreshGen;
   const sel=document.getElementById('ed-rm');
   const prevVal=selectRn||sel.value;
+  _dateWatchLast.ed=ci+'|'+co;
+  let available=null;
+  if(ci&&co&&co>ci) available=await getAvailableRoomsWithRates(VR,ci,co,editId);
+  if(myGen!==_edRefreshGen) return;
   sel.innerHTML='';
-  if(!ci||!co||co<=ci){
+  if(!available){
     VR.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
+  } else if(!available.length){
+    sel.add(new Option('No rooms available for these dates',''));
   } else {
-    const available=await getAvailableRoomsWithRates(VR,ci,co,editId);
-    if(!available.length){
-      sel.add(new Option('No rooms available for these dates',''));
-    } else {
-      available.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
-    }
+    available.forEach(rm=>sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)));
   }
   if(prevVal && Array.from(sel.options).some(o=>o.value===prevVal)) sel.value=prevVal;
 }
@@ -5098,6 +5101,27 @@ function nbSC(){
   const otas=['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'];
   if(prop!=='vilu'&&otas.includes(src)){document.getElementById('nb-src').value='Direct';toast('⚠️ OTA bookings are Vilu Residence only');}
 }
+// Opens New Booking pre-filled from a calendar click/drag-select. Called
+// either with explicit (rn,ci,en) args (drag-select) or with no args, in
+// which case it falls back to the sR/sS/sE globals the calendar click
+// handler just set (single-cell click). "en" is the last selected date,
+// so checkout is the day after it.
+async function openNewBookingFromSel(rn,ci,en){
+  if(canViewOnly()){toast('⚠️ Agency access — cannot make bookings');return;}
+  rn=rn||sR;const start=ci||sS,last=en||sE;
+  if(!rn||!start||!last)return;
+  const co=D2(last,1);
+  go('newbk',null);
+  document.getElementById('nb-ci').value=start;
+  document.getElementById('nb-co').value=co;
+  const prop=getR(rn)?.prop||'vilu';
+  document.getElementById('nb-prop').value=prop;
+  if(prop!=='vilu'){
+    document.getElementById('nb-src').innerHTML='<option>Direct</option><option>Phone</option><option>Walk-in</option>';
+  }
+  await nbRefreshRoomOptions(rn);
+  nbCalc();
+}
 async function nbPC(){
   const prop=document.getElementById('nb-prop').value;
   if(prop!=='vilu'){
@@ -5113,21 +5137,24 @@ async function nbPC(){
 // locks and blocks writeReservation() itself enforces), covering both Vilu
 // Residence and partner hotel rooms. Falls back to an unfiltered list with
 // flat rates if no valid dates have been entered yet.
-async function nbRefreshRoomOptions(){
+let _nbRefreshGen=0;
+async function nbRefreshRoomOptions(forceRn){
+  const myGen=++_nbRefreshGen;
   const prop=document.getElementById('nb-prop').value,sel=document.getElementById('nb-rm');
   const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
-  const prevVal=sel.value;
+  const prevVal=forceRn||sel.value;
   const candidates = prop==='vilu' ? VR : getHR().filter(r=>r.prop===prop);
+  _dateWatchLast.nb=ci+'|'+co+'|'+prop;
+  let available=null;
+  if(ci&&co&&co>ci) available = await getAvailableRoomsWithRates(candidates,ci,co,null);
+  if(myGen!==_nbRefreshGen) return;
   sel.innerHTML='<option value="">Select room...</option>';
-  if(!ci||!co||co<=ci){
+  if(!available){
     candidates.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
+  } else if(!available.length){
+    sel.add(new Option('No rooms available for these dates',''));
   } else {
-    const available = await getAvailableRoomsWithRates(candidates,ci,co,null);
-    if(!available.length){
-      sel.add(new Option('No rooms available for these dates',''));
-    } else {
-      available.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
-    }
+    available.forEach(r=>sel.add(new Option(r.nm+' — $'+r.rate+'/night',r.n)));
   }
   if(prevVal && Array.from(sel.options).some(o=>o.value===prevVal)) sel.value=prevVal;
 }
@@ -6079,7 +6106,7 @@ function rdRenderTab(n, r){
     h += '<div class="rd-grid">';
     h += '<div class="rd-field"><label>Check-in</label><input type="date" id="rde-ci" value="'+r.ci+'" onchange="rdDatesChanged()"></div>';
     h += '<div class="rd-field"><label>Check-out</label><input type="date" id="rde-co" value="'+r.co+'" onchange="rdDatesChanged()"></div>';
-    h += '<div class="rd-field"><label>Room</label><select id="rde-rm" onchange="rdUpdateTotal()">'+vrOpts+'</select></div>';
+    h += '<div class="rd-field"><label>Room</label><select id="rde-rm" onchange="rdUpdateTotal()" onfocus="rdRefreshRoomOptions(document.getElementById(\'rde-ci\').value,document.getElementById(\'rde-co\').value)">'+vrOpts+'</select></div>';
     h += '<div class="rd-field"><label>Source</label><select id="rde-src">'+srcOpts+'</select></div>';
     h += '<div class="rd-field"><label>Adults</label><select id="rde-ad" onchange="rdUpdateTotal()">'+adOpts+'</select></div>';
     h += '<div class="rd-field"><label>Children</label><select id="rde-ch" onchange="rdUpdateTotal()">'+chOpts+'</select></div>';
@@ -6145,20 +6172,23 @@ function rdRenderTab(n, r){
 // Rebuilds the drawer's room dropdown from actual availability for the
 // given dates (excluding this reservation's own lock entry), same pattern
 // as the edit modal's edRefreshRoomOptions.
+let _rdRefreshGen=0;
 async function rdRefreshRoomOptions(ci,co){
   var sel=document.getElementById('rde-rm');
   if(!sel) return;
+  var myGen=++_rdRefreshGen;
   var prevVal=sel.value;
+  _dateWatchLast.rd=ci+'|'+co;
+  var available=null;
+  if(ci&&co&&co>ci) available=await getAvailableRoomsWithRates(VR,ci,co,drawerResId);
+  if(myGen!==_rdRefreshGen) return;
   sel.innerHTML='';
-  if(!ci||!co||co<=ci){
+  if(!available){
     VR.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
+  } else if(!available.length){
+    sel.add(new Option('No rooms available for these dates',''));
   } else {
-    var available=await getAvailableRoomsWithRates(VR,ci,co,drawerResId);
-    if(!available.length){
-      sel.add(new Option('No rooms available for these dates',''));
-    } else {
-      available.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
-    }
+    available.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
   }
   if(prevVal && Array.from(sel.options).some(function(o){return o.value===prevVal;})) sel.value=prevVal;
 }
@@ -6167,6 +6197,33 @@ async function rdDatesChanged(){
   await rdRefreshRoomOptions(ci,co);
   rdUpdateTotal();
 }
+
+// Self-heals the room dropdown in New Booking / Edit / Room drawer whenever the
+// check-in/check-out fields differ from what the dropdown was last computed for
+// — catches browser form-restore-on-reload and other value changes that don't
+// fire change/input events, not just the onchange-driven path.
+let _dateWatchLast={nb:'',ed:'',rd:''};
+setInterval(function(){
+  try{
+    const nbSec=document.getElementById('s-newbk');
+    if(nbSec&&nbSec.classList.contains('on')){
+      const k=(document.getElementById('nb-ci')?.value||'')+'|'+(document.getElementById('nb-co')?.value||'')+'|'+(document.getElementById('nb-prop')?.value||'');
+      if(k!==_dateWatchLast.nb){_dateWatchLast.nb=k;nbRefreshRoomOptions();}
+    }
+    if(document.getElementById('m-edit')?.classList.contains('on')){
+      const eci=document.getElementById('ed-ci')?.value,eco=document.getElementById('ed-co')?.value;
+      const k=eci+'|'+eco;
+      if(k!==_dateWatchLast.ed){_dateWatchLast.ed=k;edRefreshRoomOptions(eci,eco,null);}
+    }
+    if(typeof drawerResId!=='undefined'&&drawerResId!==null){
+      const rci=document.getElementById('rde-ci')?.value,rco=document.getElementById('rde-co')?.value;
+      if(rci&&rco){
+        const k=rci+'|'+rco;
+        if(k!==_dateWatchLast.rd){_dateWatchLast.rd=k;rdRefreshRoomOptions(rci,rco);}
+      }
+    }
+  }catch(e){}
+},700);
 
 function rdUpdateTotal(){
   var ci=document.getElementById('rde-ci')?.value;
