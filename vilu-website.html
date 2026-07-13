@@ -25,6 +25,16 @@
   --glow: rgba(34,211,238,.4);
   --card: #0f2d52;
   --card-border: rgba(34,211,238,.15);
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-display: 48px;
+  --font-size-display-lg: 64px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -102,20 +112,20 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .nav-logo{display:flex;align-items:center;gap:12px}
 .nav-logo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 14px var(--glow)}
 .nav-logo-text{display:flex;flex-direction:column}
-.nav-logo-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;letter-spacing:.04em;color:var(--white);line-height:1}
-.nav-logo-sub{font-size:10px;font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+.nav-logo-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;letter-spacing:.04em;color:var(--white);line-height:1}
+.nav-logo-sub{font-size:var(--font-size-xs);font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
 .nav-links{display:flex;gap:32px;list-style:none}
-.nav-links a{font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;transition:color .25s}
+.nav-links a{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;transition:color .25s}
 .nav-links a:hover{color:var(--gold-light);text-shadow:0 0 12px var(--glow)}
-.nav-book{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 24px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.nav-book{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 24px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .nav-book:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(34,211,238,.4)}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
 .nav-hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:all .3s}
 .mobile-menu{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(10,22,40,.98);backdrop-filter:blur(20px);padding:24px 5vw;flex-direction:column;gap:0;z-index:999;border-bottom:1px solid rgba(34,211,238,.22)}
 .mobile-menu.open{display:flex}
-.mobile-menu a{padding:16px 0;font-size:14px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
+.mobile-menu a{padding:16px 0;font-size:var(--font-size-md);font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
 .mobile-menu a:hover{color:var(--gold)}
-.mobile-menu .m-book-btn{margin-top:20px;background:var(--gold);color:var(--navy);padding:14px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%}
+.mobile-menu .m-book-btn{margin-top:20px;background:var(--gold);color:var(--navy);padding:14px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%}
 
 /* ── HERO ── */
 #home{position:relative;height:100vh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -129,27 +139,27 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 @keyframes waveDrift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes waveHeave{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 .hero-content{position:relative;z-index:5;text-align:center;padding:0 5vw;max-width:900px}
-.hero-badge{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);border:1px solid rgba(34,211,238,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
-.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,8vw,96px);font-weight:300;line-height:1;letter-spacing:-.01em;margin-bottom:8px;text-shadow:0 0 40px rgba(34,211,238,.35);animation:fadeUp .8s .1s ease both}
+.hero-badge{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);border:1px solid rgba(34,211,238,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(var(--font-size-display),8vw,96px);font-weight:300;line-height:1;letter-spacing:-.01em;margin-bottom:8px;text-shadow:0 0 40px rgba(34,211,238,.35);animation:fadeUp .8s .1s ease both}
 .hero-title em{font-style:italic;color:var(--gold-light)}
-.hero-subtitle{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,3vw,26px);font-weight:300;color:rgba(255,255,255,.75);margin-bottom:40px;letter-spacing:.04em;animation:fadeUp .8s .2s ease both}
+.hero-subtitle{font-family:'Cormorant Garamond',serif;font-size:clamp(var(--font-size-xl),3vw,26px);font-weight:300;color:rgba(255,255,255,.75);margin-bottom:40px;letter-spacing:.04em;animation:fadeUp .8s .2s ease both}
 .hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s .3s ease both}
-.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:16px 36px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .35s}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:16px 36px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .35s}
 .btn-primary:hover{background-position:100% 0;transform:translateY(-2px);box-shadow:0 10px 30px rgba(34,211,238,.4)}
-.btn-outline{background:rgba(255,255,255,.03);backdrop-filter:blur(6px);color:var(--white);padding:16px 36px;border:1px solid rgba(255,255,255,.4);border-radius:2px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.btn-outline{background:rgba(255,255,255,.03);backdrop-filter:blur(6px);color:var(--white);padding:16px 36px;border:1px solid rgba(255,255,255,.4);border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .btn-outline:hover{border-color:var(--ocean);color:var(--ocean);box-shadow:0 0 24px var(--glow)}
 .hero-scroll{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;animation:fadeUpCenter .8s .5s ease both}
-.hero-scroll span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.hero-scroll span{font-size:var(--font-size-xs);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5)}
 .scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(34,211,238,.9),transparent);animation:scrollAnim 2s infinite}
 .hero-stats{position:absolute;bottom:140px;right:5vw;display:flex;flex-direction:column;gap:20px;z-index:5;animation:fadeUp .8s .4s ease both}
 .stat{text-align:right}
-.stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold-light);line-height:1;text-shadow:0 0 18px var(--glow)}
-.stat-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:2px}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:300;color:var(--gold-light);line-height:1;text-shadow:0 0 18px var(--glow)}
+.stat-label{font-size:var(--font-size-xs);letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:2px}
 
 /* ── SECTION BASE ── */
 section{position:relative}
 .section-inner{max-width:1200px;margin:0 auto;padding:0 5vw;position:relative;z-index:1}
-.section-tag{font-size:10px;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.section-tag{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,60px);font-weight:300;line-height:1.1;letter-spacing:-.01em}
 
 /* ── QUICK BOOKING BAR ── */
@@ -157,11 +167,11 @@ section{position:relative}
 .booking-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:stretch;gap:0;height:72px}
 .bb-field{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 20px;border-right:1px solid rgba(255,255,255,.08)}
 .bb-field:first-child{padding-left:0}
-.bb-label{font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
-.bb-input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);width:100%;cursor:pointer}
+.bb-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.bb-input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--white);width:100%;cursor:pointer}
 .bb-input::placeholder{color:rgba(255,255,255,.4)}
 .bb-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
-.bb-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:0 32px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s;white-space:nowrap}
+.bb-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:0 32px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s;white-space:nowrap}
 .bb-btn:hover{background-position:100% 0}
 
 /* ── ROOMS ── */
@@ -174,17 +184,17 @@ section{position:relative}
 .room-card-img{height:260px;overflow:hidden;position:relative}
 .room-card-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .room-card:hover .room-card-img-bg{transform:scale(1.08)}
-.room-card-badge{position:absolute;top:16px;left:16px;background:rgba(10,30,38,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:var(--white);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px}
+.room-card-badge{position:absolute;top:16px;left:16px;background:rgba(10,30,38,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:var(--white);font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px}
 .room-card-body{padding:24px}
-.room-card-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px}
-.room-card-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.room-card-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--text);margin-bottom:6px}
+.room-card-desc{font-size:var(--font-size-base);color:var(--muted);line-height:1.6;margin-bottom:16px}
 .room-card-features{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-.room-feature{font-size:11px;color:var(--muted);background:var(--sand);padding:4px 10px;border-radius:20px}
+.room-feature{font-size:var(--font-size-xs);color:var(--muted);background:var(--sand);padding:4px 10px;border-radius:20px}
 .room-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--sand2);padding-top:16px}
 .room-price{font-family:'Cormorant Garamond',serif}
-.room-price-amount{font-size:28px;font-weight:600;color:var(--teal)}
-.room-price-label{font-size:11px;color:var(--muted)}
-.room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .3s}
+.room-price-amount{font-size:var(--font-size-3xl);font-weight:600;color:var(--teal)}
+.room-price-label{font-size:var(--font-size-xs);color:var(--muted)}
+.room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .3s}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
 
 /* ── ABOUT ── */
@@ -196,16 +206,16 @@ section{position:relative}
 .about-img-frame::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.14) 0%,transparent 60%)}
 .about-logo-big{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.3);object-fit:cover}
 .about-float-card{position:absolute;bottom:-24px;right:-24px;background:linear-gradient(135deg,var(--gold),var(--gold-light));padding:24px 28px;border-radius:6px;box-shadow:0 16px 34px rgba(0,10,20,.4)}
-.about-float-num{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--navy);line-height:1}
-.about-float-text{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);opacity:.7;margin-top:4px}
+.about-float-num{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:300;color:var(--navy);line-height:1}
+.about-float-text{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);opacity:.7;margin-top:4px}
 .about-text .section-tag{color:var(--gold)}
 .about-text .section-title{color:var(--white)}
-.about-desc{font-size:15px;color:rgba(255,255,255,.65);line-height:1.8;margin-top:24px;margin-bottom:32px}
+.about-desc{font-size:var(--font-size-lg);color:rgba(255,255,255,.65);line-height:1.8;margin-top:24px;margin-bottom:32px}
 .about-features{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
 .about-feature{display:flex;align-items:flex-start;gap:12px}
-.af-icon{width:32px;height:32px;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
-.af-text{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5}
-.af-title{font-size:13px;font-weight:500;color:var(--white);margin-bottom:2px}
+.af-icon{width:32px;height:32px;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:var(--font-size-md)}
+.af-text{font-size:var(--font-size-base);color:rgba(255,255,255,.6);line-height:1.5}
+.af-title{font-size:var(--font-size-base);font-weight:500;color:var(--white);margin-bottom:2px}
 
 /* ── GALLERY ── */
 #gallery{background:linear-gradient(190deg,var(--navy) 0%,#081527 100%);padding:100px 0;position:relative}
@@ -221,7 +231,7 @@ section{position:relative}
 .g-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .g-item:hover .g-bg{transform:scale(1.1)}
 .g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,.75) 0%,transparent 60%);opacity:0;transition:opacity .35s;display:flex;align-items:flex-end;padding:20px}
-.g-label{font-size:12px;font-weight:500;letter-spacing:.08em;color:var(--white)}
+.g-label{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;color:var(--white)}
 
 /* ── BOOKING SECTION ── */
 #booking{background:linear-gradient(165deg,var(--navy2) 0%,#0a3049 55%,#0e5570 100%);padding:100px 0;position:relative}
@@ -229,43 +239,43 @@ section{position:relative}
 .booking-split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
 .booking-info .section-tag{color:var(--gold)}
 .booking-info .section-title{color:var(--white);margin-bottom:24px}
-.booking-info p{font-size:15px;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:32px}
+.booking-info p{font-size:var(--font-size-lg);color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:32px}
 .booking-perks{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
-.booking-perk{display:flex;align-items:center;gap:12px;font-size:13px;color:rgba(255,255,255,.7)}
+.booking-perk{display:flex;align-items:center;gap:12px;font-size:var(--font-size-base);color:rgba(255,255,255,.7)}
 .bp-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0;box-shadow:0 0 8px var(--gold)}
 .booking-widget-frame{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border:1px solid rgba(34,211,238,.22);border-radius:10px;padding:32px;text-align:center;box-shadow:0 20px 50px rgba(0,10,20,.35)}
-.bwf-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--white);margin-bottom:8px}
-.bwf-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:28px}
+.bwf-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:300;color:var(--white);margin-bottom:8px}
+.bwf-sub{font-size:var(--font-size-base);color:rgba(255,255,255,.5);margin-bottom:28px}
 .bwf-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
 .bwf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .bwf-field{display:flex;flex-direction:column;gap:6px;text-align:left}
-.bwf-label{font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
-.bwf-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
+.bwf-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
+.bwf-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
 .bwf-input:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
 .bwf-input::placeholder{color:rgba(255,255,255,.3)}
 .bwf-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
-.bwf-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
-.bwf-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;margin-bottom:12px}
+.bwf-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
+.bwf-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;margin-bottom:12px}
 .bwf-btn:hover{background-position:100% 0;box-shadow:0 10px 26px rgba(34,211,238,.4)}
-.bwf-note{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em}
+.bwf-note{font-size:var(--font-size-xs);color:rgba(255,255,255,.35);letter-spacing:.04em}
 
 /* ── AVAILABILITY CALENDAR (booked dates blocked from live PMS/Supabase data) ── */
 .vilu-date-input{cursor:pointer}
 .vilu-cal{position:fixed;z-index:3000;background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 20px 50px rgba(0,4,10,.55);padding:14px;width:280px;font-family:'DM Sans',sans-serif;display:none}
 .vilu-cal.open{display:block}
 .vilu-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.vilu-cal-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:.03em}
-.vilu-cal-nav{background:none;border:1px solid rgba(255,255,255,.14);color:var(--teal-light);font-size:14px;cursor:pointer;padding:2px 10px;border-radius:4px;line-height:1.6}
+.vilu-cal-title{font-size:var(--font-size-base);font-weight:600;color:var(--text);letter-spacing:.03em}
+.vilu-cal-nav{background:none;border:1px solid rgba(255,255,255,.14);color:var(--teal-light);font-size:var(--font-size-md);cursor:pointer;padding:2px 10px;border-radius:4px;line-height:1.6}
 .vilu-cal-nav:hover{background:rgba(34,211,238,.14)}
 .vilu-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.vilu-cal-dow{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding:4px 0}
-.vilu-cal-day{font-size:12px;text-align:center;padding:7px 0;border-radius:6px;cursor:pointer;color:var(--text);background:rgba(255,255,255,.03)}
+.vilu-cal-dow{font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding:4px 0}
+.vilu-cal-day{font-size:var(--font-size-sm);text-align:center;padding:7px 0;border-radius:6px;cursor:pointer;color:var(--text);background:rgba(255,255,255,.03)}
 .vilu-cal-day:hover:not(.disabled):not(.empty){background:rgba(34,211,238,.2)}
 .vilu-cal-day.empty{cursor:default;background:none}
 .vilu-cal-day.disabled{color:rgba(255,255,255,.2);text-decoration:line-through;cursor:not-allowed;background:none}
 .vilu-cal-day.today{box-shadow:inset 0 0 0 1px var(--teal-light)}
 .vilu-cal-day.selected{background:var(--teal-light);color:var(--navy);font-weight:600}
-.vilu-cal-legend{display:flex;gap:14px;margin-top:10px;font-size:10px;color:var(--muted)}
+.vilu-cal-legend{display:flex;gap:14px;margin-top:10px;font-size:var(--font-size-xs);color:var(--muted)}
 .vilu-cal-legend span{display:inline-flex;align-items:center;gap:5px}
 .vilu-cal-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
@@ -274,22 +284,22 @@ section{position:relative}
 #contact::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 55% 40% at 90% 0%,rgba(34,211,238,.08),transparent 60%)}
 #contact .section-tag{color:var(--teal)}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:60px}
-.contact-info h3{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:24px;color:var(--text)}
+.contact-info h3{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:400;margin-bottom:24px;color:var(--text)}
 .contact-details{display:flex;flex-direction:column;gap:20px}
 .cd-item{display:flex;gap:16px;align-items:flex-start}
-.cd-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--teal),var(--teal-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 6px 16px rgba(14,116,144,.3)}
-.cd-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
-.cd-value{font-size:15px;color:var(--text)}
+.cd-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--teal),var(--teal-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-lg);flex-shrink:0;box-shadow:0 6px 16px rgba(14,116,144,.3)}
+.cd-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
+.cd-value{font-size:var(--font-size-lg);color:var(--text)}
 .cd-value a{color:var(--text);text-decoration:none}
 .contact-form{background:var(--card);border:1px solid var(--card-border);padding:40px;border-radius:10px;box-shadow:0 20px 60px rgba(0,4,10,.35)}
-.cf-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:24px;color:var(--text)}
+.cf-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:400;margin-bottom:24px;color:var(--text)}
 .cf-fields{display:flex;flex-direction:column;gap:16px}
-.cf-field label{display:block;font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
-.cf-field input,.cf-field textarea,.cf-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
+.cf-field label{display:block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.cf-field input,.cf-field textarea,.cf-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
 .cf-field input:focus,.cf-field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.15)}
 .cf-field textarea{height:100px;resize:vertical}
 .cf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.cf-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.cf-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .cf-btn:hover{background:var(--teal-light);box-shadow:0 10px 26px rgba(14,116,144,.35)}
 
 /* ── FOOTER ── */
@@ -299,16 +309,16 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
 .footer-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .footer-brand-logo img{width:48px;height:48px;border-radius:50%;border:2px solid rgba(34,211,238,.4);object-fit:cover}
-.footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:var(--white)}
-.footer-brand-sub{font-size:10px;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
-.footer-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:20px}
-.footer-col h4{font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:400;color:var(--white)}
+.footer-brand-sub{font-size:var(--font-size-xs);color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+.footer-desc{font-size:var(--font-size-base);color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:20px}
+.footer-col h4{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
-.footer-col ul a{font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
+.footer-col ul a{font-size:var(--font-size-base);color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
 .footer-col ul a:hover{color:var(--ocean)}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding-top:24px;display:flex;justify-content:space-between;align-items:center}
-.footer-copy{font-size:12px;color:rgba(255,255,255,.3)}
-.footer-pms-badge{font-size:11px;color:rgba(255,255,255,.25);display:flex;align-items:center;gap:6px}
+.footer-copy{font-size:var(--font-size-sm);color:rgba(255,255,255,.3)}
+.footer-pms-badge{font-size:var(--font-size-xs);color:rgba(255,255,255,.25);display:flex;align-items:center;gap:6px}
 .footer-pms-badge span{color:var(--gold)}
 
 /* ── BOOKING POPUP ── */
@@ -316,8 +326,8 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 .booking-popup-overlay.open{display:flex}
 .booking-popup{background:linear-gradient(165deg,var(--navy2),#0a2540);border:1px solid rgba(34,211,238,.28);border-radius:10px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.16,1,.3,1);box-shadow:0 30px 80px rgba(0,5,10,.6)}
 .popup-header{padding:28px 32px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
-.popup-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--white)}
-.popup-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:22px;cursor:pointer;line-height:1;transition:color .2s;padding:4px}
+.popup-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:300;color:var(--white)}
+.popup-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:var(--font-size-3xl);cursor:pointer;line-height:1;transition:color .2s;padding:4px}
 .popup-close:hover{color:var(--white)}
 .popup-body{padding:28px 32px 32px}
 
@@ -326,17 +336,17 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 .bfp-header{background:linear-gradient(120deg,var(--navy),var(--navy2));padding:20px 5vw;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 8px 24px rgba(0,10,20,.3)}
 .bfp-logo{display:flex;align-items:center;gap:10px}
 .bfp-logo img{width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
-.bfp-logo-text{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--white)}
-.bfp-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:8px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.bfp-logo-text{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-lg);color:var(--white)}
+.bfp-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:8px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .bfp-close:hover{background:rgba(255,255,255,.2)}
 .bfp-content{max-width:960px;margin:0 auto;padding:48px 5vw}
-.bfp-title{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--text);margin-bottom:8px}
-.bfp-sub{font-size:15px;color:var(--muted);margin-bottom:40px}
+.bfp-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:300;color:var(--text);margin-bottom:8px}
+.bfp-sub{font-size:var(--font-size-lg);color:var(--muted);margin-bottom:40px}
 .bfp-search{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px;box-shadow:0 10px 40px rgba(0,4,10,.3);margin-bottom:40px}
 .bfp-search-grid{display:grid;grid-template-columns:1fr 1fr 80px 80px auto;gap:16px;align-items:end}
-.bfp-field label{font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
-.bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none}
-.bfp-search-btn{background:var(--teal);color:var(--white);border:none;padding:11px 24px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s}
+.bfp-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
+.bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none}
+.bfp-search-btn{background:var(--teal);color:var(--white);border:none;padding:11px 24px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s}
 .bfp-search-btn:hover{background:var(--teal-light);box-shadow:0 8px 22px rgba(14,116,144,.35)}
 .bfp-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .bfp-room-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,4,10,.3);transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1)}
@@ -345,12 +355,12 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 .bfp-room-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .bfp-room-card:hover .bfp-room-img-bg{transform:scale(1.07)}
 .bfp-room-body{padding:20px}
-.bfp-room-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px}
-.bfp-room-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.bfp-room-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:6px}
+.bfp-room-desc{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;margin-bottom:14px}
 .bfp-room-footer{display:flex;align-items:center;justify-content:space-between}
-.bfp-room-price{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--teal);font-weight:600}
-.bfp-room-price span{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--muted);font-weight:400}
-.bfp-book-btn{background:var(--teal);color:var(--white);border:none;padding:9px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.bfp-room-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);color:var(--teal);font-weight:600}
+.bfp-room-price span{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);color:var(--muted);font-weight:400}
+.bfp-book-btn{background:var(--teal);color:var(--white);border:none;padding:9px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .bfp-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 16px rgba(14,116,144,.35)}
 
 /* ── ANIMATIONS ── */
@@ -724,7 +734,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
         <p class="footer-desc">A welcoming guesthouse in the South Ari Atoll offering genuine service and authentic Maldivian experiences.</p>
-        <div style="font-size:12px;color:rgba(255,255,255,.3)">+960 9903339 · Viluresidence@gmail.com</div>
+        <div style="font-size:var(--font-size-sm);color:rgba(255,255,255,.3)">+960 9903339 · Viluresidence@gmail.com</div>
       </div>
       <div class="footer-col"><h4>Navigate</h4><ul><li><a href="#home">Home</a></li><li><a href="#rooms">Rooms</a></li><li><a href="#about">About Us</a></li><li><a href="#gallery">Gallery</a></li><li><a href="#contact">Contact</a></li></ul></div>
       <div class="footer-col"><h4>Rooms</h4><ul><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Premium Room — $90</a></li><li><a href="#rooms">Premium Room — $90</a></li></ul></div>
@@ -782,16 +792,16 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
         <button class="bfp-search-btn" onclick="bfpSearch()">Search</button>
       </div>
     </div>
-    <div id="bfp-suggest" style="display:none;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--muted)"></div>
+    <div id="bfp-suggest" style="display:none;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:var(--font-size-base);color:var(--muted)"></div>
     <div class="bfp-rooms-grid" id="bfp-rooms-grid">
       <!-- Rooms populated by JS -->
     </div>
     <div style="margin-top:40px;padding:24px;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;text-align:center">
-      <p style="font-size:14px;color:var(--muted);margin-bottom:12px">To complete your booking, please contact us directly:</p>
+      <p style="font-size:var(--font-size-md);color:var(--muted);margin-bottom:12px">To complete your booking, please contact us directly:</p>
       <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
-        <a href="tel:+9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:15px">📞 +960 9903339</a>
-        <a href="mailto:Viluresidence@gmail.com" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:15px">✉️ Viluresidence@gmail.com</a>
-        <a href="https://wa.me/9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:15px">💬 WhatsApp</a>
+        <a href="tel:+9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)">📞 +960 9903339</a>
+        <a href="mailto:Viluresidence@gmail.com" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)">✉️ Viluresidence@gmail.com</a>
+        <a href="https://wa.me/9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)">💬 WhatsApp</a>
       </div>
     </div>
   </div>
@@ -805,12 +815,12 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
       <button class="popup-close" onclick="closeGuestDetails()">×</button>
     </div>
     <div class="popup-body">
-      <div id="gd-summary" style="font-size:13px;color:var(--muted);margin-bottom:20px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:6px"></div>
+      <div id="gd-summary" style="font-size:var(--font-size-base);color:var(--muted);margin-bottom:20px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:6px"></div>
       <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label">Full Name</div><input type="text" class="bwf-input" id="gd-name"></div>
       <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label">Email</div><input type="email" class="bwf-input" id="gd-email"></div>
       <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label">Phone</div><input type="tel" class="bwf-input" id="gd-phone"></div>
       <div class="bwf-field" style="margin-bottom:20px"><div class="bwf-label">Country</div><input type="text" class="bwf-input" id="gd-country"></div>
-      <div id="gd-error" style="display:none;color:#f87171;font-size:12px;margin-bottom:14px;line-height:1.5"></div>
+      <div id="gd-error" style="display:none;color:#f87171;font-size:var(--font-size-sm);margin-bottom:14px;line-height:1.5"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()">Confirm Booking</button>
       <div class="bwf-note">We'll email your confirmation. No payment is taken now.</div>
     </div>
@@ -1163,7 +1173,7 @@ function showAvailabilityWarning() {
   var b = document.createElement('div');
   b.id = 'avail-warning-banner';
   b.textContent = "⚠️ We're having trouble loading live availability right now — dates shown may not be accurate. Please contact us to confirm before booking.";
-  b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#fef3c7;color:#92400e;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.1)';
+  b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#fef3c7;color:#92400e;text-align:center;padding:10px 16px;font-size:var(--font-size-base);font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.1)';
   document.body.appendChild(b);
 }
 function hideAvailabilityWarning() {
@@ -1466,7 +1476,7 @@ function bfpCheckSuggestion(availableCount, ci, co){
   }
   var label = nearest.rooms.length===1 ? nearest.rooms[0].name : nearest.rooms.length+' rooms available';
   el.style.display='block';
-  el.innerHTML = 'No rooms available for these exact dates.<br>Nearest availability: <strong>'+label+'</strong> — '+fdShort(nearest.ci)+' to '+fdShort(nearest.co)+' <button class="bfp-search-btn" style="padding:6px 14px;font-size:11px;margin-left:8px" onclick="bfpApplySuggestedDates(\''+nearest.ci+'\',\''+nearest.co+'\')">Use these dates</button>';
+  el.innerHTML = 'No rooms available for these exact dates.<br>Nearest availability: <strong>'+label+'</strong> — '+fdShort(nearest.ci)+' to '+fdShort(nearest.co)+' <button class="bfp-search-btn" style="padding:6px 14px;font-size:var(--font-size-xs);margin-left:8px" onclick="bfpApplySuggestedDates(\''+nearest.ci+'\',\''+nearest.co+'\')">Use these dates</button>';
 }
 function bfpApplySuggestedDates(ci, co){
   document.getElementById('bfp-ci').value = ci;
@@ -1480,7 +1490,7 @@ function bfpRenderRooms(rooms, ci, co){
   if(!rooms.length){
     var empty = document.createElement('div');
     empty.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px;color:#8fb4c9';
-    empty.innerHTML = '<div style="font-size:48px;margin-bottom:16px">&#127965;</div><p>No rooms available. Try different dates or contact us.</p>';
+    empty.innerHTML = '<div style="font-size:var(--font-size-display);margin-bottom:16px">&#127965;</div><p>No rooms available. Try different dates or contact us.</p>';
     grid.appendChild(empty);
     return;
   }
@@ -1694,14 +1704,14 @@ function renderWebsitePackages(pkgs) {
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px">'
     +pkgs.map(function(p){
       return '<div class="reveal" style="background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px">'
-        +'<div style="font-size:36px;margin-bottom:12px">'+(p.emoji||'🎁')+'</div>'
-        +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;font-weight:600;color:var(--white);margin-bottom:6px">'+p.name+'</div>'
-        +'<div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px">$'+p.price+' per person · '+p.nights+' night'+(p.nights>1?'s':'')+'</div>'
-        +'<div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:16px">'+p.desc+'</div>'
+        +'<div style="font-size:var(--font-size-display);margin-bottom:12px">'+(p.emoji||'🎁')+'</div>'
+        +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--white);margin-bottom:6px">'+p.name+'</div>'
+        +'<div style="font-size:var(--font-size-base);color:rgba(255,255,255,.5);margin-bottom:12px">$'+p.price+' per person · '+p.nights+' night'+(p.nights>1?'s':'')+'</div>'
+        +'<div style="font-size:var(--font-size-base);color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:16px">'+p.desc+'</div>'
         +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">'
-        +(p.includes||[]).map(function(inc){ return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.6)"><div style="width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0"></div>'+inc+'</div>'; }).join('')
+        +(p.includes||[]).map(function(inc){ return '<div style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm);color:rgba(255,255,255,.6)"><div style="width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0"></div>'+inc+'</div>'; }).join('')
         +'</div>'
-        +'<button onclick="openBookingPopup()" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:12px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;cursor:pointer">Book This Package</button>'
+        +'<button onclick="openBookingPopup()" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:12px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:var(--font-size-base);font-weight:600;letter-spacing:.08em;cursor:pointer">Book This Package</button>'
         +'</div>';
     }).join('')
     +'</div></div>';
