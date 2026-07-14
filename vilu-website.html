@@ -416,6 +416,14 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .nav-links,.nav-book{display:none}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
+  /* Wide 16:9 source photos lose most of their width to a narrow phone's
+     cover-crop (~26% of the image is visible) - shift the crop window
+     per-photo so each animal's head/body stays in frame instead of the
+     default center slice, which often lands on empty midsection. */
+  .hero-slide:nth-child(1) .hero-slide-img{object-position:72% 48%}
+  .hero-slide:nth-child(3) .hero-slide-img{object-position:32% 42%}
+  .hero-slide:nth-child(5) .hero-slide-img{object-position:68% 50%}
+  .hero-slide:nth-child(6) .hero-slide-img{object-position:50% 58%}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
