@@ -225,14 +225,15 @@ section{position:relative}
 /* ── GALLERY ── */
 #gallery{background:var(--depth-scrim);padding:100px 0;position:relative}
 #gallery::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 45% at 85% 5%,rgba(34,211,238,.13),transparent 60%)}
-.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,220px);gap:6px;margin-top:60px}
+.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(3,220px);gap:6px;margin-top:60px}
 .g-item{overflow:hidden;border-radius:6px;position:relative;cursor:pointer}
 .g-item:hover .g-overlay{opacity:1}
-.g-item-1{grid-column:1/6;grid-row:1/3}
+.g-item-1{grid-column:1/6;grid-row:1/4}
 .g-item-2{grid-column:6/9;grid-row:1/2}
 .g-item-3{grid-column:9/13;grid-row:1/2}
-.g-item-4{grid-column:6/10;grid-row:2/3}
-.g-item-5{grid-column:10/13;grid-row:2/3}
+.g-item-4{grid-column:6/9;grid-row:2/3}
+.g-item-5{grid-column:9/13;grid-row:2/3}
+.g-item-6{grid-column:6/13;grid-row:3/4}
 .g-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .g-item:hover .g-bg{transform:scale(1.1)}
 .g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,.75) 0%,transparent 60%);opacity:0;transition:opacity .35s;display:flex;align-items:flex-end;padding:20px}
@@ -410,7 +411,8 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
-  .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5{grid-column:auto;grid-row:auto}
+  .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
+  .g-item{aspect-ratio:4/3}
   .bb-field:nth-child(n+3){display:none}
   .bfp-search-grid{grid-template-columns:1fr 1fr;gap:12px}
   .bfp-search-grid .bfp-field:nth-child(n+3){display:none}
@@ -650,11 +652,12 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
       <h2 class="section-title">Moments <em style="font-style:italic;color:var(--gold-light)">in paradise</em></h2>
     </div>
     <div class="gallery-grid reveal">
-      <div class="g-item g-item-1"><div class="g-bg" style="background:linear-gradient(135deg,#0a1628,#0e7490);height:100%"></div><div class="g-overlay"><span class="g-label">The Ocean</span></div></div>
-      <div class="g-item g-item-2"><div class="g-bg" style="background:linear-gradient(135deg,#0d2545,#22d3ee);height:100%"></div><div class="g-overlay"><span class="g-label">Our Rooms</span></div></div>
-      <div class="g-item g-item-3"><div class="g-bg" style="background:linear-gradient(135deg,#0e7490,#0d2545);height:100%"></div><div class="g-overlay"><span class="g-label">Maldives Life</span></div></div>
-      <div class="g-item g-item-4"><div class="g-bg" style="background:linear-gradient(135deg,#22d3ee,#0d2545);height:100%"></div><div class="g-overlay"><span class="g-label">Sunset Views</span></div></div>
-      <div class="g-item g-item-5"><div class="g-bg" style="background:linear-gradient(135deg,#0d2545,#0e7490);height:100%"></div><div class="g-overlay"><span class="g-label">Activities</span></div></div>
+      <div class="g-item g-item-1"><div class="g-bg" style="background:url(images/whale_shark_hd.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Whale Sharks</span></div></div>
+      <div class="g-item g-item-2"><div class="g-bg" style="background:url(images/manta_ray_hd.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Manta Rays</span></div></div>
+      <div class="g-item g-item-3"><div class="g-bg" style="background:url(images/whale_shark_2_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Gentle Giants</span></div></div>
+      <div class="g-item g-item-4"><div class="g-bg" style="background:url(images/turtle_snorkelers_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Snorkeling with Turtles</span></div></div>
+      <div class="g-item g-item-5"><div class="g-bg" style="background:url(images/manta_silhouette_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Manta Silhouette</span></div></div>
+      <div class="g-item g-item-6"><div class="g-bg" style="background:url(images/dolphin_pod_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Dolphin Pods</span></div></div>
     </div>
   </div>
 </section>
