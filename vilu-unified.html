@@ -4176,6 +4176,38 @@ function drawCal(){
       }
       row.appendChild(bar);
     });
+    // Manual blocks (Block Rooms page and calendar drag-select) live in BLK,
+    // not RES — they were never drawn as bars here before, only enforced
+    // for conflicts (isOcc checks both arrays) and listed in the Blocked
+    // rooms panel. Mirrors the RES bar logic above, minus dragging.
+    BLK.forEach(function(b){
+      var row=document.querySelector('.cb-booking-row[data-rn="'+b.rn+'"]');
+      if(!row)return;
+      var vs=b.from<dsl[0]?dsl[0]:b.from,ld=dsl[dsl.length-1];
+      if(vs>ld||b.to<=dsl[0])return;
+      var si=dsl.indexOf(vs),ei=dsl.findIndex(function(d){return d>=b.to;})-1;
+      if(ei<0)ei=dsl.length-1;
+      if(si<0)return;
+      var sV=b.from>=dsl[0],h2=36,cI=dsl.indexOf(b.to);
+      var left=sV?si*72+h2:si*72,rE=cI>=0?cI*72+h2:(ei+1)*72,w=rE-left-2;
+      if(w<4)return;
+      var bar=document.createElement('div');
+      bar.className='cb-bar';
+      bar.style.cssText='position:absolute;top:4px;height:30px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:pointer;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+blkColor(b.type);
+      bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">[BLOCK] '+(b.type||'Blocked')+(b.note?' — '+b.note:'')+'</span>';
+      bar.addEventListener('click',function(e){
+        e.preventDefault();e.stopPropagation();
+        if(canViewOnly()){toast((b.type||'Blocked')+' · '+fd(b.from)+'–'+fd(b.to)+(b.note?' · '+b.note:''));return;}
+        showConfirm({
+          title:'Remove this block?',
+          msg:rNm(b.rn)+' · '+fd(b.from)+'–'+fd(b.to)+' · '+(b.type||'Blocked')+(b.note?' — '+b.note:''),
+          warn:'The room becomes bookable again for these dates immediately.',
+          btnLabel:'Yes, unblock',
+          onYes:function(){removeBlk(b.id);}
+        });
+      });
+      row.appendChild(bar);
+    });
     document.querySelectorAll('.cb-cell').forEach(function(cell){
       var rn=cell.dataset.rn,ds=cell.dataset.d;
       cell.addEventListener('mousedown',function(e){if(e.button!==0||e.target.closest('.cb-bar'))return;e.preventDefault();clrSel();sR=rn;sS=ds;sE=ds;sOn=true;updSel();});
@@ -4411,7 +4443,7 @@ function _showDetLegacy(id){
     partBtn.style.cssText='flex:1;background:#7c3aed;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit';
     partBtn.innerHTML='<i class="ti ti-receipt-2"></i> Custom invoice';
     partBtn.onclick=function(){ openPartialInvoice(id); };
-    invBtn.parentElement.appendChild(partBtn);
+    sec.appendChild(partBtn);
     invBtn.style.cssText='width:100%;margin-top:10px;background:#2563eb;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit';
     invBtn.addEventListener('click',function(){
       document.getElementById('m-det').classList.remove('on');
@@ -5247,7 +5279,7 @@ function closeQuickBlock(){
 function qbReasonChanged(){
   document.getElementById('qb-other-wrap').style.display=document.getElementById('qb-reason').value==='Other'?'block':'none';
 }
-function submitQuickBlock(){
+async function submitQuickBlock(){
   if(!_qbSel)return;
   const {rn,ci,co}=_qbSel;
   const cf=document.getElementById('qb-cf');cf.style.display='none';
@@ -5256,10 +5288,31 @@ function submitQuickBlock(){
   const reasonSel=document.getElementById('qb-reason').value;
   const type=reasonSel==='Other'?(document.getElementById('qb-other').value.trim()||'Other'):reasonSel;
   const note=document.getElementById('qb-notes').value.trim();
-  // Same BLK array / saveBLK() / syncBlksToSupabase() pipeline as the full
-  // Block Rooms page's addBlk() — same blocks collection, same fields, same
-  // existing Firestore rule. No new write path or permission model.
-  BLK.push({id:'BL'+Date.now(),type,rn,from:ci,to:co,note});
+  const blk={id:'BL'+Date.now(),type,rn,from:ci,to:co,note};
+
+  // Wait for the actual Firestore write before showing success — this used
+  // to call the fire-and-forget saveBLK()/syncBlksToSupabase() pipeline and
+  // show "✓ Room blocked" unconditionally, regardless of whether the write
+  // actually reached Firestore.
+  const btn=document.querySelector('#m-quickblock button[onclick="submitQuickBlock()"]');
+  if(btn){btn.disabled=true;btn.innerHTML='Blocking…';}
+  let ok=false;
+  try{
+    await fsDb.collection('blocks').doc(blk.id).set({id:blk.id, room_id:blk.rn, from_date:blk.from, to_date:blk.to, reason:blk.note||blk.type||'Blocked'}, {merge:true});
+    ok=true;
+  }catch(e){ console.error('submitQuickBlock Firestore write failed', e); }
+  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Confirm block';}
+
+  if(!ok){
+    cf.style.display='block';
+    cf.textContent='⚠️ Could not save the block — please check your connection and try again.';
+    return;
+  }
+
+  // Firestore write confirmed — now update local state. Still goes through
+  // saveBLK() (localStorage + a full re-sync) same as addBlk(), but that's
+  // just keeping things consistent now, not the thing success depended on.
+  BLK.push(blk);
   saveBLK();
   aLog('warn','Block: '+rNm(rn)+' '+fd(ci)+'–'+fd(co)+' ('+type+')');
   closeQuickBlock();
@@ -5473,12 +5526,37 @@ function saveBLK(){
   // Push to Firestore immediately so the website's calendar sees manual blocks too
   if(typeof syncBlksToSupabase==='function') syncBlksToSupabase().catch(function(){});
 }
-function removeBlk(id){
+// Color per block reason for the calendar bars — covers both reason sets in
+// use (the quick-block modal's Vacant/Maintenance/Cleaning/Agency Block/
+// Other, and the Block Rooms page's lowercase maintenance/owner/hold),
+// plus 'hold', which is what an approved agency block request is actually
+// tagged with (see approveBlockRequest). Anything unrecognized (including
+// "owner"/free-text "Other" reasons) falls back to neutral grey.
+function blkColor(type){
+  var t=(type||'').toLowerCase();
+  if(t==='vacant') return '#0891b2';
+  if(t==='maintenance') return '#f59e0b';
+  if(t==='cleaning') return '#8b5cf6';
+  if(t==='agency block'||t==='hold') return '#db2777';
+  return '#6b7280';
+}
+// Deletes the block from Firestore first (fsDb call directly, not the
+// error-swallowing supaFetch wrapper, so a permission-denied or network
+// failure is actually caught) — only updates local state, the Blocked
+// rooms list, and the calendar once that's confirmed, and reports failure
+// honestly instead of always saying "Block removed".
+async function removeBlk(id){
+  let ok=false;
+  try{
+    await fsDb.collection('blocks').doc(id).delete();
+    ok=true;
+  }catch(e){ console.error('removeBlk Firestore delete failed', e); }
+  if(!ok){ toast('⚠️ Could not remove block — please try again'); return; }
   BLK=BLK.filter(function(x){return x.id!==id;});
   saveBLK();
   drawBlkLst();
-  toast('Block removed');
-  if(typeof supaFetch==='function') supaFetch('DELETE','blocks',null,'id=eq.'+encodeURIComponent(id)).catch(function(){});
+  toast('✓ Block removed');
+  drawCal();
 }
 function drawBlk(){
   const sel=document.getElementById('bl-r');
@@ -7128,6 +7206,22 @@ function loadRoomDetails(){
 function saveRoomDetails(details){
   localStorage.setItem('vilu_room_details',JSON.stringify(details));
   syncEngineData();
+  syncRoomDetailsToFirestore().catch(function(){});
+}
+
+// Firestore is the durable, cross-device source of truth for room photos/
+// info — the website and this PMS's own booking-engine preview used to
+// both read the localStorage copy above, which only ever existed on a
+// device where the PMS itself had been opened, so a real guest's browser
+// never saw uploaded photos. This pushes every room's details up whenever
+// they're edited; see the automatic backfill call near syncPackagesToFirestore
+// for existing localStorage-only data from before this change.
+async function syncRoomDetailsToFirestore(){
+  var roomIds = Object.keys(_roomDetails);
+  await Promise.all(roomIds.map(function(rn){
+    return fsDb.collection('room_details').doc(rn).set(_roomDetails[rn])
+      .catch(function(e){ console.error('syncRoomDetailsToFirestore failed for', rn, e); });
+  }));
 }
 function syncEngineData(){
   var details=loadRoomDetails();
@@ -8624,40 +8718,22 @@ function be_nt(ci,co){
   return Math.max(1,Math.round((new Date(co)-new Date(ci))/(864e5)));
 }
 
+// Same room_availability + blocks Firestore collections the PMS calendar
+// and the public website both read — reuses fetchRoomIntervals()/
+// isRangeFree() (see the atomic-reservation section below) instead of the
+// old per-session localStorage cache, so this widget can never show a
+// room as available when another device just booked or blocked it.
+var BE_INTERVALS = {};
+async function beRefreshIntervals(){
+  try{
+    var intervals = await fetchRoomIntervals(VR);
+    var map = {};
+    intervals.forEach(function(x){ map[x.n] = x.ranges; });
+    BE_INTERVALS = map;
+  }catch(e){ console.error('beRefreshIntervals failed', e); }
+}
 function isAvailable(roomId, ci, co){
-  // 1. Check PMS availability (reservations + blocks synced from PMS)
-  try{
-    var av = localStorage.getItem('vilu_availability');
-    if(av){
-      var parsed = JSON.parse(av);
-      var res = parsed.reservations||[];
-      var blks = parsed.blocks||[];
-      for(var i=0;i<res.length;i++){
-        var r=res[i];
-        if(r.rn!==roomId) continue;
-        if(r.ci<co && r.co>ci) return false;
-      }
-      for(var j=0;j<blks.length;j++){
-        var b=blks[j];
-        if(b.rn!==roomId) continue;
-        if(b.from<co && b.to>ci) return false;
-      }
-    }
-  }catch(e){}
-  // 2. Check locally saved web bookings (not yet synced to PMS)
-  try{
-    var local = localStorage.getItem('vilu_pms_reservations');
-    if(local){
-      var localRes = JSON.parse(local);
-      for(var k=0;k<localRes.length;k++){
-        var lr=localRes[k];
-        if(lr.rn!==roomId) continue;
-        if(lr.st==='Cancelled'||lr.st==='Checked out') continue;
-        if(lr.ci<co && lr.co>ci) return false;
-      }
-    }
-  }catch(e){}
-  return true;
+  return isRangeFree(BE_INTERVALS[roomId]||[], ci, co);
 }
 
 function calcPrice(rate, ci, co, ad, ch){
@@ -8668,6 +8744,18 @@ function calcPrice(rate, ci, co, ad, ch){
   const gp = ad + ch;
   const green = +(BE_TAX.green * gp * n).toFixed(2);
   return {n, base, svc, tgst, green, total: +(base+svc+tgst+green).toFixed(2)};
+}
+
+// Average per-night price across the stay, using the same date-specific
+// room_prices overrides Bulk Price Manager writes (via pmGetPrice) instead
+// of the room's flat base rate — passing this into calcPrice(rate,...) as
+// "rate" gives an identical total to summing each night's real price,
+// since calcPrice does n * rate = n * (sum/n) = sum.
+function beAvgPrice(roomId, ci, co){
+  var total = 0, nights = 0;
+  var d = new Date(ci+'T12:00:00'), end = new Date(co+'T12:00:00');
+  while(d < end){ total += pmGetPrice(roomId, pmDateStr(d)); nights++; d.setDate(d.getDate()+1); }
+  return nights>0 ? total/nights : (VR.find(function(r){return r.n===roomId;})?.rate||80);
 }
 
 function be_fd(d){ return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
@@ -8690,7 +8778,7 @@ function setDefaultDates(){
   });
 }
 
-function searchRooms(){
+async function searchRooms(){
   const ci = document.getElementById('s-ci').value;
   const co = document.getElementById('s-co').value;
   const ad = +document.getElementById('s-ad').value;
@@ -8703,6 +8791,8 @@ function searchRooms(){
 
   searchParams = {ci, co, ad, ch};
   const nights = be_nt(ci, co);
+
+  await beRefreshIntervals();
 
   document.getElementById('welcome-state').classList.add('hidden');
   document.getElementById('results-wrap').classList.remove('hidden');
@@ -8721,7 +8811,8 @@ function searchRooms(){
   BE_ROOMS.forEach(function(room){
     const avail = isAvailable(room.id, ci, co);
     if(avail) availCount++;
-    const p = calcPrice(room.rate, ci, co, ad, ch);
+    const avgRate = beAvgPrice(room.id, ci, co);
+    const p = calcPrice(avgRate, ci, co, ad, ch);
     const card = document.createElement('div');
     card.className = 'room-card';
 
@@ -8754,7 +8845,7 @@ function searchRooms(){
         (inclHtml?'<div style="margin-bottom:12px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px">✓ Included free</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+inclHtml+'</div></div>':'')+
         '<div class="room-footer">'+
           '<div class="price-block">'+
-            '<div class="rate">$'+room.rate+' <span style="font-size:var(--font-size-md);font-weight:400;color:var(--muted)">/night</span></div>'+
+            '<div class="rate">$'+Math.round(avgRate)+' <span style="font-size:var(--font-size-md);font-weight:400;color:var(--muted)">/night</span></div>'+
             '<div class="total">'+nights+' night'+(nights>1?'s':'')+' total: <strong style="color:var(--green)">$'+p.total.toFixed(2)+'</strong> incl. all taxes</div>'+
           '</div>'+
           (avail?'<button class="btn-book" data-rid="'+room.id+'" onclick="selectRoom(this.dataset.rid,this)">Select room</button>':'<button class="btn-book" disabled>Not available</button>')+
@@ -8773,7 +8864,8 @@ function selectRoom(roomId,btn){
   const room = BE_ROOMS.find(r=>r.id===roomId);
   if(!room) return;
   selectedRoom = room;
-  const p = calcPrice(room.rate, searchParams.ci, searchParams.co, searchParams.ad, searchParams.ch);
+  const avgRate = beAvgPrice(room.id, searchParams.ci, searchParams.co);
+  const p = calcPrice(avgRate, searchParams.ci, searchParams.co, searchParams.ad, searchParams.ch);
   const nights = p.n;
 
   // Update sidebar
@@ -8782,7 +8874,7 @@ function selectRoom(roomId,btn){
   document.getElementById('sum-content').innerHTML =
     '<div style="font-size:var(--font-size-base);font-weight:700;margin-bottom:10px">'+room.emoji+' '+room.name+'</div>' +
     '<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:10px">'+be_fd(searchParams.ci)+' → '+be_fd(searchParams.co)+' · '+nights+' nights</div>' +
-    '<div class="sum-row"><span>Room ('+nights+' × $'+room.rate+')</span><span>$'+p.base.toFixed(2)+'</span></div>' +
+    '<div class="sum-row"><span>Room ('+nights+' × $'+Math.round(avgRate)+')</span><span>$'+p.base.toFixed(2)+'</span></div>' +
     '<div class="sum-row"><span>Service charge (10%)</span><span>$'+p.svc.toFixed(2)+'</span></div>' +
     '<div class="sum-row"><span>TGST (17%)</span><span>$'+p.tgst.toFixed(2)+'</span></div>' +
     '<div class="sum-row"><span>Green tax ($6/pp/night)</span><span>$'+p.green.toFixed(2)+'</span></div>' +
@@ -8799,7 +8891,7 @@ function selectRoom(roomId,btn){
 
 function proceedBook(){
   if(!selectedRoom){ alert('Please select a room first'); return; }
-  const p = calcPrice(selectedRoom.rate, searchParams.ci, searchParams.co, searchParams.ad, searchParams.ch);
+  const p = calcPrice(beAvgPrice(selectedRoom.id, searchParams.ci, searchParams.co), searchParams.ci, searchParams.co, searchParams.ad, searchParams.ch);
   document.getElementById('book-summary').innerHTML =
     '<i class="ti ti-calendar-check" style="flex-shrink:0;font-size:var(--font-size-lg)"></i>' +
     '<div><strong>'+selectedRoom.name+'</strong> · '+be_fd(searchParams.ci)+' → '+be_fd(searchParams.co)+' · '+p.n+' nights · <strong>$'+p.total.toFixed(2)+'</strong> total</div>';
@@ -8837,7 +8929,7 @@ function submitBooking(){
   }
 
   const ref = generateRef();
-  const p = calcPrice(selectedRoom.rate, searchParams.ci, searchParams.co, searchParams.ad, searchParams.ch);
+  const p = calcPrice(beAvgPrice(selectedRoom.id, searchParams.ci, searchParams.co), searchParams.ci, searchParams.co, searchParams.ad, searchParams.ch);
 
   // Save reservation (shared with PMS via localStorage)
   const reservation = {
@@ -9638,6 +9730,9 @@ try { reconcileIfDue(); } catch(e) {}
 // packages-on-load sync (the earlier "Sync on load" block runs before
 // Firebase itself has initialized).
 try { syncPackagesToFirestore(); } catch(e) { console.error('syncPkgFirestore', e); }
+// One-time (per load) backfill of any room photos/details that only ever
+// made it to localStorage before room_details existed in Firestore.
+try { syncRoomDetailsToFirestore(); } catch(e) { console.error('syncRoomDetailsToFirestore', e); }
 
 async function runReconciliationNow() {
   var btn = document.querySelector('button[onclick="runReconciliationNow()"]');

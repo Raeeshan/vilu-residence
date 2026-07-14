@@ -343,7 +343,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 .bfp-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:300;color:var(--text);margin-bottom:8px}
 .bfp-sub{font-size:var(--font-size-lg);color:var(--muted);margin-bottom:40px}
 .bfp-search{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px;box-shadow:0 10px 40px rgba(0,4,10,.3);margin-bottom:40px}
-.bfp-search-grid{display:grid;grid-template-columns:1fr 1fr 80px 80px auto;gap:16px;align-items:end}
+.bfp-search-grid{display:grid;grid-template-columns:1fr 1fr 80px 80px 90px auto;gap:16px;align-items:end}
 .bfp-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
 .bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none}
 .bfp-search-btn{background:var(--teal);color:var(--white);border:none;padding:11px 24px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s}
@@ -362,6 +362,8 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 .bfp-room-price span{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);color:var(--muted);font-weight:400}
 .bfp-book-btn{background:var(--teal);color:var(--white);border:none;padding:9px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .bfp-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 16px rgba(14,116,144,.35)}
+.bfp-book-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.bfp-multi-bar{display:none;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:14px 20px;margin-bottom:20px;font-size:var(--font-size-base);color:var(--text);position:sticky;top:12px;z-index:5}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
@@ -789,10 +791,12 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
         <div class="bfp-field"><label>Check-out</label><input type="text" class="vilu-date-input" id="bfp-co"></div>
         <div class="bfp-field"><label>Adults</label><select id="bfp-ad"><option>1</option><option selected>2</option><option>3</option></select></div>
         <div class="bfp-field"><label>Children</label><select id="bfp-ch"><option selected>0</option><option>1</option><option>2</option></select></div>
+        <div class="bfp-field"><label>Rooms</label><select id="bfp-rooms"><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
         <button class="bfp-search-btn" onclick="bfpSearch()">Search</button>
       </div>
     </div>
     <div id="bfp-suggest" style="display:none;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:var(--font-size-base);color:var(--muted)"></div>
+    <div class="bfp-multi-bar" id="bfp-multi-bar"></div>
     <div class="bfp-rooms-grid" id="bfp-rooms-grid">
       <!-- Rooms populated by JS -->
     </div>
@@ -990,6 +994,23 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load rooms from Supabase
   await loadRoomsFromSupabase();
 
+  // Load room photos/descriptions/amenities from Firestore, then merge them
+  // into ROOMS in place — loadRoomsFromSupabase() above doesn't carry these
+  // fields, and re-deriving ROOMS from loadPMSRooms() here would discard
+  // whatever id/name/rate/cap it just set from the rooms collection.
+  await fetchRoomDetailsFromFirestore();
+  ROOMS = ROOMS.map(function(r) {
+    var d = _roomDetailsCache[r.id] || {};
+    return Object.assign({}, r, {
+      view: d.view || r.view,
+      desc: d.description || r.desc,
+      size: d.size || r.size || 22,
+      beds: d.beds || r.beds || '1 Double bed',
+      amenities: d.amenities || r.amenities || [],
+      photo: d.photo || r.photo || '',
+    });
+  });
+
   // Load availability (reservations + blocks) — powers BOOKED_RANGES / isRoomAvailable / the calendar widget
   await loadBookedRangesFromSupabase();
 
@@ -1024,12 +1045,28 @@ var DEFAULT_ROOMS = [
    desc:'Superior room with stunning sea views and comfortable amenities.'},
 ];
 
-// Load rooms from PMS localStorage (live sync)
+// Room photos/descriptions/amenities, read live from Firestore (see
+// fetchRoomDetailsFromFirestore) — replaces a localStorage read that only
+// ever had data on a device where the PMS itself had been opened, so a
+// real guest's browser never actually saw uploaded room photos before this.
+var _roomDetailsCache = {};
+async function fetchRoomDetailsFromFirestore() {
+  try {
+    var roomIds = ['VR01','VR02','VR03','VR04','VR05','VR06'];
+    var cache = {};
+    var snaps = await Promise.all(roomIds.map(function(id){ return fsDb.collection('room_details').doc(id).get(); }));
+    snaps.forEach(function(snap, i){ cache[roomIds[i]] = (snap.exists && snap.data()) || {}; });
+    _roomDetailsCache = cache;
+  } catch(e) { console.error('fetchRoomDetailsFromFirestore failed', e); }
+}
+
+// Load rooms from PMS (base rate/name/type from localStorage, live sync;
+// photos/description/amenities from Firestore — see _roomDetailsCache)
 // Vilu Residence only — never surface partner hotel rooms here either.
 function loadPMSRooms() {
   try {
     var saved = localStorage.getItem('vilu_rooms');
-    var details = JSON.parse(localStorage.getItem('vilu_room_details') || '{}');
+    var details = _roomDetailsCache;
     var base = saved ? JSON.parse(saved) : DEFAULT_ROOMS;
     base = base.filter(function(r) { return r.id && /^VR0[1-6]$/.test(r.id); });
     if (!base.length) base = DEFAULT_ROOMS;
@@ -1107,8 +1144,10 @@ try {
   var _bc = new BroadcastChannel('vilu_pms');
   _bc.onmessage = function(e) {
     if (e.data && (e.data.type === 'SETTINGS_UPDATE' || e.data.type === 'ROOM_DETAILS_UPDATE' || e.data.type === 'PRICE_UPDATE')) {
-      ROOMS = loadPMSRooms();
-      refreshRoomCards();
+      Promise.all([fetchRoomDetailsFromFirestore(), fetchRoomPricesFromFirestore()]).then(function(){
+        ROOMS = loadPMSRooms();
+        refreshRoomCards();
+      });
     }
     if (e.data && (e.data.type === 'NEW_BOOKING' || e.data.type === 'BLOCK_REQUEST')) {
       loadBookedRangesFromSupabase();
@@ -1204,10 +1243,13 @@ function refreshRoomCards() {
   // share the same rate. Map by id, not array index — ROOMS has 6 entries but
   // there are only 3 price elements on the page.
   var priceEls = document.querySelectorAll('.room-price-amount');
+  var imgEls = document.querySelectorAll('.room-card-img-bg');
   ['VR01', 'VR03', 'VR05'].forEach(function(id, i) {
     if (!priceEls[i]) return;
     var r = ROOMS.find(function(x) { return x.id === id; });
-    if (r) priceEls[i].textContent = '$' + r.rate;
+    if (!r) return;
+    priceEls[i].textContent = '$' + r.rate;
+    if (r.photo && imgEls[i]) imgEls[i].style.background = "url('"+r.photo+"') center/cover";
   });
 
   // Update hero booking bar selects with latest rates
@@ -1426,13 +1468,17 @@ function openBookingPageWithDates(){
 async function bfpSearch(){
   var ci = document.getElementById('bfp-ci').value;
   var co = document.getElementById('bfp-co').value;
+  var numRooms = +document.getElementById('bfp-rooms').value || 1;
   if(!ci || !co || co <= ci){alert('Please select valid dates'); return;}
-  // Reload rooms from PMS in case prices changed, and refresh availability + prices from Firestore
+  // Reload rooms from PMS in case prices/photos changed, and refresh availability + prices + details from Firestore
+  await Promise.all([loadBookedRangesFromSupabase(), fetchRoomPricesFromFirestore(), fetchRoomDetailsFromFirestore()]);
   ROOMS = loadPMSRooms();
-  await Promise.all([loadBookedRangesFromSupabase(), fetchRoomPricesFromFirestore()]);
   var available = ROOMS.filter(function(r){return isRoomAvailable(r.id, ci, co);});
-  bfpRenderRooms(available, ci, co);
-  bfpCheckSuggestion(available.length, ci, co);
+  // A guest asking for N rooms only ever sees results when at least N rooms
+  // are simultaneously free for the exact dates — not just "one room free".
+  var enough = available.length >= numRooms;
+  bfpRenderRooms(enough ? available : [], ci, co, numRooms);
+  bfpCheckSuggestion(available.length, ci, co, numRooms);
 }
 
 function isRoomAvailable(roomId, ci, co){
@@ -1454,29 +1500,32 @@ function fdShort(dateStr){
 // the nearest dates where at least one room is free. Reuses BOOKED_RANGES,
 // already bulk-fetched once by loadBookedRangesFromSupabase() above — so
 // this whole search runs in memory with zero extra Firestore reads.
-function findNearestAvailabilityWeb(ci, co, capDays){
+function findNearestAvailabilityWeb(ci, co, capDays, minCount){
+  minCount = minCount || 1;
   for(var offset=1; offset<=capDays; offset++){
     var laterCi=addDaysISO(ci,offset), laterCo=addDaysISO(co,offset);
     var laterFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,laterCi,laterCo);});
-    if(laterFree.length) return {ci:laterCi, co:laterCo, rooms:laterFree};
+    if(laterFree.length>=minCount) return {ci:laterCi, co:laterCo, rooms:laterFree};
     var earlierCi=addDaysISO(ci,-offset), earlierCo=addDaysISO(co,-offset);
     var earlierFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,earlierCi,earlierCo);});
-    if(earlierFree.length) return {ci:earlierCi, co:earlierCo, rooms:earlierFree};
+    if(earlierFree.length>=minCount) return {ci:earlierCi, co:earlierCo, rooms:earlierFree};
   }
   return null;
 }
-function bfpCheckSuggestion(availableCount, ci, co){
+function bfpCheckSuggestion(availableCount, ci, co, numRooms){
+  numRooms = numRooms || 1;
   var el = document.getElementById('bfp-suggest');
-  if(availableCount > 0){ el.style.display='none'; return; }
-  var nearest = findNearestAvailabilityWeb(ci, co, 90);
+  if(availableCount >= numRooms){ el.style.display='none'; return; }
+  var notEnoughMsg = numRooms>1 ? 'Only '+availableCount+' of '+numRooms+' rooms available for these exact dates.' : 'No rooms available for these exact dates.';
+  var nearest = findNearestAvailabilityWeb(ci, co, 90, numRooms);
   if(!nearest){
     el.style.display='block';
-    el.innerHTML = 'No rooms available for these exact dates. No availability found in the near term — please contact us directly.';
+    el.innerHTML = notEnoughMsg+' No availability found in the near term — please contact us directly.';
     return;
   }
   var label = nearest.rooms.length===1 ? nearest.rooms[0].name : nearest.rooms.length+' rooms available';
   el.style.display='block';
-  el.innerHTML = 'No rooms available for these exact dates.<br>Nearest availability: <strong>'+label+'</strong> — '+fdShort(nearest.ci)+' to '+fdShort(nearest.co)+' <button class="bfp-search-btn" style="padding:6px 14px;font-size:var(--font-size-xs);margin-left:8px" onclick="bfpApplySuggestedDates(\''+nearest.ci+'\',\''+nearest.co+'\')">Use these dates</button>';
+  el.innerHTML = notEnoughMsg+'<br>Nearest availability: <strong>'+label+'</strong> — '+fdShort(nearest.ci)+' to '+fdShort(nearest.co)+' <button class="bfp-search-btn" style="padding:6px 14px;font-size:var(--font-size-xs);margin-left:8px" onclick="bfpApplySuggestedDates(\''+nearest.ci+'\',\''+nearest.co+'\')">Use these dates</button>';
 }
 function bfpApplySuggestedDates(ci, co){
   document.getElementById('bfp-ci').value = ci;
@@ -1484,13 +1533,27 @@ function bfpApplySuggestedDates(ci, co){
   bfpSearch();
 }
 
-function bfpRenderRooms(rooms, ci, co){
+// Multi-room selection state — only used when the guest searched for more
+// than 1 room. With numRooms===1 the grid behaves exactly as before (each
+// card books immediately), so nothing changes for the common case.
+var _selectedRoomIds = [];
+var _searchNumRooms = 1;
+
+function bfpRenderRooms(rooms, ci, co, numRooms){
+  numRooms = numRooms || 1;
+  _searchNumRooms = numRooms;
+  _selectedRoomIds = [];
   var grid = document.getElementById('bfp-rooms-grid');
+  var bar = document.getElementById('bfp-multi-bar');
   grid.innerHTML = '';
+
   if(!rooms.length){
+    if(bar) bar.style.display = 'none';
     var empty = document.createElement('div');
     empty.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px;color:#8fb4c9';
-    empty.innerHTML = '<div style="font-size:var(--font-size-display);margin-bottom:16px">&#127965;</div><p>No rooms available. Try different dates or contact us.</p>';
+    empty.innerHTML = numRooms>1
+      ? '<div style="font-size:var(--font-size-display);margin-bottom:16px">&#127965;</div><p>Not enough rooms available for '+numRooms+' rooms on these dates. Try different dates, fewer rooms, or contact us.</p>'
+      : '<div style="font-size:var(--font-size-display);margin-bottom:16px">&#127965;</div><p>No rooms available. Try different dates or contact us.</p>';
     grid.appendChild(empty);
     return;
   }
@@ -1498,26 +1561,79 @@ function bfpRenderRooms(rooms, ci, co){
   rooms.forEach(function(r){
     var nightlyRate = getAvgPrice(r.id, ci, co);
     var total = nightlyRate * nights;
-    var r_rate = nightlyRate; // override display rate
     var card = document.createElement('div');
     card.className = 'bfp-room-card';
-    var bg = COLORS[r.type] || COLORS['Standard'];
+    var bg = r.photo ? ("url('"+r.photo+"') center/cover") : (COLORS[r.type] || COLORS['Standard']);
+    var actionHtml = numRooms>1
+      ? '<button class="bfp-book-btn bfp-select-btn" data-rid="'+r.id+'">Select</button>'
+      : '<button class="bfp-book-btn">Book</button>';
     card.innerHTML = '<div class="bfp-room-img"><div class="bfp-room-img-bg" style="background:'+bg+';height:100%"></div></div>'
       + '<div class="bfp-room-body">'
       + '<div class="bfp-room-name">'+r.name+'</div>'
       + '<div class="bfp-room-desc">'+r.desc+'</div>'
       + '<div class="bfp-room-footer">'
-      + '<div class="bfp-room-price">$'+r_rate+'<span> /night'+(nights>1?' &middot; $'+total+' total':'')+'</span></div>'
-      + '<button class="bfp-book-btn">Book</button>'
+      + '<div class="bfp-room-price">$'+nightlyRate+'<span> /night'+(nights>1?' &middot; $'+total+' total':'')+'</span></div>'
+      + actionHtml
       + '</div></div>';
-    (function(room){
-      card.querySelector('.bfp-book-btn').addEventListener('click', function(){ bfpBookRoom(room.id); });
-    })(r);
+    if(numRooms>1){
+      card.querySelector('.bfp-select-btn').addEventListener('click', function(){ bfpToggleRoomSelect(r.id, card, this); });
+    } else {
+      (function(room){
+        card.querySelector('.bfp-book-btn').addEventListener('click', function(){ bfpBookRoom(room.id); });
+      })(r);
+    }
     grid.appendChild(card);
   });
+
+  if(numRooms>1 && bar){
+    bar.style.display = 'flex';
+    bfpUpdateMultiBar();
+  } else if(bar){
+    bar.style.display = 'none';
+  }
 }
 
-// ── BOOK A ROOM: collect guest details, then submit a real reservation ──
+function bfpToggleRoomSelect(roomId, card, btn){
+  var idx = _selectedRoomIds.indexOf(roomId);
+  if(idx>-1){
+    _selectedRoomIds.splice(idx,1);
+    btn.textContent = 'Select';
+    card.style.outline = '';
+  } else {
+    if(_selectedRoomIds.length >= _searchNumRooms) return; // button should already be disabled in this state
+    _selectedRoomIds.push(roomId);
+    btn.textContent = 'Selected ✓';
+    card.style.outline = '3px solid var(--teal)';
+  }
+  bfpUpdateMultiBar();
+}
+
+function bfpUpdateMultiBar(){
+  var bar = document.getElementById('bfp-multi-bar');
+  if(!bar) return;
+  var count = _selectedRoomIds.length;
+  var capped = count >= _searchNumRooms;
+  document.querySelectorAll('.bfp-select-btn').forEach(function(btn){
+    var isSel = _selectedRoomIds.indexOf(btn.dataset.rid) > -1;
+    btn.disabled = capped && !isSel;
+  });
+  bar.innerHTML = '<span>'+count+' of '+_searchNumRooms+' room'+(_searchNumRooms>1?'s':'')+' selected</span>'
+    + '<button class="bfp-search-btn" '+(count===0?'disabled':'')+' onclick="bfpStartMultiBooking()">Continue with '+count+' room'+(count===1?'':'s')+'</button>';
+}
+
+function bfpStartMultiBooking(){
+  var ci = document.getElementById('bfp-ci').value;
+  var co = document.getElementById('bfp-co').value;
+  var rooms = _selectedRoomIds.map(function(id){ return ROOMS.find(function(r){ return r.id===id; }); }).filter(Boolean);
+  if(!rooms.length) return;
+  bfpOpenGuestDetails(rooms, ci, co);
+}
+
+// ── BOOK ROOM(S): collect guest details once, then submit one atomic
+// reservation per room via writeReservation() ──
+// _pendingBooking.lines holds one entry per room being booked — a single-
+// room booking is just a one-line array, so both paths share one submit
+// flow instead of duplicating the guest-details/submit logic.
 var _pendingBooking = null;
 
 function bfpBookRoom(roomId){
@@ -1526,15 +1642,21 @@ function bfpBookRoom(roomId){
   if(!ci || !co || co <= ci){ alert('Please select valid check-in and check-out dates first.'); return; }
   var room = ROOMS.find(function(r){ return r.id === roomId; });
   if(!room){ return; }
+  bfpOpenGuestDetails([room], ci, co);
+}
+
+function bfpOpenGuestDetails(rooms, ci, co){
   var nights = Math.max(1, Math.round((new Date(co)-new Date(ci))/86400000));
-  var rate = getAvgPrice(room.id, ci, co);
-  _pendingBooking = {
-    roomId: room.id, roomName: room.name, ci: ci, co: co,
-    adults: +document.getElementById('bfp-ad').value || 2,
-    rate: rate, nights: nights
-  };
-  document.getElementById('gd-summary').innerHTML =
-    '<strong>'+room.name+'</strong><br>'+ci+' &rarr; '+co+' &middot; '+nights+' night'+(nights>1?'s':'')+' &middot; $'+(rate*nights)+' total';
+  var adults = +document.getElementById('bfp-ad').value || 2;
+  var lines = rooms.map(function(r){
+    return { roomId: r.id, roomName: r.name, rate: getAvgPrice(r.id, ci, co) };
+  });
+  var grandTotal = lines.reduce(function(sum,l){ return sum + l.rate*nights; }, 0);
+  _pendingBooking = { lines: lines, ci: ci, co: co, adults: adults, nights: nights };
+
+  document.getElementById('gd-summary').innerHTML = lines.length===1
+    ? '<strong>'+lines[0].roomName+'</strong><br>'+ci+' &rarr; '+co+' &middot; '+nights+' night'+(nights>1?'s':'')+' &middot; $'+(lines[0].rate*nights)+' total'
+    : '<strong>'+lines.length+' rooms:</strong> '+lines.map(function(l){return l.roomName;}).join(', ')+'<br>'+ci+' &rarr; '+co+' &middot; '+nights+' night'+(nights>1?'s':'')+' &middot; $'+grandTotal+' total';
   document.getElementById('gd-error').style.display = 'none';
   document.getElementById('gd-name').value = '';
   document.getElementById('gd-email').value = '';
@@ -1566,30 +1688,61 @@ async function confirmGuestBooking(){
 
   // Re-check availability right before submitting to reduce double-booking races
   await loadBookedRangesFromSupabase();
-  if(!isRoomAvailable(_pendingBooking.roomId, _pendingBooking.ci, _pendingBooking.co)){
-    btn.disabled = false; btn.textContent = 'Confirm Booking';
-    showGuestError('Sorry, this room was just booked for those dates. Please choose another room or dates.');
-    return;
+
+  // One atomic writeReservation() call per room — same path every other
+  // booking (PMS, agency, single-room website) uses, so a race against
+  // another booking fails just that room with CONFLICT rather than risking
+  // a double-book. Successes are kept; failures are reported clearly so the
+  // guest knows exactly what happened, rather than a silent partial booking.
+  var succeeded = [], failed = [];
+  for(var i=0;i<_pendingBooking.lines.length;i++){
+    var line = _pendingBooking.lines[i];
+    if(!isRoomAvailable(line.roomId, _pendingBooking.ci, _pendingBooking.co)){
+      failed.push({roomId: line.roomId, roomName: line.roomName, reason: 'no longer available'});
+      continue;
+    }
+    var id = await submitDirectBooking({
+      roomId: line.roomId, name: name, email: email, phone: phone, country: country,
+      ci: _pendingBooking.ci, co: _pendingBooking.co, adults: _pendingBooking.adults, rate: line.rate
+    });
+    if(id === 'CONFLICT'){
+      failed.push({roomId: line.roomId, roomName: line.roomName, reason: 'just booked by someone else'});
+    } else if(id){
+      succeeded.push({roomId: line.roomId, roomName: line.roomName, ref: id});
+    } else {
+      failed.push({roomId: line.roomId, roomName: line.roomName, reason: 'a submission error'});
+    }
   }
 
-  var id = await submitDirectBooking({
-    roomId: _pendingBooking.roomId, name: name, email: email, phone: phone, country: country,
-    ci: _pendingBooking.ci, co: _pendingBooking.co, adults: _pendingBooking.adults, rate: _pendingBooking.rate
-  });
-
   btn.disabled = false; btn.textContent = 'Confirm Booking';
+  loadBookedRangesFromSupabase();
 
-  if(id === 'CONFLICT'){
-    loadBookedRangesFromSupabase();
-    showGuestError('Sorry, this room was just booked for those dates. Please choose another room or dates.');
-  } else if(id){
+  if(succeeded.length && !failed.length){
     closeGuestDetails();
-    loadBookedRangesFromSupabase();
-    alert('✓ Booking request received! Reference: '+id+'. We will confirm shortly by email.');
+    var refList = succeeded.map(function(s){ return s.roomName+' (Ref: '+s.ref+')'; }).join(', ');
+    alert('✓ Booking'+(succeeded.length>1?'s':'')+' confirmed!\n'+refList+'\nWe will confirm shortly by email.');
     closeBookingPage();
     _pendingBooking = null;
+    _selectedRoomIds = [];
+  } else if(succeeded.length && failed.length){
+    var okList = succeeded.map(function(s){ return s.roomName+' (Ref: '+s.ref+')'; }).join(', ');
+    var failList = failed.map(function(f){ return f.roomName+' — '+f.reason; }).join('; ');
+    showGuestError(
+      '<strong>Partially booked.</strong><br>'+
+      '&#10003; Confirmed: '+okList+'<br>'+
+      '&#10007; Could not book: '+failList+'<br><br>'+
+      'Please <a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)">email us</a> or '+
+      '<a href="https://wa.me/9609903339" style="color:var(--teal)">WhatsApp</a> about the room(s) that failed — '+
+      'we can help find an alternative, or you can go back and select a different room for those dates.'
+    );
+    // Only the failed rooms remain pending — a retry (if the guest goes back
+    // and re-selects) won't re-submit the ones that already succeeded.
+    _pendingBooking.lines = _pendingBooking.lines.filter(function(l){
+      return failed.some(function(f){ return f.roomId === l.roomId; });
+    });
   } else {
-    showGuestError('We could not submit your booking automatically. Please contact us directly: '
+    var allFailList = failed.map(function(f){ return f.roomName+' — '+f.reason; }).join('; ');
+    showGuestError('Sorry, we could not book: '+allFailList+'. Please choose different room(s) or dates, or contact us directly: '
       + '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)">Viluresidence@gmail.com</a> or '
       + '<a href="https://wa.me/9609903339" style="color:var(--teal)">WhatsApp</a>.');
   }
