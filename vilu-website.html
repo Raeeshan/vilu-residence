@@ -26,6 +26,7 @@
   --glow: rgba(34,211,238,.4);
   --card: #0f2d52;
   --card-border: rgba(34,211,238,.15);
+  --depth-scrim: rgba(4,12,24,.25);
   --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-base: 13px;
@@ -40,7 +41,14 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+/* ── SHARED OCEAN-DEPTH BACKGROUND ──
+   Reusable, copy-paste-ready across any guest page: percentage stops on a
+   block's own background scale to that element's full content height, so
+   this single gradient automatically spans each page's actual length —
+   bright sunlit surface at the top, fading to abyssal dark at the bottom —
+   with no JS and no per-page tuning. */
+body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;
+  background:linear-gradient(180deg,var(--gold-light) 0%,var(--teal-light) 15%,var(--teal) 35%,var(--navy2) 55%,var(--navy) 75%,var(--abyss) 100%)}
 ::selection{background:var(--ocean);color:#04141c}
 ::-webkit-scrollbar{width:10px}
 ::-webkit-scrollbar-track{background:var(--abyss)}
@@ -170,7 +178,7 @@ section{position:relative}
 .bb-btn:hover{background-position:100% 0}
 
 /* ── ROOMS ── */
-#rooms{background:var(--sand);color:var(--text);padding:100px 0;position:relative}
+#rooms{background:var(--depth-scrim);color:var(--text);padding:100px 0;position:relative}
 #rooms::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 55% 40% at 15% 0%,rgba(34,211,238,.08),transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(34,211,238,.07),transparent 60%)}
 #rooms .section-tag{color:var(--teal)}
 .rooms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2px;margin-top:60px}
@@ -193,7 +201,7 @@ section{position:relative}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
 
 /* ── ABOUT ── */
-#about{background:linear-gradient(190deg,var(--navy2) 0%,#0a1e38 100%);padding:100px 0;overflow:hidden;position:relative}
+#about{background:var(--depth-scrim);padding:100px 0;overflow:hidden;position:relative}
 #about::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 45% at 10% 10%,rgba(34,211,238,.14),transparent 60%),radial-gradient(ellipse 55% 45% at 95% 90%,rgba(34,211,238,.08),transparent 60%)}
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:60px}
 .about-visual{position:relative}
@@ -213,7 +221,7 @@ section{position:relative}
 .af-title{font-size:var(--font-size-base);font-weight:500;color:var(--white);margin-bottom:2px}
 
 /* ── GALLERY ── */
-#gallery{background:linear-gradient(190deg,var(--navy) 0%,#081527 100%);padding:100px 0;position:relative}
+#gallery{background:var(--depth-scrim);padding:100px 0;position:relative}
 #gallery::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 45% at 85% 5%,rgba(34,211,238,.13),transparent 60%)}
 .gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,220px);gap:6px;margin-top:60px}
 .g-item{overflow:hidden;border-radius:6px;position:relative;cursor:pointer}
@@ -229,7 +237,7 @@ section{position:relative}
 .g-label{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;color:var(--white)}
 
 /* ── BOOKING SECTION ── */
-#booking{background:linear-gradient(165deg,var(--navy2) 0%,#0a3049 55%,#0e5570 100%);padding:100px 0;position:relative}
+#booking{background:var(--depth-scrim);padding:100px 0;position:relative}
 #booking::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 45% at 20% 0%,rgba(34,211,238,.12),transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(34,211,238,.08),transparent 60%)}
 .booking-split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
 .booking-info .section-tag{color:var(--gold)}
@@ -275,7 +283,8 @@ section{position:relative}
 .vilu-cal-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
 /* ── CONTACT ── */
-#contact{background:var(--sand);color:var(--text);padding:100px 0;position:relative}
+#getting-here{background:var(--depth-scrim)}
+#contact{background:var(--depth-scrim);color:var(--text);padding:100px 0;position:relative}
 #contact::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 55% 40% at 90% 0%,rgba(34,211,238,.08),transparent 60%)}
 #contact .section-tag{color:var(--teal)}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:60px}
@@ -298,7 +307,7 @@ section{position:relative}
 .cf-btn:hover{background:var(--teal-light);box-shadow:0 10px 26px rgba(14,116,144,.35)}
 
 /* ── FOOTER ── */
-footer{background:linear-gradient(180deg,var(--navy) 0%,var(--abyss) 100%);border-top:1px solid rgba(34,211,238,.25);padding:60px 5vw 32px;position:relative;overflow:hidden}
+footer{background:var(--depth-scrim);border-top:1px solid rgba(34,211,238,.25);padding:60px 5vw 32px;position:relative;overflow:hidden}
 footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 50% 40% at 15% 100%,rgba(34,211,238,.1),transparent 60%)}
 .footer-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
