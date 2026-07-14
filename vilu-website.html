@@ -133,12 +133,11 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .hero-bg{position:absolute;inset:0;background:linear-gradient(175deg,var(--abyss) 0%,#0a1a30 28%,#0d2545 55%,#0e5a78 80%,#0e7490 100%);z-index:0}
 .hero-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% -8%,rgba(150,235,255,.35) 0%,transparent 65%),radial-gradient(ellipse 60% 45% at 82% 75%,rgba(34,211,238,.22) 0%,transparent 60%)}
 .hero-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:60px 60px;animation:causticDrift 14s linear infinite}
-.hero-waves{position:absolute;bottom:0;left:0;right:0;height:120px;z-index:4;overflow:hidden;animation:waveHeave 7s ease-in-out infinite}
-.wave-layer{position:absolute;bottom:0;left:0;width:200%;height:100%;display:block}
-.wave-layer--back{animation:waveDrift 30s linear infinite}
-.wave-layer--front{animation:waveDrift 19s linear infinite reverse}
-@keyframes waveDrift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes waveHeave{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.hero-waves{position:absolute;bottom:0;left:0;right:0;height:120px;z-index:4;overflow:hidden}
+.hero-underwater-video{position:absolute;bottom:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+.hero-waves-fade{position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,var(--abyss) 0%,rgba(10,26,48,0) 100%);pointer-events:none}
+@media(min-width:601px){.hero-waves{height:340px}}
+@media(min-width:601px) and (max-width:900px){.hero-waves{height:220px}}
 .hero-content{position:relative;z-index:5;text-align:center;padding:0 5vw;max-width:900px}
 .hero-badge{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);border:1px solid rgba(34,211,238,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
 .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(var(--font-size-display),8vw,96px);font-weight:300;line-height:1;letter-spacing:-.01em;margin-bottom:8px;text-shadow:0 0 40px rgba(34,211,238,.35);animation:fadeUp .8s .1s ease both}
@@ -473,12 +472,10 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   <div class="hero-ocean-overlay" aria-hidden="true"></div>
   <div class="light-rays" aria-hidden="true"></div>
   <div class="hero-waves" aria-hidden="true">
-    <svg class="wave-layer wave-layer--back" viewBox="0 0 2880 120" preserveAspectRatio="none">
-      <path d="M0,80 C360,20 720,120 1080,40 C1260,0 1360,80 1440,60 L1440,120 L0,120 Z M1440,80 C1800,20 2160,120 2520,40 C2700,0 2800,80 2880,60 L2880,120 L1440,120 Z" fill="#eafcff" opacity=".1"/>
-    </svg>
-    <svg class="wave-layer wave-layer--front" viewBox="0 0 2880 120" preserveAspectRatio="none">
-      <path d="M0,60 C240,120 480,0 720,60 C960,120 1200,0 1440,60 L1440,120 L0,120 Z M1440,60 C1680,120 1920,0 2160,60 C2400,120 2640,0 2880,60 L2880,120 L1440,120 Z" fill="#eafcff" opacity=".18"/>
-    </svg>
+    <video class="hero-underwater-video" id="hero-underwater-video" muted loop playsinline preload="metadata" poster="images/underwater-poster.jpg">
+      <source src="videos/underwater-web.mp4" type="video/mp4">
+    </video>
+    <div class="hero-waves-fade"></div>
   </div>
   <div class="hero-content">
     <div class="hero-badge">South Ari Atoll · Maldives</div>
@@ -1460,6 +1457,33 @@ document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);}
     var el = document.getElementById(id);
     if(el){el.value = fmt(tomorrow); el.min = fmt(tomorrow);}
   });
+})();
+
+// ── HERO UNDERWATER VIDEO ── autoplay only when appropriate. Skips for
+// prefers-reduced-motion and Data Saver connections — the poster frame is
+// a perfectly fine static fallback either way, so nothing ever looks
+// broken or shows a blank gap.
+(function(){
+  var vid = document.getElementById('hero-underwater-video');
+  if(!vid) return;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var saveData = navigator.connection && navigator.connection.saveData;
+  if(reduceMotion || saveData) return;
+  // Chromium can interrupt video-only (no audio track) autoplay right at
+  // page load with "paused to save power" before it's confirmed the tab
+  // is actually visible/painted — this is transient, so a short retry
+  // almost always succeeds once the page has settled.
+  var attempts = 0;
+  var tryPlay = function(){
+    vid.play().catch(function(){ if(attempts++ < 4) setTimeout(tryPlay, 350); });
+  };
+  tryPlay();
+  // Belt-and-suspenders: retry once more on the first real user interaction,
+  // in case a browser still blocks/interrupts every attempt above.
+  var retry = function(){ if(vid.paused) tryPlay(); };
+  document.addEventListener('click', retry, {once:true, passive:true});
+  document.addEventListener('scroll', retry, {once:true, passive:true});
+  document.addEventListener('touchstart', retry, {once:true, passive:true});
 })();
 
 // ── AVAILABILITY CALENDAR WIDGET ──
