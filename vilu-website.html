@@ -41,14 +41,10 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-/* ── SHARED OCEAN-DEPTH BACKGROUND ──
-   Reusable, copy-paste-ready across any guest page: percentage stops on a
-   block's own background scale to that element's full content height, so
-   this single gradient automatically spans each page's actual length —
-   bright sunlit surface at the top, fading to abyssal dark at the bottom —
-   with no JS and no per-page tuning. */
-body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;
-  background:linear-gradient(180deg,var(--gold-light) 0%,var(--teal-light) 15%,var(--teal) 35%,var(--navy2) 55%,var(--navy) 75%,var(--abyss) 100%)}
+/* ── SHARED OCEAN BACKGROUND ──
+   One flat ocean-blue, reusable as-is across any guest page. Sections
+   still layer --depth-scrim on top for text/card contrast. */
+body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;background:var(--navy2)}
 ::selection{background:var(--ocean);color:#04141c}
 ::-webkit-scrollbar{width:10px}
 ::-webkit-scrollbar-track{background:var(--abyss)}
