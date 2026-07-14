@@ -134,8 +134,9 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .hero-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% -8%,rgba(150,235,255,.35) 0%,transparent 65%),radial-gradient(ellipse 60% 45% at 82% 75%,rgba(34,211,238,.22) 0%,transparent 60%)}
 .hero-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:60px 60px;animation:causticDrift 14s linear infinite}
 .hero-waves{position:absolute;bottom:0;left:0;right:0;height:120px;z-index:4;overflow:hidden}
-.hero-underwater-video{position:absolute;bottom:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
-.hero-waves-fade{position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,var(--abyss) 0%,rgba(10,26,48,0) 100%);pointer-events:none}
+.hero-underwater-video{position:absolute;bottom:0;left:0;width:100%;height:100%;object-fit:cover;display:block;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 28%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 28%)}
 @media(min-width:601px){.hero-waves{height:340px}}
 @media(min-width:601px) and (max-width:900px){.hero-waves{height:220px}}
 .hero-content{position:relative;z-index:5;text-align:center;padding:0 5vw;max-width:900px}
@@ -475,7 +476,6 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
     <video class="hero-underwater-video" id="hero-underwater-video" muted loop playsinline preload="metadata" poster="images/underwater-poster.jpg">
       <source src="videos/underwater-web.mp4" type="video/mp4">
     </video>
-    <div class="hero-waves-fade"></div>
   </div>
   <div class="hero-content">
     <div class="hero-badge">South Ari Atoll · Maldives</div>
