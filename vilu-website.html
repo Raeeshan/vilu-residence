@@ -23,6 +23,7 @@
   --muted: #8fb4c9;
   --ocean: #22d3ee;
   --abyss: #050b14;
+  --surface-glow: #dbeef4;
   --glow: rgba(34,211,238,.4);
   --card: #0f2d52;
   --card-border: rgba(34,211,238,.15);
@@ -41,10 +42,15 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-/* ── SHARED OCEAN BACKGROUND ──
-   One flat ocean-blue, reusable as-is across any guest page. Sections
-   still layer --depth-scrim on top for text/card contrast. */
-body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;background:var(--navy2)}
+/* ── SHARED OCEAN-DEPTH BACKGROUND ──
+   Reusable, copy-paste-ready across any guest page: percentage stops on a
+   block's own background scale to that element's full content height, so
+   this single gradient automatically spans each page's actual length. A
+   thin sunlit-glow band at the very top resolves into ocean blue within
+   ~9%, then darkens steadily the rest of the way to near-black — light
+   doesn't penetrate far, so the dark portion dominates the length. */
+body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;
+  background:linear-gradient(180deg,var(--surface-glow) 0%,#6fb0c2 4%,var(--teal) 9%,var(--navy2) 32%,var(--navy) 60%,var(--abyss) 100%)}
 ::selection{background:var(--ocean);color:#04141c}
 ::-webkit-scrollbar{width:10px}
 ::-webkit-scrollbar-track{background:var(--abyss)}
