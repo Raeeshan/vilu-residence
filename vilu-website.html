@@ -87,19 +87,27 @@ body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;
 
 /* ── HERO CINEMATIC SLIDESHOW ── */
 .hero-slideshow{position:absolute;inset:0;z-index:1;overflow:hidden;background:var(--abyss)}
-.hero-slide{position:absolute;inset:0;overflow:hidden;opacity:0;animation:heroSlideFade 20s ease-in-out infinite}
+.hero-slide{position:absolute;inset:0;overflow:hidden;opacity:0;animation:heroSlideFade 60s ease-in-out infinite}
 .hero-slide:nth-child(1){animation-delay:0s}
-.hero-slide:nth-child(2){animation-delay:-10s}
+.hero-slide:nth-child(2){animation-delay:-50s}
+.hero-slide:nth-child(3){animation-delay:-40s}
+.hero-slide:nth-child(4){animation-delay:-30s}
+.hero-slide:nth-child(5){animation-delay:-20s}
+.hero-slide:nth-child(6){animation-delay:-10s}
 .hero-slide-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1);will-change:transform;animation:heroKenBurns 10s ease-in-out infinite;filter:contrast(1.06) saturate(1.12)}
 .hero-slide:nth-child(1) .hero-slide-img{animation-delay:0s}
-.hero-slide:nth-child(2) .hero-slide-img{animation-delay:-10s}
+.hero-slide:nth-child(2) .hero-slide-img{animation-delay:-50s}
+.hero-slide:nth-child(3) .hero-slide-img{animation-delay:-40s}
+.hero-slide:nth-child(4) .hero-slide-img{animation-delay:-30s}
+.hero-slide:nth-child(5) .hero-slide-img{animation-delay:-20s}
+.hero-slide:nth-child(6) .hero-slide-img{animation-delay:-10s}
 .hero-slide:nth-child(odd) .hero-slide-img{animation-direction:alternate}
 .hero-slide:nth-child(even) .hero-slide-img{animation-direction:alternate-reverse}
 @keyframes heroSlideFade{
   0%{opacity:0}
-  6%{opacity:1}
-  44%{opacity:1}
-  50%{opacity:0}
+  2%{opacity:1}
+  15%{opacity:1}
+  17%{opacity:0}
   100%{opacity:0}
 }
 @keyframes heroKenBurns{
@@ -476,6 +484,10 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   <div class="hero-slideshow" aria-hidden="true">
     <div class="hero-slide"><img class="hero-slide-img" src="images/whale_shark_hd.jpg" alt=""></div>
     <div class="hero-slide"><img class="hero-slide-img" src="images/manta_ray_hd.jpg" alt=""></div>
+    <div class="hero-slide"><img class="hero-slide-img" src="images/turtle_snorkelers_gallery.jpg" alt=""></div>
+    <div class="hero-slide"><img class="hero-slide-img" src="images/manta_silhouette_gallery.jpg" alt=""></div>
+    <div class="hero-slide"><img class="hero-slide-img" src="images/whale_shark_2_gallery.jpg" alt=""></div>
+    <div class="hero-slide"><img class="hero-slide-img" src="images/dolphin_pod_gallery.jpg" alt=""></div>
   </div>
   <div class="hero-ocean-overlay" aria-hidden="true"></div>
   <div class="light-rays" aria-hidden="true"></div>
@@ -651,14 +663,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
       <div class="section-tag">Gallery</div>
       <h2 class="section-title">Moments <em style="font-style:italic;color:var(--gold-light)">in paradise</em></h2>
     </div>
-    <div class="gallery-grid reveal">
-      <div class="g-item g-item-1"><div class="g-bg" style="background:url(images/whale_shark_hd.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Whale Sharks</span></div></div>
-      <div class="g-item g-item-2"><div class="g-bg" style="background:url(images/manta_ray_hd.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Manta Rays</span></div></div>
-      <div class="g-item g-item-3"><div class="g-bg" style="background:url(images/whale_shark_2_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Gentle Giants</span></div></div>
-      <div class="g-item g-item-4"><div class="g-bg" style="background:url(images/turtle_snorkelers_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Snorkeling with Turtles</span></div></div>
-      <div class="g-item g-item-5"><div class="g-bg" style="background:url(images/manta_silhouette_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Manta Silhouette</span></div></div>
-      <div class="g-item g-item-6"><div class="g-bg" style="background:url(images/dolphin_pod_gallery.jpg) center/cover;height:100%"></div><div class="g-overlay"><span class="g-label">Dolphin Pods</span></div></div>
-    </div>
+    <div class="gallery-grid reveal"></div>
   </div>
 </section>
 
