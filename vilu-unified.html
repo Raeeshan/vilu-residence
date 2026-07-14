@@ -647,6 +647,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" onclick="go('engine',this)"><i class="ti ti-world"></i>Booking engine</div>
   <div class="sl" id="sl-bin" style="display:none" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
+  <div class="sl" id="sl-transport" style="display:none" onclick="go('transport',this)"><i class="ti ti-anchor"></i>Transportation</div>
   <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
   <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:var(--font-size-xs);color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
@@ -1207,6 +1208,26 @@ body.pms-mode { overflow:hidden; }
     <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Staff cannot cancel a reservation without this code. Share it only with staff you trust to cancel bookings, and change it any time here.</div></div>
     <div class="fg"><label>Override code</label><input type="text" id="st-cancel-code" placeholder="Set a code staff will enter to cancel a booking"></div>
     <button class="btn p" onclick="saveCancellationOverrideCode()"><i class="ti ti-device-floppy"></i>Save override code</button>
+  </div>
+</div>
+
+<div class="sec" id="s-transport">
+  <div style="margin-bottom:14px"><h2 style="font-size:var(--font-size-lg);font-weight:700">Transportation</h2><p style="font-size:var(--font-size-sm);color:#6b7280;margin-top:3px">Editable fields for the website's "Getting Here" section — saved changes go live immediately.</p></div>
+  <div class="g2">
+    <div class="card">
+      <h3><i class="ti ti-plane-arrival" style="margin-right:6px"></i>Arrival</h3>
+      <div id="tr-form-arrival"></div>
+    </div>
+    <div class="card">
+      <h3><i class="ti ti-plane-departure" style="margin-right:6px"></i>Departure</h3>
+      <div id="tr-form-departure"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3><i class="ti ti-info-circle" style="margin-right:6px"></i>General note</h3>
+    <div class="fg"><label>Shown below both tabs on the website</label><textarea id="tr-general-note" placeholder="Book your international flight aligned with these schedules..."></textarea></div>
+    <button class="btn p" onclick="saveTransportGeneral()"><i class="ti ti-device-floppy"></i>Save general note</button>
+    <div id="tr-general-status" style="margin-top:8px;font-size:var(--font-size-sm)"></div>
   </div>
 </div>
 
@@ -3994,8 +4015,8 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',ops:'Daily Operations'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,ops:function(){
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation'};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -4008,8 +4029,8 @@ const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();
     },200);
   }};
 function go(id,el){
-  // Block non-admins from accessing user management
-  if(id==='users' && (!currentUser || currentUser.role!=='admin')){
+  // Block non-admins from accessing user management / transportation settings
+  if((id==='users'||id==='transport') && (!currentUser || currentUser.role!=='admin')){
     toast('⛔ Admin access only');
     return;
   }
@@ -5660,6 +5681,107 @@ function drawCfg(){
   drawTaxSum();
   loadCancellationOverrideCodeField();
 }
+
+// ── TRANSPORTATION ── editable fields for the website's "Getting Here"
+// section. One Firestore doc per option (website_content/transport_*) so
+// admin can update a single field without touching anything else — same
+// live-Firestore pattern as room_prices/room_details. Option name/icon
+// are fixed per slot, matching vilu-website.html's GH_META; only these 6
+// fields are admin-editable.
+const TR_OPTIONS = {
+  arrival: [
+    {key:'transport_arrival_direct', label:'Direct speedboat'},
+    {key:'transport_arrival_transit', label:'Transit via Dhigurah'},
+    {key:'transport_arrival_flight', label:'Domestic flight'}
+  ],
+  departure: [
+    {key:'transport_departure_direct', label:'Direct speedboat'},
+    {key:'transport_departure_transit', label:'Transit via Dhigurah'},
+    {key:'transport_departure_flight', label:'Domestic flight'}
+  ]
+};
+const TR_FIELDS = [
+  {name:'price', label:'Price', type:'text', placeholder:'$55 / person, one-way'},
+  {name:'duration', label:'Duration', type:'text', placeholder:'~1h 45m'},
+  {name:'departure_times', label:'Departure times', type:'text', placeholder:'Departs Malé 15:00'},
+  {name:'operator_name', label:'Operator name', type:'text', placeholder:'My Express Maamigili'},
+  {name:'notes', label:'Notes', type:'textarea', placeholder:'No Friday service, advance booking required...'},
+  {name:'advance_notice_days', label:'Advance notice (days)', type:'number', placeholder:'3'}
+];
+let TR_DATA = {};
+
+async function drawTransport(){
+  try {
+    var ids = [].concat(TR_OPTIONS.arrival, TR_OPTIONS.departure).map(function(o){return o.key;});
+    var snaps = await Promise.all(ids.map(function(id){ return fsDb.collection('website_content').doc(id).get(); }));
+    var data = {};
+    snaps.forEach(function(snap, i){ data[ids[i]] = (snap.exists && snap.data()) || {}; });
+    TR_DATA = data;
+    var genSnap = await fsDb.collection('website_content').doc('transport_general').get();
+    document.getElementById('tr-general-note').value = (genSnap.exists && genSnap.data().note) || '';
+  } catch(e) {
+    console.error('drawTransport load failed', e);
+    toast('⚠️ Could not load transportation content');
+  }
+  renderTransportForm('arrival');
+  renderTransportForm('departure');
+}
+
+function renderTransportForm(section){
+  var el = document.getElementById('tr-form-'+section);
+  if(!el) return;
+  el.innerHTML = TR_OPTIONS[section].map(function(opt){
+    var d = TR_DATA[opt.key] || {};
+    var fieldsHtml = TR_FIELDS.map(function(f){
+      var val = d[f.name] != null ? d[f.name] : '';
+      var id = 'tr-'+opt.key+'-'+f.name;
+      if(f.type === 'textarea') return '<div class="fg"><label>'+f.label+'</label><textarea id="'+id+'" placeholder="'+f.placeholder+'">'+val+'</textarea></div>';
+      return '<div class="fg"><label>'+f.label+'</label><input type="'+f.type+'" id="'+id+'" value="'+String(val).replace(/"/g,'&quot;')+'" placeholder="'+f.placeholder+'"></div>';
+    }).join('');
+    return '<div style="border-top:1px solid #f3f4f6;margin-top:14px;padding-top:14px">'
+      + '<div style="font-size:var(--font-size-base);font-weight:700;margin-bottom:8px">'+opt.label+'</div>'
+      + fieldsHtml
+      + '<button class="btn sm" onclick="saveTransportOption(\''+opt.key+'\')"><i class="ti ti-device-floppy"></i>Save '+opt.label.toLowerCase()+'</button>'
+      + '<span id="tr-status-'+opt.key+'" style="margin-left:10px;font-size:var(--font-size-sm)"></span>'
+      + '</div>';
+  }).join('');
+}
+
+async function saveTransportOption(key){
+  var fields = {};
+  TR_FIELDS.forEach(function(f){
+    var el = document.getElementById('tr-'+key+'-'+f.name);
+    if(!el) return;
+    fields[f.name] = f.type === 'number' ? (+el.value || 0) : el.value.trim();
+  });
+  var statusEl = document.getElementById('tr-status-'+key);
+  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
+  try {
+    await fsDb.collection('website_content').doc(key).set(fields, { merge: true });
+    TR_DATA[key] = Object.assign({}, TR_DATA[key], fields);
+    if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
+    toast('✓ Transportation option saved');
+  } catch(e) {
+    console.error('saveTransportOption failed', e);
+    if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
+    toast('⚠️ Could not save — please try again');
+  }
+}
+
+async function saveTransportGeneral(){
+  var note = (document.getElementById('tr-general-note').value||'').trim();
+  var statusEl = document.getElementById('tr-general-status');
+  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
+  try {
+    await fsDb.collection('website_content').doc('transport_general').set({ note: note }, { merge: true });
+    if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
+    toast('✓ General note saved');
+  } catch(e) {
+    console.error('saveTransportGeneral failed', e);
+    if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
+    toast('⚠️ Could not save — please try again');
+  }
+}
 function drawTaxSum(){
   const el=document.getElementById('tax-sum');if(!el)return;
   el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
@@ -6001,7 +6123,7 @@ function applyUserMgmtVisibility(){
   // never sees the nav entries at all, not just a disabled/blocked screen.
   // Partner hotel *reservations* still show on the calendar for everyone;
   // this only hides the management/add-hotel section itself.
-  ['sl-users','sl-bin','sl-htls'].forEach(function(id){
+  ['sl-users','sl-bin','sl-htls','sl-transport'].forEach(function(id){
     const sl = document.getElementById(id);
     if(sl) sl.style.display = isAdmin ? '' : 'none';
   });
