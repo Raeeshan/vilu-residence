@@ -416,15 +416,17 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .nav-links,.nav-book{display:none}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
-  /* Reverted from object-fit:contain (commit 0d81c55): on a real device,
-     full-bleed cover with some edge cropping looked better than a fully
-     visible but small letterboxed photo. Per-photo object-position still
-     centers the crop on each animal's most recognizable part, recomputed
-     against the tighter crops from the recent margin-trimming work. */
-  .hero-slide:nth-child(1) .hero-slide-img{object-position:90% 48%}
-  .hero-slide:nth-child(3) .hero-slide-img{object-position:28% 42%}
-  .hero-slide:nth-child(5) .hero-slide-img{object-position:90% 50%}
-  .hero-slide:nth-child(6) .hero-slide-img{object-position:30% 55%}
+  /* Size the photo by its own aspect ratio instead of forcing it into a
+     fixed-height box (zero crop, zero gap, by construction) - the
+     stacked layers (hero-bg/hero-slideshow/hero-ocean-overlay/light-rays)
+     share one grid cell so they all match hero-slideshow's aspect-ratio
+     height; hero-content moves to a second row in normal flow below the
+     photo instead of overlaid on top of it. */
+  #home{display:grid;grid-template-columns:1fr;align-items:stretch;justify-items:stretch;height:auto;min-height:0;overflow:visible}
+  .hero-bg,.hero-slideshow,.hero-ocean-overlay,.light-rays{grid-row:1;grid-column:1;position:relative;inset:auto}
+  .hero-slideshow{aspect-ratio:1672/941;width:100%;overflow:hidden}
+  .hero-content{grid-row:2;grid-column:1;padding:32px 5vw 40px}
+  .hero-scroll{display:none}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
