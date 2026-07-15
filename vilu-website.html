@@ -437,8 +437,11 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
      space, not photo size. 50vh is the shortest height that still gives
      the title/subtitle/button stack (~360px tall) comfortable padding
      instead of crowding the edges; min-height guards short viewports
-     (e.g. iPhone SE) where 50vh alone would undershoot that. */
-  #home{height:50vh;min-height:420px}
+     (e.g. iPhone SE) where 50vh alone would undershoot that, and also
+     keeps .hero-badge clear of the fixed 72px nav bar - at the original
+     420px floor the centered content started at y=55, overlapping the
+     nav's logo subtitle text. */
+  #home{height:50vh;min-height:500px}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
