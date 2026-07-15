@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "viluresidence",
     "public": ".",
     "ignore": [
       "firebase.json",
