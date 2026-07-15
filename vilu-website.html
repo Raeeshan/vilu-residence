@@ -416,22 +416,17 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .nav-links,.nav-book{display:none}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
-  /* Badge/title/subtitle/actions restored to overlaying the photo
-     (matching the original design) instead of sitting below it in normal
-     flow. 500px is a deliberate compromise: the photo's natural
-     aspect-ratio height (~219px at this width) is too short to fit the
-     overlaid content without severe overflow, so the box is sized to fit
-     the content comfortably (confirmed: 22px clearance under the fixed
-     nav, 46px above the bottom edge) and the photo crops via cover to
-     fill it - but at ~48% of its width visible, meaningfully gentler than
-     the original full-screen hero's ~26%, since this box is far shorter
-     than a full screen. */
+  /* Badge/title/subtitle/actions overlay the photo (matching desktop).
+     500px fits that content comfortably (22px clearance under the fixed
+     nav, 46px above the bottom edge) regardless of which photo is
+     showing. On mobile/tablet (<=900px), <picture> swaps in dedicated
+     portrait (1570x1962, ratio 0.8) photos instead of the landscape
+     originals - at this box's ~0.78 aspect ratio, cover now crops only
+     ~2-6% of the image width instead of the ~52% the landscape photos
+     needed, so no per-photo object-position tuning is necessary anymore
+     (plain center, the default, already looks right). */
   #home{height:500px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{display:none}
-  .hero-slide:nth-child(1) .hero-slide-img{object-position:90% 48%}
-  .hero-slide:nth-child(3) .hero-slide-img{object-position:28% 42%}
-  .hero-slide:nth-child(5) .hero-slide-img{object-position:90% 50%}
-  .hero-slide:nth-child(6) .hero-slide-img{object-position:30% 55%}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
@@ -498,12 +493,12 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 <section id="home">
   <div class="hero-bg"></div>
   <div class="hero-slideshow" aria-hidden="true">
-    <div class="hero-slide"><img class="hero-slide-img" src="images/whale_shark_hd.jpg" alt=""></div>
-    <div class="hero-slide"><img class="hero-slide-img" src="images/manta_ray_hd.jpg" alt=""></div>
-    <div class="hero-slide"><img class="hero-slide-img" src="images/turtle_snorkelers_gallery.jpg" alt=""></div>
-    <div class="hero-slide"><img class="hero-slide-img" src="images/manta_silhouette_gallery.jpg" alt=""></div>
-    <div class="hero-slide"><img class="hero-slide-img" src="images/whale_shark_2_gallery.jpg" alt=""></div>
-    <div class="hero-slide"><img class="hero-slide-img" src="images/dolphin_pod_gallery.jpg" alt=""></div>
+    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/whale_shark_portrait_hd.jpg"><img class="hero-slide-img" src="images/whale_shark_hd.jpg" alt=""></picture></div>
+    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/manta_portrait_hd.jpg"><img class="hero-slide-img" src="images/manta_ray_hd.jpg" alt=""></picture></div>
+    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/turtle_portrait_hd.jpg"><img class="hero-slide-img" src="images/turtle_snorkelers_gallery.jpg" alt=""></picture></div>
+    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/manta_silhouette_portrait_hd.jpg"><img class="hero-slide-img" src="images/manta_silhouette_gallery.jpg" alt=""></picture></div>
+    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/whale_shark2_portrait_hd.jpg"><img class="hero-slide-img" src="images/whale_shark_2_gallery.jpg" alt=""></picture></div>
+    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/dolphins_portrait_hd.jpg"><img class="hero-slide-img" src="images/dolphin_pod_gallery.jpg" alt=""></picture></div>
   </div>
   <div class="hero-ocean-overlay" aria-hidden="true"></div>
   <div class="light-rays" aria-hidden="true"></div>
