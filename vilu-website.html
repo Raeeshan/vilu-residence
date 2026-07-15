@@ -416,17 +416,22 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .nav-links,.nav-book{display:none}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
-  /* Size the photo by its own aspect ratio instead of forcing it into a
-     fixed-height box (zero crop, zero gap, by construction) - the
-     stacked layers (hero-bg/hero-slideshow/hero-ocean-overlay/light-rays)
-     share one grid cell so they all match hero-slideshow's aspect-ratio
-     height; hero-content moves to a second row in normal flow below the
-     photo instead of overlaid on top of it. */
-  #home{display:grid;grid-template-columns:1fr;align-items:stretch;justify-items:stretch;height:auto;min-height:0;overflow:visible}
-  .hero-bg,.hero-slideshow,.hero-ocean-overlay,.light-rays{grid-row:1;grid-column:1;position:relative;inset:auto}
-  .hero-slideshow{aspect-ratio:1672/941;width:100%;overflow:hidden}
-  .hero-content{grid-row:2;grid-column:1;padding:32px 5vw 40px}
+  /* Badge/title/subtitle/actions restored to overlaying the photo
+     (matching the original design) instead of sitting below it in normal
+     flow. 500px is a deliberate compromise: the photo's natural
+     aspect-ratio height (~219px at this width) is too short to fit the
+     overlaid content without severe overflow, so the box is sized to fit
+     the content comfortably (confirmed: 22px clearance under the fixed
+     nav, 46px above the bottom edge) and the photo crops via cover to
+     fill it - but at ~48% of its width visible, meaningfully gentler than
+     the original full-screen hero's ~26%, since this box is far shorter
+     than a full screen. */
+  #home{height:500px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{display:none}
+  .hero-slide:nth-child(1) .hero-slide-img{object-position:90% 48%}
+  .hero-slide:nth-child(3) .hero-slide-img{object-position:28% 42%}
+  .hero-slide:nth-child(5) .hero-slide-img{object-position:90% 50%}
+  .hero-slide:nth-child(6) .hero-slide-img{object-position:30% 55%}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
