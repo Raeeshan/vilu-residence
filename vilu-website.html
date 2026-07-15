@@ -416,6 +416,11 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .nav-links,.nav-book{display:none}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
+  /* .hero-scroll is anchored bottom:140px from #home, which cleared the
+     content comfortably at 100dvh but collides with the button row once
+     #home is shortened below - hide it here since the next section is
+     already much closer at this height, making the cue less necessary. */
+  .hero-scroll{display:none}
   /* object-fit:cover on these 941px-tall landscape photos can only ever
      show ~26% of the image's width on a real phone aspect ratio (~0.46) -
      no object-position can widen that window enough to fit a 1000-1500px-
@@ -426,6 +431,14 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
      flat color. */
   .hero-slide-img{object-fit:contain;object-position:center}
   .hero-slideshow{background:transparent}
+  /* These landscape photos are width-constrained under contain on a
+     narrow phone, so they render at a fixed ~224px tall no matter how
+     tall #home is - shrinking 100dvh mainly just cuts empty gradient
+     space, not photo size. 50vh is the shortest height that still gives
+     the title/subtitle/button stack (~360px tall) comfortable padding
+     instead of crowding the edges; min-height guards short viewports
+     (e.g. iPhone SE) where 50vh alone would undershoot that. */
+  #home{height:50vh;min-height:420px}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
