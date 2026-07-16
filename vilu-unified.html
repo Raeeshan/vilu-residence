@@ -9618,7 +9618,15 @@ firebase.auth().onAuthStateChanged(async function(fbUser){
   else if (fbUser) restored = await restoreSession(fbUser);
   var loadingEl = document.getElementById('auth-check-loading');
   if (loadingEl) loadingEl.style.display = 'none';
-  if (!restored) document.getElementById('login-card').style.display = '';
+  if (!restored) { document.getElementById('login-card').style.display = ''; return; }
+  // Packages/room-details on-load sync — must wait until here, not fire at
+  // parse time: fsDb exists as soon as the SDK initializes, but Firebase
+  // Auth's own session restore above is asynchronous, so anything run
+  // earlier always hits Firestore before request.auth is populated and
+  // gets rejected by the isAdmin()/isStaff() rules regardless of whether
+  // the user is really signed in.
+  try { syncPackagesToFirestore(); } catch(e) { console.error('syncPkgFirestore', e); }
+  try { syncRoomDetailsToFirestore(); } catch(e) { console.error('syncRoomDetailsToFirestore', e); }
 });
 
 // ── SINGLE ATOMIC RESERVATION WRITE ──
@@ -9848,13 +9856,8 @@ async function reconcileIfDue() {
   } catch(e) { console.error('reconcileIfDue failed', e); }
 }
 try { reconcileIfDue(); } catch(e) {}
-// fsDb only exists from this point on — this is the correct place for the
-// packages-on-load sync (the earlier "Sync on load" block runs before
-// Firebase itself has initialized).
-try { syncPackagesToFirestore(); } catch(e) { console.error('syncPkgFirestore', e); }
-// One-time (per load) backfill of any room photos/details that only ever
-// made it to localStorage before room_details existed in Firestore.
-try { syncRoomDetailsToFirestore(); } catch(e) { console.error('syncRoomDetailsToFirestore', e); }
+// packages/room_details on-load sync moved into onAuthStateChanged above —
+// see the comment there for why it can't run here at parse time.
 
 async function runReconciliationNow() {
   var btn = document.querySelector('button[onclick="runReconciliationNow()"]');
