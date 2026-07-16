@@ -258,34 +258,34 @@ section{position:relative}
 /* ── HOLIDAY PACKAGES ── */
 #holiday-packages{background:var(--depth-scrim);padding:100px 0;position:relative}
 #holiday-packages .section-tag{color:var(--teal)}
-.hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
-.hp-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:28px;display:flex;flex-direction:column;position:relative}
-.hp-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal);color:var(--white);font-size:var(--font-size-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:14px;align-self:flex-start}
-.hp-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:8px}
-.hp-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
-.hp-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--teal-light)}
+.hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:52px;align-items:start}
+.hp-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:32px;display:flex;flex-direction:column;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,border-color .35s}
+.hp-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(0,4,10,.5);border-color:rgba(34,211,238,.35)}
+.hp-card.hp-featured{border-color:rgba(34,211,238,.4)}
+.hp-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));color:var(--navy);font-size:var(--font-size-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:18px;align-self:flex-start;box-shadow:0 6px 16px rgba(34,211,238,.25)}
+.hp-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.2}
+.hp-price-row{display:flex;align-items:baseline;gap:9px}
+.hp-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:600;color:var(--teal-light);line-height:1}
 .hp-price-sub{font-size:var(--font-size-sm);color:var(--muted)}
-.hp-rate{font-size:var(--font-size-sm);color:var(--muted);margin-bottom:6px}
-.hp-savings{display:inline-block;font-size:var(--font-size-xs);font-weight:600;color:#059669;background:rgba(5,150,105,.15);padding:3px 10px;border-radius:20px;margin-bottom:14px;align-self:flex-start}
-.hp-hook{font-size:var(--font-size-base);color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:18px}
-.hp-details{border-top:1px solid rgba(255,255,255,.08)}
-.hp-details summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-light)}
-.hp-details summary::-webkit-details-marker{display:none}
-.hp-details summary .hp-chevron{transition:transform .25s}
-.hp-details[open] summary .hp-chevron{transform:rotate(180deg)}
-.hp-detail-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-sm);color:rgba(255,255,255,.65);padding:4px 0}
-.hp-detail-line i{color:var(--gold-light);flex-shrink:0;margin-top:2px}
-.hp-upgrade{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:var(--gold-light);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px 12px;margin:14px 0;line-height:1.5}
-.hp-actions{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:10px}
-.hp-enquire-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:13px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.hp-enquire-btn:hover{background:var(--teal-light);color:var(--navy)}
+.hp-rate-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0 20px;font-size:var(--font-size-sm);color:var(--muted)}
+.hp-savings{display:inline-block;font-size:var(--font-size-xs);font-weight:700;letter-spacing:.02em;color:#34d399;background:rgba(5,150,105,.15);padding:3px 10px;border-radius:20px}
+.hp-hook{font-size:var(--font-size-base);color:rgba(255,255,255,.8);line-height:1.65;margin-bottom:26px;padding-left:14px;border-left:2px solid var(--teal);font-style:italic}
+.hp-section{border-top:1px solid rgba(255,255,255,.08);padding-top:16px;margin-top:16px}
+.hp-section-label{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-light);margin-bottom:10px}
+.hp-detail-line{display:flex;align-items:flex-start;gap:10px;font-size:var(--font-size-sm);color:rgba(255,255,255,.68);padding:5px 0;line-height:1.5}
+.hp-detail-line i{color:var(--gold-light);flex-shrink:0;margin-top:3px;font-size:var(--font-size-md)}
+.hp-upgrade{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:var(--gold-light);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px 12px;margin:20px 0 0;line-height:1.5}
+.hp-actions{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:10px}
+.hp-enquire-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:14px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.hp-enquire-btn:hover{background:var(--teal-light);color:var(--navy);box-shadow:0 10px 26px rgba(34,211,238,.3)}
 .hp-whatsapp-link{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);text-decoration:none;font-size:var(--font-size-sm);transition:color .2s}
 .hp-whatsapp-link:hover{color:var(--gold-light)}
 @keyframes hpPulse{0%,100%{box-shadow:0 20px 60px rgba(0,4,10,.35)}50%{box-shadow:0 0 0 4px var(--gold-light),0 20px 60px rgba(0,4,10,.35)}}
 .hp-card.hp-pulse{animation:hpPulse 1.4s ease}
 @media(max-width:900px){
-  .hp-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px;margin:48px -5vw 0;padding:0 5vw 8px;-webkit-overflow-scrolling:touch}
-  .hp-card{flex:0 0 82%;min-width:260px;scroll-snap-align:start}
+  .hp-grid{display:flex;grid-template-columns:none;align-items:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:18px;margin:52px -5vw 0;padding:0 5vw 10px;-webkit-overflow-scrolling:touch}
+  .hp-card{flex:0 0 84%;min-width:260px;scroll-snap-align:start}
+  .hp-card:hover{transform:none}
 }
 
 /* ── BOOKING SECTION ── */
@@ -524,6 +524,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
     <li><a href="#rooms">Rooms</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#holiday-packages">Packages</a></li>
     <li><a href="#getting-here">Getting Here</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
@@ -549,6 +550,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   <a href="#rooms" onclick="closeMobileMenu()">Rooms</a>
   <a href="#about" onclick="closeMobileMenu()">About</a>
   <a href="#gallery" onclick="closeMobileMenu()">Gallery</a>
+  <a href="#holiday-packages" onclick="closeMobileMenu()">Packages</a>
   <a href="#getting-here" onclick="closeMobileMenu()">Getting Here</a>
   <a href="#contact" onclick="closeMobileMenu()">Contact</a>
   <button class="m-book-btn" onclick="openBookingPopup();closeMobileMenu()">Book Your Stay</button>
@@ -756,7 +758,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
     <div class="reveal">
       <div class="section-tag">Holiday Packages</div>
       <h2 class="section-title" style="color:var(--text)">Curated <em style="font-style:italic;color:var(--gold-light)">island escapes</em></h2>
-      <p class="gh-sub" style="margin-top:16px">All-inclusive packages built around our best reef and ocean experiences — pick the length that fits your trip.</p>
+      <p class="gh-sub" style="margin-top:16px">Daily breakfast and round-trip speedboat transfers included on every package — pick the length that fits your trip, then add half or full board if you'd like.</p>
     </div>
     <div class="hp-grid reveal" id="hp-grid">
       <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Loading packages…</div>
@@ -887,7 +889,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
         <p class="footer-desc">A welcoming guesthouse in the South Ari Atoll offering genuine service and authentic Maldivian experiences.</p>
         <div style="font-size:var(--font-size-sm);color:rgba(255,255,255,.3)">+960 9903339 · Viluresidence@gmail.com</div>
       </div>
-      <div class="footer-col"><h4>Navigate</h4><ul><li><a href="#home">Home</a></li><li><a href="#rooms">Rooms</a></li><li><a href="#about">About Us</a></li><li><a href="#gallery">Gallery</a></li><li><a href="#getting-here">Getting Here</a></li><li><a href="#contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Navigate</h4><ul><li><a href="#home">Home</a></li><li><a href="#rooms">Rooms</a></li><li><a href="#about">About Us</a></li><li><a href="#gallery">Gallery</a></li><li><a href="#holiday-packages">Packages</a></li><li><a href="#getting-here">Getting Here</a></li><li><a href="#contact">Contact</a></li></ul></div>
       <div class="footer-col"><h4>Rooms</h4><ul><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Premium Room — $90</a></li><li><a href="#rooms">Premium Room — $90</a></li></ul></div>
       <div class="footer-col"><h4>Info</h4><ul><li><a href="#booking" onclick="openBookingPage()">Book Direct</a></li><li><a href="#contact">Enquiries</a></li><li><a href="#contact">Groups</a></li></ul></div>
     </div>
@@ -2151,26 +2153,16 @@ function renderHolidayPackages(pkgs){
     var activitiesHtml = hpDetailLines(p.activities);
     var addOnsHtml = hpDetailLines(p.addOns, function(a){ return a.name+' — $'+a.price+a.unit; });
 
-    return '<div class="hp-card" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
+    return '<div class="hp-card'+(p.badge?' hp-featured':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
       + (p.badge ? '<div class="hp-badge"><i class="ti ti-star" aria-hidden="true"></i>'+p.badge+'</div>' : '')
       + '<div class="hp-name">'+p.name+'</div>'
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">pp &middot; '+p.nights+' night'+(p.nights>1?'s':'')+'</span></div>'
-      + '<div class="hp-rate">$'+rate.toFixed(0)+'/night per person</div>'
-      + (savingsPct>0 ? '<div class="hp-savings">Save '+savingsPct+'% per night vs '+baselineNights+'-night rate</div>' : '')
+      + '<div class="hp-rate-row"><span>$'+rate.toFixed(0)+'/night per person</span>'+(savingsPct>0 ? '<span class="hp-savings">Save '+savingsPct+'% vs '+baselineNights+'-night rate</span>' : '')+'</div>'
       + '<p class="hp-hook">'+(p.description||'')+'</p>'
       + (upgradeAdded.length ? '<div class="hp-upgrade"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i><span>Adds '+upgradeAdded.join(' &amp; ')+' — our most complete stay yet.</span></div>' : '')
-      + '<details class="hp-details" ontoggle="if(this.open) hpTrackExpand(\''+p.id+'\',\''+safeName+'\')">'
-        + '<summary>Includes <i class="ti ti-chevron-down hp-chevron" aria-hidden="true"></i></summary>'
-        + '<div>'+includesHtml+'</div>'
-      + '</details>'
-      + '<details class="hp-details" ontoggle="if(this.open) hpTrackExpand(\''+p.id+'\',\''+safeName+'\')">'
-        + '<summary>Activities <i class="ti ti-chevron-down hp-chevron" aria-hidden="true"></i></summary>'
-        + '<div>'+activitiesHtml+'</div>'
-      + '</details>'
-      + '<details class="hp-details" ontoggle="if(this.open) hpTrackExpand(\''+p.id+'\',\''+safeName+'\')">'
-        + '<summary>Optional Add-Ons <i class="ti ti-chevron-down hp-chevron" aria-hidden="true"></i></summary>'
-        + '<div>'+addOnsHtml+'</div>'
-      + '</details>'
+      + '<div class="hp-section"><div class="hp-section-label">Includes</div>'+includesHtml+'</div>'
+      + '<div class="hp-section"><div class="hp-section-label">Activities</div>'+activitiesHtml+'</div>'
+      + '<div class="hp-section"><div class="hp-section-label">Optional Add-Ons</div>'+addOnsHtml+'</div>'
       + '<div class="hp-actions">'
         + '<button class="hp-enquire-btn" onclick="hpEnquire(\''+p.id+'\',\''+safeName+'\')">Enquire About This Package</button>'
         + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire_click\',{package:\''+p.id+'\',channel:\'whatsapp\'})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Ask on WhatsApp</a>'
@@ -2195,10 +2187,6 @@ function renderHolidayPackages(pkgs){
 
   injectHolidayPackagesJsonLd(pkgs);
   handleHolidayPackageDeepLink();
-}
-
-function hpTrackExpand(id, name){
-  trackEvent('package_expand_details', {package: id, name: name});
 }
 
 function hpEnquire(id, name){
