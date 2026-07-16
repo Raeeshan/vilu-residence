@@ -1562,6 +1562,16 @@ body.pms-mode { overflow:hidden; }
     </div>
   </div>
   <div id="pkg-sync-result" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px"></div>
+  <div class="card" style="margin-bottom:14px">
+    <h3><i class="ti ti-file-text" style="margin-right:6px"></i>Package terms</h3>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Shared across every package on the website (one line per term).</p>
+    <div class="fg"><textarea id="pkg-terms" rows="3" placeholder="Applicable only for direct bookings
+Cash payments appreciated
+Free for infants 0–1.99yrs
+All taxes included"></textarea></div>
+    <button class="btn p" onclick="savePkgTerms()"><i class="ti ti-device-floppy"></i>Save terms</button>
+    <span id="pkg-terms-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+  </div>
   <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
 </div>
 
@@ -2073,7 +2083,7 @@ Suite</textarea></div>
 
 <!-- PACKAGE EDIT MODAL -->
 <div class="mbg" id="m-pkg" onclick="if(event.target===this)this.classList.remove('on')">
-  <div class="mdl" style="width:560px">
+  <div class="mdl" style="width:560px;max-height:90vh;overflow-y:auto">
     <div class="mhd">
       <h3 id="pkg-modal-title">New package</h3>
       <button class="ab" onclick="document.getElementById('m-pkg').classList.remove('on')"><i class="ti ti-x"></i></button>
@@ -2087,12 +2097,25 @@ Suite</textarea></div>
       <div class="fg" style="margin:0"><label>Price per person / night ($) *</label><input type="number" id="pkg-price" min="0" step="5" placeholder="0.00"></div>
       <div class="fg" style="margin:0"><label>Fixed nights *</label><input type="number" id="pkg-nights" min="1" value="3" placeholder="e.g. 3"></div>
     </div>
+    <div class="fg" style="margin:0 0 12px"><label>Badge (optional)</label><input type="text" id="pkg-badge" placeholder="e.g. Most Popular, Best Value — leave blank for none"></div>
     <div class="fg">
       <label>What's included (one per line)</label>
       <textarea id="pkg-includes" rows="5" placeholder="Accommodation
 Daily breakfast
 2-way speedboat transfer
 Snorkelling trip"></textarea>
+    </div>
+    <div class="fg">
+      <label>Activities (one per line)</label>
+      <textarea id="pkg-activities" rows="4" placeholder="Whale Shark Snorkeling
+Manta Snorkeling
+Turtle Snorkeling"></textarea>
+    </div>
+    <div class="fg">
+      <label>Optional add-ons (one per line: Name | Price | Unit)</label>
+      <textarea id="pkg-addons" rows="4" placeholder="Half-Board | 25 | /day
+Full-Board | 40 | /day
+Photography | 25 | /hr"></textarea>
     </div>
     <div class="al bl" style="margin-bottom:12px"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>All package prices are <strong>tax-inclusive</strong>.</div></div>
     <div class="fg">
@@ -7548,10 +7571,26 @@ let AGENCY_BK=loadAgencyBookings();
 // ══════════════════════════════════════════════
 var _editPkgId = null;
 
-function drawPkgs(){
+async function drawPkgs(){
+  loadPkgTerms();
   var el = document.getElementById('pkg-list');
   if(!el) return;
-  PACKAGES = loadPackages();
+  // Firestore is authoritative (it's what the website and agency portal
+  // actually read) — refresh the local copy from it so this list never
+  // shows stale data from a package edited on another device. Falls back
+  // to the local cache if Firestore can't be reached.
+  try {
+    var qs = await fsDb.collection('packages').get();
+    if(!qs.empty){
+      PACKAGES = qs.docs.map(function(d){ return d.data(); });
+      localStorage.setItem('vilu_packages', JSON.stringify(PACKAGES));
+    } else {
+      PACKAGES = loadPackages();
+    }
+  } catch(e) {
+    console.error('drawPkgs Firestore fetch failed, falling back to local cache', e);
+    PACKAGES = loadPackages();
+  }
   if(!PACKAGES.length){
     el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first agency package</p></div>';
     return;
@@ -7573,6 +7612,7 @@ function drawPkgs(){
           '</div>' +
           '<span style="font-size:var(--font-size-xs);font-weight:700;padding:3px 10px;border-radius:20px;background:'+(pkg.active?'#b8eef8':'#f3f4f6')+';color:'+(pkg.active?'#0096c7':'#6b7280')+'">'+(pkg.active?'Active':'Inactive')+'</span>' +
         '</div>' +
+        (pkg.badge?'<span style="display:inline-block;font-size:var(--font-size-xs);font-weight:700;padding:3px 10px;border-radius:20px;background:#ccfbf1;color:#0d9488;margin-bottom:8px">'+pkg.badge+'</span>':'')+
         (pkg.description?'<p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px;line-height:1.5">'+pkg.description+'</p>':'')+
         '<div style="margin-bottom:12px">' +
           (pkg.includes||[]).map(function(inc){ return '<div style="font-size:var(--font-size-xs);color:#374151;padding:2px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:#00b4d8;font-size:var(--font-size-xs)"></i>'+inc+'</div>'; }).join('') +
@@ -7591,6 +7631,33 @@ function drawPkgs(){
   });
 }
 
+async function loadPkgTerms(){
+  var el = document.getElementById('pkg-terms');
+  if(!el) return;
+  try {
+    var snap = await fsDb.collection('website_content').doc('packages_terms').get();
+    var terms = (snap.exists && snap.data().terms) || [];
+    el.value = terms.join('\n');
+  } catch(e) {
+    console.error('loadPkgTerms failed', e);
+  }
+}
+
+async function savePkgTerms(){
+  var terms = (document.getElementById('pkg-terms').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var statusEl = document.getElementById('pkg-terms-status');
+  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
+  try {
+    await fsDb.collection('website_content').doc('packages_terms').set({ terms: terms }, { merge: true });
+    if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
+    toast('✓ Package terms saved');
+  } catch(e) {
+    console.error('savePkgTerms failed', e);
+    if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
+    toast('⚠️ Could not save — please try again');
+  }
+}
+
 function openPkgForm(pid){
   _editPkgId = pid;
   var isNew = !pid;
@@ -7601,7 +7668,10 @@ function openPkgForm(pid){
   document.getElementById('pkg-desc').value = pkg ? (pkg.description||'') : '';
   document.getElementById('pkg-price').value = pkg ? pkg.pricePerRoom : '';
   document.getElementById('pkg-nights').value = pkg ? pkg.nights : 1;
+  document.getElementById('pkg-badge').value = pkg ? (pkg.badge||'') : '';
   document.getElementById('pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : 'Accommodation\n2-way speedboat transfer';
+  document.getElementById('pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
+  document.getElementById('pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
 
   // Visibility: default to "all" for new packages and any existing package
   // saved before this feature existed (visibleToAgencies missing entirely).
@@ -7649,6 +7719,11 @@ function savePkg(){
   if(!name){toast('Enter a package name');return;}
   if(!price){toast('Enter a price');return;}
   var includes = (document.getElementById('pkg-includes').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var activities = (document.getElementById('pkg-activities').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var addOns = (document.getElementById('pkg-addons').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean).map(function(line){
+    var parts = line.split('|').map(function(s){return s.trim();});
+    return { name: parts[0]||'', price: +(parts[1]||0), unit: parts[2]||'' };
+  }).filter(function(a){return a.name;});
   var visSpecific = document.querySelector('input[name="pkg-vis"]:checked').value === 'specific';
   var visibleToAgencies = visSpecific ? _pkgChecklistSelected() : 'all';
   var pkg = {
@@ -7658,7 +7733,10 @@ function savePkg(){
     description: (document.getElementById('pkg-desc').value||'').trim(),
     pricePerRoom: price,
     nights: +(document.getElementById('pkg-nights').value||1),
+    badge: (document.getElementById('pkg-badge').value||'').trim(),
     includes: includes,
+    activities: activities,
+    addOns: addOns,
     color: '#00b4d8',
     active: true,
     visibleToAgencies: visibleToAgencies,

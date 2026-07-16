@@ -255,6 +255,39 @@ section{position:relative}
 .g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,.75) 0%,transparent 60%);opacity:0;transition:opacity .35s;display:flex;align-items:flex-end;padding:20px}
 .g-label{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;color:var(--white)}
 
+/* ── HOLIDAY PACKAGES ── */
+#holiday-packages{background:var(--depth-scrim);padding:100px 0;position:relative}
+#holiday-packages .section-tag{color:var(--teal)}
+.hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.hp-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:28px;display:flex;flex-direction:column;position:relative}
+.hp-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal);color:var(--white);font-size:var(--font-size-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:14px;align-self:flex-start}
+.hp-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:8px}
+.hp-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.hp-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--teal-light)}
+.hp-price-sub{font-size:var(--font-size-sm);color:var(--muted)}
+.hp-rate{font-size:var(--font-size-sm);color:var(--muted);margin-bottom:6px}
+.hp-savings{display:inline-block;font-size:var(--font-size-xs);font-weight:600;color:#059669;background:rgba(5,150,105,.15);padding:3px 10px;border-radius:20px;margin-bottom:14px;align-self:flex-start}
+.hp-hook{font-size:var(--font-size-base);color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:18px}
+.hp-details{border-top:1px solid rgba(255,255,255,.08)}
+.hp-details summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-light)}
+.hp-details summary::-webkit-details-marker{display:none}
+.hp-details summary .hp-chevron{transition:transform .25s}
+.hp-details[open] summary .hp-chevron{transform:rotate(180deg)}
+.hp-detail-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-sm);color:rgba(255,255,255,.65);padding:4px 0}
+.hp-detail-line i{color:var(--gold-light);flex-shrink:0;margin-top:2px}
+.hp-upgrade{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:var(--gold-light);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px 12px;margin:14px 0;line-height:1.5}
+.hp-actions{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:10px}
+.hp-enquire-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:13px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.hp-enquire-btn:hover{background:var(--teal-light);color:var(--navy)}
+.hp-whatsapp-link{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);text-decoration:none;font-size:var(--font-size-sm);transition:color .2s}
+.hp-whatsapp-link:hover{color:var(--gold-light)}
+@keyframes hpPulse{0%,100%{box-shadow:0 20px 60px rgba(0,4,10,.35)}50%{box-shadow:0 0 0 4px var(--gold-light),0 20px 60px rgba(0,4,10,.35)}}
+.hp-card.hp-pulse{animation:hpPulse 1.4s ease}
+@media(max-width:900px){
+  .hp-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px;margin:48px -5vw 0;padding:0 5vw 8px;-webkit-overflow-scrolling:touch}
+  .hp-card{flex:0 0 82%;min-width:260px;scroll-snap-align:start}
+}
+
 /* ── BOOKING SECTION ── */
 #booking{background:var(--depth-scrim);padding:100px 0;position:relative}
 #booking::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 45% at 20% 0%,rgba(34,211,238,.12),transparent 60%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(34,211,238,.08),transparent 60%)}
@@ -717,6 +750,20 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   </div>
 </section>
 
+<!-- ══ HOLIDAY PACKAGES ══ -->
+<section id="holiday-packages">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Holiday Packages</div>
+      <h2 class="section-title" style="color:var(--text)">Curated <em style="font-style:italic;color:var(--gold-light)">island escapes</em></h2>
+      <p class="gh-sub" style="margin-top:16px">All-inclusive packages built around our best reef and ocean experiences — pick the length that fits your trip.</p>
+    </div>
+    <div class="hp-grid reveal" id="hp-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Loading packages…</div>
+    </div>
+  </div>
+</section>
+
 <!-- ══ BOOKING SECTION ══ -->
 <section id="booking">
   <div class="section-inner">
@@ -810,13 +857,14 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
         <div class="cf-title">Send us a message</div>
         <div class="cf-fields">
           <div class="cf-row">
-            <div class="cf-field"><label>Your Name</label><input type="text" placeholder="Full name"></div>
-            <div class="cf-field"><label>Email</label><input type="email" placeholder="your@email.com"></div>
+            <div class="cf-field"><label>Your Name</label><input type="text" id="cf-name" placeholder="Full name"></div>
+            <div class="cf-field"><label>Email</label><input type="email" id="cf-email" placeholder="your@email.com"></div>
           </div>
           <div class="cf-field"><label>Subject</label>
-            <select><option>Room Enquiry</option><option>Booking Question</option><option>Activities</option><option>Group Booking</option><option>Other</option></select>
+            <select id="cf-subject"><option>Room Enquiry</option><option>Booking Question</option><option>Activities</option><option>Group Booking</option><option>Other</option></select>
           </div>
-          <div class="cf-field"><label>Message</label><textarea placeholder="Tell us about your travel plans..."></textarea></div>
+          <div class="cf-field" id="cf-package-wrap" style="display:none"><label>Package</label><input type="text" id="cf-package" placeholder="" readonly></div>
+          <div class="cf-field"><label>Message</label><textarea id="cf-message" placeholder="Tell us about your travel plans..."></textarea></div>
           <button class="cf-btn" onclick="sendContactForm()">Send Message →</button>
         </div>
       </div>
@@ -1995,13 +2043,222 @@ async function confirmGuestBooking(){
 
 // ── CONTACT FORM ──
 function sendContactForm(){
-  var name = document.querySelector('.cf-field input[type=text]').value;
-  var email = document.querySelector('.cf-field input[type=email]').value;
-  var msg = document.querySelector('.cf-field textarea').value;
+  var name = document.getElementById('cf-name').value;
+  var email = document.getElementById('cf-email').value;
+  var pkg = document.getElementById('cf-package').value;
+  var msg = document.getElementById('cf-message').value;
   if(!name||!email||!msg){alert('Please fill in all fields');return;}
-  var body = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\n\nMessage:\n'+msg);
+  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+'\n\nMessage:\n'+msg;
+  var body = encodeURIComponent(bodyText);
   window.location.href = 'mailto:Viluresidence@gmail.com?subject=Enquiry%20from%20'+encodeURIComponent(name)+'&body='+body;
 }
+
+// Pre-fills the contact form's Package field from a holiday package card's
+// Enquire button and scrolls the guest straight to the message field.
+function enquireAboutPackage(pkgName){
+  var wrap = document.getElementById('cf-package-wrap');
+  var input = document.getElementById('cf-package');
+  if(wrap && input){ wrap.style.display = ''; input.value = pkgName; }
+  var msgField = document.getElementById('cf-message');
+  if(msgField && !msgField.value) msgField.value = "Hi! I'm interested in the "+pkgName+" package.";
+  var contactSection = document.getElementById('contact');
+  if(contactSection) contactSection.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ══════════════════════════════════════════════════════
+// ANALYTICS STUB — no provider wired up yet. Fires a CustomEvent (so a
+// future GA4/Meta Pixel snippet can just add one listener) and logs to
+// console. Swap the body of this function when a real provider is added.
+// ══════════════════════════════════════════════════════
+function trackEvent(name, data){
+  try {
+    document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
+    console.log('[track]', name, data||{});
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════
+// HOLIDAY PACKAGES — live from Firestore `packages` collection. Only
+// packages with a populated `activities` list are shown here (that's what
+// distinguishes a curated holiday package from any other package doc),
+// so this section never needs its own separate content store.
+// ══════════════════════════════════════════════════════
+var _hpSeenCards = (function(){
+  try { return new Set(JSON.parse(sessionStorage.getItem('hp_seen_cards')||'[]')); } catch(e) { return new Set(); }
+})();
+function _hpMarkSeen(id){
+  _hpSeenCards.add(id);
+  try { sessionStorage.setItem('hp_seen_cards', JSON.stringify(Array.from(_hpSeenCards))); } catch(e) {}
+}
+
+function hpSlug(name){
+  return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+}
+
+var HP_ICON_RULES = [
+  [/transfer|speedboat|boat/i, 'ti-anchor'],
+  [/accommodation|room|suite|night/i, 'ti-bed'],
+  [/breakfast|board|meal|dinner|lunch/i, 'ti-coffee'],
+  [/snorkel|shark|manta|turtle|reef/i, 'ti-fish'],
+  [/sunset|cruise|dolphin/i, 'ti-sunset-2'],
+  [/photo/i, 'ti-camera'],
+  [/picnic|sandbank/i, 'ti-umbrella']
+];
+function hpIconFor(text){
+  for (var i=0; i<HP_ICON_RULES.length; i++){
+    if (HP_ICON_RULES[i][0].test(text)) return HP_ICON_RULES[i][1];
+  }
+  return 'ti-circle-check';
+}
+
+function hpDetailLines(items, formatter){
+  return (items||[]).map(function(item){
+    var label = formatter ? formatter(item) : item;
+    return '<div class="hp-detail-line"><i class="ti '+hpIconFor(label)+'" aria-hidden="true"></i><span>'+label+'</span></div>';
+  }).join('');
+}
+
+async function loadHolidayPackages(){
+  var grid = document.getElementById('hp-grid');
+  if(!grid || typeof fsDb === 'undefined') return;
+  try {
+    var qs = await fsDb.collection('packages').where('active','==',true).get();
+    var pkgs = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
+      .filter(function(p){ return p.activities && p.activities.length; })
+      .sort(function(a,b){ return a.nights - b.nights; });
+    if(!pkgs.length){ document.getElementById('holiday-packages').style.display = 'none'; return; }
+    renderHolidayPackages(pkgs);
+  } catch(e) {
+    console.error('loadHolidayPackages failed', e);
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Packages are temporarily unavailable — please <a href="#contact" style="color:var(--gold-light)">contact us</a> directly.</div>';
+  }
+}
+
+function renderHolidayPackages(pkgs){
+  var grid = document.getElementById('hp-grid');
+  var baselineNights = pkgs[0].nights;
+  var baselineRate = pkgs[0].pricePerRoom / pkgs[0].nights;
+
+  grid.innerHTML = pkgs.map(function(p, i){
+    var rate = p.pricePerRoom / p.nights;
+    var savingsPct = i>0 ? Math.round((1 - rate/baselineRate) * 100) : 0;
+    var prev = i>0 ? pkgs[i-1] : null;
+    var upgradeAdded = prev ? (p.activities||[]).filter(function(a){ return (prev.activities||[]).indexOf(a) === -1; }) : [];
+    var slug = hpSlug(p.name);
+    var safeName = (p.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+
+    var includesHtml = hpDetailLines(p.includes);
+    var activitiesHtml = hpDetailLines(p.activities);
+    var addOnsHtml = hpDetailLines(p.addOns, function(a){ return a.name+' — $'+a.price+a.unit; });
+
+    return '<div class="hp-card" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
+      + (p.badge ? '<div class="hp-badge"><i class="ti ti-star" aria-hidden="true"></i>'+p.badge+'</div>' : '')
+      + '<div class="hp-name">'+p.name+'</div>'
+      + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">pp &middot; '+p.nights+' night'+(p.nights>1?'s':'')+'</span></div>'
+      + '<div class="hp-rate">$'+rate.toFixed(0)+'/night per person</div>'
+      + (savingsPct>0 ? '<div class="hp-savings">Save '+savingsPct+'% per night vs '+baselineNights+'-night rate</div>' : '')
+      + '<p class="hp-hook">'+(p.description||'')+'</p>'
+      + (upgradeAdded.length ? '<div class="hp-upgrade"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i><span>Adds '+upgradeAdded.join(' &amp; ')+' — our most complete stay yet.</span></div>' : '')
+      + '<details class="hp-details" ontoggle="if(this.open) hpTrackExpand(\''+p.id+'\',\''+safeName+'\')">'
+        + '<summary>Includes <i class="ti ti-chevron-down hp-chevron" aria-hidden="true"></i></summary>'
+        + '<div>'+includesHtml+'</div>'
+      + '</details>'
+      + '<details class="hp-details" ontoggle="if(this.open) hpTrackExpand(\''+p.id+'\',\''+safeName+'\')">'
+        + '<summary>Activities <i class="ti ti-chevron-down hp-chevron" aria-hidden="true"></i></summary>'
+        + '<div>'+activitiesHtml+'</div>'
+      + '</details>'
+      + '<details class="hp-details" ontoggle="if(this.open) hpTrackExpand(\''+p.id+'\',\''+safeName+'\')">'
+        + '<summary>Optional Add-Ons <i class="ti ti-chevron-down hp-chevron" aria-hidden="true"></i></summary>'
+        + '<div>'+addOnsHtml+'</div>'
+      + '</details>'
+      + '<div class="hp-actions">'
+        + '<button class="hp-enquire-btn" onclick="hpEnquire(\''+p.id+'\',\''+safeName+'\')">Enquire About This Package</button>'
+        + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire_click\',{package:\''+p.id+'\',channel:\'whatsapp\'})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Ask on WhatsApp</a>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  loadHpTerms();
+
+  var hpViewObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.dataset.pkgId;
+        if(!_hpSeenCards.has(id)){
+          _hpMarkSeen(id);
+          trackEvent('package_card_view', {package: id, name: entry.target.dataset.pkgName});
+        }
+      }
+    });
+  }, {threshold:0.5});
+  document.querySelectorAll('#hp-grid .hp-card').forEach(function(card){ hpViewObserver.observe(card); });
+
+  injectHolidayPackagesJsonLd(pkgs);
+  handleHolidayPackageDeepLink();
+}
+
+function hpTrackExpand(id, name){
+  trackEvent('package_expand_details', {package: id, name: name});
+}
+
+function hpEnquire(id, name){
+  trackEvent('package_enquire_click', {package: id, channel: 'contact_form'});
+  enquireAboutPackage(name);
+}
+
+async function loadHpTerms(){
+  try {
+    var snap = await fsDb.collection('website_content').doc('packages_terms').get();
+    var terms = (snap.exists && snap.data().terms) || [];
+    if(!terms.length) return;
+    var grid = document.getElementById('hp-grid');
+    if(!grid || document.getElementById('hp-terms')) return;
+    var el = document.createElement('div');
+    el.id = 'hp-terms';
+    el.style.cssText = 'grid-column:1/-1;font-size:var(--font-size-xs);color:var(--muted);text-align:center;margin-top:8px;line-height:1.7';
+    el.textContent = terms.join(' · ');
+    grid.parentNode.appendChild(el);
+  } catch(e) { console.error('loadHpTerms failed', e); }
+}
+
+function injectHolidayPackagesJsonLd(pkgs){
+  var existing = document.getElementById('hp-jsonld');
+  if(existing) existing.remove();
+  var data = pkgs.map(function(p){
+    return {
+      "@context":"https://schema.org",
+      "@type":"Product",
+      "name": p.name,
+      "description": p.description||'',
+      "offers": {
+        "@type":"Offer",
+        "price": p.pricePerRoom,
+        "priceCurrency":"USD",
+        "availability":"https://schema.org/InStock",
+        "url": location.origin + location.pathname + '#package-' + hpSlug(p.name)
+      }
+    };
+  });
+  var script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'hp-jsonld';
+  script.textContent = JSON.stringify(data);
+  document.head.appendChild(script);
+}
+
+function handleHolidayPackageDeepLink(){
+  if(!location.hash || location.hash.indexOf('#package-') !== 0) return;
+  var el = document.querySelector(location.hash);
+  if(!el) return;
+  setTimeout(function(){
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.classList.add('visible');
+    el.classList.add('hp-pulse');
+    setTimeout(function(){ el.classList.remove('hp-pulse'); }, 1600);
+  }, 400);
+}
+
+document.addEventListener('DOMContentLoaded', loadHolidayPackages);
 
 // ── KEYBOARD ESC ──
 document.addEventListener('keydown',function(e){
