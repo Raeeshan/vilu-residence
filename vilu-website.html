@@ -138,6 +138,14 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .nav-links a:hover{color:var(--gold-light);text-shadow:0 0 12px var(--glow)}
 .nav-book{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 24px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .nav-book:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(34,211,238,.4)}
+.nav-clock{display:flex;align-items:center;gap:8px}
+.nav-clock i{font-size:17px;color:var(--gold-light)}
+.nav-clock-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-clock-label{font-size:var(--font-size-xs);font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+.nav-clock-time{font-size:var(--font-size-base);font-weight:500;color:var(--white);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.nav-mobile-right{display:none;align-items:center;gap:14px}
+.nav-clock-compact{display:none;align-items:center;gap:4px;font-size:var(--font-size-xs);color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
+.nav-clock-compact i{font-size:13px;color:var(--gold-light)}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
 .nav-hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:all .3s}
 .mobile-menu{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(10,22,40,.98);backdrop-filter:blur(20px);padding:24px 5vw;flex-direction:column;gap:0;z-index:999;border-bottom:1px solid rgba(34,211,238,.22)}
@@ -414,6 +422,9 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   .nav-links,.nav-book{display:none}
+  .nav-clock{display:none}
+  .nav-mobile-right{display:flex}
+  .nav-clock-compact{display:flex}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
   /* Badge/title/subtitle/actions overlay the photo (matching desktop).
@@ -440,6 +451,14 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
   .footer-top{grid-template-columns:1fr}
   .cf-row,.bwf-row{grid-template-columns:1fr}
   .rooms-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  /* Measured at 394px: logo (203px) + clock+hamburger group (100px) + nav
+     padding (32px) leaves only ~58px slack, projecting overlap around
+     ~336px viewport width. Hide the compact clock with a safety margin
+     above that point rather than cutting it exactly at the collision
+     threshold. */
+  .nav-clock-compact{display:none}
 }
 </style>
 </head>
@@ -472,9 +491,19 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
     <li><a href="#getting-here">Getting Here</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
+  <div class="nav-clock" aria-hidden="true">
+    <i class="ti ti-clock" aria-hidden="true"></i>
+    <div class="nav-clock-text">
+      <span class="nav-clock-label">Maldives Time</span>
+      <span class="nav-clock-time" id="navClockTime">--:--:--</span>
+    </div>
+  </div>
   <button class="nav-book" onclick="openBookingPopup()">Book Now</button>
-  <div class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburger">
-    <span></span><span></span><span></span>
+  <div class="nav-mobile-right">
+    <div class="nav-clock-compact" aria-hidden="true"><i class="ti ti-clock" aria-hidden="true"></i><span id="navClockTimeCompact">--:--</span></div>
+    <div class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 </nav>
 
@@ -1483,6 +1512,22 @@ document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);}
     var el = document.getElementById(id);
     if(el){el.value = fmt(tomorrow); el.min = fmt(tomorrow);}
   });
+})();
+
+// ── NAV MALDIVES CLOCK ──
+(function(){
+  var timeEl = document.getElementById('navClockTime');
+  var timeElCompact = document.getElementById('navClockTimeCompact');
+  if(!timeEl && !timeElCompact) return;
+  var fullFmt = new Intl.DateTimeFormat('en-GB', {timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+  var compactFmt = new Intl.DateTimeFormat('en-GB', {timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', hour12:false});
+  function tick(){
+    var now = new Date();
+    if(timeEl) timeEl.textContent = fullFmt.format(now);
+    if(timeElCompact) timeElCompact.textContent = compactFmt.format(now);
+  }
+  tick();
+  setInterval(tick, 1000);
 })();
 
 // ── AVAILABILITY CALENDAR WIDGET ──
