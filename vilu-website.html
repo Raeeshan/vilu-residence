@@ -1519,8 +1519,8 @@ document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);}
   var timeEl = document.getElementById('navClockTime');
   var timeElCompact = document.getElementById('navClockTimeCompact');
   if(!timeEl && !timeElCompact) return;
-  var fullFmt = new Intl.DateTimeFormat('en-GB', {timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
-  var compactFmt = new Intl.DateTimeFormat('en-GB', {timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', hour12:false});
+  var fullFmt = new Intl.DateTimeFormat('en-US', {timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
+  var compactFmt = new Intl.DateTimeFormat('en-US', {timeZone:'Indian/Maldives', hour:'numeric', minute:'2-digit', hour12:true});
   function tick(){
     var now = new Date();
     if(timeEl) timeEl.textContent = fullFmt.format(now);
