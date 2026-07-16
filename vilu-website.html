@@ -257,6 +257,7 @@ section{position:relative}
 
 /* ── HOLIDAY PACKAGES ── */
 #holiday-packages{background:var(--depth-scrim);padding:100px 0;position:relative}
+#holiday-packages::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 40% at 88% 0%,rgba(34,211,238,.1),transparent 60%),radial-gradient(ellipse 50% 40% at 10% 100%,rgba(34,211,238,.07),transparent 60%)}
 #holiday-packages .section-tag{color:var(--teal)}
 .hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:52px;align-items:start}
 .hp-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:32px;display:flex;flex-direction:column;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,border-color .35s}
@@ -335,7 +336,10 @@ section{position:relative}
 .vilu-cal-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
 /* ── CONTACT ── */
-#getting-here{background:var(--depth-scrim)}
+#getting-here{background:var(--depth-scrim);position:relative}
+#getting-here::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 40% at 85% 0%,rgba(34,211,238,.1),transparent 60%),radial-gradient(ellipse 50% 40% at 15% 100%,rgba(34,211,238,.07),transparent 60%)}
+#reviews{background:var(--depth-scrim);padding:100px 0;position:relative}
+#reviews::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 40% at 12% 20%,rgba(34,211,238,.09),transparent 60%)}
 #contact{background:var(--depth-scrim);color:var(--text);padding:100px 0;position:relative}
 #contact::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 55% 40% at 90% 0%,rgba(34,211,238,.08),transparent 60%)}
 #contact .section-tag{color:var(--teal)}
@@ -825,7 +829,7 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
 </section>
 
 <!-- ══ REVIEWS ══ -->
-<section id="reviews" style="background:var(--depth-scrim);padding:100px 0;position:relative">
+<section id="reviews">
   <div class="section-inner" style="text-align:center">
     <div class="reveal" style="max-width:560px;margin:0 auto">
       <div class="section-tag">What Guests Say</div>
