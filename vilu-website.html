@@ -307,6 +307,9 @@ section{position:relative}
 #contact::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 55% 40% at 90% 0%,rgba(34,211,238,.08),transparent 60%)}
 #contact .section-tag{color:var(--teal)}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:60px}
+.map-embed{width:100%;aspect-ratio:16/7;border-radius:10px;overflow:hidden;border:1px solid var(--card-border);box-shadow:0 20px 60px rgba(0,4,10,.35);margin-top:48px}
+.map-embed iframe{width:100%;height:100%;border:0;display:block}
+@media(max-width:800px){.map-embed{aspect-ratio:4/3}}
 .contact-info h3{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:400;margin-bottom:24px;color:var(--text)}
 .contact-details{display:flex;flex-direction:column;gap:20px}
 .cd-item{display:flex;gap:16px;align-items:flex-start}
@@ -817,6 +820,9 @@ footer::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:non
           <button class="cf-btn" onclick="sendContactForm()">Send Message →</button>
         </div>
       </div>
+    </div>
+    <div class="map-embed reveal">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d3982.4784863481955!2d72.83426557497258!3d3.4759281464984784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e6!4m3!3m2!1d3.473408!2d72.8375756!4m5!1s0x3b472f578e808eb1%3A0x77b12ee05368e158!2sVilu%20Residence%20-%20Best%20Guesthouse%20in%20Maamigili%20Island%2C%20Rahdhebai%20mahu%20A.dh%20maamigili%2C%2000100!3m2!1d3.4784482999999997!2d72.836158!5e0!3m2!1sen!2smv!4v1784201127651!5m2!1sen!2smv" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="Vilu Residence location on Google Maps"></iframe>
     </div>
   </div>
 </section>
