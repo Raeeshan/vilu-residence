@@ -1572,6 +1572,21 @@ All taxes included"></textarea></div>
     <button class="btn p" onclick="savePkgTerms()"><i class="ti ti-device-floppy"></i>Save terms</button>
     <span id="pkg-terms-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
   </div>
+  <div class="card" style="margin-bottom:14px">
+    <h3><i class="ti ti-info-circle" style="margin-right:6px"></i>Trip notes ("Good to Know" — collapsed by default on each package card)</h3>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">General notes show on every package. Activity-specific notes only show on a package if that exact activity appears in its Activities list — no need to pick which packages get which note, it's worked out automatically from each package's own Activities.</p>
+    <div class="fg">
+      <label>General notes (one per line, shown on every package)</label>
+      <textarea id="pkg-notes-general" rows="5" placeholder="Please time your international flight with our speedboat transfer schedule in mind..."></textarea>
+    </div>
+    <div class="fg">
+      <label>Activity-specific notes (one per line: Activity Name | Note text)</label>
+      <textarea id="pkg-notes-activity" rows="5" placeholder="Sandbank Trip | Lunch is included during the Sandbank Trip.
+Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely time to spot dolphins."></textarea>
+    </div>
+    <button class="btn p" onclick="savePkgTripNotes()"><i class="ti ti-device-floppy"></i>Save trip notes</button>
+    <span id="pkg-notes-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+  </div>
   <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
 </div>
 
@@ -7587,6 +7602,7 @@ var _editPkgId = null;
 
 async function drawPkgs(){
   loadPkgTerms();
+  loadPkgTripNotes();
   var el = document.getElementById('pkg-list');
   if(!el) return;
   // Firestore is authoritative (it's what the website and agency portal
@@ -7667,6 +7683,41 @@ async function savePkgTerms(){
     toast('✓ Package terms saved');
   } catch(e) {
     console.error('savePkgTerms failed', e);
+    if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
+    toast('⚠️ Could not save — please try again');
+  }
+}
+
+async function loadPkgTripNotes(){
+  var genEl = document.getElementById('pkg-notes-general');
+  if(!genEl) return;
+  try {
+    var snap = await fsDb.collection('website_content').doc('packages_trip_notes').get();
+    var data = (snap.exists && snap.data()) || {};
+    genEl.value = (data.general||[]).join('\n');
+    document.getElementById('pkg-notes-activity').value = (data.activityNotes||[]).map(function(a){return a.activity+' | '+a.note;}).join('\n');
+  } catch(e) {
+    console.error('loadPkgTripNotes failed', e);
+  }
+}
+
+async function savePkgTripNotes(){
+  var general = (document.getElementById('pkg-notes-general').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var activityNotes = (document.getElementById('pkg-notes-activity').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean).map(function(line){
+    var idx = line.indexOf('|');
+    if(idx<0) return null;
+    var activity = line.slice(0,idx).trim();
+    var note = line.slice(idx+1).trim();
+    return activity && note ? { activity: activity, note: note } : null;
+  }).filter(Boolean);
+  var statusEl = document.getElementById('pkg-notes-status');
+  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
+  try {
+    await fsDb.collection('website_content').doc('packages_trip_notes').set({ general: general, activityNotes: activityNotes }, { merge: true });
+    if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
+    toast('✓ Trip notes saved');
+  } catch(e) {
+    console.error('savePkgTripNotes failed', e);
     if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
     toast('⚠️ Could not save — please try again');
   }

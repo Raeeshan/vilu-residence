@@ -290,6 +290,15 @@ section{position:relative}
   .hp-list-2col{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));column-gap:14px}
 }
 .hp-upgrade{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:var(--gold-light);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px 12px;margin:20px 0 0;line-height:1.5}
+.hp-notes{border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-top:10px}
+.hp-notes summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-size:var(--font-size-xs);font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.hp-notes summary::-webkit-details-marker{display:none}
+.hp-notes summary:hover{color:var(--teal-light)}
+.hp-notes-chevron{transition:transform .25s}
+.hp-notes[open] summary .hp-notes-chevron{transform:rotate(180deg)}
+.hp-notes-body{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.hp-notes-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:rgba(255,255,255,.55);padding:3px 0;line-height:1.5}
+.hp-notes-line i{color:var(--muted);flex-shrink:0;margin-top:2px;font-size:var(--font-size-sm)}
 .hp-actions{margin-top:auto;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:10px}
 .hp-enquire-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:14px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .hp-enquire-btn:hover{background:var(--teal-light);color:var(--navy);box-shadow:0 10px 26px rgba(34,211,238,.3)}
@@ -2141,7 +2150,13 @@ async function loadHolidayPackages(){
   var grid = document.getElementById('hp-grid');
   if(!grid || typeof fsDb === 'undefined') return;
   try {
-    var qs = await fsDb.collection('packages').where('active','==',true).get();
+    var results = await Promise.all([
+      fsDb.collection('packages').where('active','==',true).get(),
+      fsDb.collection('website_content').doc('packages_trip_notes').get().catch(function(){ return null; })
+    ]);
+    var qs = results[0];
+    var notesSnap = results[1];
+    var notesData = (notesSnap && notesSnap.exists) ? notesSnap.data() : {};
     var pkgs = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
       .filter(function(p){ return p.activities && p.activities.length; })
       .sort(function(a,b){
@@ -2154,14 +2169,22 @@ async function loadHolidayPackages(){
         return a.nights - b.nights;
       });
     if(!pkgs.length){ document.getElementById('holiday-packages').style.display = 'none'; return; }
-    renderHolidayPackages(pkgs);
+    renderHolidayPackages(pkgs, notesData);
   } catch(e) {
     console.error('loadHolidayPackages failed', e);
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Packages are temporarily unavailable — please <a href="#contact" style="color:var(--gold-light)">contact us</a> directly.</div>';
   }
 }
 
-function renderHolidayPackages(pkgs){
+function hpNotesFor(p, notesData){
+  var general = (notesData && notesData.general) || [];
+  var activityNotes = (notesData && notesData.activityNotes) || [];
+  var pkgActivities = p.activities || [];
+  var matched = activityNotes.filter(function(an){ return pkgActivities.indexOf(an.activity) > -1; }).map(function(an){ return an.note; });
+  return general.concat(matched);
+}
+
+function renderHolidayPackages(pkgs, notesData){
   var grid = document.getElementById('hp-grid');
   var baselineNights = pkgs[0].nights;
   var baselineRate = pkgs[0].pricePerRoom / pkgs[0].nights;
@@ -2179,6 +2202,8 @@ function renderHolidayPackages(pkgs){
     var includesHtml = hpDetailLines(p.includes);
     var activitiesHtml = hpDetailLines(p.activities);
     var addOnsHtml = hpDetailLines(p.addOns, function(a){ return a.name+' — $'+a.price+a.unit; });
+    var notesLines = hpNotesFor(p, notesData);
+    var notesHtml = notesLines.map(function(n){ return '<div class="hp-notes-line"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'+n+'</span></div>'; }).join('');
 
     var isOrphan = (i === pkgs.length-1) && (pkgs.length % 3 === 1);
     var rateRowExtra = !isLadder
@@ -2194,6 +2219,10 @@ function renderHolidayPackages(pkgs){
       + '<div class="hp-section"><div class="hp-section-label">Includes</div><div class="hp-list">'+includesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">Activities</div><div class="hp-list hp-list-2col">'+activitiesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">Optional Add-Ons</div><div class="hp-list">'+addOnsHtml+'</div></div>'
+      + (notesLines.length ? '<details class="hp-notes" ontoggle="if(this.open) trackEvent(\'package_expand_details\',{package:\''+p.id+'\',name:\''+safeName+'\'})">'
+          + '<summary>Good to Know <i class="ti ti-chevron-down hp-notes-chevron" aria-hidden="true"></i></summary>'
+          + '<div class="hp-notes-body">'+notesHtml+'</div>'
+        + '</details>' : '')
       + '<div class="hp-actions">'
         + '<button class="hp-enquire-btn" onclick="hpEnquire(\''+p.id+'\',\''+safeName+'\')">Enquire About This Package</button>'
         + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire_click\',{package:\''+p.id+'\',channel:\'whatsapp\'})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Ask on WhatsApp</a>'
