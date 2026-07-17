@@ -28,6 +28,8 @@
   --card: #0f2d52;
   --card-border: rgba(34,211,238,.15);
   --depth-scrim: rgba(4,12,24,.25);
+  --rose: #d88fa8;
+  --rose-light: #f0c3d4;
   --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-base: 13px;
@@ -269,12 +271,15 @@ section{position:relative}
 .hp-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(0,4,10,.5);border-color:rgba(34,211,238,.35)}
 .hp-card.hp-featured{border-color:rgba(34,211,238,.4)}
 .hp-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));color:var(--navy);font-size:var(--font-size-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:18px;align-self:flex-start;box-shadow:0 6px 16px rgba(34,211,238,.25)}
+.hp-badge-rose{background:linear-gradient(135deg,var(--rose),var(--rose-light) 55%,var(--rose));color:#4a1f30;box-shadow:0 6px 16px rgba(216,143,168,.3)}
+.hp-card.hp-featured.hp-featured-rose{border-color:rgba(216,143,168,.4)}
 .hp-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.2}
 .hp-price-row{display:flex;align-items:baseline;gap:9px}
 .hp-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:600;color:var(--teal-light);line-height:1}
 .hp-price-sub{font-size:var(--font-size-sm);color:var(--muted)}
 .hp-rate-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0 20px;font-size:var(--font-size-sm);color:var(--muted)}
 .hp-savings{display:inline-block;font-size:var(--font-size-xs);font-weight:700;letter-spacing:.02em;color:#34d399;background:rgba(5,150,105,.15);padding:3px 10px;border-radius:20px}
+.hp-specialty-tag{display:inline-block;font-size:var(--font-size-xs);font-weight:700;letter-spacing:.02em;color:var(--rose-light);background:rgba(216,143,168,.15);padding:3px 10px;border-radius:20px}
 .hp-hook{font-size:var(--font-size-base);color:rgba(255,255,255,.8);line-height:1.65;margin-bottom:26px;padding-left:14px;border-left:2px solid var(--teal);font-style:italic}
 .hp-section{border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-top:10px}
 .hp-section-label{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-light);margin-bottom:6px}
@@ -2139,7 +2144,15 @@ async function loadHolidayPackages(){
     var qs = await fsDb.collection('packages').where('active','==',true).get();
     var pkgs = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
       .filter(function(p){ return p.activities && p.activities.length; })
-      .sort(function(a,b){ return a.nights - b.nights; });
+      .sort(function(a,b){
+        // Specialty/ladder-excluded packages (e.g. honeymoon tiers) always
+        // sort after the regular value-ladder packages, regardless of
+        // nights, so they read as a distinct tier rather than competing
+        // on position with the progression.
+        var aEx = a.excludeFromLadder ? 1 : 0, bEx = b.excludeFromLadder ? 1 : 0;
+        if (aEx !== bEx) return aEx - bEx;
+        return a.nights - b.nights;
+      });
     if(!pkgs.length){ document.getElementById('holiday-packages').style.display = 'none'; return; }
     renderHolidayPackages(pkgs);
   } catch(e) {
@@ -2154,23 +2167,28 @@ function renderHolidayPackages(pkgs){
   var baselineRate = pkgs[0].pricePerRoom / pkgs[0].nights;
 
   grid.innerHTML = pkgs.map(function(p, i){
+    var isLadder = !p.excludeFromLadder;
     var rate = p.pricePerRoom / p.nights;
-    var savingsPct = i>0 ? Math.round((1 - rate/baselineRate) * 100) : 0;
-    var prev = i>0 ? pkgs[i-1] : null;
+    var savingsPct = (isLadder && i>0) ? Math.round((1 - rate/baselineRate) * 100) : 0;
+    var prev = (isLadder && i>0) ? pkgs[i-1] : null;
     var upgradeAdded = prev ? (p.activities||[]).filter(function(a){ return (prev.activities||[]).indexOf(a) === -1; }) : [];
     var slug = hpSlug(p.name);
     var safeName = (p.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    var isRose = p.badgeStyle === 'rose';
 
     var includesHtml = hpDetailLines(p.includes);
     var activitiesHtml = hpDetailLines(p.activities);
     var addOnsHtml = hpDetailLines(p.addOns, function(a){ return a.name+' — $'+a.price+a.unit; });
 
     var isOrphan = (i === pkgs.length-1) && (pkgs.length % 3 === 1);
-    return '<div class="hp-card'+(p.badge?' hp-featured':'')+(isOrphan?' hp-card-center':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
-      + (p.badge ? '<div class="hp-badge"><i class="ti ti-star" aria-hidden="true"></i>'+p.badge+'</div>' : '')
+    var rateRowExtra = !isLadder
+      ? '<span class="hp-specialty-tag">Exclusively for honeymooners</span>'
+      : (savingsPct>0 ? '<span class="hp-savings">Save '+savingsPct+'% vs '+baselineNights+'-night rate</span>' : '');
+    return '<div class="hp-card'+(p.badge?' hp-featured':'')+(p.badge&&isRose?' hp-featured-rose':'')+(isOrphan?' hp-card-center':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
+      + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'"><i class="ti ti-star" aria-hidden="true"></i>'+p.badge+'</div>' : '')
       + '<div class="hp-name">'+p.name+'</div>'
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">pp &middot; '+p.nights+' night'+(p.nights>1?'s':'')+'</span></div>'
-      + '<div class="hp-rate-row"><span>$'+rate.toFixed(0)+'/night per person</span>'+(savingsPct>0 ? '<span class="hp-savings">Save '+savingsPct+'% vs '+baselineNights+'-night rate</span>' : '')+'</div>'
+      + '<div class="hp-rate-row"><span>$'+rate.toFixed(0)+'/night per person</span>'+rateRowExtra+'</div>'
       + '<p class="hp-hook">'+(p.description||'')+'</p>'
       + (upgradeAdded.length ? '<div class="hp-upgrade"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i><span>Adds '+upgradeAdded.join(' &amp; ')+' — our most complete stay yet.</span></div>' : '')
       + '<div class="hp-section"><div class="hp-section-label">Includes</div><div class="hp-list">'+includesHtml+'</div></div>'

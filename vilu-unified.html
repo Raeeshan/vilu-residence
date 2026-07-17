@@ -2097,7 +2097,21 @@ Suite</textarea></div>
       <div class="fg" style="margin:0"><label>Price per person / night ($) *</label><input type="number" id="pkg-price" min="0" step="5" placeholder="0.00"></div>
       <div class="fg" style="margin:0"><label>Fixed nights *</label><input type="number" id="pkg-nights" min="1" value="3" placeholder="e.g. 3"></div>
     </div>
-    <div class="fg" style="margin:0 0 12px"><label>Badge (optional)</label><input type="text" id="pkg-badge" placeholder="e.g. Most Popular, Best Value — leave blank for none"></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:8px">
+      <div class="fg" style="margin:0"><label>Badge (optional)</label><input type="text" id="pkg-badge" placeholder="e.g. Most Popular, Best Value — leave blank for none"></div>
+      <div class="fg" style="margin:0"><label>Badge color</label>
+        <select id="pkg-badge-style">
+          <option value="gold">Gold</option>
+          <option value="rose">Rose</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin:0 0 12px">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer">
+        <input type="checkbox" id="pkg-exclude-ladder" style="width:auto">
+        Specialty package — exclude from per-night savings % comparison and "what you gain" tier notes, and always sort last
+      </label>
+    </div>
     <div class="fg">
       <label>What's included (one per line)</label>
       <textarea id="pkg-includes" rows="5" placeholder="Accommodation
@@ -7669,6 +7683,8 @@ function openPkgForm(pid){
   document.getElementById('pkg-price').value = pkg ? pkg.pricePerRoom : '';
   document.getElementById('pkg-nights').value = pkg ? pkg.nights : 1;
   document.getElementById('pkg-badge').value = pkg ? (pkg.badge||'') : '';
+  document.getElementById('pkg-badge-style').value = pkg ? (pkg.badgeStyle||'gold') : 'gold';
+  document.getElementById('pkg-exclude-ladder').checked = pkg ? !!pkg.excludeFromLadder : false;
   document.getElementById('pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : 'Accommodation\n2-way speedboat transfer';
   document.getElementById('pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
   document.getElementById('pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
@@ -7734,6 +7750,8 @@ function savePkg(){
     pricePerRoom: price,
     nights: +(document.getElementById('pkg-nights').value||1),
     badge: (document.getElementById('pkg-badge').value||'').trim(),
+    badgeStyle: document.getElementById('pkg-badge-style').value||'gold',
+    excludeFromLadder: document.getElementById('pkg-exclude-ladder').checked,
     includes: includes,
     activities: activities,
     addOns: addOns,
