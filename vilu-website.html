@@ -2165,19 +2165,23 @@ function hpSlug(name){
   return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 }
 
+// Each icon below was fetched as its real Tabler v2.44.0 SVG and visually
+// inspected before being picked (Tabler has no literal shark/manta/turtle/
+// dolphin glyph, so those four are the closest deliberate stand-ins, chosen
+// to look distinct from one another rather than left to a generic fallback).
 var HP_ICON_RULES = [
-  [/shark/i, 'ti-triangle'],
+  [/shark/i, 'ti-fish'],
   [/manta/i, 'ti-diamond'],
-  [/turtle/i, 'ti-shield'],
-  [/dolphin/i, 'ti-wave-sine'],
+  [/turtle/i, 'ti-hexagon'],
+  [/dolphin/i, 'ti-sunrise'],
   [/sunset/i, 'ti-sunset-2'],
-  [/cruise/i, 'ti-sailboat'],
-  [/sandbank/i, 'ti-beach'],
+  [/cruise/i, 'ti-ship'],
+  [/sandbank/i, 'ti-map-pin'],
   [/picnic/i, 'ti-basket'],
   [/fishing/i, 'ti-fish-hook'],
   [/resort/i, 'ti-hotel-service'],
   [/private dinner|dinner.*beach/i, 'ti-tools-kitchen-2'],
-  [/transfer|speedboat|boat/i, 'ti-anchor'],
+  [/transfer|speedboat|boat/i, 'ti-ship'],
   [/breakfast|board|meal|dinner|lunch/i, 'ti-coffee'],
   [/accommodation|room|suite|night/i, 'ti-bed'],
   [/photo/i, 'ti-camera'],
