@@ -2124,13 +2124,22 @@ function hpSlug(name){
 }
 
 var HP_ICON_RULES = [
+  [/shark/i, 'ti-triangle'],
+  [/manta/i, 'ti-diamond'],
+  [/turtle/i, 'ti-shield'],
+  [/dolphin/i, 'ti-wave-sine'],
+  [/sunset/i, 'ti-sunset-2'],
+  [/cruise/i, 'ti-sailboat'],
+  [/sandbank/i, 'ti-beach'],
+  [/picnic/i, 'ti-basket'],
+  [/fishing/i, 'ti-fish-hook'],
+  [/resort/i, 'ti-hotel-service'],
+  [/private dinner|dinner.*beach/i, 'ti-tools-kitchen-2'],
   [/transfer|speedboat|boat/i, 'ti-anchor'],
-  [/accommodation|room|suite|night/i, 'ti-bed'],
   [/breakfast|board|meal|dinner|lunch/i, 'ti-coffee'],
-  [/snorkel|shark|manta|turtle|reef/i, 'ti-fish'],
-  [/sunset|cruise|dolphin/i, 'ti-sunset-2'],
+  [/accommodation|room|suite|night/i, 'ti-bed'],
   [/photo/i, 'ti-camera'],
-  [/picnic|sandbank/i, 'ti-umbrella']
+  [/snorkel|reef/i, 'ti-fish']
 ];
 function hpIconFor(text){
   for (var i=0; i<HP_ICON_RULES.length; i++){
@@ -2215,7 +2224,7 @@ function renderHolidayPackages(pkgs, notesData){
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">pp &middot; '+p.nights+' night'+(p.nights>1?'s':'')+'</span></div>'
       + '<div class="hp-rate-row"><span>$'+rate.toFixed(0)+'/night per person</span>'+rateRowExtra+'</div>'
       + '<p class="hp-hook">'+(p.description||'')+'</p>'
-      + (upgradeAdded.length ? '<div class="hp-upgrade"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i><span>Adds '+upgradeAdded.join(' &amp; ')+' — our most complete stay yet.</span></div>' : '')
+      + (upgradeAdded.length ? '<div class="hp-upgrade"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i><span>Adds '+upgradeAdded.join(' &amp; ')+', our most complete stay yet.</span></div>' : '')
       + '<div class="hp-section"><div class="hp-section-label">Includes</div><div class="hp-list">'+includesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">Activities</div><div class="hp-list hp-list-2col">'+activitiesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">Optional Add-Ons</div><div class="hp-list">'+addOnsHtml+'</div></div>'
