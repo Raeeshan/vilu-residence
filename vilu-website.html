@@ -425,6 +425,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:400;color:var(--white)}
 .footer-brand-sub{font-size:var(--font-size-xs);color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
 .footer-desc{font-size:var(--font-size-base);color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:20px}
+.footer-social{display:flex;gap:12px;margin-top:18px}
+.footer-social a{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.14);border-radius:50%;color:rgba(255,255,255,.6);font-size:17px;transition:all .25s;text-decoration:none}
+.footer-social a:hover{color:var(--navy);background:var(--gold);border-color:var(--gold)}
 .footer-col h4{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
 .footer-col ul a{font-size:var(--font-size-base);color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
@@ -498,6 +501,45 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .gh-general{margin-top:28px;padding:16px 20px;border-left:2px solid var(--gold);background:rgba(34,211,238,.06);font-size:var(--font-size-sm);color:var(--muted);line-height:1.65;border-radius:0 6px 6px 0}
 .gh-general b{color:var(--white);font-weight:500}
 @media(max-width:800px){.gh-grid{grid-template-columns:1fr}}
+
+/* ── TRANSFER TIMING CHECKER ── */
+.tc-tabs{display:inline-flex;border:1px solid rgba(255,255,255,.18);border-radius:2px;overflow:hidden;margin-bottom:32px}
+.tc-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:28px 26px;display:flex;flex-direction:column;gap:24px;max-width:640px}
+.tc-field{display:flex;flex-direction:column;gap:10px}
+.tc-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.tc-inputs{display:flex;gap:10px;flex-wrap:wrap}
+.tc-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;color-scheme:dark}
+.tc-check-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:10px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background-position .3s}
+.tc-check-btn:hover{background-position:100% 0}
+.tc-result{display:none;padding:14px 16px;border-radius:8px;font-size:var(--font-size-sm);line-height:1.6}
+.tc-result.show{display:block}
+.tc-result.ok{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:var(--text)}
+.tc-result.tight{background:rgba(216,143,168,.12);border:1px solid rgba(216,143,168,.4);color:var(--text)}
+.tc-result-status{font-weight:700;letter-spacing:.03em;display:block;margin-bottom:4px}
+.tc-result.ok .tc-result-status{color:var(--teal-light)}
+.tc-result.tight .tc-result-status{color:var(--rose-light)}
+.tc-result a{color:var(--gold-light)}
+.tc-disclaimer{font-size:var(--font-size-xs);color:var(--muted);line-height:1.6}
+@media(max-width:600px){.tc-inputs{flex-direction:column;align-items:stretch}.tc-card{padding:22px 18px}}
+
+/* ── FAQ ── */
+.faq-controls{display:flex;flex-direction:column;gap:16px;margin-bottom:32px}
+.faq-search{position:relative;max-width:420px}
+.faq-search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+.faq-search input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:11px 14px 11px 40px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none}
+.faq-cats{display:flex;gap:8px;flex-wrap:wrap}
+.faq-cat-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
+.faq-cat-btn.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.faq-question{width:100%;text-align:left;background:none;border:none;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;color:var(--white)}
+.faq-question i{color:var(--teal-light);transition:transform .25s;flex-shrink:0}
+.faq-item.open .faq-question i{transform:rotate(180deg)}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-answer-inner{padding:0 20px 20px;color:var(--muted);font-size:var(--font-size-sm);line-height:1.7}
+.faq-cat-pill{display:block;font-size:var(--font-size-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+[dir="rtl"] .faq-question{text-align:right}
+[dir="rtl"] .faq-search i{left:auto;right:14px}
+[dir="rtl"] .faq-search input{padding:11px 40px 11px 14px}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
@@ -931,6 +973,75 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
 </section>
 
+<!-- ══ TRANSFER TIMING CHECKER ══ -->
+<section id="timing-checker">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag" data-i18n="timing.tag">Plan Your Journey</div>
+      <h2 class="section-title"><span data-i18n="timing.titlePrefix">Transfer Timing</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="timing.titleEmphasis">Checker</em></h2>
+      <p class="gh-sub" data-i18n="timing.intro">Not sure if your connection times work? Enter your flight or speedboat time below for an instant check against our recommended buffers.</p>
+    </div>
+    <div class="tc-tabs reveal">
+      <button class="gh-tab on" id="tc-tab-arrival" onclick="tcSwitchTab('arrival')" data-i18n="gettingHere.arrival">Arrival</button>
+      <button class="gh-tab" id="tc-tab-departure" onclick="tcSwitchTab('departure')" data-i18n="gettingHere.departure">Departure</button>
+    </div>
+    <div class="tc-card reveal">
+      <div id="tc-arrival-fields">
+        <div class="tc-field">
+          <div class="tc-label" data-i18n="timing.domesticLabel">Domestic flight departure time (Malé → Maamigili)</div>
+          <div class="tc-inputs">
+            <input type="date" class="tc-input" id="tc-flight-date">
+            <input type="time" class="tc-input" id="tc-flight-time">
+            <button class="tc-check-btn" onclick="tcCheck('flight')" data-i18n="timing.checkBtn">Check</button>
+          </div>
+          <div class="tc-result" id="tc-result-flight"></div>
+        </div>
+        <div class="tc-field">
+          <div class="tc-label" data-i18n="timing.boatLabel">Speedboat departure time (direct from Malé)</div>
+          <div class="tc-inputs">
+            <input type="date" class="tc-input" id="tc-boat-date">
+            <input type="time" class="tc-input" id="tc-boat-time">
+            <button class="tc-check-btn" onclick="tcCheck('boat')" data-i18n="timing.checkBtn">Check</button>
+          </div>
+          <div class="tc-result" id="tc-result-boat"></div>
+        </div>
+      </div>
+      <div id="tc-departure-fields" style="display:none">
+        <div class="tc-field">
+          <div class="tc-label" data-i18n="timing.depLabel">Departure flight check-in time (per your ticket, Maamigili Airport)</div>
+          <div class="tc-inputs">
+            <input type="date" class="tc-input" id="tc-dep-date">
+            <input type="time" class="tc-input" id="tc-dep-time">
+            <button class="tc-check-btn" onclick="tcCheck('dep')" data-i18n="timing.checkBtn">Check</button>
+          </div>
+          <div class="tc-result" id="tc-result-dep"></div>
+        </div>
+      </div>
+      <div class="tc-disclaimer" data-i18n="timing.disclaimer">These are general guidance times based on standard buffers, not a guarantee — always confirm exact details with us directly, especially close to your travel date.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section id="faq">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag" data-i18n="faq.tag">Guest FAQ</div>
+      <h2 class="section-title"><span data-i18n="faq.titlePrefix">Quick</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="faq.titleEmphasis">answers</em></h2>
+      <p class="gh-sub" data-i18n="faq.intro">Search or browse by category — these answers are pulled straight from our live package and travel information.</p>
+    </div>
+    <div class="faq-controls reveal">
+      <div class="faq-search">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" id="faq-search-input" data-i18n-placeholder="faq.searchPlaceholder" placeholder="Search questions…">
+      </div>
+      <div class="faq-cats" id="faq-cats"></div>
+    </div>
+    <div class="faq-list reveal" id="faq-list"></div>
+    <div class="faq-empty" id="faq-empty" style="display:none" data-i18n="faq.noResults">No matching questions — try a different search or category.</div>
+  </div>
+</section>
+
 <!-- ══ REVIEWS ══ -->
 <section id="reviews">
   <div class="section-inner" style="text-align:center">
@@ -995,6 +1106,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         </div>
         <p class="footer-desc" data-i18n="footer.desc">A welcoming guesthouse in the South Ari Atoll offering genuine service and authentic Maldivian experiences.</p>
         <div style="font-size:var(--font-size-sm);color:rgba(255,255,255,.3)">+960 9903339 · Viluresidence@gmail.com</div>
+        <!-- TODO: replace # placeholders with real profile URLs once provided -->
+        <div class="footer-social">
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+        </div>
       </div>
       <div class="footer-col"><h4 data-i18n="footer.navigate">Navigate</h4><ul><li><a href="#home" data-i18n="nav.home">Home</a></li><li><a href="#rooms" data-i18n="nav.rooms">Rooms</a></li><li><a href="#about" data-i18n="about.tag">About Us</a></li><li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li><li><a href="#holiday-packages" data-i18n="nav.packages">Packages</a></li><li><a href="#getting-here" data-i18n="nav.gettingHere">Getting Here</a></li><li><a href="#contact" data-i18n="nav.contact">Contact</a></li></ul></div>
       <div class="footer-col"><h4 data-i18n="footer.roomsHeading">Rooms</h4><ul><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Room — $80</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Garden Deluxe — $85</a></li><li><a href="#rooms">Premium Room — $90</a></li><li><a href="#rooms">Premium Room — $90</a></li></ul></div>
@@ -1108,8 +1225,10 @@ en: {
   about:{tag:"About Us",titlePrefix:"Your home",titleEmphasis:"in paradise",desc:"Nestled in the South Ari Atoll, Vilu Residence Maamigili offers an intimate boutique experience surrounded by the natural beauty of the Maldives. We believe every guest deserves personalised attention, authentic experiences, and a genuine connection with this remarkable corner of the world.",feat1Title:"Snorkeling & Diving",feat1Text:"World-class reef within minutes",feat2Title:"Island Hopping",feat2Text:"Explore surrounding atolls",feat3Title:"Local Cuisine",feat3Text:"Fresh seafood & Maldivian dishes",feat4Title:"Stunning Sunsets",feat4Text:"Unforgettable Indian Ocean views",planYourStay:"Plan Your Stay",cosyRooms:"Cosy Rooms"},
   gallery:{tag:"Gallery",titlePrefix:"Moments",titleEmphasis:"in paradise",ocean:"The Ocean",ourRooms:"Our Rooms",maldivesLife:"Maldives Life",sunsetViews:"Sunset Views",activities:"Activities",underwater:"Underwater"},
   packages:{tag:"Holiday Packages",titlePrefix:"Curated",titleEmphasis:"island escapes",subtitle:"Daily breakfast and round-trip speedboat transfers included on every package. Pick the length that fits your trip, then add half or full board if you'd like.",loading:"Loading packages…",includes:"Includes",activitiesLabel:"Activities",addOns:"Optional Add-Ons",goodToKnow:"Good to Know",enquireButton:"Enquire About This Package",askWhatsapp:"Ask on WhatsApp",saveVsRate:"Save {pct}% vs {nights}-night rate",honeymoonTag:"Exclusively for honeymooners",mostComplete:"our most complete stay yet",adds:"Adds",and:"and",pp:"pp",night:"night",nights:"nights",perNightPerPerson:"/night per person",unavailable:"Packages are temporarily unavailable — please",contactUsLink:"contact us",directly:"directly."},
-  booking:{tag:"Reservations",titlePrefix:"Reserve your",titleEmphasis:"escape",intro:"Book directly with us for the best rates and personalised service. No booking fees, flexible policies.",perk1:"Best rate guaranteed, book direct with us",perk2:"Instant confirmation via email",perk3:"Personalised welcome & local insights",perk4:"Activities & transfers arrangeable",perk5:"TGST 17% & Green Tax included in rates",viewAllAvailability:"View All Availability",quickReservation:"Quick Reservation",checkInSeconds:"Check availability in seconds",adults:"Adults",children:"Children",adult1:"1 Adult",adult2:"2 Adults",adult3:"3 Adults",noChildren:"No children",child1:"1 Child",child2:"2 Children",checkAvailabilityArrow:"Check Availability →",orBrowseAllRooms:"browse all rooms",directBookingsOnly:"Direct bookings only",or:"Or"},
+  booking:{tag:"Reservations",titlePrefix:"Reserve your",titleEmphasis:"escape",intro:"Book directly with us for the best rates and personalised service. No booking fees, flexible policies.",perk1:"Best rate guaranteed, book direct with us",perk2:"Instant confirmation via email",perk3:"Personalised welcome & local insights",perk4:"Activities & transfers arrangeable",perk5:"TGST 17% & Green Tax included in rates",viewAllAvailability:"View All Availability",quickReservation:"Quick Reservation",checkInSeconds:"Free, instant check — no obligation to book",adults:"Adults",children:"Children",adult1:"1 Adult",adult2:"2 Adults",adult3:"3 Adults",noChildren:"No children",child1:"1 Child",child2:"2 Children",checkAvailabilityArrow:"Check Availability →",orBrowseAllRooms:"browse all rooms",directBookingsOnly:"Direct bookings only",or:"Or"},
   gettingHere:{tag:"Travel logistics",titlePrefix:"Getting",titleEmphasis:"here",intro:"Vilu Residence sits in the South Ari Atoll, reaching us takes one connection from Velana International Airport. Choose the option that fits your dates and budget.",arrival:"Arrival",departure:"Departure",duration:"Duration",times:"Times",operator:"Operator",advanceNotice:"Requires {n} days advance notice",beforeYouBook:"Before you book:",directSpeedboat:"Direct speedboat",transitDhigurah:"Transit via Dhigurah",domesticFlight:"Domestic flight"},
+  timing:{tag:"Plan Your Journey",titlePrefix:"Transfer Timing",titleEmphasis:"Checker",intro:"Not sure if your connection times work? Enter your flight or speedboat time below for an instant check against our recommended buffers.",domesticLabel:"Domestic flight departure time (Malé → Maamigili)",boatLabel:"Speedboat departure time (direct from Malé)",depLabel:"Departure flight check-in time (per your ticket, Maamigili Airport)",checkBtn:"Check",missingInfo:"Please enter a date and time first.",pastDate:"That date has already passed — please enter an upcoming date.",tight:"This timing is tight — please contact us directly",onTrack:"You're on track",contactUs:"Contact us on WhatsApp",msgFlight:"Plan to check in at the Malé domestic terminal by {time} (45 minutes before departure).",msgBoat:"Plan to be at the speedboat departure point by {time} (30 minutes before departure).",msgDep:"Plan to be ready to leave by {time} so you reach Maamigili Airport in time for your ticket's check-in.",disclaimer:"These are general guidance times based on standard buffers, not a guarantee — always confirm exact details with us directly, especially close to your travel date."},
+  faq:{tag:"Guest FAQ",titlePrefix:"Quick",titleEmphasis:"answers",intro:"Search or browse by category — these answers are pulled straight from our live package and travel information.",searchPlaceholder:"Search questions…",noResults:"No matching questions — try a different search or category.",catAll:"All",catTransport:"Transportation",catPricing:"Packages & Pricing",catActivities:"Activities",catBooking:"Booking & Payment"},
   reviews:{tag:"What Guests Say",titlePrefix:"Read our",titleEmphasis:"reviews",subtitle:"Hear directly from guests who've stayed with us at Vilu Residence.",readOnGoogle:"Read Our Reviews on Google"},
   contact:{tag:"Get In Touch",titlePrefix:"We'd love to",titleEmphasis:"hear from you",contactUs:"Contact Vilu Residence",address:"Address",phone:"Phone / WhatsApp",email:"Email",responseTime:"Response Time",within24h:"Within 24 hours",sendMessage:"Send us a message",yourName:"Your Name",emailLabel:"Email",subject:"Subject",packageLabel:"Package",message:"Message",namePlaceholder:"Full name",emailPlaceholder:"your@email.com",messagePlaceholder:"Tell us about your travel plans...",subjectRoom:"Room Enquiry",subjectBooking:"Booking Question",subjectActivities:"Activities",subjectGroup:"Group Booking",subjectOther:"Other",sendButton:"Send Message →"},
   footer:{desc:"A welcoming guesthouse in the South Ari Atoll offering genuine service and authentic Maldivian experiences.",navigate:"Navigate",roomsHeading:"Rooms",info:"Info",bookDirect:"Book Direct",enquiries:"Enquiries",groups:"Groups",rights:"All rights reserved.",managedBy:"Managed by"},
@@ -1577,6 +1696,7 @@ function renderGettingHere() {
   }).join('');
   var gen = document.getElementById('gh-general');
   if(gen) gen.innerHTML = '<b>'+t('gettingHere.beforeYouBook')+'</b> '+td(_transportGeneral);
+  if (typeof renderFAQ === 'function') renderFAQ();
 }
 
 // Load rooms from PMS (base rate/name/type from localStorage, live sync;
@@ -1873,6 +1993,288 @@ document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);}
   tick();
   setInterval(tick, 1000);
 })();
+
+// ══════════════════════════════════════════════════════
+// TRANSFER TIMING CHECKER — plain-JS arithmetic, no backend/AI. Buffers
+// below are our own recommended safety margins (not live data from any
+// airline/operator), so the result always links to WhatsApp alongside the
+// calculated time rather than presenting it as a guarantee.
+// ══════════════════════════════════════════════════════
+var TC_BUFFER_DOMESTIC_MIN = 45;         // be at the Malé domestic terminal this many minutes before flight time
+var TC_BUFFER_SPEEDBOAT_MIN = 30;        // be at the speedboat point this many minutes before departure
+var TC_BUFFER_DEPARTURE_READY_MIN = 15;  // be ready to leave the guesthouse this many minutes before your ticket's Maamigili Airport check-in time
+var TC_SOON_THRESHOLD_MIN = 30;          // same-day only: flag as "tight" once less than this many minutes of buffer remain
+
+function tcTodayMaldives() {
+  var parts = new Intl.DateTimeFormat('en-CA', {timeZone:'Indian/Maldives', year:'numeric', month:'2-digit', day:'2-digit'}).formatToParts(new Date());
+  var y, mo, d;
+  parts.forEach(function(p){ if(p.type==='year') y=p.value; if(p.type==='month') mo=p.value; if(p.type==='day') d=p.value; });
+  return y+'-'+mo+'-'+d;
+}
+function tcNowMinutesMaldives() {
+  var parts = new Intl.DateTimeFormat('en-US', {timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', hourCycle:'h23'}).formatToParts(new Date());
+  var h=0, m=0;
+  parts.forEach(function(p){ if(p.type==='hour') h=+p.value; if(p.type==='minute') m=+p.value; });
+  return h*60+m;
+}
+function tcMinutesToClock(mins) {
+  mins = ((mins % 1440) + 1440) % 1440;
+  var h = Math.floor(mins/60), m = mins%60;
+  var ampm = h>=12 ? 'PM' : 'AM';
+  var h12 = h%12; if (h12===0) h12=12;
+  return h12+':'+String(m).padStart(2,'0')+' '+ampm;
+}
+
+function tcSwitchTab(mode) {
+  var aTab = document.getElementById('tc-tab-arrival'), dTab = document.getElementById('tc-tab-departure');
+  if (aTab) aTab.classList.toggle('on', mode==='arrival');
+  if (dTab) dTab.classList.toggle('on', mode==='departure');
+  var aFields = document.getElementById('tc-arrival-fields'), dFields = document.getElementById('tc-departure-fields');
+  if (aFields) aFields.style.display = mode==='arrival' ? '' : 'none';
+  if (dFields) dFields.style.display = mode==='departure' ? '' : 'none';
+}
+
+function tcCheck(kind) {
+  var dateEl, timeEl, resultEl, bufferMin, msgKey;
+  if (kind === 'flight') {
+    dateEl = document.getElementById('tc-flight-date'); timeEl = document.getElementById('tc-flight-time');
+    resultEl = document.getElementById('tc-result-flight'); bufferMin = TC_BUFFER_DOMESTIC_MIN; msgKey = 'timing.msgFlight';
+  } else if (kind === 'boat') {
+    dateEl = document.getElementById('tc-boat-date'); timeEl = document.getElementById('tc-boat-time');
+    resultEl = document.getElementById('tc-result-boat'); bufferMin = TC_BUFFER_SPEEDBOAT_MIN; msgKey = 'timing.msgBoat';
+  } else {
+    dateEl = document.getElementById('tc-dep-date'); timeEl = document.getElementById('tc-dep-time');
+    resultEl = document.getElementById('tc-result-dep'); bufferMin = TC_BUFFER_DEPARTURE_READY_MIN; msgKey = 'timing.msgDep';
+  }
+  if (!dateEl.value || !timeEl.value) {
+    resultEl.className = 'tc-result show tight';
+    resultEl.innerHTML = '<span class="tc-result-status">'+t('timing.missingInfo')+'</span>';
+    return;
+  }
+
+  var timeParts = timeEl.value.split(':');
+  var timeMinutes = (+timeParts[0])*60 + (+timeParts[1]);
+  var deadlineMinutes = timeMinutes - bufferMin;
+  var deadlineClock = tcMinutesToClock(deadlineMinutes);
+  var today = tcTodayMaldives();
+  var isToday = dateEl.value === today;
+  var isPastDate = dateEl.value < today;
+
+  var whatsappLink = ' <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer">'+t('timing.contactUs')+'</a>';
+  var cls, statusText;
+  if (isPastDate) {
+    cls = 'tight';
+    statusText = t('timing.pastDate');
+  } else if (isToday) {
+    var minutesLeft = deadlineMinutes - tcNowMinutesMaldives();
+    if (minutesLeft <= TC_SOON_THRESHOLD_MIN) { cls = 'tight'; statusText = t('timing.tight'); }
+    else { cls = 'ok'; statusText = t('timing.onTrack'); }
+  } else {
+    cls = 'ok';
+    statusText = t('timing.onTrack');
+  }
+
+  var detailMsg = tf(msgKey, {time: deadlineClock});
+  resultEl.className = 'tc-result show ' + cls;
+  resultEl.innerHTML = '<span class="tc-result-status">'+statusText+'</span><span>'+detailMsg+(cls==='tight' ? whatsappLink : '')+'</span>';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  ['tc-flight-date','tc-boat-date','tc-dep-date'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = tcTodayMaldives();
+  });
+});
+
+// ══════════════════════════════════════════════════════
+// FAQ — every answer here is assembled from the SAME live data already
+// cached by the Getting Here and Holiday Packages sections (transport
+// content, package includes/activities, trip notes, booking terms), so
+// there is no separate hardcoded copy of facts that could drift out of
+// sync with whatever an admin edits in the PMS. Only the question prompts
+// and a couple of purely navigational answers (e.g. "how do I check
+// availability") are authored copy.
+// ══════════════════════════════════════════════════════
+var _faqActiveCategory = 'all';
+var _faqSearchTerm = '';
+
+var FAQ_CATEGORIES = [
+  {id:'all', key:'faq.catAll'},
+  {id:'transport', key:'faq.catTransport'},
+  {id:'pricing', key:'faq.catPricing'},
+  {id:'activities', key:'faq.catActivities'},
+  {id:'booking', key:'faq.catBooking'}
+];
+
+function faqDedupe(arr) {
+  var seen = {}, out = [];
+  (arr||[]).forEach(function(x){ if (x && !seen[x]) { seen[x]=1; out.push(x); } });
+  return out;
+}
+
+function faqTransportLine(direction) {
+  var keys = ['direct','transit','flight'];
+  var names = {direct:'Direct speedboat', transit:'Transit via Dhigurah', flight:'Domestic flight'};
+  return keys.map(function(k){
+    var id = 'transport_'+direction+'_'+k;
+    var d = (_transportCache && _transportCache[id]) || (typeof DEFAULT_TRANSPORT !== 'undefined' && DEFAULT_TRANSPORT[id]) || {};
+    var bits = [td(names[k])];
+    if (d.price) bits.push(td(d.price));
+    if (d.duration) bits.push(td(d.duration));
+    return bits.join(' — ');
+  }).join('<br>');
+}
+
+function faqBuildItems() {
+  var items = [];
+
+  items.push({
+    cat:'transport',
+    q:'What are my options for getting from Malé to Vilu Residence?',
+    a: faqTransportLine('arrival') + (typeof _transportGeneral !== 'undefined' && _transportGeneral ? '<br><br>'+td(_transportGeneral) : '')
+  });
+  items.push({
+    cat:'transport',
+    q:'How do I get back to Malé for my departure flight?',
+    a: faqTransportLine('departure') + (typeof _transportGeneral !== 'undefined' && _transportGeneral ? '<br><br>'+td(_transportGeneral) : '')
+  });
+
+  var pkgs = _lastPkgs || [];
+  if (pkgs.length) {
+    var allHaveTransfer = pkgs.every(function(p){ return (p.includes||[]).some(function(i){ return /speedboat|transfer/i.test(i); }); });
+    items.push({
+      cat:'transport',
+      q:'Is round-trip transfer included in my holiday package?',
+      a: allHaveTransfer
+        ? 'Yes — every one of our current holiday packages includes round-trip speedboat transfer between Malé and Maamigili.'
+        : 'Most of our holiday packages include round-trip speedboat transfer — check the Includes list on each package to confirm.'
+    });
+
+    items.push({
+      cat:'pricing',
+      q:'What holiday packages do you currently offer?',
+      a: pkgs.map(function(p){ return td(p.name)+' — $'+p.pricePerRoom+' pp · '+p.nights+' night'+(p.nights>1?'s':''); }).join('<br>')
+    });
+
+    var allIncludes = faqDedupe(pkgs.reduce(function(acc,p){ return acc.concat(p.includes||[]); }, []));
+    if (allIncludes.length) {
+      items.push({
+        cat:'pricing',
+        q:"What's typically included in a package?",
+        a: allIncludes.map(function(i){ return td(i); }).join(', ')
+      });
+    }
+
+    var allActivities = faqDedupe(pkgs.reduce(function(acc,p){ return acc.concat(p.activities||[]); }, []));
+    if (allActivities.length) {
+      items.push({
+        cat:'activities',
+        q:'What activities can I do during my stay?',
+        a: allActivities.map(function(a){ return td(a); }).join(', ')
+      });
+    }
+  }
+
+  var notesData = _lastNotesData || {};
+  if ((notesData.general||[]).length) {
+    items.push({
+      cat:'activities',
+      q:'What should I know before booking activities?',
+      a: notesData.general.map(function(n){ return '• '+td(n); }).join('<br>')
+    });
+  }
+  if ((notesData.activityNotes||[]).length) {
+    items.push({
+      cat:'activities',
+      q:'Are there any activity-specific notes I should know?',
+      a: notesData.activityNotes.map(function(an){ return '• '+td(an.note); }).join('<br>')
+    });
+  }
+
+  if ((_lastTerms||[]).length) {
+    items.push({
+      cat:'booking',
+      q:'What are your payment and booking terms?',
+      a: _lastTerms.map(function(term){ return td(term); }).join(' · ')
+    });
+  }
+  items.push({
+    cat:'booking',
+    q:'Do you charge any booking fees?',
+    a: t('booking.intro')
+  });
+  items.push({
+    cat:'booking',
+    q:'How do I check if my dates are available?',
+    a: 'Use the "Check Availability" search in the booking bar at the top of the page, or the <a href="#booking">Quick Reservation widget</a> further down — both check real-time availability instantly, with no obligation to book.'
+  });
+
+  return items;
+}
+
+function renderFAQ() {
+  var listEl = document.getElementById('faq-list');
+  var catsEl = document.getElementById('faq-cats');
+  var emptyEl = document.getElementById('faq-empty');
+  if (!listEl || !catsEl) return;
+
+  catsEl.innerHTML = FAQ_CATEGORIES.map(function(c){
+    return '<button class="faq-cat-btn'+(c.id===_faqActiveCategory?' on':'')+'" data-cat="'+c.id+'">'+t(c.key)+'</button>';
+  }).join('');
+  catsEl.querySelectorAll('.faq-cat-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      _faqActiveCategory = btn.getAttribute('data-cat');
+      renderFAQ();
+    });
+  });
+
+  var items = faqBuildItems();
+  var term = _faqSearchTerm.toLowerCase();
+  var filtered = items.filter(function(it){
+    var matchesCat = _faqActiveCategory === 'all' || it.cat === _faqActiveCategory;
+    var matchesTerm = !term || (it.q+' '+it.a).toLowerCase().indexOf(term) > -1;
+    return matchesCat && matchesTerm;
+  });
+
+  if (emptyEl) emptyEl.style.display = filtered.length ? 'none' : 'block';
+  if (!filtered.length) { listEl.innerHTML = ''; return; }
+
+  var catLabels = {};
+  FAQ_CATEGORIES.forEach(function(c){ catLabels[c.id] = t(c.key); });
+  listEl.innerHTML = filtered.map(function(it, i){
+    return '<div class="faq-item" data-idx="'+i+'">'
+      + '<button class="faq-question" onclick="faqToggle(this)">'
+      + '<span><span class="faq-cat-pill">'+catLabels[it.cat]+'</span>'+it.q+'</span>'
+      + '<i class="ti ti-chevron-down" aria-hidden="true"></i>'
+      + '</button>'
+      + '<div class="faq-answer"><div class="faq-answer-inner">'+it.a+'</div></div>'
+      + '</div>';
+  }).join('');
+}
+
+function faqToggle(btn) {
+  var item = btn.closest('.faq-item');
+  var answer = item.querySelector('.faq-answer');
+  var isOpen = item.classList.contains('open');
+  if (isOpen) {
+    answer.style.maxHeight = null;
+    item.classList.remove('open');
+  } else {
+    item.classList.add('open');
+    answer.style.maxHeight = answer.scrollHeight + 'px';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  renderFAQ();
+  var searchInput = document.getElementById('faq-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(){
+      _faqSearchTerm = searchInput.value;
+      renderFAQ();
+    });
+  }
+});
 
 // ── AVAILABILITY CALENDAR WIDGET ──
 // Single continuous range-selection calendar (Airbnb/Booking.com pattern):
@@ -2502,6 +2904,7 @@ function hpDetailLines(items, formatter){
 
 var _lastPkgs = null;
 var _lastNotesData = null;
+var _lastTerms = [];
 
 async function loadHolidayPackages(){
   var grid = document.getElementById('hp-grid');
@@ -2608,6 +3011,7 @@ function renderHolidayPackages(pkgs, notesData){
 
   injectHolidayPackagesJsonLd(pkgs);
   handleHolidayPackageDeepLink();
+  if (typeof renderFAQ === 'function') renderFAQ();
 }
 
 function hpEnquire(id, name){
@@ -2619,6 +3023,8 @@ async function loadHpTerms(){
   try {
     var snap = await fsDb.collection('website_content').doc('packages_terms').get();
     var terms = (snap.exists && snap.data().terms) || [];
+    _lastTerms = terms;
+    if (typeof renderFAQ === 'function') renderFAQ();
     if(!terms.length) return;
     var grid = document.getElementById('hp-grid');
     if(!grid || document.getElementById('hp-terms')) return;
