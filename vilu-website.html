@@ -377,7 +377,7 @@ section{position:relative}
 .vilu-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .vilu-cal-dow{font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding:4px 0}
 .vilu-cal-day{position:relative;font-size:var(--font-size-sm);text-align:center;padding:7px 0;cursor:pointer;color:var(--text);background:rgba(255,255,255,.03);border-radius:6px}
-.vilu-cal-day:hover:not(.disabled):not(.empty){background:rgba(34,211,238,.2)}
+.vilu-cal-day:hover:not(.disabled):not(.empty):not(.range-start):not(.range-end):not(.in-range):not(.in-range-preview):not(.range-end-preview){background:rgba(34,211,238,.2)}
 .vilu-cal-day.empty{cursor:default;background:none}
 .vilu-cal-day.disabled{color:rgba(255,255,255,.2);text-decoration:line-through;cursor:not-allowed;background:none}
 .vilu-cal-day.today{box-shadow:inset 0 0 0 1px var(--teal-light)}
@@ -2021,9 +2021,33 @@ function calRenderMonth() {
   el.querySelectorAll('.vilu-cal-day[data-date]:not(.disabled)').forEach(function(cell) {
     var ds = cell.getAttribute('data-date');
     cell.addEventListener('click', function() { calSelectDay(ds); });
+    // Hover only ever toggles classes on the already-rendered cells (see
+    // calUpdateRangeClasses) rather than calling calRenderMonth() again —
+    // rebuilding the grid's innerHTML on every mouseenter used to destroy
+    // and recreate the very cell the mouse was resting on, so the browser
+    // never got a fresh native mouseenter for it and the preview lagged a
+    // cell behind the real cursor position.
     if (calState.phase === 'checkout' && checkin) {
-      cell.addEventListener('mouseenter', function() { calState.hoverDate = ds; calRenderMonth(); });
+      cell.addEventListener('mouseenter', function() { calState.hoverDate = ds; calUpdateRangeClasses(); });
+      cell.addEventListener('mouseleave', function() {
+        if (calState.hoverDate === ds) { calState.hoverDate = null; calUpdateRangeClasses(); }
+      });
     }
+  });
+}
+
+function calUpdateRangeClasses() {
+  var el = calEl;
+  if (!el) return;
+  var checkin = calState.checkin, checkout = calState.checkout;
+  var previewEnd = calState.phase === 'checkout' && checkin && calState.hoverDate && calState.hoverDate > checkin ? calState.hoverDate : null;
+  el.querySelectorAll('.vilu-cal-day[data-date]').forEach(function(cell) {
+    var ds = cell.getAttribute('data-date');
+    cell.classList.toggle('range-start', ds === checkin);
+    cell.classList.toggle('range-end', ds === checkout);
+    cell.classList.toggle('in-range', !!(checkin && checkout && ds > checkin && ds < checkout));
+    cell.classList.toggle('in-range-preview', !!(previewEnd && ds > checkin && ds < previewEnd));
+    cell.classList.toggle('range-end-preview', !!(previewEnd && ds === previewEnd));
   });
 }
 
