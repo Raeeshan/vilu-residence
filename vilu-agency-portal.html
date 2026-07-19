@@ -384,6 +384,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <!-- Guest info -->
       <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Guest information</div>
       <div class="form-grid" style="margin-bottom:12px">
+        <div class="fg" style="margin:0"><label>Title</label>
+          <select id="bk-title"><option value="">--</option><option value="Mr">Mr</option><option value="Mrs">Mrs</option><option value="Ms">Ms</option><option value="Miss">Miss</option><option value="Dr">Dr</option></select>
+        </div>
+        <div class="fg" style="margin:0"><label>Children</label><input type="number" id="bk-children" min="0" max="10" value="0"></div>
+      </div>
+      <div class="form-grid" style="margin-bottom:12px">
         <div class="fg" style="margin:0"><label>First name *</label><input type="text" id="bk-fn" placeholder="First name"></div>
         <div class="fg" style="margin:0"><label>Last name *</label><input type="text" id="bk-ln" placeholder="Last name"></div>
         <div class="fg" style="margin:0"><label>Email</label><input type="email" id="bk-em" placeholder="guest@email.com"></div>
@@ -392,6 +398,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="form-grid" style="margin-bottom:12px">
         <div class="fg" style="margin:0"><label>Nationality</label><input type="text" id="bk-nat" placeholder="Nationality"></div>
         <div class="fg" style="margin:0"><label>Passport / ID</label><input type="text" id="bk-pid" placeholder="Passport number"></div>
+      </div>
+      <div class="fg" style="margin-bottom:12px">
+        <label>Passport photo <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional — for your records only, has no effect on the booking or its confirmation document)</span></label>
+        <input type="file" id="bk-passport" accept="image/*,.pdf" onchange="bkUploadPassport(this)">
+        <div id="bk-passport-status" style="margin-top:6px;font-size:var(--font-size-sm)"></div>
       </div>
       <div class="fg"><label>Special requests</label><textarea id="bk-notes" rows="2" placeholder="Any special requirements..."></textarea></div>
 
@@ -916,27 +927,121 @@ function _openDocWindow(title, bodyHtml){
     +'</head><body>'+bodyHtml+'</body></html>');
 }
 
-function generateBookingConfirmation(bkId){
+// Shared branding (logo) and package terms — fetched once and cached, since
+// every confirmation letter needs the same letterhead and policy text.
+var _brandingCache = null;
+async function _loadBranding(){
+  if(_brandingCache) return _brandingCache;
+  try {
+    var snap = await fsDb.collection('website_content').doc('branding').get();
+    _brandingCache = (snap.exists && snap.data()) || {};
+  } catch(e) { console.error('_loadBranding failed', e); _brandingCache = {}; }
+  return _brandingCache;
+}
+var _termsCache = null;
+async function _loadPackageTerms(){
+  if(_termsCache) return _termsCache;
+  try {
+    var snap = await fsDb.collection('website_content').doc('packages_terms').get();
+    _termsCache = (snap.exists && snap.data().terms) || [];
+  } catch(e) { console.error('_loadPackageTerms failed', e); _termsCache = []; }
+  return _termsCache;
+}
+
+// A polished, letter-style Booking Confirmation — never shows pricing (see
+// generateAgencyInvoice for the priced sibling document). Every field is
+// pulled straight from the reservation's own stored fields; nothing is
+// re-entered here. Whether a passport photo was attached has zero bearing
+// on this document — it's an unrelated, purely optional attachment on the
+// Firestore reservation record itself.
+async function generateBookingConfirmation(bkId){
   var bk=myBookings.find(function(b){return b.id===bkId;});
   if(!bk) return;
   var nights=bk.totalNights||Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
-  var roomsRow = bk.roomCount>1
-    ? '<tr><th>Rooms</th><td>'+bk.roomCount+' × '+bk.roomType+' ('+bk.rn+')</td></tr><tr><th>Guests per room</th><td>'+(bk.guestSplit||[]).join(', ')+'</td></tr>'
-    : '<tr><th>Room</th><td>'+bk.rn+'</td></tr>';
-  var html='<h1>Booking Confirmation</h1><div style="color:#6b7280;font-size:var(--font-size-base);margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
-    +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
-    +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
-    +roomsRow
-    +'<tr><th>Check-in</th><td>'+fd(bk.ci)+'</td></tr>'
-    +'<tr><th>Check-out</th><td>'+fd(bk.co)+' ('+nights+' nights'+(bk.extraNights?', includes '+bk.extraNights+' additional':'')+')</td></tr>'
-    +'<tr><th>Adults</th><td>'+(bk.ad||2)+'</td></tr>'
-    +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
-    +(bk.transferArrival?'<tr><th>Arrival transfer</th><td>'+bk.transferArrival+'</td></tr>':'')
-    +(bk.transferDeparture?'<tr><th>Departure transfer</th><td>'+bk.transferDeparture+'</td></tr>':'')
-    +(bk.boardPlan?'<tr><th>Board plan</th><td>'+bk.boardPlan+'</td></tr>':'')
-    +'<tr><th>Included</th><td>'+((bk.packageIncludes||[]).join(', ')||'—')+'</td></tr>'
-    +'<tr><th>Booked via</th><td>'+(bk.agency||currentAgency.name)+'</td></tr>'
-    +'</table><div style="margin-top:20px;font-size:var(--font-size-xs);color:#9ca3af">This document confirms the booking details only. It does not include pricing.</div>';
+  var branding = await _loadBranding();
+  var terms = await _loadPackageTerms();
+
+  var livePkg = loadPMS_Packages().find(function(p){return p.id===bk.package;});
+  // Activity labels carry their reference price baked in (e.g. "Whale Shark
+  // Snorkeling — $72") for the booking screens — stripped here since this
+  // document must never show a dollar amount anywhere.
+  var activities = ((livePkg && livePkg.activities) || []).map(function(a){
+    return a.replace(/\s*[—-]\s*\$\d+(\.\d+)?.*$/,'').trim();
+  }).filter(Boolean);
+
+  var mealPlan = bk.boardPlan==='Full-Board' ? 'Full Board' : bk.boardPlan==='Half-Board' ? 'Half Board' : 'Breakfast Only';
+
+  var arr = bk.transferArrival||'Speedboat', dep = bk.transferDeparture||'Speedboat';
+  var transferSentence = (arr==='Speedboat'&&dep==='Speedboat') ? 'Return transfer by private speedboat'
+    : (arr==='Domestic Flight'&&dep==='Domestic Flight') ? 'Return transfer by domestic flight'
+    : 'Transfer: arrival by '+arr.toLowerCase()+', departure by '+dep.toLowerCase();
+  var inclusionsSentence = 'Accommodation with '+mealPlan+(activities.length?' & Trips — '+activities.join(', '):'')+', '+transferSentence+'.';
+
+  var greetName = (bk.title?bk.title+' ':'')+bk.fn+' '+bk.ln;
+  var roomLine = bk.roomCount+' × '+(bk.roomType||'Room')+(bk.roomCount>1?'s':'');
+
+  function row(label, value){
+    return '<div class="ci-row"><div class="ci-label">'+label+'</div><div class="ci-value">'+value+'</div></div>';
+  }
+
+  var html = ''
+    +'<style>'
+      +'.doc-actions{margin-bottom:18px}'
+      +'.doc-actions button{background:#00b4d8;color:#fff;border:none;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}'
+      +'@media print{.doc-actions{display:none}}'
+      +'.letter{max-width:680px;margin:0 auto;font-family:Georgia,\'Times New Roman\',serif;color:#1f2937}'
+      +'.letter-hdr{display:flex;align-items:center;gap:16px;border-bottom:3px solid #1e3a5f;padding-bottom:16px;margin-bottom:24px}'
+      +'.letter-hdr img{height:56px;width:56px;border-radius:50%;object-fit:cover;flex-shrink:0}'
+      +'.letter-hdr .brand{font-family:Arial,sans-serif}'
+      +'.letter-hdr .brand-name{font-size:20px;font-weight:800;color:#1e3a5f;letter-spacing:.03em}'
+      +'.letter-hdr .brand-sub{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}'
+      +'.doc-title{font-family:Arial,sans-serif;font-size:13px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#00b4d8;margin-bottom:18px}'
+      +'.conf-badge{display:inline-block;background:#eef9fc;border:1.5px solid #00b4d8;border-radius:8px;padding:8px 16px;font-family:Arial,sans-serif;margin-bottom:20px}'
+      +'.conf-badge .lbl{font-size:10px;color:#0891b2;text-transform:uppercase;letter-spacing:.08em;font-weight:700}'
+      +'.conf-badge .num{font-size:18px;font-weight:800;color:#1e3a5f}'
+      +'.greet{font-size:15px;line-height:1.7;margin-bottom:22px}'
+      +'.ci-grid{font-family:Arial,sans-serif;border-top:1px solid #e5e7eb;margin-bottom:20px}'
+      +'.ci-row{display:flex;padding:10px 0;border-bottom:1px solid #e5e7eb}'
+      +'.ci-label{width:200px;flex-shrink:0;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;padding-top:1px}'
+      +'.ci-value{font-size:14px;font-weight:600;color:#111827}'
+      +'.inclusions-box{background:#f9fafb;border-left:4px solid #00b4d8;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-family:Arial,sans-serif}'
+      +'.inclusions-box .lbl{font-size:10px;font-weight:800;color:#0891b2;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}'
+      +'.inclusions-box p{font-size:13.5px;line-height:1.6;color:#374151}'
+      +'.policy{font-family:Arial,sans-serif;font-size:11.5px;color:#6b7280;line-height:1.8;margin-bottom:18px;padding-top:14px;border-top:1px solid #e5e7eb}'
+      +'.policy .lbl{font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.05em;font-size:10px;margin-bottom:6px}'
+      +'.closing{font-size:14px;line-height:1.7;margin-bottom:34px}'
+      +'.sig{margin-bottom:30px}'
+      +'.sig-line{border-bottom:1.5px solid #1f2937;width:200px;margin-bottom:8px}'
+      +'.sig-name{font-family:Arial,sans-serif;font-weight:800;font-size:13px}'
+      +'.sig-title{font-family:Arial,sans-serif;font-size:11.5px;color:#6b7280}'
+      +'.letter-ftr{font-family:Arial,sans-serif;text-align:center;font-size:11px;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:14px}'
+      +'.letter-ftr a{color:#0891b2;text-decoration:none}'
+    +'</style>'
+    +'<div class="doc-actions"><button onclick="window.print()">🖨️ Download as PDF</button></div>'
+    +'<div class="letter">'
+      +'<div class="letter-hdr">'
+        +(branding.logoSrc?'<img src="'+branding.logoSrc+'" alt="Vilu Residence">':'')
+        +'<div class="brand"><div class="brand-name">Vilu Residence</div><div class="brand-sub">Maamigili · South Ari Atoll · Maldives</div></div>'
+      +'</div>'
+      +'<div class="doc-title">Booking Confirmation</div>'
+      +'<div class="conf-badge"><div class="lbl">Confirmation Number</div><div class="num">'+bk.id+'</div></div>'
+      +'<div class="greet">Dear '+greetName+',<br><br>We are delighted to confirm your upcoming stay with us. Please find your booking details below.</div>'
+      +'<div class="ci-grid">'
+        +row('Guest Name', greetName)
+        +row('Arrival Date', fd(bk.ci)+' <span style="color:#6b7280;font-weight:400">— by '+arr+'</span>')
+        +row('Departure Date', fd(bk.co)+' <span style="color:#6b7280;font-weight:400">— by '+dep+'</span>')
+        +row('Number of Guests', bk.ad+' Adult'+(bk.ad>1?'s':'')+(bk.ch?', '+bk.ch+' Child'+(bk.ch>1?'ren':''):''))
+        +row('Number of Rooms', String(bk.roomCount))
+        +row('Number of Nights', String(nights))
+        +row('Room Type', bk.roomType||'—')
+        +row('Meal Plan', mealPlan)
+      +'</div>'
+      +'<div class="inclusions-box"><div class="lbl">Rate Inclusions</div><p>'+(bk.packageName?'<strong>'+bk.packageName+'</strong> — ':'')+inclusionsSentence+'</p></div>'
+      +(terms.length?'<div class="policy"><div class="lbl">Policy</div>'+terms.join('<br>')+'</div>':'')
+      +'<div class="closing">Please advise us within 96 hours of any discrepancies in the above details. We look forward to welcoming you to Vilu Residence.</div>'
+      +'<div class="sig"><div class="sig-line"></div><div class="sig-name">Raeeshan Ibrahim</div><div class="sig-title">Operation Manager</div></div>'
+      +'<div class="letter-ftr">Vilu Residence Maamigili, South Ari Atoll, Maldives &nbsp;·&nbsp; <a href="https://viluresidence.web.app">viluresidence.web.app</a> &nbsp;·&nbsp; +960 9903339</div>'
+    +'</div>';
   _openDocWindow('Booking Confirmation - '+bk.id, html);
 }
 
@@ -1004,6 +1109,37 @@ async function drawMyBlocks(){
 // Package customizer state
 var customExtras = [];
 var removedIncludes = [];
+
+// Passport photo — entirely optional, stored as a base64 attachment on the
+// primary reservation doc only (not every linked room, to avoid duplicating
+// a large field). Capped well under Firestore's 1MiB per-document limit,
+// accounting for base64 encoding overhead (~4/3 the raw file size) plus the
+// reservation's other fields.
+var _bkPassportDataUri = null;
+var BK_PASSPORT_MAX_BYTES = 500*1024;
+function bkUploadPassport(inputEl){
+  var file = inputEl.files[0];
+  var statusEl = document.getElementById('bk-passport-status');
+  if(!file) return;
+  if(file.size > BK_PASSPORT_MAX_BYTES){
+    statusEl.innerHTML = '<span style="color:#dc2626">File too large — max 500KB</span>';
+    inputEl.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    _bkPassportDataUri = e.target.result;
+    statusEl.innerHTML = '<span style="color:var(--green)">✓ '+file.name+' attached</span> <button type="button" onclick="bkRemovePassport()" style="margin-left:8px;background:none;border:none;color:#b91c1c;cursor:pointer;font-size:var(--font-size-xs);text-decoration:underline">Remove</button>';
+  };
+  reader.readAsDataURL(file);
+}
+function bkRemovePassport(){
+  _bkPassportDataUri = null;
+  var input = document.getElementById('bk-passport');
+  if(input) input.value = '';
+  var statusEl = document.getElementById('bk-passport-status');
+  if(statusEl) statusEl.innerHTML = '';
+}
 // Transfer/extra-nights/board-plan state — separate from customExtras
 // since they're structured selections (radio/quantity), not free-form
 // additive extras, and extra nights/board must recompute together
@@ -1175,6 +1311,9 @@ async function openBookingModal(pid){
   document.getElementById('bk-notes').value='';
   document.getElementById('bk-room-type').value='';
   document.getElementById('bk-ad').value = 2;
+  document.getElementById('bk-title').value = '';
+  document.getElementById('bk-children').value = 0;
+  bkRemovePassport();
 
   var today = new Date().toISOString().slice(0,10);
   document.getElementById('bk-ci').value = today;
@@ -1484,6 +1623,8 @@ async function submitAgencyBooking(){
   var ph=(document.getElementById('bk-ph').value||'').trim();
   var nat=(document.getElementById('bk-nat').value||'').trim();
   var pid=(document.getElementById('bk-pid')?.value||'').trim();
+  var title=(document.getElementById('bk-title')?.value||'').trim();
+  var ch=+(document.getElementById('bk-children')?.value||0);
   var notes=(document.getElementById('bk-notes').value||'').trim();
   var ad=+document.getElementById('bk-ad').value;
   if(!ci||!co||co<=ci){alert('Select valid dates');return;}
@@ -1545,10 +1686,11 @@ async function submitAgencyBooking(){
     +(boardName?'. '+boardName+' ('+totalNights+' nights)':'');
   var roomsNote = roomCount>1 ? ' · '+roomCount+' rooms ('+roomType+'): '+roomIds.join(', ')+' — guests per room: '+guestSplit.join(', ') : '';
   var bk={
-    id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,
+    id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,title:title,
     rn:roomIds.join(', '),rate:agencyPrice,
     roomType:roomType, roomCount:roomCount, roomIds:roomIds, guestSplit:guestSplit,
-    ci:ci,co:co,ad:ad,ch:0,inf:0,
+    ci:ci,co:co,ad:ad,ch:ch,inf:0,
+    hasPassportPhoto: !!_bkPassportDataUri,
     src:'Agency',pay:'Unpaid',st:'Confirmed',ref:ref,
     notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+'. '+bookingOptionsNote+roomsNote+(notes?'. '+notes:''),
     nlog:[],prop:'vilu',
@@ -1585,12 +1727,17 @@ async function submitAgencyBooking(){
       // wrote to this browser's localStorage and a BroadcastChannel message,
       // neither of which crosses devices, so a booking made from a real
       // agency laptop never reached the PMS or room_availability at all.
-      await writeReservation(roomRef, {
+      // Passport photo (if provided) and the children count both describe
+      // the guest party as a whole, not a per-room split — attached only to
+      // the primary/first room's document, never duplicated across linked
+      // rooms. Entirely optional: omitting it doesn't block or alter the
+      // booking or its confirmation document in any way.
+      var roomFields = {
         id: roomRef, room_id: roomId,
-        guest_name: fn+' '+ln,
+        guest_name: (title?title+' ':'')+fn+' '+ln, guest_title: title,
         guest_email: em, guest_phone: ph, guest_country: nat,
         check_in: ci, check_out: co,
-        adults: guestSplit[ri]||1, children: 0,
+        adults: guestSplit[ri]||1, children: ri===0?ch:0,
         rate: agencyPrice||0, status: 'Confirmed',
         source: 'Agency', notes: bk.notes+(roomCount>1?' (Room '+(ri+1)+' of '+roomCount+', linked booking '+ref+')':''),
         agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
@@ -1598,7 +1745,9 @@ async function submitAgencyBooking(){
         arr_time:'', arr_transport: arrTransportLabel, arr_from: 'Malé',
         dep_time:'', dep_transport: depTransportLabel, dep_to: 'Malé',
         updated_at: new Date().toISOString()
-      });
+      };
+      if(ri===0 && _bkPassportDataUri) roomFields.passport_photo = _bkPassportDataUri;
+      await writeReservation(roomRef, roomFields);
       succeededRooms.push(roomId);
     } catch(e) {
       failedRooms.push({roomId:roomId, reason: e.message==='ROOM_CONFLICT'?'just booked by someone else':'error'});
@@ -1614,6 +1763,7 @@ async function submitAgencyBooking(){
     alert('Booked '+succeededRooms.length+' of '+roomIds.length+' rooms successfully. '+failedRooms.length+' room'+(failedRooms.length>1?'s were':' was')+' not reserved ('+failedRooms.map(function(f){return f.roomId+': '+f.reason;}).join(', ')+') — contact Vilu Residence to arrange the remaining room(s).');
   }
 
+  _bkPassportDataUri = null;
   myBookings.unshift(bk);
   localStorage.setItem('vilu_agency_bk_'+currentAgency.email, JSON.stringify(myBookings));
   try{
