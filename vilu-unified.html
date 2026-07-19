@@ -1574,6 +1574,11 @@ body.pms-mode { overflow:hidden; }
     </div>
   </div>
   <div id="pkg-sync-result" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px"></div>
+  <div class="tabs" style="padding:0;margin-bottom:14px;border-radius:8px 8px 0 0">
+    <button class="tab on" id="pkg-tab-website" onclick="pkgSwitchTab('website')"><i class="ti ti-world"></i> Website Packages</button>
+    <button class="tab" id="pkg-tab-agency" onclick="pkgSwitchTab('agency')"><i class="ti ti-building-store"></i> Agency Packages</button>
+  </div>
+  <div id="pkg-tab-desc" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">Guest-facing content and retail pricing — this is exactly what website visitors see.</div>
   <div class="card" style="margin-bottom:14px">
     <h3><i class="ti ti-file-text" style="margin-right:6px"></i>Package terms</h3>
     <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Shared across every package on the website (one line per term).</p>
@@ -2120,10 +2125,12 @@ Suite</textarea></div>
       <div class="fg" style="margin:0"><label>Emoji / icon</label><input type="text" id="pkg-emoji" placeholder="🏖️" style="font-size:var(--font-size-xl)"></div>
     </div>
     <div class="fg"><label>Description</label><textarea id="pkg-desc" rows="2" placeholder="What's included, taxes note..."></textarea></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div class="fg" style="margin:0"><label>Price per person / night ($) *</label><input type="number" id="pkg-price" min="0" step="5" placeholder="0.00"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="fg" style="margin:0"><label>Guest price ($) *</label><input type="number" id="pkg-price" min="0" step="5" placeholder="0.00"></div>
+      <div class="fg" style="margin:0"><label>Agency price ($)</label><input type="number" id="pkg-agency-price" min="0" step="5" placeholder="Same as guest price if blank"></div>
       <div class="fg" style="margin:0"><label>Fixed nights *</label><input type="number" id="pkg-nights" min="1" value="3" placeholder="e.g. 3"></div>
     </div>
+    <div style="font-size:var(--font-size-xs);color:#6b7280;margin:-6px 0 12px">Both are per person / night, tax-inclusive. Agency price is what partnered agencies are invoiced — leave blank to default to the guest price.</div>
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:8px">
       <div class="fg" style="margin:0"><label>Badge (optional)</label><input type="text" id="pkg-badge" placeholder="e.g. Most Popular, Best Value — leave blank for none"></div>
       <div class="fg" style="margin:0"><label>Badge color</label>
@@ -7616,6 +7623,38 @@ let AGENCY_BK=loadAgencyBookings();
 // ══════════════════════════════════════════════
 var _editPkgId = null;
 
+// Which of the 2 Package Manager tabs is showing — 'website' (guest
+// content + retail price, exactly what viluresidence.web.app shows) or
+// 'agency' (same 9 packages' content, but agency price + visibleToAgencies
+// instead). Both tabs edit through the same openPkgForm()/savePkg() modal,
+// since a package's content/activities/inclusions are one shared record —
+// only which price/visibility fields are surfaced in the list differs.
+var _pkgViewTab = 'website';
+function pkgSwitchTab(tab){
+  _pkgViewTab = tab;
+  var wTab = document.getElementById('pkg-tab-website'), aTab = document.getElementById('pkg-tab-agency');
+  if(wTab) wTab.classList.toggle('on', tab==='website');
+  if(aTab) aTab.classList.toggle('on', tab==='agency');
+  var desc = document.getElementById('pkg-tab-desc');
+  if(desc) desc.textContent = tab==='website'
+    ? 'Guest-facing content and retail pricing — this is exactly what website visitors see.'
+    : 'Same 9 packages\' content — agency/wholesale price and which partnered agencies can see each one.';
+  drawPkgs();
+}
+
+// Builds the "Visible to" line shown on Agency-tab cards, matching the
+// exact same visibleToAgencies data the checklist in the edit modal reads.
+function pkgVisibilitySummary(pkg){
+  var vis = pkg.visibleToAgencies || 'all';
+  if(vis === 'all') return 'Visible to: All agencies';
+  if(!Array.isArray(vis) || !vis.length) return 'Visible to: No agencies yet';
+  var names = vis.map(function(email){
+    var u = USERS.find(function(x){ return x.role==='agency' && (x.email||'').toLowerCase()===email; });
+    return u ? u.name : email;
+  });
+  return 'Visible to: ' + names.join(', ');
+}
+
 async function drawPkgs(){
   loadPkgTerms();
   loadPkgTripNotes();
@@ -7642,8 +7681,19 @@ async function drawPkgs(){
     return;
   }
   el.innerHTML = '';
+  var isAgencyTab = _pkgViewTab === 'agency';
   PACKAGES.forEach(function(pkg){
-    var net = pkg.pricePerRoom.toFixed ? pkg.pricePerRoom.toFixed(2) : pkg.pricePerRoom;
+    var agencyPrice = pkg.agencyPricePerRoom || pkg.pricePerRoom;
+    var priceFooter = isAgencyTab
+      ? ('<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
+          '<div style="display:flex;justify-content:space-between;margin-bottom:6px">' +
+            '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">AGENCY PRICE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#00b4d8">$'+agencyPrice+'</div></div>' +
+          '</div>' +
+          '<div style="font-size:var(--font-size-xs);color:#6b7280">'+pkgVisibilitySummary(pkg)+'</div>' +
+        '</div>')
+      : ('<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
+          '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">GUEST PRICE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#111827">$'+pkg.pricePerRoom+'</div></div>' +
+        '</div>');
     var card = document.createElement('div');
     card.style.cssText = 'background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;border-top:4px solid '+(pkg.color||'#00b4d8');
     card.innerHTML =
@@ -7663,10 +7713,7 @@ async function drawPkgs(){
         '<div style="margin-bottom:12px">' +
           (pkg.includes||[]).map(function(inc){ return '<div style="font-size:var(--font-size-xs);color:#374151;padding:2px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:#00b4d8;font-size:var(--font-size-xs)"></i>'+inc+'</div>'; }).join('') +
         '</div>' +
-        '<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid #f3f4f6">' +
-          '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">RACK RATE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#111827">$'+pkg.pricePerRoom+'</div></div>' +
-          '<div style="text-align:right"><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">AGENCY NET</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#00b4d8">$'+net+'</div></div>' +
-        '</div>' +
+        priceFooter +
         '<div style="display:flex;gap:6px;margin-top:10px">' +
           '<button data-pid="'+pkg.id+'" onclick="openPkgForm(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-weight:600;font-family:inherit"><i class="ti ti-edit"></i> Edit</button>' +
           '<button data-pid="'+pkg.id+'" onclick="togglePkg(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-weight:600;font-family:inherit">'+(pkg.active?'<i class="ti ti-eye-off"></i> Disable':'<i class="ti ti-eye"></i> Enable')+'</button>' +
@@ -7748,6 +7795,10 @@ function openPkgForm(pid){
   document.getElementById('pkg-emoji').value = pkg ? (pkg.emoji||'📦') : '📦';
   document.getElementById('pkg-desc').value = pkg ? (pkg.description||'') : '';
   document.getElementById('pkg-price').value = pkg ? pkg.pricePerRoom : '';
+  // Prefill with the saved agency price if set; otherwise show the guest
+  // price as the starting point (not blank/0) so admins never see a $0
+  // agency rate for a package they haven't priced separately yet.
+  document.getElementById('pkg-agency-price').value = pkg ? (pkg.agencyPricePerRoom || pkg.pricePerRoom || '') : '';
   document.getElementById('pkg-nights').value = pkg ? pkg.nights : 1;
   document.getElementById('pkg-badge').value = pkg ? (pkg.badge||'') : '';
   document.getElementById('pkg-badge-style').value = pkg ? (pkg.badgeStyle||'gold') : 'gold';
@@ -7799,6 +7850,9 @@ function renderPkgAgencyChecklist(selectedEmails){
 function savePkg(){
   var name = (document.getElementById('pkg-name').value||'').trim();
   var price = +(document.getElementById('pkg-price').value||0);
+  // Agency price is optional — an admin who hasn't set it yet should never
+  // end up with a $0/blank agency rate, so fall back to the guest price.
+  var agencyPrice = +(document.getElementById('pkg-agency-price').value||0) || price;
   if(!name){toast('Enter a package name');return;}
   if(!price){toast('Enter a price');return;}
   var includes = (document.getElementById('pkg-includes').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
@@ -7815,6 +7869,7 @@ function savePkg(){
     emoji: (document.getElementById('pkg-emoji').value||'📦').trim(),
     description: (document.getElementById('pkg-desc').value||'').trim(),
     pricePerRoom: price,
+    agencyPricePerRoom: agencyPrice,
     nights: +(document.getElementById('pkg-nights').value||1),
     badge: (document.getElementById('pkg-badge').value||'').trim(),
     badgeStyle: document.getElementById('pkg-badge-style').value||'gold',

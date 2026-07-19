@@ -235,7 +235,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
     <!-- PACKAGES TAB -->
     <div id="tab-packages">
-      <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>All package prices are <strong>tax-inclusive</strong>. Your net rate (after commission) is shown on each package. Select a package to make a booking.</div></div>
+      <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>All package prices are <strong>tax-inclusive</strong>. Your agency rate is shown on each package. Select a package to make a booking.</div></div>
       <div class="pkg-grid" id="pkg-cards"></div>
     </div>
 
@@ -823,8 +823,10 @@ async function drawPackages(){
   var colors=['#00b4d8','#2563eb','#7c3aed','#dc2626','#d97706','#0891b2'];
   pkgs.forEach(function(pkg,i){
     var col=pkg.color||colors[i%colors.length];
-    var commission=pkg.commission||10;
-    var net=(pkg.pricePerRoom*(1-commission/100)).toFixed(2);
+    // Agency price is an explicit number the admin sets per package (not a
+    // commission-derived discount) — agencies only ever see this figure,
+    // never the website's retail price.
+    var agencyPrice=pkg.agencyPricePerRoom||pkg.pricePerRoom;
     var card=document.createElement('div');
     card.className='pkg-card';
     card.style.borderTop='4px solid '+col;
@@ -838,9 +840,8 @@ async function drawPackages(){
         +'<div style="margin-bottom:12px">'
           +(pkg.includes||[]).map(function(inc){return '<div style="font-size:var(--font-size-sm);padding:3px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:var(--green);font-size:var(--font-size-xs)"></i>'+inc+'</div>';}).join('')
         +'</div>'
-        +'<div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">'
-          +'<div><div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">RACK RATE</div><div style="font-size:var(--font-size-xl);font-weight:800">$'+pkg.pricePerRoom+'</div></div>'
-          +'<div style="text-align:right"><div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">YOUR NET RATE</div><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">$'+net+'</div><div style="font-size:var(--font-size-xs);color:var(--muted)">after '+commission+'% commission</div></div>'
+        +'<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">'
+          +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">AGENCY PRICE</div><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">$'+agencyPrice+'</div>'
         +'</div>'
         +'<button data-pid="'+pkg.id+'" onclick="openBookingModal(this.dataset.pid)" style="width:100%;background:'+col+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit">Book this package →</button>'
       +'</div>';
@@ -862,7 +863,7 @@ function drawMyBookings(){
     el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:var(--font-size-display);margin-bottom:12px">📋</div><p>No bookings yet.</p></div>';
     return;
   }
-  var h='<table class="tb"><thead><tr><th>Ref</th><th>Guest</th><th>Package</th><th>Room</th><th>Dates</th><th>Net</th><th>Status</th><th>Documents</th></tr></thead><tbody>';
+  var h='<table class="tb"><thead><tr><th>Ref</th><th>Guest</th><th>Package</th><th>Room</th><th>Dates</th><th>Total</th><th>Status</th><th>Documents</th></tr></thead><tbody>';
   myBookings.forEach(function(bk){
     var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
     h+='<tr>';
@@ -871,7 +872,7 @@ function drawMyBookings(){
     h+='<td style="font-size:var(--font-size-sm)">'+bk.packageName+'</td>';
     h+='<td style="font-size:var(--font-size-sm)">'+bk.rn+'</td>';
     h+='<td style="font-size:var(--font-size-sm)">'+fd(bk.ci)+' → '+fd(bk.co)+'<br><span style="color:var(--muted)">'+nights+' nights</span></td>';
-    h+='<td style="font-weight:700;color:var(--green)">$'+bk.netRate+'</td>';
+    h+='<td style="font-weight:700;color:var(--green)">$'+(bk.total||bk.netRate||bk.rackTotal||0)+'</td>';
     h+='<td><span class="badge '+(bk.st==='Confirmed'?'ok':'pending')+'">'+bk.st+'</span></td>';
     h+='<td><div style="display:flex;gap:4px"><button class="btn-outline" style="font-size:var(--font-size-xs);padding:4px 8px" onclick="generateBookingConfirmation(\''+bk.id+'\')">Confirmation</button><button class="btn-outline" style="font-size:var(--font-size-xs);padding:4px 8px" onclick="generateAgencyInvoice(\''+bk.id+'\')">Invoice</button></div></td>';
     h+='</tr>';
@@ -917,9 +918,8 @@ function generateAgencyInvoice(bkId){
     +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
     +'<tr><th>Dates</th><td>'+fd(bk.ci)+' → '+fd(bk.co)+' ('+nights+' nights)</td></tr>'
     +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
-    +'<tr><th>Rack total</th><td>$'+bk.rackTotal+'</td></tr>'
-    +'<tr><th>Commission ('+bk.commission+'%)</th><td>-$'+(bk.rackTotal-bk.netRate).toFixed(2)+'</td></tr>'
-    +'<tr><th><strong>Net amount due</strong></th><td><strong>$'+bk.netRate+'</strong></td></tr>'
+    +'<tr><th>Agency rate</th><td>$'+bk.rate+'/person/night</td></tr>'
+    +'<tr><th><strong>Total amount due</strong></th><td><strong>$'+(bk.total||bk.netRate||bk.rackTotal||0)+'</strong></td></tr>'
     +'<tr><th>Payment status</th><td>'+(bk.pay||'Unpaid')+'</td></tr>'
     +'</table>';
   _openDocWindow('Invoice - '+bk.id, html);
@@ -979,8 +979,7 @@ async function openBookingModal(pid){
   customExtras = [];
   removedIncludes = [];
 
-  var commission = selectedPkg.commission||10;
-  var net = (selectedPkg.pricePerRoom*(1-commission/100)).toFixed(2);
+  var agencyPrice = selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
 
   document.getElementById('bk-modal-title').textContent = 'Book: '+selectedPkg.name;
   document.getElementById('bk-pkg-summary').innerHTML =
@@ -988,7 +987,7 @@ async function openBookingModal(pid){
     +'<span style="font-size:var(--font-size-3xl)">'+(selectedPkg.emoji||'📦')+'</span>'
     +'<div><div style="font-size:var(--font-size-lg);font-weight:800">'+selectedPkg.name+'</div>'
     +'<div style="font-size:var(--font-size-xs);opacity:.8;margin-top:2px">'+(selectedPkg.includes||[]).slice(0,3).join(' · ')+'</div></div>'
-    +'<div style="margin-left:auto;text-align:right"><div style="font-size:var(--font-size-xs);opacity:.7">YOUR NET RATE</div><div style="font-size:var(--font-size-xl);font-weight:800">$'+net+'<span style="font-size:var(--font-size-xs);font-weight:400">/room/night</span></div></div>'
+    +'<div style="margin-left:auto;text-align:right"><div style="font-size:var(--font-size-xs);opacity:.7">AGENCY PRICE</div><div style="font-size:var(--font-size-xl);font-weight:800">$'+agencyPrice+'<span style="font-size:var(--font-size-xs);font-weight:400">/person/night</span></div></div>'
     +'</div>';
 
   // Render included items (removable checkboxes)
@@ -1149,10 +1148,12 @@ function updateBkSummary(){
 
   var nights = Math.round((new Date(co)-new Date(ci))/864e5);
   var ad = +(document.getElementById('bk-ad').value||2);
-  var commission = selectedPkg.commission||10;
 
-  // Base package price = per person per night × adults × nights
-  var basePerPersonNight = selectedPkg.pricePerRoom;
+  // Base package price = agency per-person/night rate × adults × nights.
+  // Agency price is an explicit number the admin sets per package (Package
+  // Manager's Agency Packages tab) — not a commission discount off the
+  // guest/retail price, so there's no further commission deduction here.
+  var basePerPersonNight = selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
   var basePerNight = basePerPersonNight * ad;
   var baseTotal = basePerNight * nights;
 
@@ -1186,9 +1187,7 @@ function updateBkSummary(){
     removedLines += '<div class="sum-row" style="color:#b91c1c"><span>- Removed: '+inc+'</span><span style="color:#6b7280">included</span></div>';
   });
 
-  var grandTotal = baseTotal + extrasTotal;
-  var netTotal = (grandTotal * (1-commission/100)).toFixed(2);
-  var commissionAmt = (grandTotal * commission/100).toFixed(2);
+  var grandTotal = (baseTotal + extrasTotal).toFixed(2);
 
   // Availability check
   if(rm){
@@ -1211,8 +1210,7 @@ function updateBkSummary(){
     +removedLines
     +extraLines
     +(extrasTotal>0?'<div class="sum-row"><span>Extras total</span><span>$'+extrasTotal.toFixed(2)+'</span></div>':'')
-    +'<div class="sum-row"><span>Commission ('+commission+'%)</span><span style="color:#b91c1c">-$'+commissionAmt+'</span></div>'
-    +'<div class="sum-row total"><span>Your net charge</span><span>$'+netTotal+'</span></div>'
+    +'<div class="sum-row total"><span>Total due</span><span>$'+grandTotal+'</span></div>'
     +'<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
     +'<div style="font-size:var(--font-size-xs);font-weight:700;color:var(--muted);margin-bottom:5px">FINAL PACKAGE INCLUDES</div>'
     +finalIncludes.map(function(i){return '<span style="font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#374151"><i class="ti ti-check" style="color:var(--green)"></i>'+i+'</span>';}).join('')
@@ -1244,24 +1242,25 @@ async function submitAgencyBooking(){
   var avail=isRoomAvailable(rm,ci,co);
   if(!avail.available){alert('Room not available: '+avail.reason);return;}
   var nights=Math.round((new Date(co)-new Date(ci))/864e5);
-  var commission=selectedPkg.commission||10;
+  // Agency price is an explicit per-package number (Package Manager's
+  // Agency Packages tab), not a commission discount off the guest price.
+  var agencyPrice=selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
   var extrasTotal=customExtras.reduce(function(s,ex){
     var c;
-    if(ex.type==='night') c=selectedPkg.pricePerRoom*ad;
+    if(ex.type==='night') c=agencyPrice*ad;
     else if(ex.perNight&&ex.perPerson) c=ex.price*nights*ad;
     else if(ex.perNight) c=ex.price*nights;
     else if(ex.perPerson) c=ex.price*ad;
     else c=ex.price;
     return s+c;
   },0);
-  var grandTotal=selectedPkg.pricePerRoom*nights*ad+extrasTotal;
-  var netTotal=(grandTotal*(1-commission/100)).toFixed(2);
+  var grandTotal=(agencyPrice*nights*ad+extrasTotal).toFixed(2);
   var finalIncludes=(selectedPkg.includes||[]).filter(function(i){return removedIncludes.indexOf(i)<0;});
   var allIncludes=finalIncludes.concat(customExtras.map(function(e){return e.name;}));
   var ref='AG-'+Date.now().toString().slice(-6);
   var bk={
     id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,
-    rn:rm,rate:selectedPkg.pricePerRoom,
+    rn:rm,rate:agencyPrice,
     ci:ci,co:co,ad:ad,ch:0,inf:0,
     src:'Agency',pay:'Unpaid',st:'Confirmed',ref:ref,
     notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+(notes?'. '+notes:''),
@@ -1272,9 +1271,7 @@ async function submitAgencyBooking(){
     extras:customExtras,
     agency:currentAgency.name||currentAgency.email,
     agencyEmail:currentAgency.email,
-    commission:commission,
-    rackTotal:grandTotal.toFixed(2),
-    netRate:netTotal,
+    total:grandTotal,
     bookedAt:new Date().toISOString()
   };
 
@@ -1291,7 +1288,7 @@ async function submitAgencyBooking(){
       guest_email: em, guest_phone: ph, guest_country: nat,
       check_in: ci, check_out: co,
       adults: ad||2, children: 0,
-      rate: selectedPkg.pricePerRoom||0, status: 'Confirmed',
+      rate: agencyPrice||0, status: 'Confirmed',
       source: 'Agency', notes: bk.notes,
       agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
       extra_beds: 0, trips: '[]', food_orders: '[]',
