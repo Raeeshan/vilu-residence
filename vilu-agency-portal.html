@@ -681,10 +681,13 @@ function showTab(name, el){
 // ── AVAILABILITY ── (see window.getAvailability/window.isRoomAvailable
 // below — the real implementations, reading live Firestore data)
 
+// type must exactly match the room category name on the Booking.com
+// channel manager for this property, same source of truth as the PMS's
+// VR array and the public website's ROOMS/DEFAULT_ROOMS.
 var ROOMS_LIST = [
-  {id:'VR01',name:'Room 101'},{id:'VR02',name:'Room 102'},
-  {id:'VR03',name:'Room 103'},{id:'VR04',name:'Room 104'},
-  {id:'VR05',name:'Room 105'},{id:'VR06',name:'Room 106'},
+  {id:'VR01',name:'Room 101',type:'Deluxe Family Room'},{id:'VR02',name:'Room 102',type:'Deluxe Family Room'},
+  {id:'VR03',name:'Room 103',type:'Double Room'},{id:'VR04',name:'Room 104',type:'Double Room'},
+  {id:'VR05',name:'Room 105',type:'Double Room'},{id:'VR06',name:'Room 106',type:'Deluxe Family Room with Open Deck'},
 ];
 
 // ── LIVE CALENDAR GRID ──
@@ -728,7 +731,7 @@ async function renderAgencyCalendarGrid(){
   html += '</tr>';
 
   ROOMS_LIST.forEach(function(room){
-    html += '<tr><td style="padding:6px 10px;font-weight:700;position:sticky;left:0;background:#fff;border-right:1px solid var(--border)">'+room.name+'</td>';
+    html += '<tr><td style="padding:6px 10px;font-weight:700;position:sticky;left:0;background:#fff;border-right:1px solid var(--border)"><div>'+room.name+'</div><div style="font-weight:400;font-size:var(--font-size-xs);color:#6b7280">'+room.type+'</div></td>';
     days.forEach(function(d){
       var ds = ymdStr(d);
       var cellStyle = 'background:#dcfce7;border:1px solid #86efac'; // available
@@ -773,6 +776,7 @@ async function checkAvailability(){
     var slot=document.createElement('div');
     slot.className='room-slot'+(avail.available?'':avail.reason&&avail.reason.indexOf('Your')>-1?' mine':' blocked');
     slot.innerHTML='<div style="font-size:var(--font-size-base);font-weight:700">'+room.name+'</div>'
+      +'<div style="font-size:var(--font-size-xs);color:#6b7280">'+room.type+'</div>'
       +'<div style="font-size:var(--font-size-xs);margin-top:4px;color:'+(avail.available?'var(--green)':avail.reason&&avail.reason.indexOf('Your')>-1?'#0096c7':'#b91c1c')+'">'+(avail.available?'✓ Available':avail.reason)+'</div>';
     grid.appendChild(slot);
   });
@@ -1052,14 +1056,14 @@ async function bkRefreshRoomOptions(){
   var prevVal = sel.value;
   sel.innerHTML = '<option value="">-- Select room --</option>';
   if(!ci || !co || co<=ci){
-    ROOMS_LIST.forEach(function(r){ sel.add(new Option(r.name, r.id)); });
+    ROOMS_LIST.forEach(function(r){ sel.add(new Option(r.name+' · '+r.type, r.id)); });
   } else {
     await fetchLiveAvailability();
     var available = ROOMS_LIST.filter(function(r){ return isRoomAvailable(r.id, ci, co).available; });
     if(!available.length){
       sel.add(new Option('No rooms available for these dates',''));
     } else {
-      available.forEach(function(r){ sel.add(new Option(r.name, r.id)); });
+      available.forEach(function(r){ sel.add(new Option(r.name+' · '+r.type, r.id)); });
     }
   }
   if(prevVal && Array.from(sel.options).some(function(o){return o.value===prevVal;})) sel.value = prevVal;

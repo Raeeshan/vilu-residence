@@ -3422,12 +3422,12 @@ Snorkelling trip"></textarea>
           <div class="fg" style="margin:0"><label>Room</label>
             <select id="blk-rm">
               <option value="">-- Select room --</option>
-              <option value="VR01">Room 101</option>
-              <option value="VR02">Room 102</option>
-              <option value="VR03">Room 103</option>
-              <option value="VR04">Room 104</option>
-              <option value="VR05">Room 105</option>
-              <option value="VR06">Room 106</option>
+              <option value="VR01">Room 101 — Deluxe Family Room</option>
+              <option value="VR02">Room 102 — Deluxe Family Room</option>
+              <option value="VR03">Room 103 — Double Room</option>
+              <option value="VR04">Room 104 — Double Room</option>
+              <option value="VR05">Room 105 — Double Room</option>
+              <option value="VR06">Room 106 — Deluxe Family Room with Open Deck</option>
             </select>
           </div>
           <div class="fg" style="margin:0"><label>Reason / group name</label><input type="text" id="blk-note" placeholder="e.g. Tour group - 15 pax"></div>
@@ -3459,12 +3459,12 @@ Snorkelling trip"></textarea>
         <div class="fg" style="margin:0"><label>Room *</label>
           <select id="bk-rm" onchange="updateBkSummary()">
             <option value="">-- Select room --</option>
-            <option value="VR01">Room 101</option>
-            <option value="VR02">Room 102</option>
-            <option value="VR03">Room 103</option>
-            <option value="VR04">Room 104</option>
-            <option value="VR05">Room 105</option>
-            <option value="VR06">Room 106</option>
+            <option value="VR01">Room 101 — Deluxe Family Room</option>
+            <option value="VR02">Room 102 — Deluxe Family Room</option>
+            <option value="VR03">Room 103 — Double Room</option>
+            <option value="VR04">Room 104 — Double Room</option>
+            <option value="VR05">Room 105 — Double Room</option>
+            <option value="VR06">Room 106 — Deluxe Family Room with Open Deck</option>
           </select>
         </div>
         <div class="fg" style="margin:0"><label>Adults</label>
@@ -3751,13 +3751,17 @@ const CW=36;let IC=1000;
 let TAX={tgst:17,green:6,svc:10,bed:0};
 let PROP={nm:'Vilu Residence Maamigili',addr:'South Ari Atoll, Maamigili, 00100',ph:'+960 9903339',em:'Viluresidence@gmail.com',gst:'MVT-2025-00001',bk:''};
 
+// type must exactly match the room category name as listed on the
+// Booking.com channel manager for this property — the website, agency
+// portal, and Holiday Package "Includes" text all key off this same
+// string so guests never see a different room name here vs. Booking.com.
 const VR=[
-  {n:'VR01',nm:'Room 101',type:'Double',rate:80,cap:3},
-  {n:'VR02',nm:'Room 102',type:'Double',rate:80,cap:3},
-  {n:'VR03',nm:'Room 103',type:'Double',rate:85,cap:3},
-  {n:'VR04',nm:'Room 104',type:'Double',rate:85,cap:3},
-  {n:'VR05',nm:'Room 105',type:'Double',rate:90,cap:3},
-  {n:'VR06',nm:'Room 106',type:'Double',rate:90,cap:3},
+  {n:'VR01',nm:'Room 101',type:'Deluxe Family Room',rate:80,cap:3},
+  {n:'VR02',nm:'Room 102',type:'Deluxe Family Room',rate:80,cap:3},
+  {n:'VR03',nm:'Room 103',type:'Double Room',rate:85,cap:3},
+  {n:'VR04',nm:'Room 104',type:'Double Room',rate:85,cap:3},
+  {n:'VR05',nm:'Room 105',type:'Double Room',rate:90,cap:3},
+  {n:'VR06',nm:'Room 106',type:'Deluxe Family Room with Open Deck',rate:90,cap:3},
 ];
 
 let PH=[
@@ -4186,7 +4190,7 @@ function drawCal(){
   var occ={};
   dates.forEach(function(d){var ds=lDs(d);occ[ds]=RES.filter(function(r){return r.prop==='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds;}).length;});
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
-  VR.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room"><div><div class="rn">'+rm.nm+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
+  VR.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room"><div><div class="rn">'+rm.nm+'</div><div class="rt">'+rm.type+' · $'+rm.rate+'/night</div></div></div>';});
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
     fH+='<div class="cb-section-lbl" style="background:'+h.color+'22"><span style="color:'+h.color+'">'+h.nm+'</span></div>';
@@ -4600,7 +4604,7 @@ async function edRefreshRoomOptions(ci,co,selectRn){
     hidden.value=stillThere?prevVal:'';
     tb.innerHTML=available.map(function(rm){
       const isSel=stillThere&&rm.n===prevVal;
-      return '<tr data-rn="'+rm.n+'" style="'+(isSel?'background:#e0f7fa':'')+'"><td>'+rm.nm+'</td><td>$'+rm.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="edSelectRoom(\''+rm.n+'\')">'+(isSel?'Selected':'Select')+'</button></td></tr>';
+      return '<tr data-rn="'+rm.n+'" style="'+(isSel?'background:#e0f7fa':'')+'"><td>'+rm.nm+(rm.type?' · '+rm.type:'')+'</td><td>$'+rm.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="edSelectRoom(\''+rm.n+'\')">'+(isSel?'Selected':'Select')+'</button></td></tr>';
     }).join('');
   }
   edC();
@@ -5451,7 +5455,7 @@ async function nbRenderRooms(){
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="3" style="color:#9ca3af;font-size:var(--font-size-sm);padding:8px">'+(available.length?'All available rooms added':'No rooms available for these dates')+'</td></tr>';
   } else {
-    tb.innerHTML=rows.map(r=>'<tr><td>'+r.nm+'</td><td>$'+r.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="nbAddRoom(\''+r.n+'\')">Add</button></td></tr>').join('');
+    tb.innerHTML=rows.map(r=>'<tr><td>'+r.nm+(r.type?' · '+r.type:'')+'</td><td>$'+r.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="nbAddRoom(\''+r.n+'\')">Add</button></td></tr>').join('');
   }
   nbRenderSelectedList();
 }
@@ -5459,7 +5463,7 @@ function nbAddRoom(rn){
   const rm=getR(rn);if(!rm)return;
   const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
   const rate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
-  nbSelectedRooms.push({n:rn,nm:rm.nm,rate});
+  nbSelectedRooms.push({n:rn,nm:rm.nm,type:rm.type,rate});
   nbRenderRooms();
 }
 function nbRemoveRoom(rn){
@@ -5471,7 +5475,7 @@ function nbRenderSelectedList(){
   if(!nbSelectedRooms.length){
     list.innerHTML='<div style="font-size:var(--font-size-sm);color:#9ca3af">No rooms selected yet</div>';
   } else {
-    list.innerHTML=nbSelectedRooms.map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:6px;padding:6px 10px;font-size:var(--font-size-sm)"><span>'+r.nm+' — $'+r.rate+'/night</span><button class="btn sm" onclick="nbRemoveRoom(\''+r.n+'\')" aria-label="Remove"><i class="ti ti-x"></i></button></div>').join('');
+    list.innerHTML=nbSelectedRooms.map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:6px;padding:6px 10px;font-size:var(--font-size-sm)"><span>'+r.nm+(r.type?' · '+r.type:'')+' — $'+r.rate+'/night</span><button class="btn sm" onclick="nbRemoveRoom(\''+r.n+'\')" aria-label="Remove"><i class="ti ti-x"></i></button></div>').join('');
   }
   nbCalc();
 }
@@ -6591,7 +6595,7 @@ function rdRenderTab(n, r){
   const footer = document.getElementById('rd-footer');
   const x = calcTax(r);
   if(n===0){
-    const vrOpts = VR.map(function(rm){return '<option value="'+rm.n+'"'+(rm.n===r.rn?' selected':'')+'>'+rm.nm+' — $'+rm.rate+'/night</option>';}).join('');
+    const vrOpts = VR.map(function(rm){return '<option value="'+rm.n+'"'+(rm.n===r.rn?' selected':'')+'>'+rm.nm+' · '+rm.type+' — $'+rm.rate+'/night</option>';}).join('');
     const srcOpts = ['Direct','Booking.com','Airbnb','Agoda','Expedia','Google Hotels','Phone','Walk-in'].map(function(s){return '<option'+(s===r.src?' selected':'')+'>'+s+'</option>';}).join('');
     const adOpts = [1,2,3,4].map(function(n2){return '<option'+(n2===r.ad?' selected':'')+'>'+n2+'</option>';}).join('');
     const chOpts = [0,1,2,3].map(function(n2){return '<option'+(n2===r.ch?' selected':'')+'>'+n2+'</option>';}).join('');
@@ -6696,7 +6700,7 @@ async function rdRefreshRoomOptions(ci,co){
   if(!available.length){
     sel.add(new Option('No rooms available for these dates',''));
   } else {
-    available.forEach(function(rm){ sel.add(new Option(rm.nm+' — $'+rm.rate+'/night',rm.n)); });
+    available.forEach(function(rm){ sel.add(new Option(rm.nm+(rm.type?' · '+rm.type:'')+' — $'+rm.rate+'/night',rm.n)); });
   }
   if(prevVal && Array.from(sel.options).some(function(o){return o.value===prevVal;})) sel.value=prevVal;
 }
@@ -7465,7 +7469,7 @@ function renderEngRoomForm(rn){
     :'<div style="width:100%;height:90px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);color:#9ca3af;margin-bottom:8px">No photo — upload below</div>';
 
   el.innerHTML=
-    '<div style="font-size:var(--font-size-base);font-weight:800;color:#00b4d8;margin-bottom:12px">'+vr.nm+' — $'+vr.rate+'/night</div>'+
+    '<div style="font-size:var(--font-size-base);font-weight:800;color:#00b4d8;margin-bottom:12px">'+vr.nm+' · '+vr.type+' — $'+vr.rate+'/night</div>'+
     '<div class="rd-section">Description</div>'+
     '<div class="fg"><label>Short description</label>'+
     '<textarea id="eng-desc" rows="3" style="font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;width:100%;resize:vertical">'+(d.description||'')+'</textarea></div>'+
@@ -8407,9 +8411,9 @@ function isRoomAvailable(rn, ci, co, excludeId){
 }
 
 var ROOMS_LIST = [
-  {id:'VR01',name:'Room 101'},{id:'VR02',name:'Room 102'},
-  {id:'VR03',name:'Room 103'},{id:'VR04',name:'Room 104'},
-  {id:'VR05',name:'Room 105'},{id:'VR06',name:'Room 106'},
+  {id:'VR01',name:'Room 101 — Deluxe Family Room'},{id:'VR02',name:'Room 102 — Deluxe Family Room'},
+  {id:'VR03',name:'Room 103 — Double Room'},{id:'VR04',name:'Room 104 — Double Room'},
+  {id:'VR05',name:'Room 105 — Double Room'},{id:'VR06',name:'Room 106 — Deluxe Family Room with Open Deck'},
 ];
 
 function checkAvailability(){
@@ -8911,12 +8915,12 @@ function loadPMSData_BE(){
     var sd=localStorage.getItem('vilu_room_details');
     var details=sd?JSON.parse(sd):{};
     var rooms = sr ? JSON.parse(sr) : [
-      {id:'VR01',name:'Room 101',type:'Double',rate:80,cap:3},
-      {id:'VR02',name:'Room 102',type:'Double',rate:80,cap:3},
-      {id:'VR03',name:'Room 103',type:'Double',rate:85,cap:3},
-      {id:'VR04',name:'Room 104',type:'Double',rate:85,cap:3},
-      {id:'VR05',name:'Room 105',type:'Double',rate:90,cap:3},
-      {id:'VR06',name:'Room 106',type:'Double',rate:90,cap:3},
+      {id:'VR01',name:'Room 101',type:'Deluxe Family Room',rate:80,cap:3},
+      {id:'VR02',name:'Room 102',type:'Deluxe Family Room',rate:80,cap:3},
+      {id:'VR03',name:'Room 103',type:'Double Room',rate:85,cap:3},
+      {id:'VR04',name:'Room 104',type:'Double Room',rate:85,cap:3},
+      {id:'VR05',name:'Room 105',type:'Double Room',rate:90,cap:3},
+      {id:'VR06',name:'Room 106',type:'Deluxe Family Room with Open Deck',rate:90,cap:3},
     ];
     return rooms.map(function(r){
       var d=details[r.id]||{};
@@ -9872,7 +9876,7 @@ async function getAvailableRoomsWithRates(candidateRooms, ci, co, excludeId) {
       if (occupied) return null;
       if (await hasBlockConflict(rm.n, ci, co)) return null;
       var rate = isVR(rm.n) ? getDateRangeRate(rm.n, ci, co) : rm.rate;
-      return { n: rm.n, nm: rm.nm, rate: rate };
+      return { n: rm.n, nm: rm.nm, type: rm.type, rate: rate };
     } catch(e) { return null; }
   }));
   return results.filter(Boolean);
