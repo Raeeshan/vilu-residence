@@ -927,9 +927,9 @@ function generateAgencyInvoice(bkId){
   if(!bk) return;
   var nights=bk.totalNights||Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
   var baseNights=bk.baseNights||nights;
-  var baseTotal=(bk.rate*(bk.ad||2)*baseNights).toFixed(2);
+  var baseTotal=(bk.rate*(bk.ad||2)).toFixed(2);
   var lineRows=
-    '<tr><th>Package base ('+baseNights+' nights × '+(bk.ad||2)+' pax × $'+bk.rate+')</th><td>$'+baseTotal+'</td></tr>'
+    '<tr><th>Package base ('+baseNights+' nights · '+(bk.ad||2)+' pax × $'+bk.rate+'/person)</th><td>$'+baseTotal+'</td></tr>'
     +(bk.extraNights?'<tr><th>Additional nights ('+bk.extraNights+' × '+(bk.ad||2)+' pax)</th><td>$'+bk.extraNightsCost+'</td></tr>':'')
     +(bk.transferArrival?'<tr><th>Arrival transfer ('+bk.transferArrival+')</th><td>'+(bk.transferArrival==='Speedboat'?'Included':'$'+bk.arrTransferCost)+'</td></tr>':'')
     +(bk.transferDeparture?'<tr><th>Departure transfer ('+bk.transferDeparture+')</th><td>'+(bk.transferDeparture==='Speedboat'?'Included':'$'+bk.depTransferCost)+'</td></tr>':'')
@@ -1062,7 +1062,7 @@ async function openBookingModal(pid){
     +'<span style="font-size:var(--font-size-3xl)">'+(selectedPkg.emoji||'📦')+'</span>'
     +'<div><div style="font-size:var(--font-size-lg);font-weight:800">'+selectedPkg.name+'</div>'
     +'<div style="font-size:var(--font-size-xs);opacity:.8;margin-top:2px">'+(selectedPkg.includes||[]).slice(0,3).join(' · ')+'</div></div>'
-    +'<div style="margin-left:auto;text-align:right"><div style="font-size:var(--font-size-xs);opacity:.7">AGENCY PRICE</div><div style="font-size:var(--font-size-xl);font-weight:800">$'+agencyPrice+'<span style="font-size:var(--font-size-xs);font-weight:400">/person/night</span></div></div>'
+    +'<div style="margin-left:auto;text-align:right"><div style="font-size:var(--font-size-xs);opacity:.7">AGENCY PRICE</div><div style="font-size:var(--font-size-xl);font-weight:800">$'+agencyPrice+'<span style="font-size:var(--font-size-xs);font-weight:400">/person</span></div></div>'
     +'</div>';
 
   // Render included items (removable checkboxes)
@@ -1276,11 +1276,13 @@ function updateBkSummary(){
   // price base nights and extra nights at their own separate rates.
   var totalNights = Math.round((new Date(co)-new Date(ci))/864e5);
 
-  // Base package price = agency per-person/night rate × adults × the
-  // package's OWN fixed nights only — extra nights are priced separately
-  // below at the flat admin-set rate, not the package's agency rate.
+  // Base package price is a fixed per-person rate for the WHOLE package
+  // (e.g. $775 covers all 10 nights of the "10 Nights Maldives Bliss"
+  // package) — never multiplied by nights. Extra nights beyond the
+  // package's own fixed duration are priced separately below at the flat
+  // admin-set rate, and are the only nightly component of the base stay.
   var basePerPersonNight = selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
-  var baseTotal = basePerPersonNight * ad * baseNights;
+  var baseTotal = basePerPersonNight * ad;
 
   var extraNightsCost = extraNights * settings.extraNightRate * ad;
 
@@ -1357,7 +1359,7 @@ function updateBkSummary(){
 
   document.getElementById('bk-price-summary').innerHTML =
     '<div style="margin-bottom:8px;font-size:var(--font-size-xs);font-weight:700;color:var(--muted)">PRICE BREAKDOWN</div>'
-    +'<div class="sum-row"><span>Package base ('+baseNights+' nights × '+ad+' pax × $'+basePerPersonNight+')</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
+    +'<div class="sum-row"><span>Package base ('+baseNights+' nights · '+ad+' pax × $'+basePerPersonNight+'/person)</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
     +(extraNights>0?'<div class="sum-row"><span>Additional nights ('+extraNights+' × '+ad+' pax × $'+settings.extraNightRate+')</span><span>$'+extraNightsCost.toFixed(2)+'</span></div>':'')
     +transferLines
     +boardLine
@@ -1400,11 +1402,12 @@ async function submitAgencyBooking(){
   var extraNights=_bkExtraNights||0;
   var totalNights=Math.round((new Date(co)-new Date(ci))/864e5);
   // Agency price is an explicit per-package number (Package Manager's
-  // Agency Packages tab), not a commission discount off the guest price.
-  // Extra nights, transfer, and board are priced separately — see
-  // updateBkSummary() for the identical math shown live in the modal.
+  // Agency Packages tab) fixed for the WHOLE package, not a per-night rate
+  // — never multiplied by nights. Extra nights, transfer, and board are
+  // priced separately — see updateBkSummary() for the identical math shown
+  // live in the modal.
   var agencyPrice=selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
-  var baseTotal=agencyPrice*ad*baseNights;
+  var baseTotal=agencyPrice*ad;
   var extraNightsCost=extraNights*settings.extraNightRate*ad;
   var arrTransferCost=_bkTransferArrival==='flight'?settings.flightSurcharge*ad:0;
   var depTransferCost=_bkTransferDeparture==='flight'?settings.flightSurcharge*ad:0;
