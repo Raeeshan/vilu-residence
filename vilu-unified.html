@@ -1568,7 +1568,7 @@ body.pms-mode { overflow:hidden; }
       <h2 style="font-size:var(--font-size-lg);font-weight:700">Package manager</h2>
       <p style="font-size:var(--font-size-sm);color:#6b7280;margin-top:3px">Create and manage packages for agencies. All prices are tax-inclusive.</p>
     </div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px" id="pkg-toolbar-new-btns">
       <button class="btn" onclick="syncAllPackagesNow()" style="border-color:#00b4d8;color:#00b4d8"><i class="ti ti-refresh"></i>Sync all packages to Firestore now</button>
       <button class="btn p" onclick="openPkgForm(null)"><i class="ti ti-plus"></i>New package</button>
     </div>
@@ -1588,6 +1588,10 @@ body.pms-mode { overflow:hidden; }
     </div>
     <button class="btn p" onclick="saveAgencyBookingSettings()"><i class="ti ti-device-floppy"></i>Save settings</button>
     <span id="agy-settings-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f3f4f6">
+      <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:8px">Each agency now has its own independent package set (edit one from that agency's row in User Management). Existing agencies from before this feature can be given one now:</p>
+      <button class="btn" onclick="backfillAgencyPackages()"><i class="ti ti-refresh"></i>Backfill missing agency package sets</button>
+    </div>
   </div>
   <div class="card" style="margin-bottom:14px">
     <h3><i class="ti ti-file-text" style="margin-right:6px"></i>Package terms</h3>
@@ -2025,6 +2029,49 @@ Suite</textarea></div>
   </div>
 </div>
 
+<!-- AGENCY PACKAGE SET MODAL — each agency's own independent package copy,
+     opened from that agency's row in User Management. Never touches the
+     master 8 template or any other agency's packages. -->
+<div class="mbg" id="m-agency-pkgs" onclick="if(event.target===this)closeAgencyPkgManager()">
+  <div class="mdl" style="width:640px;max-height:85vh;overflow-y:auto">
+    <div class="mhd">
+      <h3><i class="ti ti-building-store" style="color:#00b4d8;margin-right:6px"></i>Packages — <span id="agy-pkg-agency-name"></span></h3>
+      <button class="ab" onclick="closeAgencyPkgManager()"><i class="ti ti-x"></i></button>
+    </div>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">
+      <strong id="agy-pkg-agency-email"></strong> — fully independent from the master template and every other agency. Changes here only ever affect what this one agency sees in the Agency Portal.
+    </p>
+
+    <div id="agy-pkg-list-view">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn p" style="flex:1" onclick="openAgencyPkgForm(null)"><i class="ti ti-plus"></i>New package</button>
+        <button class="btn" onclick="resetAgencyPkgsToMaster()"><i class="ti ti-refresh"></i>Reset to master 8</button>
+      </div>
+      <div id="agy-pkg-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <div id="agy-pkg-form-view" style="display:none">
+      <div class="fg"><label>Package name</label><input type="text" id="agy-pkg-name" placeholder="e.g. 5 Nights Adventure Break"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fg"><label>Emoji</label><input type="text" id="agy-pkg-emoji" placeholder="📦" maxlength="4"></div>
+        <div class="fg"><label>Nights</label><input type="number" id="agy-pkg-nights" min="1" value="1"></div>
+      </div>
+      <div class="fg"><label>Agency price ($/person)</label><input type="number" id="agy-pkg-price" min="0" step="5"></div>
+      <div class="fg"><label>Description</label><input type="text" id="agy-pkg-desc" placeholder="Short one-line hook"></div>
+      <div class="fg"><label>Includes (one per line)</label><textarea id="agy-pkg-includes" rows="4" placeholder="Round-trip speedboat transfer
+5 nights accommodation (Standard Room)
+Daily breakfast"></textarea></div>
+      <div class="fg"><label>Activities (one per line — bake the price into the label, e.g. "Whale Shark Snorkeling — $72")</label><textarea id="agy-pkg-activities" rows="4"></textarea></div>
+      <div class="fg"><label>Add-ons (one per line: Name | Price | Unit)</label><textarea id="agy-pkg-addons" rows="3" placeholder="Half-Board | 25 | /day
+Full-Board | 40 | /day"></textarea></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn p" style="flex:1" onclick="saveAgencyPkgForm()"><i class="ti ti-device-floppy"></i>Save package</button>
+        <button class="btn" onclick="closeAgencyPkgForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- CATEGORY MANAGER MODAL -->
 <div class="mbg" id="m-catmgr" onclick="if(event.target===this)this.classList.remove('on')">
@@ -2176,14 +2223,6 @@ Full-Board | 40 | /day
 Photography | 25 | /hr"></textarea>
     </div>
     <div class="al bl" style="margin-bottom:12px"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>All package prices are <strong>tax-inclusive</strong>.</div></div>
-    <div class="fg">
-      <label>Visible to</label>
-      <div style="display:flex;gap:16px;margin-bottom:8px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-base);font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="all" checked onchange="pkgVisibilityChanged()"> All agencies</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-base);font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="specific" onchange="pkgVisibilityChanged()"> Specific agencies only</label>
-      </div>
-      <div id="pkg-agency-checklist" style="display:none;max-height:140px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px"></div>
-    </div>
     <div style="display:flex;gap:8px">
       <button class="btn p" style="flex:1" onclick="savePkg()"><i class="ti ti-device-floppy"></i>Save package</button>
       <button class="btn" onclick="document.getElementById('m-pkg').classList.remove('on')">Cancel</button>
@@ -3239,14 +3278,6 @@ Daily breakfast
 Snorkelling trip"></textarea>
     </div>
     <div class="al bl" style="margin-bottom:12px"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>All package prices are <strong>tax-inclusive</strong>.</div></div>
-    <div class="fg">
-      <label>Visible to</label>
-      <div style="display:flex;gap:16px;margin-bottom:8px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-base);font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="all" checked onchange="pkgVisibilityChanged()"> All agencies</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-base);font-weight:400;cursor:pointer"><input type="radio" name="pkg-vis" value="specific" onchange="pkgVisibilityChanged()"> Specific agencies only</label>
-      </div>
-      <div id="pkg-agency-checklist" style="display:none;max-height:140px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px"></div>
-    </div>
     <div style="display:flex;gap:8px">
       <button class="btn p" style="flex:1" onclick="savePkg()"><i class="ti ti-device-floppy"></i>Save package</button>
       <button class="btn" onclick="document.getElementById('m-pkg').classList.remove('on')">Cancel</button>
@@ -6004,6 +6035,7 @@ function renderUsersTable(){
       <td>${accessCell}</td>
       <td>
         <div style="display:flex;gap:4px">
+          ${u.role==='agency' ? `<button class="ab" title="This agency's packages" onclick="openAgencyPkgManager('${u.email}')"><i class="ti ti-package"></i></button>` : ''}
           <button class="ab" title="Edit" onclick="openEditUser('${u.email}')"><i class="ti ti-edit"></i></button>
           ${!isMe ? `<button class="ab" title="Delete" style="color:#b91c1c" onclick="deleteUser('${u.email}')"><i class="ti ti-trash"></i></button>` : ''}
         </div>
@@ -6179,6 +6211,12 @@ async function saveAddUser(){
     USERS.push({email, role:auRoleSelected, name, uid:newUid});
     saveUsers(USERS);
     closeAddUser();
+    if (auRoleSelected === 'agency') {
+      // Seed this agency's own independent package set from the master 8
+      // right away — never leave a new agency with an empty Agency Portal.
+      try { await createAgencyPackageSet(email, false); }
+      catch(e) { console.error('createAgencyPackageSet failed for new agency', email, e); }
+    }
     toast('✓ '+name+' added as '+auRoleSelected);
   }
   drawUsers();
@@ -6212,6 +6250,163 @@ function applyUserMgmtVisibility(){
     const sl = document.getElementById(id);
     if(sl) sl.style.display = isAdmin ? '' : 'none';
   });
+}
+
+// ── PER-AGENCY PACKAGE EDITOR (opened from a specific agency's row) ──
+var _agyPkgEmail = null;
+var _agyPkgWorking = [];
+var _agyPkgEditId = null;
+
+async function openAgencyPkgManager(email){
+  if(!currentUser||currentUser.role!=="admin"){toast("⛔ Admin access only");return;}
+  email = (email||'').toLowerCase();
+  var u = USERS.find(function(x){ return (x.email||'').toLowerCase()===email; });
+  if(!u){ toast('Agency not found'); return; }
+  _agyPkgEmail = email;
+  _agyPkgEditId = null;
+  document.getElementById('agy-pkg-agency-name').textContent = u.name;
+  document.getElementById('agy-pkg-agency-email').textContent = email;
+  document.getElementById('agy-pkg-list-view').style.display = '';
+  document.getElementById('agy-pkg-form-view').style.display = 'none';
+  document.getElementById('agy-pkg-list').innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af">Loading…</div>';
+  document.getElementById('m-agency-pkgs').classList.add('on');
+  try {
+    var snap = await fsDb.collection('agency_packages').doc(email).get();
+    if(snap.exists){
+      _agyPkgWorking = snap.data().packages || [];
+    } else {
+      // Safety net for an agency somehow still without a set (e.g. created
+      // right before this feature shipped, backfill not yet run).
+      await createAgencyPackageSet(email, false);
+      var snap2 = await fsDb.collection('agency_packages').doc(email).get();
+      _agyPkgWorking = (snap2.exists && snap2.data().packages) || [];
+    }
+  } catch(e) {
+    console.error('openAgencyPkgManager failed', e);
+    toast('⚠️ Could not load this agency\'s packages');
+    _agyPkgWorking = [];
+  }
+  renderAgencyPkgList();
+}
+
+function closeAgencyPkgManager(){
+  document.getElementById('m-agency-pkgs').classList.remove('on');
+  _agyPkgEmail = null;
+  _agyPkgWorking = [];
+  _agyPkgEditId = null;
+}
+
+function renderAgencyPkgList(){
+  var el = document.getElementById('agy-pkg-list');
+  if(!el) return;
+  if(!_agyPkgWorking.length){
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:#9ca3af">No packages yet. Click "New package" or "Reset to master 8".</div>';
+    return;
+  }
+  el.innerHTML = _agyPkgWorking.map(function(pkg){
+    var price = pkg.agencyPricePerRoom || pkg.pricePerRoom || 0;
+    return '<div style="border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      + '<div><div style="font-weight:700;font-size:var(--font-size-base)">'+(pkg.emoji||'📦')+' '+pkg.name+'</div>'
+      + '<div style="font-size:var(--font-size-sm);color:#6b7280">$'+price+'/person · '+pkg.nights+' night'+(pkg.nights>1?'s':'')+'</div></div>'
+      + '<div style="display:flex;gap:4px;flex-shrink:0">'
+      + '<button class="ab" title="Edit" onclick="openAgencyPkgForm(\''+pkg.id+'\')"><i class="ti ti-edit"></i></button>'
+      + '<button class="ab" title="Delete" style="color:#b91c1c" onclick="deleteAgencyPkg(\''+pkg.id+'\')"><i class="ti ti-trash"></i></button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function openAgencyPkgForm(pid){
+  _agyPkgEditId = pid;
+  var pkg = pid ? _agyPkgWorking.find(function(p){return p.id===pid;}) : null;
+  document.getElementById('agy-pkg-name').value = pkg ? pkg.name : '';
+  document.getElementById('agy-pkg-emoji').value = pkg ? (pkg.emoji||'📦') : '📦';
+  document.getElementById('agy-pkg-nights').value = pkg ? pkg.nights : 1;
+  document.getElementById('agy-pkg-price').value = pkg ? (pkg.agencyPricePerRoom||pkg.pricePerRoom||'') : '';
+  document.getElementById('agy-pkg-desc').value = pkg ? (pkg.description||'') : '';
+  document.getElementById('agy-pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : '';
+  document.getElementById('agy-pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
+  document.getElementById('agy-pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
+  document.getElementById('agy-pkg-list-view').style.display = 'none';
+  document.getElementById('agy-pkg-form-view').style.display = '';
+}
+
+function closeAgencyPkgForm(){
+  document.getElementById('agy-pkg-list-view').style.display = '';
+  document.getElementById('agy-pkg-form-view').style.display = 'none';
+  _agyPkgEditId = null;
+}
+
+async function saveAgencyPkgForm(){
+  var name = (document.getElementById('agy-pkg-name').value||'').trim();
+  var price = +(document.getElementById('agy-pkg-price').value||0);
+  if(!name){ toast('Enter a package name'); return; }
+  if(!price){ toast('Enter a price'); return; }
+  var includes = (document.getElementById('agy-pkg-includes').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var activities = (document.getElementById('agy-pkg-activities').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var addOns = (document.getElementById('agy-pkg-addons').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean).map(function(line){
+    var parts = line.split('|').map(function(s){return s.trim();});
+    return { name: parts[0]||'', price: +(parts[1]||0), unit: parts[2]||'' };
+  }).filter(function(a){return a.name;});
+  var pkg = {
+    id: _agyPkgEditId || ('AGYPKG'+Date.now()),
+    name: name,
+    emoji: (document.getElementById('agy-pkg-emoji').value||'📦').trim(),
+    description: (document.getElementById('agy-pkg-desc').value||'').trim(),
+    pricePerRoom: price,
+    agencyPricePerRoom: price,
+    nights: +(document.getElementById('agy-pkg-nights').value||1),
+    includes: includes,
+    activities: activities,
+    addOns: addOns,
+    color: '#00b4d8',
+    active: true,
+    channel: 'agency'
+  };
+  if(_agyPkgEditId){
+    var idx = _agyPkgWorking.findIndex(function(p){return p.id===_agyPkgEditId;});
+    if(idx>-1) _agyPkgWorking[idx] = pkg;
+  } else {
+    _agyPkgWorking.push(pkg);
+  }
+  try {
+    await fsDb.collection('agency_packages').doc(_agyPkgEmail).set({ email: _agyPkgEmail, packages: _agyPkgWorking }, { merge: true });
+    toast('✓ Package saved');
+  } catch(e) {
+    console.error('saveAgencyPkgForm failed', e);
+    toast('⚠️ Could not save — please try again');
+    return;
+  }
+  closeAgencyPkgForm();
+  renderAgencyPkgList();
+}
+
+function deleteAgencyPkg(pid){
+  showConfirm({title:'Delete this package?',msg:'This only removes it from this agency\'s own package set — the master 8 and every other agency are unaffected.',icon:'🗑️',btnLabel:'Yes, delete',btnColor:'#dc2626',onYes:async function(){
+    _agyPkgWorking = _agyPkgWorking.filter(function(p){return p.id!==pid;});
+    try {
+      await fsDb.collection('agency_packages').doc(_agyPkgEmail).set({ email: _agyPkgEmail, packages: _agyPkgWorking }, { merge: true });
+      toast('Package deleted');
+    } catch(e) {
+      console.error('deleteAgencyPkg failed', e);
+      toast('⚠️ Could not delete — please try again');
+    }
+    renderAgencyPkgList();
+  }});
+}
+
+function resetAgencyPkgsToMaster(){
+  showConfirm({title:'Reset to master 8?',msg:'This overwrites ALL of this agency\'s current packages with a fresh copy of the master template. Any custom edits will be lost.',icon:'↺',btnLabel:'Yes, reset',btnColor:'#d97706',onYes:async function(){
+    try {
+      await createAgencyPackageSet(_agyPkgEmail, true);
+      var snap = await fsDb.collection('agency_packages').doc(_agyPkgEmail).get();
+      _agyPkgWorking = (snap.exists && snap.data().packages) || [];
+      toast('✓ Reset to master 8');
+      renderAgencyPkgList();
+    } catch(e) {
+      console.error('resetAgencyPkgsToMaster failed', e);
+      toast('⚠️ Could not reset — please try again');
+    }
+  }});
 }
 
 
@@ -7614,11 +7809,52 @@ async function syncPackagesToFirestore(){
   }));
 }
 let PACKAGES=loadPackages();
-// Backfill for packages saved before visibleToAgencies existed — defaults
-// to "all" so nothing silently disappears from agency portals once the
-// restricted read rule ships. The next "Sync all packages to Firestore
-// now" click (or any edit/re-save) writes this default through.
-PACKAGES.forEach(function(p){ if(!p.visibleToAgencies) p.visibleToAgencies='all'; });
+
+// ══════════════════════════════════════════════
+// PER-AGENCY PACKAGE SETS
+// ══════════════════════════════════════════════
+// Each agency owns a fully independent copy of the master 8 agency
+// packages (Package Manager's Agency Packages tab), seeded at the moment
+// the agency account is created and editable from that agency's own row
+// in User Management from then on. Stored in a new `agency_packages`
+// collection keyed by the agency's lowercase email — one doc per agency,
+// so editing one agency's copy can never touch another's, and the master
+// 8 are only ever read here, never written back to.
+function getMasterAgencyPackages(){
+  return PACKAGES.filter(function(p){ return p.channel === 'agency'; });
+}
+
+// force=false: leaves an existing package set alone (safe to call blindly
+// on every agency, e.g. from a backfill loop). force=true: overwrites
+// with a fresh copy of the master 8, discarding whatever was there.
+async function createAgencyPackageSet(email, force){
+  email = (email||'').toLowerCase();
+  if(!email) return false;
+  if(!force){
+    var existing = await fsDb.collection('agency_packages').doc(email).get();
+    if(existing.exists) return false;
+  }
+  var master = JSON.parse(JSON.stringify(getMasterAgencyPackages()));
+  await fsDb.collection('agency_packages').doc(email).set({ email: email, packages: master });
+  return true;
+}
+
+// One-time (but safe to re-run) backfill for agencies created before this
+// per-agency structure existed — anyone already missing a package set gets
+// one seeded from the master 8 now; agencies that already have one are
+// left untouched.
+async function backfillAgencyPackages(){
+  var agencies = USERS.filter(function(u){ return u.role === 'agency'; });
+  var created = 0;
+  for (var i=0;i<agencies.length;i++){
+    try {
+      var didCreate = await createAgencyPackageSet(agencies[i].email, false);
+      if(didCreate) created++;
+    } catch(e) { console.error('backfillAgencyPackages failed for', agencies[i].email, e); }
+  }
+  toast(created ? ('✓ Backfilled package sets for '+created+' agenc'+(created===1?'y':'ies')) : 'All agencies already have their own package set');
+  return created;
+}
 
 // Agency bookings tracking
 function loadAgencyBookings(){
@@ -7642,18 +7878,34 @@ var _editPkgId = null;
 // package's own `channel` field — new packages are created into whichever
 // tab is open, and editing never moves a package between tabs.
 var _pkgViewTab = 'website';
+// Within the Agency Packages tab: 'directory' (list of agencies + master
+// template) or 'master' (editing the master 8 template itself). Editing a
+// specific agency's own packages happens in the m-agency-pkgs modal, opened
+// straight from a directory row — it never changes this sub-state.
+var _agencyPkgView = 'directory';
 function pkgSwitchTab(tab){
   _pkgViewTab = tab;
+  if(tab === 'agency') _agencyPkgView = 'directory';
   var wTab = document.getElementById('pkg-tab-website'), aTab = document.getElementById('pkg-tab-agency');
   if(wTab) wTab.classList.toggle('on', tab==='website');
   if(aTab) aTab.classList.toggle('on', tab==='agency');
   var desc = document.getElementById('pkg-tab-desc');
   if(desc) desc.textContent = tab==='website'
     ? 'Guest-facing content and retail pricing — this is exactly what website visitors see.'
-    : 'Agency-exclusive packages — never shown on the website, only in the Agency Portal at the agency price below.';
+    : 'Each agency has its own independent package set. Pick an agency below to edit theirs, or open the master template used only when creating a new agency.';
   var settingsCard = document.getElementById('agency-booking-settings-card');
   if(settingsCard) settingsCard.style.display = tab==='agency' ? '' : 'none';
   if(tab==='agency') loadAgencyBookingSettings();
+  drawPkgs();
+}
+
+function showAgencyPkgDirectory(){
+  _agencyPkgView = 'directory';
+  drawPkgs();
+}
+
+function showMasterPkgTemplate(){
+  _agencyPkgView = 'master';
   drawPkgs();
 }
 
@@ -7690,19 +7942,6 @@ async function saveAgencyBookingSettings(){
   }
 }
 
-// Builds the "Visible to" line shown on Agency-tab cards, matching the
-// exact same visibleToAgencies data the checklist in the edit modal reads.
-function pkgVisibilitySummary(pkg){
-  var vis = pkg.visibleToAgencies || 'all';
-  if(vis === 'all') return 'Visible to: All agencies';
-  if(!Array.isArray(vis) || !vis.length) return 'Visible to: No agencies yet';
-  var names = vis.map(function(email){
-    var u = USERS.find(function(x){ return x.role==='agency' && (x.email||'').toLowerCase()===email; });
-    return u ? u.name : email;
-  });
-  return 'Visible to: ' + names.join(', ');
-}
-
 async function drawPkgs(){
   loadPkgTerms();
   loadPkgTripNotes();
@@ -7724,17 +7963,30 @@ async function drawPkgs(){
     console.error('drawPkgs Firestore fetch failed, falling back to local cache', e);
     PACKAGES = loadPackages();
   }
+
+  var toolbarNew = document.getElementById('pkg-toolbar-new-btns');
+  if(_pkgViewTab === 'agency' && _agencyPkgView === 'directory'){
+    if(toolbarNew) toolbarNew.style.display = 'none';
+    drawAgencyPkgDirectory();
+    return;
+  }
+  if(toolbarNew) toolbarNew.style.display = '';
+
   var isAgencyTab = _pkgViewTab === 'agency';
   // channel defaults to 'website' for any package saved before this field
   // existed, so the Website tab is "everything not explicitly agency" and
   // the Agency tab is "only explicitly agency" — the two tabs' package
   // lists are otherwise completely independent, not a shared set.
   var tabPackages = PACKAGES.filter(function(pkg){ return isAgencyTab ? pkg.channel==='agency' : pkg.channel!=='agency'; });
+  el.style.display = 'grid';
+  var backBtn = isAgencyTab
+    ? '<div style="grid-column:1/-1;margin-bottom:2px"><button class="btn" onclick="showAgencyPkgDirectory()"><i class="ti ti-arrow-left"></i>Back to agencies</button></div>'
+    : '';
   if(!tabPackages.length){
-    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first '+(isAgencyTab?'agency':'website')+' package</p></div>';
+    el.innerHTML = backBtn+'<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first '+(isAgencyTab?'agency':'website')+' package</p></div>';
     return;
   }
-  el.innerHTML = '';
+  el.innerHTML = backBtn;
   tabPackages.forEach(function(pkg){
     var agencyPrice = pkg.agencyPricePerRoom || pkg.pricePerRoom;
     var priceFooter = isAgencyTab
@@ -7742,7 +7994,7 @@ async function drawPkgs(){
           '<div style="display:flex;justify-content:space-between;margin-bottom:6px">' +
             '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">AGENCY PRICE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#00b4d8">$'+agencyPrice+'</div></div>' +
           '</div>' +
-          '<div style="font-size:var(--font-size-xs);color:#6b7280">'+pkgVisibilitySummary(pkg)+'</div>' +
+          '<div style="font-size:var(--font-size-xs);color:#6b7280">Master template — copied into every new agency\'s own package set at creation. To edit one agency\'s own packages, go back to the agency list.</div>' +
         '</div>')
       : ('<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
           '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">GUEST PRICE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#111827">$'+pkg.pricePerRoom+'</div></div>' +
@@ -7775,6 +8027,35 @@ async function drawPkgs(){
       '</div>';
     el.appendChild(card);
   });
+}
+
+// Agency Packages tab's top-level view: a directory of every agency plus
+// the master template — not a shared package list. Clicking an agency
+// opens its own isolated package set (m-agency-pkgs); clicking the master
+// template switches to the existing card-grid editor for the 8 packages
+// used only to seed brand-new agencies.
+function drawAgencyPkgDirectory(){
+  var el = document.getElementById('pkg-list');
+  if(!el) return;
+  el.style.display = 'block';
+  var agencies = USERS.filter(function(u){ return u.role === 'agency'; });
+  var rowStyle = 'cursor:pointer;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;transition:border-color .15s';
+  var html = '<div onclick="showMasterPkgTemplate()" style="'+rowStyle+';background:#f9fafb">'
+    + '<div><div style="font-weight:800;font-size:var(--font-size-base)">📋 Master Template</div>'
+    + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">Used only to seed a brand-new agency\'s package set — editing this never changes any existing agency</div></div>'
+    + '<i class="ti ti-chevron-right" style="color:#9ca3af;font-size:var(--font-size-lg)"></i></div>';
+  if(!agencies.length){
+    html += '<div style="text-align:center;padding:30px;color:#9ca3af">No agency accounts yet. Add one from User Management.</div>';
+  } else {
+    html += agencies.map(function(a){
+      var email = (a.email||'').replace(/'/g,"\\'");
+      return '<div onclick="openAgencyPkgManager(\''+email+'\')" style="'+rowStyle+'">'
+        + '<div><div style="font-weight:800;font-size:var(--font-size-base)">🏢 '+a.name+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+a.email+'</div></div>'
+        + '<i class="ti ti-chevron-right" style="color:#9ca3af;font-size:var(--font-size-lg)"></i></div>';
+    }).join('');
+  }
+  el.innerHTML = html;
 }
 
 async function loadPkgTerms(){
@@ -7860,44 +8141,7 @@ function openPkgForm(pid){
   document.getElementById('pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
   document.getElementById('pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
 
-  // Visibility: default to "all" for new packages and any existing package
-  // saved before this feature existed (visibleToAgencies missing entirely).
-  var vis = pkg ? (pkg.visibleToAgencies || 'all') : 'all';
-  var isSpecific = Array.isArray(vis);
-  var radios = document.getElementsByName('pkg-vis');
-  radios.forEach(function(r){ r.checked = (r.value === (isSpecific ? 'specific' : 'all')); });
-  renderPkgAgencyChecklist(isSpecific ? vis : []);
-  document.getElementById('pkg-agency-checklist').style.display = isSpecific ? 'block' : 'none';
-
   document.getElementById('m-pkg').classList.add('on');
-}
-
-function pkgVisibilityChanged(){
-  var specific = document.querySelector('input[name="pkg-vis"]:checked').value === 'specific';
-  document.getElementById('pkg-agency-checklist').style.display = specific ? 'block' : 'none';
-  if (specific) renderPkgAgencyChecklist(_pkgChecklistSelected());
-}
-
-// Preserves whatever's currently checked when re-rendering (e.g. switching
-// the radio back and forth shouldn't lose selections already made).
-function _pkgChecklistSelected(){
-  var checked = [];
-  document.querySelectorAll('#pkg-agency-checklist input[type="checkbox"]:checked').forEach(function(c){ checked.push(c.value); });
-  return checked;
-}
-
-function renderPkgAgencyChecklist(selectedEmails){
-  var el = document.getElementById('pkg-agency-checklist');
-  if (!el) return;
-  var agencies = USERS.filter(function(u){ return u.role === 'agency'; });
-  if (!agencies.length) { el.innerHTML = '<div style="font-size:var(--font-size-sm);color:#9ca3af">No agency accounts yet.</div>'; return; }
-  el.innerHTML = agencies.map(function(a){
-    var email = a.email.toLowerCase();
-    var checked = selectedEmails.indexOf(email) > -1;
-    return '<label style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-base);font-weight:400;padding:4px 0;cursor:pointer">'
-      + '<input type="checkbox" value="'+email+'"'+(checked?' checked':'')+'> '+a.name+' ('+email+')'
-      + '</label>';
-  }).join('');
 }
 
 function savePkg(){
@@ -7914,8 +8158,6 @@ function savePkg(){
     var parts = line.split('|').map(function(s){return s.trim();});
     return { name: parts[0]||'', price: +(parts[1]||0), unit: parts[2]||'' };
   }).filter(function(a){return a.name;});
-  var visSpecific = document.querySelector('input[name="pkg-vis"]:checked').value === 'specific';
-  var visibleToAgencies = visSpecific ? _pkgChecklistSelected() : 'all';
   var pkg = {
     id: _editPkgId || ('PKG'+Date.now()),
     name: name,
@@ -7932,7 +8174,6 @@ function savePkg(){
     addOns: addOns,
     color: '#00b4d8',
     active: true,
-    visibleToAgencies: visibleToAgencies,
     // Which Package Manager tab this package lives in — a brand new
     // package is created into whichever tab was open when "New package"
     // was clicked; editing an existing one never moves it between tabs.

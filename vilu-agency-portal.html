@@ -806,28 +806,18 @@ async function checkAvailability(){
 function fd(d){return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 
 // ── PACKAGES ──
-// Packages used to only reach this portal via a same-device localStorage
-// broadcast from the PMS — invisible from any separate device. Now read
-// live from Firestore, same pattern as fetchLiveAvailability().
+// Each agency now has its own fully independent package set, seeded from
+// the master 8 at account-creation time and edited per-agency from the PMS
+// (User Management → that agency's "📦 Packages" button). This doc is
+// this agency's *only* source of packages — no shared list, no visibility
+// toggle, so one agency's customized pricing can never leak to another.
 var _pkgCache = [];
-// Two separate, narrowly-constrained queries, not one open collection.get()
-// — Firestore validates a list query's security rule using only that
-// query's own where() filters, so a rule that depends on document data
-// (visibleToAgencies) needs a matching filter to be provable at all. One
-// query for packages visible to everyone, one for packages specifically
-// shared with this agency's own email; merged and de-duped here.
 async function fetchPackagesFromFirestore() {
+  if (!currentAgency || !currentAgency.email) { _pkgCache = []; return _pkgCache; }
   try {
-    var out = [];
-    var seen = {};
-    var snapAll = await fsDb.collection('packages').where('visibleToAgencies', '==', 'all').get();
-    snapAll.forEach(function(d){ if(!seen[d.id]){ out.push(d.data()); seen[d.id]=true; } });
-    if (currentAgency && currentAgency.email) {
-      var snapMine = await fsDb.collection('packages').where('visibleToAgencies', 'array-contains', currentAgency.email.toLowerCase()).get();
-      snapMine.forEach(function(d){ if(!seen[d.id]){ out.push(d.data()); seen[d.id]=true; } });
-    }
-    _pkgCache = out;
-  } catch(e) { console.error('fetchPackagesFromFirestore failed', e); }
+    var snap = await fsDb.collection('agency_packages').doc(currentAgency.email.toLowerCase()).get();
+    _pkgCache = (snap.exists && snap.data().packages) || [];
+  } catch(e) { console.error('fetchPackagesFromFirestore failed', e); _pkgCache = []; }
   return _pkgCache;
 }
 
