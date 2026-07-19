@@ -316,15 +316,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="form-grid" style="margin-bottom:12px">
         <div class="fg" style="margin:0"><label>Check-in *</label><input type="date" id="bk-ci" onchange="bkDatesChanged()"></div>
         <div class="fg" style="margin:0"><label>Check-out <span style="font-size:var(--font-size-xs);color:var(--muted)">(fixed by package)</span></label><input type="date" id="bk-co" readonly style="background:#f9fafb;color:var(--muted)"></div>
-        <div class="fg" style="margin:0"><label>Room *</label>
-          <select id="bk-rm" onchange="updateBkSummary()">
-            <option value="">-- Select room --</option>
+        <div class="fg" style="margin:0"><label>Room type *</label>
+          <select id="bk-room-type" onchange="bkRoomTypeChanged()">
+            <option value="">-- Select room type --</option>
           </select>
         </div>
-        <div class="fg" style="margin:0"><label>Adults</label>
-          <select id="bk-ad" onchange="updateBkSummary()">
-            <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
+        <div class="fg" style="margin:0"><label>Number of rooms *</label>
+          <select id="bk-room-count" onchange="bkRoomCountChanged()">
+            <option value="1" selected>1</option>
           </select>
+        </div>
+        <div class="fg" style="margin:0"><label>Adults <span style="font-size:var(--font-size-xs);color:var(--muted)">(max 4/room)</span></label>
+          <input type="number" id="bk-ad" min="1" max="24" value="2" onchange="updateBkSummary()">
         </div>
         <div class="fg" style="margin:0"><label>Additional nights <span style="font-size:var(--font-size-xs);color:var(--muted)">(extends check-out)</span></label>
           <select id="bk-extra-nights" onchange="bkExtraNightsChanged()">
@@ -917,10 +920,13 @@ function generateBookingConfirmation(bkId){
   var bk=myBookings.find(function(b){return b.id===bkId;});
   if(!bk) return;
   var nights=bk.totalNights||Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
+  var roomsRow = bk.roomCount>1
+    ? '<tr><th>Rooms</th><td>'+bk.roomCount+' × '+bk.roomType+' ('+bk.rn+')</td></tr><tr><th>Guests per room</th><td>'+(bk.guestSplit||[]).join(', ')+'</td></tr>'
+    : '<tr><th>Room</th><td>'+bk.rn+'</td></tr>';
   var html='<h1>Booking Confirmation</h1><div style="color:#6b7280;font-size:var(--font-size-base);margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
     +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
     +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
-    +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
+    +roomsRow
     +'<tr><th>Check-in</th><td>'+fd(bk.ci)+'</td></tr>'
     +'<tr><th>Check-out</th><td>'+fd(bk.co)+' ('+nights+' nights'+(bk.extraNights?', includes '+bk.extraNights+' additional':'')+')</td></tr>'
     +'<tr><th>Adults</th><td>'+(bk.ad||2)+'</td></tr>'
@@ -946,10 +952,13 @@ function generateAgencyInvoice(bkId){
     +(bk.transferArrival?'<tr><th>Arrival transfer ('+bk.transferArrival+')</th><td>'+(bk.transferArrival==='Speedboat'?'Included':'$'+bk.arrTransferCost)+'</td></tr>':'')
     +(bk.transferDeparture?'<tr><th>Departure transfer ('+bk.transferDeparture+')</th><td>'+(bk.transferDeparture==='Speedboat'?'Included':'$'+bk.depTransferCost)+'</td></tr>':'')
     +(bk.boardPlan?'<tr><th>'+bk.boardPlan+' ('+nights+' nights × '+(bk.ad||2)+' pax)</th><td>$'+bk.boardCost+'</td></tr>':'');
+  var invRoomsRow = bk.roomCount>1
+    ? '<tr><th>Rooms</th><td>'+bk.roomCount+' × '+bk.roomType+' ('+bk.rn+')</td></tr><tr><th>Guests per room</th><td>'+(bk.guestSplit||[]).join(', ')+'</td></tr>'
+    : '<tr><th>Room</th><td>'+bk.rn+'</td></tr>';
   var html='<h1>Invoice</h1><div style="color:#6b7280;font-size:var(--font-size-base);margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
     +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
     +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
-    +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
+    +invRoomsRow
     +'<tr><th>Dates</th><td>'+fd(bk.ci)+' → '+fd(bk.co)+' ('+nights+' nights)</td></tr>'
     +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
     +lineRows
@@ -1164,7 +1173,8 @@ async function openBookingModal(pid){
   document.getElementById('bk-nat').value='';
   document.getElementById('bk-pid')&&(document.getElementById('bk-pid').value='');
   document.getElementById('bk-notes').value='';
-  document.getElementById('bk-rm').value='';
+  document.getElementById('bk-room-type').value='';
+  document.getElementById('bk-ad').value = 2;
 
   var today = new Date().toISOString().slice(0,10);
   document.getElementById('bk-ci').value = today;
@@ -1176,36 +1186,74 @@ async function openBookingModal(pid){
   document.getElementById('bk-co').style.background = '#f9fafb';
   document.getElementById('bk-co').title = 'Auto-calculated from fixed package nights';
 
-  await bkRefreshRoomOptions();
+  await bkRefreshRoomTypeOptions();
   document.getElementById('m-bk').classList.add('on');
   updateBkSummary();
 }
 
-// Rebuilds the room dropdown from actual availability for the current
-// dates — replaces the old static hardcoded VR01-06 option list, which
-// never checked availability at all.
-async function bkRefreshRoomOptions(){
-  var sel = document.getElementById('bk-rm');
+// Group ROOMS_LIST by category and, for the current dates, count how many
+// of each category are actually free — a package booking picks a room
+// TYPE plus a quantity, not one specific room (agency cap: 4 guests/room).
+var _bkRoomTypeAvailability = {}; // {typeName: availableCount}
+async function bkRefreshRoomTypeOptions(){
+  var sel = document.getElementById('bk-room-type');
   if(!sel) return;
   var ci = document.getElementById('bk-ci').value, co = document.getElementById('bk-co').value;
   var prevVal = sel.value;
-  sel.innerHTML = '<option value="">-- Select room --</option>';
-  if(!ci || !co || co<=ci){
-    ROOMS_LIST.forEach(function(r){ sel.add(new Option(r.name+' · '+r.type, r.id)); });
-  } else {
-    await fetchLiveAvailability();
-    var available = ROOMS_LIST.filter(function(r){ return isRoomAvailable(r.id, ci, co).available; });
-    if(!available.length){
-      sel.add(new Option('No rooms available for these dates',''));
-    } else {
-      available.forEach(function(r){ sel.add(new Option(r.name+' · '+r.type, r.id)); });
-    }
-  }
+  var types = [];
+  ROOMS_LIST.forEach(function(r){ if(types.indexOf(r.type)===-1) types.push(r.type); });
+  _bkRoomTypeAvailability = {};
+  if(ci && co && co>ci){ await fetchLiveAvailability(); }
+  sel.innerHTML = '<option value="">-- Select room type --</option>';
+  types.forEach(function(type){
+    var roomsOfType = ROOMS_LIST.filter(function(r){ return r.type===type; });
+    var availableCount = (ci && co && co>ci)
+      ? roomsOfType.filter(function(r){ return isRoomAvailable(r.id, ci, co).available; }).length
+      : roomsOfType.length;
+    _bkRoomTypeAvailability[type] = availableCount;
+    sel.add(new Option(type+' ('+availableCount+' available)', type, false, false));
+    if(availableCount===0) sel.options[sel.options.length-1].disabled = true;
+  });
   if(prevVal && Array.from(sel.options).some(function(o){return o.value===prevVal;})) sel.value = prevVal;
+  await bkRoomTypeChanged();
 }
+
+// Rebuilds the "Number of rooms" select to match how many rooms of the
+// selected type are actually free — never lets an agency request more
+// rooms of a category than physically exist and are available.
+async function bkRoomTypeChanged(){
+  var typeSel = document.getElementById('bk-room-type');
+  var countSel = document.getElementById('bk-room-count');
+  var type = typeSel.value;
+  var max = type ? (_bkRoomTypeAvailability[type]||0) : 0;
+  var prevVal = +(countSel.value||1);
+  countSel.innerHTML = '';
+  if(max<1){
+    countSel.add(new Option('—',''));
+  } else {
+    for(var i=1;i<=max;i++) countSel.add(new Option(String(i), String(i)));
+    countSel.value = String(Math.min(prevVal||1, max));
+  }
+  updateBkSummary();
+}
+
+function bkRoomCountChanged(){
+  updateBkSummary();
+}
+
+// Splits total guests as evenly as possible across N rooms (e.g. 9 guests
+// / 3 rooms → 3,3,3; 10 guests / 3 rooms → 4,3,3) — used for both the
+// live summary and the actual per-room reservation writes.
+function splitGuestsAcrossRooms(total, rooms){
+  rooms = Math.max(1, rooms||1);
+  var base = Math.floor(total/rooms), rem = total%rooms, out=[];
+  for(var i=0;i<rooms;i++) out.push(base + (i<rem?1:0));
+  return out;
+}
+
 async function bkDatesChanged(){
   autoSetCheckout();
-  await bkRefreshRoomOptions();
+  await bkRefreshRoomTypeOptions();
   updateBkSummary();
 }
 
@@ -1224,7 +1272,7 @@ function autoSetCheckout(){
 async function bkExtraNightsChanged(){
   _bkExtraNights = +(document.getElementById('bk-extra-nights').value||0);
   autoSetCheckout();
-  await bkRefreshRoomOptions();
+  await bkRefreshRoomTypeOptions();
   updateBkSummary();
 }
 
@@ -1286,11 +1334,17 @@ function renderAddedExtras(){
   el.innerHTML = h;
 }
 
+// Agency Packages allow up to this many guests per room (Website Packages
+// use a lower cap — see the enquiry form's own guidance text instead,
+// since the website has no live booking/availability engine for packages).
+var AGENCY_MAX_GUESTS_PER_ROOM = 4;
+
 function updateBkSummary(){
   if(!selectedPkg) return;
   var ci = document.getElementById('bk-ci').value;
   var co = document.getElementById('bk-co').value;
-  var rm = document.getElementById('bk-rm').value;
+  var roomType = document.getElementById('bk-room-type').value;
+  var roomCount = +(document.getElementById('bk-room-count').value||0);
   var ad = +(document.getElementById('bk-ad').value||2);
   var warn = document.getElementById('bk-avail-warn');
 
@@ -1370,23 +1424,38 @@ function updateBkSummary(){
 
   var grandTotal = (baseTotal + extraNightsCost + transferCost + boardCost + extrasTotal).toFixed(2);
 
-  // Availability check
-  if(rm){
-    var avail = isRoomAvailable(rm,ci,co);
-    if(!avail.available){
-      warn.querySelector('span').textContent = rm+' is not available: '+avail.reason;
-      warn.className = 'al warn';
-    } else {
-      warn.className = 'al warn hidden';
-    }
+  // Room validation: guests must fit within roomCount × per-room cap, and
+  // the requested room count must not exceed what's actually available
+  // for this type/dates (checked again, freshly, right before submit).
+  var capMax = roomCount * AGENCY_MAX_GUESTS_PER_ROOM;
+  var availableForType = roomType ? (_bkRoomTypeAvailability[roomType]||0) : 0;
+  var roomIssue = '';
+  if(!roomType || !roomCount){
+    roomIssue = 'Select a room type and number of rooms.';
+  } else if(roomCount > availableForType){
+    roomIssue = 'Only '+availableForType+' '+roomType+(availableForType===1?'':'s')+' available for these dates — reduce the room count.';
+  } else if(ad > capMax){
+    var minRooms = Math.ceil(ad/AGENCY_MAX_GUESTS_PER_ROOM);
+    roomIssue = ad+' guests needs at least '+minRooms+' room'+(minRooms>1?'s':'')+' (max '+AGENCY_MAX_GUESTS_PER_ROOM+'/room) — select more rooms.';
+  }
+  if(roomIssue){
+    warn.querySelector('span').textContent = roomIssue;
+    warn.className = 'al warn';
   } else {
     warn.className = 'al warn hidden';
   }
+
+  var guestSplit = (roomType && roomCount) ? splitGuestsAcrossRooms(ad, roomCount) : [];
+  var roomsLine = (roomType && roomCount)
+    ? '<div class="sum-row"><span>Rooms</span><span>'+roomCount+' × '+roomType+'</span></div>'
+      +'<div style="font-size:var(--font-size-xs);color:var(--muted);margin:-4px 0 8px">Guests per room: '+guestSplit.join(', ')+'</div>'
+    : '';
 
   var finalIncludes = (selectedPkg.includes||[]).filter(function(i){return removedIncludes.indexOf(i)<0;});
 
   document.getElementById('bk-price-summary').innerHTML =
     '<div style="margin-bottom:8px;font-size:var(--font-size-xs);font-weight:700;color:var(--muted)">PRICE BREAKDOWN</div>'
+    +roomsLine
     +'<div class="sum-row"><span>Package base ('+baseNights+' nights · '+ad+' pax × $'+basePerPersonNight+'/person)</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
     +(extraNights>0?'<div class="sum-row"><span>Additional nights ('+extraNights+' × '+ad+' pax × $'+settings.extraNightRate+')</span><span>$'+extraNightsCost.toFixed(2)+'</span></div>':'')
     +transferLines
@@ -1407,7 +1476,8 @@ async function submitAgencyBooking(){
   if(!selectedPkg||!currentAgency) return;
   var ci=document.getElementById('bk-ci').value;
   var co=document.getElementById('bk-co').value;
-  var rm=document.getElementById('bk-rm').value;
+  var roomType=document.getElementById('bk-room-type').value;
+  var roomCount=+(document.getElementById('bk-room-count').value||0);
   var fn=(document.getElementById('bk-fn').value||'').trim();
   var ln=(document.getElementById('bk-ln').value||'').trim();
   var em=(document.getElementById('bk-em').value||'').trim();
@@ -1417,14 +1487,27 @@ async function submitAgencyBooking(){
   var notes=(document.getElementById('bk-notes').value||'').trim();
   var ad=+document.getElementById('bk-ad').value;
   if(!ci||!co||co<=ci){alert('Select valid dates');return;}
-  if(!rm){alert('Select a room');return;}
+  if(!roomType||!roomCount){alert('Select a room type and number of rooms');return;}
   if(!fn||!ln){alert('Enter guest name');return;}
+  if(ad > roomCount*AGENCY_MAX_GUESTS_PER_ROOM){
+    var minRooms = Math.ceil(ad/AGENCY_MAX_GUESTS_PER_ROOM);
+    alert(ad+' guests needs at least '+minRooms+' room'+(minRooms>1?'s':'')+' (max '+AGENCY_MAX_GUESTS_PER_ROOM+' guests/room).');
+    return;
+  }
   // Re-check against live Firestore data right before submitting — fast
   // feedback, though the real guarantee is writeReservation's own
-  // transaction below, same pattern as the website's confirmGuestBooking().
+  // per-room transaction below, same loop-of-atomic-writes pattern already
+  // used by the PMS's New Booking (submitNB) and the website's multi-room
+  // confirmGuestBooking() for reserving several rooms as one linked booking.
   await fetchLiveAvailability();
-  var avail=isRoomAvailable(rm,ci,co);
-  if(!avail.available){alert('Room not available: '+avail.reason);return;}
+  var roomsOfType = ROOMS_LIST.filter(function(r){ return r.type===roomType; });
+  var availableRooms = roomsOfType.filter(function(r){ return isRoomAvailable(r.id, ci, co).available; });
+  if(availableRooms.length < roomCount){
+    alert('Only '+availableRooms.length+' '+roomType+(availableRooms.length===1?'':'s')+' available for these dates — please reduce the room count or pick different dates.');
+    return;
+  }
+  var roomIds = availableRooms.slice(0, roomCount).map(function(r){ return r.id; });
+  var guestSplit = splitGuestsAcrossRooms(ad, roomCount);
   var settings=_agyBookingSettings||{flightSurcharge:155,extraNightRate:40};
   var baseNights=selectedPkg.nights||3;
   var extraNights=_bkExtraNights||0;
@@ -1460,12 +1543,14 @@ async function submitAgencyBooking(){
   var bookingOptionsNote='Transfer: Arrival '+arrTransportLabel+', Departure '+depTransportLabel
     +(extraNights>0?'. +'+extraNights+' additional night'+(extraNights>1?'s':'')+' ($'+settings.extraNightRate+'/pax/night)':'')
     +(boardName?'. '+boardName+' ('+totalNights+' nights)':'');
+  var roomsNote = roomCount>1 ? ' · '+roomCount+' rooms ('+roomType+'): '+roomIds.join(', ')+' — guests per room: '+guestSplit.join(', ') : '';
   var bk={
     id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,
-    rn:rm,rate:agencyPrice,
+    rn:roomIds.join(', '),rate:agencyPrice,
+    roomType:roomType, roomCount:roomCount, roomIds:roomIds, guestSplit:guestSplit,
     ci:ci,co:co,ad:ad,ch:0,inf:0,
     src:'Agency',pay:'Unpaid',st:'Confirmed',ref:ref,
-    notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+'. '+bookingOptionsNote+(notes?'. '+notes:''),
+    notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+'. '+bookingOptionsNote+roomsNote+(notes?'. '+notes:''),
     nlog:[],prop:'vilu',
     package:selectedPkg.id,packageName:selectedPkg.name,
     packageIncludes:allIncludes,
@@ -1484,32 +1569,50 @@ async function submitAgencyBooking(){
 
   var btn=document.querySelector('button[onclick="submitAgencyBooking()"]');
   if(btn) btn.disabled=true;
-  try {
-    // The write that actually reaches Firestore — the old version only ever
-    // wrote to this browser's localStorage and a BroadcastChannel message,
-    // neither of which crosses devices, so a booking made from a real
-    // agency laptop never reached the PMS or room_availability at all.
-    await writeReservation(ref, {
-      id: ref, room_id: rm,
-      guest_name: fn+' '+ln,
-      guest_email: em, guest_phone: ph, guest_country: nat,
-      check_in: ci, check_out: co,
-      adults: ad||2, children: 0,
-      rate: agencyPrice||0, status: 'Confirmed',
-      source: 'Agency', notes: bk.notes,
-      agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
-      extra_beds: 0, trips: '[]', food_orders: '[]',
-      arr_time:'', arr_transport: arrTransportLabel, arr_from: 'Malé',
-      dep_time:'', dep_transport: depTransportLabel, dep_to: 'Malé',
-      updated_at: new Date().toISOString()
-    });
-  } catch(e) {
-    if(btn) btn.disabled=false;
-    if(e.message==='ROOM_CONFLICT'){ alert('Sorry, this room was just booked for those dates. Please choose another room.'); return; }
-    alert('Could not submit booking — please try again or contact Vilu Residence directly.');
-    return;
+  // Reserve every selected room as one linked booking — a loop of
+  // independent atomic per-room writeReservation() transactions, the exact
+  // same pattern already used for multi-room bookings by the PMS's New
+  // Booking (submitNB) and the website's confirmGuestBooking(): each room
+  // succeeds or fails on its own conflict check, so one room's race
+  // condition doesn't corrupt the others, and any partial failure is
+  // reported clearly rather than silently overbooking.
+  var succeededRooms = [], failedRooms = [];
+  for(var ri=0; ri<roomIds.length; ri++){
+    var roomId = roomIds[ri];
+    var roomRef = ri===0 ? ref : ref+'-'+(ri+1);
+    try {
+      // The write that actually reaches Firestore — the old version only ever
+      // wrote to this browser's localStorage and a BroadcastChannel message,
+      // neither of which crosses devices, so a booking made from a real
+      // agency laptop never reached the PMS or room_availability at all.
+      await writeReservation(roomRef, {
+        id: roomRef, room_id: roomId,
+        guest_name: fn+' '+ln,
+        guest_email: em, guest_phone: ph, guest_country: nat,
+        check_in: ci, check_out: co,
+        adults: guestSplit[ri]||1, children: 0,
+        rate: agencyPrice||0, status: 'Confirmed',
+        source: 'Agency', notes: bk.notes+(roomCount>1?' (Room '+(ri+1)+' of '+roomCount+', linked booking '+ref+')':''),
+        agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
+        extra_beds: 0, trips: '[]', food_orders: '[]',
+        arr_time:'', arr_transport: arrTransportLabel, arr_from: 'Malé',
+        dep_time:'', dep_transport: depTransportLabel, dep_to: 'Malé',
+        updated_at: new Date().toISOString()
+      });
+      succeededRooms.push(roomId);
+    } catch(e) {
+      failedRooms.push({roomId:roomId, reason: e.message==='ROOM_CONFLICT'?'just booked by someone else':'error'});
+    }
   }
   if(btn) btn.disabled=false;
+
+  if(!succeededRooms.length){
+    alert('Could not submit booking — none of the selected rooms could be reserved (they may have just been booked). Please try again.');
+    return;
+  }
+  if(failedRooms.length){
+    alert('Booked '+succeededRooms.length+' of '+roomIds.length+' rooms successfully. '+failedRooms.length+' room'+(failedRooms.length>1?'s were':' was')+' not reserved ('+failedRooms.map(function(f){return f.roomId+': '+f.reason;}).join(', ')+') — contact Vilu Residence to arrange the remaining room(s).');
+  }
 
   myBookings.unshift(bk);
   localStorage.setItem('vilu_agency_bk_'+currentAgency.email, JSON.stringify(myBookings));
@@ -1525,7 +1628,8 @@ async function submitAgencyBooking(){
   document.getElementById('success-details').innerHTML=
     '<strong>'+fn+' '+ln+'</strong><br>'
     +selectedPkg.name+'<br>'
-    +'Room: '+rm+' · '+fd(ci)+' → '+fd(co)+' · '+totalNights+' nights<br>'
+    +'Rooms: '+roomCount+' × '+roomType+' ('+succeededRooms.join(', ')+') · '+fd(ci)+' → '+fd(co)+' · '+totalNights+' nights<br>'
+    +'Guests per room: '+guestSplit.join(', ')+'<br>'
     +'Transfer: Arrival '+arrTransportLabel+', Departure '+depTransportLabel+(boardName?' · '+boardName:'')+'<br>'
     +'Includes: '+allIncludes.join(', ')+'<br>'
     +'Total due: <strong style="color:var(--green)">$'+grandTotal+'</strong><br>'

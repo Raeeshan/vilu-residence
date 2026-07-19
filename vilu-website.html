@@ -1078,6 +1078,11 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
             <select id="cf-subject"><option data-i18n="contact.subjectRoom">Room Enquiry</option><option data-i18n="contact.subjectBooking">Booking Question</option><option data-i18n="contact.subjectActivities">Activities</option><option data-i18n="contact.subjectGroup">Group Booking</option><option data-i18n="contact.subjectOther">Other</option></select>
           </div>
           <div class="cf-field" id="cf-package-wrap" style="display:none"><label data-i18n="contact.packageLabel">Package</label><input type="text" id="cf-package" placeholder="" readonly></div>
+          <div class="cf-field" id="cf-rooms-wrap" style="display:none">
+            <label data-i18n="contact.roomsLabel">Number of Rooms Needed</label>
+            <input type="number" id="cf-rooms" min="1" max="10" placeholder="e.g. 2">
+            <div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px" data-i18n="contact.roomsHint">Up to 3 guests per room</div>
+          </div>
           <div class="cf-field"><label data-i18n="contact.message">Message</label><textarea id="cf-message" placeholder="Tell us about your travel plans..." data-i18n-placeholder="contact.messagePlaceholder"></textarea></div>
           <button class="cf-btn" onclick="sendContactForm()" data-i18n="contact.sendButton">Send Message →</button>
         </div>
@@ -3177,9 +3182,11 @@ function sendContactForm(){
   var name = document.getElementById('cf-name').value;
   var email = document.getElementById('cf-email').value;
   var pkg = document.getElementById('cf-package').value;
+  var roomsEl = document.getElementById('cf-rooms');
+  var rooms = (roomsEl && roomsEl.value) ? roomsEl.value : '';
   var msg = document.getElementById('cf-message').value;
   if(!name||!email||!msg){alert(t('alerts.fillAllFields'));return;}
-  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+'\n\nMessage:\n'+msg;
+  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+'\n\nMessage:\n'+msg;
   var body = encodeURIComponent(bodyText);
   window.location.href = 'mailto:Viluresidence@gmail.com?subject=Enquiry%20from%20'+encodeURIComponent(name)+'&body='+body;
 }
@@ -3190,6 +3197,8 @@ function enquireAboutPackage(pkgName){
   var wrap = document.getElementById('cf-package-wrap');
   var input = document.getElementById('cf-package');
   if(wrap && input){ wrap.style.display = ''; input.value = pkgName; }
+  var roomsWrap = document.getElementById('cf-rooms-wrap');
+  if(roomsWrap) roomsWrap.style.display = '';
   var msgField = document.getElementById('cf-message');
   if(msgField && !msgField.value) msgField.value = "Hi! I'm interested in the "+pkgName+" package.";
   var contactSection = document.getElementById('contact');
