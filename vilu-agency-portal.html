@@ -352,6 +352,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div style="font-size:var(--font-size-xs);font-weight:700;color:#374151;margin-bottom:8px">Included items — uncheck to remove</div>
           <div id="pkg-incl-checks"></div>
         </div>
+        <!-- Activities / trips included (read-only — reference info, not a
+             separate priced line item; see updateBkSummary for pricing) -->
+        <div style="padding:12px 14px;border-bottom:1px solid #f3f4f6" id="pkg-activities-section">
+          <div style="font-size:var(--font-size-xs);font-weight:700;color:#374151;margin-bottom:8px">Activities included</div>
+          <div id="pkg-activities-list"></div>
+        </div>
         <!-- Board plan (only shown if this package offers Half/Full-Board) -->
         <div style="padding:12px 14px;border-bottom:1px solid #f3f4f6;background:#f9fafb;display:none" id="bk-board-section">
           <div style="font-size:var(--font-size-xs);font-weight:700;color:#374151;margin-bottom:8px">Board plan <span style="font-weight:400;color:var(--muted)">— auto-priced across the full stay</span></div>
@@ -851,6 +857,12 @@ async function drawPackages(){
         +'<div style="margin-bottom:12px">'
           +(pkg.includes||[]).map(function(inc){return '<div style="font-size:var(--font-size-sm);padding:3px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:var(--green);font-size:var(--font-size-xs)"></i>'+inc+'</div>';}).join('')
         +'</div>'
+        +((pkg.activities&&pkg.activities.length) ? (
+          '<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">'
+            +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700;margin-bottom:6px">ACTIVITIES INCLUDED</div>'
+            +pkg.activities.map(function(a){return '<div style="font-size:var(--font-size-sm);padding:2px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-ticket" style="color:var(--green);font-size:var(--font-size-xs)"></i>'+a+'</div>';}).join('')
+          +'</div>'
+        ) : '')
         +'<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">'
           +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">AGENCY PRICE</div><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">$'+agencyPrice+'</div>'
         +'</div>'
@@ -1074,6 +1086,22 @@ async function openBookingModal(pid){
     row.innerHTML = '<input type="checkbox" checked style="accent-color:var(--green)" onchange="toggleInclude(this,\''+inc.replace(/'/g,'&#39;')+'\')"> '+inc;
     inclEl.appendChild(row);
   });
+
+  // Activities/trips — read-only reference list (the $ shown in each label
+  // is informational only, never a separate priced line item — see
+  // updateBkSummary()), so no checkbox, just what the package includes.
+  var actSection = document.getElementById('pkg-activities-section');
+  var actList = document.getElementById('pkg-activities-list');
+  var activities = selectedPkg.activities||[];
+  if(activities.length){
+    actSection.style.display = '';
+    actList.innerHTML = activities.map(function(a){
+      return '<div style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm);padding:4px 0"><i class="ti ti-ticket" style="color:var(--green);font-size:var(--font-size-xs)"></i>'+a+'</div>';
+    }).join('');
+  } else {
+    actSection.style.display = 'none';
+    actList.innerHTML = '';
+  }
 
   // Transfer selects — labels bake in the current admin-set surcharge.
   ['bk-transfer-arrival','bk-transfer-departure'].forEach(function(id){
