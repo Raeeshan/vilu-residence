@@ -326,6 +326,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
           </select>
         </div>
+        <div class="fg" style="margin:0"><label>Additional nights <span style="font-size:var(--font-size-xs);color:var(--muted)">(extends check-out)</span></label>
+          <select id="bk-extra-nights" onchange="bkExtraNightsChanged()">
+            <option value="0" selected>None</option>
+            <option value="1">+1 night</option>
+            <option value="2">+2 nights</option>
+            <option value="3">+3 nights</option>
+            <option value="4">+4 nights</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 1b: Transfer -->
+      <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Transfer</div>
+      <div class="form-grid" style="margin-bottom:14px">
+        <div class="fg" style="margin:0"><label>Arrival</label><select id="bk-transfer-arrival" onchange="updateBkSummary()"></select></div>
+        <div class="fg" style="margin:0"><label>Departure</label><select id="bk-transfer-departure" onchange="updateBkSummary()"></select></div>
       </div>
 
       <!-- Step 2: Package customizer -->
@@ -335,6 +351,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="padding:12px 14px;border-bottom:1px solid #f3f4f6;background:#f9fafb">
           <div style="font-size:var(--font-size-xs);font-weight:700;color:#374151;margin-bottom:8px">Included items — uncheck to remove</div>
           <div id="pkg-incl-checks"></div>
+        </div>
+        <!-- Board plan (only shown if this package offers Half/Full-Board) -->
+        <div style="padding:12px 14px;border-bottom:1px solid #f3f4f6;background:#f9fafb;display:none" id="bk-board-section">
+          <div style="font-size:var(--font-size-xs);font-weight:700;color:#374151;margin-bottom:8px">Board plan <span style="font-weight:400;color:var(--muted)">— auto-priced across the full stay</span></div>
+          <div id="bk-board-options"></div>
         </div>
         <!-- Add extras -->
         <div style="padding:12px 14px">
@@ -893,15 +914,18 @@ function _openDocWindow(title, bodyHtml){
 function generateBookingConfirmation(bkId){
   var bk=myBookings.find(function(b){return b.id===bkId;});
   if(!bk) return;
-  var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
+  var nights=bk.totalNights||Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
   var html='<h1>Booking Confirmation</h1><div style="color:#6b7280;font-size:var(--font-size-base);margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
     +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
     +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
     +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
     +'<tr><th>Check-in</th><td>'+fd(bk.ci)+'</td></tr>'
-    +'<tr><th>Check-out</th><td>'+fd(bk.co)+' ('+nights+' nights)</td></tr>'
+    +'<tr><th>Check-out</th><td>'+fd(bk.co)+' ('+nights+' nights'+(bk.extraNights?', includes '+bk.extraNights+' additional':'')+')</td></tr>'
     +'<tr><th>Adults</th><td>'+(bk.ad||2)+'</td></tr>'
     +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
+    +(bk.transferArrival?'<tr><th>Arrival transfer</th><td>'+bk.transferArrival+'</td></tr>':'')
+    +(bk.transferDeparture?'<tr><th>Departure transfer</th><td>'+bk.transferDeparture+'</td></tr>':'')
+    +(bk.boardPlan?'<tr><th>Board plan</th><td>'+bk.boardPlan+'</td></tr>':'')
     +'<tr><th>Included</th><td>'+((bk.packageIncludes||[]).join(', ')||'—')+'</td></tr>'
     +'<tr><th>Booked via</th><td>'+(bk.agency||currentAgency.name)+'</td></tr>'
     +'</table><div style="margin-top:20px;font-size:var(--font-size-xs);color:#9ca3af">This document confirms the booking details only. It does not include pricing.</div>';
@@ -911,14 +935,22 @@ function generateBookingConfirmation(bkId){
 function generateAgencyInvoice(bkId){
   var bk=myBookings.find(function(b){return b.id===bkId;});
   if(!bk) return;
-  var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
+  var nights=bk.totalNights||Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
+  var baseNights=bk.baseNights||nights;
+  var baseTotal=(bk.rate*(bk.ad||2)*baseNights).toFixed(2);
+  var lineRows=
+    '<tr><th>Package base ('+baseNights+' nights × '+(bk.ad||2)+' pax × $'+bk.rate+')</th><td>$'+baseTotal+'</td></tr>'
+    +(bk.extraNights?'<tr><th>Additional nights ('+bk.extraNights+' × '+(bk.ad||2)+' pax)</th><td>$'+bk.extraNightsCost+'</td></tr>':'')
+    +(bk.transferArrival?'<tr><th>Arrival transfer ('+bk.transferArrival+')</th><td>'+(bk.transferArrival==='Speedboat'?'Included':'$'+bk.arrTransferCost)+'</td></tr>':'')
+    +(bk.transferDeparture?'<tr><th>Departure transfer ('+bk.transferDeparture+')</th><td>'+(bk.transferDeparture==='Speedboat'?'Included':'$'+bk.depTransferCost)+'</td></tr>':'')
+    +(bk.boardPlan?'<tr><th>'+bk.boardPlan+' ('+nights+' nights × '+(bk.ad||2)+' pax)</th><td>$'+bk.boardCost+'</td></tr>':'');
   var html='<h1>Invoice</h1><div style="color:#6b7280;font-size:var(--font-size-base);margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
     +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
     +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
     +'<tr><th>Room</th><td>'+bk.rn+'</td></tr>'
     +'<tr><th>Dates</th><td>'+fd(bk.ci)+' → '+fd(bk.co)+' ('+nights+' nights)</td></tr>'
     +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
-    +'<tr><th>Agency rate</th><td>$'+bk.rate+'/person/night</td></tr>'
+    +lineRows
     +'<tr><th><strong>Total amount due</strong></th><td><strong>$'+(bk.total||bk.netRate||bk.rackTotal||0)+'</strong></td></tr>'
     +'<tr><th>Payment status</th><td>'+(bk.pay||'Unpaid')+'</td></tr>'
     +'</table>';
@@ -961,25 +993,78 @@ async function drawMyBlocks(){
 // Package customizer state
 var customExtras = [];
 var removedIncludes = [];
+// Transfer/extra-nights/board-plan state — separate from customExtras
+// since they're structured selections (radio/quantity), not free-form
+// additive extras, and extra nights/board must recompute together
+// whenever nights, guests, or each other change.
+var _bkTransferArrival = 'speedboat';
+var _bkTransferDeparture = 'speedboat';
+var _bkExtraNights = 0;
+var _bkBoardPlan = 'none'; // 'none' | 'half' | 'full'
+var _bkBoardOptions = null; // {half:{price,unit}, full:{price,unit}} detected per package
+
+// Global, admin-editable rates (Package Manager's Agency Packages tab ->
+// "Agency booking settings") — never hardcoded in the booking math below.
+var _agyBookingSettings = null;
+async function loadAgyBookingSettings(){
+  if(_agyBookingSettings) return _agyBookingSettings;
+  try {
+    var snap = await fsDb.collection('website_content').doc('agency_booking_settings').get();
+    var data = (snap.exists && snap.data()) || {};
+    _agyBookingSettings = { flightSurcharge: data.flightSurcharge!=null?data.flightSurcharge:155, extraNightRate: data.extraNightRate!=null?data.extraNightRate:40 };
+  } catch(e) {
+    console.error('loadAgyBookingSettings failed', e);
+    _agyBookingSettings = { flightSurcharge: 155, extraNightRate: 40 };
+  }
+  return _agyBookingSettings;
+}
 
 var EXTRA_OPTIONS = [
-  {name:'Extra night',price:0,type:'night',perNight:false,emoji:'🌙',desc:'Adds 1 extra night at the package room rate'},
-  {name:'Speedboat Male → Maamigili',price:40,type:'transfer',perNight:false,perPerson:true,emoji:'🚤',desc:'Arrival transfer per person'},
-  {name:'Speedboat Maamigili → Male',price:40,type:'transfer',perNight:false,perPerson:true,emoji:'🚤',desc:'Departure transfer per person'},
   {name:'Extra bed',price:25,type:'room',perNight:true,perPerson:false,emoji:'🛏️',desc:'Extra bed per night'},
   {name:'Extra light / electricity',price:10,type:'room',perNight:true,perPerson:false,emoji:'💡',desc:'Additional electricity charge per night'},
 ];
+// Rebuilt every time openBookingModal() runs (EXTRA_OPTIONS + this
+// package's own non-board add-ons) — addPresetExtra(idx) reads from this,
+// not the fixed EXTRA_OPTIONS, since the combined list differs per package.
+var _currentExtraOptions = EXTRA_OPTIONS;
+
+// Board add-ons are detected by name (case-insensitive "half-board" /
+// "full-board") rather than a fixed list, so any package's own add-ons
+// text drives both the price and whether the board selector shows at all
+// — a package with no board add-ons (e.g. one already Full Board by
+// default) simply never gets the selector.
+function _detectBoardOptions(pkg){
+  var half = null, full = null;
+  (pkg.addOns||[]).forEach(function(a){
+    if(/half.?board/i.test(a.name)) half = a;
+    else if(/full.?board/i.test(a.name)) full = a;
+  });
+  return (half||full) ? {half:half, full:full} : null;
+}
+
+function parseAddOnUnit(unit){
+  var u = (unit||'').toLowerCase();
+  if(u.indexOf('day') > -1) return {perNight:true, perPerson:false};
+  if(u.indexOf('person') > -1 || u.indexOf('pax') > -1) return {perNight:false, perPerson:true};
+  return {perNight:false, perPerson:false}; // e.g. "/hr" — simple flat one-time addition
+}
 
 async function openBookingModal(pid){
   var pkgs = loadPMS_Packages();
   selectedPkg = pkgs.find(function(p){return p.id===pid;});
   if(!selectedPkg) return;
 
-  // Reset customizer
+  // Reset customizer + new structured booking options
   customExtras = [];
   removedIncludes = [];
+  _bkTransferArrival = 'speedboat';
+  _bkTransferDeparture = 'speedboat';
+  _bkExtraNights = 0;
+  _bkBoardPlan = 'none';
+  document.getElementById('bk-extra-nights').value = '0';
 
   var agencyPrice = selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
+  var settings = await loadAgyBookingSettings();
 
   document.getElementById('bk-modal-title').textContent = 'Book: '+selectedPkg.name;
   document.getElementById('bk-pkg-summary').innerHTML =
@@ -1000,15 +1085,48 @@ async function openBookingModal(pid){
     inclEl.appendChild(row);
   });
 
+  // Transfer selects — labels bake in the current admin-set surcharge.
+  ['bk-transfer-arrival','bk-transfer-departure'].forEach(function(id){
+    var sel = document.getElementById(id);
+    sel.innerHTML = '<option value="speedboat">Speedboat (included)</option><option value="flight">Domestic Flight (+$'+settings.flightSurcharge+'/person)</option>';
+    sel.value = 'speedboat';
+  });
+
+  // Board plan — only shown when this package actually offers it.
+  _bkBoardOptions = _detectBoardOptions(selectedPkg);
+  var boardSection = document.getElementById('bk-board-section');
+  if(_bkBoardOptions){
+    boardSection.style.display = '';
+    var opts = '<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm);cursor:pointer;padding:3px 0"><input type="radio" name="bk-board" value="none" checked onchange="bkBoardChanged(this.value)"> None</label>';
+    if(_bkBoardOptions.half) opts += '<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm);cursor:pointer;padding:3px 0"><input type="radio" name="bk-board" value="half" onchange="bkBoardChanged(this.value)"> Half-Board (+$'+_bkBoardOptions.half.price+'/person/day)</label>';
+    if(_bkBoardOptions.full) opts += '<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm);cursor:pointer;padding:3px 0"><input type="radio" name="bk-board" value="full" onchange="bkBoardChanged(this.value)"> Full-Board (+$'+_bkBoardOptions.full.price+'/person/day)</label>';
+    document.getElementById('bk-board-options').innerHTML = opts;
+  } else {
+    boardSection.style.display = 'none';
+    document.getElementById('bk-board-options').innerHTML = '';
+  }
+
+  // Extras: the fixed generic list (Extra bed/light) plus this package's
+  // own add-ons, minus whichever board entries are handled above — built
+  // fresh per package since add-ons differ package to package.
+  var boardNames = [];
+  if(_bkBoardOptions){ if(_bkBoardOptions.half) boardNames.push(_bkBoardOptions.half.name); if(_bkBoardOptions.full) boardNames.push(_bkBoardOptions.full.name); }
+  var pkgExtraOptions = (selectedPkg.addOns||[])
+    .filter(function(a){ return boardNames.indexOf(a.name) === -1; })
+    .map(function(a){
+      var flags = parseAddOnUnit(a.unit);
+      return {name:a.name, price:a.price, type:'pkgAddOn', perNight:flags.perNight, perPerson:flags.perPerson, emoji:'✚', desc:a.name+' ('+a.unit+')'};
+    });
+  _currentExtraOptions = EXTRA_OPTIONS.concat(pkgExtraOptions);
+
   // Render extras buttons
   var extEl = document.getElementById('pkg-extras-btns');
   extEl.innerHTML = '';
-  EXTRA_OPTIONS.forEach(function(opt,i){
+  _currentExtraOptions.forEach(function(opt,i){
     var btn = document.createElement('button');
     btn.style.cssText = 'padding:5px 11px;font-size:var(--font-size-xs);border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:flex;align-items:center;gap:4px';
     var lbl = opt.emoji+' '+opt.name;
-    if(opt.type==='night') lbl += ' (+1 night)';
-    else if(opt.perNight&&opt.perPerson) lbl += ' +$'+opt.price+'/pax/night';
+    if(opt.perNight&&opt.perPerson) lbl += ' +$'+opt.price+'/pax/night';
     else if(opt.perNight) lbl += ' +$'+opt.price+'/night';
     else if(opt.perPerson) lbl += ' +$'+opt.price+'/pax';
     else if(opt.price>0) lbl += ' +$'+opt.price;
@@ -1073,14 +1191,28 @@ async function bkDatesChanged(){
   updateBkSummary();
 }
 
-
+// Check-out always spans the package's fixed nights PLUS any additional
+// nights the agency has added — the actual reservation must cover the
+// full stay, not just the base package length.
 function autoSetCheckout(){
   if(!selectedPkg) return;
   var ci = document.getElementById('bk-ci').value;
   if(!ci) return;
   var d = new Date(ci);
-  d.setDate(d.getDate() + (selectedPkg.nights||3));
+  d.setDate(d.getDate() + (selectedPkg.nights||3) + (_bkExtraNights||0));
   document.getElementById('bk-co').value = d.toISOString().slice(0,10);
+}
+
+async function bkExtraNightsChanged(){
+  _bkExtraNights = +(document.getElementById('bk-extra-nights').value||0);
+  autoSetCheckout();
+  await bkRefreshRoomOptions();
+  updateBkSummary();
+}
+
+function bkBoardChanged(value){
+  _bkBoardPlan = value;
+  updateBkSummary();
 }
 
 function toggleInclude(cb, inc){
@@ -1093,9 +1225,9 @@ function toggleInclude(cb, inc){
 }
 
 function addPresetExtra(idx){
-  var opt = EXTRA_OPTIONS[idx];
+  var opt = _currentExtraOptions[idx];
   if(!opt) return;
-  customExtras.push({id:Date.now(), name:opt.emoji+' '+opt.name, price:opt.price, type:opt.type, perNight:opt.perNight||false});
+  customExtras.push({id:Date.now(), name:opt.emoji+' '+opt.name, price:opt.price, type:opt.type, perNight:opt.perNight||false, perPerson:opt.perPerson||false});
   renderAddedExtras();
   updateBkSummary();
 }
@@ -1146,31 +1278,60 @@ function updateBkSummary(){
 
   if(!ci||!co||co<=ci){document.getElementById('bk-price-summary').innerHTML='<p style="color:var(--muted);font-size:var(--font-size-sm)">Select dates to see price breakdown.</p>';return;}
 
-  var nights = Math.round((new Date(co)-new Date(ci))/864e5);
-  var ad = +(document.getElementById('bk-ad').value||2);
+  var settings = _agyBookingSettings || {flightSurcharge:155, extraNightRate:40};
+  var baseNights = selectedPkg.nights||3;
+  var extraNights = _bkExtraNights||0;
+  // Trust the date fields for the total stay length (autoSetCheckout keeps
+  // check-out = check-in + baseNights + extraNights automatically), but
+  // price base nights and extra nights at their own separate rates.
+  var totalNights = Math.round((new Date(co)-new Date(ci))/864e5);
 
-  // Base package price = agency per-person/night rate × adults × nights.
-  // Agency price is an explicit number the admin sets per package (Package
-  // Manager's Agency Packages tab) — not a commission discount off the
-  // guest/retail price, so there's no further commission deduction here.
+  // Base package price = agency per-person/night rate × adults × the
+  // package's OWN fixed nights only — extra nights are priced separately
+  // below at the flat admin-set rate, not the package's agency rate.
   var basePerPersonNight = selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
-  var basePerNight = basePerPersonNight * ad;
-  var baseTotal = basePerNight * nights;
+  var baseTotal = basePerPersonNight * ad * baseNights;
+
+  var extraNightsCost = extraNights * settings.extraNightRate * ad;
+
+  // Transfer — itemized per direction regardless of choice, so the
+  // invoice always shows exactly which method was used each way.
+  var transferCost = 0;
+  var transferLines = '';
+  if(_bkTransferArrival==='flight'){
+    var arrCost = settings.flightSurcharge*ad; transferCost += arrCost;
+    transferLines += '<div class="sum-row"><span>Arrival: Domestic Flight ('+ad+' pax × $'+settings.flightSurcharge+')</span><span>$'+arrCost.toFixed(2)+'</span></div>';
+  } else {
+    transferLines += '<div class="sum-row"><span>Arrival: Speedboat (included)</span><span>$0.00</span></div>';
+  }
+  if(_bkTransferDeparture==='flight'){
+    var depCost = settings.flightSurcharge*ad; transferCost += depCost;
+    transferLines += '<div class="sum-row"><span>Departure: Domestic Flight ('+ad+' pax × $'+settings.flightSurcharge+')</span><span>$'+depCost.toFixed(2)+'</span></div>';
+  } else {
+    transferLines += '<div class="sum-row"><span>Departure: Speedboat (included)</span><span>$0.00</span></div>';
+  }
+
+  // Board plan — auto-calculated across base nights + extra nights, live.
+  var boardCost = 0, boardLine = '';
+  if(_bkBoardPlan==='half' && _bkBoardOptions && _bkBoardOptions.half){
+    boardCost = _bkBoardOptions.half.price * ad * totalNights;
+    boardLine = '<div class="sum-row"><span>Half-Board ('+totalNights+' nights × '+ad+' pax × $'+_bkBoardOptions.half.price+')</span><span>$'+boardCost.toFixed(2)+'</span></div>';
+  } else if(_bkBoardPlan==='full' && _bkBoardOptions && _bkBoardOptions.full){
+    boardCost = _bkBoardOptions.full.price * ad * totalNights;
+    boardLine = '<div class="sum-row"><span>Full-Board ('+totalNights+' nights × '+ad+' pax × $'+_bkBoardOptions.full.price+')</span><span>$'+boardCost.toFixed(2)+'</span></div>';
+  }
 
   // Calculate extras
   var extrasTotal = 0;
   var extraLines = '';
   customExtras.forEach(function(ex){
     var exCost;
-    if(ex.type==='night'){
-      exCost = basePerNight;
-      extraLines += '<div class="sum-row"><span>+ '+ex.name+' (1 extra night)</span><span>$'+exCost.toFixed(2)+'</span></div>';
-    } else if(ex.perNight && ex.perPerson){
-      exCost = ex.price * nights * ad;
-      extraLines += '<div class="sum-row"><span>+ '+ex.name+' ('+nights+' nights × '+ad+' pax × $'+ex.price+')</span><span>$'+exCost.toFixed(2)+'</span></div>';
+    if(ex.perNight && ex.perPerson){
+      exCost = ex.price * totalNights * ad;
+      extraLines += '<div class="sum-row"><span>+ '+ex.name+' ('+totalNights+' nights × '+ad+' pax × $'+ex.price+')</span><span>$'+exCost.toFixed(2)+'</span></div>';
     } else if(ex.perNight){
-      exCost = ex.price * nights;
-      extraLines += '<div class="sum-row"><span>+ '+ex.name+' ('+nights+' nights × $'+ex.price+')</span><span>$'+exCost.toFixed(2)+'</span></div>';
+      exCost = ex.price * totalNights;
+      extraLines += '<div class="sum-row"><span>+ '+ex.name+' ('+totalNights+' nights × $'+ex.price+')</span><span>$'+exCost.toFixed(2)+'</span></div>';
     } else if(ex.perPerson){
       exCost = ex.price * ad;
       extraLines += '<div class="sum-row"><span>+ '+ex.name+' ('+ad+' pax × $'+ex.price+')</span><span>$'+exCost.toFixed(2)+'</span></div>';
@@ -1187,7 +1348,7 @@ function updateBkSummary(){
     removedLines += '<div class="sum-row" style="color:#b91c1c"><span>- Removed: '+inc+'</span><span style="color:#6b7280">included</span></div>';
   });
 
-  var grandTotal = (baseTotal + extrasTotal).toFixed(2);
+  var grandTotal = (baseTotal + extraNightsCost + transferCost + boardCost + extrasTotal).toFixed(2);
 
   // Availability check
   if(rm){
@@ -1206,7 +1367,10 @@ function updateBkSummary(){
 
   document.getElementById('bk-price-summary').innerHTML =
     '<div style="margin-bottom:8px;font-size:var(--font-size-xs);font-weight:700;color:var(--muted)">PRICE BREAKDOWN</div>'
-    +'<div class="sum-row"><span>Package base ('+nights+' nights × '+ad+' pax × $'+basePerPersonNight+')</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
+    +'<div class="sum-row"><span>Package base ('+baseNights+' nights × '+ad+' pax × $'+basePerPersonNight+')</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
+    +(extraNights>0?'<div class="sum-row"><span>Additional nights ('+extraNights+' × '+ad+' pax × $'+settings.extraNightRate+')</span><span>$'+extraNightsCost.toFixed(2)+'</span></div>':'')
+    +transferLines
+    +boardLine
     +removedLines
     +extraLines
     +(extrasTotal>0?'<div class="sum-row"><span>Extras total</span><span>$'+extrasTotal.toFixed(2)+'</span></div>':'')
@@ -1216,7 +1380,7 @@ function updateBkSummary(){
     +finalIncludes.map(function(i){return '<span style="font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#374151"><i class="ti ti-check" style="color:var(--green)"></i>'+i+'</span>';}).join('')
     +customExtras.map(function(e){return '<span style="font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#00b4d8"><i class="ti ti-plus"></i>'+e.name+'</span>';}).join('')
     +'</div>'
-    +'<div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+' · All taxes included</div>';
+    +'<div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px">'+fd(ci)+' → '+fd(co)+' · '+totalNights+' night'+(totalNights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+' · All taxes included</div>';
 }
 
 async function submitAgencyBooking(){
@@ -1241,29 +1405,46 @@ async function submitAgencyBooking(){
   await fetchLiveAvailability();
   var avail=isRoomAvailable(rm,ci,co);
   if(!avail.available){alert('Room not available: '+avail.reason);return;}
-  var nights=Math.round((new Date(co)-new Date(ci))/864e5);
+  var settings=_agyBookingSettings||{flightSurcharge:155,extraNightRate:40};
+  var baseNights=selectedPkg.nights||3;
+  var extraNights=_bkExtraNights||0;
+  var totalNights=Math.round((new Date(co)-new Date(ci))/864e5);
   // Agency price is an explicit per-package number (Package Manager's
   // Agency Packages tab), not a commission discount off the guest price.
+  // Extra nights, transfer, and board are priced separately — see
+  // updateBkSummary() for the identical math shown live in the modal.
   var agencyPrice=selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
+  var baseTotal=agencyPrice*ad*baseNights;
+  var extraNightsCost=extraNights*settings.extraNightRate*ad;
+  var arrTransferCost=_bkTransferArrival==='flight'?settings.flightSurcharge*ad:0;
+  var depTransferCost=_bkTransferDeparture==='flight'?settings.flightSurcharge*ad:0;
+  var transferCost=arrTransferCost+depTransferCost;
+  var boardCost=0, boardName='';
+  if(_bkBoardPlan==='half'&&_bkBoardOptions&&_bkBoardOptions.half){ boardCost=_bkBoardOptions.half.price*ad*totalNights; boardName='Half-Board'; }
+  else if(_bkBoardPlan==='full'&&_bkBoardOptions&&_bkBoardOptions.full){ boardCost=_bkBoardOptions.full.price*ad*totalNights; boardName='Full-Board'; }
   var extrasTotal=customExtras.reduce(function(s,ex){
     var c;
-    if(ex.type==='night') c=agencyPrice*ad;
-    else if(ex.perNight&&ex.perPerson) c=ex.price*nights*ad;
-    else if(ex.perNight) c=ex.price*nights;
+    if(ex.perNight&&ex.perPerson) c=ex.price*totalNights*ad;
+    else if(ex.perNight) c=ex.price*totalNights;
     else if(ex.perPerson) c=ex.price*ad;
     else c=ex.price;
     return s+c;
   },0);
-  var grandTotal=(agencyPrice*nights*ad+extrasTotal).toFixed(2);
+  var grandTotal=(baseTotal+extraNightsCost+transferCost+boardCost+extrasTotal).toFixed(2);
   var finalIncludes=(selectedPkg.includes||[]).filter(function(i){return removedIncludes.indexOf(i)<0;});
   var allIncludes=finalIncludes.concat(customExtras.map(function(e){return e.name;}));
+  var arrTransportLabel=_bkTransferArrival==='flight'?'Domestic Flight':'Speedboat';
+  var depTransportLabel=_bkTransferDeparture==='flight'?'Domestic Flight':'Speedboat';
   var ref='AG-'+Date.now().toString().slice(-6);
+  var bookingOptionsNote='Transfer: Arrival '+arrTransportLabel+', Departure '+depTransportLabel
+    +(extraNights>0?'. +'+extraNights+' additional night'+(extraNights>1?'s':'')+' ($'+settings.extraNightRate+'/pax/night)':'')
+    +(boardName?'. '+boardName+' ('+totalNights+' nights)':'');
   var bk={
     id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,
     rn:rm,rate:agencyPrice,
     ci:ci,co:co,ad:ad,ch:0,inf:0,
     src:'Agency',pay:'Unpaid',st:'Confirmed',ref:ref,
-    notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+(notes?'. '+notes:''),
+    notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+'. '+bookingOptionsNote+(notes?'. '+notes:''),
     nlog:[],prop:'vilu',
     package:selectedPkg.id,packageName:selectedPkg.name,
     packageIncludes:allIncludes,
@@ -1272,6 +1453,11 @@ async function submitAgencyBooking(){
     agency:currentAgency.name||currentAgency.email,
     agencyEmail:currentAgency.email,
     total:grandTotal,
+    baseNights:baseNights, extraNights:extraNights, totalNights:totalNights,
+    transferArrival:arrTransportLabel, transferDeparture:depTransportLabel,
+    arrTransferCost:arrTransferCost.toFixed(2), depTransferCost:depTransferCost.toFixed(2),
+    extraNightsCost:extraNightsCost.toFixed(2),
+    boardPlan:boardName, boardCost:boardCost.toFixed(2),
     bookedAt:new Date().toISOString()
   };
 
@@ -1292,8 +1478,8 @@ async function submitAgencyBooking(){
       source: 'Agency', notes: bk.notes,
       agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
       extra_beds: 0, trips: '[]', food_orders: '[]',
-      arr_time:'', arr_transport:'', arr_from:'',
-      dep_time:'', dep_transport:'', dep_to:'',
+      arr_time:'', arr_transport: arrTransportLabel, arr_from: 'Malé',
+      dep_time:'', dep_transport: depTransportLabel, dep_to: 'Malé',
       updated_at: new Date().toISOString()
     });
   } catch(e) {
@@ -1318,9 +1504,10 @@ async function submitAgencyBooking(){
   document.getElementById('success-details').innerHTML=
     '<strong>'+fn+' '+ln+'</strong><br>'
     +selectedPkg.name+'<br>'
-    +'Room: '+rm+' · '+fd(ci)+' → '+fd(co)+' · '+nights+' nights<br>'
+    +'Room: '+rm+' · '+fd(ci)+' → '+fd(co)+' · '+totalNights+' nights<br>'
+    +'Transfer: Arrival '+arrTransportLabel+', Departure '+depTransportLabel+(boardName?' · '+boardName:'')+'<br>'
     +'Includes: '+allIncludes.join(', ')+'<br>'
-    +'Net charge: <strong style="color:var(--green)">$'+netTotal+'</strong><br>'
+    +'Total due: <strong style="color:var(--green)">$'+grandTotal+'</strong><br>'
     +'Booked by: '+currentAgency.name;
   document.getElementById('m-success').classList.add('on');
 }

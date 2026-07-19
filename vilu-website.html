@@ -3282,6 +3282,11 @@ async function loadHolidayPackages(){
     var notesSnap = results[1];
     var notesData = (notesSnap && notesSnap.exists) ? notesSnap.data() : {};
     var pkgs = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
+      // Agency-exclusive packages (Package Manager's "Agency Packages" tab)
+      // must never reach the public site — channel defaults to 'website'
+      // for any package saved before this field existed, so only an
+      // explicit 'agency' tag excludes it here.
+      .filter(function(p){ return p.channel !== 'agency'; })
       .filter(function(p){ return p.activities && p.activities.length; })
       .sort(function(a,b){
         // Specialty/ladder-excluded packages (e.g. honeymoon tiers) always

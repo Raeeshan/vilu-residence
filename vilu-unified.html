@@ -1579,6 +1579,16 @@ body.pms-mode { overflow:hidden; }
     <button class="tab" id="pkg-tab-agency" onclick="pkgSwitchTab('agency')"><i class="ti ti-building-store"></i> Agency Packages</button>
   </div>
   <div id="pkg-tab-desc" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">Guest-facing content and retail pricing — this is exactly what website visitors see.</div>
+  <div class="card" style="margin-bottom:14px;display:none" id="agency-booking-settings-card">
+    <h3><i class="ti ti-settings" style="margin-right:6px"></i>Agency booking settings</h3>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Applies to every agency package's booking flow — editable here, never hardcoded.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="fg" style="margin:0"><label>Domestic flight surcharge ($/person, one-way)</label><input type="number" id="agy-flight-surcharge" min="0" step="5" placeholder="155"></div>
+      <div class="fg" style="margin:0"><label>Additional night rate ($/person/night)</label><input type="number" id="agy-extra-night-rate" min="0" step="5" placeholder="40"></div>
+    </div>
+    <button class="btn p" onclick="saveAgencyBookingSettings()"><i class="ti ti-device-floppy"></i>Save settings</button>
+    <span id="agy-settings-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+  </div>
   <div class="card" style="margin-bottom:14px">
     <h3><i class="ti ti-file-text" style="margin-right:6px"></i>Package terms</h3>
     <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Shared across every package on the website (one line per term).</p>
@@ -7625,10 +7635,12 @@ var _editPkgId = null;
 
 // Which of the 2 Package Manager tabs is showing — 'website' (guest
 // content + retail price, exactly what viluresidence.web.app shows) or
-// 'agency' (same 9 packages' content, but agency price + visibleToAgencies
-// instead). Both tabs edit through the same openPkgForm()/savePkg() modal,
-// since a package's content/activities/inclusions are one shared record —
-// only which price/visibility fields are surfaced in the list differs.
+// 'agency' — a fully independent set of packages only ever shown in the
+// Agency Portal, distinct from the Website tab's guest-facing packages.
+// Both tabs edit through the same openPkgForm()/savePkg() modal and the
+// same underlying `packages` Firestore collection, just filtered by each
+// package's own `channel` field — new packages are created into whichever
+// tab is open, and editing never moves a package between tabs.
 var _pkgViewTab = 'website';
 function pkgSwitchTab(tab){
   _pkgViewTab = tab;
@@ -7638,8 +7650,44 @@ function pkgSwitchTab(tab){
   var desc = document.getElementById('pkg-tab-desc');
   if(desc) desc.textContent = tab==='website'
     ? 'Guest-facing content and retail pricing — this is exactly what website visitors see.'
-    : 'Same 9 packages\' content — agency/wholesale price and which partnered agencies can see each one.';
+    : 'Agency-exclusive packages — never shown on the website, only in the Agency Portal at the agency price below.';
+  var settingsCard = document.getElementById('agency-booking-settings-card');
+  if(settingsCard) settingsCard.style.display = tab==='agency' ? '' : 'none';
+  if(tab==='agency') loadAgencyBookingSettings();
   drawPkgs();
+}
+
+// Global, editable-in-admin figures used by the Agency Portal's booking
+// flow (transfer substitution + extra-night pricing) — stored once, not
+// hardcoded per package, since every agency package uses the same rates.
+async function loadAgencyBookingSettings(){
+  var flightEl = document.getElementById('agy-flight-surcharge'), nightEl = document.getElementById('agy-extra-night-rate');
+  if(!flightEl) return;
+  try {
+    var snap = await fsDb.collection('website_content').doc('agency_booking_settings').get();
+    var data = (snap.exists && snap.data()) || {};
+    flightEl.value = data.flightSurcharge!=null ? data.flightSurcharge : 155;
+    nightEl.value = data.extraNightRate!=null ? data.extraNightRate : 40;
+  } catch(e) {
+    console.error('loadAgencyBookingSettings failed', e);
+    flightEl.value = 155; nightEl.value = 40;
+  }
+}
+
+async function saveAgencyBookingSettings(){
+  var flightSurcharge = +(document.getElementById('agy-flight-surcharge').value||155);
+  var extraNightRate = +(document.getElementById('agy-extra-night-rate').value||40);
+  var statusEl = document.getElementById('agy-settings-status');
+  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
+  try {
+    await fsDb.collection('website_content').doc('agency_booking_settings').set({ flightSurcharge: flightSurcharge, extraNightRate: extraNightRate }, { merge: true });
+    if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
+    toast('✓ Agency booking settings saved');
+  } catch(e) {
+    console.error('saveAgencyBookingSettings failed', e);
+    if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
+    toast('⚠️ Could not save — please try again');
+  }
 }
 
 // Builds the "Visible to" line shown on Agency-tab cards, matching the
@@ -7676,13 +7724,18 @@ async function drawPkgs(){
     console.error('drawPkgs Firestore fetch failed, falling back to local cache', e);
     PACKAGES = loadPackages();
   }
-  if(!PACKAGES.length){
-    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first agency package</p></div>';
+  var isAgencyTab = _pkgViewTab === 'agency';
+  // channel defaults to 'website' for any package saved before this field
+  // existed, so the Website tab is "everything not explicitly agency" and
+  // the Agency tab is "only explicitly agency" — the two tabs' package
+  // lists are otherwise completely independent, not a shared set.
+  var tabPackages = PACKAGES.filter(function(pkg){ return isAgencyTab ? pkg.channel==='agency' : pkg.channel!=='agency'; });
+  if(!tabPackages.length){
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first '+(isAgencyTab?'agency':'website')+' package</p></div>';
     return;
   }
   el.innerHTML = '';
-  var isAgencyTab = _pkgViewTab === 'agency';
-  PACKAGES.forEach(function(pkg){
+  tabPackages.forEach(function(pkg){
     var agencyPrice = pkg.agencyPricePerRoom || pkg.pricePerRoom;
     var priceFooter = isAgencyTab
       ? ('<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
@@ -7880,10 +7933,14 @@ function savePkg(){
     color: '#00b4d8',
     active: true,
     visibleToAgencies: visibleToAgencies,
+    // Which Package Manager tab this package lives in — a brand new
+    // package is created into whichever tab was open when "New package"
+    // was clicked; editing an existing one never moves it between tabs.
+    channel: _pkgViewTab,
   };
   if(_editPkgId){
     var idx = PACKAGES.findIndex(function(p){return p.id===_editPkgId;});
-    if(idx>-1){pkg.active=PACKAGES[idx].active;pkg.color=PACKAGES[idx].color||'#00b4d8';PACKAGES[idx]=pkg;}
+    if(idx>-1){pkg.active=PACKAGES[idx].active;pkg.color=PACKAGES[idx].color||'#00b4d8';pkg.channel=PACKAGES[idx].channel||'website';PACKAGES[idx]=pkg;}
   } else {
     PACKAGES.push(pkg);
   }
