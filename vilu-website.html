@@ -1083,6 +1083,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
             <input type="number" id="cf-rooms" min="1" max="10" placeholder="e.g. 2">
             <div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px" data-i18n="contact.roomsHint">Up to 3 guests per room</div>
           </div>
+          <div class="cf-field" id="cf-flight-wrap" style="display:none">
+            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:normal;cursor:pointer">
+              <input type="checkbox" id="cf-flight" style="width:auto">
+              <span data-i18n="contact.flightLabel">Add Domestic Flight transfer — $110 per person (optional)</span>
+            </label>
+          </div>
           <div class="cf-field"><label data-i18n="contact.message">Message</label><textarea id="cf-message" placeholder="Tell us about your travel plans..." data-i18n-placeholder="contact.messagePlaceholder"></textarea></div>
           <button class="cf-btn" onclick="sendContactForm()" data-i18n="contact.sendButton">Send Message →</button>
         </div>
@@ -3184,9 +3190,11 @@ function sendContactForm(){
   var pkg = document.getElementById('cf-package').value;
   var roomsEl = document.getElementById('cf-rooms');
   var rooms = (roomsEl && roomsEl.value) ? roomsEl.value : '';
+  var flightEl = document.getElementById('cf-flight');
+  var wantsFlight = flightEl && flightEl.checked;
   var msg = document.getElementById('cf-message').value;
   if(!name||!email||!msg){alert(t('alerts.fillAllFields'));return;}
-  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+'\n\nMessage:\n'+msg;
+  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+(wantsFlight?'\nDomestic Flight transfer requested: Yes ($110/person)':'')+'\n\nMessage:\n'+msg;
   var body = encodeURIComponent(bodyText);
   window.location.href = 'mailto:Viluresidence@gmail.com?subject=Enquiry%20from%20'+encodeURIComponent(name)+'&body='+body;
 }
@@ -3199,6 +3207,8 @@ function enquireAboutPackage(pkgName){
   if(wrap && input){ wrap.style.display = ''; input.value = pkgName; }
   var roomsWrap = document.getElementById('cf-rooms-wrap');
   if(roomsWrap) roomsWrap.style.display = '';
+  var flightWrap = document.getElementById('cf-flight-wrap');
+  if(flightWrap) flightWrap.style.display = '';
   var msgField = document.getElementById('cf-message');
   if(msgField && !msgField.value) msgField.value = "Hi! I'm interested in the "+pkgName+" package.";
   var contactSection = document.getElementById('contact');
