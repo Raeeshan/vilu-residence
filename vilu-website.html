@@ -230,6 +230,14 @@ section{position:relative}
 .bb-input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--white);width:100%;cursor:pointer}
 .bb-input::placeholder{color:rgba(255,255,255,.4)}
 .bb-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+/* Native <select> popups otherwise default to a plain white OS panel,
+   clashing hard with the dark navy/cyan theme. background-color + color on
+   the select and its options is real (if not perfectly uniform) cross-
+   browser support: Chrome/Firefox on desktop and Android honor both:
+   Safari/iOS ignores the option-level styling and always renders its own
+   native light popup regardless — an accepted limitation of <select>. */
+select.bb-input{color-scheme:dark}
+select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .bb-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:0 32px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s;white-space:nowrap}
 .bb-btn:hover{background-position:100% 0}
 
@@ -756,16 +764,22 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <option value="3" style="color:#000" data-i18n="bookingBar.guest3">3 Guests</option>
       </select>
     </div>
-    <div class="bb-field" style="border-right:none">
+    <div class="bb-field">
       <div class="bb-label" data-i18n="bookingBar.rooms">Rooms</div>
-      <select class="bb-input" id="bb-rooms" style="background:transparent;cursor:pointer">
-        <option value="any" style="color:#000" data-i18n="bookingBar.anyRoom">Any room</option>
-        <option value="101" style="color:#000">Garden Room — $80/night</option>
-        <option value="102" style="color:#000">Garden Room — $80/night</option>
-        <option value="103" style="color:#000">Garden Deluxe — $85/night</option>
-        <option value="104" style="color:#000">Garden Deluxe — $85/night</option>
-        <option value="105" style="color:#000">Premium Room — $90/night</option>
-        <option value="106" style="color:#000">Premium Room — $90/night</option>
+      <select class="bb-input" id="bb-rooms" style="background:transparent;cursor:pointer" onchange="refreshBBRoomCountOptions()">
+        <option value="any" data-i18n="bookingBar.anyRoom">Any room</option>
+        <option value="101">Garden Room — $80/night</option>
+        <option value="102">Garden Room — $80/night</option>
+        <option value="103">Garden Deluxe — $85/night</option>
+        <option value="104">Garden Deluxe — $85/night</option>
+        <option value="105">Premium Room — $90/night</option>
+        <option value="106">Premium Room — $90/night</option>
+      </select>
+    </div>
+    <div class="bb-field" style="border-right:none">
+      <div class="bb-label" data-i18n="bookingBar.numRooms">Number of Rooms</div>
+      <select class="bb-input" id="bb-room-count" style="background:transparent;cursor:pointer">
+        <option value="1" selected>1</option>
       </select>
     </div>
     <button class="bb-btn" onclick="openBookingPageWithDates()" data-i18n="bookingBar.checkAvailability">Check Availability</button>
@@ -1254,6 +1268,8 @@ en: {
     "guest2": "2 Guests",
     "guest3": "3 Guests",
     "anyRoom": "Any room",
+    "numRooms": "Number of Rooms",
+    "available": "available",
     "checkAvailability": "Check Availability"
   },
   "rooms": {
@@ -2261,12 +2277,19 @@ function refreshRoomCards() {
   }
 }
 
-// Hero booking bar's "Rooms" dropdown. Before check-in/check-out are both
-// picked it just lists every room (so guests can browse room types without
-// committing to dates first). Once real dates are set, it re-filters to
-// only the rooms actually free for that range — reusing isRoomAvailable()/
-// getAvgPrice(), the exact same availability check bfpSearch() already
-// uses for the full booking page, rather than a second parallel one.
+// Hero booking bar's "Rooms" dropdown lists room CATEGORIES (not individual
+// physical rooms), each tagged with how many of that category are actually
+// free — mirroring the agency portal's room-type/room-count pattern
+// (_bkRoomTypeAvailability + bkRoomTypeChanged there). Before check-in/
+// check-out are both picked it just shows every category's full physical
+// count; once dates are set it re-filters to real availability — reusing
+// isRoomAvailable()/getAvgPrice(), the exact same availability check
+// bfpSearch() already uses for the full booking page, rather than a second
+// parallel one. "Any room" is tracked the same way, as the total available
+// across every category, so the Number of Rooms field behaves consistently
+// whether or not a specific category is chosen.
+var BB_ROOM_TYPES = ['Double Room', 'Deluxe Family Room', 'Deluxe Family Room with Open Deck'];
+var _bbRoomTypeAvailability = {}; // {typeName or 'any': availableCount}
 function refreshBBRoomsAvailability() {
   var sel = document.getElementById('bb-rooms');
   if (!sel || typeof ROOMS === 'undefined') return;
@@ -2275,19 +2298,46 @@ function refreshBBRoomsAvailability() {
   var datesSet = !!(ci && co && co > ci);
   var prevVal = sel.value;
 
-  // Every <option> needs an explicit black text color (matching the static
-  // fallback markup in the HTML) since .bb-input sets white text for the
-  // closed select sitting on the dark hero bar — inherited into the native
-  // dropdown popup's own light background, these options would otherwise
-  // render white-on-white and look empty even though they're really there.
-  var opts = ['<option value="any" style="color:#000">'+t('bookingBar.anyRoom')+'</option>'];
-  ROOMS.forEach(function(r) {
-    if (datesSet && typeof isRoomAvailable === 'function' && !isRoomAvailable(r.id, ci, co)) return;
-    var rate = datesSet && typeof getAvgPrice === 'function' ? getAvgPrice(r.id, ci, co) : r.rate;
-    opts.push('<option value="'+r.id+'" style="color:#000">'+td(r.name)+' — $'+rate+t('bfp.perNight')+'</option>');
+  _bbRoomTypeAvailability = {};
+  var opts = [];
+  var anyCount = 0;
+  BB_ROOM_TYPES.forEach(function(type) {
+    var roomsOfType = ROOMS.filter(function(r) { return r.type === type; });
+    if (!roomsOfType.length) return;
+    var availableRooms = datesSet ? roomsOfType.filter(function(r) { return isRoomAvailable(r.id, ci, co); }) : roomsOfType;
+    var count = availableRooms.length;
+    anyCount += count;
+    _bbRoomTypeAvailability[type] = count;
+    var minRate = Math.min.apply(null, roomsOfType.map(function(r) {
+      return datesSet && typeof getAvgPrice === 'function' ? getAvgPrice(r.id, ci, co) : r.rate;
+    }));
+    var label = td(type) + ' — $' + minRate + t('bfp.perNight') + ' (' + count + ' ' + t('bookingBar.available') + ')';
+    opts.push('<option value="' + type + '"' + (count < 1 ? ' disabled' : '') + '>' + label + '</option>');
   });
+  _bbRoomTypeAvailability.any = anyCount;
+  opts.unshift('<option value="any">' + t('bookingBar.anyRoom') + '</option>');
   sel.innerHTML = opts.join('');
   sel.value = [].some.call(sel.options, function(o){ return o.value === prevVal; }) ? prevVal : 'any';
+  refreshBBRoomCountOptions();
+}
+
+// Rebuilds the "Number of Rooms" select to match how many rooms of the
+// selected category are actually free (or, for "Any room", the total
+// available across every category) — never lets a guest ask for more
+// rooms than physically exist and are free, mirroring bkRoomTypeChanged()
+// in the agency portal.
+function refreshBBRoomCountOptions() {
+  var typeSel = document.getElementById('bb-rooms'), countSel = document.getElementById('bb-room-count');
+  if (!typeSel || !countSel) return;
+  var max = _bbRoomTypeAvailability[typeSel.value] || 0;
+  var prevVal = +(countSel.value || 1);
+  countSel.innerHTML = '';
+  if (max < 1) {
+    countSel.add(new Option('—', ''));
+  } else {
+    for (var i = 1; i <= max; i++) countSel.add(new Option(String(i), String(i)));
+    countSel.value = String(Math.min(prevVal || 1, max));
+  }
 }
 const COLORS = {
   'Double Room':'linear-gradient(135deg,#0a1628,#0e7490)',
@@ -2878,7 +2928,14 @@ function closeBookingPopup(){
 }
 
 // ── FULL BOOKING PAGE ──
+// Room-type filter carried over from the hero widget's "Rooms" dropdown —
+// null means no filter ("Any room" / not set via the widget at all). Reset
+// whenever the page is opened by any route other than openBookingPageWithDates()
+// so a stale filter from an earlier hero-widget search never silently
+// narrows a fresh "View All Availability"/"Book Direct" visit.
+var _bfpTypeFilter = null;
 function openBookingPage(){
+  _bfpTypeFilter = null;
   document.getElementById('booking-full-page').style.display='block';
   document.body.style.overflow='hidden';
   bfpRenderRooms(ROOMS);
@@ -2894,6 +2951,15 @@ function openBookingPageWithDates(){
   var co = document.getElementById('bb-co').value || document.getElementById('bwf-co').value || document.getElementById('popup-co').value;
   if(ci) document.getElementById('bfp-ci').value = ci;
   if(co) document.getElementById('bfp-co').value = co;
+  // Carry the hero widget's room type + count over into the full page's own
+  // search fields, so "Check Availability" reflects exactly what was picked.
+  var bbRoomsEl = document.getElementById('bb-rooms'), bbCountEl = document.getElementById('bb-room-count');
+  if (bbRoomsEl) {
+    _bfpTypeFilter = bbRoomsEl.value && bbRoomsEl.value !== 'any' ? bbRoomsEl.value : null;
+    var bfpRoomsEl = document.getElementById('bfp-rooms');
+    var count = bbCountEl ? +bbCountEl.value || 1 : 1;
+    if (bfpRoomsEl && [].some.call(bfpRoomsEl.options, function(o){ return +o.value === count; })) bfpRoomsEl.value = String(count);
+  }
   if(ci && co) bfpSearch();
 }
 
@@ -2906,12 +2972,13 @@ async function bfpSearch(){
   // Reload rooms from PMS in case prices/photos changed, and refresh availability + prices + details from Firestore
   await Promise.all([loadBookedRangesFromSupabase(), fetchRoomPricesFromFirestore(), fetchRoomDetailsFromFirestore()]);
   ROOMS = loadPMSRooms();
-  var available = ROOMS.filter(function(r){return isRoomAvailable(r.id, ci, co);});
+  var typeFilter = _bfpTypeFilter;
+  var available = ROOMS.filter(function(r){return isRoomAvailable(r.id, ci, co) && (!typeFilter || r.type===typeFilter);});
   // A guest asking for N rooms only ever sees results when at least N rooms
   // are simultaneously free for the exact dates — not just "one room free".
   var enough = available.length >= numRooms;
   bfpRenderRooms(enough ? available : [], ci, co, numRooms);
-  bfpCheckSuggestion(available.length, ci, co, numRooms);
+  bfpCheckSuggestion(available.length, ci, co, numRooms, typeFilter);
 }
 
 function isRoomAvailable(roomId, ci, co){
@@ -2933,24 +3000,25 @@ function fdShort(dateStr){
 // the nearest dates where at least one room is free. Reuses BOOKED_RANGES,
 // already bulk-fetched once by loadBookedRangesFromSupabase() above — so
 // this whole search runs in memory with zero extra Firestore reads.
-function findNearestAvailabilityWeb(ci, co, capDays, minCount){
+function findNearestAvailabilityWeb(ci, co, capDays, minCount, typeFilter){
   minCount = minCount || 1;
   for(var offset=1; offset<=capDays; offset++){
     var laterCi=addDaysISO(ci,offset), laterCo=addDaysISO(co,offset);
-    var laterFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,laterCi,laterCo);});
+    var laterFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,laterCi,laterCo) && (!typeFilter || r.type===typeFilter);});
     if(laterFree.length>=minCount) return {ci:laterCi, co:laterCo, rooms:laterFree};
     var earlierCi=addDaysISO(ci,-offset), earlierCo=addDaysISO(co,-offset);
-    var earlierFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,earlierCi,earlierCo);});
+    var earlierFree=ROOMS.filter(function(r){return isRoomAvailable(r.id,earlierCi,earlierCo) && (!typeFilter || r.type===typeFilter);});
     if(earlierFree.length>=minCount) return {ci:earlierCi, co:earlierCo, rooms:earlierFree};
   }
   return null;
 }
-function bfpCheckSuggestion(availableCount, ci, co, numRooms){
+function bfpCheckSuggestion(availableCount, ci, co, numRooms, typeFilter){
   numRooms = numRooms || 1;
   var el = document.getElementById('bfp-suggest');
   if(availableCount >= numRooms){ el.style.display='none'; return; }
-  var notEnoughMsg = numRooms>1 ? 'Only '+availableCount+' of '+numRooms+' rooms available for these exact dates.' : 'No rooms available for these exact dates.';
-  var nearest = findNearestAvailabilityWeb(ci, co, 90, numRooms);
+  var roomLabel = typeFilter ? (td(typeFilter)+(numRooms===1?'':'s')) : (numRooms===1?'room':'rooms');
+  var notEnoughMsg = numRooms>1 ? 'Only '+availableCount+' of '+numRooms+' '+roomLabel+' available for these exact dates.' : 'No '+roomLabel+' available for these exact dates.';
+  var nearest = findNearestAvailabilityWeb(ci, co, 90, numRooms, typeFilter);
   if(!nearest){
     el.style.display='block';
     el.innerHTML = notEnoughMsg+' No availability found in the near term — please contact us directly.';
