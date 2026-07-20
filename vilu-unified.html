@@ -101,6 +101,9 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-nav button{padding:4px 8px;font-size:var(--font-size-sm);font-weight:600;border-radius:4px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit}
 .cb-month-lbl{font-size:var(--font-size-md);font-weight:800;color:#1e40af;min-width:160px;padding:0 14px}
 .cb-actions{display:flex;align-items:center;gap:6px;padding:6px 12px;margin-left:auto;border-left:1px solid #e5e7eb}
+.cb-legend{display:flex;align-items:center;gap:14px;padding:5px 12px;background:#fff;border-bottom:1px solid #e5e7eb;flex-wrap:wrap;flex-shrink:0}
+.cb-legend-item{display:inline-flex;align-items:center;gap:5px;font-size:var(--font-size-xs);color:#374151;font-weight:600;white-space:nowrap}
+.cb-legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
 .cb-body{display:flex;flex:1;overflow:hidden;min-height:0}
 .cb-fixed-col{flex-shrink:0;width:132px;border-right:2px solid #d1d5db;display:flex;flex-direction:column;background:#f8fafc;z-index:10}
 .cb-fixed-head{height:68px;border-bottom:1px solid #d1d5db;display:flex;align-items:center;justify-content:center;padding:6px 8px;background:#f1f5f9;flex-shrink:0}
@@ -122,6 +125,13 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-room-row-lbl .rt{font-size:var(--font-size-xs);color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
 .cb-section-lbl{height:18px;flex-shrink:0;display:flex;align-items:center;padding:0 8px;background:#e0e7ff;border-bottom:1px solid #c7d2fe}
 .cb-section-lbl span{font-size:var(--font-size-xs);font-weight:800;color:#3730a3;text-transform:uppercase;letter-spacing:.06em}
+/* Nested category grouping (e.g. "Deluxe Family Room") within a
+   property section - a lighter, indented sub-header, one level below
+   .cb-section-lbl. Must stay the same height as its .cb-category-row
+   counterpart in the scrollable grid, same reasoning as the room-row
+   pairing above. */
+.cb-category-lbl{height:16px;flex-shrink:0;display:flex;align-items:center;padding:0 8px 0 14px;background:#f8fafc;border-bottom:1px solid #e5e7eb}
+.cb-category-lbl span{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
 .cb-scroll-area{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
 .cb-scroll-area::-webkit-scrollbar{height:14px;width:14px}
 .cb-scroll-area::-webkit-scrollbar-track{background:#f1f5f9}
@@ -142,6 +152,8 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-booking-row{height:44px;display:flex;flex-shrink:0;position:relative}
 .cb-section-row{height:18px;flex-shrink:0;display:flex;background:#e0e7ff;cursor:grab}
 .cb-section-row.cb-dragging{cursor:grabbing}
+.cb-category-row{height:16px;flex-shrink:0;display:flex;background:#f8fafc;cursor:grab}
+.cb-category-row.cb-dragging{cursor:grabbing}
 .cb-cell{width:50px;flex-shrink:0;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;position:relative;cursor:pointer;background:#fff}
 .cb-cell:hover{background:#e0f7fd}
 .cb-cell.weekend{background:#fefce8}
@@ -733,6 +745,17 @@ body.pms-mode { overflow:hidden; }
       <span style="font-size:var(--font-size-xs);color:#94a3b8"><i class="ti ti-hand-click"></i> Drag empty cells to book · Click bar for details</span>
       <button class="btn p sm" onclick="go('newbk',document.querySelectorAll('.sl')[9])"><i class="ti ti-plus"></i>New booking</button>
     </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="cb-legend">
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#16a34a"></i>Confirmed</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#2563eb"></i>Checked in</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#94a3b8"></i>Checked out</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#ca8a04"></i>Pending</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#f59e0b"></i>Maintenance</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#6b7280"></i>Owner use</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#db2777"></i>Soft hold</span>
   </div>
 
   <!-- BODY -->
@@ -2491,6 +2514,17 @@ Photography | 25 | /hr"></textarea>
     </div>
   </div>
 
+  <!-- LEGEND -->
+  <div class="cb-legend">
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#16a34a"></i>Confirmed</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#2563eb"></i>Checked in</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#94a3b8"></i>Checked out</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#ca8a04"></i>Pending</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#f59e0b"></i>Maintenance</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#6b7280"></i>Owner use</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#db2777"></i>Soft hold</span>
+  </div>
+
   <!-- BODY -->
   <div class="cb-body">
     <!-- FIXED LEFT COL -->
@@ -4210,6 +4244,37 @@ function drawDash(){
 const DOW_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SRC_BAR={'Booking.com':'#2563eb','Airbnb':'#e11d48','Agoda':'#d97706','Expedia':'#b45309','Google Hotels':'#4285f4','Direct':'#059669','Phone':'#7c3aed','Walk-in':'#0891b2'};
+// Reservation-bar color by status (Cancelled is never rendered as a bar,
+// so it has no color here) - kept in sync with the calendar legend.
+const RES_STATUS_COLOR={'Confirmed':'#16a34a','Checked in':'#2563eb','Checked out':'#94a3b8','Pending':'#ca8a04'};
+function resBarColor(res){return RES_STATUS_COLOR[res.st]||RES_STATUS_COLOR.Confirmed;}
+// Chevron/arrow-shaped bar ends (Cloudbeds-style): a check-in that's
+// actually visible in the current date range gets a notch pointing right
+// at its left edge; a checkout visible in range gets a notch pointing
+// left at its right edge. A stay that continues off-screen (the real
+// check-in/checkout isn't in view) keeps a flat cut edge on that side,
+// signalling "this continues" rather than a false endpoint.
+function calBarClip(w,h,leftNotch,rightNotch){
+  var n=Math.min(7,w/4);
+  var pts=['0 0', w+'px 0'];
+  if(rightNotch) pts.push((w-n)+'px '+(h/2)+'px');
+  pts.push(w+'px '+h+'px', '0 '+h+'px');
+  if(leftNotch) pts.push(n+'px '+(h/2)+'px');
+  return 'polygon('+pts.join(',')+')';
+}
+// Groups an array of room objects by their `type` field, preserving the
+// order each distinct type first appears in - used to render Vilu
+// Residence's room-category sub-headers ("Deluxe Family Room" etc.)
+// without depending on VR being pre-sorted by type (it isn't: VR06
+// shares a type with VR01/02 but isn't adjacent to them).
+function groupByType(arr){
+  var map={},order=[];
+  arr.forEach(function(rm){
+    if(!map[rm.type]){map[rm.type]=[];order.push(rm.type);}
+    map[rm.type].push(rm);
+  });
+  return order.map(function(t){return {type:t,rooms:map[t]};});
+}
 
 // Column width in px for one calendar day — single source of truth for
 // both the CSS (.cb-date-col/.cb-cell) and the JS bar-positioning math
@@ -4285,8 +4350,12 @@ function drawCal(){
   document.getElementById('cb-lbl').textContent=MON_NAMES[dates[0].getMonth()]+' '+dates[0].getFullYear()+' - '+MON_NAMES[endD.getMonth()]+' '+endD.getFullYear();
   var occ={};
   dates.forEach(function(d){var ds=lDs(d);occ[ds]=RES.filter(function(r){return r.prop==='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds;}).length;});
+  var vrGroups=groupByType(VR);
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
-  VR.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room"><div class="cb-room-info"><div class="rn">'+rm.nm+'</div><div class="rc" title="'+rm.type+'">'+rm.type+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
+  vrGroups.forEach(function(grp){
+    fH+='<div class="cb-category-lbl"><span>'+grp.type+'</span></div>';
+    grp.rooms.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room"><div class="cb-room-info"><div class="rn">'+rm.nm+'</div><div class="rc" title="'+rm.type+'">'+rm.type+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
+  });
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
     fH+='<div class="cb-section-lbl" style="background:'+h.color+'22"><span style="color:'+h.color+'">'+h.nm+'</span></div>';
@@ -4316,7 +4385,10 @@ function drawCal(){
     return r2;
   }
   gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:#e0e7ff;border-bottom:1px solid #c7d2fe"></div></div>';
-  VR.forEach(function(rm){gH+=mR(rm,false,null);});
+  vrGroups.forEach(function(grp){
+    gH+='<div class="cb-category-row"><div class="cb-category-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:#f8fafc;border-bottom:1px solid #e5e7eb"></div></div>';
+    grp.rooms.forEach(function(rm){gH+=mR(rm,false,null);});
+  });
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
     var col=h.color;
@@ -4327,7 +4399,7 @@ function drawCal(){
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
   if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;};
   if(sa){
-    var panEls=sa.querySelectorAll('.cb-date-header-row, .cb-section-row');
+    var panEls=sa.querySelectorAll('.cb-date-header-row, .cb-section-row, .cb-category-row');
     panEls.forEach(function(panEl){
       panEl.onmousedown=function(e){
         calPanActive=true;calPanX=e.clientX;calPanScroll=sa.scrollLeft;calPanSA=sa;
@@ -4352,7 +4424,8 @@ function drawCal(){
       if(w<4)return;
       var bar=document.createElement('div');
       bar.className='cb-bar';
-      bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:grab;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+(res.isBlock||res.src==='Agency Block'?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):'#7dd3fc');
+      bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:grab;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+(res.isBlock||res.src==='Agency Block'?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):resBarColor(res));
+      bar.style.clipPath=calBarClip(w,32,sV,cI>=0);
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+((res.isBlock||res.src==='Agency Block')&&res.blockSt!=='Confirmed'?'[PENDING] ':(res.isBlock||res.src==='Agency Block')?'[BLOCK] ':'')+res.fn+' '+res.ln+'</span>';
       bar.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showDet(res.id);});
       bar.addEventListener('mousedown',function(e){e.stopPropagation();if(!(res.isBlock||res.src==='Agency Block')){bDrg=true;sOn=false;}});
@@ -4381,6 +4454,7 @@ function drawCal(){
       var bar=document.createElement('div');
       bar.className='cb-bar';
       bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:pointer;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+blkColor(b.type);
+      bar.style.clipPath=calBarClip(w,32,sV,cI>=0);
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">[BLOCK] '+(b.type||'Blocked')+(b.note?' — '+b.note:'')+'</span>';
       bar.addEventListener('click',function(e){
         e.preventDefault();e.stopPropagation();
