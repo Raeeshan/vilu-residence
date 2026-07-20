@@ -387,7 +387,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="fg" style="margin:0"><label>Title</label>
           <select id="bk-title"><option value="">--</option><option value="Mr">Mr</option><option value="Mrs">Mrs</option><option value="Ms">Ms</option><option value="Miss">Miss</option><option value="Dr">Dr</option></select>
         </div>
-        <div class="fg" style="margin:0"><label>Children</label><input type="number" id="bk-children" min="0" max="10" value="0"></div>
+        <div class="fg" style="margin:0"><label>Children</label><input type="number" id="bk-children" min="0" max="10" value="0" onchange="updateBkSummary()"></div>
       </div>
       <div class="form-grid" style="margin-bottom:12px">
         <div class="fg" style="margin:0"><label>First name *</label><input type="text" id="bk-fn" placeholder="First name"></div>
@@ -1118,9 +1118,17 @@ function generateAgencyInvoice(bkId){
   if(!bk) return;
   var nights=bk.totalNights||Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
   var baseNights=bk.baseNights||nights;
-  var baseTotal=(bk.rate*(bk.ad||2)).toFixed(2);
+  var ch=bk.ch||0;
+  var childDiscountPct=bk.childDiscountPct||0;
+  var childRate=bk.rate*(1-childDiscountPct/100);
+  var baseTotal=(bk.rate*(bk.ad||2)+childRate*ch).toFixed(2);
+  var packageBaseRow = ch>0
+    ? '<tr><th>Package base ('+baseNights+' nights)</th><td>$'+baseTotal+'</td></tr>'
+      +'<tr><th style="font-weight:400;color:#6b7280">— '+(bk.ad||2)+' Adult'+((bk.ad||2)>1?'s':'')+' × $'+bk.rate+'</th><td style="color:#6b7280">$'+(bk.rate*(bk.ad||2)).toFixed(2)+'</td></tr>'
+      +'<tr><th style="font-weight:400;color:#6b7280">— '+ch+' Child'+(ch>1?'ren':'')+' × $'+childRate.toFixed(2)+(childDiscountPct>0?' ('+childDiscountPct+'% off adult rate)':'')+'</th><td style="color:#6b7280">$'+(childRate*ch).toFixed(2)+'</td></tr>'
+    : '<tr><th>Package base ('+baseNights+' nights · '+(bk.ad||2)+' pax × $'+bk.rate+'/person)</th><td>$'+baseTotal+'</td></tr>';
   var lineRows=
-    '<tr><th>Package base ('+baseNights+' nights · '+(bk.ad||2)+' pax × $'+bk.rate+'/person)</th><td>$'+baseTotal+'</td></tr>'
+    packageBaseRow
     +(bk.extraNights?'<tr><th>Additional nights ('+bk.extraNights+' × '+(bk.ad||2)+' pax)</th><td>$'+bk.extraNightsCost+'</td></tr>':'')
     +(bk.transferArrival?'<tr><th>Arrival transfer ('+bk.transferArrival+')</th><td>'+(bk.transferArrival==='Speedboat'?'Included':'$'+bk.arrTransferCost)+'</td></tr>':'')
     +(bk.transferDeparture?'<tr><th>Departure transfer ('+bk.transferDeparture+')</th><td>'+(bk.transferDeparture==='Speedboat'?'Included':'$'+bk.depTransferCost)+'</td></tr>':'')
@@ -1553,6 +1561,7 @@ function updateBkSummary(){
   var roomType = document.getElementById('bk-room-type').value;
   var roomCount = +(document.getElementById('bk-room-count').value||0);
   var ad = +(document.getElementById('bk-ad').value||2);
+  var ch = +(document.getElementById('bk-children')?.value||0);
   var warn = document.getElementById('bk-avail-warn');
 
   if(!ci||!co||co<=ci){document.getElementById('bk-price-summary').innerHTML='<p style="color:var(--muted);font-size:var(--font-size-sm)">Select dates to see price breakdown.</p>';return;}
@@ -1570,8 +1579,16 @@ function updateBkSummary(){
   // package) — never multiplied by nights. Extra nights beyond the
   // package's own fixed duration are priced separately below at the flat
   // admin-set rate, and are the only nightly component of the base stay.
+  // Children ride at this same per-package rate minus that package's own
+  // Child Discount % (0 if the admin never set one) — adults are always
+  // full price. Add-ons below (extra nights, transfer, board) deliberately
+  // stay priced per ADULT count only, at full rate — real hospitality
+  // pricing rarely discounts board/transfer for children, and this wasn't
+  // explicitly specified either way, so flagging the assumption here.
   var basePerPersonNight = selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
-  var baseTotal = basePerPersonNight * ad;
+  var childDiscountPct = selectedPkg.childDiscountPct||0;
+  var childPerPersonNight = basePerPersonNight * (1 - childDiscountPct/100);
+  var baseTotal = basePerPersonNight * ad + childPerPersonNight * ch;
 
   var extraNightsCost = extraNights * settings.extraNightRate * ad;
 
@@ -1663,7 +1680,9 @@ function updateBkSummary(){
   document.getElementById('bk-price-summary').innerHTML =
     '<div style="margin-bottom:8px;font-size:var(--font-size-xs);font-weight:700;color:var(--muted)">PRICE BREAKDOWN</div>'
     +roomsLine
-    +'<div class="sum-row"><span>Package base ('+baseNights+' nights · '+ad+' pax × $'+basePerPersonNight+'/person)</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
+    +(ch>0
+      ? '<div class="sum-row"><span>Package base ('+baseNights+' nights · '+ad+' Adult'+(ad>1?'s':'')+' × $'+basePerPersonNight+' + '+ch+' Child'+(ch>1?'ren':'')+' × $'+childPerPersonNight.toFixed(2)+(childDiscountPct>0?' — '+childDiscountPct+'% off':'')+')</span><span>$'+baseTotal.toFixed(2)+'</span></div>'
+      : '<div class="sum-row"><span>Package base ('+baseNights+' nights · '+ad+' pax × $'+basePerPersonNight+'/person)</span><span>$'+baseTotal.toFixed(2)+'</span></div>')
     +(extraNights>0?'<div class="sum-row"><span>Additional nights ('+extraNights+' × '+ad+' pax × $'+settings.extraNightRate+')</span><span>$'+extraNightsCost.toFixed(2)+'</span></div>':'')
     +transferLines
     +boardLine
@@ -1676,7 +1695,7 @@ function updateBkSummary(){
     +finalIncludes.map(function(i){return '<span style="font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#374151"><i class="ti ti-check" style="color:var(--green)"></i>'+i+'</span>';}).join('')
     +customExtras.map(function(e){return '<span style="font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#00b4d8"><i class="ti ti-plus"></i>'+e.name+'</span>';}).join('')
     +'</div>'
-    +'<div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px">'+fd(ci)+' → '+fd(co)+' · '+totalNights+' night'+(totalNights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+' · All taxes included</div>';
+    +'<div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px">'+fd(ci)+' → '+fd(co)+' · '+totalNights+' night'+(totalNights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+(ch>0?' · '+ch+' child'+(ch>1?'ren':''):'')+' · All taxes included</div>';
 }
 
 async function submitAgencyBooking(){
@@ -1727,7 +1746,12 @@ async function submitAgencyBooking(){
   // priced separately — see updateBkSummary() for the identical math shown
   // live in the modal.
   var agencyPrice=selectedPkg.agencyPricePerRoom||selectedPkg.pricePerRoom;
-  var baseTotal=agencyPrice*ad;
+  // Children ride at this package's own Child Discount % off the adult
+  // rate (0 if never set); add-ons below stay priced per adult count only,
+  // at full rate — see the matching comment in updateBkSummary().
+  var childDiscountPct=selectedPkg.childDiscountPct||0;
+  var childRate=agencyPrice*(1-childDiscountPct/100);
+  var baseTotal=agencyPrice*ad+childRate*ch;
   var extraNightsCost=extraNights*settings.extraNightRate*ad;
   var arrTransferCost=_bkTransferArrival==='flight'?settings.flightSurcharge*ad:0;
   var depTransferCost=_bkTransferDeparture==='flight'?settings.flightSurcharge*ad:0;
@@ -1757,7 +1781,7 @@ async function submitAgencyBooking(){
     id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,title:title,
     rn:roomIds.join(', '),rate:agencyPrice,
     roomType:roomType, roomCount:roomCount, roomIds:roomIds, guestSplit:guestSplit,
-    ci:ci,co:co,ad:ad,ch:ch,inf:0,
+    ci:ci,co:co,ad:ad,ch:ch,inf:0,childDiscountPct:childDiscountPct,
     hasPassportPhoto: !!_bkPassportDataUri,
     src:'Agency',pay:'Unpaid',st:'Confirmed',ref:ref,
     notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+'. '+bookingOptionsNote+roomsNote+(notes?'. '+notes:''),

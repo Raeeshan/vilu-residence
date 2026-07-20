@@ -2057,6 +2057,7 @@ Suite</textarea></div>
         <div class="fg"><label>Nights</label><input type="number" id="agy-pkg-nights" min="1" value="1"></div>
       </div>
       <div class="fg"><label>Agency price ($/person)</label><input type="number" id="agy-pkg-price" min="0" step="5"></div>
+      <div class="fg"><label>Child Discount (%) <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">— off the adult price, per child. 0 if unset</span></label><input type="number" id="agy-pkg-childdiscount" min="0" max="100" step="5" placeholder="0"></div>
       <div class="fg"><label>Description</label><input type="text" id="agy-pkg-desc" placeholder="Short one-line hook"></div>
       <div class="fg"><label>Includes (one per line)</label><textarea id="agy-pkg-includes" rows="4" placeholder="Round-trip speedboat transfer
 5 nights accommodation (Standard Room)
@@ -6321,7 +6322,7 @@ function renderAgencyPkgList(){
     var price = pkg.agencyPricePerRoom || pkg.pricePerRoom || 0;
     return '<div style="border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       + '<div><div style="font-weight:700;font-size:var(--font-size-base)">'+(pkg.emoji||'📦')+' '+pkg.name+'</div>'
-      + '<div style="font-size:var(--font-size-sm);color:#6b7280">$'+price+'/person · '+pkg.nights+' night'+(pkg.nights>1?'s':'')+'</div>'
+      + '<div style="font-size:var(--font-size-sm);color:#6b7280">$'+price+'/person · '+pkg.nights+' night'+(pkg.nights>1?'s':'')+(pkg.childDiscountPct?' · Child discount '+pkg.childDiscountPct+'%':'')+'</div>'
       + ((pkg.guestCharge||pkg.commission) ? '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px"><i class="ti ti-notebook" style="margin-right:2px"></i>Margin Ledger — Guest Charge $'+(pkg.guestCharge||0)+' · Commission $'+(pkg.commission||0)+'</div>' : '') + '</div>'
       + '<div style="display:flex;gap:4px;flex-shrink:0">'
       + '<button class="ab" title="Edit" onclick="openAgencyPkgForm(\''+pkg.id+'\')"><i class="ti ti-edit"></i></button>'
@@ -6337,6 +6338,7 @@ function openAgencyPkgForm(pid){
   document.getElementById('agy-pkg-emoji').value = pkg ? (pkg.emoji||'📦') : '📦';
   document.getElementById('agy-pkg-nights').value = pkg ? pkg.nights : 1;
   document.getElementById('agy-pkg-price').value = pkg ? (pkg.agencyPricePerRoom||pkg.pricePerRoom||'') : '';
+  document.getElementById('agy-pkg-childdiscount').value = pkg ? (pkg.childDiscountPct||'') : '';
   document.getElementById('agy-pkg-desc').value = pkg ? (pkg.description||'') : '';
   document.getElementById('agy-pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : '';
   document.getElementById('agy-pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
@@ -6371,6 +6373,7 @@ async function saveAgencyPkgForm(){
     description: (document.getElementById('agy-pkg-desc').value||'').trim(),
     pricePerRoom: price,
     agencyPricePerRoom: price,
+    childDiscountPct: Math.min(100, Math.max(0, +(document.getElementById('agy-pkg-childdiscount').value||0))),
     nights: +(document.getElementById('agy-pkg-nights').value||1),
     includes: includes,
     activities: activities,
