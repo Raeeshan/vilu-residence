@@ -427,6 +427,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 </div>
+
+<!-- MARGIN LEDGER MODAL — this agency's own internal Guest Charge/Commission
+     tracking for one package. Purely informational: never read by pricing,
+     booking totals, or any generated document. Only ever reads/writes this
+     agency's own agency_packages/{email} doc — never visible to other
+     agencies, the public website, or guests. -->
+<div class="modal-bg" id="m-margin-ledger" onclick="if(event.target===this)closeMarginLedger()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr">
+      <h2>Margin Ledger</h2>
+      <button onclick="closeMarginLedger()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-weight:700;font-size:var(--font-size-base);margin-bottom:4px" id="ml-pkg-name"></div>
+      <p style="font-size:var(--font-size-xs);color:var(--muted);margin-bottom:16px">Internal tracking only, for your own reference. Does not affect Agency Price, bookings, or any generated document — only you can see these numbers.</p>
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="fg" style="margin:0"><label>Guest Charge</label><input type="number" id="ml-guestcharge" min="0" step="5" placeholder="0"></div>
+        <div class="fg" style="margin:0"><label>Commission</label><input type="number" id="ml-commission" min="0" step="5" placeholder="0"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-outline" style="flex:1" onclick="closeMarginLedger()">Cancel</button>
+        <button style="flex:1;background:var(--green);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit" onclick="saveMarginLedger()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -880,6 +906,11 @@ async function drawPackages(){
         +'<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">'
           +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">AGENCY PRICE</div><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">$'+agencyPrice+'</div>'
         +'</div>'
+        +'<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;margin-bottom:12px">'
+          +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700;margin-bottom:4px">MARGIN LEDGER <span style="font-weight:400">(internal only)</span></div>'
+          +((pkg.guestCharge||pkg.commission) ? '<div style="font-size:var(--font-size-sm)">Guest Charge: <strong>$'+(pkg.guestCharge||0)+'</strong> · Commission: <strong>$'+(pkg.commission||0)+'</strong></div>' : '<div style="font-size:var(--font-size-sm);color:var(--muted)">Not set</div>')
+          +'<button type="button" data-pid="'+pkg.id+'" onclick="openMarginLedger(this.dataset.pid)" style="margin-top:4px;background:none;border:none;color:var(--green);cursor:pointer;font-size:var(--font-size-xs);text-decoration:underline;padding:0;font-family:inherit">Edit →</button>'
+        +'</div>'
         +'<button data-pid="'+pkg.id+'" onclick="openBookingModal(this.dataset.pid)" style="width:100%;background:'+col+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit">Book this package →</button>'
       +'</div>';
     el.appendChild(card);
@@ -888,6 +919,43 @@ async function drawPackages(){
 
 function loadPMS_Packages(){
   return _pkgCache;
+}
+
+// ── MARGIN LEDGER — this agency's own internal Guest Charge/Commission
+// tracking per package. Purely informational: reads/writes only this
+// agency's own agency_packages/{email} doc, never touches pricing, booking
+// totals, or any generated document.
+var _mlPkgId = null;
+function openMarginLedger(pid){
+  var pkg = _pkgCache.find(function(p){ return p.id===pid; });
+  if(!pkg) return;
+  _mlPkgId = pid;
+  document.getElementById('ml-pkg-name').textContent = (pkg.emoji||'📦')+' '+pkg.name;
+  document.getElementById('ml-guestcharge').value = pkg.guestCharge || '';
+  document.getElementById('ml-commission').value = pkg.commission || '';
+  document.getElementById('m-margin-ledger').classList.add('on');
+}
+function closeMarginLedger(){
+  document.getElementById('m-margin-ledger').classList.remove('on');
+  _mlPkgId = null;
+}
+async function saveMarginLedger(){
+  if(!_mlPkgId || !currentAgency || !currentAgency.email) return;
+  var idx = _pkgCache.findIndex(function(p){ return p.id===_mlPkgId; });
+  if(idx===-1) return;
+  var guestCharge = +(document.getElementById('ml-guestcharge').value||0);
+  var commission = +(document.getElementById('ml-commission').value||0);
+  _pkgCache[idx].guestCharge = guestCharge;
+  _pkgCache[idx].commission = commission;
+  try {
+    await fsDb.collection('agency_packages').doc(currentAgency.email.toLowerCase()).set({ packages: _pkgCache }, { merge: true });
+  } catch(e) {
+    console.error('saveMarginLedger failed', e);
+    alert('Could not save — please try again');
+    return;
+  }
+  closeMarginLedger();
+  drawPackages();
 }
 
 // ── BOOKING MODAL ──

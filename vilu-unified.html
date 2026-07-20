@@ -2064,6 +2064,20 @@ Daily breakfast"></textarea></div>
       <div class="fg"><label>Activities (one per line — bake the price into the label, e.g. "Whale Shark Snorkeling — $72")</label><textarea id="agy-pkg-activities" rows="4"></textarea></div>
       <div class="fg"><label>Add-ons (one per line: Name | Price | Unit)</label><textarea id="agy-pkg-addons" rows="3" placeholder="Half-Board | 25 | /day
 Full-Board | 40 | /day"></textarea></div>
+
+      <!-- MARGIN LEDGER — this agency's own internal Guest Charge/Commission
+           tracking. Purely informational: never read by pricing, booking
+           totals, or any generated document. Visible only here (this
+           agency's own page in PMS admin) and in that agency's own portal. -->
+      <div style="margin:16px 0;padding:14px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:10px">
+        <div style="font-weight:700;font-size:var(--font-size-sm);color:#374151;margin-bottom:2px"><i class="ti ti-notebook" style="margin-right:4px"></i>Margin Ledger</div>
+        <div style="font-size:var(--font-size-xs);color:#9ca3af;margin-bottom:10px">Internal tracking only, for this agency's own reference. Never affects Agency Price, bookings, or any generated document.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="fg" style="margin:0"><label>Guest Charge</label><input type="number" id="agy-pkg-guestcharge" min="0" step="5" placeholder="0"></div>
+          <div class="fg" style="margin:0"><label>Commission</label><input type="number" id="agy-pkg-commission" min="0" step="5" placeholder="0"></div>
+        </div>
+      </div>
+
       <div style="display:flex;gap:8px">
         <button class="btn p" style="flex:1" onclick="saveAgencyPkgForm()"><i class="ti ti-device-floppy"></i>Save package</button>
         <button class="btn" onclick="closeAgencyPkgForm()">Cancel</button>
@@ -6307,7 +6321,8 @@ function renderAgencyPkgList(){
     var price = pkg.agencyPricePerRoom || pkg.pricePerRoom || 0;
     return '<div style="border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       + '<div><div style="font-weight:700;font-size:var(--font-size-base)">'+(pkg.emoji||'📦')+' '+pkg.name+'</div>'
-      + '<div style="font-size:var(--font-size-sm);color:#6b7280">$'+price+'/person · '+pkg.nights+' night'+(pkg.nights>1?'s':'')+'</div></div>'
+      + '<div style="font-size:var(--font-size-sm);color:#6b7280">$'+price+'/person · '+pkg.nights+' night'+(pkg.nights>1?'s':'')+'</div>'
+      + ((pkg.guestCharge||pkg.commission) ? '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px"><i class="ti ti-notebook" style="margin-right:2px"></i>Margin Ledger — Guest Charge $'+(pkg.guestCharge||0)+' · Commission $'+(pkg.commission||0)+'</div>' : '') + '</div>'
       + '<div style="display:flex;gap:4px;flex-shrink:0">'
       + '<button class="ab" title="Edit" onclick="openAgencyPkgForm(\''+pkg.id+'\')"><i class="ti ti-edit"></i></button>'
       + '<button class="ab" title="Delete" style="color:#b91c1c" onclick="deleteAgencyPkg(\''+pkg.id+'\')"><i class="ti ti-trash"></i></button>'
@@ -6326,6 +6341,8 @@ function openAgencyPkgForm(pid){
   document.getElementById('agy-pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : '';
   document.getElementById('agy-pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
   document.getElementById('agy-pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
+  document.getElementById('agy-pkg-guestcharge').value = pkg ? (pkg.guestCharge||'') : '';
+  document.getElementById('agy-pkg-commission').value = pkg ? (pkg.commission||'') : '';
   document.getElementById('agy-pkg-list-view').style.display = 'none';
   document.getElementById('agy-pkg-form-view').style.display = '';
 }
@@ -6358,6 +6375,8 @@ async function saveAgencyPkgForm(){
     includes: includes,
     activities: activities,
     addOns: addOns,
+    guestCharge: +(document.getElementById('agy-pkg-guestcharge').value||0),
+    commission: +(document.getElementById('agy-pkg-commission').value||0),
     color: '#00b4d8',
     active: true,
     channel: 'agency'
