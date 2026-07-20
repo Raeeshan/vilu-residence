@@ -16,6 +16,14 @@
         "source": "/",
         "destination": "/vilu-website.html"
       }
+    ],
+    "headers": [
+      {
+        "source": "/{vilu-website,vilu-unified,vilu-agency-portal}.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      }
     ]
   }
 }
