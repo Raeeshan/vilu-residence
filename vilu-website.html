@@ -2275,11 +2275,16 @@ function refreshBBRoomsAvailability() {
   var datesSet = !!(ci && co && co > ci);
   var prevVal = sel.value;
 
-  var opts = ['<option value="any">'+t('bookingBar.anyRoom')+'</option>'];
+  // Every <option> needs an explicit black text color (matching the static
+  // fallback markup in the HTML) since .bb-input sets white text for the
+  // closed select sitting on the dark hero bar — inherited into the native
+  // dropdown popup's own light background, these options would otherwise
+  // render white-on-white and look empty even though they're really there.
+  var opts = ['<option value="any" style="color:#000">'+t('bookingBar.anyRoom')+'</option>'];
   ROOMS.forEach(function(r) {
     if (datesSet && typeof isRoomAvailable === 'function' && !isRoomAvailable(r.id, ci, co)) return;
     var rate = datesSet && typeof getAvgPrice === 'function' ? getAvgPrice(r.id, ci, co) : r.rate;
-    opts.push('<option value="'+r.id+'">'+td(r.name)+' — $'+rate+t('bfp.perNight')+'</option>');
+    opts.push('<option value="'+r.id+'" style="color:#000">'+td(r.name)+' — $'+rate+t('bfp.perNight')+'</option>');
   });
   sel.innerHTML = opts.join('');
   sel.value = [].some.call(sel.options, function(o){ return o.value === prevVal; }) ? prevVal : 'any';
