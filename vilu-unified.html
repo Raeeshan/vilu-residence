@@ -127,7 +127,8 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-scroll-area::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:7px;border:3px solid #f1f5f9;background-clip:padding-box}
 .cb-scroll-area::-webkit-scrollbar-thumb:hover{background:#64748b;background-clip:padding-box}
 .cb-grid{display:flex;flex-direction:column;min-width:max-content}
-.cb-date-header-row{display:flex;height:68px;flex-shrink:0;position:sticky;top:0;z-index:8;background:#fff}
+.cb-date-header-row{display:flex;height:68px;flex-shrink:0;position:sticky;top:0;z-index:8;background:#fff;cursor:grab}
+.cb-date-header-row.cb-dragging{cursor:grabbing}
 .cb-date-col{flex-shrink:0;width:50px;border-right:1px solid #e5e7eb;border-bottom:1px solid #d1d5db;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;cursor:pointer;scroll-snap-align:start}
 .cb-date-col:hover{background:#eff6ff}
 .cb-date-col.weekend{background:#fef9f0}
@@ -138,7 +139,8 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-day{font-size:var(--font-size-xl);font-weight:800;color:#1e293b;line-height:1.1}
 .cb-occ{font-size:var(--font-size-xs);color:#94a3b8;background:#f1f5f9;border-radius:10px;padding:1px 6px;margin-top:2px}
 .cb-booking-row{height:64px;display:flex;flex-shrink:0;position:relative}
-.cb-section-row{height:24px;flex-shrink:0;display:flex;background:#e0e7ff}
+.cb-section-row{height:24px;flex-shrink:0;display:flex;background:#e0e7ff;cursor:grab}
+.cb-section-row.cb-dragging{cursor:grabbing}
 .cb-cell{width:50px;flex-shrink:0;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;position:relative;cursor:pointer;background:#fff}
 .cb-cell:hover{background:#e0f7fd}
 .cb-cell.weekend{background:#fefce8}
@@ -4221,6 +4223,22 @@ let calSlid = false;
 let sR=null,sS=null,sE=null,sOn=false,bDrg=false;
 // popup state
 let popupResId = null;
+// Click-drag panning on the date-header strip, the way Cloudbeds/Mews
+// let a mouse-only user (no trackpad) pan the calendar directly instead
+// of hunting for the scrollbar. This is additive to native overflow
+// scrolling (trackpad swipe / shift+wheel / scrollbar drag all still
+// work) - it only claims the header row, never the booking-row cells,
+// so it can't collide with cell-drag-to-book.
+let calPanActive=false,calPanX=0,calPanScroll=0,calPanSA=null;
+document.addEventListener('mousemove',function(e){
+  if(!calPanActive||!calPanSA)return;
+  calPanSA.scrollLeft=calPanScroll-(e.clientX-calPanX);
+});
+document.addEventListener('mouseup',function(){
+  if(!calPanActive)return;
+  calPanActive=false;
+  document.querySelectorAll('.cb-dragging').forEach(function(el){el.classList.remove('cb-dragging');});
+});
 
 // calNav/calNavToday are defined once, further down, via
 // window.calNav=/window.calNavToday= — that's the single source of
@@ -4307,6 +4325,16 @@ function drawCal(){
   document.getElementById('cb-grid').innerHTML=gH;
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
   if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;};
+  if(sa){
+    var panEls=sa.querySelectorAll('.cb-date-header-row, .cb-section-row');
+    panEls.forEach(function(panEl){
+      panEl.onmousedown=function(e){
+        calPanActive=true;calPanX=e.clientX;calPanScroll=sa.scrollLeft;calPanSA=sa;
+        panEl.classList.add('cb-dragging');
+        e.preventDefault();
+      };
+    });
+  }
   bDrg=false;
   setTimeout(function(){
     var dsl=dates.map(function(d){return lDs(d);});
