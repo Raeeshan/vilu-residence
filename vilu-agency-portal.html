@@ -329,6 +329,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="fg" style="margin:0"><label>Adults <span style="font-size:var(--font-size-xs);color:var(--muted)">(max 4/room)</span></label>
           <input type="number" id="bk-ad" min="1" max="24" value="2" onchange="updateBkSummary()">
         </div>
+        <div class="fg" style="margin:0"><label>Children</label><input type="number" id="bk-children" min="0" max="10" value="0" onchange="updateBkSummary()"></div>
+      </div>
+      <div class="form-grid" style="margin-bottom:12px">
         <div class="fg" style="margin:0"><label>Additional nights <span style="font-size:var(--font-size-xs);color:var(--muted)">(extends check-out)</span></label>
           <select id="bk-extra-nights" onchange="bkExtraNightsChanged()">
             <option value="0" selected>None</option>
@@ -387,7 +390,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="fg" style="margin:0"><label>Title</label>
           <select id="bk-title"><option value="">--</option><option value="Mr">Mr</option><option value="Mrs">Mrs</option><option value="Ms">Ms</option><option value="Miss">Miss</option><option value="Dr">Dr</option></select>
         </div>
-        <div class="fg" style="margin:0"><label>Children</label><input type="number" id="bk-children" min="0" max="10" value="0" onchange="updateBkSummary()"></div>
       </div>
       <div class="form-grid" style="margin-bottom:12px">
         <div class="fg" style="margin:0"><label>First name *</label><input type="text" id="bk-fn" placeholder="First name"></div>
