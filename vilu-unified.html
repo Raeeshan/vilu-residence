@@ -106,18 +106,19 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-fixed-head{height:68px;border-bottom:1px solid #d1d5db;display:flex;align-items:center;justify-content:center;padding:6px 8px;background:#f1f5f9;flex-shrink:0}
 .cb-fixed-head-inner{font-size:var(--font-size-xs);font-weight:700;color:#64748b;text-align:center;line-height:1.3}
 .cb-fixed-rows{flex:1;overflow:hidden;display:flex;flex-direction:column}
-/* Cloudbeds-density room label: 2 lines only (name; rate) — the rate
-   must always be fully visible (never truncated, per legibility
-   requirement), so the room category is dropped from the visible line
-   entirely and shown only via the row's title tooltip on hover. Must
+/* Room label: 3 lines (name; category; rate), each single-line
+   truncated with ellipsis (full category text also in a title tooltip,
+   in case an unusually long name still doesn't fit). Row height is the
+   smallest that fits all three lines without clipping/overlap - must
    stay equal to .cb-booking-row's height since each label row sits
    beside its matching calendar grid row. overflow:hidden remains the
    safety net against any future overflow. */
-.cb-room-row-lbl{height:36px;flex-shrink:0;display:flex;align-items:center;padding:2px 8px;border-bottom:1px solid #e5e7eb;overflow:hidden}
+.cb-room-row-lbl{height:44px;flex-shrink:0;display:flex;align-items:center;padding:2px 8px;border-bottom:1px solid #e5e7eb;overflow:hidden}
 .cb-room-row-lbl.vilu-room{border-left:3px solid #2563eb}
 .cb-room-row-lbl.partner-room{border-left:3px solid #7c3aed}
 .cb-room-info{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0;width:100%}
 .cb-room-row-lbl .rn{font-size:var(--font-size-xs);font-weight:700;color:#1e3a5f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.cb-room-row-lbl .rc{font-size:10px;color:#64748b;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cb-room-row-lbl .rt{font-size:var(--font-size-xs);color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
 .cb-section-lbl{height:18px;flex-shrink:0;display:flex;align-items:center;padding:0 8px;background:#e0e7ff;border-bottom:1px solid #c7d2fe}
 .cb-section-lbl span{font-size:var(--font-size-xs);font-weight:800;color:#3730a3;text-transform:uppercase;letter-spacing:.06em}
@@ -138,7 +139,7 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-dow{font-size:var(--font-size-xs);font-weight:700;color:#94a3b8;text-transform:uppercase}
 .cb-day{font-size:var(--font-size-xl);font-weight:800;color:#1e293b;line-height:1.1}
 .cb-occ{font-size:var(--font-size-xs);color:#94a3b8;background:#f1f5f9;border-radius:10px;padding:1px 6px;margin-top:2px}
-.cb-booking-row{height:36px;display:flex;flex-shrink:0;position:relative}
+.cb-booking-row{height:44px;display:flex;flex-shrink:0;position:relative}
 .cb-section-row{height:18px;flex-shrink:0;display:flex;background:#e0e7ff;cursor:grab}
 .cb-section-row.cb-dragging{cursor:grabbing}
 .cb-cell{width:50px;flex-shrink:0;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;position:relative;cursor:pointer;background:#fff}
@@ -148,7 +149,7 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-cell.sel-start,.cb-cell.sel-end{background:#caf0f8!important;outline:2px solid #00b4d8;outline-offset:-1px;z-index:2}
 .cb-cell.sel-range{background:#b8eef8!important}
 .cb-cell.drop-target{background:#fef3c7!important;outline:2px solid #d97706;outline-offset:-1px;z-index:3}
-.cb-bar{position:absolute;top:4px;height:28px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:var(--font-size-xs);font-weight:700;color:#fff;z-index:5;overflow:hidden;white-space:nowrap;cursor:grab;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.cb-bar{position:absolute;top:6px;height:32px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:var(--font-size-xs);font-weight:700;color:#fff;z-index:5;overflow:hidden;white-space:nowrap;cursor:grab;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .cb-bar:hover{filter:brightness(1.08)}
 .cb-bar .cb-bar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);flex-shrink:0;margin-right:5px}
 .cb-sel-tip{position:fixed;background:#111827;color:#fff;padding:6px 12px;border-radius:8px;font-size:var(--font-size-xs);font-weight:600;z-index:9000;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap}
@@ -4285,7 +4286,7 @@ function drawCal(){
   var occ={};
   dates.forEach(function(d){var ds=lDs(d);occ[ds]=RES.filter(function(r){return r.prop==='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds;}).length;});
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
-  VR.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room" title="'+rm.type+'"><div class="cb-room-info"><div class="rn">'+rm.nm+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
+  VR.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room"><div class="cb-room-info"><div class="rn">'+rm.nm+'</div><div class="rc" title="'+rm.type+'">'+rm.type+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
     fH+='<div class="cb-section-lbl" style="background:'+h.color+'22"><span style="color:'+h.color+'">'+h.nm+'</span></div>';
@@ -4351,7 +4352,7 @@ function drawCal(){
       if(w<4)return;
       var bar=document.createElement('div');
       bar.className='cb-bar';
-      bar.style.cssText='position:absolute;top:4px;height:28px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:grab;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+(res.isBlock||res.src==='Agency Block'?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):'#7dd3fc');
+      bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:grab;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+(res.isBlock||res.src==='Agency Block'?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):'#7dd3fc');
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+((res.isBlock||res.src==='Agency Block')&&res.blockSt!=='Confirmed'?'[PENDING] ':(res.isBlock||res.src==='Agency Block')?'[BLOCK] ':'')+res.fn+' '+res.ln+'</span>';
       bar.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showDet(res.id);});
       bar.addEventListener('mousedown',function(e){e.stopPropagation();if(!(res.isBlock||res.src==='Agency Block')){bDrg=true;sOn=false;}});
@@ -4379,7 +4380,7 @@ function drawCal(){
       if(w<4)return;
       var bar=document.createElement('div');
       bar.className='cb-bar';
-      bar.style.cssText='position:absolute;top:4px;height:28px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:pointer;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+blkColor(b.type);
+      bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:pointer;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+blkColor(b.type);
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">[BLOCK] '+(b.type||'Blocked')+(b.note?' — '+b.note:'')+'</span>';
       bar.addEventListener('click',function(e){
         e.preventDefault();e.stopPropagation();
