@@ -121,10 +121,15 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-room-row-lbl .rt{font-size:var(--font-size-xs);color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
 .cb-section-lbl{height:24px;flex-shrink:0;display:flex;align-items:center;padding:0 8px;background:#e0e7ff;border-bottom:1px solid #c7d2fe}
 .cb-section-lbl span{font-size:var(--font-size-xs);font-weight:800;color:#3730a3;text-transform:uppercase;letter-spacing:.06em}
-.cb-scroll-area{flex:1;overflow:auto;position:relative}
+.cb-scroll-area{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch}
+.cb-scroll-area::-webkit-scrollbar{height:14px;width:14px}
+.cb-scroll-area::-webkit-scrollbar-track{background:#f1f5f9}
+.cb-scroll-area::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:7px;border:3px solid #f1f5f9;background-clip:padding-box}
+.cb-scroll-area::-webkit-scrollbar-thumb:hover{background:#64748b;background-clip:padding-box}
 .cb-grid{display:flex;flex-direction:column;min-width:max-content}
-.cb-date-header-row{display:flex;height:68px;flex-shrink:0;position:sticky;top:0;z-index:8;background:#fff}
-.cb-date-col{flex-shrink:0;width:72px;border-right:1px solid #e5e7eb;border-bottom:1px solid #d1d5db;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;cursor:pointer}
+.cb-date-header-row{display:flex;height:68px;flex-shrink:0;position:sticky;top:0;z-index:8;background:#fff;cursor:grab}
+.cb-date-header-row.cb-dragging{cursor:grabbing}
+.cb-date-col{flex-shrink:0;width:50px;border-right:1px solid #e5e7eb;border-bottom:1px solid #d1d5db;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;cursor:pointer}
 .cb-date-col:hover{background:#eff6ff}
 .cb-date-col.weekend{background:#fef9f0}
 .cb-date-col.today{background:#1e40af}
@@ -135,7 +140,7 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-occ{font-size:var(--font-size-xs);color:#94a3b8;background:#f1f5f9;border-radius:10px;padding:1px 6px;margin-top:2px}
 .cb-booking-row{height:64px;display:flex;flex-shrink:0;position:relative}
 .cb-section-row{height:24px;flex-shrink:0;display:flex;background:#e0e7ff}
-.cb-cell{width:72px;flex-shrink:0;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;position:relative;cursor:pointer;background:#fff}
+.cb-cell{width:50px;flex-shrink:0;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;position:relative;cursor:pointer;background:#fff}
 .cb-cell:hover{background:#e0f7fd}
 .cb-cell.weekend{background:#fefce8}
 .cb-cell.today-cell{background:#eff6ff}
@@ -4204,22 +4209,37 @@ const DOW_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SRC_BAR={'Booking.com':'#2563eb','Airbnb':'#e11d48','Agoda':'#d97706','Expedia':'#b45309','Google Hotels':'#4285f4','Direct':'#059669','Phone':'#7c3aed','Walk-in':'#0891b2'};
 
-let calD = new Date(); calD.setHours(12,0,0,0); calD.setDate(calD.getDate()-2);
+// Column width in px for one calendar day — single source of truth for
+// both the CSS (.cb-date-col/.cb-cell) and the JS bar-positioning math
+// below, so the two can never drift out of sync again.
+const CAL_COL_W = 50;
+// Today is the leftmost visible column on open (see calNavToday below) —
+// no day offset here, so there's no flash of a different range before
+// FMAP['cal'] calls calNavToday() shortly after the section is shown.
+let calD = new Date(); calD.setHours(12,0,0,0);
 let calDays = 30;
 let calSlid = false;
 let sR=null,sS=null,sE=null,sOn=false,bDrg=false;
 // popup state
 let popupResId = null;
+// Drag-to-pan state for the date-header row (lets admins scroll the
+// calendar horizontally by dragging with a mouse, instead of only
+// via the prev/next buttons).
+let calPanActive=false,calPanX=0,calPanScroll=0,calPanSA=null;
+document.addEventListener('mousemove',function(e){
+  if(!calPanActive||!calPanSA)return;
+  calPanSA.scrollLeft=calPanScroll-(e.clientX-calPanX);
+});
+document.addEventListener('mouseup',function(){
+  if(!calPanActive)return;
+  calPanActive=false;
+  document.querySelectorAll('.cb-date-header-row.cb-dragging').forEach(function(el){el.classList.remove('cb-dragging');});
+});
 
-function calNav(d){
-  calD = new Date(calD);
-  calD.setDate(calD.getDate() + d * calDays);
-  drawCal();
-}
-function calNavToday(){
-  calD = new Date(); calD.setHours(12,0,0,0); calD.setDate(calD.getDate()-2);
-  drawCal();
-}
+// calNav/calNavToday are defined once, further down, via
+// window.calNav=/window.calNavToday= — that's the single source of
+// truth for date-nav behavior (kept in sync with the CAL_COL_W-based
+// leftmost-column-is-today convention declared above).
 function setCalView(n){
   calDays=n;
   ['14','30','60'].forEach(v=>{
@@ -4290,17 +4310,25 @@ function drawCal(){
     r2+='</div>';
     return r2;
   }
-  gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*72)+'px;background:#e0e7ff;border-bottom:1px solid #c7d2fe"></div></div>';
+  gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:#e0e7ff;border-bottom:1px solid #c7d2fe"></div></div>';
   VR.forEach(function(rm){gH+=mR(rm,false,null);});
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
     var col=h.color;
-    gH+='<div class="cb-section-row" style="background:'+col+'22"><div class="cb-section-cell" style="width:'+(dates.length*72)+'px;background:'+col+'22;border-bottom:1px solid '+col+'44"></div></div>';
+    gH+='<div class="cb-section-row" style="background:'+col+'22"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:'+col+'22;border-bottom:1px solid '+col+'44"></div></div>';
     hrs.forEach(function(rm){gH+=mR(rm,true,col);});
   });
   document.getElementById('cb-grid').innerHTML=gH;
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
   if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;};
+  var hdrRow=sa?sa.querySelector('.cb-date-header-row'):null;
+  if(hdrRow){
+    hdrRow.onmousedown=function(e){
+      calPanActive=true;calPanX=e.clientX;calPanScroll=sa.scrollLeft;calPanSA=sa;
+      hdrRow.classList.add('cb-dragging');
+      e.preventDefault();
+    };
+  }
   bDrg=false;
   setTimeout(function(){
     var dsl=dates.map(function(d){return lDs(d);});
@@ -4312,8 +4340,8 @@ function drawCal(){
       var si=dsl.indexOf(vs),ei=dsl.findIndex(function(d){return d>=res.co;})-1;
       if(ei<0)ei=dsl.length-1;
       if(si<0)return;
-      var sV=res.ci>=dsl[0],h2=36,cI=dsl.indexOf(res.co);
-      var left=sV?si*72+h2:si*72,rE=cI>=0?cI*72+h2:(ei+1)*72,w=rE-left-2;
+      var sV=res.ci>=dsl[0],h2=CAL_COL_W/2,cI=dsl.indexOf(res.co);
+      var left=sV?si*CAL_COL_W+h2:si*CAL_COL_W,rE=cI>=0?cI*CAL_COL_W+h2:(ei+1)*CAL_COL_W,w=rE-left-2;
       if(w<4)return;
       var bar=document.createElement('div');
       bar.className='cb-bar';
@@ -4340,8 +4368,8 @@ function drawCal(){
       var si=dsl.indexOf(vs),ei=dsl.findIndex(function(d){return d>=b.to;})-1;
       if(ei<0)ei=dsl.length-1;
       if(si<0)return;
-      var sV=b.from>=dsl[0],h2=36,cI=dsl.indexOf(b.to);
-      var left=sV?si*72+h2:si*72,rE=cI>=0?cI*72+h2:(ei+1)*72,w=rE-left-2;
+      var sV=b.from>=dsl[0],h2=CAL_COL_W/2,cI=dsl.indexOf(b.to);
+      var left=sV?si*CAL_COL_W+h2:si*CAL_COL_W,rE=cI>=0?cI*CAL_COL_W+h2:(ei+1)*CAL_COL_W,w=rE-left-2;
       if(w<4)return;
       var bar=document.createElement('div');
       bar.className='cb-bar';
@@ -11292,8 +11320,9 @@ var _t=setInterval(function(){if(typeof window.saveRES==='function'){clearInterv
 // from Firestore, the same class of bug as the hardcoded demo data. The
 // backup itself (autoBackup) and manual Export/Import buttons still work —
 // only the automatic on-load restore prompt is removed.
-window.calNav=function(d){calD=new Date(calD);calD.setDate(calD.getDate()+d*7);drawCal();setTimeout(drawCal,100);};
-window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);calD.setDate(calD.getDate()-14);drawCal();setTimeout(drawCal,100);};
+function calResetScroll(){var sa=document.getElementById('cb-scroll-area');if(sa)sa.scrollLeft=0;}
+window.calNav=function(d){calD=new Date(calD);calD.setDate(calD.getDate()+d*7);drawCal();calResetScroll();setTimeout(function(){drawCal();calResetScroll();},100);};
+window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);drawCal();calResetScroll();setTimeout(function(){drawCal();calResetScroll();},100);};
 window.getRoomName=function(rn){if(!rn)return rn;var vr=(typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});if(vr)return vr.nm;if(typeof getHR==='function'){var hr=getHR().find(function(r){return r.n===rn;});if(hr){var h=(typeof PH!=='undefined'?PH:[]).find(function(x){return x.id===hr.prop;});return(h?h.nm+' - ':'')+hr.nm;}}return rn;};
 window.saveTransfer=function(id){var boat=(document.getElementById('tr-boat-'+id)||{}).value||'';var time=(document.getElementById('tr-time-'+id)||{}).value||'';var rs=document.getElementById('tr-route-'+id);var route=rs?rs.value:'';if(route==='Other')route=(document.getElementById('tr-cust-'+id)||{}).value||'';var d={};try{d=JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){}d[id]={boat:boat,time:time,route:route};localStorage.setItem('vilu_transfers',JSON.stringify(d));if(typeof toast==='function')toast('Transfer saved!');if(typeof drawOps==='function')drawOps();};
 window.rebuildPendingTrips=function(){
