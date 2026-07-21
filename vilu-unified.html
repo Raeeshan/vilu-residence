@@ -678,6 +678,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sg">System</div>
   <div class="sl" onclick="go('pkgs',this)"><i class="ti ti-package"></i>Package manager</div>
   <div class="sl" onclick="go('engine',this)"><i class="ti ti-world"></i>Booking engine</div>
+  <div class="sl" onclick="go('reclog',this)"><i class="ti ti-shield-check"></i>Reconciliation log</div>
   <div class="sl" id="sl-bin" style="display:none" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
   <div class="sl" id="sl-transport" style="display:none" onclick="go('transport',this)"><i class="ti ti-anchor"></i>Transportation</div>
@@ -1148,6 +1149,14 @@ body.pms-mode { overflow:hidden; }
     <button class="btn sm" onclick="SL=[];drawLog()">Clear</button>
   </div>
   <div class="card" style="padding:0"><div style="max-height:520px;overflow-y:auto" id="log-el"></div></div>
+</div>
+
+<div class="sec" id="s-reclog">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-size:var(--font-size-sm);color:#6b7280">Read-only — last 50 automatic repairs and blocked double-bookings, most recent first</span>
+    <button class="btn sm" onclick="drawRecLog()"><i class="ti ti-refresh"></i> Refresh</button>
+  </div>
+  <div class="card" style="padding:0"><div style="max-height:520px;overflow-y:auto" id="reclog-el"></div></div>
 </div>
 
 <div class="sec" id="s-inv">
@@ -2458,6 +2467,7 @@ Photography | 25 | /hr"></textarea>
   <div class="sg">System</div>
   <div class="sl" onclick="go('pkgs',this)"><i class="ti ti-package"></i>Package manager</div>
   <div class="sl" onclick="go('engine',this)"><i class="ti ti-world"></i>Booking engine</div>
+  <div class="sl" onclick="go('reclog',this)"><i class="ti ti-shield-check"></i>Reconciliation log</div>
   <div class="sl" id="sl-bin" style="display:none" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
   <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
@@ -2627,6 +2637,14 @@ Photography | 25 | /hr"></textarea>
     <button class="btn sm" onclick="SL=[];drawLog()">Clear</button>
   </div>
   <div class="card" style="padding:0"><div style="max-height:520px;overflow-y:auto" id="log-el"></div></div>
+</div>
+
+<div class="sec" id="s-reclog">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-size:var(--font-size-sm);color:#6b7280">Read-only — last 50 automatic repairs and blocked double-bookings, most recent first</span>
+    <button class="btn sm" onclick="drawRecLog()"><i class="ti ti-refresh"></i> Refresh</button>
+  </div>
+  <div class="card" style="padding:0"><div style="max-height:520px;overflow-y:auto" id="reclog-el"></div></div>
 </div>
 
 <div class="sec" id="s-inv">
@@ -4191,8 +4209,8 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,ops:function(){
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log'};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -5275,6 +5293,57 @@ function drawLog(){
   </div>`).join('');
 }
 
+// RECONCILIATION LOG — read-only monitoring view over the reconciliation_log
+// collection (written by the daily self-healing job and by the
+// blockDoubleBooking Cloud Function). Only ever reads; never writes.
+function recLogEsc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+async function drawRecLog(){
+  var el = document.getElementById('reclog-el');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:var(--font-size-sm)">Loading…</div>';
+  var snap;
+  try {
+    snap = await fsDb.collection('reconciliation_log').orderBy('timestamp','desc').limit(50).get();
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:var(--font-size-sm)">Could not load reconciliation log.</div>';
+    return;
+  }
+  if(snap.empty){
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:var(--font-size-sm)">No repairs or blocked double-bookings yet.</div>';
+    return;
+  }
+  el.innerHTML = snap.docs.map(function(doc){
+    var d = doc.data();
+    var when = d.timestamp ? new Date(d.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    var isBlock = d.type === 'double_booking_blocked';
+    var badge = isBlock
+      ? '<span class="bx er">Double-booking blocked</span>'
+      : '<span class="bx ib2">Availability repaired</span>';
+    var detail;
+    if (isBlock) {
+      detail = 'Room ' + recLogEsc(d.roomId) + ': reservation ' + recLogEsc(d.reservationId) +
+        ' conflicted with ' + recLogEsc(d.conflictingReservationId) +
+        ' (' + recLogEsc(d.check_in) + ' → ' + recLogEsc(d.check_out) + ') — auto-cancelled';
+    } else {
+      var added = (d.missingAdded||[]).length, removed = (d.staleRemoved||[]).length;
+      var parts = [];
+      if (added) parts.push('+' + added + ' added');
+      if (removed) parts.push('-' + removed + ' removed');
+      detail = 'Room ' + recLogEsc(d.roomId) + ': availability lock repaired (' +
+        (parts.length ? parts.join(', ') : 'no drift found') +
+        ') — triggered by ' + recLogEsc(d.triggeredBy || 'manual');
+    }
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)">' +
+      '<span style="color:#6b7280;min-width:130px;font-size:var(--font-size-xs);flex-shrink:0">' + when + '</span>' +
+      '<div style="flex:1"><div style="margin-bottom:3px">' + badge + '</div><div>' + detail + '</div></div>' +
+      '</div>';
+  }).join('');
+}
+
 // INVOICES
 function drawInv(){
   const tb=document.getElementById('inv-tb');
@@ -5796,6 +5865,42 @@ function saveBLK(){
   try{localStorage.setItem('vilu_blk',JSON.stringify(BLK));syncAvailability();}catch(e){}
   // Push to Firestore immediately so the website's calendar sees manual blocks too
   if(typeof syncBlksToSupabase==='function') syncBlksToSupabase().catch(function(){});
+}
+
+// Replaces BLK with the live contents of Firestore's `blocks` collection —
+// the read half of the sync saveBLK()/syncBlksToSupabase() only ever wrote.
+// Without this, BLK only ever grew from *this browser's own* localStorage
+// cache plus whatever this session itself created/approved, so a block
+// made on another device (or approved in a session whose cache was later
+// cleared) was permanently invisible to every other PMS session's calendar
+// — while the Agency Portal, which always queries `blocks` fresh, showed it
+// correctly. Firestore only stores a single `reason` string (see saveBLK's
+// syncBlksToSupabase / line ~5572), not separate type+note fields, so on
+// read-back `reason` doubles as `type` for blkColor() — an agency-approved
+// hold's reason always starts with "Agency:" (see approveBlockRequest) so
+// that case is tagged back to 'hold' for correct coloring; anything else
+// either matches a plain type keyword (Maintenance, Cleaning, ...) or falls
+// back to blkColor()'s existing neutral-grey default, exactly as documented
+// there for free-text reasons.
+async function loadBlksFromFirestore(){
+  try{
+    var snap = await fsDb.collection('blocks').get();
+    var loaded = [];
+    snap.forEach(function(d){
+      var b = d.data();
+      var reason = b.reason || 'Blocked';
+      loaded.push({
+        id: d.id,
+        type: /^Agency:/i.test(reason) ? 'hold' : reason,
+        rn: b.room_id,
+        from: b.from_date,
+        to: b.to_date,
+        note: ''
+      });
+    });
+    BLK = loaded;
+    try{ localStorage.setItem('vilu_blk', JSON.stringify(BLK)); }catch(e){}
+  }catch(e){ console.error('loadBlksFromFirestore failed', e); }
 }
 // Color per block reason for the calendar bars — covers both reason sets in
 // use (the quick-block modal's Vacant/Maintenance/Cleaning/Agency Block/
@@ -8474,6 +8579,14 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 // AUTHENTICATION & ROLE SYSTEM
 // ═══════════════════════════════════════════════
 
+// True only for objects with a non-empty string `email` — the one field
+// every merge/lookup below keys on. A record missing it (seen in the wild
+// from older/partial local caches) must never reach a `.email.toLowerCase()`
+// call, or it crashes the whole load instead of just being skipped.
+function hasValidEmail(u){
+  return !!(u && typeof u.email === 'string' && u.email);
+}
+
 // Users database — change passwords here
 // Load users from localStorage or use default admin only
 function loadUsers(){
@@ -8484,7 +8597,11 @@ function loadUsers(){
   try{
     const saved = localStorage.getItem('vilu_users');
     if(saved){
-      const arr = JSON.parse(saved);
+      // Malformed/legacy entries (missing email) are dropped here rather than
+      // kept around — they can never be matched or logged into anyway, and
+      // silently carrying them forward is what let one bad record survive
+      // indefinitely and crash every future load that touched it.
+      const arr = JSON.parse(saved).filter(hasValidEmail);
       if(arr && arr.length){
         // Always ensure agency user exists
         DEFAULTS.forEach(function(def){
@@ -10708,12 +10825,22 @@ async function loadAllFromSupabase() {
     restoreTripsFromBackup();
     localStorage.setItem('vilu_res', JSON.stringify(RES));
   }
-  const sUsers = await supaFetch('GET','users',null,'select=*');
-  if(sUsers && sUsers.length) {
+  await loadBlksFromFirestore();
+  const sUsersRaw = await supaFetch('GET','users',null,'select=*');
+  // Firestore docs are keyed by email but don't always carry it as an
+  // explicit field (some code paths address by doc ID only) — drop any that
+  // don't, the same way malformed local records are dropped below, so one
+  // bad record can't take down every login by throwing partway through the
+  // merge (see loadAllFromSupabase's original bug: a single local record
+  // missing `email` crashed this whole function on every login/session
+  // restore, silently, because nothing here validated shape before calling
+  // .toLowerCase() on it).
+  const sUsers = (sUsersRaw||[]).filter(hasValidEmail);
+  if(sUsers.length) {
     // Merge Supabase users but NEVER overwrite local passwords for existing accounts.
     // This prevents Supabase from wiping out passwords that were changed locally.
     var localUsers = [];
-    try { localUsers = JSON.parse(localStorage.getItem('vilu_users')||'[]'); } catch(e) {}
+    try { localUsers = JSON.parse(localStorage.getItem('vilu_users')||'[]').filter(hasValidEmail); } catch(e) {}
     var merged = sUsers.map(function(u) {
       var local = localUsers.find(function(l){ return l.email.toLowerCase()===u.email.toLowerCase(); });
       return {
@@ -10770,6 +10897,26 @@ async function pollNewReservationsFromSupabase() {
   } catch(e) {}
 }
 
+// Re-fetches `blocks` on the same cadence pollNewReservationsFromSupabase()
+// already uses for reservations, so a block created/removed on another PMS
+// session (or approved from one whose local cache later got cleared) shows
+// up here within a minute instead of only at next login — matching the
+// freshness reservations already had. Unlike the reservations poll this
+// does a full replace, not an append-only merge: blocks can be *removed*
+// remotely (removeBlk on another session) and a stale local block needs to
+// disappear here too, not just gain new ones.
+async function pollBlocksFromSupabase() {
+  try {
+    var before = BLK.map(function(b){ return b.id; }).sort().join(',');
+    await loadBlksFromFirestore();
+    var after = BLK.map(function(b){ return b.id; }).sort().join(',');
+    if (before !== after) {
+      try{ drawCal(); }catch(e){}
+      try{ drawBlkLst(); }catch(e){}
+    }
+  } catch(e) {}
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Daily Operations rendered via FMAP when section is selected
   setTimeout(async function() {
@@ -10778,6 +10925,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try{drawCal();}catch(e){}
   }, 1500);
   setInterval(pollNewReservationsFromSupabase, 60*1000);
+  setInterval(pollBlocksFromSupabase, 60*1000);
   if(typeof syncBlksToSupabase==='function') syncBlksToSupabase().catch(()=>{});
   if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
 });
