@@ -484,6 +484,21 @@ body.pms-mode { overflow:hidden; }
 #agency-portal { height:100vh; overflow-y:auto; background:#f8fafc; }
 #booking-engine { background:#fff; }
 
+/* ══ PMS MOBILE SIDEBAR (must come after PMS LAYOUT above to win the cascade) ══ */
+.pms-hb{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:8px;margin-right:4px;flex-shrink:0}
+.pms-hb span{display:block;width:20px;height:2px;background:#111827;border-radius:1px}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.4);z-index:899}
+.sb-overlay.show{display:block}
+@media(max-width:768px){
+  .pms-hb{display:flex}
+  .sb{
+    position:fixed!important; top:0; left:0; height:100vh; z-index:900;
+    width:250px!important; min-width:250px!important; max-width:250px!important;
+    transform:translateX(-100%); transition:transform .25s ease; box-shadow:2px 0 16px rgba(0,0,0,.2);
+  }
+  .sb.open{transform:translateX(0)}
+  .main{width:100%}
+}
 
 /* ══ BE SCOPED CSS ══ */
 
@@ -687,11 +702,13 @@ body.pms-mode { overflow:hidden; }
   <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:var(--font-size-xs);color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
 
   </div>
+  <div class="sb-overlay" onclick="toggleSb()"></div>
   <div class="main">
     <div id="agency-banner" class="agency-banner" style="display:none">
       <i class="ti ti-eye"></i><span>Agency View — Read-only access. You can check availability but cannot make changes.</span>
     </div>
     <div class="topbar">
+      <div class="pms-hb" onclick="toggleSb()"><span></span><span></span><span></span></div>
       <h1 id="ptitle">Dashboard</h1>
       <div class="tr">
         <span style="font-size:var(--font-size-xs);color:#00b4d8"><i class="ti ti-circle-check"></i> Synced</span>
@@ -2475,11 +2492,13 @@ Photography | 25 | /hr"></textarea>
   <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:var(--font-size-xs);color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
 
   </div>
+  <div class="sb-overlay" onclick="toggleSb()"></div>
   <div class="main">
     <div id="agency-banner" class="agency-banner" style="display:none">
       <i class="ti ti-eye"></i><span>Agency View — Read-only access. You can check availability but cannot make changes.</span>
     </div>
     <div class="topbar">
+      <div class="pms-hb" onclick="toggleSb()"><span></span><span></span><span></span></div>
       <h1 id="ptitle">Dashboard</h1>
       <div class="tr">
         <span style="font-size:var(--font-size-xs);color:#00b4d8"><i class="ti ti-circle-check"></i> Synced</span>
@@ -3554,14 +3573,8 @@ Snorkelling trip"></textarea>
           <div class="fg" style="margin:0"><label>Check-in</label><input type="date" id="blk-ci" min="2026-06-01"></div>
           <div class="fg" style="margin:0"><label>Check-out</label><input type="date" id="blk-co" min="2026-06-01"></div>
           <div class="fg" style="margin:0"><label>Room</label>
-            <select id="blk-rm">
+            <select id="blk-rm" class="room-select">
               <option value="">-- Select room --</option>
-              <option value="VR01">Room 101 — Deluxe Family Room</option>
-              <option value="VR02">Room 102 — Deluxe Family Room</option>
-              <option value="VR03">Room 103 — Double Room</option>
-              <option value="VR04">Room 104 — Double Room</option>
-              <option value="VR05">Room 105 — Double Room</option>
-              <option value="VR06">Room 106 — Deluxe Family Room with Open Deck</option>
             </select>
           </div>
           <div class="fg" style="margin:0"><label>Reason / group name</label><input type="text" id="blk-note" placeholder="e.g. Tour group - 15 pax"></div>
@@ -3591,14 +3604,8 @@ Snorkelling trip"></textarea>
         <div class="fg" style="margin:0"><label>Check-in *</label><input type="date" id="bk-ci" onchange="autoSetCheckout();updateBkSummary()"></div>
         <div class="fg" style="margin:0"><label>Check-out <span style="font-size:var(--font-size-xs);color:var(--muted)">(fixed by package)</span></label><input type="date" id="bk-co" readonly="" style="background:#f9fafb;color:var(--muted)"></div>
         <div class="fg" style="margin:0"><label>Room *</label>
-          <select id="bk-rm" onchange="updateBkSummary()">
+          <select id="bk-rm" class="room-select" onchange="updateBkSummary()">
             <option value="">-- Select room --</option>
-            <option value="VR01">Room 101 — Deluxe Family Room</option>
-            <option value="VR02">Room 102 — Deluxe Family Room</option>
-            <option value="VR03">Room 103 — Double Room</option>
-            <option value="VR04">Room 104 — Double Room</option>
-            <option value="VR05">Room 105 — Double Room</option>
-            <option value="VR06">Room 106 — Deluxe Family Room with Open Deck</option>
           </select>
         </div>
         <div class="fg" style="margin:0"><label>Adults</label>
@@ -4235,6 +4242,18 @@ function go(id,el){
   if(el)el.classList.add('on');
   document.getElementById('ptitle').textContent=TITLES[id]||id;
   if(FMAP[id])FMAP[id]();
+  closeSbMobile();
+}
+
+// Mobile off-canvas sidebar (see .pms-hb/.sb.open/.sb-overlay in CSS) — a
+// no-op on desktop since .sb never gets the 'open' class there.
+function toggleSb(){
+  document.querySelectorAll('.sb').forEach(function(s){ s.classList.toggle('open'); });
+  document.querySelectorAll('.sb-overlay').forEach(function(o){ o.classList.toggle('show'); });
+}
+function closeSbMobile(){
+  document.querySelectorAll('.sb').forEach(function(s){ s.classList.remove('open'); });
+  document.querySelectorAll('.sb-overlay').forEach(function(o){ o.classList.remove('show'); });
 }
 
 // DASHBOARD
@@ -8102,14 +8121,6 @@ async function backfillAgencyPackages(){
   return created;
 }
 
-// Agency bookings tracking
-function loadAgencyBookings(){
-  try{var s=localStorage.getItem('vilu_agency_bk');if(s)return JSON.parse(s);}catch(e){}
-  return [];
-}
-function saveAgencyBookings(){localStorage.setItem('vilu_agency_bk',JSON.stringify(AGENCY_BK));}
-let AGENCY_BK=loadAgencyBookings();
-
 // ══════════════════════════════════════════════
 // PACKAGE MANAGER - PMS SIDE
 // ══════════════════════════════════════════════
@@ -8734,9 +8745,11 @@ async function doLogin() {
       err.style.display='block';err.textContent='Incorrect email or password.';
       return;
     }
-    currentUser={email:profile.email,name:profile.name,role:'agency',company:profile.company||profile.name};
-    document.getElementById('login-screen').style.display='none';
-    setTimeout(function(){routeByRole('agency');},50);
+    // Agencies belong in the dedicated vilu-agency-portal.html - this file's
+    // own embedded agency flow is a pre-portal legacy path that only ever
+    // wrote bookings to localStorage (never Firestore), so it must never be
+    // reachable again. Redirect rather than routeByRole('agency').
+    window.location.href = 'vilu-agency-portal.html';
     return;
   }
 
@@ -8795,9 +8808,9 @@ async function restoreSession(fbUser) {
     var profile = { email: fbUser.email, name: d.name, role: d.role, company: d.company||'', commission: d.commission||0 };
     currentUser = profile;
     if (profile.role === 'agency') {
-      loginRole = 'agency';
-      document.getElementById('login-screen').style.display = 'none';
-      setTimeout(function(){ routeByRole('agency'); }, 50);
+      // Same redirect as doLogin() - a persisted agency session must never
+      // auto-restore into this file's legacy localStorage-only booking flow.
+      window.location.href = 'vilu-agency-portal.html';
       return true;
     }
     loginRole = profile.role;
@@ -9034,6 +9047,22 @@ var ROOMS_LIST = [
   {id:'VR03',name:'Room 103 — Double Room'},{id:'VR04',name:'Room 104 — Double Room'},
   {id:'VR05',name:'Room 105 — Double Room'},{id:'VR06',name:'Room 106 — Deluxe Family Room with Open Deck'},
 ];
+
+// Single source of truth for the room-picker <select> options (#blk-rm,
+// #bk-rm in the agency-portal preview) — both used to hardcode their own
+// copy of this same list, which drifted out of sync once already. Anything
+// tagged class="room-select" gets its options rebuilt from ROOMS_LIST here.
+function populateRoomSelects(){
+  document.querySelectorAll('select.room-select').forEach(function(sel){
+    ROOMS_LIST.forEach(function(room){
+      var opt = document.createElement('option');
+      opt.value = room.id;
+      opt.textContent = room.name;
+      sel.appendChild(opt);
+    });
+  });
+}
+populateRoomSelects();
 
 function checkAvailability(){
   var ci=document.getElementById('av-ci').value;
@@ -9416,79 +9445,6 @@ function updateBkSummary(){
     +customExtras.map(function(e){return '<span style="font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;color:#00b4d8"><i class="ti ti-plus"></i>'+e.name+'</span>';}).join('')
     +'</div>'
     +'<div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px">'+ag_fd(ci)+' → '+ag_fd(co)+' · '+nights+' night'+(nights>1?'s':'')+' · '+ad+' adult'+(ad>1?'s':'')+' · All taxes included</div>';
-}
-
-function submitAgencyBooking(){
-  if(!selectedPkg||!currentAgency) return;
-  var ci=document.getElementById('bk-ci').value;
-  var co=document.getElementById('bk-co').value;
-  var rm=document.getElementById('bk-rm').value;
-  var fn=(document.getElementById('bk-fn').value||'').trim();
-  var ln=(document.getElementById('bk-ln').value||'').trim();
-  var em=(document.getElementById('bk-em').value||'').trim();
-  var ph=(document.getElementById('bk-ph').value||'').trim();
-  var nat=(document.getElementById('bk-nat').value||'').trim();
-  var pid=(document.getElementById('bk-pid')?.value||'').trim();
-  var notes=(document.getElementById('bk-notes').value||'').trim();
-  if(!ci||!co||co<=ci){alert('Select valid dates');return;}
-  if(!rm){alert('Select a room');return;}
-  if(!fn||!ln){alert('Enter guest name');return;}
-  var avail=isRoomAvailable(rm,ci,co);
-  if(!avail.available){alert('Room not available: '+avail.reason);return;}
-  var nights=Math.round((new Date(co)-new Date(ci))/864e5);
-  var commission=selectedPkg.commission||10;
-  var extrasTotal=customExtras.reduce(function(s,ex){
-    var c;
-    if(ex.type==='night') c=selectedPkg.pricePerRoom*ad;
-    else if(ex.perNight&&ex.perPerson) c=ex.price*nights*ad;
-    else if(ex.perNight) c=ex.price*nights;
-    else if(ex.perPerson) c=ex.price*ad;
-    else c=ex.price;
-    return s+c;
-  },0);
-  var grandTotal=selectedPkg.pricePerRoom*nights*ad+extrasTotal;
-  var netTotal=(grandTotal*(1-commission/100)).toFixed(2);
-  var finalIncludes=(selectedPkg.includes||[]).filter(function(i){return removedIncludes.indexOf(i)<0;});
-  var allIncludes=finalIncludes.concat(customExtras.map(function(e){return e.name;}));
-  var ref='AG-'+Date.now().toString().slice(-6);
-  var ad=+document.getElementById('bk-ad').value;
-  var bk={
-    id:ref,fn:fn,ln:ln,em:em,ph:ph,nat:nat,pid:pid,
-    rn:rm,rate:selectedPkg.pricePerRoom,
-    ci:ci,co:co,ad:ad,ch:0,inf:0,
-    src:'Agency',pay:'Unpaid',st:'Confirmed',ref:ref,
-    notes:'['+selectedPkg.name+'] Includes: '+allIncludes.join(', ')+(notes?'. '+notes:''),
-    nlog:[],prop:'vilu',
-    package:selectedPkg.id,packageName:selectedPkg.name,
-    packageIncludes:allIncludes,
-    removedIncludes:removedIncludes,
-    extras:customExtras,
-    agency:currentAgency.name||currentAgency.email,
-    agencyEmail:currentAgency.email,
-    commission:commission,
-    rackTotal:grandTotal.toFixed(2),
-    netRate:netTotal,
-    bookedAt:new Date().toISOString()
-  };
-  myBookings.unshift(bk);
-  localStorage.setItem('vilu_agency_bk_'+currentAgency.email, JSON.stringify(myBookings));
-  try{
-    var queue=localStorage.getItem('vilu_agency_new_bk');
-    var arr=queue?JSON.parse(queue):[];
-    arr.push(bk);
-    localStorage.setItem('vilu_agency_new_bk',JSON.stringify(arr));
-  }catch(e){}
-  try{var bc=new BroadcastChannel('vilu_pms');bc.postMessage({type:'NEW_BOOKING',reservation:bk});bc.close();}catch(e){}
-  document.getElementById('m-bk').classList.remove('on');
-  document.getElementById('success-ref').textContent=ref;
-  document.getElementById('success-details').innerHTML=
-    '<strong>'+fn+' '+ln+'</strong><br>'
-    +selectedPkg.name+'<br>'
-    +'Room: '+rm+' · '+ag_fd(ci)+' → '+ag_fd(co)+' · '+nights+' nights<br>'
-    +'Includes: '+allIncludes.join(', ')+'<br>'
-    +'Net charge: <strong style="color:var(--green)">$'+netTotal+'</strong><br>'
-    +'Booked by: '+currentAgency.name;
-  document.getElementById('m-success').classList.add('on');
 }
 
 // Real-time listen for package and user updates
