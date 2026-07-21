@@ -1,0 +1,4 @@
+.firebase/
+firestore-debug.log
+firestore-debug.*.log
+ui-debug.log
