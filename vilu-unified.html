@@ -8563,8 +8563,6 @@ function syncPackagesToAgency(){
 
 // Sync on load
 try{syncPackagesToAgency();}catch(e){console.error('syncPkg',e);}
-// syncPackagesToFirestore() runs later, once fsDb exists — see the Firebase
-// init section below (this script block runs before that one).
 try{syncAvailability();}catch(e){console.error('syncAvail',e);}
 // Real-time: listen for all incoming bookings
 window.addEventListener('storage', function(e){
@@ -10349,14 +10347,20 @@ firebase.auth().onAuthStateChanged(async function(fbUser){
   var loadingEl = document.getElementById('auth-check-loading');
   if (loadingEl) loadingEl.style.display = 'none';
   if (!restored) { document.getElementById('login-card').style.display = ''; return; }
-  // Packages/room-details on-load sync — must wait until here, not fire at
-  // parse time: fsDb exists as soon as the SDK initializes, but Firebase
-  // Auth's own session restore above is asynchronous, so anything run
-  // earlier always hits Firestore before request.auth is populated and
-  // gets rejected by the isAdmin()/isStaff() rules regardless of whether
-  // the user is really signed in.
-  try { syncPackagesToFirestore(); } catch(e) { console.error('syncPkgFirestore', e); }
-  try { syncRoomDetailsToFirestore(); } catch(e) { console.error('syncRoomDetailsToFirestore', e); }
+  // A blanket "push local cache to Firestore" call used to run right here on
+  // every single login/session-restore. It dated back to the one-time
+  // migration off local-first storage (see savePackages()/saveRoomDetails()
+  // below, which is the only place packages/room_details should ever be
+  // written from a real edit) and was never removed afterward. Firestore has
+  // been the sole source of truth for a long time now — drawPkgs() already
+  // treats it as authoritative and only falls back to the local cache if a
+  // Firestore fetch fails — so this call had no remaining legitimate purpose
+  // and was a standing risk: any browser with a stale or empty local cache
+  // (a fresh device, a cleared cache, a new test environment) would silently
+  // overwrite real package/room-details data in Firestore with whatever
+  // fallback or leftover data happened to be sitting in localStorage. This
+  // is exactly what accidentally resurrected deleted legacy packages during
+  // testing. Removed outright; nothing else depended on it running.
 });
 
 // ── SINGLE ATOMIC RESERVATION WRITE ──
