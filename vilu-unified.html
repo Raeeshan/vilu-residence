@@ -27,6 +27,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 @media(max-width:600px){
   .g4,.g2,.rd-grid,.form-grid,.fg-grid,.igg{grid-template-columns:1fr}
 }
+#res-quickbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:800;align-items:center;gap:14px;min-width:500px;max-width:90vw}
+#qb-bar-info{flex:1}
+@media(max-width:600px){
+  #res-quickbar{min-width:0;width:calc(100vw - 24px);max-width:calc(100vw - 24px);padding:12px 16px;gap:10px;flex-wrap:wrap;justify-content:center}
+  #qb-bar-info{flex:1 1 100%;text-align:center}
+}
 .sg{font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;padding:10px 14px 3px;letter-spacing:.08em;text-transform:uppercase}
 .sl{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:var(--font-size-sm);color:#374151;cursor:pointer;border-left:3px solid transparent;white-space:nowrap}
 .sl:hover{background:#f9fafb;color:#00b4d8}
@@ -2328,8 +2334,8 @@ Photography | 25 | /hr"></textarea>
   <div class="rd-footer" id="rd-footer"></div>
 </div>
 
-<div id="res-quickbar" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:800;align-items:center;gap:14px;min-width:500px;max-width:90vw">
-  <div style="flex:1">
+<div id="res-quickbar" style="display:none">
+  <div id="qb-bar-info">
     <div id="qb-name" style="font-size:var(--font-size-md);font-weight:700"></div>
     <div id="qb-sub" style="font-size:var(--font-size-xs);opacity:.7;margin-top:2px"></div>
   </div>
