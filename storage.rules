@@ -17,6 +17,14 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // General website content images (currently: the About section's
+    // property photo) - same public-read/admin-write shape as room-photos,
+    // for site assets that aren't tied to a specific room.
+    match /site-assets/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /{allPaths=**} { allow read, write: if false; }
   }
 }
