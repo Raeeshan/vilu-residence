@@ -471,9 +471,14 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .bfp-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .bfp-room-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,4,10,.3);transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1)}
 .bfp-room-card:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(14,116,144,.2)}
-.bfp-room-img{height:200px;overflow:hidden}
+.bfp-room-img{height:200px;overflow:hidden;position:relative}
 .bfp-room-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .bfp-room-card:hover .bfp-room-img-bg{transform:scale(1.07)}
+.bfp-gallery-caption{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;pointer-events:none;z-index:2}
+.bfp-gallery-thumbs{position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:6px;z-index:2}
+.bfp-gallery-thumb{width:34px;height:34px;border-radius:6px;background-size:cover;background-position:center;border:2px solid rgba(255,255,255,.55);cursor:pointer;flex-shrink:0;transition:border-color .2s,transform .2s}
+.bfp-gallery-thumb:hover{transform:translateY(-2px)}
+.bfp-gallery-thumb.active{border-color:#fff}
 .bfp-room-body{padding:20px}
 .bfp-room-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:6px}
 .bfp-room-desc{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;margin-bottom:14px}
@@ -1854,13 +1859,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   await fetchRoomDetailsFromFirestore();
   ROOMS = ROOMS.map(function(r) {
     var d = _roomDetailsCache[r.id] || {};
+    var photos = photosOf(d);
     return Object.assign({}, r, {
       view: d.view || r.view,
       desc: d.description || r.desc,
       size: d.size || r.size || 22,
       beds: d.beds || r.beds || '1 Double bed',
       amenities: d.amenities || r.amenities || [],
-      photo: d.photo || r.photo || '',
+      photos: photos,
+      photo: photos[0] ? photos[0].url : (r.photo || ''),
     });
   });
 
@@ -1910,6 +1917,16 @@ var DEFAULT_ROOMS = [
 // fetchRoomDetailsFromFirestore) — replaces a localStorage read that only
 // ever had data on a device where the PMS itself had been opened, so a
 // real guest's browser never actually saw uploaded room photos before this.
+// A room's photos live as an array ({url,label}) under room_details/{id}.photos.
+// Rooms photographed before this feature shipped only have the old singular
+// `photo` field, which is synthesized into a one-item array here rather than
+// dropped, so an already-uploaded photo keeps showing during/after migration.
+function photosOf(d){
+  if(d&&d.photos&&d.photos.length)return d.photos;
+  if(d&&d.photo)return [{url:d.photo,label:'Room'}];
+  return [];
+}
+
 var _roomDetailsCache = {};
 async function fetchRoomDetailsFromFirestore() {
   try {
@@ -2077,6 +2094,7 @@ function loadPMSRooms() {
     if (!base.length) base = DEFAULT_ROOMS;
     return base.map(function(r) {
       var d = details[r.id] || {};
+      var photos = photosOf(d);
       return {
         id: r.id,
         // Prefer type (the Booking.com category) over a legacy name field —
@@ -2092,7 +2110,8 @@ function loadPMSRooms() {
         size: d.size || 22,
         beds: d.beds || '1 Double bed',
         amenities: d.amenities || [],
-        photo: d.photo || '',
+        photos: photos,
+        photo: photos[0] ? photos[0].url : '',
       };
     });
   } catch(e) { return DEFAULT_ROOMS; }
@@ -3067,11 +3086,20 @@ function bfpRenderRooms(rooms, ci, co, numRooms){
     var total = nightlyRate * nights;
     var card = document.createElement('div');
     card.className = 'bfp-room-card';
-    var bg = r.photo ? ("url('"+r.photo+"') center/cover") : (COLORS[r.type] || COLORS['Double Room']);
+    var photos = r.photos && r.photos.length ? r.photos : (r.photo ? [{url:r.photo,label:''}] : []);
+    var fallbackBg = COLORS[r.type] || COLORS['Double Room'];
+    var mainBg = photos.length ? ("url('"+photos[0].url+"') center/cover") : fallbackBg;
     var actionHtml = numRooms>1
       ? '<button class="bfp-book-btn bfp-select-btn" data-rid="'+r.id+'">'+t('bfp.select')+'</button>'
       : '<button class="bfp-book-btn">'+t('bfp.book')+'</button>';
-    card.innerHTML = '<div class="bfp-room-img"><div class="bfp-room-img-bg" style="background:'+bg+';height:100%"></div></div>'
+    var galleryHtml = '<div class="bfp-room-img">'
+      + '<div class="bfp-room-img-bg" style="background:'+mainBg+';height:100%"></div>'
+      + (photos[0] && photos[0].label ? '<div class="bfp-gallery-caption">'+td(photos[0].label)+'</div>' : '')
+      + (photos.length>1 ? '<div class="bfp-gallery-thumbs">'+photos.map(function(p,i){
+          return '<div class="bfp-gallery-thumb'+(i===0?' active':'')+'" data-idx="'+i+'" style="background-image:url(\''+p.url+'\')" title="'+(p.label||'')+'"></div>';
+        }).join('')+'</div>' : '')
+      + '</div>';
+    card.innerHTML = galleryHtml
       + '<div class="bfp-room-body">'
       + '<div class="bfp-room-name">'+td(r.name)+'</div>'
       + '<div class="bfp-room-desc">'+td(r.desc)+'</div>'
@@ -3079,6 +3107,20 @@ function bfpRenderRooms(rooms, ci, co, numRooms){
       + '<div class="bfp-room-price">$'+nightlyRate+'<span> '+t('bfp.perNight')+(nights>1?' &middot; $'+total+' '+t('bfp.totalSuffix'):'')+'</span></div>'
       + actionHtml
       + '</div></div>';
+    if(photos.length>1){
+      var bgEl = card.querySelector('.bfp-room-img-bg');
+      var captionEl = card.querySelector('.bfp-gallery-caption');
+      card.querySelectorAll('.bfp-gallery-thumb').forEach(function(thumb){
+        thumb.addEventListener('click', function(e){
+          e.stopPropagation();
+          var p = photos[+this.dataset.idx];
+          bgEl.style.background = "url('"+p.url+"') center/cover";
+          card.querySelectorAll('.bfp-gallery-thumb').forEach(function(t){ t.classList.remove('active'); });
+          this.classList.add('active');
+          if(captionEl) captionEl.textContent = p.label || '';
+        });
+      });
+    }
     if(numRooms>1){
       card.querySelector('.bfp-select-btn').addEventListener('click', function(){ bfpToggleRoomSelect(r.id, card, this); });
     } else {
