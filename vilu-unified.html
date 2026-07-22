@@ -6679,32 +6679,32 @@ function loadRoomDetails(){
       amenities:['Air conditioning','En-suite bathroom','Hot shower','Wardrobe','Writing desk','Mirror','Safe deposit box'],
       includes:['Free WiFi','Complimentary water','Welcome drink','Daily housekeeping','Towels & linens'],
       description:'A comfortable double room with garden view, ideal for couples or solo travelers seeking a peaceful retreat.',
-      photos:[]},
+      photoSlots:engEmptySlots()},
     VR02:{size:22,beds:'1 Double bed',view:'Garden view',maxGuests:3,
       amenities:['Air conditioning','En-suite bathroom','Hot shower','Wardrobe','Writing desk','Mirror','Safe deposit box'],
       includes:['Free WiFi','Complimentary water','Welcome drink','Daily housekeeping','Towels & linens'],
       description:'A cozy double room with garden view, perfect for a relaxing Maldives getaway.',
-      photos:[]},
+      photoSlots:engEmptySlots()},
     VR03:{size:24,beds:'1 Double bed',view:'Partial sea view',maxGuests:3,
       amenities:['Air conditioning','En-suite bathroom','Hot shower','Wardrobe','Balcony','Writing desk','Mirror','Safe deposit box'],
       includes:['Free WiFi','Complimentary water','Welcome drink','Daily housekeeping','Towels & linens'],
       description:'Enjoy partial sea views from this bright double room with private balcony.',
-      photos:[]},
+      photoSlots:engEmptySlots()},
     VR04:{size:24,beds:'1 Double bed',view:'Partial sea view',maxGuests:3,
       amenities:['Air conditioning','En-suite bathroom','Hot shower','Wardrobe','Balcony','Writing desk','Mirror','Safe deposit box'],
       includes:['Free WiFi','Complimentary water','Welcome drink','Daily housekeeping','Towels & linens'],
       description:'Bright double room with partial sea views and balcony access.',
-      photos:[]},
+      photoSlots:engEmptySlots()},
     VR05:{size:28,beds:'1 King bed',view:'Full sea view',maxGuests:3,
       amenities:['Air conditioning','En-suite bathroom','Hot shower','Wardrobe','Private balcony','Mini fridge','Writing desk','Mirror','Safe deposit box'],
       includes:['Free WiFi','Complimentary water','Welcome drink','Daily housekeeping','Towels & linens','Minibar water'],
       description:'Premium room with stunning full ocean views and a private balcony — perfect for a special stay.',
-      photos:[]},
+      photoSlots:engEmptySlots()},
     VR06:{size:28,beds:'1 King bed',view:'Full sea view',maxGuests:3,
       amenities:['Air conditioning','En-suite bathroom','Hot shower','Wardrobe','Private balcony','Mini fridge','Writing desk','Mirror','Safe deposit box'],
       includes:['Free WiFi','Complimentary water','Welcome drink','Daily housekeeping','Towels & linens','Minibar water'],
       description:'Our finest room with panoramic ocean views, king bed, and private balcony.',
-      photos:[]},
+      photoSlots:engEmptySlots()},
   };
 }
 function saveRoomDetails(details){
@@ -6786,18 +6786,29 @@ function renderEngRoomForm(rn){
     return '<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm);cursor:pointer;padding:3px 0"><input type="checkbox" class="eng-incl" value="'+a+'" '+chk+' style="accent-color:#00b4d8"> '+a+'</label>';
   }).join('');
 
-  var photos=engGetPhotos(d);
-  var photoHtml=photos.length
-    ?'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:10px">'
-      +photos.map(function(p,i){
-        return '<div style="position:relative">'
-          +'<img src="'+p.url+'" style="width:100%;height:70px;object-fit:cover;border-radius:6px;display:block;border:1px solid #e5e7eb">'
-          +'<div style="font-size:10px;text-align:center;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(p.label||'Photo')+'</div>'
-          +'<button type="button" data-idx="'+i+'" class="eng-photo-remove" title="Remove" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">×</button>'
+  // Auto-migrate this room's old embedded-in-Firestore photos to Cloud
+  // Storage the first time its editor is opened after the migration
+  // shipped, so the two storage systems never run in parallel for it -
+  // re-renders once the (async) migration finishes.
+  if(!d.photoSlots && (d.photo || (d.photos && d.photos.length))){
+    migrateRoomPhotosToStorage(rn).then(function(){ if(_engRoom===rn) renderEngRoomForm(rn); });
+  }
+  var slots=d.photoSlots||engEmptySlots();
+  var photoHtml='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:10px">'
+    +engSlotDefs().map(function(sd){
+      var p=slots[sd.id];
+      return '<div style="text-align:center">'
+        +'<div style="position:relative;margin-bottom:4px">'
+        +(p&&p.url
+          ?'<img src="'+p.url+'" style="width:100%;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:block">'
+            +'<button type="button" data-slot="'+sd.id+'" class="eng-slot-remove" title="Remove" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center">×</button>'
+          :'<div style="width:100%;height:90px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#d1d5db">+</div>')
+        +'</div>'
+        +'<label style="font-size:var(--font-size-xs);font-weight:700;color:#374151;display:block;margin-bottom:4px">'+sd.label+'</label>'
+        +'<input type="file" accept="image/*" data-slot="'+sd.id+'" class="eng-slot-file" style="font-size:10px;width:100%">'
         +'</div>';
-      }).join('')
-    +'</div>'
-    :'<div style="width:100%;height:70px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);color:#9ca3af;margin-bottom:10px">No photos yet — add some below</div>';
+    }).join('')
+    +'</div>';
 
   el.innerHTML=
     '<div style="font-size:var(--font-size-base);font-weight:800;color:#00b4d8;margin-bottom:12px">'+vr.nm+' · '+vr.type+' — $'+vr.rate+'/night</div>'+
@@ -6811,13 +6822,7 @@ function renderEngRoomForm(rn){
     '<div class="fg"><label>Bed type</label><input type="text" id="eng-beds" value="'+(d.beds||'1 Double bed')+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;width:100%"></div>'+
     '<div class="fg"><label>View</label><input type="text" id="eng-view" value="'+(d.view||'')+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;width:100%"></div>'+
     '<div class="rd-section">Room photos</div>'+
-    '<div style="margin-bottom:12px">'+photoHtml+
-    '<div style="display:flex;gap:6px;align-items:center">'+
-    '<input type="text" id="eng-photo-label" list="eng-photo-label-opts" placeholder="Label (e.g. Room, Bathroom, Veranda)" style="flex:1;font-family:inherit;font-size:var(--font-size-xs);padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px">'+
-    '<input type="file" id="eng-photo" accept="image/*" style="font-size:var(--font-size-xs);flex:1">'+
-    '</div>'+
-    '<datalist id="eng-photo-label-opts"><option value="Room"><option value="Bathroom"><option value="Veranda"></datalist>'+
-    '</div>'+
+    '<div style="margin-bottom:16px">'+photoHtml+'</div>'+
     '<div class="rd-section">Amenities</div>'+
     '<div id="eng-amenities" style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:12px">'+amenChecks+'</div>'+
     '<div class="rd-section">Included free</div>'+
@@ -6830,34 +6835,161 @@ function renderEngRoomForm(rn){
   btn.addEventListener('click', function(){ engSaveRoom(rn); });
   el.appendChild(btn);
 
-  // Photo upload handler
-  document.getElementById('eng-photo').addEventListener('change', function(){
-    var labelEl=document.getElementById('eng-photo-label');
-    engAddPhoto(rn, this, labelEl?labelEl.value:'');
+  // Photo slot upload/remove handlers
+  document.querySelectorAll('.eng-slot-file').forEach(function(inp){
+    inp.addEventListener('change', function(){ engUploadSlotPhoto(rn, this.dataset.slot, this); });
   });
-  document.querySelectorAll('.eng-photo-remove').forEach(function(btn){
-    btn.addEventListener('click', function(){ engRemovePhoto(rn, +this.dataset.idx); });
+  document.querySelectorAll('.eng-slot-remove').forEach(function(btn){
+    btn.addEventListener('click', function(){ engRemoveSlotPhoto(rn, this.dataset.slot); });
   });
 }
 
 // A room's photos live as an array ({url,label}) under room_details/{rn}.photos —
 // this is the single place that reads them, so every caller (this form, the
-// legacy single-photo readers below, the website) sees the same migration:
-// rooms photographed before this feature shipped only have the old singular
-// `photo` field, which is synthesized into a one-item array here rather than
-// discarded, so nothing already uploaded is lost.
-function engGetPhotos(d){
-  if(d&&d.photos&&d.photos.length)return d.photos;
-  if(d&&d.photo)return [{url:d.photo,label:'Room'}];
-  return [];
+// legacy single-photo readers, the website) sees the same fixed slots.
+function engSlotDefs(){
+  return [
+    {id:'room1',label:'Room 1'},
+    {id:'room2',label:'Room 2'},
+    {id:'bathroom1',label:'Bathroom 1'},
+    {id:'bathroom2',label:'Bathroom 2'},
+    {id:'veranda',label:'Veranda'}
+  ];
+}
+function engEmptySlots(){
+  var s={};
+  engSlotDefs().forEach(function(sd){ s[sd.id]=null; });
+  return s;
 }
 
-// Resizes/re-encodes to keep each photo (and the room_details doc as a whole,
-// now that it can hold several photos) well under Firestore's 1MiB per-document
-// limit — the original single-photo upload stored the raw file as-is, which
-// silently failed to sync past a couple hundred KB and would have made that
-// failure far more likely with multiple photos per room.
-function compressImageFile(file, maxDim, quality){
+// Best-effort placement of a room's old freeform-labeled photos into the 5
+// fixed slots, by matching each photo's old label against the slot it's
+// closest to (falling back to the next empty slot in slot order for
+// anything unmatched or overflowing past 2 room/2 bathroom/1 veranda) -
+// used only during the one-time migration off the old embedded-photo format.
+function assignLegacyPhotosToSlots(legacyPhotos){
+  var slots=engEmptySlots();
+  var order=engSlotDefs().map(function(s){return s.id;});
+  var used={};
+  function firstEmpty(pred){
+    for(var i=0;i<order.length;i++){
+      var id=order[i];
+      if(!used[id]&&pred(id))return id;
+    }
+    return null;
+  }
+  legacyPhotos.forEach(function(p){
+    var lbl=(p.label||'').toLowerCase();
+    var target=null;
+    if(lbl.indexOf('bath')>-1)target=firstEmpty(function(id){return id.indexOf('bathroom')===0;});
+    else if(lbl.indexOf('veranda')>-1||lbl.indexOf('balcony')>-1)target=firstEmpty(function(id){return id==='veranda';});
+    else if(lbl.indexOf('room')>-1)target=firstEmpty(function(id){return id.indexOf('room')===0;});
+    if(!target)target=firstEmpty(function(){return true;});
+    if(target){slots[target]=p;used[target]=true;}
+    else console.warn('Photo migration: no empty slot left for a photo labeled "'+p.label+'" — dropped');
+  });
+  return slots;
+}
+
+function dataUrlToBlob(dataUrl){
+  var parts=dataUrl.split(',');
+  var mimeMatch=parts[0].match(/:(.*?);/);
+  var mime=mimeMatch?mimeMatch[1]:'image/jpeg';
+  var bin=atob(parts[1]);
+  var arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+
+function uploadRoomPhotoBlob(rn, slotId, blob){
+  var path='room-photos/'+rn+'/'+slotId+'.jpg';
+  return fsStorage.ref(path).put(blob,{contentType:'image/jpeg'}).then(function(snap){
+    return snap.ref.getDownloadURL();
+  });
+}
+
+// One-time migration off the old embedded-in-Firestore photo formats (the
+// freeform photos[] array, or the original single `photo` string) onto
+// Cloud Storage + the 5 fixed slots — decodes each old base64 data URL,
+// re-uploads it as a real Storage file, and clears the old fields so the
+// two storage systems never run in parallel for a given room.
+async function migrateRoomPhotosToStorage(rn){
+  _roomDetails[rn]=_roomDetails[rn]||{};
+  var d=_roomDetails[rn];
+  if(d.photoSlots)return d.photoSlots;
+  var legacy=[];
+  if(d.photos&&d.photos.length)legacy=d.photos;
+  else if(d.photo)legacy=[{url:d.photo,label:'Room'}];
+  if(!legacy.length){
+    d.photoSlots=engEmptySlots();
+    return d.photoSlots;
+  }
+  var assigned=assignLegacyPhotosToSlots(legacy);
+  var slotIds=Object.keys(assigned);
+  for(var i=0;i<slotIds.length;i++){
+    var slotId=slotIds[i];
+    var p=assigned[slotId];
+    if(!p||!p.url)continue;
+    if(p.url.indexOf('data:')===0){
+      try{
+        var blob=dataUrlToBlob(p.url);
+        var url=await uploadRoomPhotoBlob(rn, slotId, blob);
+        var slotDef=engSlotDefs().find(function(s){return s.id===slotId;});
+        assigned[slotId]={url:url,label:slotDef.label};
+      }catch(e){
+        console.error('Photo migration upload failed for', rn, slotId, e);
+      }
+    }
+  }
+  d.photoSlots=assigned;
+  delete d.photo;
+  delete d.photos;
+  saveRoomDetails(_roomDetails);
+  toast('✓ '+rn+'\'s photos migrated to Cloud Storage');
+  return assigned;
+}
+
+var ENG_MAX_UPLOAD_BYTES=15*1024*1024;
+
+function engUploadSlotPhoto(rn, slotId, inputEl){
+  var file=inputEl&&inputEl.files[0];
+  if(!file)return;
+  if(file.size>ENG_MAX_UPLOAD_BYTES){toast('Image too large — please choose a file under 15MB');return;}
+  toast('Uploading photo…');
+  resizeImageToBlob(file, 2000, 0.9).then(function(blob){
+    return uploadRoomPhotoBlob(rn, slotId, blob);
+  }).then(function(url){
+    _roomDetails[rn]=_roomDetails[rn]||{};
+    _roomDetails[rn].photoSlots=_roomDetails[rn].photoSlots||engEmptySlots();
+    var slotDef=engSlotDefs().find(function(s){return s.id===slotId;});
+    _roomDetails[rn].photoSlots[slotId]={url:url,label:slotDef.label};
+    delete _roomDetails[rn].photo;
+    delete _roomDetails[rn].photos;
+    saveRoomDetails(_roomDetails);
+    renderEngRoomForm(rn);
+    toast('Photo uploaded ✓');
+  }).catch(function(err){
+    console.error('engUploadSlotPhoto failed', err);
+    toast('⚠️ Could not upload that photo — please try again');
+  });
+}
+
+function engRemoveSlotPhoto(rn, slotId){
+  var d=_roomDetails[rn];
+  if(!d||!d.photoSlots||!d.photoSlots[slotId])return;
+  var url=d.photoSlots[slotId].url;
+  d.photoSlots[slotId]=null;
+  saveRoomDetails(_roomDetails);
+  renderEngRoomForm(rn);
+  toast('Photo removed');
+  try{ fsStorage.refFromURL(url).delete().catch(function(){}); }catch(e){}
+}
+
+// High-quality resize for new uploads (unlike the old embedded-in-Firestore
+// format, Storage has no meaningful per-file size limit that matters here,
+// so this only caps dimensions/quality for reasonable file size and load
+// speed, not to squeeze under a document size ceiling).
+function resizeImageToBlob(file, maxDim, quality){
   return new Promise(function(resolve, reject){
     var reader=new FileReader();
     reader.onerror=function(){ reject(new Error('read failed')); };
@@ -6870,50 +7002,14 @@ function compressImageFile(file, maxDim, quality){
         var canvas=document.createElement('canvas');
         canvas.width=cw; canvas.height=ch;
         canvas.getContext('2d').drawImage(img,0,0,cw,ch);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        canvas.toBlob(function(blob){
+          if(blob)resolve(blob); else reject(new Error('encode failed'));
+        }, 'image/jpeg', quality);
       };
       img.src=e.target.result;
     };
     reader.readAsDataURL(file);
   });
-}
-
-var ENG_MAX_ROOM_DETAILS_BYTES=900000; // stay well under Firestore's 1 MiB/doc limit across all of this room's fields combined
-
-function engAddPhoto(rn, inputEl, label){
-  var file=(inputEl||document.getElementById('eng-photo'))?.files[0];
-  if(!file)return;
-  if(file.size>8*1024*1024){toast('Image too large — please choose a file under 8MB');return;}
-  label=(label||'').trim()||'Photo';
-  compressImageFile(file, 1280, 0.75).then(function(dataUrl){
-    _roomDetails[rn]=_roomDetails[rn]||{};
-    var photos=engGetPhotos(_roomDetails[rn]).slice();
-    photos.push({url:dataUrl,label:label});
-    var candidate=Object.assign({},_roomDetails[rn],{photos:photos});
-    if(JSON.stringify(candidate).length>ENG_MAX_ROOM_DETAILS_BYTES){
-      toast('⚠️ This room\'s photos are taking up too much space — remove one before adding another');
-      return;
-    }
-    _roomDetails[rn].photos=photos;
-    delete _roomDetails[rn].photo; // migrated into photos[] — one source of truth going forward
-    saveRoomDetails(_roomDetails);
-    renderEngRoomForm(rn);
-    toast('Photo uploaded ✓');
-  }).catch(function(err){
-    console.error('engAddPhoto failed', err);
-    toast('⚠️ Could not process that image — please try a different file');
-  });
-}
-
-function engRemovePhoto(rn, idx){
-  _roomDetails[rn]=_roomDetails[rn]||{};
-  var photos=engGetPhotos(_roomDetails[rn]).slice();
-  photos.splice(idx,1);
-  _roomDetails[rn].photos=photos;
-  delete _roomDetails[rn].photo;
-  saveRoomDetails(_roomDetails);
-  renderEngRoomForm(rn);
-  toast('Photo removed');
 }
 
 function engSaveRoom(rn){
@@ -9235,17 +9331,23 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 <script>
 var firebaseConfig = {
   apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
   authDomain: "vilu-residence.firebaseapp.com",
   projectId: "vilu-residence",
-  storageBucket: "vilu-residence.firebasestorage.app",
+  // The real linked default bucket (confirmed via the Storage API) -
+  // the previous "vilu-residence.firebasestorage.app" value here never
+  // actually existed as a bucket; Storage itself hadn't been activated
+  // for this project until the room-photos Storage migration.
+  storageBucket: "vilu-residence.appspot.com",
   messagingSenderId: "751046104531",
   appId: "1:751046104531:web:c8af85f37c42a1c3c84b26"
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
+var fsStorage = firebase.storage();
 
 // Auto-restore session on reload — Firebase Auth persists sign-in across
 // page loads by default, but until now nothing ever checked for an

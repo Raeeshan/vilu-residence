@@ -1695,7 +1695,7 @@ var firebaseConfig = {
   apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
   authDomain: "vilu-residence.firebaseapp.com",
   projectId: "vilu-residence",
-  storageBucket: "vilu-residence.firebasestorage.app",
+  storageBucket: "vilu-residence.appspot.com",
   messagingSenderId: "751046104531",
   appId: "1:751046104531:web:c8af85f37c42a1c3c84b26"
 };
@@ -1917,11 +1917,23 @@ var DEFAULT_ROOMS = [
 // fetchRoomDetailsFromFirestore) — replaces a localStorage read that only
 // ever had data on a device where the PMS itself had been opened, so a
 // real guest's browser never actually saw uploaded room photos before this.
-// A room's photos live as an array ({url,label}) under room_details/{id}.photos.
-// Rooms photographed before this feature shipped only have the old singular
-// `photo` field, which is synthesized into a one-item array here rather than
-// dropped, so an already-uploaded photo keeps showing during/after migration.
+// A room's photos live in 5 fixed Cloud Storage-backed slots under
+// room_details/{id}.photoSlots (room1/room2/bathroom1/bathroom2/veranda) -
+// this returns them as an ordered array, skipping empty slots. Falls back to
+// the older formats (a freeform photos[] array, or the original single
+// `photo` string) for any room not yet migrated off embedded-in-Firestore
+// photos, so nothing already uploaded ever disappears mid-migration.
+var PHOTO_SLOT_ORDER = ['room1','room2','bathroom1','bathroom2','veranda'];
+var PHOTO_SLOT_LABELS = {room1:'Room 1',room2:'Room 2',bathroom1:'Bathroom 1',bathroom2:'Bathroom 2',veranda:'Veranda'};
 function photosOf(d){
+  if(d&&d.photoSlots){
+    var out=[];
+    PHOTO_SLOT_ORDER.forEach(function(id){
+      var p=d.photoSlots[id];
+      if(p&&p.url)out.push({url:p.url,label:p.label||PHOTO_SLOT_LABELS[id]});
+    });
+    if(out.length)return out;
+  }
   if(d&&d.photos&&d.photos.length)return d.photos;
   if(d&&d.photo)return [{url:d.photo,label:'Room'}];
   return [];

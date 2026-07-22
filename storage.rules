@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Cross-service rules (checking Firestore's staff_permissions from here,
+    // the same way Firestore's own rules do) proved unreliable in this
+    // project even after granting the Firebase Rules service agent
+    // datastore.viewer - admin-only for now; staff-photo-upload access can
+    // be revisited once that's resolved. Firestore rules for room_details
+    // (which staff DO still fully manage) are unaffected by this.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email.lower() == 'viluresidence@gmail.com';
+    }
+
+    match /room-photos/{roomId}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}
