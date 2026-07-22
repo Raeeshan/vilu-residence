@@ -6707,25 +6707,34 @@ function loadRoomDetails(){
       photoSlots:engEmptySlots()},
   };
 }
-function saveRoomDetails(details){
+function saveRoomDetails(details, rn){
   localStorage.setItem('vilu_room_details',JSON.stringify(details));
   syncEngineData();
-  syncRoomDetailsToFirestore().catch(function(){});
+  syncRoomDetailsToFirestore(rn).catch(function(){});
 }
 
 // Firestore is the durable, cross-device source of truth for room photos/
 // info — the website and this PMS's own booking-engine preview used to
 // both read the localStorage copy above, which only ever existed on a
 // device where the PMS itself had been opened, so a real guest's browser
-// never saw uploaded photos. This pushes every room's details up whenever
-// they're edited; see the automatic backfill call near syncPackagesToFirestore
-// for existing localStorage-only data from before this change.
-async function syncRoomDetailsToFirestore(){
-  var roomIds = Object.keys(_roomDetails);
-  await Promise.all(roomIds.map(function(rn){
-    return fsDb.collection('room_details').doc(rn).set(_roomDetails[rn])
-      .catch(function(e){ console.error('syncRoomDetailsToFirestore failed for', rn, e); });
-  }));
+// never saw uploaded photos. This pushes the edited room's details up
+// whenever they're edited; see the automatic backfill call near
+// syncPackagesToFirestore for existing localStorage-only data from before
+// this change.
+//
+// Writes ONLY the specific room passed in, merged into its existing
+// Firestore document rather than looping over every room in the local
+// _roomDetails cache with a full-document overwrite. That used to mean any
+// session whose local cache was stale or incomplete for OTHER rooms (a
+// fresh device, a cleared cache, a tab that never opened every room's
+// editor tab this visit) would silently blow away real Firestore data —
+// including uploaded photoSlots — for rooms it wasn't even touching, the
+// moment it saved anything at all. Scoping to one room plus merge:true
+// means editing Room 101 can no longer alter Room 106's document in any way.
+async function syncRoomDetailsToFirestore(rn){
+  if(!rn)return;
+  return fsDb.collection('room_details').doc(rn).set(_roomDetails[rn], {merge:true})
+    .catch(function(e){ console.error('syncRoomDetailsToFirestore failed for', rn, e); });
 }
 function syncEngineData(){
   var details=loadRoomDetails();
@@ -6739,8 +6748,31 @@ function syncEngineData(){
 var _engRoom='VR01';
 var _roomDetails=loadRoomDetails();
 
-function drawEngine(){
-  _roomDetails=loadRoomDetails();
+// Firestore is authoritative for room details (it's what the website and
+// this PMS's own preview actually read) — refresh the local copy from it
+// every time this panel opens, the same way drawPkgs() does for packages,
+// so it never operates on a stale or incomplete local cache. Before this,
+// _roomDetails came only from localStorage and was never read back from
+// Firestore, so a session that hadn't freshly opened every room's tab this
+// visit could carry an incomplete picture of other rooms — and saving
+// anything used to push that whole local picture back out (see
+// syncRoomDetailsToFirestore). Falls back to the local cache if Firestore
+// can't be reached.
+async function drawEngine(){
+  try {
+    var qs = await fsDb.collection('room_details').get();
+    if(!qs.empty){
+      var fresh = {};
+      qs.docs.forEach(function(d){ fresh[d.id] = d.data(); });
+      _roomDetails = Object.assign({}, loadRoomDetails(), fresh);
+      localStorage.setItem('vilu_room_details', JSON.stringify(_roomDetails));
+    } else {
+      _roomDetails = loadRoomDetails();
+    }
+  } catch(e) {
+    console.error('drawEngine Firestore fetch failed, falling back to local cache', e);
+    _roomDetails = loadRoomDetails();
+  }
   renderEngRoomTabs();
   renderEngRoomForm(_engRoom);
 }
@@ -6944,7 +6976,7 @@ async function migrateRoomPhotosToStorage(rn){
   d.photoSlots=assigned;
   delete d.photo;
   delete d.photos;
-  saveRoomDetails(_roomDetails);
+  saveRoomDetails(_roomDetails, rn);
   toast('✓ '+rn+'\'s photos migrated to Cloud Storage');
   return assigned;
 }
@@ -6965,7 +6997,7 @@ function engUploadSlotPhoto(rn, slotId, inputEl){
     _roomDetails[rn].photoSlots[slotId]={url:url,label:slotDef.label};
     delete _roomDetails[rn].photo;
     delete _roomDetails[rn].photos;
-    saveRoomDetails(_roomDetails);
+    saveRoomDetails(_roomDetails, rn);
     renderEngRoomForm(rn);
     toast('Photo uploaded ✓');
   }).catch(function(err){
@@ -6979,7 +7011,7 @@ function engRemoveSlotPhoto(rn, slotId){
   if(!d||!d.photoSlots||!d.photoSlots[slotId])return;
   var url=d.photoSlots[slotId].url;
   d.photoSlots[slotId]=null;
-  saveRoomDetails(_roomDetails);
+  saveRoomDetails(_roomDetails, rn);
   renderEngRoomForm(rn);
   toast('Photo removed');
   try{ fsStorage.refFromURL(url).delete().catch(function(){}); }catch(e){}
@@ -7030,7 +7062,7 @@ function engSaveRoom(rn){
   var vr=VR.find(function(r){return r.n===rn;});
   if(vr)vr.cap=cap;
 
-  saveRoomDetails(_roomDetails);
+  saveRoomDetails(_roomDetails, rn);
   toast('✓ '+rn+' updated — booking page refreshed');
   // Refresh iframe
   setTimeout(function(){
