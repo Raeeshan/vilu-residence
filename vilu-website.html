@@ -246,8 +246,11 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .rooms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2px;margin-top:60px}
 .room-card{background:var(--card);border:1px solid var(--card-border);overflow:hidden;cursor:pointer;border-radius:8px;box-shadow:0 4px 24px rgba(0,4,10,.3);transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s cubic-bezier(.16,1,.3,1);group:1}
 .room-card:hover{transform:translateY(-8px);box-shadow:0 20px 46px rgba(14,116,144,.22)}
-.room-card-img{height:260px;overflow:hidden;position:relative}
-.room-card-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+/* Source room photos are portrait (1086x1448) shot with a ceiling fan/fixture near the top of frame;
+   a landscape crop centered on the photo used to cut into the fixture instead of the bed. Square
+   aspect + bottom-anchored focal point keeps the bed in view. See .bfp-room-img for the same fix. */
+.room-card-img{aspect-ratio:1/1;overflow:hidden;position:relative}
+.room-card-img-bg{width:100%;height:100%;background-size:cover;background-position:center bottom;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .room-card:hover .room-card-img-bg{transform:scale(1.08)}
 .room-card-badge{position:absolute;top:16px;left:16px;background:rgba(10,30,38,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:var(--white);font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px}
 .room-card-body{padding:24px}
@@ -305,6 +308,12 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(0,4,10,.5);border-color:rgba(34,211,238,.35)}
 .hp-card.hp-featured{border-color:rgba(34,211,238,.4)}
 .hp-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));color:var(--navy);font-size:var(--font-size-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:18px;align-self:flex-start;box-shadow:0 6px 16px rgba(34,211,238,.25)}
+/* Package card icons render as ::before/::after pseudo-elements (font-family:tabler-icons,
+   content:the icon's private-use codepoint) instead of a child <i> tag, and label wrappers
+   write their text directly instead of a nested <span> — cuts ~2 DOM nodes per detail/notes
+   line across the 9 cards (the section's biggest DOM-size contributor). Icon-to-codepoint
+   mapping matches hpIconFor()/HP_ICON_RULES in the script below. */
+.hp-badge::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;content:"\eb2e"}
 .hp-badge-rose{background:linear-gradient(135deg,var(--rose),var(--rose-light) 55%,var(--rose));color:#4a1f30;box-shadow:0 6px 16px rgba(216,143,168,.3)}
 .hp-card.hp-featured.hp-featured-rose{border-color:rgba(216,143,168,.4)}
 .hp-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.2}
@@ -319,24 +328,41 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-section-label{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-light);margin-bottom:6px}
 .hp-list{display:flex;flex-direction:column}
 .hp-detail-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-sm);color:rgba(255,255,255,.68);padding:3px 0;line-height:1.35}
-.hp-detail-line i{color:var(--gold-light);flex-shrink:0;margin-top:2px;font-size:var(--font-size-md)}
+.hp-detail-line::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;color:var(--gold-light);flex-shrink:0;margin-top:2px;font-size:var(--font-size-md)}
+.hp-detail-line[data-ic="fish"]::before{content:"\ef2b"}
+.hp-detail-line[data-ic="diamond"]::before{content:"\eb65"}
+.hp-detail-line[data-ic="hexagon"]::before{content:"\ec02"}
+.hp-detail-line[data-ic="sunrise"]::before{content:"\ef1c"}
+.hp-detail-line[data-ic="sunset-2"]::before{content:"\f23a"}
+.hp-detail-line[data-ic="ship"]::before{content:"\ec84"}
+.hp-detail-line[data-ic="map-pin"]::before{content:"\eae8"}
+.hp-detail-line[data-ic="basket"]::before{content:"\ebe1"}
+.hp-detail-line[data-ic="fish-hook"]::before{content:"\f1f9"}
+.hp-detail-line[data-ic="hotel-service"]::before{content:"\ef80"}
+.hp-detail-line[data-ic="tools-kitchen-2"]::before{content:"\eeff"}
+.hp-detail-line[data-ic="coffee"]::before{content:"\ef0e"}
+.hp-detail-line[data-ic="bed"]::before{content:"\eb5c"}
+.hp-detail-line[data-ic="camera"]::before{content:"\ea54"}
+.hp-detail-line[data-ic="circle-check"]::before{content:"\ea67"}
 @media(min-width:901px){
   .hp-list-2col{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));column-gap:14px}
 }
 .hp-upgrade{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:var(--gold-light);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:10px 12px;margin:20px 0 0;line-height:1.5}
+.hp-upgrade::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;flex-shrink:0;margin-top:2px;content:"\ea20"}
 .hp-notes{border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-top:10px}
 .hp-notes summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-size:var(--font-size-xs);font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
 .hp-notes summary::-webkit-details-marker{display:none}
 .hp-notes summary:hover{color:var(--teal-light)}
-.hp-notes-chevron{transition:transform .25s}
-.hp-notes[open] summary .hp-notes-chevron{transform:rotate(180deg)}
+.hp-notes summary::after{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;content:"\ea5f";transition:transform .25s}
+.hp-notes[open] summary::after{transform:rotate(180deg)}
 .hp-notes-body{display:flex;flex-direction:column;gap:4px;margin-top:10px}
 .hp-notes-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:rgba(255,255,255,.55);padding:3px 0;line-height:1.5}
-.hp-notes-line i{color:var(--muted);flex-shrink:0;margin-top:2px;font-size:var(--font-size-sm)}
+.hp-notes-line::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;color:var(--muted);flex-shrink:0;margin-top:2px;font-size:var(--font-size-sm);content:"\eac5"}
 .hp-actions{margin-top:auto;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:10px}
 .hp-enquire-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:14px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .hp-enquire-btn:hover{background:var(--teal-light);color:var(--navy);box-shadow:0 10px 26px rgba(34,211,238,.3)}
 .hp-whatsapp-link{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);text-decoration:none;font-size:var(--font-size-sm);transition:color .2s}
+.hp-whatsapp-link::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;content:"\ec74"}
 .hp-whatsapp-link:hover{color:var(--gold-light)}
 @keyframes hpPulse{0%,100%{box-shadow:0 20px 60px rgba(0,4,10,.35)}50%{box-shadow:0 0 0 4px var(--gold-light),0 20px 60px rgba(0,4,10,.35)}}
 .hp-card.hp-pulse{animation:hpPulse 1.4s ease}
@@ -472,8 +498,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .bfp-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .bfp-room-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,4,10,.3);transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1)}
 .bfp-room-card:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(14,116,144,.2)}
-.bfp-room-img{height:200px;overflow:hidden;position:relative}
-.bfp-room-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.bfp-room-img{aspect-ratio:1/1;overflow:hidden;position:relative}
+.bfp-room-img-bg{width:100%;height:100%;background-size:cover;background-position:center bottom;transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .bfp-room-card:hover .bfp-room-img-bg{transform:scale(1.07)}
 .bfp-gallery-caption{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;pointer-events:none;z-index:2}
 .bfp-view-badge{position:absolute;top:10px;right:10px;background:rgba(10,30,38,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:20px;pointer-events:none;z-index:2}
@@ -728,12 +754,46 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 <section id="home">
   <div class="hero-bg"></div>
   <div class="hero-slideshow" aria-hidden="true">
-    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/whale_shark_portrait_hd.jpg"><img class="hero-slide-img" src="images/whale_shark_hd.jpg" alt=""></picture></div>
-    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/manta_portrait_hd.jpg"><img class="hero-slide-img" src="images/manta_ray_hd.jpg" alt=""></picture></div>
-    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/turtle_portrait_hd.jpg"><img class="hero-slide-img" src="images/turtle_snorkelers_gallery.jpg" alt=""></picture></div>
-    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/manta_silhouette_portrait_hd.jpg"><img class="hero-slide-img" src="images/manta_silhouette_gallery.jpg" alt=""></picture></div>
-    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/whale_shark2_portrait_hd.jpg"><img class="hero-slide-img" src="images/whale_shark_2_gallery.jpg" alt=""></picture></div>
-    <div class="hero-slide"><picture><source media="(max-width:900px)" srcset="images/dolphins_portrait_hd.jpg"><img class="hero-slide-img" src="images/dolphin_pod_gallery.jpg" alt=""></picture></div>
+    <!-- Slide 1 is the LCP element: loads eagerly with WebP+JPEG sources. Slides 2-6 carry
+         data-srcset/data-src instead of the real attributes and are populated by
+         loadHeroSlidesProgressively() (staggered, well ahead of each slide's ~10s-apart
+         reveal in the heroSlideFade cycle) so they don't compete with the LCP image. -->
+    <div class="hero-slide"><picture>
+      <source media="(max-width:900px)" type="image/webp" srcset="images/whale_shark_portrait_hd.webp">
+      <source media="(max-width:900px)" srcset="images/whale_shark_portrait_hd.jpg">
+      <source type="image/webp" srcset="images/whale_shark_hd.webp">
+      <img class="hero-slide-img" src="images/whale_shark_hd.jpg" alt="" fetchpriority="high">
+    </picture></div>
+    <div class="hero-slide"><picture>
+      <source media="(max-width:900px)" type="image/webp" data-srcset="images/manta_portrait_hd.webp">
+      <source media="(max-width:900px)" data-srcset="images/manta_portrait_hd.jpg">
+      <source type="image/webp" data-srcset="images/manta_ray_hd.webp">
+      <img class="hero-slide-img" data-src="images/manta_ray_hd.jpg" alt="">
+    </picture></div>
+    <div class="hero-slide"><picture>
+      <source media="(max-width:900px)" type="image/webp" data-srcset="images/turtle_portrait_hd.webp">
+      <source media="(max-width:900px)" data-srcset="images/turtle_portrait_hd.jpg">
+      <source type="image/webp" data-srcset="images/turtle_snorkelers_gallery.webp">
+      <img class="hero-slide-img" data-src="images/turtle_snorkelers_gallery.jpg" alt="">
+    </picture></div>
+    <div class="hero-slide"><picture>
+      <source media="(max-width:900px)" type="image/webp" data-srcset="images/manta_silhouette_portrait_hd.webp">
+      <source media="(max-width:900px)" data-srcset="images/manta_silhouette_portrait_hd.jpg">
+      <source type="image/webp" data-srcset="images/manta_silhouette_gallery.webp">
+      <img class="hero-slide-img" data-src="images/manta_silhouette_gallery.jpg" alt="">
+    </picture></div>
+    <div class="hero-slide"><picture>
+      <source media="(max-width:900px)" type="image/webp" data-srcset="images/whale_shark2_portrait_hd.webp">
+      <source media="(max-width:900px)" data-srcset="images/whale_shark2_portrait_hd.jpg">
+      <source type="image/webp" data-srcset="images/whale_shark_2_gallery.webp">
+      <img class="hero-slide-img" data-src="images/whale_shark_2_gallery.jpg" alt="">
+    </picture></div>
+    <div class="hero-slide"><picture>
+      <source media="(max-width:900px)" type="image/webp" data-srcset="images/dolphins_portrait_hd.webp">
+      <source media="(max-width:900px)" data-srcset="images/dolphins_portrait_hd.jpg">
+      <source type="image/webp" data-srcset="images/dolphin_pod_gallery.webp">
+      <img class="hero-slide-img" data-src="images/dolphin_pod_gallery.jpg" alt="">
+    </picture></div>
   </div>
   <div class="hero-ocean-overlay" aria-hidden="true"></div>
   <div class="light-rays" aria-hidden="true"></div>
@@ -1693,19 +1753,26 @@ document.addEventListener('DOMContentLoaded', async function(){
   }
 });
 
+function setLazyBgImage(el){
+  // Some cards carry an inline placeholder (e.g. a gradient) set via the
+  // `background` shorthand, which implicitly resets background-size/position
+  // to their initial values. Clear the shorthand first so the element's CSS
+  // class (background-size:cover, background-position:...) applies again.
+  el.style.background = '';
+  el.style.backgroundImage = "url('" + el.getAttribute('data-bg-url') + "')";
+}
 var _bgObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries){
   entries.forEach(function(entry){
     if (entry.isIntersecting) {
-      var el = entry.target;
-      el.style.backgroundImage = "url('" + el.getAttribute('data-bg-url') + "')";
-      _bgObserver.unobserve(el);
+      setLazyBgImage(entry.target);
+      _bgObserver.unobserve(entry.target);
     }
   });
 }, { rootMargin: '300px 0px' }) : null;
 function observeLazyBg(el){
   if (!el || !el.getAttribute('data-bg-url')) return;
   if (_bgObserver) _bgObserver.observe(el);
-  else el.style.backgroundImage = "url('" + el.getAttribute('data-bg-url') + "')";
+  else setLazyBgImage(el);
 }
 function initLazyBackgrounds(){
   document.querySelectorAll('.lazy-bg[data-bg-url]').forEach(observeLazyBg);
@@ -2451,6 +2518,28 @@ window.addEventListener('scroll', function(){
   }, {passive:true});
 })();
 
+// ── HERO SLIDE PRELOADING ── slide 1 loads eagerly (it's the LCP element);
+// slides 2-6 carry data-src/data-srcset placeholders and get populated here,
+// staggered ~2s apart starting after window 'load' so they don't compete with
+// the LCP image for bandwidth, well ahead of each slide's ~10s-apart reveal
+// in the heroSlideFade cycle (see the CSS keyframes for the timing).
+function loadHeroSlidesProgressively(){
+  var slides = document.querySelectorAll('.hero-slide');
+  for (var i = 1; i < slides.length; i++) {
+    (function(slide, delay){
+      setTimeout(function(){
+        slide.querySelectorAll('source[data-srcset]').forEach(function(source){
+          source.srcset = source.getAttribute('data-srcset');
+        });
+        var img = slide.querySelector('img[data-src]');
+        if (img) img.src = img.getAttribute('data-src');
+      }, delay);
+    })(slides[i], i * 2000);
+  }
+}
+if (document.readyState === 'complete') loadHeroSlidesProgressively();
+else window.addEventListener('load', loadHeroSlidesProgressively);
+
 // ── MOBILE MENU ──
 function toggleMobileMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
 function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open');}
@@ -3137,7 +3226,7 @@ function bfpRenderRooms(rooms, ci, co, numRooms){
     card.className = 'bfp-room-card';
     var photos = r.photos && r.photos.length ? r.photos : (r.photo ? [{url:r.photo,label:''}] : []);
     var fallbackBg = COLORS[r.type] || COLORS['Double Room'];
-    var mainBg = photos.length ? ("url('"+photos[0].url+"') center/cover") : fallbackBg;
+    var mainBg = photos.length ? ("url('"+photos[0].url+"') center bottom/cover") : fallbackBg;
     var actionHtml = numRooms>1
       ? '<button class="bfp-book-btn bfp-select-btn" data-rid="'+r.id+'">'+t('bfp.select')+'</button>'
       : '<button class="bfp-book-btn">'+t('bfp.book')+'</button>';
@@ -3164,7 +3253,7 @@ function bfpRenderRooms(rooms, ci, co, numRooms){
         thumb.addEventListener('click', function(e){
           e.stopPropagation();
           var p = photos[+this.dataset.idx];
-          bgEl.style.background = "url('"+p.url+"') center/cover";
+          bgEl.style.background = "url('"+p.url+"') center bottom/cover";
           card.querySelectorAll('.bfp-gallery-thumb').forEach(function(t){ t.classList.remove('active'); });
           this.classList.add('active');
           if(captionEl) captionEl.textContent = p.label || '';
@@ -3442,11 +3531,11 @@ function hpIconFor(text){
 function hpDetailLines(items, formatter){
   return (items||[]).map(function(item){
     var raw = formatter ? formatter(item) : item;
-    var icon = hpIconFor(raw);
+    var icon = hpIconFor(raw).replace('ti-','');
     var label = (item && typeof item === 'object' && item.name !== undefined)
       ? td(item.name) + ' — $' + item.price + td(item.unit)
       : td(raw);
-    return '<div class="hp-detail-line"><i class="ti '+icon+'" aria-hidden="true"></i><span>'+label+'</span></div>';
+    return '<div class="hp-detail-line" data-ic="'+icon+'">'+label+'</div>';
   }).join('');
 }
 
@@ -3518,7 +3607,7 @@ function renderHolidayPackages(pkgs, notesData){
     var activitiesHtml = hpDetailLines(p.activities);
     var addOnsHtml = hpDetailLines(p.addOns, function(a){ return a.name+' — $'+a.price+a.unit; });
     var notesLines = hpNotesFor(p, notesData);
-    var notesHtml = notesLines.map(function(n){ return '<div class="hp-notes-line"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'+td(n)+'</span></div>'; }).join('');
+    var notesHtml = notesLines.map(function(n){ return '<div class="hp-notes-line">'+td(n)+'</div>'; }).join('');
 
     var isOrphan = (i === pkgs.length-1) && (pkgs.length % 3 === 1);
     var rateRowExtra = !isLadder
@@ -3527,22 +3616,22 @@ function renderHolidayPackages(pkgs, notesData){
     var upgradeAddedNames = upgradeAdded.map(function(a){ return td(a); });
     var nightWord = p.nights>1 ? t('packages.nights') : t('packages.night');
     return '<div class="hp-card'+(p.badge?' hp-featured':'')+(p.badge&&isRose?' hp-featured-rose':'')+(isOrphan?' hp-card-center':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
-      + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'"><i class="ti ti-star" aria-hidden="true"></i>'+td(p.badge)+'</div>' : '')
+      + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'">'+td(p.badge)+'</div>' : '')
       + '<div class="hp-name">'+td(p.name)+'</div>'
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">'+t('packages.pp')+' &middot; '+p.nights+' '+nightWord+'</span></div>'
       + '<div class="hp-rate-row"><span>$'+rate.toFixed(0)+t('packages.perNightPerPerson')+'</span>'+rateRowExtra+'</div>'
       + '<p class="hp-hook">'+td(p.description||'')+'</p>'
-      + (upgradeAdded.length ? '<div class="hp-upgrade"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i><span>'+t('packages.adds')+' '+upgradeAddedNames.join(' '+t('packages.and')+' ')+', '+t('packages.mostComplete')+'.</span></div>' : '')
+      + (upgradeAdded.length ? '<div class="hp-upgrade">'+t('packages.adds')+' '+upgradeAddedNames.join(' '+t('packages.and')+' ')+', '+t('packages.mostComplete')+'.</div>' : '')
       + '<div class="hp-section"><div class="hp-section-label">'+t('packages.includes')+'</div><div class="hp-list">'+includesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">'+t('packages.activitiesLabel')+'</div><div class="hp-list hp-list-2col">'+activitiesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">'+t('packages.addOns')+'</div><div class="hp-list">'+addOnsHtml+'</div></div>'
       + (notesLines.length ? '<details class="hp-notes" ontoggle="if(this.open) trackEvent(\'package_expand_details\',{package:\''+p.id+'\',name:\''+safeName+'\'})">'
-          + '<summary>'+t('packages.goodToKnow')+' <i class="ti ti-chevron-down hp-notes-chevron" aria-hidden="true"></i></summary>'
+          + '<summary>'+t('packages.goodToKnow')+'</summary>'
           + '<div class="hp-notes-body">'+notesHtml+'</div>'
         + '</details>' : '')
       + '<div class="hp-actions">'
         + '<button class="hp-enquire-btn" onclick="hpEnquire(\''+p.id+'\',\''+safeName+'\')">'+t('packages.enquireButton')+'</button>'
-        + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire_click\',{package:\''+p.id+'\',channel:\'whatsapp\'})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> '+t('packages.askWhatsapp')+'</a>'
+        + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire_click\',{package:\''+p.id+'\',channel:\'whatsapp\'})">'+t('packages.askWhatsapp')+'</a>'
       + '</div>'
       + '</div>';
   }).join('');
