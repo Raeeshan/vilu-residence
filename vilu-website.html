@@ -685,9 +685,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 @media(max-width:900px){
   html{scroll-padding-top:80px}
   .nav-row-bottom{display:none}
-  .nav-row-top{justify-content:flex-end;padding:0 5vw;height:72px}
-  .nav-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-  .nav-mobile-right{display:flex}
+  .nav-row-top{display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;padding:0 5vw;height:72px}
+  .nav-logo{position:static;left:auto;top:auto;transform:none;grid-column:2;justify-self:center}
+  .nav-mobile-right{display:flex;grid-column:3;justify-self:end}
   .nav-clock-compact{display:flex}
   .nav-hamburger{display:flex}
   .hero-stats{display:none}
@@ -701,7 +701,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      needed, so no per-photo object-position tuning is necessary anymore
      (plain center, the default, already looks right). */
   #home{height:500px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .hero-scroll{display:none}
+  .hero-scroll{bottom:20px}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1fr 1fr;gap:40px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
@@ -1897,6 +1897,9 @@ async function setLanguage(lang, opts){
   applyTranslations();
   // Re-render sections whose content is generated from JS templates so they pick up the new language.
   if (typeof _lastPkgs !== 'undefined' && _lastPkgs && typeof renderHolidayPackages === 'function') renderHolidayPackages(_lastPkgs, _lastNotesData);
+  if (typeof _lastPkgs !== 'undefined' && _lastPkgs && typeof renderExperiences === 'function') renderExperiences(_lastPkgs, _lastNotesData);
+  if (typeof renderHpTerms === 'function') renderHpTerms();
+  if (typeof renderFAQ === 'function' && document.getElementById('faq-list')) renderFAQ();
   if (typeof renderGettingHere === 'function' && document.getElementById('gh-grid') && document.getElementById('gh-grid').innerHTML) renderGettingHere();
   if (typeof bfpRenderRooms === 'function' && typeof _lastBfpArgs !== 'undefined' && _lastBfpArgs && document.getElementById('booking-full-page') && document.getElementById('booking-full-page').classList.contains('open')) bfpRenderRooms(_lastBfpArgs.rooms, _lastBfpArgs.ci, _lastBfpArgs.co, _lastBfpArgs.numRooms);
   if (typeof calRefreshIfOpen === 'function') calRefreshIfOpen();
@@ -3913,20 +3916,26 @@ function hpEnquire(id, name){
   enquireAboutPackage(name);
 }
 
+function renderHpTerms(){
+  if(!_lastTerms.length) return;
+  var grid = document.getElementById('hp-grid');
+  if(!grid) return;
+  var el = document.getElementById('hp-terms');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'hp-terms';
+    el.style.cssText = 'grid-column:1/-1;font-size:var(--font-size-xs);color:var(--muted);text-align:center;margin-top:8px;line-height:1.7';
+    grid.parentNode.appendChild(el);
+  }
+  el.textContent = _lastTerms.map(function(term){ return td(term); }).join(' · ');
+}
+
 async function loadHpTerms(){
   try {
     var snap = await fsDb.collection('website_content').doc('packages_terms').get();
-    var terms = (snap.exists && snap.data().terms) || [];
-    _lastTerms = terms;
+    _lastTerms = (snap.exists && snap.data().terms) || [];
     if (typeof renderFAQ === 'function') renderFAQ();
-    if(!terms.length) return;
-    var grid = document.getElementById('hp-grid');
-    if(!grid || document.getElementById('hp-terms')) return;
-    var el = document.createElement('div');
-    el.id = 'hp-terms';
-    el.style.cssText = 'grid-column:1/-1;font-size:var(--font-size-xs);color:var(--muted);text-align:center;margin-top:8px;line-height:1.7';
-    el.textContent = terms.join(' · ');
-    grid.parentNode.appendChild(el);
+    renderHpTerms();
   } catch(e) { console.error('loadHpTerms failed', e); }
 }
 
