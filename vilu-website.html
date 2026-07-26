@@ -2069,15 +2069,6 @@ async function loadRoomsFromSupabase() {
   }
 }
 
-// Load website content from Supabase
-async function loadWebsiteFromSupabase() {
-  const data = await supaGet('website_content', 'key=eq.main&select=value');
-  if(data && data[0] && data[0].value) {
-    return data[0].value;
-  }
-  return null;
-}
-
 // Submit booking request to Supabase
 // Vilu Residence rooms only — this is the single choke point that writes a
 // reservation for the website, so the VR-only guard lives here as well as
@@ -2138,13 +2129,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load availability (reservations + blocks) — powers BOOKED_RANGES / isRoomAvailable / the calendar widget
   await loadBookedRangesFromSupabase();
 
-  // Load website content
-  const webContent = await loadWebsiteFromSupabase();
-  if(webContent) {
-    localStorage.setItem('vilu_website', JSON.stringify(webContent));
-    if(typeof applyWebsiteData === 'function') applyWebsiteData();
-  }
-  
+  // Purge any stale client-side cache from the old pre-Firestore CMS (the
+  // website_content/main doc it read from no longer exists) — a leftover
+  // cached copy on a device would silently overwrite the real, correctly
+  // translated hero title/content with years-old text on every load.
+  try { localStorage.removeItem('vilu_website'); } catch(e) {}
+
   // Update room cards, price displays, and booking bar dropdown with live rates
   refreshRoomCards();
 
@@ -3983,142 +3973,6 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){closeBookingPopup();closeBookingPage();closeGuestDetails();}
 });
 
-// ══════════════════════════════════════════════════════
-// WEBSITE CONTENT LOADER — reads from PMS vilu_website key
-// ══════════════════════════════════════════════════════
-function loadWebsiteData() {
-  try { return JSON.parse(localStorage.getItem('vilu_website') || '{}'); } catch(e) { return {}; }
-}
-
-function applyWebsiteData() {
-  var d = loadWebsiteData();
-
-  // Hero
-  if(d.hero) {
-    var h = d.hero;
-    if(h.badge) { var el=document.querySelector('.hero-badge'); if(el) el.textContent=h.badge; }
-    if(h.title) { var el=document.querySelector('.hero-title'); if(el) el.innerHTML=h.title; }
-    if(h.subtitle) { var el=document.querySelector('.hero-subtitle'); if(el) el.textContent=h.subtitle; }
-    if(h.btn1) { var el=document.querySelector('.btn-primary'); if(el) el.innerHTML='<i class="ti ti-umbrella" aria-hidden="true"></i> '+h.btn1; }
-    if(h.btn2) { var el=document.querySelectorAll('.btn-outline')[0]; if(el) el.textContent=h.btn2; }
-    var stats = document.querySelectorAll('.stat');
-    if(stats[0]&&h.stat1num) { stats[0].querySelector('.stat-num').textContent=h.stat1num; stats[0].querySelector('.stat-label').textContent=h.stat1lbl||''; }
-    if(stats[1]&&h.stat2num) { stats[1].querySelector('.stat-num').textContent=h.stat2num; stats[1].querySelector('.stat-label').textContent=h.stat2lbl||''; }
-    if(stats[2]&&h.stat3num) { stats[2].querySelector('.stat-num').textContent=h.stat3num; stats[2].querySelector('.stat-label').textContent=h.stat3lbl||''; }
-  }
-
-  // About
-  if(d.about) {
-    var a = d.about;
-    if(a.title) { var el=document.querySelector('#about .section-title'); if(el) el.innerHTML=a.title; }
-    if(a.desc) { var el=document.querySelector('.about-desc'); if(el) el.textContent=a.desc; }
-    if(a.features && a.features.length) {
-      var feats = document.querySelectorAll('.about-feature');
-      a.features.forEach(function(f,i) {
-        if(feats[i]) {
-          var icon=feats[i].querySelector('.af-icon'); if(icon) icon.textContent=f.icon||'';
-          var title=feats[i].querySelector('.af-title'); if(title) title.textContent=f.title||'';
-          var desc=feats[i].querySelector('.af-text'); if(desc) desc.textContent=f.desc||'';
-        }
-      });
-    }
-  }
-
-  // Gallery
-  if(d.gallery && d.gallery.length) {
-    var gItems = document.querySelectorAll('.g-item .g-bg');
-    d.gallery.forEach(function(photo, i) {
-      if(photo && gItems[i]) {
-        gItems[i].style.backgroundImage = 'url('+photo+')';
-        gItems[i].style.backgroundSize = 'cover';
-        gItems[i].style.backgroundPosition = 'center';
-        // Remove the gradient background
-        gItems[i].style.background = 'url('+photo+') center/cover';
-      }
-    });
-  }
-
-  // Contact
-  if(d.contact) {
-    var ct = d.contact;
-    if(ct.name) { document.querySelectorAll('.nav-logo-name,.footer-brand-name,.bfp-logo-text').forEach(function(el){ if(el) el.textContent=ct.name; }); }
-    if(ct.tagline) { document.querySelectorAll('.nav-logo-sub,.footer-brand-sub').forEach(function(el){ if(el) el.textContent=ct.tagline; }); }
-    if(ct.address) { var el=document.querySelector('.cd-value'); if(el) el.innerHTML=ct.address.replace(/,\s*/g,'<br>'); }
-    if(ct.phone) {
-      var el=document.querySelectorAll('.cd-value a[href^="tel"]')[0];
-      if(el){el.textContent=ct.phone; el.href='tel:'+ct.phone.replace(/[^+\d]/g,'');}
-    }
-    if(ct.email) {
-      var el=document.querySelectorAll('.cd-value a[href^="mailto"]')[0];
-      if(el){el.textContent=ct.email; el.href='mailto:'+ct.email;}
-    }
-    if(ct.desc) { var el=document.querySelector('.footer-desc'); if(el) el.textContent=ct.desc; }
-  }
-
-  // Packages — render in booking section
-  if(d.packages && d.packages.length) {
-    renderWebsitePackages(d.packages);
-  }
-}
-
-function renderWebsitePackages(pkgs) {
-  // Find or create packages section before #booking
-  var existing = document.getElementById('packages-section');
-  if(!existing) {
-    existing = document.createElement('section');
-    existing.id = 'packages-section';
-    existing.style.cssText = 'background:var(--navy2);padding:80px 0';
-    var bookingSec = document.getElementById('booking');
-    if(bookingSec) bookingSec.parentNode.insertBefore(existing, bookingSec);
-  }
-  existing.innerHTML = '<div class="section-inner">'
-    +'<div class="reveal"><div class="section-tag">Packages</div>'
-    +'<h2 class="section-title" style="color:var(--white)">Our <em style="font-style:italic;color:var(--gold-light)">packages</em></h2></div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px">'
-    +pkgs.map(function(p){
-      return '<div class="reveal" style="background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px">'
-        +'<div style="font-size:var(--font-size-display);margin-bottom:12px">'+(p.emoji||'<i class="ti ti-gift" aria-hidden="true"></i>')+'</div>'
-        +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--white);margin-bottom:6px">'+p.name+'</div>'
-        +'<div style="font-size:var(--font-size-base);color:rgba(255,255,255,.5);margin-bottom:12px">$'+p.price+' per person · '+p.nights+' night'+(p.nights>1?'s':'')+'</div>'
-        +'<div style="font-size:var(--font-size-base);color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:16px">'+p.desc+'</div>'
-        +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">'
-        +(p.includes||[]).map(function(inc){ return '<div style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm);color:rgba(255,255,255,.6)"><div style="width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0"></div>'+inc+'</div>'; }).join('')
-        +'</div>'
-        +'<button onclick="openBookingPopup()" style="width:100%;background:var(--gold);color:var(--navy);border:none;padding:12px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:var(--font-size-base);font-weight:600;letter-spacing:.08em;cursor:pointer">Book This Package</button>'
-        +'</div>';
-    }).join('')
-    +'</div></div>';
-
-  // Add packages link to nav if not present
-  var navLinks = document.querySelector('.nav-links');
-  if(navLinks && !document.querySelector('.nav-packages-link')) {
-    var li = document.createElement('li');
-    var a = document.createElement('a');
-    a.href='#packages-section'; a.textContent='Packages'; a.className='nav-packages-link';
-    li.appendChild(a); 
-    // Insert before Contact
-    var contactLi = navLinks.querySelector('li:last-child');
-    if(contactLi) navLinks.insertBefore(li, contactLi);
-  }
-
-  // Re-observe new reveal elements
-  document.querySelectorAll('#packages-section .reveal').forEach(function(el){ observer.observe(el); });
-}
-
-// Apply on load and on PMS updates
-document.addEventListener('DOMContentLoaded', function(){
-  applyWebsiteData();
-});
-
-// Listen for PMS website updates
-try {
-  var _wbc = new BroadcastChannel('vilu_pms');
-  _wbc.onmessage = function(e) {
-    if(e.data && e.data.type === 'WEBSITE_UPDATE') {
-      applyWebsiteData();
-    }
-  };
-} catch(e) {}
 </script>
 </body>
 </html>
