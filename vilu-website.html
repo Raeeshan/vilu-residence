@@ -2447,7 +2447,7 @@ function refreshRoomCards() {
       imgEls[i].setAttribute('data-bg-url', withPhoto.photo);
       observeLazyBg(imgEls[i]);
       var nameEl = imgEls[i].closest('.room-card') && imgEls[i].closest('.room-card').querySelector('.room-card-name');
-      if (nameEl) { imgEls[i].setAttribute('role', 'img'); imgEls[i].setAttribute('aria-label', nameEl.textContent + ' photo'); }
+      if (nameEl) { imgEls[i].setAttribute('role', 'img'); imgEls[i].setAttribute('aria-label', nameEl.textContent); }
     }
     // Badge shows the real view value read live from room_details (via
     // ROOMS[].view, merged from Firestore in fetchRoomDetailsFromFirestore) —
@@ -3291,7 +3291,7 @@ function bfpRenderRooms(rooms, ci, co, numRooms){
       ? '<button class="bfp-book-btn bfp-select-btn" data-rid="'+r.id+'">'+t('bfp.select')+'</button>'
       : '<button class="bfp-book-btn">'+t('bfp.book')+'</button>';
     var galleryHtml = '<div class="bfp-room-img">'
-      + '<div class="bfp-room-img-bg" role="img" aria-label="'+td(r.name)+' photo" style="background:'+mainBg+';height:100%"></div>'
+      + '<div class="bfp-room-img-bg" role="img" aria-label="'+td(r.name)+'" style="background:'+mainBg+';height:100%"></div>'
       + (photos[0] && photos[0].label ? '<div class="bfp-gallery-caption">'+td(photos[0].label)+'</div>' : '')
       + (r.view ? '<div class="bfp-view-badge">'+td(r.view)+'</div>' : '')
       + (photos.length>1 ? '<div class="bfp-gallery-thumbs">'+photos.map(function(p,i){
