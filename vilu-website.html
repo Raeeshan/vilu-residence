@@ -1346,10 +1346,10 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <p data-i18n="guideSaa.p3">Because the whale shark and manta sites here sit close to the surface and close to shore, they're accessible to snorkelers, not just certified divers — one of the things that makes South Ari a practical base for a guesthouse stay rather than only a liveaboard destination. Beyond the marine life, the atoll's inhabited islands each have their own small-town rhythm: fishing, guesthouses, mosques, and tea shops rather than resort infrastructure.</p>
         <h4 data-i18n="guideSaa.h4">Nearby islands</h4>
         <ul class="guide-list">
-          <li data-i18n="guideSaa.island1"><b>Dhigurah</b> — "Long Island" in Dhivehi, about 4km long with the atoll's longest beach, plus a sheltered lagoon on its western side known for manta ray sightings.</li>
-          <li data-i18n="guideSaa.island2"><b>Dhangethi</b> — a small house reef and a compact bikini beach, popular with the diving crowd.</li>
-          <li data-i18n="guideSaa.island3"><b>Omadhoo</b> — a quieter fishing island with a clean bikini beach and a reef best visited at high tide.</li>
-          <li data-i18n="guideSaa.island4"><b>Mahibadhoo</b> — the atoll's administrative capital, home to the atoll office.</li>
+          <li data-i18n-html="guideSaa.island1"><b>Dhigurah</b> — "Long Island" in Dhivehi, about 4km long with the atoll's longest beach, plus a sheltered lagoon on its western side known for manta ray sightings.</li>
+          <li data-i18n-html="guideSaa.island2"><b>Dhangethi</b> — a small house reef and a compact bikini beach, popular with the diving crowd.</li>
+          <li data-i18n-html="guideSaa.island3"><b>Omadhoo</b> — a quieter fishing island with a clean bikini beach and a reef best visited at high tide.</li>
+          <li data-i18n-html="guideSaa.island4"><b>Mahibadhoo</b> — the atoll's administrative capital, home to the atoll office.</li>
         </ul>
         <h4 data-i18n="guideSaa.h5">Getting here</h4>
         <p data-i18n="guideSaa.p5">Reaching South Ari Atoll means one connection from Velana International Airport in Malé: either a direct speedboat (around 1h45m) or a 20-minute domestic flight into Maamigili.</p>
@@ -1483,7 +1483,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       </div>
       <div class="footer-col"><h4 data-i18n="footer.navigate">Navigate</h4><ul><li><a href="#home" data-i18n="nav.home">Home</a></li><li><a href="#rooms" data-i18n="nav.rooms">Rooms</a></li><li><a href="#holiday-packages" data-i18n="nav.packages">Packages</a></li><li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li><li><a href="#about" data-i18n="about.tag">About Us</a></li><li><a href="#travel-info" data-i18n="nav.travelInfo">Travel Info</a></li><li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">FAQ</a></li><li><a href="#guides" data-i18n="nav.guides">Guides &amp; Blog</a></li><li><a href="#contact" data-i18n="nav.contact">Contact</a></li></ul></div>
       <div class="footer-col"><h4 data-i18n="footer.roomsHeading">Rooms</h4><ul><li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">Double Room</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">Deluxe Family Room</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">Deluxe Family Room with Open Deck</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li></ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.info">Info</h4><ul><li><a href="#booking" onclick="openBookingPage()" data-i18n="footer.bookDirect">Book Direct</a></li><li><a href="#contact" data-i18n="footer.enquiries">Enquiries</a></li><li><a href="#contact" data-i18n="footer.groups">Groups</a></li></ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.info">Info</h4><ul><li><a href="#booking" onclick="openBookingPage()" data-i18n="footer.bookDirect">Book Direct</a></li><li><a href="#contact" data-i18n="footer.enquiries">Enquiries</a></li><li><a href="#contact" data-i18n="footer.groups">Groups</a></li><li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">South Ari Atoll Guide</a></li><li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Whale Shark Snorkeling</a></li><li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Manta Ray Snorkeling</a></li><li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Holiday Packages</a></li></ul></div>
     </div>
     <div class="footer-bottom">
       <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">All rights reserved.</span></div>
@@ -2139,6 +2139,10 @@ function applyTranslations(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     var val = t(el.getAttribute('data-i18n'));
     if (val !== undefined) el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+    var val = t(el.getAttribute('data-i18n-html'));
+    if (val !== undefined) el.innerHTML = val;
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
     var val = t(el.getAttribute('data-i18n-placeholder'));
