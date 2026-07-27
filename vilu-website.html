@@ -2178,7 +2178,7 @@ function applyTranslations(){
 var _loadedLangs = {en: true};
 async function loadLanguageData(lang){
   if (_loadedLangs[lang]) return;
-  var res = await fetch('i18n/' + lang + '.json');
+  var res = await fetch('/i18n/' + lang + '.json');
   if (!res.ok) throw new Error('Failed to load language: ' + lang);
   var data = await res.json();
   I18N[lang] = data.static;
