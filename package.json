@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "build:i18n": "node build-i18n-pages.js"
+  },
+  "devDependencies": {
+    "cheerio": "^1.2.0"
+  }
+}

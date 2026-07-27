@@ -17,6 +17,7 @@
   "hosting": {
     "site": "viluresidence",
     "public": ".",
+    "predeploy": "node build-i18n-pages.js",
     "ignore": [
       "firebase.json",
       ".firebaserc",
@@ -24,17 +25,46 @@
       "**/.*/**",
       "**/node_modules/**",
       ".claude/**",
-      ".git/**"
+      ".git/**",
+      "build-i18n-pages.js",
+      "package.json",
+      "package-lock.json"
     ],
     "rewrites": [
       {
         "source": "/",
         "destination": "/vilu-website.html"
-      }
+      },
+      { "source": "/zh", "destination": "/zh/index.html" },
+      { "source": "/zh/", "destination": "/zh/index.html" },
+      { "source": "/ru", "destination": "/ru/index.html" },
+      { "source": "/ru/", "destination": "/ru/index.html" },
+      { "source": "/de", "destination": "/de/index.html" },
+      { "source": "/de/", "destination": "/de/index.html" },
+      { "source": "/it", "destination": "/it/index.html" },
+      { "source": "/it/", "destination": "/it/index.html" },
+      { "source": "/fr", "destination": "/fr/index.html" },
+      { "source": "/fr/", "destination": "/fr/index.html" },
+      { "source": "/ar", "destination": "/ar/index.html" },
+      { "source": "/ar/", "destination": "/ar/index.html" },
+      { "source": "/ja", "destination": "/ja/index.html" },
+      { "source": "/ja/", "destination": "/ja/index.html" },
+      { "source": "/ko", "destination": "/ko/index.html" },
+      { "source": "/ko/", "destination": "/ko/index.html" },
+      { "source": "/sk", "destination": "/sk/index.html" },
+      { "source": "/sk/", "destination": "/sk/index.html" },
+      { "source": "/cs", "destination": "/cs/index.html" },
+      { "source": "/cs/", "destination": "/cs/index.html" }
     ],
     "headers": [
       {
         "source": "/{vilu-website,vilu-unified,vilu-agency-portal}.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      },
+      {
+        "source": "/{zh,ru,de,it,fr,ar,ja,ko,sk,cs}/index.html",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" }
         ]
