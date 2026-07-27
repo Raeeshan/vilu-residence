@@ -15,6 +15,14 @@
 <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1EPZ71Q331');
+</script>
 <link rel="canonical" href="https://viluresidence.web.app/" id="canonical-link">
 <link rel="alternate" hreflang="en" href="https://viluresidence.web.app/?lang=en">
 <link rel="alternate" hreflang="zh" href="https://viluresidence.web.app/?lang=zh">
@@ -1282,7 +1290,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <h3 data-i18n="contact.contactUs">Contact Vilu Residence</h3>
         <div class="contact-details">
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.address">Address</div><div class="cd-value">Maamigili, South Ari Atoll, 00100<br>Republic of Maldives</div></div></div>
-          <div class="cd-item"><div class="cd-icon"><i class="ti ti-phone" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.phone">Phone / WhatsApp</div><div class="cd-value"><a href="tel:+9609903339">+960 9903339</a></div></div></div>
+          <div class="cd-item"><div class="cd-icon"><i class="ti ti-phone" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.phone">Phone / WhatsApp</div><div class="cd-value"><a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'contact_details'})">+960 9903339</a></div></div></div>
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-mail" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.email">Email</div><div class="cd-value"><a href="mailto:Viluresidence@gmail.com">Viluresidence@gmail.com</a></div></div></div>
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-clock" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.responseTime">Response Time</div><div class="cd-value" data-i18n="contact.within24h">Within 24 hours</div></div></div>
         </div>
@@ -1529,9 +1537,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div style="margin-top:40px;padding:24px;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;text-align:center">
       <p style="font-size:var(--font-size-md);color:var(--muted);margin-bottom:12px" data-i18n="bfp.toComplete">To complete your booking, please contact us directly:</p>
       <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
-        <a href="tel:+9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
-        <a href="mailto:Viluresidence@gmail.com" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
-        <a href="https://wa.me/9609903339" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</a>
+        <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+        <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+        <a href="https://wa.me/9609903339" onclick="trackEvent('whatsapp_click',{location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</a>
       </div>
     </div>
   </div>
@@ -3158,7 +3166,7 @@ function tcCheck(kind) {
   var isToday = dateEl.value === today;
   var isPastDate = dateEl.value < today;
 
-  var whatsappLink = ' <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer">'+t('timing.contactUs')+'</a>';
+  var whatsappLink = ' <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'whatsapp_click\',{location:\'timing_tool\'})">'+t('timing.contactUs')+'</a>';
   var cls, statusText;
   if (isPastDate) {
     cls = 'tight';
@@ -3936,8 +3944,8 @@ async function confirmGuestBooking(){
       '&#10003; '+t('bfp.confirmedLabel')+' '+okList+'<br>'+
       '&#10007; '+t('bfp.couldNotBookLabel')+' '+failList+'<br><br>'+
       tf('bfp.failedHelpText', {
-        email: '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)">'+t('bfp.emailUsLink')+'</a>',
-        whatsapp: '<a href="https://wa.me/9609903339" style="color:var(--teal)">'+t('bfp.whatsappLink')+'</a>'
+        email: '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)" onclick="trackEvent(\'email_click\',{location:\'booking_partial_fail\'})">'+t('bfp.emailUsLink')+'</a>',
+        whatsapp: '<a href="https://wa.me/9609903339" style="color:var(--teal)" onclick="trackEvent(\'whatsapp_click\',{location:\'booking_partial_fail\'})">'+t('bfp.whatsappLink')+'</a>'
       })
     );
     // Only the failed rooms remain pending — a retry (if the guest goes back
@@ -3948,8 +3956,8 @@ async function confirmGuestBooking(){
   } else {
     var allFailList = failed.map(function(f){ return td(f.roomName)+' — '+f.reason; }).join('; ');
     showGuestError(tf('bfp.allFailedPrefix', {list: allFailList})+' '
-      + '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)">Viluresidence@gmail.com</a> '+t('booking.or')+' '
-      + '<a href="https://wa.me/9609903339" style="color:var(--teal)">'+t('bfp.whatsappLink')+'</a>.');
+      + '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)" onclick="trackEvent(\'email_click\',{location:\'booking_full_fail\'})">Viluresidence@gmail.com</a> '+t('booking.or')+' '
+      + '<a href="https://wa.me/9609903339" style="color:var(--teal)" onclick="trackEvent(\'whatsapp_click\',{location:\'booking_full_fail\'})">'+t('bfp.whatsappLink')+'</a>.');
   }
 }
 
@@ -3966,6 +3974,7 @@ function sendContactForm(){
   if(!name||!email||!msg){alert(t('alerts.fillAllFields'));return;}
   var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+(wantsFlight?'\nDomestic Flight transfer requested: Yes ($110/person)':'')+'\n\nMessage:\n'+msg;
   var body = encodeURIComponent(bodyText);
+  trackEvent('contact_form_submit', {package: pkg||null, rooms: rooms||null, domestic_flight: !!wantsFlight});
   window.location.href = 'mailto:Viluresidence@gmail.com?subject=Enquiry%20from%20'+encodeURIComponent(name)+'&body='+body;
 }
 
@@ -3986,13 +3995,16 @@ function enquireAboutPackage(pkgName){
 }
 
 // ══════════════════════════════════════════════════════
-// ANALYTICS STUB — no provider wired up yet. Fires a CustomEvent (so a
-// future GA4/Meta Pixel snippet can just add one listener) and logs to
-// console. Swap the body of this function when a real provider is added.
+// ANALYTICS — sends real events to GA4 via gtag(), and keeps firing a
+// CustomEvent so any future on-page listener (Meta Pixel, etc.) can hook in
+// without touching this function again.
 // ══════════════════════════════════════════════════════
 function trackEvent(name, data){
   try {
     document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
+    if (typeof gtag === 'function') {
+      gtag('event', name, data||{});
+    }
     console.log('[track]', name, data||{});
   } catch(e) {}
 }
