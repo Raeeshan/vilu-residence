@@ -300,13 +300,14 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 
 /* ── ROOMS ── */
 #rooms{color:var(--text);padding:100px 0;position:relative}
-.rooms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2px;margin-top:60px}
-.room-card{background:var(--card);border:1px solid var(--card-border);overflow:hidden;cursor:pointer;border-radius:8px;box-shadow:0 4px 24px rgba(0,4,10,.3);transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s cubic-bezier(.16,1,.3,1);group:1}
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:28px;margin-top:60px}
+.room-card{background:var(--card);border:1px solid var(--card-border);overflow:hidden;cursor:pointer;border-radius:10px;box-shadow:0 4px 24px rgba(0,4,10,.3);transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s cubic-bezier(.16,1,.3,1);group:1}
 .room-card:hover{transform:translateY(-8px);box-shadow:0 20px 46px rgba(14,116,144,.22)}
 /* Source room photos are portrait (1086x1448) shot with a ceiling fan/fixture near the top of frame;
-   a landscape crop centered on the photo used to cut into the fixture instead of the bed. Square
-   aspect + bottom-anchored focal point keeps the bed in view. See .bfp-room-img for the same fix. */
-.room-card-img{aspect-ratio:1/1;overflow:hidden;position:relative}
+   a landscape crop centered on the photo used to cut into the fixture instead of the bed. A taller
+   (4/5) box closer to the source's own ratio plus a bottom-anchored focal point shows more of the
+   photo than a square crop while still keeping the bed in view. See .bfp-room-img for the same fix. */
+.room-card-img{aspect-ratio:4/5;overflow:hidden;position:relative}
 .room-card-img-bg{width:100%;height:100%;background-size:cover;background-position:center bottom;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .room-card:hover .room-card-img-bg{transform:scale(1.08)}
 .room-card-badge{position:absolute;top:16px;left:16px;background:rgba(10,30,38,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:var(--white);font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px}
@@ -323,26 +324,27 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
 
 /* ── ABOUT ── */
-#about{padding:100px 0;overflow:hidden;position:relative}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:60px}
+/* Cinematic treatment: larger confident display type + wider negative space; section padding (100px) unchanged for rhythm consistency, spacing added via grid gap/margins instead */
+#about{padding:100px 0;overflow:hidden;position:relative}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;margin-top:64px}
 .about-visual{position:relative}
-.about-img-frame{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,var(--teal) 0%,var(--ocean) 100%) center/cover;border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 30px 70px rgba(0,10,20,.45)}
+.about-img-frame{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,var(--teal) 0%,var(--ocean) 100%) center/cover;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 30px 70px rgba(0,10,20,.45)}
 .about-img-frame.has-photo{background-image:url('https://firebasestorage.googleapis.com/v0/b/vilu-residence.appspot.com/o/site-assets%2Fabout-courtyard.jpg?alt=media')}
 .about-img-frame::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.14) 0%,transparent 60%)}
 .about-logo-big{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.3);object-fit:cover}
 .about-float-card{position:absolute;bottom:-24px;right:-24px;background:linear-gradient(135deg,var(--gold),var(--gold-light));padding:24px 28px;border-radius:6px;box-shadow:0 16px 34px rgba(0,10,20,.4)}
 .about-float-num{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:300;color:var(--navy);line-height:1}
 .about-float-text{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);opacity:.7;margin-top:4px}
-.about-text .section-tag{color:var(--gold)}
-.about-text .section-title{color:var(--white)}
-.about-desc{font-size:var(--font-size-lg);color:rgba(255,255,255,.65);line-height:1.8;margin-top:24px;margin-bottom:32px}
-.about-features{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
+.about-text .section-tag{color:var(--gold);margin-bottom:20px}
+.about-text .section-title{color:var(--white);font-size:clamp(38px,6vw,76px)}
+.about-desc{font-size:var(--font-size-lg);color:rgba(255,255,255,.65);line-height:1.85;margin-top:30px;margin-bottom:40px;max-width:46ch}
+.about-features{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:44px}
 .about-feature{display:flex;align-items:flex-start;gap:12px}
 .af-icon{width:32px;height:32px;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:var(--font-size-md);color:var(--gold-light)}
 .af-text{font-size:var(--font-size-base);color:rgba(255,255,255,.6);line-height:1.5}
 .af-title{font-size:var(--font-size-base);font-weight:500;color:var(--white);margin-bottom:2px}
 
 /* ── GALLERY ── */
-#gallery{padding:100px 0;position:relative}.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(3,220px);gap:6px;margin-top:60px}
+#gallery{padding:100px 0;position:relative}.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(3,240px);gap:6px;margin-top:60px}
 .g-item{overflow:hidden;border-radius:6px;position:relative;cursor:pointer}
 .g-item:hover .g-overlay{opacity:1}
 .g-item-1{grid-column:1/6;grid-row:1/4}
@@ -351,13 +353,22 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .g-item-4{grid-column:6/9;grid-row:2/3}
 .g-item-5{grid-column:9/13;grid-row:2/3}
 .g-item-6{grid-column:6/13;grid-row:3/4}
-.g-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1)}
-.g-item:hover .g-bg{transform:scale(1.1)}
+/* Oversized + absolutely positioned so a per-tile scroll parallax (JS sets
+   --py, transform-only/GPU, rAF-throttled, skipped under reduced-motion —
+   same pattern as the hero) never reveals empty edges. */
+.g-bg{position:absolute;top:-8%;left:0;width:100%;height:116%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1);transform:translateY(var(--py,0px)) scale(var(--pz,1))}
+.g-item:hover .g-bg{--pz:1.1}
 .g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,.75) 0%,transparent 60%);opacity:0;transition:opacity .35s;display:flex;align-items:flex-end;padding:20px}
 .g-label{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;color:var(--white)}
 
-/* ── HOLIDAY PACKAGES ── */
+/* ── HOLIDAY PACKAGES ──
+   Sparing cinematic touch only: an ambient glow behind the header, purely
+   via ::before (zero DOM cost). The card grid itself is left untouched —
+   it was deliberately shrunk from 775 to 403 elements for performance and
+   must keep pricing/terms/activities fully visible, not more "cinematic". */
 #holiday-packages{padding:100px 0;position:relative}
+#holiday-packages::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:900px;max-width:140vw;height:420px;background:radial-gradient(ellipse 50% 50% at 50% 0%,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+#holiday-packages .section-inner{position:relative;z-index:1}
 #holiday-packages .section-tag{color:var(--teal)}
 .hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
 .hp-card-center{grid-column:2}
@@ -539,7 +550,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .footer-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .footer-brand-logo img{width:48px;height:48px;border-radius:50%;border:2px solid rgba(34,211,238,.4);object-fit:cover}
 .footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:400;color:var(--white)}
-.footer-brand-sub{font-size:var(--font-size-xs);color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+.footer-brand-sub{font-size:var(--font-size-xs);color:var(--gold);letter-spacing:.2em;text-transform:uppercase}
 .footer-desc{font-size:var(--font-size-base);color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:20px}
 .footer-social{display:flex;gap:12px;margin-top:18px}
 .footer-social a{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.14);border-radius:50%;color:rgba(255,255,255,.6);font-size:17px;transition:all .25s;text-decoration:none}
@@ -618,7 +629,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .gh-tab.on{background:var(--gold);color:var(--navy)}
 .gh-tab:not(.on):hover{color:var(--white)}
 .gh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.gh-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px 22px 22px;display:flex;flex-direction:column;gap:12px}
+.gh-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px 22px 22px;display:flex;flex-direction:column;gap:12px;transition:transform .3s ease,box-shadow .3s ease}
+.gh-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,4,10,.3)}
 .gh-icon{font-size:26px;line-height:1;color:var(--gold-light)}
 .gh-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:var(--font-size-xl);color:var(--white)}
 .gh-price-row{display:flex;align-items:baseline;gap:8px}
@@ -660,7 +672,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .faq-cats{display:flex;gap:8px;flex-wrap:wrap}
 .faq-cat-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
 .faq-cat-btn.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
-.faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .25s}
+.faq-item:hover{border-color:rgba(34,211,238,.35)}
 .faq-question{width:100%;text-align:left;background:none;border:none;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;color:var(--white)}
 .faq-question i{color:var(--teal-light);transition:transform .25s;flex-shrink:0}
 .faq-item.open .faq-question i{transform:rotate(180deg)}
@@ -2683,6 +2696,35 @@ window.addEventListener('scroll', function(){
   window.addEventListener('scroll', function(){
     if(!ticking){ requestAnimationFrame(update); ticking = true; }
   }, {passive:true});
+})();
+
+// ── GALLERY PARALLAX ── same cheap transform-only/rAF-throttled/reduced-
+// motion-aware approach as the hero, scoped to one section: each tile's
+// oversized background shifts a few percent based on its own position in
+// the viewport, only while #gallery is on screen (skipped entirely off-
+// screen so it costs nothing the rest of the time).
+(function(){
+  var section = document.getElementById('gallery');
+  if(!section) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var tiles = null;
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var rect = section.getBoundingClientRect();
+    if(rect.bottom < 0 || rect.top > window.innerHeight) return;
+    if(!tiles) tiles = section.querySelectorAll('.g-bg');
+    tiles.forEach(function(el){
+      var r = el.parentElement.getBoundingClientRect();
+      var center = r.top + r.height / 2;
+      var offset = (center - window.innerHeight / 2) / window.innerHeight;
+      el.style.setProperty('--py', (offset * 24) + 'px');
+    });
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(update); ticking = true; }
+  }, {passive:true});
+  update();
 })();
 
 // ── HERO SLIDE PRELOADING ── slide 1 loads eagerly (it's the LCP element);
