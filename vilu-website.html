@@ -684,6 +684,24 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 [dir="rtl"] .faq-search i{left:auto;right:14px}
 [dir="rtl"] .faq-search input{padding:11px 40px 11px 14px}
 
+/* ── GUIDES & TRAVEL BLOG ── */
+#guides{padding:100px 0;position:relative}
+.guides-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
+.guides-tab{display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:8px;color:var(--muted);padding:14px 24px;cursor:pointer;transition:all .25s}
+.guides-tab i{font-size:18px}
+.guides-tab.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.guides-tab:not(.on):hover{color:var(--white);border-color:rgba(255,255,255,.3)}
+@media(max-width:600px){.guides-tab{flex:1 1 auto;justify-content:center;padding:12px 16px}}
+.guide-article{padding-bottom:36px;margin-bottom:36px;border-bottom:1px solid rgba(255,255,255,.08)}
+.guide-article:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.guide-article h3{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--white);margin-bottom:14px}
+.guide-article h4{font-size:var(--font-size-lg);font-weight:600;color:var(--gold-light);margin:22px 0 8px}
+.guide-article p{font-size:var(--font-size-base);color:var(--muted);line-height:1.75;max-width:70ch}
+.guide-article p:first-of-type{margin-top:0}
+.guide-article a{color:var(--gold-light)}
+.guide-list{margin:10px 0 0;padding-left:20px;max-width:70ch}
+.guide-list li{font-size:var(--font-size-base);color:var(--muted);line-height:1.75;margin-bottom:6px}
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUpCenter{from{opacity:0;transform:translate(-50%,24px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -1302,6 +1320,150 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
 </section>
 
+<!-- ══ GUIDES & TRAVEL BLOG ══ -->
+<section id="guides">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag" data-i18n="guides.tag">Travel Resources</div>
+      <h2 class="section-title"><span data-i18n="guides.titlePrefix">Guides &amp;</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="guides.titleEmphasis">travel tips</em></h2>
+      <p class="gh-sub" data-i18n="guides.intro">Everything we know about South Ari Atoll, Maamigili, and planning a Maldives trip — researched to help you plan, not just to fill a page.</p>
+    </div>
+    <div class="guides-tabs reveal">
+      <button class="guides-tab on" id="guides-tab-destinations" onclick="guidesSwitchTab('destinations')"><i class="ti ti-map-2" aria-hidden="true"></i> <span data-i18n="guides.tabDestinations">Destination Guides</span></button>
+      <button class="guides-tab" id="guides-tab-compare" onclick="guidesSwitchTab('compare')"><i class="ti ti-arrows-diff" aria-hidden="true"></i> <span data-i18n="guides.tabCompare">Comparisons</span></button>
+      <button class="guides-tab" id="guides-tab-blog" onclick="guidesSwitchTab('blog')"><i class="ti ti-notebook" aria-hidden="true"></i> <span data-i18n="guides.tabBlog">Travel Blog</span></button>
+    </div>
+
+    <div class="guides-panel" id="guides-panel-destinations">
+      <article class="guide-article reveal" id="guide-south-ari-atoll">
+        <h3 data-i18n="guideSaa.title">South Ari Atoll Travel Guide</h3>
+        <p data-i18n="guideSaa.intro">South Ari Atoll (locally Alif Dhaalu Atoll) sits in the central Maldives, a ring of reefs and sandbanks built around a string of inhabited local islands and resorts. It's one of 26 atolls that make up the country, and it's best known for one thing above all: whale sharks.</p>
+        <h4 data-i18n="guideSaa.h1">Whale sharks, year-round</h4>
+        <p data-i18n="guideSaa.p1">The South Ari Marine Protected Area (SAMPA), established in 2009, runs along a 14-kilometre reef shelf on the atoll's southern rim, from Maamigili in the west to Dhigurah in the east. Research published by the Maldives Whale Shark Research Programme — which has photo-identified more than 500 individual sharks since 2006 — has documented what's believed to be the only confirmed year-round whale shark aggregation anywhere in the world. Most of the sharks seen here are juvenile males, so sightings aren't tied to a narrow migration window the way they are in many other whale shark destinations.</p>
+        <h4 data-i18n="guideSaa.h2">Manta rays</h4>
+        <p data-i18n="guideSaa.p2">Manta rays are also a regular sight in South Ari, with sightings possible throughout the year at several cleaning stations around the atoll — some sites are more active earlier in the year, others later, so exact timing is best confirmed locally when you book.</p>
+        <h4 data-i18n="guideSaa.h3">Snorkeling and local island life</h4>
+        <p data-i18n="guideSaa.p3">Because the whale shark and manta sites here sit close to the surface and close to shore, they're accessible to snorkelers, not just certified divers — one of the things that makes South Ari a practical base for a guesthouse stay rather than only a liveaboard destination. Beyond the marine life, the atoll's inhabited islands each have their own small-town rhythm: fishing, guesthouses, mosques, and tea shops rather than resort infrastructure.</p>
+        <h4 data-i18n="guideSaa.h4">Nearby islands</h4>
+        <ul class="guide-list">
+          <li data-i18n="guideSaa.island1"><b>Dhigurah</b> — "Long Island" in Dhivehi, about 4km long with the atoll's longest beach, plus a sheltered lagoon on its western side known for manta ray sightings.</li>
+          <li data-i18n="guideSaa.island2"><b>Dhangethi</b> — a small house reef and a compact bikini beach, popular with the diving crowd.</li>
+          <li data-i18n="guideSaa.island3"><b>Omadhoo</b> — a quieter fishing island with a clean bikini beach and a reef best visited at high tide.</li>
+          <li data-i18n="guideSaa.island4"><b>Mahibadhoo</b> — the atoll's administrative capital, home to the atoll office.</li>
+        </ul>
+        <h4 data-i18n="guideSaa.h5">Getting here</h4>
+        <p data-i18n="guideSaa.p5">Reaching South Ari Atoll means one connection from Velana International Airport in Malé: either a direct speedboat (around 1h45m) or a 20-minute domestic flight into Maamigili.</p>
+        <p class="exp-links"><a href="#travel-info"><span data-i18n="guides.linkGettingHere">See current prices and schedules on our Getting Here page</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="guide-maamigili">
+        <h3 data-i18n="guideMaa.title">Maamigili Travel Guide</h3>
+        <p data-i18n="guideMaa.intro">Maamigili is the island Vilu Residence calls home — a local island on the southern rim of South Ari Atoll, and the largest and most populous island in the atoll, with a population of more than 2,300. Locally it's sometimes called "Whale Shark Island," for reasons that will be obvious a few paragraphs down.</p>
+        <h4 data-i18n="guideMaa.h1">Getting around</h4>
+        <p data-i18n="guideMaa.p1">Maamigili is also the only island in South Ari Atoll with an airport — Villa International Airport, which opened as a domestic airport in October 2011 and was upgraded to international standards in 2013. It's a short domestic hop from Malé (about 20 minutes), or reachable by direct speedboat (around 1h45m).</p>
+        <h4 data-i18n="guideMaa.h2">Why stay here</h4>
+        <p data-i18n="guideMaa.p2">Staying on Maamigili rather than a resort island means direct access to the whale shark and manta ray sites of the South Ari Marine Protected Area, without the cost of a private-island resort. It also means everyday local-island life: small guesthouses, a real village center, and genuine day-to-day contact with the community, rather than a self-contained resort bubble. The island has local cafés and small restaurants serving Maldivian and international dishes.</p>
+        <h4 data-i18n="guideMaa.h3">What there is to do</h4>
+        <p data-i18n="guideMaa.p3">Most visitors come for the water — whale shark snorkeling, manta point visits, reef snorkeling, and sandbank or sunset trips are all run as day excursions from the island. Away from the water, Maamigili is small enough to walk in an afternoon, with a bikini beach for swimwear (as on all local islands, swimwear elsewhere is discouraged out of respect for local custom) and the everyday texture of a working Maldivian island — a working harbour, small shops, and a slower pace than any resort brochure describes.</p>
+        <p class="exp-links"><a href="#experiences"><span data-i18n="guides.linkExperiences">See exactly what each excursion involves</span></a></p>
+      </article>
+    </div>
+
+    <div class="guides-panel" id="guides-panel-compare" style="display:none">
+      <article class="guide-article reveal" id="compare-snorkeling-islands">
+        <h3 data-i18n="cmpSnorkel.title">Best Local Islands in the Maldives for Snorkeling</h3>
+        <p data-i18n="cmpSnorkel.intro">Not every local island offers the same in-water experience, and it's worth knowing what to look for rather than picking on name recognition alone. In general, the local islands with the best snorkeling share a few things in common: a nearby marine protected area or reserve, a house reef or lagoon that's swimmable without a boat, and — ideally — resident, not just seasonal, marine life.</p>
+        <h4 data-i18n="cmpSnorkel.h1">What sets South Ari Atoll apart</h4>
+        <p data-i18n="cmpSnorkel.p1">Islands along the South Ari Marine Protected Area, including Maamigili and Dhigurah, are unusual in that whale sharks are present year-round rather than during a short migration season — genuinely one of the only places on Earth where that's documented. Manta rays are also regularly sighted at cleaning stations around the atoll through the year.</p>
+        <h4 data-i18n="cmpSnorkel.h2">What to check before you book anywhere</h4>
+        <ul class="guide-list">
+          <li data-i18n="cmpSnorkel.check1">Is the marine life resident or seasonal? Ask directly — a resort or guesthouse should be able to tell you.</li>
+          <li data-i18n="cmpSnorkel.check2">Is the site snorkel-accessible, or dive-only? Whale shark and manta sites in South Ari are shallow enough for snorkelers.</li>
+          <li data-i18n="cmpSnorkel.check3">How far is the excursion boat ride? Sites just offshore, like South Ari's, mean less time in transit and more time in the water.</li>
+        </ul>
+        <p data-i18n="cmpSnorkel.p2">We're not going to name-and-rank specific competing islands here — we haven't done the on-the-ground research to back a fair, specific comparison, and a shallow one risks being unfair to places we don't operate. The criteria above should help you evaluate any local island fairly, including ours.</p>
+        <p class="exp-links"><a href="#guide-south-ari-atoll" onclick="guidesSwitchTab('destinations')"><span data-i18n="guides.linkSaaGuide">Read our full South Ari Atoll guide</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="compare-regions">
+        <h3 data-i18n="cmpRegions.title">South Ari Atoll vs Other Maldives Regions</h3>
+        <p data-i18n="cmpRegions.intro">The Maldives' 26 atolls aren't interchangeable — each region has a different character, and it's worth choosing based on what you actually want from the trip rather than just proximity to Malé.</p>
+        <h4 data-i18n="cmpRegions.h1">North Malé Atoll</h4>
+        <p data-i18n="cmpRegions.p1">The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It has the highest concentration of resorts and some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.</p>
+        <h4 data-i18n="cmpRegions.h2">Baa Atoll</h4>
+        <p data-i18n="cmpRegions.p2">Designated a UNESCO Biosphere Reserve, Baa Atoll is best known for Hanifaru Bay, one of the world's best-documented manta ray feeding aggregation sites — though access is seasonal and tightly regulated to protect the reserve.</p>
+        <h4 data-i18n="cmpRegions.h3">South Ari Atoll</h4>
+        <p data-i18n="cmpRegions.p3">Further from Malé (a genuine 1h45m by speedboat, or 20 minutes by air), which is the trade-off for what it offers: year-round whale sharks, regular manta sightings, and a mix of resorts and long-established local islands like Maamigili and Dhigurah, making it accessible to guesthouse travelers as well as resort guests.</p>
+        <h4 data-i18n="cmpRegions.h4">Choosing a region</h4>
+        <p data-i18n="cmpRegions.p4">If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that.</p>
+        <p class="exp-links"><a href="#holiday-packages"><span data-i18n="guides.linkPackages">See our holiday packages</span></a></p>
+      </article>
+    </div>
+
+    <div class="guides-panel" id="guides-panel-blog" style="display:none">
+      <article class="guide-article reveal" id="blog-best-time-visit">
+        <h3 data-i18n="blogBestTime.title">Best Time to Visit the Maldives</h3>
+        <p data-i18n="blogBestTime.intro">The short answer: November to April is the classic recommendation, and for good reason, but it's not the only good time to go — it depends what you're optimizing for.</p>
+        <h4 data-i18n="blogBestTime.h1">Dry season (December–April)</h4>
+        <p data-i18n="blogBestTime.p1">This is the northeast monsoon period: calmer seas, less rain, and daytime temperatures typically in the high 20s to low 30s°C. It's also the busiest and most expensive time to visit, since it lines up with Northern Hemisphere winter holidays.</p>
+        <h4 data-i18n="blogBestTime.h2">Wet season (May–November)</h4>
+        <p data-i18n="blogBestTime.p2">The southwest monsoon brings more rain, but usually in short, intense afternoon bursts rather than all-day washouts, with clear skies in between. Prices typically drop meaningfully in this period, and it's a genuinely good trade-off if you don't mind the occasional shower.</p>
+        <h4 data-i18n="blogBestTime.h3">For Vilu Residence specifically</h4>
+        <p data-i18n="blogBestTime.p3">Whale sharks and manta rays around South Ari Atoll are present year-round, so unlike destinations built around a narrow wildlife season, there isn't a "wrong" time to visit for the marine life itself. Weather aside, the main seasonal factor is price and crowd levels rather than whether you'll see whale sharks.</p>
+        <p class="exp-links"><a href="#blog-whale-shark-season" onclick="guidesSwitchTab('blog')"><span data-i18n="guides.linkWhaleSeason">Read our Best Time to See Whale Sharks guide</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-whale-shark-season">
+        <h3 data-i18n="blogWhaleSeason.title">Best Time to See Whale Sharks in South Ari Atoll</h3>
+        <p data-i18n="blogWhaleSeason.intro">Unlike most whale shark destinations worldwide, where sightings cluster around a specific migration window, South Ari Atoll's whale shark aggregation is documented as present year-round. Researchers with the Maldives Whale Shark Research Programme have photo-identified more than 500 individual sharks in the South Ari Marine Protected Area (SAMPA) since 2006, and the population — mostly juvenile males — appears to stay resident rather than migrate through on a seasonal cycle.</p>
+        <h4 data-i18n="blogWhaleSeason.h1">So does timing matter at all?</h4>
+        <p data-i18n="blogWhaleSeason.p1">Not in the way it does elsewhere. You don't need to plan a Maldives trip around a whale shark season the way you might for, say, Western Australia's Ningaloo Reef. That said, no single excursion can guarantee a sighting — conditions vary day to day the way they do with any wildlife encounter.</p>
+        <h4 data-i18n="blogWhaleSeason.h2">What can affect a single day's chances</h4>
+        <p data-i18n="blogWhaleSeason.p2">Sea conditions, recent weather, and time of day all play a role in any individual excursion, the same as with any wildlife encounter. Morning trips are generally preferred by local operators for calmer water.</p>
+        <p class="exp-links"><a href="#experiences"><span data-i18n="guides.linkExperiences2">See what our whale shark snorkeling excursion involves</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-guesthouse-vs-resort">
+        <h3 data-i18n="blogGvr.title">Maldives Guesthouse vs Resort: Which Is Better?</h3>
+        <p data-i18n="blogGvr.intro">Neither is objectively better — they're genuinely different trips, and the right one depends on what you're going to the Maldives for.</p>
+        <h4 data-i18n="blogGvr.h1">The legal and cultural difference</h4>
+        <p data-i18n="blogGvr.p1">Guesthouses on local islands only became legally possible in 2009, when Maldivian tourism law was opened up to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.</p>
+        <h4 data-i18n="blogGvr.h2">The price difference</h4>
+        <p data-i18n="blogGvr.p2">As a general rule (prices vary by season and property), guesthouses on local islands run considerably cheaper per night than resorts, often including breakfast in the rate. Resorts span a much wider range, from mid-range overwater options up to ultra-luxury private-island properties.</p>
+        <h4 data-i18n="blogGvr.h3">What you actually get</h4>
+        <p data-i18n="blogGvr.p3">A resort gets you a private island, often with overwater villas and all-inclusive dining, and no contact with local Maldivian life beyond staff. A guesthouse gets you a real island community, working local shops, and — because you're paying for far less private infrastructure — meaningfully lower prices for a trip built around the same reefs and marine life. Neither includes the other's experience by design, not by compromise.</p>
+        <h4 data-i18n="blogGvr.h4">A genuinely honest take</h4>
+        <p data-i18n="blogGvr.p4">If total privacy and five-star service are the point of the trip, a resort delivers that in a way a guesthouse structurally can't. If the point is the reef, the whale sharks, and a real Maldivian island — and a lower price — a guesthouse like ours delivers that well.</p>
+        <p class="exp-links"><a href="#rooms"><span data-i18n="guides.linkRooms">See our rooms and rates</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-holiday-cost">
+        <h3 data-i18n="blogCost.title">How Much Does a Maldives Holiday Cost?</h3>
+        <p data-i18n="blogCost.intro">Costs in the Maldives vary more by accommodation type than almost anywhere else in the world — a resort and a guesthouse booked for the same week can differ by an order of magnitude.</p>
+        <h4 data-i18n="blogCost.h1">General market ranges (2026)</h4>
+        <p data-i18n="blogCost.p1">These are general 2026 market ranges gathered from current travel-cost guides, not a guaranteed quote — actual prices shift with season and exchange rates:</p>
+        <ul class="guide-list">
+          <li data-i18n="blogCost.range1">Local-island guesthouses: commonly $50–150 per night, often breakfast-inclusive.</li>
+          <li data-i18n="blogCost.range2">Mid-range resorts: roughly $200–600 per night.</li>
+          <li data-i18n="blogCost.range3">Higher-end resorts with overwater villas: roughly $400–1,000+ per night.</li>
+          <li data-i18n="blogCost.range4">Ultra-luxury private-island resorts: can exceed $5,000 per night.</li>
+        </ul>
+        <h4 data-i18n="blogCost.h2">A real example</h4>
+        <p data-i18n="blogCost.p2">To give one concrete data point: our own 4-night Island Explorer Getaway package is $450 per person (about $113/night per person), including round-trip speedboat transfer, accommodation, daily breakfast, and whale shark, manta, and turtle snorkeling. Longer packages bring the per-night rate down further — our 10-night package works out to roughly $94/night per person. These prices include transfers and activities, so they're not a like-for-like comparison to a bare room rate, but they give a sense of what a full guesthouse-based trip actually costs.</p>
+        <h4 data-i18n="blogCost.h3">What else to budget for</h4>
+        <p data-i18n="blogCost.p3">International flights to Malé, the domestic flight or speedboat onward connection, and any add-on activities beyond what's included in a package are worth budgeting separately.</p>
+        <p class="exp-links"><a href="#holiday-packages"><span data-i18n="guides.linkPackages2">See all our current packages</span></a> &middot; <a href="#travel-info"><span data-i18n="guides.linkGettingHere2">Current transfer prices</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-things-to-do-maamigili">
+        <h3 data-i18n="blogThings.title">Things To Do in Maamigili</h3>
+        <p data-i18n="blogThings.intro">Maamigili's main draw is what's in the water just offshore, but there's more to a stay here than the excursions alone.</p>
+        <h4 data-i18n="blogThings.h1">In the water</h4>
+        <p data-i18n="blogThings.p1">Whale shark snorkeling in the South Ari Marine Protected Area, manta ray sites, reef and turtle snorkeling, sandbank trips, sunset cruises, and dolphin cruises are all run as day trips from the island — all included across our different holiday packages depending on length of stay.</p>
+        <h4 data-i18n="blogThings.h2">On the island</h4>
+        <p data-i18n="blogThings.p2">Maamigili is small enough to explore on foot in an afternoon: a working harbour, local cafés and small restaurants serving Maldivian and international dishes, and a designated bikini beach for swimwear (as on all local islands, swimwear elsewhere isn't appropriate out of respect for local custom).</p>
+        <h4 data-i18n="blogThings.h3">Practical notes</h4>
+        <p data-i18n="blogThings.p3">Maamigili is the only island in South Ari Atoll with an airport, so it's also a convenient base if you're combining a guesthouse stay with visits to nearby islands like Dhigurah or Dhangethi via local ferry.</p>
+        <p class="exp-links"><a href="#experiences"><span data-i18n="guides.linkExperiences3">See exactly what each excursion involves</span></a> &middot; <a href="#travel-info"><span data-i18n="guides.linkGettingHere3">Full transfer details</span></a></p>
+      </article>
+    </div>
+  </div>
+</section>
+
 <!-- ══ FOOTER ══ -->
 <footer>
   <div class="footer-inner">
@@ -1319,7 +1481,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigate</h4><ul><li><a href="#home" data-i18n="nav.home">Home</a></li><li><a href="#rooms" data-i18n="nav.rooms">Rooms</a></li><li><a href="#holiday-packages" data-i18n="nav.packages">Packages</a></li><li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li><li><a href="#about" data-i18n="about.tag">About Us</a></li><li><a href="#travel-info" data-i18n="nav.travelInfo">Travel Info</a></li><li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">FAQ</a></li><li><a href="#contact" data-i18n="nav.contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigate</h4><ul><li><a href="#home" data-i18n="nav.home">Home</a></li><li><a href="#rooms" data-i18n="nav.rooms">Rooms</a></li><li><a href="#holiday-packages" data-i18n="nav.packages">Packages</a></li><li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li><li><a href="#about" data-i18n="about.tag">About Us</a></li><li><a href="#travel-info" data-i18n="nav.travelInfo">Travel Info</a></li><li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">FAQ</a></li><li><a href="#guides" data-i18n="nav.guides">Guides &amp; Blog</a></li><li><a href="#contact" data-i18n="nav.contact">Contact</a></li></ul></div>
       <div class="footer-col"><h4 data-i18n="footer.roomsHeading">Rooms</h4><ul><li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">Double Room</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">Deluxe Family Room</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">Deluxe Family Room with Open Deck</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li></ul></div>
       <div class="footer-col"><h4 data-i18n="footer.info">Info</h4><ul><li><a href="#booking" onclick="openBookingPage()" data-i18n="footer.bookDirect">Book Direct</a></li><li><a href="#contact" data-i18n="footer.enquiries">Enquiries</a></li><li><a href="#contact" data-i18n="footer.groups">Groups</a></li></ul></div>
     </div>
@@ -1449,7 +1611,8 @@ en: {
     "maldivesTime": "Maldives Time",
     "bookNow": "Book Now",
     "bookYourStay": "Book Your Stay",
-    "travelInfo": "Travel Info"
+    "travelInfo": "Travel Info",
+    "guides": "Guides & Blog"
   },
   "hero": {
     "badge": "South Ari Atoll · Maldives",
@@ -1807,6 +1970,130 @@ en: {
     "tabGettingHere": "Getting Here",
     "tabTiming": "Timing Checker",
     "tabFaq": "FAQ"
+  },
+  "guides": {
+    "tag": "Travel Resources",
+    "titlePrefix": "Guides &",
+    "titleEmphasis": "travel tips",
+    "intro": "Everything we know about South Ari Atoll, Maamigili, and planning a Maldives trip — researched to help you plan, not just to fill a page.",
+    "tabDestinations": "Destination Guides",
+    "tabCompare": "Comparisons",
+    "tabBlog": "Travel Blog",
+    "linkGettingHere": "See current prices and schedules on our Getting Here page",
+    "linkGettingHere2": "Current transfer prices",
+    "linkGettingHere3": "Full transfer details",
+    "linkExperiences": "See exactly what each excursion involves",
+    "linkExperiences2": "See what our whale shark snorkeling excursion involves",
+    "linkExperiences3": "See exactly what each excursion involves",
+    "linkSaaGuide": "Read our full South Ari Atoll guide",
+    "linkPackages": "See our holiday packages",
+    "linkPackages2": "See all our current packages",
+    "linkRooms": "See our rooms and rates",
+    "linkWhaleSeason": "Read our Best Time to See Whale Sharks guide"
+  },
+  "guideSaa": {
+    "title": "South Ari Atoll Travel Guide",
+    "intro": "South Ari Atoll (locally Alif Dhaalu Atoll) sits in the central Maldives, a ring of reefs and sandbanks built around a string of inhabited local islands and resorts. It's one of 26 atolls that make up the country, and it's best known for one thing above all: whale sharks.",
+    "h1": "Whale sharks, year-round",
+    "p1": "The South Ari Marine Protected Area (SAMPA), established in 2009, runs along a 14-kilometre reef shelf on the atoll's southern rim, from Maamigili in the west to Dhigurah in the east. Research published by the Maldives Whale Shark Research Programme — which has photo-identified more than 500 individual sharks since 2006 — has documented what's believed to be the only confirmed year-round whale shark aggregation anywhere in the world. Most of the sharks seen here are juvenile males, so sightings aren't tied to a narrow migration window the way they are in many other whale shark destinations.",
+    "h2": "Manta rays",
+    "p2": "Manta rays are also a regular sight in South Ari, with sightings possible throughout the year at several cleaning stations around the atoll — some sites are more active earlier in the year, others later, so exact timing is best confirmed locally when you book.",
+    "h3": "Snorkeling and local island life",
+    "p3": "Because the whale shark and manta sites here sit close to the surface and close to shore, they're accessible to snorkelers, not just certified divers — one of the things that makes South Ari a practical base for a guesthouse stay rather than only a liveaboard destination. Beyond the marine life, the atoll's inhabited islands each have their own small-town rhythm: fishing, guesthouses, mosques, and tea shops rather than resort infrastructure.",
+    "h4": "Nearby islands",
+    "island1": "<b>Dhigurah</b> — \"Long Island\" in Dhivehi, about 4km long with the atoll's longest beach, plus a sheltered lagoon on its western side known for manta ray sightings.",
+    "island2": "<b>Dhangethi</b> — a small house reef and a compact bikini beach, popular with the diving crowd.",
+    "island3": "<b>Omadhoo</b> — a quieter fishing island with a clean bikini beach and a reef best visited at high tide.",
+    "island4": "<b>Mahibadhoo</b> — the atoll's administrative capital, home to the atoll office.",
+    "h5": "Getting here",
+    "p5": "Reaching South Ari Atoll means one connection from Velana International Airport in Malé: either a direct speedboat (around 1h45m) or a 20-minute domestic flight into Maamigili."
+  },
+  "guideMaa": {
+    "title": "Maamigili Travel Guide",
+    "intro": "Maamigili is the island Vilu Residence calls home — a local island on the southern rim of South Ari Atoll, and the largest and most populous island in the atoll, with a population of more than 2,300. Locally it's sometimes called \"Whale Shark Island,\" for reasons that will be obvious a few paragraphs down.",
+    "h1": "Getting around",
+    "p1": "Maamigili is also the only island in South Ari Atoll with an airport — Villa International Airport, which opened as a domestic airport in October 2011 and was upgraded to international standards in 2013. It's a short domestic hop from Malé (about 20 minutes), or reachable by direct speedboat (around 1h45m).",
+    "h2": "Why stay here",
+    "p2": "Staying on Maamigili rather than a resort island means direct access to the whale shark and manta ray sites of the South Ari Marine Protected Area, without the cost of a private-island resort. It also means everyday local-island life: small guesthouses, a real village center, and genuine day-to-day contact with the community, rather than a self-contained resort bubble. The island has local cafés and small restaurants serving Maldivian and international dishes.",
+    "h3": "What there is to do",
+    "p3": "Most visitors come for the water — whale shark snorkeling, manta point visits, reef snorkeling, and sandbank or sunset trips are all run as day excursions from the island. Away from the water, Maamigili is small enough to walk in an afternoon, with a bikini beach for swimwear (as on all local islands, swimwear elsewhere is discouraged out of respect for local custom) and the everyday texture of a working Maldivian island — a working harbour, small shops, and a slower pace than any resort brochure describes."
+  },
+  "cmpSnorkel": {
+    "title": "Best Local Islands in the Maldives for Snorkeling",
+    "intro": "Not every local island offers the same in-water experience, and it's worth knowing what to look for rather than picking on name recognition alone. In general, the local islands with the best snorkeling share a few things in common: a nearby marine protected area or reserve, a house reef or lagoon that's swimmable without a boat, and — ideally — resident, not just seasonal, marine life.",
+    "h1": "What sets South Ari Atoll apart",
+    "p1": "Islands along the South Ari Marine Protected Area, including Maamigili and Dhigurah, are unusual in that whale sharks are present year-round rather than during a short migration season — genuinely one of the only places on Earth where that's documented. Manta rays are also regularly sighted at cleaning stations around the atoll through the year.",
+    "h2": "What to check before you book anywhere",
+    "check1": "Is the marine life resident or seasonal? Ask directly — a resort or guesthouse should be able to tell you.",
+    "check2": "Is the site snorkel-accessible, or dive-only? Whale shark and manta sites in South Ari are shallow enough for snorkelers.",
+    "check3": "How far is the excursion boat ride? Sites just offshore, like South Ari's, mean less time in transit and more time in the water.",
+    "p2": "We're not going to name-and-rank specific competing islands here — we haven't done the on-the-ground research to back a fair, specific comparison, and a shallow one risks being unfair to places we don't operate. The criteria above should help you evaluate any local island fairly, including ours."
+  },
+  "cmpRegions": {
+    "title": "South Ari Atoll vs Other Maldives Regions",
+    "intro": "The Maldives' 26 atolls aren't interchangeable — each region has a different character, and it's worth choosing based on what you actually want from the trip rather than just proximity to Malé.",
+    "h1": "North Malé Atoll",
+    "p1": "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It has the highest concentration of resorts and some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
+    "h2": "Baa Atoll",
+    "p2": "Designated a UNESCO Biosphere Reserve, Baa Atoll is best known for Hanifaru Bay, one of the world's best-documented manta ray feeding aggregation sites — though access is seasonal and tightly regulated to protect the reserve.",
+    "h3": "South Ari Atoll",
+    "p3": "Further from Malé (a genuine 1h45m by speedboat, or 20 minutes by air), which is the trade-off for what it offers: year-round whale sharks, regular manta sightings, and a mix of resorts and long-established local islands like Maamigili and Dhigurah, making it accessible to guesthouse travelers as well as resort guests.",
+    "h4": "Choosing a region",
+    "p4": "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that."
+  },
+  "blogBestTime": {
+    "title": "Best Time to Visit the Maldives",
+    "intro": "The short answer: November to April is the classic recommendation, and for good reason, but it's not the only good time to go — it depends what you're optimizing for.",
+    "h1": "Dry season (December–April)",
+    "p1": "This is the northeast monsoon period: calmer seas, less rain, and daytime temperatures typically in the high 20s to low 30s°C. It's also the busiest and most expensive time to visit, since it lines up with Northern Hemisphere winter holidays.",
+    "h2": "Wet season (May–November)",
+    "p2": "The southwest monsoon brings more rain, but usually in short, intense afternoon bursts rather than all-day washouts, with clear skies in between. Prices typically drop meaningfully in this period, and it's a genuinely good trade-off if you don't mind the occasional shower.",
+    "h3": "For Vilu Residence specifically",
+    "p3": "Whale sharks and manta rays around South Ari Atoll are present year-round, so unlike destinations built around a narrow wildlife season, there isn't a \"wrong\" time to visit for the marine life itself. Weather aside, the main seasonal factor is price and crowd levels rather than whether you'll see whale sharks."
+  },
+  "blogWhaleSeason": {
+    "title": "Best Time to See Whale Sharks in South Ari Atoll",
+    "intro": "Unlike most whale shark destinations worldwide, where sightings cluster around a specific migration window, South Ari Atoll's whale shark aggregation is documented as present year-round. Researchers with the Maldives Whale Shark Research Programme have photo-identified more than 500 individual sharks in the South Ari Marine Protected Area (SAMPA) since 2006, and the population — mostly juvenile males — appears to stay resident rather than migrate through on a seasonal cycle.",
+    "h1": "So does timing matter at all?",
+    "p1": "Not in the way it does elsewhere. You don't need to plan a Maldives trip around a whale shark season the way you might for, say, Western Australia's Ningaloo Reef. That said, no single excursion can guarantee a sighting — conditions vary day to day the way they do with any wildlife encounter.",
+    "h2": "What can affect a single day's chances",
+    "p2": "Sea conditions, recent weather, and time of day all play a role in any individual excursion, the same as with any wildlife encounter. Morning trips are generally preferred by local operators for calmer water."
+  },
+  "blogGvr": {
+    "title": "Maldives Guesthouse vs Resort: Which Is Better?",
+    "intro": "Neither is objectively better — they're genuinely different trips, and the right one depends on what you're going to the Maldives for.",
+    "h1": "The legal and cultural difference",
+    "p1": "Guesthouses on local islands only became legally possible in 2009, when Maldivian tourism law was opened up to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
+    "h2": "The price difference",
+    "p2": "As a general rule (prices vary by season and property), guesthouses on local islands run considerably cheaper per night than resorts, often including breakfast in the rate. Resorts span a much wider range, from mid-range overwater options up to ultra-luxury private-island properties.",
+    "h3": "What you actually get",
+    "p3": "A resort gets you a private island, often with overwater villas and all-inclusive dining, and no contact with local Maldivian life beyond staff. A guesthouse gets you a real island community, working local shops, and — because you're paying for far less private infrastructure — meaningfully lower prices for a trip built around the same reefs and marine life. Neither includes the other's experience by design, not by compromise.",
+    "h4": "A genuinely honest take",
+    "p4": "If total privacy and five-star service are the point of the trip, a resort delivers that in a way a guesthouse structurally can't. If the point is the reef, the whale sharks, and a real Maldivian island — and a lower price — a guesthouse like ours delivers that well."
+  },
+  "blogCost": {
+    "title": "How Much Does a Maldives Holiday Cost?",
+    "intro": "Costs in the Maldives vary more by accommodation type than almost anywhere else in the world — a resort and a guesthouse booked for the same week can differ by an order of magnitude.",
+    "h1": "General market ranges (2026)",
+    "p1": "These are general 2026 market ranges gathered from current travel-cost guides, not a guaranteed quote — actual prices shift with season and exchange rates:",
+    "range1": "Local-island guesthouses: commonly $50–150 per night, often breakfast-inclusive.",
+    "range2": "Mid-range resorts: roughly $200–600 per night.",
+    "range3": "Higher-end resorts with overwater villas: roughly $400–1,000+ per night.",
+    "range4": "Ultra-luxury private-island resorts: can exceed $5,000 per night.",
+    "h2": "A real example",
+    "p2": "To give one concrete data point: our own 4-night Island Explorer Getaway package is $450 per person (about $113/night per person), including round-trip speedboat transfer, accommodation, daily breakfast, and whale shark, manta, and turtle snorkeling. Longer packages bring the per-night rate down further — our 10-night package works out to roughly $94/night per person. These prices include transfers and activities, so they're not a like-for-like comparison to a bare room rate, but they give a sense of what a full guesthouse-based trip actually costs.",
+    "h3": "What else to budget for",
+    "p3": "International flights to Malé, the domestic flight or speedboat onward connection, and any add-on activities beyond what's included in a package are worth budgeting separately."
+  },
+  "blogThings": {
+    "title": "Things To Do in Maamigili",
+    "intro": "Maamigili's main draw is what's in the water just offshore, but there's more to a stay here than the excursions alone.",
+    "h1": "In the water",
+    "p1": "Whale shark snorkeling in the South Ari Marine Protected Area, manta ray sites, reef and turtle snorkeling, sandbank trips, sunset cruises, and dolphin cruises are all run as day trips from the island — all included across our different holiday packages depending on length of stay.",
+    "h2": "On the island",
+    "p2": "Maamigili is small enough to explore on foot in an afternoon: a working harbour, local cafés and small restaurants serving Maldivian and international dishes, and a designated bikini beach for swimwear (as on all local islands, swimwear elsewhere isn't appropriate out of respect for local custom).",
+    "h3": "Practical notes",
+    "p3": "Maamigili is the only island in South Ari Atoll with an airport, so it's also a convenient base if you're combining a guesthouse stay with visits to nearby islands like Dhigurah or Dhangethi via local ferry."
   }
 },
 };
@@ -2325,6 +2612,36 @@ function tiSwitchTab(tab) {
   var shown = document.getElementById(panels[tab]);
   if (shown) shown.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
 }
+
+var GUIDES_ARTICLE_TAB = {
+  'guide-south-ari-atoll':'destinations', 'guide-maamigili':'destinations',
+  'compare-snorkeling-islands':'compare', 'compare-regions':'compare',
+  'blog-best-time-visit':'blog', 'blog-whale-shark-season':'blog',
+  'blog-guesthouse-vs-resort':'blog', 'blog-holiday-cost':'blog', 'blog-things-to-do-maamigili':'blog'
+};
+function guidesSwitchTab(tab) {
+  var tabs = {'destinations':'guides-tab-destinations','compare':'guides-tab-compare','blog':'guides-tab-blog'};
+  var panels = {'destinations':'guides-panel-destinations','compare':'guides-panel-compare','blog':'guides-panel-blog'};
+  Object.keys(tabs).forEach(function(k){
+    var tabEl = document.getElementById(tabs[k]);
+    if (tabEl) tabEl.classList.toggle('on', k === tab);
+    var panelEl = document.getElementById(panels[k]);
+    if (panelEl) panelEl.style.display = (k === tab) ? '' : 'none';
+  });
+  var shown = document.getElementById(panels[tab]);
+  if (shown) shown.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
+}
+function handleGuidesDeepLink(){
+  var hash = location.hash ? location.hash.slice(1) : '';
+  var tab = GUIDES_ARTICLE_TAB[hash];
+  if (!tab) return;
+  guidesSwitchTab(tab);
+  setTimeout(function(){
+    var el = document.getElementById(hash);
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 300);
+}
+document.addEventListener('DOMContentLoaded', handleGuidesDeepLink);
 
 function ghSwitchTab(tab) {
   ghCurrentTab = tab;
