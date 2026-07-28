@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
+const vm = require('vm');
 
 const SITE_ROOT = 'https://viluresidence.web.app';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
@@ -11,7 +12,7 @@ const PAGES = [
   { source: 'whale-shark-snorkeling.html', outFile: 'whale-shark-snorkeling.html', metaNs: 'wsMeta', i18nMode: 'standalone' },
   { source: 'manta-ray-snorkeling.html', outFile: 'manta-ray-snorkeling.html', metaNs: 'mrMeta', i18nMode: 'standalone' },
   { source: 'south-ari-atoll-guide.html', outFile: 'south-ari-atoll-guide.html', metaNs: 'saaMeta', i18nMode: 'standalone' },
-  { source: 'holiday-packages.html', outFile: 'holiday-packages.html', metaNs: 'hpMeta', i18nMode: 'standalone' },
+  { source: 'holiday-packages.html', outFile: 'holiday-packages.html', metaNs: 'hpMeta', i18nMode: 'standalone', hasPackageGrid: true },
   { source: 'maamigili-guide.html', outFile: 'maamigili-guide.html', metaNs: 'maaMeta', i18nMode: 'standalone' },
   { source: 'best-time-to-visit.html', outFile: 'best-time-to-visit.html', metaNs: 'btMeta', i18nMode: 'standalone' },
   { source: 'guesthouse-vs-resort.html', outFile: 'guesthouse-vs-resort.html', metaNs: 'gvrMeta', i18nMode: 'standalone' },
@@ -121,11 +122,108 @@ function applyStaticTranslations($, dict, metaNs, i18nMode) {
   if (seoDesc !== undefined) $('meta[name="description"]').attr('content', seoDesc);
 }
 
+// ── Package-grid pre-rendering (holiday-packages.html only) ──
+//
+// holiday-packages.html's #pkg-grid is built entirely client-side from a
+// hardcoded PACKAGES array via renderDynamicContent() (see that file) —
+// meaning even the ENGLISH raw HTML has an empty grid until JS runs, which
+// is the actual audit finding this section fixes. This is NOT
+// Firestore-sourced live data (it's an intentionally frozen snapshot, same
+// tradeoff already disclosed elsewhere in this project), so it's safe and
+// correct to pre-render at build time.
+//
+// Rather than re-implementing renderDynamicContent()'s card-building logic
+// a second time (exactly the dual-maintenance trap this project has hit
+// twice before), this EXECUTES the real, unmodified PACKAGES +
+// renderDynamicContent() code straight from the page's own <script> tag,
+// inside a small vm sandbox that mocks only `document.getElementById` and
+// provides t()/td()/tf() implementations matching shared-page-i18n.js's
+// real semantics exactly (verified against that file directly).
+
+function makeT(dict, i18nEn) {
+  return function t(key) {
+    var parts = key.split('.');
+    function lookup(root) { var node = root; for (var i = 0; i < parts.length; i++) node = node ? node[parts[i]] : undefined; return node; }
+    var node = lookup(dict);
+    var fbNode = lookup(i18nEn);
+    return node !== undefined ? node : fbNode;
+  };
+}
+function makeTd(dynamicDict) {
+  return function td(str) {
+    if (!str) return str;
+    if (!dynamicDict) return str;
+    var hit = dynamicDict[str];
+    return hit !== undefined ? hit : str;
+  };
+}
+function makeTf(tFn) {
+  return function tf(key, vars) {
+    var s = tFn(key) || '';
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.replace('{' + k + '}', vars[k]); });
+    return s;
+  };
+}
+
+// Runs the page's own inline script (containing PACKAGES + renderDynamicContent)
+// in a sandbox, then calls renderDynamicContent() and captures what it wrote
+// into #pkg-grid.
+function renderPackageGridHtml(mainScriptSrc, dict, i18nEn, dynamicDict) {
+  var capturedHtml = '';
+  var mockGrid = {
+    set innerHTML(val) { capturedHtml = val; },
+    get innerHTML() { return capturedHtml; },
+  };
+  var sandbox = {
+    document: { getElementById: function (id) { return id === 'pkg-grid' ? mockGrid : null; } },
+    t: makeT(dict, i18nEn),
+    td: makeTd(dynamicDict),
+    tf: null,
+    console: console,
+  };
+  sandbox.tf = makeTf(sandbox.t);
+  vm.createContext(sandbox);
+  vm.runInContext(mainScriptSrc + '\nrenderDynamicContent();', sandbox, { timeout: 5000 });
+  return capturedHtml;
+}
+
+// Extracts the main inline <script> (the one defining I18N/PACKAGES/
+// renderDynamicContent, NOT the small early redirect script) as raw JS text,
+// and separately extracts the embedded I18N.en object as a real JS value
+// (it's a JS object literal, not JSON, so this evaluates it in a sandbox
+// rather than JSON.parse-ing it).
+function extractPageScript($) {
+  var scripts = $('script').filter(function () { return !$(this).attr('src') && !$(this).attr('type'); });
+  // The redirect script is short and always first; the main script (with
+  // PACKAGES/renderDynamicContent) is identified by containing that function.
+  var mainScriptEl = scripts.filter(function () { return $(this).html().indexOf('function renderDynamicContent') !== -1; }).first();
+  if (!mainScriptEl.length) return null;
+  var src = mainScriptEl.html();
+  var sandbox = {};
+  vm.createContext(sandbox);
+  vm.runInContext(src + '\nthis.I18N_EN = (typeof I18N !== "undefined" && I18N.en) ? I18N.en : null;', sandbox, { timeout: 5000 });
+  return { src: src, i18nEn: sandbox.I18N_EN };
+}
+
+function prerenderPackageGrid($, mainScriptSrc, dict, i18nEn, dynamicDict) {
+  var html = renderPackageGridHtml(mainScriptSrc, dict, i18nEn, dynamicDict);
+  var grid = $('#pkg-grid');
+  if (grid.length) grid.html(html);
+}
+
 function main() {
   let totalGenerated = 0;
   for (const pageDef of PAGES) {
     if (!fs.existsSync(pageDef.source)) { console.warn(`SKIPPED ${pageDef.source}: not found`); continue; }
     const srcHtml = fs.readFileSync(pageDef.source, 'utf8');
+
+    let pkgScript = null;
+    if (pageDef.hasPackageGrid) {
+      const $orig = cheerio.load(srcHtml, { decodeEntities: false });
+      pkgScript = extractPageScript($orig);
+      if (!pkgScript) console.warn(`WARNING: ${pageDef.source} marked hasPackageGrid but no renderDynamicContent() script found`);
+    }
+
     for (const lang of LANGS) {
       const dictPath = `i18n/${lang}.json`;
       if (!fs.existsSync(dictPath)) { console.warn(`SKIPPED ${pageDef.source}/${lang}: no ${dictPath}`); continue; }
@@ -135,6 +233,7 @@ function main() {
       rewriteHreflangAndCanonical($, lang, pageDef.outFile);
       rewriteResourcePaths($);
       if (pageDef.i18nMode === 'standalone') rewriteHomepageBackLinks($, lang);
+      if (pkgScript) prerenderPackageGrid($, pkgScript.src, dict.static, pkgScript.i18nEn, dict.dynamic);
       $('html').attr('lang', lang);
       $('html').attr('dir', RTL_LANGS[lang] ? 'rtl' : 'ltr');
       const outDir = path.join('.', lang);
@@ -143,6 +242,31 @@ function main() {
       totalGenerated++;
     }
     console.log(`Generated ${pageDef.source} -> /{lang}/${pageDef.outFile}`);
+
+    // English itself also needs its #pkg-grid pre-rendered (the audit found
+    // it empty in raw HTML too, since it's JS-populated for everyone,
+    // English included). Only the grid content is touched here — done as a
+    // surgical string replace, not a cheerio full-document rewrite, so
+    // nothing else in this hand-maintained source file's formatting shifts
+    // (cheerio's serializer otherwise collapses whitespace between tags,
+    // entity-encodes raw & in attributes, and adds ="" to boolean
+    // attributes like `crossorigin` — all harmless to a browser, but
+    // needless diff noise on a file real people read and hand-edit).
+    if (pkgScript) {
+      const $en = cheerio.load('<div id="pkg-grid" class="pkg-grid"></div>', { decodeEntities: false });
+      prerenderPackageGrid($en, pkgScript.src, pkgScript.i18nEn, pkgScript.i18nEn, undefined);
+      const renderedDiv = $en.html($en('#pkg-grid')).trim();
+      const emptyDiv = '<div id="pkg-grid" class="pkg-grid"></div>';
+      if (srcHtml.indexOf(emptyDiv) === -1) {
+        console.warn(`WARNING: could not find exact empty #pkg-grid div in ${pageDef.source} to replace — skipping English self-update, check manually`);
+      } else if ((srcHtml.match(new RegExp(emptyDiv.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length > 1) {
+        console.warn(`WARNING: multiple exact matches for empty #pkg-grid div in ${pageDef.source} — skipping English self-update, check manually`);
+      } else {
+        const updatedSrcHtml = srcHtml.replace(emptyDiv, renderedDiv);
+        fs.writeFileSync(pageDef.source, updatedSrcHtml);
+        console.log(`Pre-rendered #pkg-grid in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+      }
+    }
   }
   console.log(`\nDone: ${totalGenerated}/${PAGES.length * LANGS.length} files generated.`);
 }
