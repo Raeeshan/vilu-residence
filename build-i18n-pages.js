@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio');
 const vm = require('vm');
+const { execSync } = require('child_process');
 
 const SITE_ROOT = 'https://viluresidence.web.app';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
@@ -232,6 +233,90 @@ function prerenderPackageGrid($, mainScriptSrc, dict, i18nEn, dynamicDict) {
   if (grid.length) grid.html(html);
 }
 
+// ── Sitemap <lastmod> maintenance ──
+//
+// Derives lastmod from real git commit history of each URL's SOURCE files
+// (the hand-edited HTML + the relevant i18n/{lang}.json, for non-English
+// URLs), never from "now" or from the generated output files themselves.
+// The generated files under /{lang}/ get rewritten on every single deploy
+// regardless of whether real content changed, so their own git history is
+// noise — using it would make lastmod always show "today," which search
+// engines learn to distrust. Source-file history is the only signal that
+// genuinely reflects when a URL's actual content last changed.
+const SITEMAP_ROOT = 'https://viluresidence.web.app/';
+const SITEMAP_PAGE_SOURCE = {
+  '': 'vilu-website.html',
+  'whale-shark-snorkeling.html': 'whale-shark-snorkeling.html',
+  'manta-ray-snorkeling.html': 'manta-ray-snorkeling.html',
+  'south-ari-atoll-guide.html': 'south-ari-atoll-guide.html',
+  'holiday-packages.html': 'holiday-packages.html',
+  'maamigili-guide.html': 'maamigili-guide.html',
+  'best-time-to-visit.html': 'best-time-to-visit.html',
+  'guesthouse-vs-resort.html': 'guesthouse-vs-resort.html',
+  'maldives-holiday-cost.html': 'maldives-holiday-cost.html',
+};
+
+const _lastmodCache = {};
+function gitLastCommitDate(file) {
+  if (_lastmodCache[file] !== undefined) return _lastmodCache[file];
+  let result = null;
+  try {
+    const out = execSync(`git log -1 --format=%cI -- "${file}"`, { encoding: 'utf8' }).trim();
+    if (out) result = out.slice(0, 10);
+  } catch (e) { result = null; }
+  _lastmodCache[file] = result;
+  return result;
+}
+
+function maxDateStr(a, b) {
+  if (!a) return b;
+  if (!b) return a;
+  return a > b ? a : b;
+}
+
+function parseSitemapLoc(loc) {
+  const rest = loc.replace(SITEMAP_ROOT, '');
+  const langMatch = rest.match(/^([a-z]{2})\/(.*)$/);
+  if (langMatch && LANGS.includes(langMatch[1])) {
+    return { page: langMatch[2], lang: langMatch[1] };
+  }
+  return { page: rest, lang: null };
+}
+
+function computeSitemapLastmod(loc) {
+  const { page, lang } = parseSitemapLoc(loc);
+  const sourceFile = SITEMAP_PAGE_SOURCE[page];
+  if (sourceFile === undefined) return null;
+  const pageDate = gitLastCommitDate(sourceFile);
+  if (!lang) return pageDate;
+  const i18nDate = gitLastCommitDate(`i18n/${lang}.json`);
+  return maxDateStr(pageDate, i18nDate);
+}
+
+function updateSitemapLastmod() {
+  const sitemapPath = 'sitemap.xml';
+  if (!fs.existsSync(sitemapPath)) { console.warn('SKIPPED sitemap.xml: not found'); return; }
+  let content = fs.readFileSync(sitemapPath, 'utf8');
+  // Source file has mixed CRLF/LF line endings from prior tooling passes,
+  // so match either — a literal-\n-only pattern silently misses blocks
+  // that end in \r\n (confirmed: only 45/99 blocks matched without this).
+  const urlBlocks = content.match(/  <url>[\s\S]*?<\/url>\r?\n/g);
+  if (!urlBlocks) { console.warn('sitemap.xml: no <url> blocks found'); return; }
+
+  let updated = 0;
+  for (const block of urlBlocks) {
+    const locMatch = block.match(/<loc>(.*?)<\/loc>/);
+    if (!locMatch) continue;
+    const lastmod = computeSitemapLastmod(locMatch[1]);
+    if (!lastmod) continue;
+    const withoutOld = block.replace(/\n {4}<lastmod>[^<]*<\/lastmod>/, '');
+    const newBlock = withoutOld.replace('</loc>', `</loc>\n    <lastmod>${lastmod}</lastmod>`);
+    if (newBlock !== block) { content = content.replace(block, newBlock); updated++; }
+  }
+  fs.writeFileSync(sitemapPath, content);
+  console.log(`sitemap.xml: <lastmod> refreshed on ${updated}/${urlBlocks.length} url blocks.`);
+}
+
 function main() {
   let totalGenerated = 0;
   for (const pageDef of PAGES) {
@@ -290,6 +375,7 @@ function main() {
     }
   }
   console.log(`\nDone: ${totalGenerated}/${PAGES.length * LANGS.length} files generated.`);
+  updateSitemapLastmod();
 }
 
 main();
