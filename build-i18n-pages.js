@@ -63,6 +63,27 @@ function rewriteResourcePaths($) {
       }
     }
   });
+  rewriteStyleUrls($);
+}
+
+// Rewrites url('...') references inside inline style="" attributes (e.g. a
+// hero's background-image, including the image-set() multi-URL form) to
+// root-absolute, same as any other resource path. HTML attribute rewriting
+// above never touches these since they live inside a style string, not an
+// attribute of their own — without this, every non-English generated page's
+// CSS background-image 404s silently (failed background-image loads don't
+// throw console errors, unlike a broken <img src>).
+function rewriteStyleUrls($) {
+  $('[style]').each(function () {
+    const el = $(this);
+    const style = el.attr('style');
+    if (!style || style.indexOf('url(') === -1) return;
+    const rewritten = style.replace(/url\((['"]?)([^'")]+)\1\)/g, (match, quote, url) => {
+      if (!needsAbsolute(url)) return match;
+      return `url(${quote}/${url}${quote})`;
+    });
+    if (rewritten !== style) el.attr('style', rewritten);
+  });
 }
 
 // Standalone pages link back to the homepage via already-absolute hrefs
