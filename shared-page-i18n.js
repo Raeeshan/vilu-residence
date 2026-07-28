@@ -60,7 +60,15 @@ function applyTranslations(){
   var canonical = document.getElementById('canonical-link');
   if (canonical) {
     var base = canonical.getAttribute('data-base-url');
-    if (base) canonical.setAttribute('href', currentLang === 'en' ? base : base + '?lang=' + currentLang);
+    if (base) {
+      if (currentLang === 'en') {
+        canonical.setAttribute('href', base);
+      } else {
+        var u = new URL(base);
+        u.pathname = '/' + currentLang + u.pathname;
+        canonical.setAttribute('href', u.href);
+      }
+    }
   }
 }
 
@@ -80,7 +88,7 @@ function td(str){
 var _loadedLangs = {en: true};
 async function loadLanguageData(lang){
   if (_loadedLangs[lang]) return;
-  var res = await fetch('i18n/' + lang + '.json');
+  var res = await fetch('/i18n/' + lang + '.json');
   if (!res.ok) throw new Error('Failed to load language: ' + lang);
   var data = await res.json();
   Object.keys(data.static || {}).forEach(function(ns){
@@ -93,6 +101,8 @@ async function loadLanguageData(lang){
 
 function detectInitialLang(){
   try {
+    var seg = window.location.pathname.split('/').filter(Boolean)[0];
+    if (seg && LANG_NAMES[seg]) return seg;
     var url = new URL(window.location.href);
     var q = url.searchParams.get('lang');
     if (q && LANG_NAMES[q]) return q;
@@ -108,9 +118,13 @@ async function setLanguage(lang, opts){
   currentLang = lang;
   try { localStorage.setItem('vilu_lang', lang); } catch(e) {}
   try {
-    var url = new URL(window.location.href);
-    url.searchParams.set('lang', lang);
-    window.history.replaceState({}, '', url);
+    var canonical = document.getElementById('canonical-link');
+    var base = canonical ? canonical.getAttribute('data-base-url') : null;
+    if (base) {
+      var u = new URL(base);
+      if (lang !== 'en') u.pathname = '/' + lang + u.pathname;
+      window.history.replaceState({}, '', u.pathname + window.location.hash);
+    }
   } catch(e) {}
   applyTranslations();
   if (typeof renderDynamicContent === 'function') renderDynamicContent();
