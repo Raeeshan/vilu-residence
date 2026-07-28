@@ -10,6 +10,19 @@ var LANG_NAMES = {en:"English",zh:"中文",ru:"Русский",de:"Deutsch",it:"
 var RTL_LANGS = {ar:true};
 var currentLang = 'en';
 
+// ANALYTICS — identical to vilu-website.html's trackEvent(), defined here
+// once so all 8 standalone pages share it via shared-page-i18n.js instead
+// of duplicating the function per page.
+function trackEvent(name, data){
+  try {
+    document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
+    if (typeof gtag === 'function') {
+      gtag('event', name, data||{});
+    }
+    console.log('[track]', name, data||{});
+  } catch(e) {}
+}
+
 function t(key){
   var parts = key.split('.');
   var dict = I18N[currentLang] || I18N.en;

@@ -1,5 +1,14 @@
 <!DOCTYPE html><html lang="cs" dir="ltr"><head>
 <meta charset="UTF-8">
+<!-- Google Analytics 4 -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1EPZ71Q331');
+</script>
+
 <script>
 (function(){
   try {
@@ -148,6 +157,11 @@
       <a class="btn-primary" href="/cs/#booking" data-i18n="wsPage.ctaBook">Zkontrolovat dostupnost</a>
       <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="wsPage.ctaWhatsapp">Zeptat se na WhatsApp</a>
     </div>
+    <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+    </p>
   </div>
 </main>
 
@@ -160,7 +174,7 @@
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
         <p class="footer-desc" data-i18n="footer.desc">Přívětivý penzion v Jižním atolu Ari nabízející upřímný přístup a autentické maledivské zážitky.</p>
-        <div style="font-size:var(--font-size-sm);color:rgba(255,255,255,.3)">+960 9903339 · Viluresidence@gmail.com</div>
+        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('phone_click',{location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('email_click',{location:'footer'})">Viluresidence@gmail.com</a></div>
         <div class="footer-social">
           <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
           <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
