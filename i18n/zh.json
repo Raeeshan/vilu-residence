@@ -409,7 +409,10 @@
       "linkMaaGuide": "阅读我们完整的马米吉利指南",
       "linkBestTime": "阅读我们完整的最佳旅行时间指南",
       "linkGvr": "阅读我们完整的民宿与度假村对比",
-      "linkCost": "阅读我们完整的度假费用指南"
+      "linkCost": "阅读我们完整的度假费用指南",
+      "linkCmpSnorkel": "阅读我们关于如何挑选浮潜岛屿的完整指南",
+      "linkCmpRegions": "阅读我们关于南阿里对比其他地区的完整对比",
+      "linkThings": "阅读我们关于马米吉利活动的完整指南"
     },
     "guideSaa": {
       "title": "南阿里环礁旅行指南",
@@ -531,7 +534,10 @@
       "maaGuide": "马米吉利指南",
       "btGuide": "最佳旅行时间",
       "gvrGuide": "民宿对比度假村",
-      "costGuide": "度假费用指南"
+      "costGuide": "度假费用指南",
+      "cmpSnorkelGuide": "最佳浮潜岛屿",
+      "cmpRegionsGuide": "南阿里对比其他地区",
+      "thingsGuide": "马米吉利有哪些可做的事"
     },
     "saaMeta": {
       "title": "南阿里环礁旅行指南——鲸鲨、蝠鲼与本地岛屿",
@@ -776,6 +782,70 @@
       "ctaWhatsapp": "通过WhatsApp咨询",
       "linkGettingHere": "当前交通价格 →",
       "linkPackages": "查看我们当前所有套餐价格 →"
+    },
+    "cmpSnorkelMeta": {
+      "title": "马尔代夫最适合浮潜的本地岛屿",
+      "description": "预订马尔代夫本地岛屿浮潜前真正该核实的事项——常驻还是季节性海洋生物、家礁，以及南阿里环礁为何与众不同。"
+    },
+    "cmpSnorkelPage": {
+      "breadcrumb": "最佳浮潜岛屿",
+      "subtitle": "选择马尔代夫浮潜岛屿时真正重要的因素——而不仅仅是知名度。",
+      "linkSaaGuide": "阅读我们完整的南阿里环礁指南 →",
+      "relatedTag": "继续阅读",
+      "relatedTitle": "进一步探索<em>南阿里</em>",
+      "relTag1": "目的地指南",
+      "relTitle1": "南阿里环礁指南",
+      "relTag2": "体验指南",
+      "relTitle2": "鲸鲨浮潜",
+      "relTag3": "规划住宿",
+      "relTitle3": "度假套餐",
+      "ctaTitle": "亲自体验南阿里的与众不同之处",
+      "ctaText": "Vilu Residence就位于马米吉利，处于南阿里全年海洋生物活动的中心地带。查看空房情况，或直接联系我们。",
+      "ctaBook": "查看空房情况",
+      "ctaWhatsapp": "通过WhatsApp咨询"
+    },
+    "cmpRegionsMeta": {
+      "title": "南阿里环礁对比马尔代夫其他地区",
+      "description": "南阿里环礁与北马累环礁、巴环礁相比如何——交通时间、野生动物，以及如何为你的行程选择合适的马尔代夫地区。"
+    },
+    "cmpRegionsPage": {
+      "breadcrumb": "南阿里对比其他地区",
+      "subtitle": "马尔代夫每个环礁都有不同的特色——以下是南阿里与北马累、巴环礁的对比。",
+      "linkPackages": "查看我们的度假套餐 →",
+      "relatedTag": "继续阅读",
+      "relatedTitle": "进一步规划你的<em>行程</em>",
+      "relTag1": "规划住宿",
+      "relTitle1": "度假套餐",
+      "relTag2": "目的地指南",
+      "relTitle2": "南阿里环礁指南",
+      "relTag3": "行程规划",
+      "relTitle3": "最佳旅行时间",
+      "ctaTitle": "准备好亲自体验南阿里了吗？",
+      "ctaText": "Vilu Residence就位于南阿里全年海洋生物活动的中心地带。查看空房情况，或直接联系我们。",
+      "ctaBook": "查看空房情况",
+      "ctaWhatsapp": "通过WhatsApp咨询"
+    },
+    "blogThingsMeta": {
+      "title": "马米吉利有哪些可做的事",
+      "description": "在马米吉利，除了鲸鲨浮潜之外还能做什么——水上活动、岛上生活，以及住宿的实用提示。"
+    },
+    "blogThingsPage": {
+      "breadcrumb": "马米吉利有哪些可做的事",
+      "subtitle": "马米吉利的主要魅力在于近海的水中活动，但这座岛屿的魅力远不止于此。",
+      "linkWhaleShark": "阅读我们完整的鲸鲨浮潜指南 →",
+      "linkGettingHere": "完整接送详情 →",
+      "relatedTag": "继续阅读",
+      "relatedTitle": "进一步探索<em>马米吉利</em>",
+      "relTag1": "体验指南",
+      "relTitle1": "鲸鲨浮潜",
+      "relTag2": "目的地指南",
+      "relTitle2": "马米吉利指南",
+      "relTag3": "规划住宿",
+      "relTitle3": "度假套餐",
+      "ctaTitle": "就住在一切发生的地方",
+      "ctaText": "Vilu Residence是位于马米吉利岛上的民宿——距离港口和本页提到的一切都只有几步之遥。查看空房情况，或直接联系我们。",
+      "ctaBook": "查看空房情况",
+      "ctaWhatsapp": "通过WhatsApp咨询"
     }
   },
   "dynamic": {

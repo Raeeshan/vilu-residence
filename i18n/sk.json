@@ -409,7 +409,10 @@
       "linkMaaGuide": "Prečítajte si náš úplný sprievodca Maamigili",
       "linkBestTime": "Prečítajte si náš úplný sprievodca najlepším obdobím na návštevu",
       "linkGvr": "Prečítajte si naše úplné porovnanie penziónu a rezortu",
-      "linkCost": "Prečítajte si náš úplný sprievodca nákladmi na dovolenku"
+      "linkCost": "Prečítajte si náš úplný sprievodca nákladmi na dovolenku",
+      "linkCmpSnorkel": "Prečítajte si náš kompletný sprievodca výberom ostrova na šnorchlovanie",
+      "linkCmpRegions": "Prečítajte si naše kompletné porovnanie Južného Ari s inými oblasťami",
+      "linkThings": "Prečítajte si náš kompletný sprievodca, čo robiť na Maamigili"
     },
     "guideSaa": {
       "title": "Sprievodca atolom Južný Ari",
@@ -531,7 +534,10 @@
       "maaGuide": "Sprievodca Maamigili",
       "btGuide": "Najlepší Čas na Návštevu",
       "gvrGuide": "Penzión vs. Rezort",
-      "costGuide": "Sprievodca Nákladmi"
+      "costGuide": "Sprievodca Nákladmi",
+      "cmpSnorkelGuide": "Najlepšie Ostrovy na Šnorchlovanie",
+      "cmpRegionsGuide": "Južný Ari vs. Iné Oblasti",
+      "thingsGuide": "Čo Robiť na Maamigili"
     },
     "saaMeta": {
       "title": "Sprievodca atolom Južný Ari — žraloky veľrybie, manty a miestne ostrovy",
@@ -776,6 +782,70 @@
       "ctaWhatsapp": "Opýtať sa na WhatsApp",
       "linkGettingHere": "Aktuálne ceny transferu →",
       "linkPackages": "Pozrite si všetky naše aktuálne ceny balíkov →"
+    },
+    "cmpSnorkelMeta": {
+      "title": "Najlepšie miestne ostrovy na Maldivách na šnorchlovanie",
+      "description": "Čo si skutočne overiť pred rezerváciou miestneho ostrova na Maldivách na šnorchlovanie — trvalý vs. sezónny morský život, domáce útesy a prečo je atol Južný Ari iný."
+    },
+    "cmpSnorkelPage": {
+      "breadcrumb": "Najlepšie Ostrovy na Šnorchlovanie",
+      "subtitle": "Na čom skutočne záleží pri výbere ostrova na Maldivách na šnorchlovanie — nie len na známom mene.",
+      "linkSaaGuide": "Prečítajte si náš úplný sprievodca atolom Južný Ari →",
+      "relatedTag": "Pokračovať v čítaní",
+      "relatedTitle": "Preskúmajte <em>Južný Ari</em> ďalej",
+      "relTag1": "Sprievodca Destináciou",
+      "relTitle1": "Sprievodca atolom Južný Ari",
+      "relTag2": "Sprievodca Zážitkom",
+      "relTitle2": "Šnorchlovanie so žralokmi veľrybími",
+      "relTag3": "Naplánujte si Pobyt",
+      "relTitle3": "Dovolenkové balíčky",
+      "ctaTitle": "Presvedčte sa sami, čím je Južný Ari výnimočný",
+      "ctaText": "Vilu Residence vás ubytuje priamo na Maamigili, uprostred celoročného morského života Južného Ari. Skontrolujte dostupnosť alebo sa nás opýtajte priamo.",
+      "ctaBook": "Skontrolovať dostupnosť",
+      "ctaWhatsapp": "Opýtať sa na WhatsApp"
+    },
+    "cmpRegionsMeta": {
+      "title": "Atol Južný Ari vs. iné oblasti Maldiv",
+      "description": "Ako sa atol Južný Ari porovnáva s atolom Severné Male a atolom Baa — časy transferu, divoká zver a ako vybrať správnu oblasť Maldiv pre váš výlet."
+    },
+    "cmpRegionsPage": {
+      "breadcrumb": "Južný Ari vs. Iné Oblasti",
+      "subtitle": "Každý maldivský atol má iný charakter — tu je, ako sa Južný Ari porovnáva so Severným Male a Baa.",
+      "linkPackages": "Pozrite si naše dovolenkové balíčky →",
+      "relatedTag": "Pokračovať v čítaní",
+      "relatedTitle": "Naplánujte si <em>cestu</em> ďalej",
+      "relTag1": "Naplánujte si Pobyt",
+      "relTitle1": "Dovolenkové balíčky",
+      "relTag2": "Sprievodca Destináciou",
+      "relTitle2": "Sprievodca atolom Južný Ari",
+      "relTag3": "Plánovanie Cesty",
+      "relTitle3": "Najlepší Čas na Návštevu",
+      "ctaTitle": "Ste pripravení zažiť Južný Ari na vlastnej koži?",
+      "ctaText": "Vilu Residence sa nachádza priamo uprostred celoročného morského života Južného Ari. Skontrolujte dostupnosť alebo sa nás opýtajte priamo.",
+      "ctaBook": "Skontrolovať dostupnosť",
+      "ctaWhatsapp": "Opýtať sa na WhatsApp"
+    },
+    "blogThingsMeta": {
+      "title": "Čo robiť na Maamigili",
+      "description": "Čo robiť na Maamigili okrem šnorchlovania so žralokmi veľrybími — vodné výlety, ostrovný život a praktické poznámky pre váš pobyt."
+    },
+    "blogThingsPage": {
+      "breadcrumb": "Čo Robiť na Maamigili",
+      "subtitle": "Hlavným lákadlom Maamigili je to, čo sa nachádza vo vode pri pobreží, ale ostrov ponúka viac než len výlety.",
+      "linkWhaleShark": "Prečítajte si náš úplný sprievodca šnorchlovaním so žralokmi veľrybími →",
+      "linkGettingHere": "Kompletné informácie o transfere →",
+      "relatedTag": "Pokračovať v čítaní",
+      "relatedTitle": "Preskúmajte <em>Maamigili</em> ďalej",
+      "relTag1": "Sprievodca Zážitkom",
+      "relTitle1": "Šnorchlovanie so žralokmi veľrybími",
+      "relTag2": "Sprievodca Destináciou",
+      "relTitle2": "Sprievodca Maamigili",
+      "relTag3": "Naplánujte si Pobyt",
+      "relTitle3": "Dovolenkové balíčky",
+      "ctaTitle": "Ubytujte sa priamo tam, kde sa to všetko deje",
+      "ctaText": "Vilu Residence je penzión priamo na Maamigili — pár krokov od prístavu a všetkého, čo je na tejto stránke. Skontrolujte dostupnosť alebo sa nás opýtajte priamo.",
+      "ctaBook": "Skontrolovať dostupnosť",
+      "ctaWhatsapp": "Opýtať sa na WhatsApp"
     }
   },
   "dynamic": {

@@ -409,7 +409,10 @@
       "linkMaaGuide": "마미길리 전체 가이드 읽기",
       "linkBestTime": "방문 최적기 전체 가이드 읽기",
       "linkGvr": "게스트하우스 대 리조트 전체 비교 읽기",
-      "linkCost": "여행 비용 전체 가이드 읽기"
+      "linkCost": "여행 비용 전체 가이드 읽기",
+      "linkCmpSnorkel": "스노클링 섬 선택에 대한 전체 가이드 읽어보기",
+      "linkCmpRegions": "사우스 아리와 다른 지역의 전체 비교 읽어보기",
+      "linkThings": "마미길리에서 할 일에 대한 전체 가이드 읽어보기"
     },
     "guideSaa": {
       "title": "사우스 아리 환초 여행 가이드",
@@ -531,7 +534,10 @@
       "maaGuide": "마미길리 가이드",
       "btGuide": "방문 최적기",
       "gvrGuide": "게스트하우스 대 리조트",
-      "costGuide": "비용 가이드"
+      "costGuide": "비용 가이드",
+      "cmpSnorkelGuide": "스노클링 최고의 섬",
+      "cmpRegionsGuide": "사우스 아리 vs 다른 지역",
+      "thingsGuide": "마미길리에서 할 수 있는 것들"
     },
     "saaMeta": {
       "title": "사우스 아리 환초 여행 가이드 — 고래상어, 쥐가오리 및 지역 섬",
@@ -776,6 +782,70 @@
       "ctaWhatsapp": "WhatsApp으로 문의하기",
       "linkGettingHere": "현재 교통 요금 →",
       "linkPackages": "현재 모든 패키지 가격 보기 →"
+    },
+    "cmpSnorkelMeta": {
+      "title": "스노클링을 위한 몰디브 최고의 로컬 아일랜드",
+      "description": "스노클링을 위해 몰디브 로컬 아일랜드를 예약하기 전에 실제로 확인해야 할 사항 — 서식성 대 계절성 해양 생물, 하우스 리프, 그리고 사우스 아리 환초가 다른 이유."
+    },
+    "cmpSnorkelPage": {
+      "breadcrumb": "스노클링 최고의 섬",
+      "subtitle": "몰디브에서 스노클링할 섬을 고를 때 실제로 중요한 것 — 단순한 인지도가 아닙니다.",
+      "linkSaaGuide": "사우스 아리 환초 전체 가이드 읽어보기 →",
+      "relatedTag": "계속 읽기",
+      "relatedTitle": "<em>사우스 아리</em> 더 알아보기",
+      "relTag1": "여행지 가이드",
+      "relTitle1": "사우스 아리 환초 가이드",
+      "relTag2": "체험 가이드",
+      "relTitle2": "고래상어 스노클링",
+      "relTag3": "숙박 계획",
+      "relTitle3": "홀리데이 패키지",
+      "ctaTitle": "사우스 아리만의 특별함을 직접 확인해 보세요",
+      "ctaText": "Vilu Residence는 마미길리에 위치하여, 연중 이어지는 사우스 아리의 해양 생물 한가운데에 있습니다. 예약 가능 여부를 확인하거나 직접 문의해 주세요.",
+      "ctaBook": "예약 가능 여부 확인",
+      "ctaWhatsapp": "WhatsApp으로 문의하기"
+    },
+    "cmpRegionsMeta": {
+      "title": "사우스 아리 환초 vs 몰디브의 다른 지역들",
+      "description": "사우스 아리 환초가 노스 말레 환초, 바 환초와 어떻게 다른지 — 이동 시간, 야생 동물, 그리고 여행에 맞는 몰디브 지역을 선택하는 방법."
+    },
+    "cmpRegionsPage": {
+      "breadcrumb": "사우스 아리 vs 다른 지역",
+      "subtitle": "몰디브의 환초마다 각기 다른 특징이 있습니다 — 사우스 아리가 노스 말레, 바와 어떻게 다른지 알아보세요.",
+      "linkPackages": "저희 홀리데이 패키지 보기 →",
+      "relatedTag": "계속 읽기",
+      "relatedTitle": "<em>여행</em> 계획 더 알아보기",
+      "relTag1": "숙박 계획",
+      "relTitle1": "홀리데이 패키지",
+      "relTag2": "여행지 가이드",
+      "relTitle2": "사우스 아리 환초 가이드",
+      "relTag3": "여행 계획",
+      "relTitle3": "방문 최적기",
+      "ctaTitle": "사우스 아리를 직접 경험할 준비가 되셨나요?",
+      "ctaText": "Vilu Residence는 연중 이어지는 사우스 아리의 해양 생물 한가운데에 위치해 있습니다. 예약 가능 여부를 확인하거나 직접 문의해 주세요.",
+      "ctaBook": "예약 가능 여부 확인",
+      "ctaWhatsapp": "WhatsApp으로 문의하기"
+    },
+    "blogThingsMeta": {
+      "title": "마미길리에서 할 수 있는 것들",
+      "description": "고래상어 스노클링 외에 마미길리에서 할 수 있는 것들 — 수상 액티비티, 섬 생활, 그리고 숙박을 위한 실용적인 정보."
+    },
+    "blogThingsPage": {
+      "breadcrumb": "마미길리에서 할 수 있는 것들",
+      "subtitle": "마미길리의 주된 매력은 앞바다의 물속에 있지만, 섬에는 액티비티 외에도 더 많은 것이 있습니다.",
+      "linkWhaleShark": "고래상어 스노클링 전체 가이드 읽기 →",
+      "linkGettingHere": "전체 이동 상세 정보 →",
+      "relatedTag": "계속 읽기",
+      "relatedTitle": "<em>마미길리</em> 더 알아보기",
+      "relTag1": "체험 가이드",
+      "relTitle1": "고래상어 스노클링",
+      "relTag2": "여행지 가이드",
+      "relTitle2": "마미길리 가이드",
+      "relTag3": "숙박 계획",
+      "relTitle3": "홀리데이 패키지",
+      "ctaTitle": "모든 일이 일어나는 바로 그곳에 머무세요",
+      "ctaText": "Vilu Residence는 마미길리 섬에 위치한 게스트하우스입니다 — 항구와 이 페이지의 모든 것에서 몇 걸음이면 됩니다. 예약 가능 여부를 확인하거나 직접 문의해 주세요.",
+      "ctaBook": "예약 가능 여부 확인",
+      "ctaWhatsapp": "WhatsApp으로 문의하기"
     }
   },
   "dynamic": {

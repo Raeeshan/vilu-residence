@@ -409,7 +409,10 @@
       "linkMaaGuide": "マーミギリの完全ガイドを読む",
       "linkBestTime": "ベストシーズンの完全ガイドを読む",
       "linkGvr": "ゲストハウス対リゾートの完全比較を読む",
-      "linkCost": "旅行費用の完全ガイドを読む"
+      "linkCost": "旅行費用の完全ガイドを読む",
+      "linkCmpSnorkel": "シュノーケリングの島の選び方の完全ガイドを読む",
+      "linkCmpRegions": "南アリと他地域の完全な比較を読む",
+      "linkThings": "マーミジリでのアクティビティの完全ガイドを読む"
     },
     "guideSaa": {
       "title": "南アリ環礁旅行ガイド",
@@ -531,7 +534,10 @@
       "maaGuide": "マーミギリガイド",
       "btGuide": "ベストシーズン",
       "gvrGuide": "ゲストハウス対リゾート",
-      "costGuide": "費用ガイド"
+      "costGuide": "費用ガイド",
+      "cmpSnorkelGuide": "シュノーケリングに最適な島",
+      "cmpRegionsGuide": "南アリと他地域の比較",
+      "thingsGuide": "マーミジリでできること"
     },
     "saaMeta": {
       "title": "南アリ環礁旅行ガイド——ジンベエザメ、マンタ、地元の島々",
@@ -776,6 +782,70 @@
       "ctaWhatsapp": "WhatsAppで問い合わせる",
       "linkGettingHere": "現在の送迎料金 →",
       "linkPackages": "現在のパッケージ価格をすべて見る →"
+    },
+    "cmpSnorkelMeta": {
+      "title": "モルディブでシュノーケリングに最適なローカルアイランド",
+      "description": "モルディブのローカルアイランドをシュノーケリング目的で予約する前に本当に確認すべきこと——生息が定着しているか季節限定か、ハウスリーフの有無、そして南アリ環礁がなぜ違うのか。"
+    },
+    "cmpSnorkelPage": {
+      "breadcrumb": "シュノーケリングに最適な島",
+      "subtitle": "モルディブでシュノーケリングをする島を選ぶ際に本当に重要なこと——単なる知名度ではありません。",
+      "linkSaaGuide": "南アリ環礁の完全ガイドを読む →",
+      "relatedTag": "続きを読む",
+      "relatedTitle": "<em>南アリ</em>をさらに探る",
+      "relTag1": "目的地ガイド",
+      "relTitle1": "南アリ環礁ガイド",
+      "relTag2": "体験ガイド",
+      "relTitle2": "ジンベエザメシュノーケリング",
+      "relTag3": "滞在を計画",
+      "relTitle3": "ホリデーパッケージ",
+      "ctaTitle": "南アリの魅力をご自身の目で確かめてください",
+      "ctaText": "Vilu Residenceはマーミジリ島にあり、南アリの一年中続く海洋生物のただ中に位置しています。空室状況を確認するか、直接お問い合わせください。",
+      "ctaBook": "空室状況を確認する",
+      "ctaWhatsapp": "WhatsAppで問い合わせる"
+    },
+    "cmpRegionsMeta": {
+      "title": "南アリ環礁とモルディブの他地域との比較",
+      "description": "南アリ環礁は北マーレ環礁やバア環礁とどう違うのか——移動時間、野生生物、そして旅行に合ったモルディブの地域の選び方。"
+    },
+    "cmpRegionsPage": {
+      "breadcrumb": "南アリと他地域の比較",
+      "subtitle": "モルディブの環礁にはそれぞれ異なる特徴があります——南アリが北マーレやバアとどう違うかをご紹介します。",
+      "linkPackages": "ホリデーパッケージを見る →",
+      "relatedTag": "続きを読む",
+      "relatedTitle": "<em>旅の計画</em>をさらに進める",
+      "relTag1": "滞在を計画",
+      "relTitle1": "ホリデーパッケージ",
+      "relTag2": "目的地ガイド",
+      "relTitle2": "南アリ環礁ガイド",
+      "relTag3": "旅行計画",
+      "relTitle3": "ベストシーズン",
+      "ctaTitle": "南アリをご自身で体験する準備はできましたか？",
+      "ctaText": "Vilu Residenceは南アリの一年中続く海洋生物のただ中に位置しています。空室状況を確認するか、直接お問い合わせください。",
+      "ctaBook": "空室状況を確認する",
+      "ctaWhatsapp": "WhatsAppで問い合わせる"
+    },
+    "blogThingsMeta": {
+      "title": "マーミジリでできること",
+      "description": "ジンベエザメシュノーケリング以外にマーミジリでできること——水上アクティビティ、島の暮らし、滞在のための実用的な情報。"
+    },
+    "blogThingsPage": {
+      "breadcrumb": "マーミジリでできること",
+      "subtitle": "マーミジリの一番の魅力は沖合の海の中にありますが、島にはアクティビティ以外にも多くの魅力があります。",
+      "linkWhaleShark": "ジンベエザメシュノーケリングの完全ガイドを読む →",
+      "linkGettingHere": "送迎の詳細情報 →",
+      "relatedTag": "続きを読む",
+      "relatedTitle": "<em>マーミジリ</em>をさらに探る",
+      "relTag1": "体験ガイド",
+      "relTitle1": "ジンベエザメシュノーケリング",
+      "relTag2": "目的地ガイド",
+      "relTitle2": "マーミギリガイド",
+      "relTag3": "滞在を計画",
+      "relTitle3": "ホリデーパッケージ",
+      "ctaTitle": "すべてが起こる場所にまさに滞在する",
+      "ctaText": "Vilu Residenceはマーミジリ島そのものにあるゲストハウスです——港やこのページに書かれているすべてから歩いてすぐの距離です。空室状況を確認するか、直接お問い合わせください。",
+      "ctaBook": "空室状況を確認する",
+      "ctaWhatsapp": "WhatsAppで問い合わせる"
     }
   },
   "dynamic": {

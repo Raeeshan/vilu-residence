@@ -18,6 +18,9 @@ const PAGES = [
   { source: 'best-time-to-visit.html', outFile: 'best-time-to-visit.html', metaNs: 'btMeta', i18nMode: 'standalone' },
   { source: 'guesthouse-vs-resort.html', outFile: 'guesthouse-vs-resort.html', metaNs: 'gvrMeta', i18nMode: 'standalone' },
   { source: 'maldives-holiday-cost.html', outFile: 'maldives-holiday-cost.html', metaNs: 'costMeta', i18nMode: 'standalone' },
+  { source: 'best-local-islands-snorkeling.html', outFile: 'best-local-islands-snorkeling.html', metaNs: 'cmpSnorkelMeta', i18nMode: 'standalone' },
+  { source: 'south-ari-vs-other-regions.html', outFile: 'south-ari-vs-other-regions.html', metaNs: 'cmpRegionsMeta', i18nMode: 'standalone' },
+  { source: 'things-to-do-maamigili.html', outFile: 'things-to-do-maamigili.html', metaNs: 'blogThingsMeta', i18nMode: 'standalone' },
 ];
 
 const RESOURCE_ATTRS = ['src', 'href', 'data-src', 'srcset', 'data-srcset', 'poster'];
@@ -254,6 +257,9 @@ const SITEMAP_PAGE_SOURCE = {
   'best-time-to-visit.html': 'best-time-to-visit.html',
   'guesthouse-vs-resort.html': 'guesthouse-vs-resort.html',
   'maldives-holiday-cost.html': 'maldives-holiday-cost.html',
+  'best-local-islands-snorkeling.html': 'best-local-islands-snorkeling.html',
+  'south-ari-vs-other-regions.html': 'south-ari-vs-other-regions.html',
+  'things-to-do-maamigili.html': 'things-to-do-maamigili.html',
 };
 
 const _lastmodCache = {};

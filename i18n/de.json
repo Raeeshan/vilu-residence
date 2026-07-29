@@ -409,7 +409,10 @@
       "linkMaaGuide": "Unseren vollständigen Maamigili-Reiseführer lesen",
       "linkBestTime": "Unseren vollständigen Guide zur besten Reisezeit lesen",
       "linkGvr": "Unseren vollständigen Vergleich Gästehaus vs. Resort lesen",
-      "linkCost": "Unseren vollständigen Kostenguide lesen"
+      "linkCost": "Unseren vollständigen Kostenguide lesen",
+      "linkCmpSnorkel": "Lesen Sie unseren vollständigen Guide zur Wahl einer Schnorchel-Insel",
+      "linkCmpRegions": "Lesen Sie unseren vollständigen Vergleich Süd-Ari vs. andere Regionen",
+      "linkThings": "Lesen Sie unseren vollständigen Guide zu Aktivitäten auf Maamigili"
     },
     "guideSaa": {
       "title": "Süd-Ari-Atoll Reiseführer",
@@ -531,7 +534,10 @@
       "maaGuide": "Maamigili-Reiseführer",
       "btGuide": "Beste Reisezeit",
       "gvrGuide": "Gästehaus vs. Resort",
-      "costGuide": "Urlaubskosten-Guide"
+      "costGuide": "Urlaubskosten-Guide",
+      "cmpSnorkelGuide": "Beste Inseln zum Schnorcheln",
+      "cmpRegionsGuide": "Süd-Ari vs. Andere Regionen",
+      "thingsGuide": "Was man auf Maamigili unternehmen kann"
     },
     "saaMeta": {
       "title": "Süd-Ari-Atoll Reiseführer — Walhaie, Mantarochen & lokale Inseln",
@@ -776,6 +782,70 @@
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "linkGettingHere": "Aktuelle Transferpreise →",
       "linkPackages": "Alle unsere aktuellen Paketpreise ansehen →"
+    },
+    "cmpSnorkelMeta": {
+      "title": "Die besten Lokalinseln der Malediven zum Schnorcheln",
+      "description": "Was Sie vor der Buchung einer maledivischen Lokalinsel zum Schnorcheln wirklich prüfen sollten — standortreue vs. saisonale Meereslebewesen, Hausriffe und warum das Süd-Ari-Atoll anders aufgebaut ist."
+    },
+    "cmpSnorkelPage": {
+      "breadcrumb": "Beste Inseln zum Schnorcheln",
+      "subtitle": "Worauf es bei der Wahl einer maledivischen Insel zum Schnorcheln wirklich ankommt — nicht nur der bekannte Name.",
+      "linkSaaGuide": "Lesen Sie unseren vollständigen Süd-Ari-Atoll-Reiseführer →",
+      "relatedTag": "Weiterlesen",
+      "relatedTitle": "<em>Süd-Ari</em> weiter entdecken",
+      "relTag1": "Reiseziel-Guide",
+      "relTitle1": "Süd-Ari-Atoll-Reiseführer",
+      "relTag2": "Erlebnis-Guide",
+      "relTitle2": "Walhai-Schnorcheln",
+      "relTag3": "Aufenthalt Planen",
+      "relTitle3": "Urlaubspakete",
+      "ctaTitle": "Überzeugen Sie sich selbst, was Süd-Ari besonders macht",
+      "ctaText": "Vilu Residence bringt Sie direkt nach Maamigili, mitten in Süd-Aris ganzjähriges Meeresleben. Prüfen Sie die Verfügbarkeit oder fragen Sie uns direkt.",
+      "ctaBook": "Verfügbarkeit prüfen",
+      "ctaWhatsapp": "Auf WhatsApp fragen"
+    },
+    "cmpRegionsMeta": {
+      "title": "Süd-Ari-Atoll im Vergleich zu anderen Malediven-Regionen",
+      "description": "Wie das Süd-Ari-Atoll im Vergleich zum Nord-Malé-Atoll und Baa-Atoll abschneidet — Transferzeiten, Tierwelt und wie Sie die richtige Malediven-Region für Ihre Reise wählen."
+    },
+    "cmpRegionsPage": {
+      "breadcrumb": "Süd-Ari vs. Andere Regionen",
+      "subtitle": "Jedes Malediven-Atoll hat seinen eigenen Charakter — hier sehen Sie, wie Süd-Ari im Vergleich zu Nord-Malé und Baa abschneidet.",
+      "linkPackages": "Sehen Sie unsere Urlaubspakete →",
+      "relatedTag": "Weiterlesen",
+      "relatedTitle": "Planen Sie Ihre <em>Reise</em> weiter",
+      "relTag1": "Aufenthalt Planen",
+      "relTitle1": "Urlaubspakete",
+      "relTag2": "Reiseziel-Guide",
+      "relTitle2": "Süd-Ari-Atoll-Reiseführer",
+      "relTag3": "Reiseplanung",
+      "relTitle3": "Beste Reisezeit",
+      "ctaTitle": "Bereit, Süd-Ari selbst zu erleben?",
+      "ctaText": "Vilu Residence liegt direkt inmitten von Süd-Aris ganzjährigem Meeresleben. Prüfen Sie die Verfügbarkeit oder fragen Sie uns direkt.",
+      "ctaBook": "Verfügbarkeit prüfen",
+      "ctaWhatsapp": "Auf WhatsApp fragen"
+    },
+    "blogThingsMeta": {
+      "title": "Was man auf Maamigili unternehmen kann",
+      "description": "Was es auf Maamigili neben dem Walhai-Schnorcheln noch zu tun gibt — Wasserausflüge, Inselleben und praktische Hinweise für Ihren Aufenthalt."
+    },
+    "blogThingsPage": {
+      "breadcrumb": "Was man auf Maamigili unternehmen kann",
+      "subtitle": "Maamigilis Hauptattraktion liegt im Wasser vor der Küste, aber die Insel hat mehr zu bieten als nur die Ausflüge.",
+      "linkWhaleShark": "Lesen Sie unseren vollständigen Walhai-Schnorchel-Guide →",
+      "linkGettingHere": "Alle Transferdetails →",
+      "relatedTag": "Weiterlesen",
+      "relatedTitle": "<em>Maamigili</em> weiter entdecken",
+      "relTag1": "Erlebnis-Guide",
+      "relTitle1": "Walhai-Schnorcheln",
+      "relTag2": "Reiseziel-Guide",
+      "relTitle2": "Maamigili-Reiseführer",
+      "relTag3": "Aufenthalt Planen",
+      "relTitle3": "Urlaubspakete",
+      "ctaTitle": "Übernachten Sie genau dort, wo alles passiert",
+      "ctaText": "Vilu Residence ist ein Gästehaus direkt auf Maamigili — nur wenige Schritte vom Hafen und allem, was auf dieser Seite steht. Prüfen Sie die Verfügbarkeit oder fragen Sie uns direkt.",
+      "ctaBook": "Verfügbarkeit prüfen",
+      "ctaWhatsapp": "Auf WhatsApp fragen"
     }
   },
   "dynamic": {

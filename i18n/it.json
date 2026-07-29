@@ -409,7 +409,10 @@
       "linkMaaGuide": "Leggi la nostra guida completa su Maamigili",
       "linkBestTime": "Leggi la nostra guida completa sul periodo migliore per visitare",
       "linkGvr": "Leggi il nostro confronto completo tra guesthouse e resort",
-      "linkCost": "Leggi la nostra guida completa sui costi della vacanza"
+      "linkCost": "Leggi la nostra guida completa sui costi della vacanza",
+      "linkCmpSnorkel": "Leggi la nostra guida completa per scegliere un'isola per lo snorkeling",
+      "linkCmpRegions": "Leggi il nostro confronto completo tra Ari Sud e altre regioni",
+      "linkThings": "Leggi la nostra guida completa sulle cose da fare a Maamigili"
     },
     "guideSaa": {
       "title": "Guida di viaggio dell'atollo di Ari Sud",
@@ -531,7 +534,10 @@
       "maaGuide": "Guida di Maamigili",
       "btGuide": "Periodo Migliore",
       "gvrGuide": "Guesthouse vs Resort",
-      "costGuide": "Guida ai Costi"
+      "costGuide": "Guida ai Costi",
+      "cmpSnorkelGuide": "Migliori Isole per lo Snorkeling",
+      "cmpRegionsGuide": "Ari Sud vs Altre Regioni",
+      "thingsGuide": "Cosa Fare a Maamigili"
     },
     "saaMeta": {
       "title": "Guida di viaggio dell'atollo di Ari Sud — Squali balena, manta e isole locali",
@@ -776,6 +782,70 @@
       "ctaWhatsapp": "Chiedi su WhatsApp",
       "linkGettingHere": "Prezzi attuali dei trasferimenti →",
       "linkPackages": "Vedi tutti i nostri prezzi attuali dei pacchetti →"
+    },
+    "cmpSnorkelMeta": {
+      "title": "Le migliori isole locali alle Maldive per lo snorkeling",
+      "description": "Cosa verificare davvero prima di prenotare un'isola locale delle Maldive per lo snorkeling — vita marina residente o stagionale, house reef, e perché l'atollo di Ari Sud è diverso."
+    },
+    "cmpSnorkelPage": {
+      "breadcrumb": "Migliori Isole per lo Snorkeling",
+      "subtitle": "Ciò che conta davvero nella scelta di un'isola delle Maldive per lo snorkeling — non solo la notorietà del nome.",
+      "linkSaaGuide": "Leggi la nostra guida completa all'atollo di Ari Sud →",
+      "relatedTag": "Continua a leggere",
+      "relatedTitle": "Esplora ulteriormente <em>Ari Sud</em>",
+      "relTag1": "Guida alla Destinazione",
+      "relTitle1": "Guida all'atollo di Ari Sud",
+      "relTag2": "Guida all'Esperienza",
+      "relTitle2": "Snorkeling con squali balena",
+      "relTag3": "Pianifica il Soggiorno",
+      "relTitle3": "Pacchetti vacanza",
+      "ctaTitle": "Scopri di persona cosa rende speciale Ari Sud",
+      "ctaText": "Vilu Residence ti porta direttamente a Maamigili, nel cuore della vita marina di Ari Sud presente tutto l'anno. Verifica la disponibilità o contattaci direttamente.",
+      "ctaBook": "Verifica disponibilità",
+      "ctaWhatsapp": "Chiedi su WhatsApp"
+    },
+    "cmpRegionsMeta": {
+      "title": "Atollo di Ari Sud vs altre regioni delle Maldive",
+      "description": "Come si confronta l'atollo di Ari Sud con l'atollo di Malé Nord e l'atollo di Baa — tempi di trasferimento, fauna selvatica, e come scegliere la regione giusta delle Maldive per il tuo viaggio."
+    },
+    "cmpRegionsPage": {
+      "breadcrumb": "Ari Sud vs Altre Regioni",
+      "subtitle": "Ogni atollo delle Maldive ha un carattere diverso — ecco come si confronta Ari Sud con Malé Nord e Baa.",
+      "linkPackages": "Vedi i nostri pacchetti vacanza →",
+      "relatedTag": "Continua a leggere",
+      "relatedTitle": "Pianifica ulteriormente il tuo <em>viaggio</em>",
+      "relTag1": "Pianifica il Soggiorno",
+      "relTitle1": "Pacchetti vacanza",
+      "relTag2": "Guida alla Destinazione",
+      "relTitle2": "Guida all'atollo di Ari Sud",
+      "relTag3": "Pianificazione Viaggio",
+      "relTitle3": "Periodo Migliore",
+      "ctaTitle": "Pronto a vivere Ari Sud in prima persona?",
+      "ctaText": "Vilu Residence si trova proprio nel cuore della vita marina di Ari Sud presente tutto l'anno. Verifica la disponibilità o contattaci direttamente.",
+      "ctaBook": "Verifica disponibilità",
+      "ctaWhatsapp": "Chiedi su WhatsApp"
+    },
+    "blogThingsMeta": {
+      "title": "Cosa fare a Maamigili",
+      "description": "Cosa fare a Maamigili oltre allo snorkeling con gli squali balena — escursioni in acqua, vita sull'isola, e note pratiche per il tuo soggiorno."
+    },
+    "blogThingsPage": {
+      "breadcrumb": "Cosa Fare a Maamigili",
+      "subtitle": "La principale attrattiva di Maamigili è ciò che si trova in acqua al largo, ma l'isola offre molto più delle sole escursioni.",
+      "linkWhaleShark": "Leggi la nostra guida completa allo snorkeling con gli squali balena →",
+      "linkGettingHere": "Dettagli completi sul trasferimento →",
+      "relatedTag": "Continua a leggere",
+      "relatedTitle": "Esplora ulteriormente <em>Maamigili</em>",
+      "relTag1": "Guida all'Esperienza",
+      "relTitle1": "Snorkeling con squali balena",
+      "relTag2": "Guida alla Destinazione",
+      "relTitle2": "Guida di Maamigili",
+      "relTag3": "Pianifica il Soggiorno",
+      "relTitle3": "Pacchetti vacanza",
+      "ctaTitle": "Soggiorna proprio dove succede tutto",
+      "ctaText": "Vilu Residence è una guesthouse proprio a Maamigili — a pochi passi dal porto e da tutto ciò che trovi in questa pagina. Verifica la disponibilità o contattaci direttamente.",
+      "ctaBook": "Verifica disponibilità",
+      "ctaWhatsapp": "Chiedi su WhatsApp"
     }
   },
   "dynamic": {
