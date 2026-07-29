@@ -100,6 +100,17 @@ section{padding:80px 0;position:relative}
 .info-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:8px}
 .info-card p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6}
 
+/* ── FAQ (native <details>/<summary> — crawlable, no JS, matches FAQPage schema) ── */
+.faq-block{margin-top:32px}
+.faq-block details{background:var(--card);border:1px solid var(--card-border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .25s}
+.faq-block details:hover,.faq-block details[open]{border-color:rgba(34,211,238,.35)}
+.faq-block summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;color:var(--white)}
+.faq-block summary::-webkit-details-marker{display:none}
+.faq-block summary i{color:var(--teal-light);transition:transform .25s;flex-shrink:0;font-size:16px}
+.faq-block details[open] summary i{transform:rotate(180deg)}
+.faq-block .faq-a{padding:0 20px 20px;color:var(--muted);font-size:var(--font-size-sm);line-height:1.7}
+[dir="rtl"] .faq-block summary{text-align:right}
+
 /* ── CTA BAND (funnels back to real homepage booking flow) ── */
 .cta-band{background:linear-gradient(135deg,var(--navy2),var(--navy));border:1px solid rgba(34,211,238,.2);border-radius:14px;padding:48px 5vw;text-align:center;margin-top:20px}
 .cta-band h2{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,3.4vw,38px);font-weight:300;margin-bottom:14px}

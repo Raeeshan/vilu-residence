@@ -426,7 +426,10 @@
       "island3": "<b>Omadhoo</b> — klidnější rybářský ostrov s čistou bikini pláží a útesem, který je nejlepší navštívit za přílivu.",
       "island4": "<b>Mahibadhoo</b> — administrativní hlavní město atolu, sídlo atolového úřadu.",
       "h5": "Jak se sem dostat",
-      "p5": "Cesta na atol Jižní Ari znamená jeden přestup z mezinárodního letiště Velana v Malé: buď přímý rychločlun (asi 1h45m), nebo 20minutový vnitrostátní let do Maamigili."
+      "p5": "Cesta na atol Jižní Ari znamená jeden přestup z mezinárodního letiště Velana v Malé: buď přímý rychločlun (asi 1h45m), nebo 20minutový vnitrostátní let do Maamigili.",
+      "hFacts": "Rychlá Fakta",
+      "hItinerary": "Ukázkový 3-denní Itinerář",
+      "hFaq": "Často Kladené Otázky"
     },
     "guideMaa": {
       "title": "Průvodce ostrovem Maamigili",
@@ -436,7 +439,9 @@
       "h2": "Proč se zde ubytovat",
       "p2": "Pobyt na Maamigili namísto resortového ostrova znamená přímý přístup k lokalitám žraloků velrybích a mant v chráněné mořské oblasti Jižní Ari, bez nákladů na soukromý ostrovní resort. Znamená to také každodenní život na místním ostrově: malé penziony, skutečné centrum obce a skutečný každodenní kontakt s komunitou, namísto uzavřené resortové bubliny. Ostrov má místní kavárny a malé restaurace nabízející maledivská a mezinárodní jídla.",
       "h3": "Co tu dělat",
-      "p3": "Většina návštěvníků přijíždí kvůli vodě — šnorchlování se žraloky velrybími, návštěvy manta bodů, šnorchlování na útesech a výlety na písečnou lavici nebo za západem slunce se organizují jako jednodenní výlety z ostrova. Mimo vodu je Maamigili dostatečně malé na to, aby se dalo projít pěšky za odpoledne, s bikini pláží pro plavky (jako na všech místních ostrovech se plavky jinde neodporučují z úcty k místním zvyklostem) a s každodenní atmosférou pracujícího maledivského ostrova — pracovním přístavem, malými obchody a pomalejším tempem, než popisuje jakákoli resortová brožura."
+      "p3": "Většina návštěvníků přijíždí kvůli vodě — šnorchlování se žraloky velrybími, návštěvy manta bodů, šnorchlování na útesech a výlety na písečnou lavici nebo za západem slunce se organizují jako jednodenní výlety z ostrova. Mimo vodu je Maamigili dostatečně malé na to, aby se dalo projít pěšky za odpoledne, s bikini pláží pro plavky (jako na všech místních ostrovech se plavky jinde neodporučují z úcty k místním zvyklostem) a s každodenní atmosférou pracujícího maledivského ostrova — pracovním přístavem, malými obchody a pomalejším tempem, než popisuje jakákoli resortová brožura.",
+      "hFacts": "Rychlá Fakta",
+      "hFaq": "Často Kladené Otázky"
     },
     "cmpSnorkel": {
       "title": "Nejlepší místní ostrovy na Maledivách pro šnorchlování",
@@ -553,7 +558,31 @@
       "ctaTitle": "Jste připraveni to vidět na vlastní oči?",
       "ctaText": "Vilu Residence je penzion přímo na Maamigili, ostrově v srdci oblastí žraloků velrybích atolu Jižní Ari. Zkontrolujte dostupnost nebo nám napište přímo na WhatsApp.",
       "ctaBook": "Zkontrolovat dostupnost",
-      "ctaWhatsapp": "Zeptat se na WhatsApp"
+      "ctaWhatsapp": "Zeptat se na WhatsApp",
+      "factLabel1": "Poloha",
+      "factValue1": "Centrální Maledivy, asi 75 km jižně od Malé.",
+      "factLabel2": "Typ Atolu",
+      "factValue2": "Prstencový atol — administrativní kód atolu Alifu Dhaalu.",
+      "factLabel3": "Proslulý Díky",
+      "factValue3": "Jedinému potvrzenému celoročnímu shromáždění žraloků velrybích na světě, plus pravidelným pozorováním mant.",
+      "factLabel4": "Jak se Dostat",
+      "factValue4": "Rychlým člunem (asi 1h45) nebo vnitrostátním letem (asi 20 min) z Malé.",
+      "day1Title": "Den 1",
+      "day1Desc": "Příjezd, ubytování a seznámení s ostrovem. Večer volitelná plavba při západu slunce.",
+      "day2Title": "Den 2",
+      "day2Desc": "Šnorchlování se žraloky velrybími ráno, kdy je voda nejklidnější, odpoledne čisticí stanice mant.",
+      "day3Title": "Den 3",
+      "day3Desc": "Ráno výlet na pískovou lavici, čas na pěší průzkum místního ostrova, poté odjezd.",
+      "faqQ1": "Potřebuji potápěčský certifikát, abych viděl žraloky velrybí nebo manty?",
+      "faqA1": "Ne — každé místo výskytu žraloků velrybích a mant v Jižním Ari Atolu se nachází blízko hladiny, takže šnorchlování stačí. Certifikovaným potápěčem nemusíte být pro žádné z nich.",
+      "faqQ2": "Jaké je nejlepší roční období pro návštěvu?",
+      "faqA2": "Mořský život v Jižním Ari je přítomen celoročně, takže neexistuje jediný \"nejlepší\" měsíc pro divokou přírodu — počasí a cena jsou většími sezónními faktory. Podívejte se na našeho kompletního <a href=\"best-time-to-visit.html\">průvodce nejlepší dobou návštěvy</a>.",
+      "faqQ3": "Mám se ubytovat na místním ostrově, nebo v resortu?",
+      "faqA3": "Obě možnosti jsou platné, se skutečnými kompromisy v ceně, soukromí a přístupu k místní kultuře. Podívejte se na naše kompletní <a href=\"guesthouse-vs-resort.html\">srovnání penzionu a resortu</a>.",
+      "faqQ4": "Jak se dostanu do Jižního Ari Atolu z Malé?",
+      "faqA4": "Buď přímým rychlým člunem (asi 1h45), nebo 20minutovým vnitrostátním letem na letiště Villa International v Maamigili.",
+      "faqQ5": "Na kterém ostrově bych se měl ubytovat pro nejlepší přístup k žralokům velrybím?",
+      "faqA5": "Maamigili, na jižním okraji atolu, leží nejblíže Chráněné mořské oblasti Jižní Ari a má vlastní letiště — většina výletů za žraloky velrybími odjíždí přímo odtud. Přečtěte si našeho kompletního <a href=\"maamigili-guide.html\">průvodce Maamigili</a>."
     },
     "wsMeta": {
       "title": "Šnorchlování se žraloky velrybími na Maledivách — atol Jižní Ari, celoročně",
@@ -663,7 +692,25 @@
       "ctaWhatsapp": "Zeptat se na WhatsApp",
       "linkGettingHere": "Podívejte se na aktuální ceny a časy transferů →",
       "linkGvr": "Penzion nebo resort — co je pro vás vhodné? →",
-      "linkWhaleShark": "Přečtěte si našeho kompletního průvodce šnorchlováním se žraloky velrybími →"
+      "linkWhaleShark": "Přečtěte si našeho kompletního průvodce šnorchlováním se žraloky velrybími →",
+      "factLabel1": "Počet Obyvatel",
+      "factValue1": "Více než 2 300 obyvatel.",
+      "factLabel2": "Letiště",
+      "factValue2": "Letiště Villa International — otevřeno jako vnitrostátní v roce 2011, povýšeno na mezinárodní v roce 2013.",
+      "factLabel3": "Známý Jako",
+      "factValue3": "\"Ostrov Žraloků Velrybích\" — místní přezdívka za jeho příbřežní lokality žraloků velrybích.",
+      "factLabel4": "Jazyk a Měna",
+      "factValue4": "Běžně se mluví dhivehštinou i angličtinou; přijímá se rufiyaa i americký dolar.",
+      "faqQ1": "Je na Maamigili dostupný alkohol?",
+      "faqA1": "Ne — Maamigili je místní ostrov spravovaný podle islámského práva, takže se tam alkohol neprodává ani nepodává. Jde o výjimku pro resortové ostrovy, nikoli pro místní ostrovy jako Maamigili.",
+      "faqQ2": "Potřebuji k návštěvě vízum?",
+      "faqA2": "Většina národností dostane při příletu na Maledivy bezplatné 30denní turistické vízum, pro většinu pasů není potřeba žádost předem.",
+      "faqQ3": "Jak se dostanu z letiště do svého penzionu?",
+      "faqA3": "Letiště Villa International se nachází přímo na Maamigili, takže transfer je krátký — krátká procházka nebo krátká jízda tuk-tukem, nikoli přeprava lodí na samostatný ostrov.",
+      "faqQ4": "Je Maamigili bezpečné?",
+      "faqA4": "Ano — jako na většině obydlených ostrovů Maledivy je kriminalita na Maamigili velmi nízká a je běžné, že se návštěvníci volně pohybují ve dne i v noci.",
+      "faqQ5": "Jakým jazykem se mluví na Maamigili?",
+      "faqA5": "Úředním jazykem je dhivehština, ale angličtina se běžně používá v penzionech, restauracích a při organizaci výletů."
     },
     "btMeta": {
       "title": "Nejlepší Doba pro Návštěvu Maledivy — Průvodce podle Sezóny",

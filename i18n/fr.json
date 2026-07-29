@@ -426,7 +426,10 @@
       "island3": "<b>Omadhoo</b> — une île de pêcheurs plus tranquille avec une plage bikini propre et un récif à visiter de préférence à marée haute.",
       "island4": "<b>Mahibadhoo</b> — la capitale administrative de l'atoll, siège du bureau de l'atoll.",
       "h5": "Comment s'y rendre",
-      "p5": "Pour rejoindre l'atoll de Sud Ari, il faut une correspondance depuis l'aéroport international de Velana à Malé : soit un bateau rapide direct (environ 1h45), soit un vol intérieur de 20 minutes jusqu'à Maamigili."
+      "p5": "Pour rejoindre l'atoll de Sud Ari, il faut une correspondance depuis l'aéroport international de Velana à Malé : soit un bateau rapide direct (environ 1h45), soit un vol intérieur de 20 minutes jusqu'à Maamigili.",
+      "hFacts": "Informations Essentielles",
+      "hItinerary": "Exemple d'Itinéraire sur 3 Jours",
+      "hFaq": "Questions Fréquentes"
     },
     "guideMaa": {
       "title": "Guide de voyage de Maamigili",
@@ -436,7 +439,9 @@
       "h2": "Pourquoi séjourner ici",
       "p2": "Séjourner à Maamigili plutôt que sur une île resort signifie un accès direct aux sites de requins-baleines et de raies manta de l'aire marine protégée de Sud Ari, sans le coût d'un resort sur île privée. Cela signifie aussi la vie quotidienne d'une île locale : petites guesthouses, un vrai centre de village, et un contact authentique au quotidien avec la communauté, plutôt qu'une bulle de resort autonome. L'île compte des cafés locaux et de petits restaurants servant des plats maldiviens et internationaux.",
       "h3": "Ce qu'il y a à faire",
-      "p3": "La plupart des visiteurs viennent pour l'eau — snorkeling avec les requins-baleines, visites des points à mantas, snorkeling sur récif, excursions sur banc de sable ou au coucher du soleil sont toutes organisées en excursions à la journée depuis l'île. En dehors de l'eau, Maamigili est assez petite pour être explorée à pied en un après-midi, avec une plage bikini pour les maillots de bain (comme sur toutes les îles locales, les maillots de bain ailleurs sont déconseillés par respect pour les coutumes locales) et l'ambiance quotidienne d'une île maldivienne active — un port de travail, de petites boutiques, et un rythme plus lent que ne le décrit n'importe quelle brochure de resort."
+      "p3": "La plupart des visiteurs viennent pour l'eau — snorkeling avec les requins-baleines, visites des points à mantas, snorkeling sur récif, excursions sur banc de sable ou au coucher du soleil sont toutes organisées en excursions à la journée depuis l'île. En dehors de l'eau, Maamigili est assez petite pour être explorée à pied en un après-midi, avec une plage bikini pour les maillots de bain (comme sur toutes les îles locales, les maillots de bain ailleurs sont déconseillés par respect pour les coutumes locales) et l'ambiance quotidienne d'une île maldivienne active — un port de travail, de petites boutiques, et un rythme plus lent que ne le décrit n'importe quelle brochure de resort.",
+      "hFacts": "Informations Essentielles",
+      "hFaq": "Questions Fréquentes"
     },
     "cmpSnorkel": {
       "title": "Les meilleures îles locales des Maldives pour le snorkeling",
@@ -553,7 +558,31 @@
       "ctaTitle": "Prêt à le voir par vous-même ?",
       "ctaText": "Vilu Residence est une guesthouse située sur Maamigili, l'île au cœur des zones de requins-baleines de l'atoll de Sud Ari. Vérifiez les disponibilités ou écrivez-nous directement sur WhatsApp.",
       "ctaBook": "Vérifier les disponibilités",
-      "ctaWhatsapp": "Demander sur WhatsApp"
+      "ctaWhatsapp": "Demander sur WhatsApp",
+      "factLabel1": "Emplacement",
+      "factValue1": "Maldives centrales, à environ 75 km au sud de Malé.",
+      "factLabel2": "Type d'Atoll",
+      "factValue2": "Atoll en anneau — code administratif de l'atoll Alifu Dhaalu.",
+      "factLabel3": "Réputé Pour",
+      "factValue3": "La seule agrégation confirmée de requins-baleines présente toute l'année au monde, avec des observations régulières de raies manta.",
+      "factLabel4": "Comment Venir",
+      "factValue4": "Bateau rapide (environ 1h45) ou vol domestique (environ 20min) depuis Malé.",
+      "day1Title": "Jour 1",
+      "day1Desc": "Arrivée, installation et prise de repères sur l'île. Croisière au coucher du soleil en option le soir.",
+      "day2Title": "Jour 2",
+      "day2Desc": "Plongée avec les requins-baleines le matin, quand l'eau est la plus calme, suivie d'une station de nettoyage des raies manta l'après-midi.",
+      "day3Title": "Jour 3",
+      "day3Desc": "Excursion sur un banc de sable le matin, temps pour explorer l'île locale à pied, puis départ.",
+      "faqQ1": "Ai-je besoin d'une certification de plongée pour voir les requins-baleines ou les raies manta ?",
+      "faqA1": "Non — chaque site de requins-baleines et de raies manta dans l'Atoll de Ari Sud se trouve près de la surface, la plongée avec tuba suffit donc. Vous n'avez pas besoin d'être plongeur certifié pour voir l'un ou l'autre.",
+      "faqQ2": "Quelle est la meilleure période de l'année pour visiter ?",
+      "faqA2": "La vie marine à Ari Sud est présente toute l'année, il n'y a donc pas un seul \"meilleur\" mois pour la faune — la météo et le prix sont les facteurs saisonniers les plus importants. Consultez notre guide complet de la <a href=\"best-time-to-visit.html\">Meilleure Période pour Visiter</a>.",
+      "faqQ3": "Devrais-je séjourner sur une île locale ou dans un resort ?",
+      "faqA3": "Les deux sont des choix valables, avec de réels compromis en matière de prix, d'intimité et d'accès à la culture locale. Consultez notre comparatif complet <a href=\"guesthouse-vs-resort.html\">Guesthouse vs Resort</a>.",
+      "faqQ4": "Comment se rendre à l'Atoll de Ari Sud depuis Malé ?",
+      "faqA4": "Soit par un bateau rapide direct (environ 1h45), soit par un vol domestique de 20 minutes jusqu'à l'aéroport international Villa à Maamigili.",
+      "faqQ5": "Sur quelle île devrais-je m'installer pour un meilleur accès aux requins-baleines ?",
+      "faqA5": "Maamigili, sur le rebord sud de l'atoll, est l'île la plus proche de l'Aire Marine Protégée de Ari Sud et possède son propre aéroport — la plupart des excursions aux requins-baleines partent directement de là. Lisez notre <a href=\"maamigili-guide.html\">Guide de Maamigili</a> complet."
     },
     "wsMeta": {
       "title": "Snorkeling avec requins-baleines aux Maldives — Atoll de Sud Ari, toute l'année",
@@ -663,7 +692,25 @@
       "ctaWhatsapp": "Demander sur WhatsApp",
       "linkGettingHere": "Voir les tarifs et horaires de transfert actuels →",
       "linkGvr": "Guesthouse ou resort — lequel vous convient ? →",
-      "linkWhaleShark": "Lire notre guide complet de plongée avec les requins-baleines →"
+      "linkWhaleShark": "Lire notre guide complet de plongée avec les requins-baleines →",
+      "factLabel1": "Population",
+      "factValue1": "Plus de 2 300 habitants.",
+      "factLabel2": "Aéroport",
+      "factValue2": "Aéroport international Villa — ouvert comme aéroport domestique en 2011, élevé au rang international en 2013.",
+      "factLabel3": "Connue Comme",
+      "factValue3": "\"L'Île des Requins-Baleines\" — un surnom local pour ses zones de requins-baleines au large.",
+      "factLabel4": "Langue et Devise",
+      "factValue4": "Le dhivehi et l'anglais sont tous deux largement parlés ; la rufiyaa et le dollar américain sont tous deux acceptés.",
+      "faqQ1": "L'alcool est-il disponible à Maamigili ?",
+      "faqA1": "Non — Maamigili est une île locale régie par la loi islamique, l'alcool n'y est donc ni vendu ni servi. C'est une exception réservée aux îles-resorts, pas aux îles locales comme Maamigili.",
+      "faqQ2": "Ai-je besoin d'un visa pour visiter ?",
+      "faqA2": "La plupart des nationalités reçoivent un visa touristique gratuit de 30 jours à l'arrivée aux Maldives, sans demande préalable nécessaire pour la plupart des passeports.",
+      "faqQ3": "Comment se rendre de l'aéroport à ma guesthouse ?",
+      "faqA3": "L'aéroport international Villa se trouve directement à Maamigili, le transfert est donc court — une courte marche ou un bref trajet en tuk-tuk, pas un transfert en bateau vers une île séparée.",
+      "faqQ4": "Maamigili est-elle sûre ?",
+      "faqA4": "Oui — comme sur la plupart des îles habitées des Maldives, la criminalité à Maamigili est très faible, et il est courant que les visiteurs se déplacent librement, de jour comme de nuit.",
+      "faqQ5": "Quelle langue est parlée à Maamigili ?",
+      "faqA5": "Le dhivehi est la langue officielle, mais l'anglais est largement parlé dans les guesthouses, les restaurants et les activités touristiques."
     },
     "btMeta": {
       "title": "Meilleure Période pour Visiter les Maldives — Guide Saisonnier",

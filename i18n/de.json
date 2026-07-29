@@ -426,7 +426,10 @@
       "island3": "<b>Omadhoo</b> — eine ruhigere Fischerinsel mit einem sauberen Bikini-Strand und einem Riff, das am besten bei Flut besucht wird.",
       "island4": "<b>Mahibadhoo</b> — die Verwaltungshauptstadt des Atolls, Sitz des Atollbüros.",
       "h5": "Anreise",
-      "p5": "Das Süd-Ari-Atoll zu erreichen bedeutet eine Verbindung ab dem Velana International Airport in Malé: entweder ein direktes Schnellboot (etwa 1 Std. 45 Min.) oder ein 20-minütiger Inlandsflug nach Maamigili."
+      "p5": "Das Süd-Ari-Atoll zu erreichen bedeutet eine Verbindung ab dem Velana International Airport in Malé: entweder ein direktes Schnellboot (etwa 1 Std. 45 Min.) oder ein 20-minütiger Inlandsflug nach Maamigili.",
+      "hFacts": "Kurzübersicht",
+      "hItinerary": "Beispiel-Reiseplan für 3 Tage",
+      "hFaq": "Häufig gestellte Fragen"
     },
     "guideMaa": {
       "title": "Maamigili Reiseführer",
@@ -436,7 +439,9 @@
       "h2": "Warum hier übernachten",
       "p2": "Ein Aufenthalt auf Maamigili statt auf einer Resortinsel bedeutet direkten Zugang zu den Walhai- und Mantarochen-Stellen des Süd-Ari-Meeresschutzgebiets, ohne die Kosten eines privaten Inselresorts. Es bedeutet auch alltägliches Inselleben: kleine Guesthouses, ein echtes Dorfzentrum und echten Kontakt mit der Gemeinschaft, statt einer abgeschotteten Resort-Blase. Die Insel hat lokale Cafés und kleine Restaurants mit maledivischen und internationalen Gerichten.",
       "h3": "Was es zu tun gibt",
-      "p3": "Die meisten Besucher kommen wegen des Wassers — Walhai-Schnorcheln, Besuche der Manta-Punkte, Riff-Schnorcheln sowie Sandbank- oder Sonnenuntergangstouren werden alle als Tagesausflüge von der Insel aus angeboten. Abseits des Wassers ist Maamigili klein genug, um es an einem Nachmittag zu Fuß zu erkunden, mit einem Bikini-Strand für Badebekleidung (wie auf allen lokalen Inseln wird Badebekleidung anderswo aus Respekt vor lokalen Gepflogenheiten nicht empfohlen) und der alltäglichen Textur einer arbeitenden maledivischen Insel — ein Arbeitshafen, kleine Läden und ein langsameres Tempo, als es jede Resort-Broschüre beschreibt."
+      "p3": "Die meisten Besucher kommen wegen des Wassers — Walhai-Schnorcheln, Besuche der Manta-Punkte, Riff-Schnorcheln sowie Sandbank- oder Sonnenuntergangstouren werden alle als Tagesausflüge von der Insel aus angeboten. Abseits des Wassers ist Maamigili klein genug, um es an einem Nachmittag zu Fuß zu erkunden, mit einem Bikini-Strand für Badebekleidung (wie auf allen lokalen Inseln wird Badebekleidung anderswo aus Respekt vor lokalen Gepflogenheiten nicht empfohlen) und der alltäglichen Textur einer arbeitenden maledivischen Insel — ein Arbeitshafen, kleine Läden und ein langsameres Tempo, als es jede Resort-Broschüre beschreibt.",
+      "hFacts": "Kurzübersicht",
+      "hFaq": "Häufig gestellte Fragen"
     },
     "cmpSnorkel": {
       "title": "Die besten lokalen Inseln der Malediven zum Schnorcheln",
@@ -553,7 +558,31 @@
       "ctaTitle": "Bereit, es selbst zu erleben?",
       "ctaText": "Vilu Residence ist ein Gästehaus direkt auf Maamigili, der Insel im Herzen der Walhai-Gebiete des Süd-Ari-Atolls. Prüfen Sie die Verfügbarkeit oder schreiben Sie uns direkt auf WhatsApp.",
       "ctaBook": "Verfügbarkeit prüfen",
-      "ctaWhatsapp": "Auf WhatsApp fragen"
+      "ctaWhatsapp": "Auf WhatsApp fragen",
+      "factLabel1": "Lage",
+      "factValue1": "Zentrale Malediven, etwa 75 km südlich von Malé.",
+      "factLabel2": "Atoll-Typ",
+      "factValue2": "Ringatoll — Verwaltungscode des Atolls: Alifu Dhaalu.",
+      "factLabel3": "Bekannt für",
+      "factValue3": "Die einzige bestätigte ganzjährige Walhai-Ansammlung der Welt sowie regelmäßige Mantarochen-Sichtungen.",
+      "factLabel4": "Anreise",
+      "factValue4": "Schnellboot (ca. 1h45) oder Inlandsflug (ca. 20 Min.) ab Malé.",
+      "day1Title": "Tag 1",
+      "day1Desc": "Ankunft, Einleben und Orientierung auf der Insel. Abends optional eine Sunset-Cruise.",
+      "day2Title": "Tag 2",
+      "day2Desc": "Walhai-Schnorcheln am Morgen, wenn das Wasser am ruhigsten ist, gefolgt von einer Mantarochen-Putzstation am Nachmittag.",
+      "day3Title": "Tag 3",
+      "day3Desc": "Ein Sandbank-Ausflug am Morgen, Zeit, die lokale Insel zu Fuß zu erkunden, dann Abreise.",
+      "faqQ1": "Brauche ich einen Tauchschein, um die Walhaie oder Mantarochen zu sehen?",
+      "faqA1": "Nein — jede Walhai- und Mantarochen-Stelle im Süd-Ari-Atoll liegt nahe der Wasseroberfläche, Schnorcheln genügt also. Ein Tauchschein ist für keines von beiden nötig.",
+      "faqQ2": "Was ist die beste Reisezeit?",
+      "faqA2": "Das Meeresleben in Süd-Ari ist ganzjährig präsent, es gibt also keinen einzelnen \"besten\" Monat für die Tierwelt — Wetter und Preis sind die größeren saisonalen Faktoren. Sehen Sie unseren vollständigen <a href=\"best-time-to-visit.html\">Guide zur besten Reisezeit</a>.",
+      "faqQ3": "Sollte ich auf einer Lokalinsel oder in einem Resort übernachten?",
+      "faqA3": "Beides sind sinnvolle Optionen mit echten Abwägungen bei Preis, Privatsphäre und Zugang zur lokalen Kultur. Sehen Sie unseren vollständigen <a href=\"guesthouse-vs-resort.html\">Vergleich Gästehaus vs. Resort</a>.",
+      "faqQ4": "Wie komme ich von Malé zum Süd-Ari-Atoll?",
+      "faqA4": "Entweder mit einem direkten Schnellboot (etwa 1h45) oder einem 20-minütigen Inlandsflug zum Villa International Airport in Maamigili.",
+      "faqQ5": "Auf welcher Insel sollte ich mich für den besten Zugang zu Walhaien niederlassen?",
+      "faqA5": "Maamigili, am südlichen Rand des Atolls, liegt am nächsten am Süd-Ari-Meeresschutzgebiet und hat einen eigenen Flughafen — die meisten Walhai-Ausflüge starten direkt von dort. Lesen Sie unseren vollständigen <a href=\"maamigili-guide.html\">Maamigili-Reiseführer</a>."
     },
     "wsMeta": {
       "title": "Walhai-Schnorcheln Malediven — Süd-Ari-Atoll, das ganze Jahr über",
@@ -663,7 +692,25 @@
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "linkGettingHere": "Aktuelle Transferpreise und Zeitpläne ansehen →",
       "linkGvr": "Gästehaus oder Resort — was passt zu Ihnen? →",
-      "linkWhaleShark": "Unseren vollständigen Walhai-Schnorchel-Guide lesen →"
+      "linkWhaleShark": "Unseren vollständigen Walhai-Schnorchel-Guide lesen →",
+      "factLabel1": "Einwohnerzahl",
+      "factValue1": "Mehr als 2.300 Einwohner.",
+      "factLabel2": "Flughafen",
+      "factValue2": "Villa International Airport — 2011 als Inlandsflughafen eröffnet, 2013 zum internationalen Flughafen ausgebaut.",
+      "factLabel3": "Bekannt als",
+      "factValue3": "\"Walhai-Insel\" — ein lokaler Spitzname für die vorgelagerten Walhai-Gründe.",
+      "factLabel4": "Sprache & Währung",
+      "factValue4": "Dhivehi und Englisch werden beide weit verbreitet gesprochen; Rufiyaa und US-Dollar werden beide akzeptiert.",
+      "faqQ1": "Ist Alkohol auf Maamigili erhältlich?",
+      "faqA1": "Nein — Maamigili ist eine Lokalinsel, die nach islamischem Recht verwaltet wird, daher wird dort kein Alkohol verkauft oder ausgeschenkt. Das ist eine Ausnahme für Resortinseln, nicht für Lokalinseln wie Maamigili.",
+      "faqQ2": "Brauche ich ein Visum für den Besuch?",
+      "faqA2": "Die meisten Nationalitäten erhalten bei der Ankunft auf den Malediven ein kostenloses 30-Tage-Touristenvisum, für die meisten Pässe ist keine vorherige Beantragung nötig.",
+      "faqQ3": "Wie komme ich vom Flughafen zu meinem Gästehaus?",
+      "faqA3": "Der Villa International Airport liegt direkt auf Maamigili, der Transfer ist also kurz — ein kurzer Fußweg oder eine kurze Tuk-Tuk-Fahrt, kein Bootstransfer zu einer separaten Insel.",
+      "faqQ4": "Ist Maamigili sicher?",
+      "faqA4": "Ja — wie auf den meisten bewohnten Inseln der Malediven ist die Kriminalität auf Maamigili sehr gering, und Besucher bewegen sich häufig frei, bei Tag wie bei Nacht.",
+      "faqQ5": "Welche Sprache wird auf Maamigili gesprochen?",
+      "faqA5": "Dhivehi ist die Amtssprache, aber Englisch wird in Gästehäusern, Restaurants und im Ausflugsbetrieb weit verbreitet gesprochen."
     },
     "btMeta": {
       "title": "Beste Reisezeit für die Malediven — Ein Guide nach Jahreszeiten",
