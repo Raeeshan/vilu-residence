@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, follow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page Not Found — Vilu Residence</title>
+<meta name="description" content="This page doesn't exist, but here's how to find what you're looking for at Vilu Residence, Maamigili.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/tabler-icons-subset.css">
+<link rel="stylesheet" href="shared-page.css">
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1EPZ71Q331');
+  gtag('event', 'page_not_found', { page_location: window.location.href, page_referrer: document.referrer });
+</script>
+<style>
+  .nf-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 5vw;background:linear-gradient(180deg,var(--abyss) 0%,var(--navy) 60%,var(--navy2) 100%)}
+  .nf-eyebrow{font-family:'DM Sans',sans-serif;letter-spacing:.15em;text-transform:uppercase;font-size:13px;color:var(--gold-light);margin-bottom:16px}
+  .nf-title{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,10vw,96px);color:var(--white);line-height:1;margin:0 0 20px}
+  .nf-sub{font-family:'DM Sans',sans-serif;font-size:var(--font-size-lg);color:var(--muted);max-width:520px;margin:0 auto 40px;line-height:1.6}
+  .nf-links{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:36px}
+  .nf-links a{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);color:var(--white);background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:12px 20px;text-decoration:none;transition:border-color .2s}
+  .nf-links a:hover{border-color:var(--gold-light)}
+  .nf-home{display:inline-block;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--navy);background:var(--gold-light);border-radius:8px;padding:14px 32px;text-decoration:none}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <div class="nav-row-top">
+    <a href="/" class="nav-logo">
+      <img src="images/vilu-logo.jpg" alt="Vilu Residence">
+      <div class="nav-logo-text">
+        <div class="nav-logo-name">Vilu Residence</div>
+        <div class="nav-logo-sub">Maamigili · Maldives</div>
+      </div>
+    </a>
+    <div class="nav-right">
+      <div class="lang-switcher" aria-label="Language selector"></div>
+      <a class="nav-book" href="/#booking"><span>Book Now</span></a>
+    </div>
+  </div>
+</nav>
+<div class="nf-wrap">
+  <div class="nf-eyebrow">404</div>
+  <h1 class="nf-title">Page Not Found</h1>
+  <p class="nf-sub">This page doesn't exist, or may have moved. Here's how to find what you were looking for:</p>
+  <div class="nf-links">
+    <a href="/#rooms"><i class="ti ti-bed" aria-hidden="true"></i> Rooms</a>
+    <a href="/#holiday-packages"><i class="ti ti-suitcase" aria-hidden="true"></i> Holiday Packages</a>
+    <a href="whale-shark-snorkeling.html"><i class="ti ti-fish" aria-hidden="true"></i> Whale Shark Snorkeling</a>
+    <a href="south-ari-atoll-guide.html"><i class="ti ti-map-pin" aria-hidden="true"></i> South Ari Atoll Guide</a>
+    <a href="/#contact"><i class="ti ti-message-circle" aria-hidden="true"></i> Contact Us</a>
+  </div>
+  <a class="nf-home" href="/">Back to Homepage</a>
+</div>
+<a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+<script>
+// Minimal, standalone language switcher for this page only — links to the
+// equivalent /{lang}/ homepage rather than trying to preserve a specific
+// deep link, since we don't know what the visitor was actually looking for.
+(function(){
+  var LANG_NAMES = {en:"English",zh:"中文",ru:"Русский",de:"Deutsch",it:"Italiano",fr:"Français",ar:"العربية",ja:"日本語",ko:"한국어",sk:"Slovenčina",cs:"Čeština"};
+  var sel = document.createElement('select');
+  Object.keys(LANG_NAMES).forEach(function(code){
+    var opt = document.createElement('option');
+    opt.value = code; opt.textContent = LANG_NAMES[code];
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', function(){
+    window.location.href = this.value === 'en' ? '/' : '/' + this.value + '/';
+  });
+  document.querySelector('.lang-switcher').appendChild(sel);
+})();
+</script>
+</body>
+</html>

@@ -333,7 +333,14 @@
       "aCheckAvailability": "Použite vyhľadávanie \"Check Availability\" v rezervačnom paneli v hornej časti stránky, alebo {link} nižšie — obe možnosti okamžite overia dostupnosť v reálnom čase, bez akéhokoľvek záväzku rezervovať.",
       "checkAvailabilityLinkText": "Widget rýchlej rezervácie",
       "qCancellationPolicy": "Účtujete poplatok za zrušenie alebo nedostavenie sa?",
-      "aCancellationPolicy": "Bezplatné zrušenie pre všetky priame rezervácie uskutočnené priamo u nás — cez našu webovú stránku, WhatsApp alebo telefonicky. Pri týchto rezerváciách nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, iba v hotovosti (USD alebo EUR) —, takže zrušenie alebo zmena rezervácie nikdy nespôsobí žiadny poplatok. Ak ste rezervovali cez OTA (Booking.com, Airbnb alebo inú platformu tretej strany), namiesto našich podmienok platí vlastná storno politika danej platformy, keďže podmienky OTA nemôžeme kontrolovať ani meniť."
+      "aCancellationPolicy": "Bezplatné zrušenie pre všetky priame rezervácie uskutočnené priamo u nás — cez našu webovú stránku, WhatsApp alebo telefonicky. Pri týchto rezerváciách nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, iba v hotovosti (USD alebo EUR) —, takže zrušenie alebo zmena rezervácie nikdy nespôsobí žiadny poplatok. Ak ste rezervovali cez OTA (Booking.com, Airbnb alebo inú platformu tretej strany), namiesto našich podmienok platí vlastná storno politika danej platformy, keďže podmienky OTA nemôžeme kontrolovať ani meniť.",
+      "catAmenities": "Vybavenie",
+      "qWifi": "Má Vilu Residence Wi-Fi?",
+      "aWifi": "Áno — bezplatné Wi-Fi je k dispozícii všetkým hosťom počas celého pobytu.",
+      "qAircon": "Sú izby klimatizované?",
+      "aAircon": "Áno — všetky naše izby majú klimatizáciu.",
+      "qDietary": "Dokážete vyhovieť špeciálnym stravovacím požiadavkám?",
+      "aDietary": "Vo všeobecnosti áno — dajte nám vedieť o akýchkoľvek stravovacích požiadavkách (vegetariánska strava, halal, alergie atď.) pri rezervácii a urobíme všetko pre to, aby sme ich splnili."
     },
     "travelInfo": {
       "tag": "Naplánujte si cestu",

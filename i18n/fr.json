@@ -333,7 +333,14 @@
       "aCheckAvailability": "Utilisez la recherche \"Check Availability\" dans la barre de réservation en haut de la page, ou le {link} plus bas — les deux vérifient instantanément la disponibilité en temps réel, sans obligation de réservation.",
       "checkAvailabilityLinkText": "widget de réservation rapide",
       "qCancellationPolicy": "Facturez-vous des frais d'annulation ou de non-présentation ?",
-      "aCancellationPolicy": "Annulation gratuite pour toutes les réservations directes effectuées avec nous — via notre site web, WhatsApp ou par téléphone. Nous ne collectons jamais d'acompte, de prépaiement ni de données de carte en ligne pour ces réservations — le paiement se fait en personne, uniquement en espèces (USD ou EUR) — donc annuler ou modifier votre réservation n'entraîne jamais de frais. Si vous avez réservé via une OTA (Booking.com, Airbnb ou une autre plateforme tierce), c'est la politique d'annulation de cette plateforme qui s'applique, car nous ne contrôlons ni ne modifions les conditions des OTA."
+      "aCancellationPolicy": "Annulation gratuite pour toutes les réservations directes effectuées avec nous — via notre site web, WhatsApp ou par téléphone. Nous ne collectons jamais d'acompte, de prépaiement ni de données de carte en ligne pour ces réservations — le paiement se fait en personne, uniquement en espèces (USD ou EUR) — donc annuler ou modifier votre réservation n'entraîne jamais de frais. Si vous avez réservé via une OTA (Booking.com, Airbnb ou une autre plateforme tierce), c'est la politique d'annulation de cette plateforme qui s'applique, car nous ne contrôlons ni ne modifions les conditions des OTA.",
+      "catAmenities": "Équipements",
+      "qWifi": "Vilu Residence dispose-t-il du Wi-Fi ?",
+      "aWifi": "Oui — le Wi-Fi gratuit est disponible pour tous les clients pendant toute la durée de leur séjour.",
+      "qAircon": "Les chambres sont-elles climatisées ?",
+      "aAircon": "Oui — toutes nos chambres sont climatisées.",
+      "qDietary": "Pouvez-vous tenir compte de restrictions alimentaires ?",
+      "aDietary": "En général, oui — indiquez-nous vos besoins alimentaires (végétarien, halal, allergies, etc.) lors de la réservation, et nous ferons de notre mieux pour nous y adapter."
     },
     "travelInfo": {
       "tag": "Planifiez votre voyage",

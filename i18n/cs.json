@@ -333,7 +333,14 @@
       "aCheckAvailability": "Použijte vyhledávání \"Check Availability\" v rezervační liště v horní části stránky, nebo {link} níže — obě možnosti okamžitě ověří dostupnost v reálném čase, bez jakéhokoli závazku k rezervaci.",
       "checkAvailabilityLinkText": "widget Rychlá rezervace",
       "qCancellationPolicy": "Účtujete poplatek za zrušení nebo nedostavení se?",
-      "aCancellationPolicy": "Bezplatné zrušení pro všechny přímé rezervace uskutečněné přímo u nás — přes naše webové stránky, WhatsApp nebo telefonicky. U těchto rezervací nikdy online nevybíráme zálohu, platbu předem ani údaje o kartě — platba probíhá osobně, pouze v hotovosti (USD nebo EUR) —, takže zrušení nebo změna rezervace nikdy nezpůsobí žádný poplatek. Pokud jste rezervovali přes OTA (Booking.com, Airbnb nebo jinou platformu třetí strany), platí místo našich podmínek storno politika dané platformy, jelikož podmínky OTA nemůžeme kontrolovat ani měnit."
+      "aCancellationPolicy": "Bezplatné zrušení pro všechny přímé rezervace uskutečněné přímo u nás — přes naše webové stránky, WhatsApp nebo telefonicky. U těchto rezervací nikdy online nevybíráme zálohu, platbu předem ani údaje o kartě — platba probíhá osobně, pouze v hotovosti (USD nebo EUR) —, takže zrušení nebo změna rezervace nikdy nezpůsobí žádný poplatek. Pokud jste rezervovali přes OTA (Booking.com, Airbnb nebo jinou platformu třetí strany), platí místo našich podmínek storno politika dané platformy, jelikož podmínky OTA nemůžeme kontrolovat ani měnit.",
+      "catAmenities": "Vybavení",
+      "qWifi": "Má Vilu Residence Wi-Fi?",
+      "aWifi": "Ano — bezplatné Wi-Fi je k dispozici všem hostům po celou dobu pobytu.",
+      "qAircon": "Jsou pokoje klimatizované?",
+      "aAircon": "Ano — všechny naše pokoje mají klimatizaci.",
+      "qDietary": "Dokážete vyhovět speciálním stravovacím požadavkům?",
+      "aDietary": "Obecně ano — dejte nám vědět o jakýchkoli stravovacích požadavcích (vegetariánská strava, halal, alergie atd.) při rezervaci a uděláme vše pro to, abychom je splnili."
     },
     "travelInfo": {
       "tag": "Naplánujte si cestu",

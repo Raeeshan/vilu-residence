@@ -35,6 +35,7 @@
 <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
 <script>
@@ -1766,6 +1767,7 @@ en: {
     "catPricing": "Packages & Pricing",
     "catActivities": "Activities",
     "catBooking": "Booking & Payment",
+    "catAmenities": "Amenities",
     "qTransportOptions": "What are my options for getting from Malé to Vilu Residence?",
     "qTransportReturn": "How do I get back to Malé for my departure flight?",
     "qTransferIncluded": "Is round-trip transfer included in my holiday package?",
@@ -1782,7 +1784,13 @@ en: {
     "aCancellationPolicy": "Free cancellation for all direct bookings made with us — through our website, WhatsApp, or phone. We never collect a deposit, prepayment, or card details online for these bookings — payment is made in person, in cash (USD or EUR) only — so cancelling or changing your reservation never results in any charge. If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
     "qCheckAvailability": "How do I check if my dates are available?",
     "aCheckAvailability": "Use the \"Check Availability\" search in the booking bar at the top of the page, or the {link} further down — both check real-time availability instantly, with no obligation to book.",
-    "checkAvailabilityLinkText": "Quick Reservation widget"
+    "checkAvailabilityLinkText": "Quick Reservation widget",
+    "qWifi": "Does Vilu Residence have Wi-Fi?",
+    "aWifi": "Yes — free Wi-Fi is available for all guests throughout your stay.",
+    "qAircon": "Are the rooms air-conditioned?",
+    "aAircon": "Yes — all of our rooms have air conditioning.",
+    "qDietary": "Can you accommodate dietary restrictions?",
+    "aDietary": "Generally, yes — let us know about any dietary requirements (vegetarian, halal, allergies, etc.) when you book, and we'll do our best to accommodate them."
   },
   "reviews": {
     "tag": "What Guests Say",
@@ -3187,7 +3195,8 @@ var FAQ_CATEGORIES = [
   {id:'transport', key:'faq.catTransport'},
   {id:'pricing', key:'faq.catPricing'},
   {id:'activities', key:'faq.catActivities'},
-  {id:'booking', key:'faq.catBooking'}
+  {id:'booking', key:'faq.catBooking'},
+  {id:'amenities', key:'faq.catAmenities'}
 ];
 
 function faqDedupe(arr) {
@@ -3295,6 +3304,9 @@ function faqBuildItems() {
     q: t('faq.qCheckAvailability'),
     a: tf('faq.aCheckAvailability', {link: '<a href="#booking">'+t('faq.checkAvailabilityLinkText')+'</a>'})
   });
+  items.push({ cat:'amenities', q: t('faq.qWifi'), a: t('faq.aWifi') });
+  items.push({ cat:'amenities', q: t('faq.qAircon'), a: t('faq.aAircon') });
+  items.push({ cat:'amenities', q: t('faq.qDietary'), a: t('faq.aDietary') });
 
   return items;
 }

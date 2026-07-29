@@ -1,0 +1,13 @@
+{
+  "name": "Vilu Residence — Guesthouse in Maamigili, Maldives",
+  "short_name": "Vilu Residence",
+  "description": "Boutique guesthouse in Maamigili, South Ari Atoll — whale shark and manta ray snorkeling, easy beach access, warm local hospitality.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "icons": [
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
