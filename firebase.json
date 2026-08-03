@@ -74,6 +74,12 @@
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" }
         ]
+      },
+      {
+        "source": "/{sitemap.xml,robots.txt}",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
       }
     ]
   }
