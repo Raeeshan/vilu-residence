@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 const vm = require('vm');
 const { execSync } = require('child_process');
 
-const SITE_ROOT = 'https://viluresidence.web.app';
+const SITE_ROOT = 'https://viluresidence.net';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
 const RTL_LANGS = { ar: true };
 
@@ -246,7 +246,7 @@ function prerenderPackageGrid($, mainScriptSrc, dict, i18nEn, dynamicDict) {
 // noise — using it would make lastmod always show "today," which search
 // engines learn to distrust. Source-file history is the only signal that
 // genuinely reflects when a URL's actual content last changed.
-const SITEMAP_ROOT = 'https://viluresidence.web.app/';
+const SITEMAP_ROOT = 'https://viluresidence.net/';
 const SITEMAP_PAGE_SOURCE = {
   '': 'vilu-website.html',
   'whale-shark-snorkeling.html': 'whale-shark-snorkeling.html',

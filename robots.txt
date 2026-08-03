@@ -3,4 +3,4 @@ Allow: /
 Disallow: /vilu-unified.html
 Disallow: /vilu-agency-portal.html
 
-Sitemap: https://viluresidence.web.app/sitemap.xml
+Sitemap: https://viluresidence.net/sitemap.xml
