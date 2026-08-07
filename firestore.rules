@@ -1,0 +1,165 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email.lower() == 'viluresidence@gmail.com';
+    }
+    function isStaff() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/staff_permissions/$(request.auth.uid));
+    }
+    function isAgency() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.token.email.lower())).data.role == 'agency';
+    }
+    function isCancellingNow() {
+      return request.resource.data.status == 'Cancelled' && resource.data.status != 'Cancelled';
+    }
+    function validOverrideCode() {
+      return request.resource.data.cancellationAttemptId is string &&
+        get(/databases/$(database)/documents/cancellation_attempts/$(request.resource.data.cancellationAttemptId)).data.overrideCode
+          == get(/databases/$(database)/documents/admin_settings/security).data.cancellationOverrideCode;
+    }
+    // Shared by create/update: check-out must be strictly after check-in, and
+    // the rate must be a sane, in-range number. Doesn't attempt to validate
+    // the *exact* seasonal price (that logic lives in pmGetPrice() and is too
+    // involved to safely mirror in rules without risking false rejections on
+    // legitimate bookings) — just catches malformed or absurd values, which
+    // covers the case that actually matters: a raw API write bypassing the
+    // app's own client-side checks entirely.
+    function validReservationShape() {
+      return request.resource.data.check_out > request.resource.data.check_in
+        && request.resource.data.rate is number
+        && request.resource.data.rate >= 0
+        && request.resource.data.rate < 100000;
+    }
+
+    match /reservations/{id} {
+      allow read: if isAdmin() || isStaff() || (isAgency() && resource.data.agencyId == request.auth.uid);
+      allow create: if request.resource.data.room_id is string
+                    && request.resource.data.check_in is string
+                    && request.resource.data.check_out is string
+                    && validReservationShape()
+                    && (
+                      isAdmin() || isStaff() ||
+                      (isAgency() && request.resource.data.agencyId == request.auth.uid && request.resource.data.source == 'Agency') ||
+                      (request.auth == null && request.resource.data.source == 'Website' && !('agencyId' in request.resource.data))
+                    );
+      allow update: if request.resource.data.room_id is string
+                    && request.resource.data.check_in is string
+                    && request.resource.data.check_out is string
+                    && validReservationShape()
+                    && (isAdmin() || (isStaff() && (!isCancellingNow() || validOverrideCode())));
+      allow delete: if false;
+    }
+
+    match /blocks/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+
+    match /rooms/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+
+    match /website_content/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+
+    match /room_availability/{roomId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+    match /reconciliation_log/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+
+    match /users/{id} {
+      // Full-collection listing (the User Management panel) is admin/staff
+      // only; anyone else can only ever read their own profile doc — this
+      // is what was missing before: `allow read: if true` let an
+      // unauthenticated request list every agency's commission rate, name,
+      // and email in one call. isAgency()/isStaff() elsewhere in this file
+      // use get() on this same path internally, which bypasses this read
+      // rule entirely (rules-internal get()/exists() always succeed), so
+      // tightening this doesn't touch that.
+      allow read: if isAdmin() || isStaff() || (request.auth != null && request.auth.token.email.lower() == id);
+      // Self-service writes may never change `role` (existing) or
+      // `commission` (added) — both are admin-set fields with no legitimate
+      // self-edit path in the app. `uid` is deliberately left self-writable:
+      // authenticateUser()/restoreSession() backfill it onto a caller's own
+      // doc the first time they log in after an account was created without
+      // one, and that's the only place a non-admin ever writes it.
+      allow write: if isAdmin() || (
+        request.auth != null && request.auth.token.email.lower() == id &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.get('commission', null) == resource.data.get('commission', null)
+      );
+    }
+
+    match /staff_permissions/{staffUid} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == staffUid);
+      allow write: if isAdmin();
+    }
+
+    match /admin_settings/security { allow read, write: if isAdmin(); }
+    match /cancellation_attempts/{attemptId} { allow create: if request.auth != null; allow read, update, delete: if false; }
+    match /block_requests/{id} {
+      allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid;
+      allow read: if request.auth != null && (isAdmin() || isStaff() || resource.data.agencyId == request.auth.uid);
+      allow update: if isAdmin() || isStaff();
+      allow delete: if false;
+    }
+
+    match /packages/{packageId} {
+      allow read: if isAdmin() || isStaff()
+        || resource.data.get('visibleToAgencies', 'all') == 'all'
+        || (request.auth != null
+            && resource.data.visibleToAgencies is list
+            && request.auth.token.email.lower() in resource.data.visibleToAgencies);
+      allow write: if isAdmin() || isStaff();
+    }
+
+    // Per-agency package copies - each agency's own customized package set,
+    // keyed by their email. Only that specific agency (or admin) can read it;
+    // only admin can write it (matches how packages/room_details are admin-managed).
+    match /agency_packages/{email} {
+      allow read: if request.auth != null &&
+        (request.auth.token.email.lower() == email || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /room_prices/{roomId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+
+    match /room_details/{roomId} {
+      allow read: if true;
+      allow write: if isAdmin() || isStaff();
+    }
+
+    // Guest reviews - manually entered OTA reviews + platform aggregate
+    // ratings. Admin-only write (matches the Transportation panel's
+    // admin-only access pattern), public read so the website can display
+    // reviews without requiring a login.
+    match /manual_reviews/{reviewId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /platform_ratings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
