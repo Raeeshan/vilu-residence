@@ -4,7 +4,8 @@
      default entry. This mirrors the <link rel="alternate" hreflang="..."> tags
      in the page's own <head>. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://viluresidence.net/</loc>
     <lastmod>2026-08-07</lastmod>
@@ -20,6 +21,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -38,6 +57,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -56,6 +93,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -74,6 +129,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -92,6 +165,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -110,6 +201,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -128,6 +237,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -146,6 +273,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -164,6 +309,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -182,6 +345,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -200,6 +381,24 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_silhouette_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/dolphin_pod_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -218,6 +417,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -236,6 +438,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -254,6 +459,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -272,6 +480,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -290,6 +501,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -308,6 +522,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -326,6 +543,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -344,6 +564,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -362,6 +585,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -380,6 +606,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -398,6 +627,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -416,6 +648,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -434,6 +669,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -452,6 +690,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -470,6 +711,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -488,6 +732,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -506,6 +753,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -524,6 +774,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -542,6 +795,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -560,6 +816,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -578,6 +837,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -596,6 +858,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -614,6 +879,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -632,6 +900,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -650,6 +921,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -668,6 +942,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -686,6 +963,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -704,6 +984,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -722,6 +1005,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -740,6 +1026,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -758,6 +1047,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -776,6 +1068,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -794,6 +1089,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -812,6 +1110,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -830,6 +1131,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -848,6 +1152,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -866,6 +1173,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -884,6 +1194,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -902,6 +1215,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -920,6 +1236,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -938,6 +1257,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -956,6 +1278,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -974,6 +1299,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -992,6 +1320,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1010,6 +1341,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1028,6 +1362,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1046,6 +1383,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1064,6 +1404,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1082,6 +1425,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1100,6 +1446,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1118,6 +1467,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1136,6 +1488,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1154,6 +1509,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1172,6 +1530,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1190,6 +1551,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1208,6 +1572,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1226,6 +1593,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1244,6 +1614,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1262,6 +1635,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1280,6 +1656,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1298,6 +1677,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1316,6 +1698,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1334,6 +1719,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1352,6 +1740,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1370,6 +1761,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1388,6 +1782,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1406,6 +1803,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1424,6 +1824,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1442,6 +1845,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1460,6 +1866,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1478,6 +1887,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1496,6 +1908,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1514,6 +1929,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1532,6 +1950,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1550,6 +1971,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1568,6 +1992,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1586,6 +2013,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1604,6 +2034,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1622,6 +2055,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1640,6 +2076,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1658,6 +2097,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1676,6 +2118,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1694,6 +2139,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1712,6 +2160,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1730,6 +2181,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1748,6 +2202,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1766,6 +2223,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1784,6 +2244,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1802,6 +2265,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1820,6 +2286,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1838,6 +2307,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1856,6 +2328,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1874,6 +2349,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1892,6 +2370,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1910,6 +2391,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1928,6 +2412,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1946,6 +2433,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1964,6 +2454,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-local-islands-snorkeling.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-local-islands-snorkeling.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/whale_shark_2_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1982,6 +2475,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2000,6 +2496,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2018,6 +2517,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2036,6 +2538,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2054,6 +2559,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2072,6 +2580,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2090,6 +2601,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2108,6 +2622,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2126,6 +2643,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2144,6 +2664,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2162,6 +2685,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/manta_ray_hd.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2180,6 +2706,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2198,6 +2727,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2216,6 +2748,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2234,6 +2769,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2252,6 +2790,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2270,6 +2811,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2288,6 +2832,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2306,6 +2853,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2324,6 +2874,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2342,6 +2895,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2360,6 +2916,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2378,6 +2937,9 @@
     <xhtml:link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maldives-holiday-cost.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maldives-holiday-cost.html"/>
+    <image:image>
+      <image:loc>https://viluresidence.net/images/turtle_snorkelers_gallery.jpg</image:loc>
+    </image:image>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

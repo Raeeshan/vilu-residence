@@ -5,6 +5,7 @@ const vm = require('vm');
 const { execSync } = require('child_process');
 
 const SITE_ROOT = 'https://viluresidence.net';
+const IMAGE_SITEMAP_NS = 'http://www.google.com/schemas/sitemap-image/1.1';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
 const RTL_LANGS = { ar: true };
 
@@ -315,19 +316,120 @@ function updateSitemapLastmod() {
     if (!locMatch) continue;
     const lastmod = computeSitemapLastmod(locMatch[1]);
     if (!lastmod) continue;
-    const withoutOld = block.replace(/\n {4}<lastmod>[^<]*<\/lastmod>/, '');
-    const newBlock = withoutOld.replace('</loc>', `</loc>\n    <lastmod>${lastmod}</lastmod>`);
+    const withoutOld = block.replace(/\r?\n {4}<lastmod>[^<]*<\/lastmod>/, '');
+    const newBlock = withoutOld.replace('</loc>', `</loc>\r\n    <lastmod>${lastmod}</lastmod>`);
     if (newBlock !== block) { content = content.replace(block, newBlock); updated++; }
   }
   fs.writeFileSync(sitemapPath, content);
   console.log(`sitemap.xml: <lastmod> refreshed on ${updated}/${urlBlocks.length} url blocks.`);
 }
 
+// ── Image sitemap ──
+//
+// Only viluresidence.net-hosted images are eligible. Firebase Storage's
+// firebasestorage.googleapis.com is a shared, Google-owned, multi-tenant
+// host — it can't be verified as a Vilu Residence property in Search
+// Console, which Google's cross-domain image-sitemap guidance requires, so
+// gallery/About/room photos (all Storage-only today) are excluded here, not
+// just deferred by choice. Extracted straight from each page's own source
+// markup rather than a hand-maintained parallel list, so this stays correct
+// automatically if a hero photo is ever swapped later.
+function escapeXmlText(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function extractHeroImages(pageDef, srcHtml) {
+  const files = [];
+  const seen = new Set();
+  if (pageDef.outFile === 'index.html') {
+    // Homepage: several hero-slide-img tags — slide 1 uses src=, the rest
+    // use data-src= (deferred-loaded). Only .jpg, never the sibling .webp
+    // <source> variant — one canonical URL per real photo.
+    const re = /class="hero-slide-img"[^>]*?(?:data-src|src)="images\/([^"]+\.jpg)"/g;
+    let m;
+    while ((m = re.exec(srcHtml))) {
+      if (!seen.has(m[1])) { seen.add(m[1]); files.push(m[1]); }
+    }
+  } else {
+    // Standalone pages: exactly one page-header hero background image.
+    const m = srcHtml.match(/class="page-header"[^>]*style="[^"]*?background-image:url\('images\/([^']+\.jpg)'\)/);
+    if (m) files.push(m[1]);
+  }
+  return files.map((file) => `${SITE_ROOT}/images/${file}`);
+}
+
+function ensureImageSitemapNamespace(content) {
+  if (content.indexOf('xmlns:image=') !== -1) return content;
+  return content.replace(
+    /(<urlset\s+xmlns="[^"]*"\s*\r?\n\s*xmlns:xhtml="[^"]*")/,
+    `$1\r\n        xmlns:image="${IMAGE_SITEMAP_NS}"`
+  );
+}
+
+function updateSitemapImages(imagesBySource) {
+  const sitemapPath = 'sitemap.xml';
+  if (!fs.existsSync(sitemapPath)) { console.warn('SKIPPED sitemap.xml: not found (image step)'); return; }
+  let content = fs.readFileSync(sitemapPath, 'utf8');
+  content = ensureImageSitemapNamespace(content);
+
+  const urlBlocks = content.match(/  <url>[\s\S]*?<\/url>\r?\n/g);
+  if (!urlBlocks) { console.warn('sitemap.xml: no <url> blocks found (image step)'); return; }
+
+  let imageTagCount = 0;
+  let urlsWithImages = 0;
+  for (const block of urlBlocks) {
+    const locMatch = block.match(/<loc>(.*?)<\/loc>/);
+    if (!locMatch) continue;
+    const { page } = parseSitemapLoc(locMatch[1]);
+    const sourceFile = SITEMAP_PAGE_SOURCE[page];
+    const images = sourceFile ? (imagesBySource[sourceFile] || []) : [];
+
+    // Strip any existing <image:image> entries first, so re-running the
+    // build replaces cleanly on every pass instead of appending duplicates.
+    const withoutOldImages = block.replace(
+      /\s*<image:image>\s*<image:loc>[^<]*<\/image:loc>\s*<\/image:image>/g,
+      ''
+    );
+
+    if (images.length === 0) {
+      if (withoutOldImages !== block) content = content.replace(block, withoutOldImages);
+      continue;
+    }
+
+    const imageXml = images
+      .map((url) => `\r\n    <image:image>\r\n      <image:loc>${escapeXmlText(url)}</image:loc>\r\n    </image:image>`)
+      .join('');
+
+    // Insert right after the last hreflang line (x-default is always last)
+    // and before <changefreq> — same insertion point regardless of a
+    // block's own priority/changefreq value.
+    const newBlock = withoutOldImages.replace(
+      /(<xhtml:link rel="alternate" hreflang="x-default" href="[^"]*"\/>)\r?\n(\s*<changefreq>)/,
+      `$1${imageXml}\r\n$2`
+    );
+
+    if (newBlock === withoutOldImages) {
+      console.warn(`sitemap.xml: could not find image-insertion point for ${locMatch[1]}`);
+      if (withoutOldImages !== block) content = content.replace(block, withoutOldImages);
+      continue;
+    }
+
+    content = content.replace(block, newBlock);
+    imageTagCount += images.length;
+    urlsWithImages++;
+  }
+
+  fs.writeFileSync(sitemapPath, content);
+  console.log(`sitemap.xml: ${imageTagCount} <image:image> entries written across ${urlsWithImages} url blocks.`);
+}
+
 function main() {
   let totalGenerated = 0;
+  const imagesBySource = {};
   for (const pageDef of PAGES) {
     if (!fs.existsSync(pageDef.source)) { console.warn(`SKIPPED ${pageDef.source}: not found`); continue; }
     const srcHtml = fs.readFileSync(pageDef.source, 'utf8');
+    imagesBySource[pageDef.source] = extractHeroImages(pageDef, srcHtml);
 
     let pkgScript = null;
     if (pageDef.hasPackageGrid) {
@@ -381,6 +483,7 @@ function main() {
     }
   }
   console.log(`\nDone: ${totalGenerated}/${PAGES.length * LANGS.length} files generated.`);
+  updateSitemapImages(imagesBySource);
   updateSitemapLastmod();
 }
 
