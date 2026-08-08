@@ -3768,7 +3768,7 @@ function bfpRenderRooms(rooms, ci, co, numRooms){
       + (photos[0] && photos[0].label ? '<div class="bfp-gallery-caption">'+td(photos[0].label)+'</div>' : '')
       + (r.view ? '<div class="bfp-view-badge">'+td(r.view)+'</div>' : '')
       + (photos.length>1 ? '<div class="bfp-gallery-thumbs">'+photos.map(function(p,i){
-          return '<div class="bfp-gallery-thumb'+(i===0?' active':'')+'" data-idx="'+i+'" style="background-image:url(\''+p.url+'\')" title="'+(p.label||'')+'"></div>';
+          return '<div class="bfp-gallery-thumb'+(i===0?' active':'')+'" data-idx="'+i+'" style="background-image:url(\''+p.url+'\')" role="img" aria-label="'+(p.label||'')+'" title="'+(p.label||'')+'"></div>';
         }).join('')+'</div>' : '')
       + '</div>';
     card.innerHTML = galleryHtml
