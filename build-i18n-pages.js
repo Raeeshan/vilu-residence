@@ -350,6 +350,14 @@ function extractHeroImages(pageDef, srcHtml) {
     while ((m = re.exec(srcHtml))) {
       if (!seen.has(m[1])) { seen.add(m[1]); files.push(m[1]); }
     }
+    // Gallery + About: same-origin lazy-bg photos already migrated off
+    // Firebase Storage (data-bg-url="https://viluresidence.net/images/...").
+    // Room-card data-bg-url values are Firestore-sourced Storage URLs and
+    // never match this same-origin prefix, so they're excluded automatically.
+    const galleryRe = new RegExp(`data-bg-url="${SITE_ROOT}/images/([^"]+\\.jpg)"`, 'g');
+    while ((m = galleryRe.exec(srcHtml))) {
+      if (!seen.has(m[1])) { seen.add(m[1]); files.push(m[1]); }
+    }
   } else {
     // Standalone pages: exactly one page-header hero background image.
     const m = srcHtml.match(/class="page-header"[^>]*style="[^"]*?background-image:url\('images\/([^']+\.jpg)'\)/);
