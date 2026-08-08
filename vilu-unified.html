@@ -1381,6 +1381,7 @@ body.pms-mode { overflow:hidden; }
       <div style="padding:14px 16px;border-bottom:1px solid #e5e7eb;background:#f9fafb;border-radius:12px 12px 0 0">
         <div style="font-size:var(--font-size-base);font-weight:700;color:#111827;margin-bottom:2px">Room settings</div>
         <div style="font-size:var(--font-size-xs);color:#6b7280">Edit room details shown on the booking page</div>
+        <div id="eng-seo-sync-indicator" style="display:none"></div>
       </div>
       <!-- Room tabs -->
       <div style="display:flex;border-bottom:1px solid #e5e7eb;overflow-x:auto" id="eng-room-tabs"></div>
@@ -6776,6 +6777,7 @@ async function drawEngine(){
   }
   renderEngRoomTabs();
   renderEngRoomForm(_engRoom);
+  renderSeoSyncIndicator();
 }
 
 function renderEngRoomTabs(){
@@ -6941,6 +6943,155 @@ function uploadRoomPhotoBlob(rn, slotId, blob){
   });
 }
 
+// ── Room Photo SEO Architecture, Phase 1 (durability safeguard) ──
+// Writes a second, descriptively-named copy of every uploaded room photo to
+// Storage (room-photos-seo/) and tracks its sync state in Firestore. This
+// mirror is NOT read by the website or the image sitemap yet — Hosting
+// publishing stays a separate, human-run step (Phase 2). The point is only
+// that a future migration always has an up-to-date, correctly-named source
+// to work from, instead of silently drifting behind whatever staff most
+// recently uploaded through the generic room-photos/ path.
+//
+// seoMirror state shape, kept deliberately small:
+//   sourceContentHash — hash of the CURRENT primary photo; set on every
+//                        upload regardless of whether the mirror succeeded.
+//   status            — 'pending_publish' | 'mirror_failed' | 'synced'.
+//   path              — Storage path of the mirror file; null unless status
+//                        is pending_publish or synced.
+//   mirrorContentHash — hash of the content actually sitting in that mirror
+//                        file; null unless path is set.
+//   updatedAt         — when the source photo was last changed.
+//   mirroredAt        — when the mirror was last successfully (re)generated;
+//                        null if it's never succeeded or the last attempt failed.
+//   syncedAt          — when Hosting was last confirmed to match this exact
+//                        mirrorContentHash; null unless status is synced.
+// There's no separate "pending_mirror" status: the mirror upload happens
+// synchronously within the same upload action, so by the time anything is
+// written to Firestore the outcome (succeeded or failed) is already known —
+// a transient "in progress" state is never itself persisted or observable.
+var SEO_MIRROR_STATUS={PENDING_PUBLISH:'pending_publish', MIRROR_FAILED:'mirror_failed', SYNCED:'synced'};
+
+// Slot-content slugs are a deliberate approximation, not a guarantee: a
+// human reviewing an actual photo (as the one-time 15-image migration did)
+// can name it far more precisely than code can for a photo nobody's looked
+// at yet. These reflect the composition every room has consistently used
+// per slot to date; revisit if that pattern ever changes.
+var SEO_ROOM_TYPE_SLUGS={
+  'Deluxe Family Room':'deluxe-family-room',
+  'Double Room':'double-room',
+  'Deluxe Family Room with Open Deck':'deluxe-family-room-open-deck'
+};
+var SEO_SLOT_SLUGS={room1:'bed',room2:'interior',bathroom1:'bathroom-vanity',bathroom2:'bathroom-shower',veranda:'veranda'};
+
+// Short content hash for cache-busting: identical bytes always produce the
+// same filename (harmless, even reveals genuine duplicates at a glance);
+// any real content change always produces a new one, the same way Firebase
+// Storage's own download tokens already do for the generic upload path.
+function shortContentHash(blob){
+  return blob.arrayBuffer().then(function(buf){
+    return crypto.subtle.digest('SHA-256', buf);
+  }).then(function(hashBuf){
+    return Array.from(new Uint8Array(hashBuf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('').slice(0,8);
+  });
+}
+
+function seoMirrorFileName(rn, slotId, roomType, hash){
+  var typeSlug=SEO_ROOM_TYPE_SLUGS[roomType]||'room';
+  var slotSlug=SEO_SLOT_SLUGS[slotId]||slotId;
+  return 'vilu-residence-'+typeSlug+'-'+slotSlug+'-'+rn.toLowerCase()+'-'+hash+'.jpg';
+}
+
+// Best-effort: never blocks or fails the primary upload. Takes the
+// already-computed content hash (the caller needs it regardless of whether
+// this succeeds, to record sourceContentHash) rather than recomputing it.
+// Resolves with the Storage path on success, or rejects (caller decides how
+// to handle — see engUploadSlotPhoto, which never lets a rejection here
+// leave stale mirror metadata in place).
+function uploadSeoMirror(rn, slotId, blob, hash){
+  var vr=VR.find(function(r){return r.n===rn;});
+  var roomType=vr?vr.type:'';
+  var fileName=seoMirrorFileName(rn, slotId, roomType, hash);
+  var path='room-photos-seo/'+fileName;
+  return fsStorage.ref(path).put(blob,{contentType:'image/jpeg'}).then(function(){
+    return path;
+  });
+}
+
+// Scans every room's photoSlots for slots not currently in sync with
+// Hosting (status pending_publish or mirror_failed). Read-only — never
+// called anywhere that could block or alter booking, availability, pricing,
+// or reservation workflows.
+function getSeoSyncPendingList(){
+  var pending=[];
+  Object.keys(_roomDetails||{}).forEach(function(rn){
+    var slots=(_roomDetails[rn]&&_roomDetails[rn].photoSlots)||{};
+    engSlotDefs().forEach(function(sd){
+      var entry=slots[sd.id];
+      var m=entry&&entry.seoMirror;
+      if(m&&(m.status===SEO_MIRROR_STATUS.PENDING_PUBLISH||m.status===SEO_MIRROR_STATUS.MIRROR_FAILED)){
+        pending.push({room:rn, slot:sd.id, label:sd.label, status:m.status});
+      }
+    });
+  });
+  return pending;
+}
+
+function renderSeoSyncIndicator(){
+  var el=document.getElementById('eng-seo-sync-indicator');
+  if(!el)return;
+  var pending=getSeoSyncPendingList();
+  if(!pending.length){ el.style.display='none'; el.innerHTML=''; return; }
+  var ready=pending.filter(function(p){return p.status===SEO_MIRROR_STATUS.PENDING_PUBLISH;});
+  var failed=pending.filter(function(p){return p.status===SEO_MIRROR_STATUS.MIRROR_FAILED;});
+  var lines='';
+  if(ready.length){
+    lines+='<div style="margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:6px 10px;font-size:var(--font-size-xs);color:#9a3412;line-height:1.4">'
+      +'⚠ '+ready.length+' room photo'+(ready.length===1?'':'s')+' ready for SEO publish — '+ready.map(function(p){return p.room+' – '+p.label;}).join(', ')
+      +'</div>';
+  }
+  if(failed.length){
+    lines+='<div style="margin-top:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:6px 10px;font-size:var(--font-size-xs);color:#991b1b;line-height:1.4">'
+      +'✕ '+failed.length+' room photo mirror'+(failed.length===1?'':'s')+' failed — re-upload to retry: '+failed.map(function(p){return p.room+' – '+p.label;}).join(', ')
+      +'</div>';
+  }
+  el.style.display='block';
+  el.innerHTML=lines;
+}
+
+// Not called anywhere yet in Phase 1 — this is the function the future
+// Phase 2 Hosting-migration script calls once a slot's SEO mirror has
+// actually been published to viluresidence.net/images/rooms/.
+//
+// Re-reads the room's document fresh from Firestore (never trusts the local
+// _roomDetails cache, which could be stale by the time a human runs the
+// Phase 2 script) and only marks the slot synced if expectedContentHash
+// still matches both the mirror's own content hash AND the room's current
+// source-photo hash — i.e. nothing has changed since the mirror the caller
+// is about to publish was generated. Refuses (does not throw) otherwise, so
+// a slot can never be marked synced against a mirror that no longer
+// corresponds to the live source photo.
+function markRoomPhotoSeoSynced(rn, slotId, expectedContentHash){
+  return fsDb.collection('room_details').doc(rn).get().then(function(snap){
+    var data=(snap.exists&&snap.data())||{};
+    var entry=data.photoSlots&&data.photoSlots[slotId];
+    var m=entry&&entry.seoMirror;
+    if(!m) return {ok:false, reason:'no-mirror-state'};
+    if(m.status!==SEO_MIRROR_STATUS.PENDING_PUBLISH) return {ok:false, reason:'not-pending-publish', status:m.status};
+    if(m.mirrorContentHash!==expectedContentHash||m.sourceContentHash!==expectedContentHash){
+      return {ok:false, reason:'stale-hash', expected:expectedContentHash, mirrorContentHash:m.mirrorContentHash, sourceContentHash:m.sourceContentHash};
+    }
+    var updatePath={};
+    updatePath['photoSlots.'+slotId+'.seoMirror.status']=SEO_MIRROR_STATUS.SYNCED;
+    updatePath['photoSlots.'+slotId+'.seoMirror.syncedAt']=firebase.firestore.FieldValue.serverTimestamp();
+    return fsDb.collection('room_details').doc(rn).update(updatePath).then(function(){
+      if(_roomDetails[rn]&&_roomDetails[rn].photoSlots&&_roomDetails[rn].photoSlots[slotId]&&_roomDetails[rn].photoSlots[slotId].seoMirror){
+        _roomDetails[rn].photoSlots[slotId].seoMirror.status=SEO_MIRROR_STATUS.SYNCED;
+      }
+      return {ok:true};
+    });
+  });
+}
+
 // One-time migration off the old embedded-in-Firestore photo formats (the
 // freeform photos[] array, or the original single `photo` string) onto
 // Cloud Storage + the 5 fixed slots — decodes each old base64 data URL,
@@ -6989,17 +7140,55 @@ function engUploadSlotPhoto(rn, slotId, inputEl){
   if(!file)return;
   if(file.size>ENG_MAX_UPLOAD_BYTES){toast('Image too large — please choose a file under 15MB');return;}
   toast('Uploading photo…');
+  var photoBlob, contentHash;
   resizeImageToBlob(file, 2000, 0.9).then(function(blob){
+    photoBlob=blob;
     return uploadRoomPhotoBlob(rn, slotId, blob);
   }).then(function(url){
+    return shortContentHash(photoBlob).then(function(hash){
+      contentHash=hash;
+      // SEO mirror is best-effort and must never block or fail the primary
+      // upload. On failure this resolves {mirrorPath:null} rather than
+      // reusing any prior mirror info — a failed mirror must never be able
+      // to masquerade as still describing the new source photo.
+      return uploadSeoMirror(rn, slotId, photoBlob, hash).then(function(path){
+        return {url:url, mirrorPath:path};
+      }).catch(function(e){
+        console.error('SEO mirror upload failed (non-fatal)', rn, slotId, e);
+        return {url:url, mirrorPath:null};
+      });
+    });
+  }).then(function(result){
     _roomDetails[rn]=_roomDetails[rn]||{};
     _roomDetails[rn].photoSlots=_roomDetails[rn].photoSlots||engEmptySlots();
     var slotDef=engSlotDefs().find(function(s){return s.id===slotId;});
-    _roomDetails[rn].photoSlots[slotId]={url:url,label:slotDef.label};
+    var slotEntry={url:result.url,label:slotDef.label};
+    // Every successful primary upload writes a complete, fresh seoMirror
+    // object — never merges with or falls back to whatever was there
+    // before, so a slot can never end up describing last time's photo.
+    slotEntry.seoMirror = result.mirrorPath ? {
+      sourceContentHash: contentHash,
+      status: SEO_MIRROR_STATUS.PENDING_PUBLISH,
+      path: result.mirrorPath,
+      mirrorContentHash: contentHash,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      mirroredAt: firebase.firestore.FieldValue.serverTimestamp(),
+      syncedAt: null
+    } : {
+      sourceContentHash: contentHash,
+      status: SEO_MIRROR_STATUS.MIRROR_FAILED,
+      path: null,
+      mirrorContentHash: null,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      mirroredAt: null,
+      syncedAt: null
+    };
+    _roomDetails[rn].photoSlots[slotId]=slotEntry;
     delete _roomDetails[rn].photo;
     delete _roomDetails[rn].photos;
     saveRoomDetails(_roomDetails, rn);
     renderEngRoomForm(rn);
+    renderSeoSyncIndicator();
     toast('Photo uploaded ✓');
   }).catch(function(err){
     console.error('engUploadSlotPhoto failed', err);
@@ -7010,12 +7199,16 @@ function engUploadSlotPhoto(rn, slotId, inputEl){
 function engRemoveSlotPhoto(rn, slotId){
   var d=_roomDetails[rn];
   if(!d||!d.photoSlots||!d.photoSlots[slotId])return;
-  var url=d.photoSlots[slotId].url;
+  var entry=d.photoSlots[slotId];
+  var url=entry.url;
+  var mirrorPath=entry.seoMirror&&entry.seoMirror.path;
   d.photoSlots[slotId]=null;
   saveRoomDetails(_roomDetails, rn);
   renderEngRoomForm(rn);
+  renderSeoSyncIndicator();
   toast('Photo removed');
   try{ fsStorage.refFromURL(url).delete().catch(function(){}); }catch(e){}
+  if(mirrorPath){ try{ fsStorage.ref(mirrorPath).delete().catch(function(){}); }catch(e){} }
 }
 
 // High-quality resize for new uploads (unlike the old embedded-in-Firestore

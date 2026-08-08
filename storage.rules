@@ -17,6 +17,16 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // Descriptively-named SEO-mirror copies written alongside each
+    // room-photos upload (Room Photo SEO Architecture, Phase 1) — same
+    // public-read/admin-write shape as room-photos itself. Not yet read by
+    // the website; exists so a future one-time Hosting migration always has
+    // an up-to-date, correctly-named source instead of drifting silently.
+    match /room-photos-seo/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // General website content images (currently: the About section's
     // property photo) - same public-read/admin-write shape as room-photos,
     // for site assets that aren't tied to a specific room.
