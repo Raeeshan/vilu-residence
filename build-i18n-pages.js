@@ -329,14 +329,69 @@ function updateSitemapLastmod() {
 // Only viluresidence.net-hosted images are eligible. Firebase Storage's
 // firebasestorage.googleapis.com is a shared, Google-owned, multi-tenant
 // host — it can't be verified as a Vilu Residence property in Search
-// Console, which Google's cross-domain image-sitemap guidance requires, so
-// gallery/About/room photos (all Storage-only today) are excluded here, not
-// just deferred by choice. Extracted straight from each page's own source
-// markup rather than a hand-maintained parallel list, so this stays correct
-// automatically if a hero photo is ever swapped later.
+// Console, which Google's cross-domain image-sitemap guidance requires.
+// Hero/Gallery/About images are extracted straight from each page's own
+// source markup rather than a hand-maintained parallel list, so those stay
+// correct automatically if a photo is ever swapped later.
 function escapeXmlText(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+// Room photos CANNOT be extracted the same way: photoSlots.{slot}.url lives
+// in Firestore and is written into the DOM by client-side JS at runtime
+// (see refreshRoomCards() / the booking-flow gallery in vilu-website.html),
+// never into this file's static source markup — so no regex over srcHtml
+// will ever find them, and this build script deliberately has no Firestore
+// access (see Room Photo Image Sitemap Integration task). This list is
+// therefore a manually maintained snapshot of the 30 canonical URLs that
+// were live and `seoMirror.status === 'synced'` in Firestore as of the
+// Room Photo SEO Migration (VR01–VR06, closed). If a room photo is ever
+// replaced after this, photoSlots.{slot}.url in Firestore will move on
+// without this list — someone must update it by hand, or the sitemap will
+// silently go stale for that one image. Every room's URL is kept even where
+// two rooms share byte-identical underlying photography (see the migration
+// report), because each is a real, independently live URL for a specific
+// room — deduplicating would arbitrarily attribute one room's photo to
+// another. JPG only, never the .webp twin, matching the pattern used for
+// every other image list in this file.
+const ROOM_PHOTO_SITEMAP_URLS = [
+  // VR01 — Deluxe Family Room
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bed-vr01-cd89b8dd.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-interior-vr01-6b24913b.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-vanity-vr01-4dba6981.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-shower-vr01-5c619110.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-veranda-night-vr01-c17b483d.jpg`,
+  // VR02 — Deluxe Family Room
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-interior-vr02-6b24913b.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bed-vr02-cd89b8dd.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-vanity-vr02-4dba6981.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-shower-vr02-5c619110.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-veranda-night-vr02-c17b483d.jpg`,
+  // VR03 — Double Room
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bed-vr03-5ddc46c5.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-interior-vr03-a7349edd.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-shower-vr03-cfa7afa3.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr03-e10a9edf.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-veranda-night-vr03-ff126dbb.jpg`,
+  // VR04 — Double Room
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bed-vr04-5ddc46c5.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-interior-vr04-a7349edd.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-shower-vr04-cfa7afa3.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr04-e10a9edf.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-veranda-night-vr04-ff126dbb.jpg`,
+  // VR05 — Double Room
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bed-vr05-5ddc46c5.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-interior-vr05-a7349edd.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-shower-vr05-cfa7afa3.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr05-e10a9edf.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-veranda-night-vr05-ff126dbb.jpg`,
+  // VR06 — Deluxe Family Room with Open Deck
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-bed-ec7aef94.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-patio-door-8ccfeeaf.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-bathroom-shower-63d57afd.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-bathroom-vanity-ac6dad9a.jpg`,
+  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-veranda-night-6023c510.jpg`,
+];
 
 function extractHeroImages(pageDef, srcHtml) {
   const files = [];
@@ -352,17 +407,22 @@ function extractHeroImages(pageDef, srcHtml) {
     }
     // Gallery + About: same-origin lazy-bg photos already migrated off
     // Firebase Storage (data-bg-url="https://viluresidence.net/images/...").
-    // Room-card data-bg-url values are Firestore-sourced Storage URLs and
-    // never match this same-origin prefix, so they're excluded automatically.
+    // Room-card data-bg-url values are set by client-side JS at runtime and
+    // are never present in this static srcHtml at all, so they're excluded
+    // automatically here regardless of what host they now point to — see
+    // ROOM_PHOTO_SITEMAP_URLS below for how those are actually included.
     const galleryRe = new RegExp(`data-bg-url="${SITE_ROOT}/images/([^"]+\\.jpg)"`, 'g');
     while ((m = galleryRe.exec(srcHtml))) {
       if (!seen.has(m[1])) { seen.add(m[1]); files.push(m[1]); }
     }
-  } else {
-    // Standalone pages: exactly one page-header hero background image.
-    const m = srcHtml.match(/class="page-header"[^>]*style="[^"]*?background-image:url\('images\/([^']+\.jpg)'\)/);
-    if (m) files.push(m[1]);
+    const fullUrls = files.map((file) => `${SITE_ROOT}/images/${file}`);
+    // Room photos are already full URLs (they live under /images/rooms/,
+    // not /images/), so they're appended after the map, not before it.
+    return fullUrls.concat(ROOM_PHOTO_SITEMAP_URLS);
   }
+  // Standalone pages: exactly one page-header hero background image.
+  const m = srcHtml.match(/class="page-header"[^>]*style="[^"]*?background-image:url\('images\/([^']+\.jpg)'\)/);
+  if (m) files.push(m[1]);
   return files.map((file) => `${SITE_ROOT}/images/${file}`);
 }
 
