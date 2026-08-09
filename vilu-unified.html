@@ -21,13 +21,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .scrl{flex:1;min-width:0;overflow-y:auto;overflow-x:auto;padding:16px}
 .sec{display:none}.sec.on{display:block!important;padding-bottom:60px}
 #s-cal.on{display:flex!important;flex-direction:column;padding:0!important}
-@media(max-width:900px){
-  .sb{width:180px;min-width:180px;max-width:180px}
-  .g4{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:600px){
-  .g4,.g2,.rd-grid,.form-grid,.fg-grid,.igg{grid-template-columns:1fr}
-}
 #res-quickbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:800;align-items:center;gap:14px;min-width:500px;max-width:90vw}
 #qb-bar-info{flex:1}
 @media(max-width:600px){
@@ -636,6 +629,24 @@ body.pms-mode { overflow:hidden; }
 .an-honesty .tag.b{background:#fdf3d8;color:#b7791f}
 .an-honesty .tag.c{background:#eef0f2;color:#5f6b76}
 @media (max-width:600px){.an-pill{padding:5px 10px;font-size:var(--font-size-xs)}}
+
+/* Responsive grid breakpoints for .g4/.g2/.rd-grid/.form-grid/.fg-grid/.igg
+   (and the .sb sidebar width) — MUST stay here, after every unconditional
+   base rule for these selectors. Plain CSS cascade rules mean that among
+   rules of equal specificity, the one later in source order wins,
+   regardless of whether a media query's condition is true — these blocks
+   used to sit near the top of the stylesheet, before the base .g4/.g2/etc
+   rules further down, which made the base rules always win and silently
+   turned every mobile/tablet breakpoint into dead code. Do not move this
+   block back above line ~460 (.fg-grid) without re-checking every base
+   rule these selectors touch. */
+@media(max-width:900px){
+  .sb{width:180px;min-width:180px;max-width:180px}
+  .g4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .g4,.g2,.rd-grid,.form-grid,.fg-grid,.igg{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
