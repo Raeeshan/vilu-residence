@@ -616,6 +616,26 @@ body.pms-mode { overflow:hidden; }
 #booking-engine[style*="display: block"] {
   opacity: 1 !important;
 }
+
+/* ── Owner Analytics ── */
+.an-h{font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.06em;color:#6b7280;font-weight:700;margin:0 0 8px}
+.an-pill{padding:6px 14px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-size:var(--font-size-sm);font-weight:600;color:#6b7280;cursor:pointer}
+.an-pill.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.an-chart{width:100%;height:auto;display:block}
+.an-chart text{font-size:10px;fill:#6b7280;font-family:inherit}
+.an-tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-sm);margin-top:8px}
+.an-tbl th{text-align:left;color:#6b7280;font-weight:700;font-size:var(--font-size-xs);text-transform:uppercase;padding:4px 8px 6px;border-bottom:1px solid #e5e7eb}
+.an-tbl td{padding:6px 8px;border-bottom:1px solid #f3f4f6}
+.an-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.an-honesty{background:#f4f6f8;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;font-size:var(--font-size-sm);color:#6b7280}
+.an-honesty h4{margin:0 0 8px;font-size:var(--font-size-sm);color:#111827;font-weight:700}
+.an-honesty ul{margin:0;padding-left:18px}
+.an-honesty li{margin-bottom:5px}
+.an-honesty .tag{font-weight:700;padding:1px 6px;border-radius:4px;font-size:10.5px;margin-right:4px}
+.an-honesty .tag.a{background:#e6f4ea;color:#0f9d58}
+.an-honesty .tag.b{background:#fdf3d8;color:#b7791f}
+.an-honesty .tag.c{background:#eef0f2;color:#5f6b76}
+@media (max-width:600px){.an-pill{padding:5px 10px;font-size:var(--font-size-xs)}}
 </style>
 </head>
 <body>
@@ -706,6 +726,8 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" id="sl-transport" style="display:none" onclick="go('transport',this)"><i class="ti ti-anchor"></i>Transportation</div>
   <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
+  <div class="sg">Owner</div>
+  <div class="sl" id="sl-analytics" style="display:none" onclick="go('analytics',this)"><i class="ti ti-chart-histogram"></i>Owner analytics</div>
   <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:var(--font-size-xs);color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
 
   </div>
@@ -1215,7 +1237,7 @@ body.pms-mode { overflow:hidden; }
         <div class="fg"><label>Adults</label><select id="nb-ad" onchange="nbCalc()"><option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Children (2-12)</label><select id="nb-ch" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
         <div class="fg"><label>Infants &lt;2 <span style="color:#0096c7;font-size:var(--font-size-xs)">Green tax exempt</span></label><select id="nb-inf" onchange="nbCalc()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
-        <div class="fg"><label>Source</label><select id="nb-src" onchange="nbSC()"><option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Agoda</option><option>Expedia</option><option>Google Hotels</option><option>Phone</option><option>Walk-in</option></select></div>
+        <div class="fg"><label>Source</label><select id="nb-src" onchange="nbSC()"><option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Agoda</option><option>Expedia</option><option>Google Hotels</option><option>Agency</option><option>Website</option><option>Phone</option><option>Walk-in</option></select></div>
         <div class="fg"><label>Payment</label><select id="nb-pay"><option>Unpaid</option><option>Deposit paid</option><option>Fully paid</option></select></div>
         <div class="fg" style="grid-column:1/-1"><label>Notes / special requests</label><textarea id="nb-notes" placeholder="Early check-in, dietary needs..."></textarea></div>
       </div>
@@ -1689,6 +1711,56 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
 </div>
 
 <div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Loading operations...</div></div></div>
+
+<div class="sec" id="s-analytics">
+  <div class="card">
+    <h3>Reporting period</h3>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button class="an-pill" onclick="anSetRange('today')" id="an-pill-today">Today</button>
+      <button class="an-pill" onclick="anSetRange('week')" id="an-pill-week">This week</button>
+      <button class="an-pill on" onclick="anSetRange('month')" id="an-pill-month">This month</button>
+      <button class="an-pill" onclick="anSetRange('year')" id="an-pill-year">This year</button>
+      <button class="an-pill" onclick="anSetRange('custom')" id="an-pill-custom">Custom</button>
+      <input type="date" id="an-from" onchange="anSetRange('custom')" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 8px;font-size:var(--font-size-sm)">
+      <span style="color:#6b7280;font-size:var(--font-size-sm)">to</span>
+      <input type="date" id="an-to" onchange="anSetRange('custom')" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 8px;font-size:var(--font-size-sm)">
+      <button onclick="anRefresh()" style="margin-left:auto;background:#e8f5f2;color:#0f4a3c;border:1px solid #bfe3d8;border-radius:6px;padding:6px 12px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer">↻ Refresh data</button>
+    </div>
+  </div>
+
+  <div id="an-empty" style="display:none"></div>
+  <div id="an-body">
+    <h4 class="an-h">Today's Overview</h4>
+    <div class="g4" id="an-today"></div>
+
+    <h4 class="an-h" id="an-rev-label">Revenue &amp; Occupancy</h4>
+    <div class="g4" id="an-rev"></div>
+
+    <div class="g2">
+      <div class="card"><h3>Booking Sources</h3><div id="an-src"></div></div>
+      <div class="card"><h3>Monthly Revenue</h3><div id="an-chart-rev"></div></div>
+    </div>
+
+    <div class="g2">
+      <div class="card"><h3>Occupancy Trend</h3><div id="an-chart-occ"></div></div>
+      <div class="card"><h3>Guest Nationalities <span style="font-size:11px;color:#6b7280;font-weight:400">(as entered)</span></h3><div id="an-chart-nat"></div></div>
+    </div>
+
+    <div class="g4" id="an-stay"></div>
+
+    <div class="g2">
+      <div class="card"><h3>Activities Sold <span style="font-size:11px;color:#6b7280;font-weight:400">(counts only — no price data)</span></h3><div id="an-acts"></div></div>
+      <div class="card"><h3>Monthly Arrival Trend</h3><div id="an-arrivals"></div></div>
+    </div>
+
+    <div class="g2">
+      <div class="card"><h3>Tax Collected</h3><div id="an-tax"></div></div>
+      <div class="card"><h3>Payment Status</h3><div id="an-pay"></div></div>
+    </div>
+
+    <div id="an-honesty"></div>
+  </div>
+</div>
 
 <!-- TRIPS MODAL -->
 <div class="mbg" id="m-trips" onclick="if(event.target===this)this.classList.remove('on')">
@@ -2757,8 +2829,8 @@ const OTAS=[
   {id:'gg',nm:'Google Hotels',color:'#4285f4',comm:0,on:true,bk:3,rev:840},
 ];
 
-const SRC_COL={Direct:'#22c55e','Booking.com':'#3b82f6','Airbnb':'#f43f5e','Agoda':'#f59e0b','Expedia':'#eab308','Google Hotels':'#4285f4'};
-const SRC_CLS={Direct:'ok','Booking.com':'ib2','Airbnb':'er','Agoda':'wn','Expedia':'wn','Google Hotels':'ib2','Phone':'ot','Walk-in':'ot'};
+const SRC_COL={Direct:'#22c55e','Booking.com':'#3b82f6','Airbnb':'#f43f5e','Agoda':'#f59e0b','Expedia':'#eab308','Google Hotels':'#4285f4',Agency:'#4f46e5',Website:'#1e3a5f'};
+const SRC_CLS={Direct:'ok','Booking.com':'ib2','Airbnb':'er','Agoda':'wn','Expedia':'wn','Google Hotels':'ib2',Agency:'ib2',Website:'ok','Phone':'ot','Walk-in':'ot'};
 const ST_CLS={Confirmed:'ok',Pending:'wn','Checked in':'ib2','Checked out':'ot',Cancelled:'er'};
 
 function getHR(){
@@ -3055,8 +3127,8 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,ops:function(){
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -3069,8 +3141,8 @@ const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();
     },200);
   }};
 function go(id,el){
-  // Block non-admins from accessing user management / transportation settings
-  if((id==='users'||id==='transport') && (!currentUser || currentUser.role!=='admin')){
+  // Block non-admins from accessing user management / transportation settings / owner analytics
+  if((id==='users'||id==='transport'||id==='analytics') && (!currentUser || currentUser.role!=='admin')){
     toast('⛔ Admin access only');
     return;
   }
@@ -3120,10 +3192,375 @@ function drawDash(){
     <div style="background:#f3f4f6;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Service</div><div style="font-size:var(--font-size-xl);font-weight:700">${TAX.svc}%</div></div>`;
 }
 
+// ══════════════════════════════════════════════
+// OWNER ANALYTICS (admin-only, read-only — see the Owner Analytics plan doc)
+// Everything below reads RES/VR/BLK/TAX/DEFAULT_TRIPS, already loaded by
+// the rest of the app, and writes only innerHTML. No Firestore reads or
+// writes of its own — anRefresh() just calls the existing loader.
+// ══════════════════════════════════════════════
+var AN_RANGE='month', AN_FROM='', AN_TO='';
+
+function anMonday(dstr){
+  var d=new Date(dstr+'T12:00');var day=d.getDay();var diff=(day===0?-6:1-day);
+  d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);
+}
+function anRangeBounds(preset){
+  if(preset==='today')return{from:tS,to:tS};
+  if(preset==='week'){var mon=anMonday(tS);return{from:mon,to:D2(mon,6)};}
+  if(preset==='month'){var ym=tS.slice(0,7);var last=new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();return{from:ym+'-01',to:ym+'-'+String(last).padStart(2,'0')};}
+  if(preset==='year'){var y=tS.slice(0,4);return{from:y+'-01-01',to:y+'-12-31'};}
+  return{from:AN_FROM||tS,to:AN_TO||tS};
+}
+function anSetRange(preset){
+  AN_RANGE=preset;
+  document.querySelectorAll('.an-pill').forEach(function(p){p.classList.remove('on');});
+  var pill=document.getElementById('an-pill-'+preset);if(pill)pill.classList.add('on');
+  if(preset!=='custom'){
+    var b=anRangeBounds(preset);AN_FROM=b.from;AN_TO=b.to;
+    var fromEl=document.getElementById('an-from'),toEl=document.getElementById('an-to');
+    if(fromEl)fromEl.value=AN_FROM;if(toEl)toEl.value=AN_TO;
+  }else{
+    AN_FROM=document.getElementById('an-from').value||tS;
+    AN_TO=document.getElementById('an-to').value||tS;
+  }
+  drawAnalytics();
+}
+async function anRefresh(){
+  try{await loadAllFromSupabase();}catch(e){}
+  drawAnalytics();
+}
+function anRangeLabel(){
+  return{today:'Today',week:'This Week',month:'This Month',year:'This Year',custom:'Custom Range'}[AN_RANGE]||'Selected Period';
+}
+
+// ── shared predicates/helpers ──
+function anVilu(r){return(r.prop||propFromRoomId(r.rn))==='vilu';}
+function anActive(r){return r.st!=='Cancelled';}
+function anOverlaps(r,from,to){return r.ci<to&&r.co>from;}
+function anNightsIn(r,from,to){
+  var s=r.ci>from?r.ci:from,e=r.co<to?r.co:to;
+  return Math.max(0,nt(s,e));
+}
+function anViluRes(){return RES.filter(function(r){return anVilu(r)&&anActive(r);});}
+function anFmt(n){return'$'+Math.round(n||0).toLocaleString();}
+// calcTax() doesn't include the extra-bed charge — saveEdit()/pbd() compute
+// it separately and don't persist it to Firestore — so this is the one
+// place that formula lives; anResTotal() and anRevenue() both call it
+// rather than each re-deriving it.
+function anExtraBedCharge(r){
+  var nights=nt(r.ci,r.co)||1;
+  return(r.extraBeds||0)*(r.rate||0)*nights;
+}
+// The ONE shared money helper — every dollar figure in this section must
+// go through this, never calcTax(r).total alone (see anExtraBedCharge above
+// for why calcTax() alone under-reports).
+function anResTotal(r){
+  return calcTax(r).total+anExtraBedCharge(r);
+}
+// Prorates a reservation's total across only the nights of its stay that
+// fall inside [from,to] — so a stay spanning a range boundary is neither
+// double-counted nor dropped when two adjacent periods are summed.
+function anResTotalIn(r,from,to){
+  var totalNights=nt(r.ci,r.co)||1;
+  var inRangeNights=anNightsIn(r,from,to);
+  if(inRangeNights<=0)return 0;
+  return anResTotal(r)*inRangeNights/totalNights;
+}
+
+// ── aggregators (pure — take a range, return a plain object) ──
+function anToday(){
+  var occRes=RES.filter(function(r){return anVilu(r)&&anActive(r)&&r.st!=='Checked out'&&r.ci<=tS&&r.co>tS;});
+  var blockedToday=BLK.filter(function(b){return isVR(b.rn)&&b.from<=tS&&b.to>tS;}).length;
+  var checkins=RES.filter(function(r){return anVilu(r)&&anActive(r)&&r.st!=='Checked out'&&r.ci===tS;});
+  var checkouts=RES.filter(function(r){return anVilu(r)&&r.co===tS&&r.st==='Checked in';});
+  return{
+    occupied:occRes.length,available:Math.max(0,VR.length-occRes.length-blockedToday),blocked:blockedToday,
+    checkins:checkins.length,checkouts:checkouts.length,
+    guests:occRes.reduce(function(s,r){return s+(r.ad||0)+(r.ch||0);},0),
+    adults:occRes.reduce(function(s,r){return s+(r.ad||0);},0),
+    children:occRes.reduce(function(s,r){return s+(r.ch||0);},0)
+  };
+}
+function anRevenue(from,to){
+  var res=anViluRes().filter(function(r){return anOverlaps(r,from,to);});
+  var out={total:0,base:0,svc:0,tgst:0,green:0,bed:0,nights:0,bookings:res.length};
+  res.forEach(function(r){
+    var x=calcTax(r);
+    var totalNights=nt(r.ci,r.co)||1,inNights=anNightsIn(r,from,to);
+    var frac=inNights/totalNights;
+    out.base+=x.base*frac;out.svc+=x.svc*frac;out.tgst+=x.tgst*frac;out.green+=x.green*frac;out.bed+=x.bed*frac;
+    out.total+=(x.total+anExtraBedCharge(r))*frac;
+    out.nights+=inNights;
+  });
+  return out;
+}
+// revArg lets a caller that already computed anRevenue() for this exact
+// range pass it in instead of paying for a second full RES pass — used by
+// drawAnalytics()'s main render, which needs both anyway. Trend callers
+// (anTrailing12) still compute it fresh per-month, which is unavoidable —
+// that's 12 genuinely different ranges, not duplicate work.
+function anOccupancy(from,to,revArg){
+  var days=nt(from,to)+1;
+  var availableRoomNights=VR.length*days;
+  var rev=revArg||anRevenue(from,to);
+  var occPct=availableRoomNights>0?(rev.nights/availableRoomNights*100):0;
+  var roomRevenue=rev.base+rev.svc; // ADR/RevPAR convention: net of tax
+  var adr=rev.nights>0?roomRevenue/rev.nights:0;
+  var revpar=availableRoomNights>0?roomRevenue/availableRoomNights:0;
+  var stays=anViluRes().filter(function(r){return anOverlaps(r,from,to);});
+  var avgStay=stays.length?stays.reduce(function(s,r){return s+nt(r.ci,r.co);},0)/stays.length:0;
+  var withLead=stays.filter(function(r){return r.createdAt;});
+  var avgLead=withLead.length?withLead.reduce(function(s,r){return s+Math.max(0,nt(r.createdAt.slice(0,10),r.ci));},0)/withLead.length:null;
+  return{occPct:occPct,adr:adr,revpar:revpar,avgStay:avgStay,avgLead:avgLead,leadCoverage:withLead.length,leadTotal:stays.length};
+}
+function anSources(from,to){
+  var res=anViluRes().filter(function(r){return anOverlaps(r,from,to);});
+  var map={};
+  res.forEach(function(r){
+    var s=r.src||'Unspecified';
+    if(!map[s])map[s]={src:s,bookings:0,revenue:0};
+    map[s].bookings++;map[s].revenue+=anResTotalIn(r,from,to);
+  });
+  var rows=Object.values(map).sort(function(a,b){return b.revenue-a.revenue;});
+  var total=rows.reduce(function(s,x){return s+x.revenue;},0);
+  rows.forEach(function(x){x.pct=total>0?x.revenue/total*100:0;});
+  return rows;
+}
+function anGuests(from,to){
+  var allActive=anViluRes(); // computed once, reused below for both the
+                              // range-scoped stats and the all-history
+                              // returning-guest match — avoids scanning
+                              // RES twice per call.
+  var res=allActive.filter(function(r){return anOverlaps(r,from,to);});
+  var natMap={};
+  res.forEach(function(r){var n=(r.nat||'').trim()||'Unspecified';natMap[n]=(natMap[n]||0)+1;});
+  var nat=Object.keys(natMap).map(function(k){return{label:k,value:natMap[k]};}).sort(function(a,b){return b.value-a.value;});
+  // Returning = seen on ≥2 non-cancelled bookings, matched by normalized
+  // email (falling back to name) across ALL history, not just this range —
+  // "returning" describes the guest, not the period.
+  var byGuest={};
+  allActive.forEach(function(r){
+    var key=(r.em||'').trim().toLowerCase()||((r.fn||'')+' '+(r.ln||'')).trim().toLowerCase();
+    if(!key)return;
+    byGuest[key]=(byGuest[key]||0)+1;
+  });
+  var returning=Object.keys(byGuest).filter(function(k){return byGuest[k]>=2;}).length;
+  return{
+    nationality:nat,returning:returning,
+    adults:res.reduce(function(s,r){return s+(r.ad||0);},0),
+    children:res.reduce(function(s,r){return s+(r.ch||0);},0)
+  };
+}
+function anActivities(from,to){
+  var res=anViluRes().filter(function(r){return anOverlaps(r,from,to);});
+  var byType={};
+  var arr=0,dep=0,foodRevenue=0;
+  res.forEach(function(r){
+    (r.trips||[]).forEach(function(t){
+      if(t.date<from||t.date>to)return;
+      var cfg=TRIPS_CONFIG.find(function(c){return c.id===t.tripId;});
+      if(!byType[t.tripId])byType[t.tripId]={id:t.tripId,name:cfg?cfg.name:t.tripId,icon:cfg?cfg.icon:'🎫',booked:0,done:0};
+      byType[t.tripId].booked++;
+      if(t.status==='done')byType[t.tripId].done++;
+    });
+    if(r.arrTransport&&r.ci>=from&&r.ci<=to)arr++;
+    if(r.depTransport&&r.co>=from&&r.co<=to)dep++;
+    (r.foodOrders||[]).forEach(function(f){foodRevenue+=(f.qty||0)*(f.price||0);});
+  });
+  var rows=Object.values(byType).sort(function(a,b){return b.booked-a.booked;});
+  return{byType:rows,transfersArr:arr,transfersDep:dep,foodRevenue:foodRevenue};
+}
+function anFinancial(from,to){
+  var res=anViluRes().filter(function(r){return anOverlaps(r,from,to);});
+  var buckets={'Fully paid':0,'Deposit paid':0,'Unpaid':0,'Unknown':0};
+  var outstanding=0;
+  res.forEach(function(r){
+    var p=r.pay||'';
+    if(p==='Fully paid')buckets['Fully paid']++;
+    else if(p==='Deposit paid'){buckets['Deposit paid']++;outstanding+=anResTotalIn(r,from,to)*0.5;}
+    else if(p==='Unpaid'){buckets['Unpaid']++;outstanding+=anResTotalIn(r,from,to);}
+    else buckets['Unknown']++;
+  });
+  var rev=anRevenue(from,to);
+  return{buckets:buckets,outstanding:outstanding,tgst:rev.tgst,green:rev.green,svc:rev.svc};
+}
+// Trailing-12-month trend series — deliberately independent of the
+// reporting-period picker (a picker set to "Today" shouldn't collapse a
+// trend chart to one bar), matching how drawDash's own metrics never
+// depend on any user-facing filter either.
+function anTrailing12(fn){
+  var out=[];
+  var base=new Date(tS+'T12:00');
+  for(var i=11;i>=0;i--){
+    var d=new Date(base.getFullYear(),base.getMonth()-i,1);
+    var y=d.getFullYear(),m=d.getMonth();
+    var from=y+'-'+String(m+1).padStart(2,'0')+'-01';
+    var last=new Date(y,m+1,0).getDate();
+    var to=y+'-'+String(m+1).padStart(2,'0')+'-'+String(last).padStart(2,'0');
+    out.push({label:MON_NAMES[m].slice(0,3),value:fn(from,to)});
+  }
+  return out;
+}
+function anArrivalTrend(){
+  var counts={};
+  anViluRes().forEach(function(r){var key=r.ci.slice(0,7);counts[key]=(counts[key]||0)+1;});
+  var out=[];
+  var base=new Date(tS+'T12:00');
+  for(var i=11;i>=0;i--){
+    var d=new Date(base.getFullYear(),base.getMonth()-i,1);
+    var key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    out.push({label:MON_NAMES[d.getMonth()].slice(0,3),value:counts[key]||0});
+  }
+  return out;
+}
+
+// ── chart primitives — hand-rolled inline SVG, no charting library. See
+// the Owner Analytics plan doc for why: this file loads zero JS
+// dependencies beyond Firebase, and every section here is a stateless
+// innerHTML re-render, which a stateful canvas library isn't built for. ──
+function anBarChart(data,opts){
+  opts=opts||{};
+  var w=320,h=140,padB=22,padT=8;
+  var max=Math.max.apply(null,data.map(function(d){return d.value||0;}).concat([1]));
+  var n=data.length||1,gap=w/n,bw=Math.max(4,gap*0.55);
+  var bars=data.map(function(d,i){
+    var bh=max>0?(h-padT-padB)*(d.value/max):0;
+    var x=i*gap+(gap-bw)/2,y=h-padB-Math.max(0,bh);
+    return'<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,bh).toFixed(1)+'" fill="'+(opts.color||'#00b4d8')+'"><title>'+d.label+': '+(opts.fmt?opts.fmt(d.value):d.value)+'</title></rect>'+
+      (n<=12?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(h-6)+'" text-anchor="middle">'+d.label+'</text>':'');
+  }).join('');
+  return'<svg class="an-chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><line x1="0" y1="'+(h-padB)+'" x2="'+w+'" y2="'+(h-padB)+'" stroke="#e5e7eb"/>'+bars+'</svg>';
+}
+function anLineChart(data,opts){
+  opts=opts||{};
+  var w=320,h=140,padB=22,padT=10,padX=10;
+  var max=Math.max.apply(null,data.map(function(d){return d.value||0;}).concat([1]));
+  var n=data.length||1,step=n>1?(w-2*padX)/(n-1):0;
+  var pts=data.map(function(d,i){
+    return{x:padX+i*step,y:h-padB-(max>0?(h-padT-padB)*(d.value/max):0),d:d};
+  });
+  var poly=pts.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  var dots=pts.map(function(p,i){
+    return'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="2.5" fill="'+(opts.color||'#0891b2')+'"><title>'+p.d.label+': '+(opts.fmt?opts.fmt(p.d.value):p.d.value)+'</title></circle>'+
+      (i===0||i===pts.length-1||n<=8?'<text x="'+p.x.toFixed(1)+'" y="'+(h-6)+'" text-anchor="middle">'+p.d.label+'</text>':'');
+  }).join('');
+  return'<svg class="an-chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><line x1="0" y1="'+(h-padB)+'" x2="'+w+'" y2="'+(h-padB)+'" stroke="#e5e7eb"/><polyline fill="none" stroke="'+(opts.color||'#0891b2')+'" stroke-width="2.2" points="'+poly+'"/>'+dots+'</svg>';
+}
+function anHBarChart(data,opts){
+  opts=opts||{};
+  var w=320,rowH=22,labelW=90;
+  var h=Math.max(1,data.length)*rowH+6;
+  var max=Math.max.apply(null,data.map(function(d){return d.value||0;}).concat([1]));
+  var rows=data.map(function(d,i){
+    var y=i*rowH+4,bw=max>0?(w-labelW-8)*(d.value/max):0;
+    return'<text x="0" y="'+(y+13)+'" font-size="11" fill="#374151">'+d.label+'</text><rect x="'+labelW+'" y="'+y+'" width="'+Math.max(0,bw).toFixed(1)+'" height="14" fill="'+(opts.color||'#0f4a3c')+'"><title>'+d.label+': '+d.value+'</title></rect><text x="'+(labelW+bw+6).toFixed(1)+'" y="'+(y+11)+'" font-size="10">'+d.value+'</text>';
+  }).join('');
+  return'<svg class="an-chart" viewBox="0 0 '+w+' '+h+'">'+rows+'</svg>';
+}
+function anStackedBar(data){
+  var w=320,h=28;
+  var total=data.reduce(function(s,d){return s+(d.value||0);},0)||1;
+  var x=0;
+  var rects=data.map(function(d){
+    var bw=w*(d.value/total);
+    var r='<rect x="'+x.toFixed(1)+'" y="4" width="'+Math.max(0,bw).toFixed(1)+'" height="20" fill="'+(d.color||'#94a3b8')+'"><title>'+d.label+': '+d.value.toFixed(0)+'%</title></rect>';
+    x+=bw;return r;
+  }).join('');
+  return'<svg class="an-chart" viewBox="0 0 '+w+' '+h+'">'+rects+'</svg>';
+}
+
+// ── orchestrator ──
+function drawAnalytics(){
+  if(!currentUser||currentUser.role!=="admin"){toast("⛔ Admin access only");return;}
+  if(!AN_FROM||!AN_TO){var b=anRangeBounds(AN_RANGE);AN_FROM=b.from;AN_TO=b.to;}
+  var fromEl=document.getElementById('an-from'),toEl=document.getElementById('an-to');
+  if(fromEl&&!fromEl.value)fromEl.value=AN_FROM;
+  if(toEl&&!toEl.value)toEl.value=AN_TO;
+
+  var emptyEl=document.getElementById('an-empty'),bodyEl=document.getElementById('an-body');
+  if(!anViluRes().length){
+    if(emptyEl){emptyEl.style.display='block';emptyEl.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#6b7280">No non-cancelled reservations in the system yet — every metric below will read zero until real bookings come in.</div>';}
+    if(bodyEl)bodyEl.style.display='none';
+    return;
+  }
+  if(emptyEl)emptyEl.style.display='none';
+  if(bodyEl)bodyEl.style.display='';
+
+  var from=AN_FROM,to=AN_TO;
+  var today=anToday(),rev=anRevenue(from,to),occ=anOccupancy(from,to,rev),srcs=anSources(from,to),
+      guests=anGuests(from,to),acts=anActivities(from,to),fin=anFinancial(from,to);
+
+  document.getElementById('an-today').innerHTML=
+    '<div class="met"><label>Occupied rooms</label><div class="v">'+today.occupied+'<span style="font-size:16px;color:#6b7280;font-weight:600"> / '+VR.length+'</span></div><div class="s">'+today.available+' available'+(today.blocked?' · '+today.blocked+' blocked':'')+'</div></div>'+
+    '<div class="met"><label>Check-ins today</label><div class="v">'+today.checkins+'</div></div>'+
+    '<div class="met"><label>Check-outs today</label><div class="v">'+today.checkouts+'</div></div>'+
+    '<div class="met"><label>Guests staying</label><div class="v">'+today.guests+'</div><div class="s">'+today.adults+' adults · '+today.children+' children</div></div>';
+
+  document.getElementById('an-rev-label').textContent='Revenue & Occupancy — '+anRangeLabel();
+  document.getElementById('an-rev').innerHTML=
+    '<div class="met"><label>Revenue</label><div class="v">'+anFmt(rev.total)+'</div><div class="s">prorated per night in range</div></div>'+
+    '<div class="met"><label>Occupancy</label><div class="v">'+occ.occPct.toFixed(0)+'%</div><div class="s">'+Math.round(rev.nights)+' room-nights sold</div></div>'+
+    '<div class="met"><label>ADR</label><div class="v">'+anFmt(occ.adr)+'</div><div class="s">net of tax</div></div>'+
+    '<div class="met"><label>RevPAR</label><div class="v">'+anFmt(occ.revpar)+'</div><div class="s">ADR × occupancy</div></div>';
+
+  document.getElementById('an-src').innerHTML=
+    (srcs.length?anStackedBar(srcs.map(function(s){return{label:s.src,value:s.pct,color:SRC_BAR[s.src]||'#94a3b8'};})):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No bookings in this period.</p>')+
+    '<table class="an-tbl"><tr><th>Source</th><th>Bookings</th><th>Revenue</th></tr>'+
+    srcs.map(function(s){return'<tr><td><span class="an-dot" style="background:'+(SRC_BAR[s.src]||'#94a3b8')+'"></span>'+s.src+'</td><td>'+s.bookings+'</td><td>'+anFmt(s.revenue)+'</td></tr>';}).join('')+
+    '</table>';
+
+  document.getElementById('an-chart-rev').innerHTML=anBarChart(anTrailing12(function(f,t){return anRevenue(f,t).total;}),{color:'#00b4d8',fmt:anFmt});
+  document.getElementById('an-chart-occ').innerHTML=anLineChart(anTrailing12(function(f,t){return anOccupancy(f,t).occPct;}),{color:'#0891b2',fmt:function(v){return v.toFixed(0)+'%';}});
+
+  var natTop=guests.nationality.slice(0,10);
+  var natOther=guests.nationality.slice(10).reduce(function(s,x){return s+x.value;},0);
+  if(natOther>0)natTop.push({label:'Other',value:natOther});
+  document.getElementById('an-chart-nat').innerHTML=natTop.length?anHBarChart(natTop,{color:'#0f4a3c'}):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No guests in this period.</p>';
+
+  document.getElementById('an-stay').innerHTML=
+    '<div class="met"><label>Avg. stay length</label><div class="v">'+occ.avgStay.toFixed(1)+'<span style="font-size:14px;color:#6b7280"> nights</span></div></div>'+
+    '<div class="met"><label>Avg. lead time</label><div class="v">'+(occ.avgLead===null?'—':occ.avgLead.toFixed(1)+' days')+'</div><div class="s" style="'+(occ.leadCoverage<occ.leadTotal?'color:#b7791f':'')+'">'+occ.leadCoverage+' of '+occ.leadTotal+' bookings have data</div></div>'+
+    '<div class="met"><label>Adults</label><div class="v">'+guests.adults+'</div></div>'+
+    '<div class="met"><label>Children</label><div class="v">'+guests.children+'</div></div>'+
+    '<div class="met"><label>Returning guests</label><div class="v">'+guests.returning+'</div><div class="s">matched by email/name, all-time</div></div>';
+
+  document.getElementById('an-acts').innerHTML=
+    (acts.byType.length?
+      '<table class="an-tbl"><tr><th>Trip</th><th>Booked</th><th>Completed</th></tr>'+
+      acts.byType.map(function(t){return'<tr><td>'+t.icon+' '+t.name+'</td><td>'+t.booked+'</td><td>'+t.done+'</td></tr>';}).join('')+
+      '</table>'
+    :'<p style="font-size:var(--font-size-sm);color:#9ca3af">No activities booked in this period.</p>')+
+    '<div style="margin-top:10px;font-size:12px;color:#6b7280">✈️ Airport transfers: '+acts.transfersArr+' arrivals · '+acts.transfersDep+' departures'+(acts.foodRevenue>0?' · 🍽️ Food revenue: '+anFmt(acts.foodRevenue):'')+'</div>';
+
+  document.getElementById('an-arrivals').innerHTML=anBarChart(anArrivalTrend(),{color:'#94a3b8'});
+
+  document.getElementById('an-tax').innerHTML=
+    '<table class="an-tbl">'+
+    '<tr><td>TGST ('+TAX.tgst+'%)</td><td style="text-align:right">'+anFmt(fin.tgst)+'</td></tr>'+
+    '<tr><td>Green Tax ($'+TAX.green+'/pp/night)</td><td style="text-align:right">'+anFmt(fin.green)+'</td></tr>'+
+    '<tr><td>Service Charge ('+TAX.svc+'%)</td><td style="text-align:right">'+anFmt(fin.svc)+'</td></tr>'+
+    '</table>';
+
+  document.getElementById('an-pay').innerHTML=
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
+    '<span class="bx ok">Fully paid · '+fin.buckets['Fully paid']+'</span>'+
+    '<span class="bx wn">Deposit · '+fin.buckets['Deposit paid']+'</span>'+
+    '<span class="bx er">Unpaid · '+fin.buckets['Unpaid']+'</span>'+
+    '<span class="bx ot">Unknown · '+fin.buckets['Unknown']+'</span>'+
+    '</div><div style="font-size:13px"><strong>Outstanding estimate:</strong> '+anFmt(fin.outstanding)+' <span style="color:#6b7280;font-size:12px">(Unpaid full balance + 50% of Deposit paid — excludes Unknown)</span></div>';
+
+  document.getElementById('an-honesty').innerHTML=
+    '<div class="an-honesty"><h4>About these numbers</h4><ul>'+
+    '<li><span class="tag a">Accurate</span>Occupancy, revenue, ADR/RevPAR, tax totals, booking sources, activity counts — computed live from Firestore, same formulas as your invoices.</li>'+
+    '<li><span class="tag b">Approximate</span>Nationalities are shown exactly as typed on the booking form. Airport transfers are inferred from transport fields, not a bookable item. Activity revenue isn\'t shown — trip types don\'t carry a price yet.</li>'+
+    '<li><span class="tag c">Grows over time</span>Lead time and full Paid/Unpaid coverage only populate for bookings made after this feature shipped — there is no way to backfill historical data.</li>'+
+    '</ul></div>';
+}
+
 // CALENDAR
 const DOW_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const SRC_BAR={'Booking.com':'#2563eb','Airbnb':'#e11d48','Agoda':'#d97706','Expedia':'#b45309','Google Hotels':'#4285f4','Direct':'#059669','Phone':'#7c3aed','Walk-in':'#0891b2'};
+const SRC_BAR={'Booking.com':'#2563eb','Airbnb':'#e11d48','Agoda':'#d97706','Expedia':'#b45309','Google Hotels':'#4285f4','Direct':'#059669','Phone':'#7c3aed','Walk-in':'#0891b2','Agency':'#4f46e5','Website':'#1e3a5f'};
 // Reservation-bar color by status (Cancelled is never rendered as a bar,
 // so it has no color here) - kept in sync with the calendar legend.
 const RES_STATUS_COLOR={'Confirmed':'#16a34a','Checked in':'#2563eb','Checked out':'#94a3b8','Pending':'#ca8a04'};
@@ -4683,7 +5120,7 @@ async function submitNB(){
   for(let i=0;i<nbSelectedRooms.length;i++){
     const room=nbSelectedRooms[i];
     const id='BK'+String(Date.now()).slice(-5)+'-'+i;
-    const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn:room.n,rate:room.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop};
+    const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn:room.n,rate:room.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop,createdAt:new Date().toISOString()};
     try{
       await writeReservation(id,resToFirestoreFields(newRes));
       RES.unshift(newRes);
@@ -5343,7 +5780,7 @@ function applyUserMgmtVisibility(){
   // never sees the nav entries at all, not just a disabled/blocked screen.
   // Partner hotel *reservations* still show on the calendar for everyone;
   // this only hides the management/add-hotel section itself.
-  ['sl-users','sl-bin','sl-htls','sl-transport'].forEach(function(id){
+  ['sl-users','sl-bin','sl-htls','sl-transport','sl-analytics'].forEach(function(id){
     const sl = document.getElementById(id);
     if(sl) sl.style.display = isAdmin ? '' : 'none';
   });
@@ -9038,7 +9475,8 @@ function submitBooking(){
     nlog: [],
     prop: 'vilu',
     bookedAt: new Date().toISOString(),
-    bookedVia: 'Booking Engine'
+    bookedVia: 'Booking Engine',
+    createdAt: new Date().toISOString()
   };
   saveReservation(reservation);
 
@@ -9710,7 +10148,7 @@ async function getAvailableRoomsWithRates(candidateRooms, ci, co, excludeId) {
 // write path (new/edit/cancel/restore/field-only changes) produces the same
 // document shape the old syncResToSupabase() loop used to.
 function resToFirestoreFields(r) {
-  return {
+  var f = {
     id:r.id, room_id:r.rn,
     guest_name:(r.fn||'')+' '+(r.ln||''),
     guest_email:r.em||'', guest_phone:r.ph||'',
@@ -9724,8 +10162,20 @@ function resToFirestoreFields(r) {
     food_orders: JSON.stringify(r.foodOrders||[]),
     arr_time:r.arrTime||'', arr_transport:r.arrTransport||'', arr_from:r.arrFrom||'',
     dep_time:r.depTime||'', dep_transport:r.depTransport||'', dep_to:r.depTo||'',
+    pay:r.pay||'',
     updated_at:new Date().toISOString()
   };
+  // created_at is written ONCE, at creation, and must never be re-stamped on
+  // an edit — writeReservation() saves with {merge:true} on every save, so
+  // emitting this unconditionally would silently overwrite a booking's real
+  // creation date every time someone edits it. Only emit it when the
+  // in-memory record already carries one (stamped at the two creation
+  // sites: submitNB() and the booking engine's submitBooking()). A
+  // historical reservation that was never stamped simply never gets one —
+  // that's intentional, not a bug: there is no way to recover a real
+  // creation date for bookings made before this field existed.
+  if (r.createdAt) f.created_at = r.createdAt;
+  return f;
 }
 
 // docId/fields describe the reservation as it should end up. Pass
@@ -9995,7 +10445,8 @@ async function loadResFromSupabase() {
       inf:local.inf||0,
       st:r.status||local.st||'Confirmed',
       src:r.source||local.src||'Direct',
-      pay:local.pay||'',
+      pay:r.pay||local.pay||'',
+      createdAt:r.created_at||local.createdAt||'',
       ref:local.ref||'',
       notes:r.notes||local.notes||'',
       extraBeds:r.extra_beds||local.extraBeds||0,
