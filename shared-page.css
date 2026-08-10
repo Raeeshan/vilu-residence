@@ -29,6 +29,9 @@
   --card-border: rgba(34,211,238,.15);
   --rose: #d88fa8;
   --rose-light: #f0c3d4;
+  --warn: #f0a94e;
+  --warn-border: rgba(240,169,78,.3);
+  --warn-bg: rgba(240,169,78,.08);
   --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-base: 13px;
@@ -99,6 +102,39 @@ section{padding:80px 0;position:relative}
 .info-card i{font-size:24px;color:var(--gold-light);margin-bottom:12px;display:block}
 .info-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:8px}
 .info-card p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6}
+
+/* ── TABLE OF CONTENTS (guide pages with many sections, e.g. maamigili-guide.html) ── */
+.toc-block{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:20px 24px;margin-top:24px}
+.toc-block .section-title{font-size:var(--font-size-xl);margin-bottom:10px}
+.toc-block ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 20px;counter-reset:toc}
+.toc-block ol li{counter-increment:toc;font-size:var(--font-size-sm)}
+.toc-block ol li::before{content:counter(toc)'. ';color:var(--gold-light)}
+.toc-block a{color:var(--muted);text-decoration:none;transition:color .2s}
+.toc-block a:hover{color:var(--gold-light);text-decoration:underline}
+
+/* ── TIP BOX (advisory content — same trusted-card language as .info-card, full-width banner) ── */
+.tip-box{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--card-border);border-left:3px solid var(--gold-light);border-radius:8px;padding:18px 20px;margin:20px 0}
+.tip-box i{font-size:20px;color:var(--gold-light);flex-shrink:0;margin-top:2px}
+.tip-box p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.7;margin:0;max-width:none}
+.tip-box strong{color:var(--white)}
+
+/* ── WARNING BOX (legal/cultural compliance — alcohol, dress code, visa — deliberately
+   more visually serious than a tip box, using the new --warn amber accent) ── */
+.warning-box{display:flex;gap:14px;align-items:flex-start;background:var(--warn-bg);border:1px solid var(--warn-border);border-left:3px solid var(--warn);border-radius:8px;padding:18px 20px;margin:20px 0}
+.warning-box i{font-size:20px;color:var(--warn);flex-shrink:0;margin-top:2px}
+.warning-box p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.7;margin:0;max-width:none}
+.warning-box strong{color:var(--white)}
+
+/* ── IN-ARTICLE CONTENT IMAGES (guide pages embedding photos within prose) ── */
+.content-img{width:100%;max-width:100%;height:auto;max-height:420px;object-fit:cover;border-radius:10px;border:1px solid var(--card-border);display:block;margin:20px 0}
+
+/* ── CONTENT TABLES (comparison/reference tables within guide-page prose) ── */
+.table-wrap{margin:20px 0}
+.table-wrap table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;font-size:var(--font-size-sm)}
+.table-wrap th,.table-wrap td{padding:12px 16px;text-align:left;color:var(--muted);border-bottom:1px solid var(--card-border);line-height:1.5}
+.table-wrap th{color:var(--gold-light);font-weight:600;background:rgba(34,211,238,.06);white-space:nowrap}
+.table-wrap tr:last-child td{border-bottom:none}
+[dir="rtl"] .table-wrap th,[dir="rtl"] .table-wrap td{text-align:right}
 
 /* ── FAQ (native <details>/<summary> — crawlable, no JS, matches FAQPage schema) ── */
 .faq-block{margin-top:32px}
