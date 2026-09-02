@@ -290,13 +290,139 @@ function parseSitemapLoc(loc) {
   return { page: rest, lang: null };
 }
 
+// Maps a sitemap page-key ('' for the homepage, otherwise the outFile name)
+// to its full PAGES entry, so the namespace-scoping below can read
+// metaNs/hasPackageGrid without a second hand-maintained table — derived
+// mechanically from PAGES, not hand-typed.
+const SITEMAP_PAGE_DEF = {};
+for (const p of PAGES) {
+  SITEMAP_PAGE_DEF[p.outFile === 'index.html' ? '' : p.outFile] = p;
+}
+
+// ── Namespace-scoped translation history (fixes the whole-file lastmod bug) ──
+//
+// The naive approach — git-log-dating the entire i18n/{lang}.json file — was
+// wrong: that file holds every page's translation namespaces, so editing
+// just one page's namespace (e.g. hpPage for a Holiday Packages copy change)
+// made the WHOLE file's git-log date bump, which then got attributed to
+// every OTHER page in that language too (110 spurious lastmod changes from a
+// single real commit, confirmed against this repo's own history). The fix:
+// track each top-level i18n key's own last-changed date from git history,
+// and only look at the keys a given page actually reads.
+//
+// Split into a pure function (computeKeyLastChanged) and an impure one
+// (getLangJsonSnapshots) specifically so the date-diffing LOGIC is testable
+// without shelling out to git — see the test file.
+
+// Pure. Extracts the set of top-level i18n namespaces a page's markup
+// actually reads, from its own data-i18n*="ns.key" attributes — derived from
+// the page's real markup on every build, not a hand-maintained page→namespace
+// map, so a namespace rename/addition in the HTML is picked up automatically
+// and can never drift out of sync the way a manual table could.
+const DATA_I18N_ATTR_RE = /data-i18n(?:-html|-placeholder|-alt|-aria-label)?="([^"]+)"/g;
+function extractNamespaces(html) {
+  const ns = new Set();
+  let m;
+  DATA_I18N_ATTR_RE.lastIndex = 0;
+  while ((m = DATA_I18N_ATTR_RE.exec(html))) {
+    const first = m[1].split('.')[0];
+    if (first) ns.add(first);
+  }
+  return ns;
+}
+
+// Derives a page's full relevant-namespace set: its data-i18n-attribute
+// namespaces, plus its metadata namespace (metaNs — title/description are
+// set directly from dict.static[metaNs], never via a data-i18n attribute, so
+// it would never be found by extractNamespaces alone), plus the pseudo-key
+// "__dynamic__" for pages whose #pkg-grid reads dict.dynamic (package-name
+// translations) at build time.
+const _namespaceCache = {};
+function namespacesForPage(pageDef) {
+  if (_namespaceCache[pageDef.source]) return _namespaceCache[pageDef.source];
+  const html = fs.readFileSync(pageDef.source, 'utf8');
+  const ns = extractNamespaces(html);
+  if (pageDef.metaNs) ns.add(pageDef.metaNs);
+  if (pageDef.hasPackageGrid) ns.add('__dynamic__');
+  _namespaceCache[pageDef.source] = ns;
+  return ns;
+}
+
+// Pure. Given an i18n/{lang}.json file's history as an ordered array of
+// { date, static, dynamic } snapshots (oldest first), returns a map of
+// { [topLevelKey]: dateLastChanged }. A key's date updates whenever its
+// value differs (by deep JSON comparison) from the immediately preceding
+// snapshot — including its first appearance, which is correctly attributed
+// to the commit that introduced it (comparison against the "nothing yet"
+// starting state of {}/undefined). dict.dynamic is tracked as a single
+// pseudo-key "__dynamic__" since it's read as one block by the package grid,
+// not per-namespace.
+function computeKeyLastChanged(snapshots) {
+  const result = {};
+  let prevStatic = {};
+  let prevDynamicJson;
+  for (const snap of snapshots) {
+    const snapStatic = snap.static || {};
+    const keys = new Set(Object.keys(prevStatic).concat(Object.keys(snapStatic)));
+    for (const k of keys) {
+      if (JSON.stringify(prevStatic[k]) !== JSON.stringify(snapStatic[k])) result[k] = snap.date;
+    }
+    const dynamicJson = JSON.stringify(snap.dynamic);
+    if (dynamicJson !== prevDynamicJson) result.__dynamic__ = snap.date;
+    prevStatic = snapStatic;
+    prevDynamicJson = dynamicJson;
+  }
+  return result;
+}
+
+// Impure. Walks the full commit history of i18n/{lang}.json (oldest first)
+// and parses each revision's JSON via `git show <hash>:<file>`, for
+// computeKeyLastChanged to diff. No caching to disk (deliberately, per this
+// task's scope) — result is memoized in-process per language for the
+// lifetime of one build run, since a build recomputes it once per language
+// regardless of how many pages/URLs reference it.
+function getLangJsonSnapshots(lang) {
+  const file = `i18n/${lang}.json`;
+  let log;
+  try {
+    log = execSync(`git log --format=%H%x09%cI --reverse -- "${file}"`, { encoding: 'utf8' });
+  } catch (e) { return []; }
+  const snapshots = [];
+  for (const line of log.split('\n')) {
+    if (!line) continue;
+    const [hash, dateIso] = line.split('\t');
+    let raw;
+    try {
+      raw = execSync(`git show ${hash}:"${file}"`, { encoding: 'utf8' });
+    } catch (e) { continue; }
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch (e) { continue; }
+    snapshots.push({ date: dateIso.slice(0, 10), static: parsed.static, dynamic: parsed.dynamic });
+  }
+  return snapshots;
+}
+
+const _keyLastChangedCache = {};
+function keyLastChangedForLang(lang) {
+  if (_keyLastChangedCache[lang]) return _keyLastChangedCache[lang];
+  const result = computeKeyLastChanged(getLangJsonSnapshots(lang));
+  _keyLastChangedCache[lang] = result;
+  return result;
+}
+
 function computeSitemapLastmod(loc) {
   const { page, lang } = parseSitemapLoc(loc);
   const sourceFile = SITEMAP_PAGE_SOURCE[page];
   if (sourceFile === undefined) return null;
   const pageDate = gitLastCommitDate(sourceFile);
-  if (!lang) return pageDate;
-  const i18nDate = gitLastCommitDate(`i18n/${lang}.json`);
+  if (!lang) return pageDate; // English: source-file history only, no i18n coupling — unchanged behavior.
+  const pageDef = SITEMAP_PAGE_DEF[page];
+  if (!pageDef) return pageDate;
+  const keyDates = keyLastChangedForLang(lang);
+  let i18nDate = null;
+  for (const ns of namespacesForPage(pageDef)) {
+    i18nDate = maxDateStr(i18nDate, keyDates[ns] || null);
+  }
   return maxDateStr(pageDate, i18nDate);
 }
 
@@ -555,4 +681,21 @@ function main() {
   updateSitemapLastmod();
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  PAGES,
+  SITEMAP_PAGE_SOURCE,
+  SITEMAP_PAGE_DEF,
+  parseSitemapLoc,
+  maxDateStr,
+  gitLastCommitDate,
+  extractNamespaces,
+  namespacesForPage,
+  computeKeyLastChanged,
+  getLangJsonSnapshots,
+  keyLastChangedForLang,
+  computeSitemapLastmod,
+};
