@@ -201,7 +201,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:40px}
 .pkg-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:28px;display:flex;flex-direction:column;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s}
 .pkg-card:hover{transform:translateY(-6px);box-shadow:0 26px 70px rgba(14,116,144,.25)}
-.pkg-badge{position:absolute;top:-12px;left:28px;background:var(--gold);color:var(--navy);font-size:var(--font-size-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px}
+.pkg-img{aspect-ratio:16/10;width:calc(100% + 56px);object-fit:cover;display:block;margin:-28px -28px 20px;border-radius:12px 12px 0 0}
+.pkg-badge{position:absolute;top:-12px;left:28px;background:var(--gold);color:var(--navy);font-size:var(--font-size-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:20px;z-index:1}
 .pkg-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--white);margin-top:8px}
 .pkg-price-row{display:flex;align-items:baseline;gap:8px;margin:10px 0 4px}
 .pkg-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:600;color:var(--teal-light,var(--gold-light))}
@@ -212,10 +213,53 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .pkg-list{list-style:none;font-size:var(--font-size-sm);color:var(--muted);line-height:1.7}
 .pkg-cta{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .pkg-cta a{flex:1;text-align:center;font-size:var(--font-size-xs);padding:12px 14px}
+.pkg-cta-alt{display:block;text-align:center;margin-top:10px;font-size:var(--font-size-xs);color:var(--muted);text-decoration:none}
+.pkg-cta-alt:hover{color:var(--gold-light);text-decoration:underline}
+
+/* ── HOLIDAY PACKAGES: intro / accommodation / trust sections ── */
+.hp-section{max-width:70ch}
+.hp-section p{font-size:var(--font-size-base);color:var(--muted);line-height:1.75;margin-top:10px}
+.hp-soft-link{display:inline-block;margin-top:14px;font-size:var(--font-size-sm);color:var(--gold-light);text-decoration:none}
+.hp-soft-link:hover{text-decoration:underline}
+
+/* ── HOLIDAY PACKAGES: accommodation section image + text layout ── */
+.hp-section-accom{max-width:900px}
+.hp-accom-layout{display:flex;gap:28px;align-items:center;margin-top:16px}
+.hp-accom-img{width:260px;flex-shrink:0;aspect-ratio:4/3;object-fit:cover;border-radius:10px;box-shadow:0 12px 30px rgba(0,4,10,.3)}
+.hp-accom-text{flex:1;min-width:0}
+.hp-accom-text p{margin-top:0}
+@media(max-width:700px){
+  .hp-accom-layout{flex-direction:column;align-items:stretch}
+  .hp-accom-img{width:100%;aspect-ratio:16/9}
+}
+
+/* ── HOLIDAY PACKAGES: generic mobile sticky CTA (non-package-aware) ── */
+.pkg-sticky-cta{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:800;background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 12px 30px rgba(0,4,10,.4);padding:12px 16px;align-items:center;justify-content:space-between;gap:10px;transform:translateY(140%);transition:transform .3s ease;display:none}
+.pkg-sticky-cta.visible{display:flex;transform:translateY(0)}
+.pkg-sticky-cta-link{color:var(--white);text-decoration:none;font-size:var(--font-size-sm);font-weight:500;flex:1}
+.pkg-sticky-cta-link i{color:var(--teal-light);margin-right:6px}
+.pkg-sticky-cta-close{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px;flex-shrink:0}
+@media(min-width:701px){.pkg-sticky-cta.visible{display:none}}
+/* Reserved bottom clearance while the sticky bar is showing, so content at
+   the very end of the page (closing CTA, footer) can still be scrolled clear
+   of the bar's fixed footprint. Toggled by JS alongside .visible; removed on
+   dismiss. Matches the bar's own footprint: 12px offset + ~50px bar height +
+   12px breathing room + safe-area, on mobile widths only. */
+body.pkg-sticky-clearance{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+@media(min-width:701px){body.pkg-sticky-clearance{padding-bottom:0}}
 
 /* ── RTL ── */
 [dir="rtl"] .content-list{padding-left:0;padding-right:20px}
 [dir="rtl"] .breadcrumbs a{margin-left:4px}
+[dir="rtl"] .pkg-sticky-cta-link i{margin-right:0;margin-left:6px}
+[dir="rtl"] .hp-accom-img{margin-right:0}
+
+/* ── HOLIDAY PACKAGES: related-strip scoped 3-column desktop layout
+   (page-specific modifier — does not alter .related-strip's default
+   auto-fit behavior used by other guide pages) ── */
+.related-strip-3col{grid-template-columns:repeat(3,1fr)}
+@media(max-width:900px){.related-strip-3col{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.related-strip-3col{grid-template-columns:1fr}}
 
 /* ── RESPONSIVE ── */
 @media(max-width:800px){
