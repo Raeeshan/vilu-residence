@@ -562,7 +562,7 @@
       "h3": "Atol Jižní Ari",
       "p3": "Dále od Malé (skutečných 1h45m rychločlunem, nebo 20 minut letadlem), což je kompromis za to, co nabízí: celoroční žraloky velrybí, pravidelná pozorování mant a kombinaci resortů a dlouho zavedených místních ostrovů jako Maamigili a Dhigurah, díky čemuž je dostupný jak pro cestovatele v penzionech, tak pro hosty resortů.",
       "h4": "Výběr regionu",
-      "p4": "Pokud je minimalizace času transferu nejdůležitější, atol Severní Malé je těžké překonat. Pokud je cílem konkrétní, výrazně sezónní přírodní událost, vyplatí se naplánovat záliv Hanifaru v atolu Baa. Pokud chcete celoroční mořský život a skutečný pobyt na místním ostrově, Jižní Ari je stvořen přesně pro to."
+      "p4": "Pokud je minimalizace času transferu nejdůležitější, atol Severní Malé je těžké překonat. Pokud je cílem konkrétní, výrazně sezónní přírodní událost, vyplatí se naplánovat záliv Hanifaru v atolu Baa. Pokud chcete celoroční mořský život a skutečný pobyt na místním ostrově, Jižní Ari je stvořen přesně pro to. Naše dovolenkové balíčky spojují ubytování a zážitky dohromady, pokud právě takový výlet plánujete."
     },
     "blogBestTime": {
       "title": "Nejlepší období pro návštěvu Maledivy",
@@ -592,7 +592,8 @@
       "h3": "Co skutečně získáte",
       "p3": "Resort vám poskytuje soukromý ostrov, často s vilami nad vodou a stravováním all-inclusive, ale žádný kontakt s místním maledivským životem kromě personálu. Penzion vám poskytuje skutečnou ostrovní komunitu, fungující místní obchody a — jelikož platíte za mnohem menší soukromou infrastrukturu — výrazně nižší ceny za cestu postavenou na stejných útesech a stejném mořském životě. Ani jedno nezahrnuje zážitek toho druhého, a to záměrně, nikoli jako kompromis.",
       "h4": "Skutečně upřímný pohled",
-      "p4": "Pokud je smyslem cesty naprosté soukromí a pětihvězdičkový servis, resort to poskytne způsobem, který penzion strukturálně nedokáže. Pokud je smyslem útes, žraloci velrybí a skutečný maledivský ostrov — a nižší cena — penzion jako ten náš to poskytuje velmi dobře."
+      "p4": "Pokud je smyslem cesty naprosté soukromí a pětihvězdičkový servis, resort to poskytne způsobem, který penzion strukturálně nedokáže. Pokud je smyslem útes, žraloci velrybí a skutečný maledivský ostrov — a nižší cena — penzion jako ten náš to poskytuje velmi dobře.",
+      "p5": "Jedna možnosť spája oboje: náš balíček <a href=\"holiday-packages.html#ultimate-resort-island-odyssey\">Ultimate Resort &amp; Island Odyssey</a> je jediný dovolenkový balíček Vilu Residence, který zahrnuje jednodenní návštěvu sousedního resortu — způsob, jak poznat i tuto stránku Maledivy, aniž byste měnili místo pobytu."
     },
     "blogCost": {
       "title": "Kolik stojí dovolená na Maledivách?",
@@ -716,7 +717,7 @@
       "faqQ3": "Jaké je nejlepší roční období k návštěvě?",
       "faqA3": "Mořský život v Jižním Ari je přítomen po celý rok, takže neexistuje jediný „nejlepší\" měsíc pro divokou přírodu — počasí a stav moře jsou důležitějšími sezónními faktory. Podívejte se na našeho <a href=\"best-time-to-visit.html\">kompletního průvodce nejlepší dobou k návštěvě</a>.",
       "faqQ4": "Mám se ubytovat na místním ostrově, nebo v resortu?",
-      "faqA4": "Obě možnosti jsou platnou volbou s reálnými kompromisy ve struktuře nákladů, soukromí a přístupu k místní kultuře. Podívejte se na naše <a href=\"guesthouse-vs-resort.html\">kompletní srovnání penzionu a resortu</a>.",
+      "faqA4": "Obě možnosti jsou platnou volbou s reálnými kompromisy ve struktuře nákladů, soukromí a přístupu k místní kultuře. Podívejte se na naše <a href=\"guesthouse-vs-resort.html\">kompletní srovnání penzionu a resortu</a>, nebo na naše <a href=\"holiday-packages.html\">dovolenkové balíčky</a>, které spojují pobyt na místním ostrově se zážitky popsanými v tomto průvodci.",
       "faqQ5": "Jak se dostanu do atolu Jižní Ari z Malé?",
       "faqA5": "Buď přímým rychlým člunem (asi 1h45m), nebo vnitrostátním letem (asi 20–30 minut) na mezinárodní letiště Villa v Maamigili.",
       "faqQ6": "Na kterém ostrově bych se měl usadit?",
@@ -740,9 +741,11 @@
       "relTag3": "Naplánujte si pobyt",
       "relTitle3": "Dovolenkové balíčky",
       "ctaTitle": "Připraveni vidět to na vlastní oči?",
-      "ctaText": "Vilu Residence je penzion přímo na Maamigili, ostrově v srdci oblasti žraloků velrybích atolu Jižní Ari. Ověřte si dostupnost nebo nás kontaktujte přímo přes WhatsApp.",
+      "ctaText": "Vilu Residence je penzion přímo na Maamigili, ostrově v srdci oblasti žraloků velrybích atolu Jižní Ari. Podívejte se, jak naše dovolenkové balíčky spojují zážitky z atolu dohromady, nebo si rovnou ověřte dostupnost.",
       "ctaBook": "Ověřit dostupnost",
-      "ctaWhatsapp": "Zeptat se přes WhatsApp"
+      "ctaWhatsapp": "Zeptat se přes WhatsApp",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Pr%C5%AFvodce%20atolem%20Ji%C5%BEn%C3%AD%20Ari%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "wsMeta": {
       "title": "Šnorchlování se žraloky velrybími v Maamigili, atol Jižní Ari — Co očekávat",
@@ -819,7 +822,7 @@
       "faqQ9": "Kolik stojí šnorchlování se žraloky velrybími?",
       "faqA9": "Aktuální samostatná cena je 85 USD na osobu za sdílený výlet, i když jde o provozní cenu, která se může měnit, takže se vyplatí ověřit si aktuální sazbu přímo u Vilu Residence. Za jednoho účastníka nebo soukromý výlet může platit příplatek.",
       "faqQ10": "Je šnorchlování se žraloky velrybími zahrnuto v dovolenkových balíčcích Vilu?",
-      "faqA10": "Ano — je zahrnuto jako aktivita v každém aktuálním dovolenkovém balíčku Vilu Residence, které zahrnují také ubytování, transfer a snídani za vlastní cenu balíčku.",
+      "faqA10": "Ano — je zahrnuto jako aktivita v každém z našich aktuálních <a href=\"holiday-packages.html\">dovolenkových balíčků</a>, které zahrnují také ubytování, transfer a snídani za vlastní cenu balíčku.",
       "faqQ11": "Co se stane, když bude špatné počasí?",
       "faqA11": "Vilu kontroluje počasí a podmínky na moři před každým výletem. Pokud podmínky nejsou vhodné, hosté jsou o tom informováni před odjezdem a výlet může být odložen na jiný den nebo zrušen — rezervace předem nezaručuje, že výlet proběhne přesně podle plánu.",
       "faqQ12": "Existuje nejlepší roční doba na pozorování žraloků velrybích?",
@@ -830,10 +833,12 @@
       "relTag2": "Průvodce destinací",
       "relTag3": "Naplánujte si pobyt",
       "ctaTitle": "Zaplavte si s nimi sami",
-      "ctaText": "Šnorchlování se žraloky velrybími je zahrnuto v každém z našich aktuálních dovolenkových balíčků, nebo si ho lze rezervovat samostatně od 85 USD na osobu — ověřte si aktuální cenu a dostupnost, nebo se nás zeptejte přímo.",
+      "ctaText": "Šnorchlování se žraloky velrybími je zahrnuto v každém z našich aktuálních dovolenkových balíčků, nebo si ho lze rezervovat samostatně od 85 USD na osobu — prohlédněte si balíčky, nebo si rovnou ověřte dostupnost a aktuální samostatnou cenu.",
       "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp",
-      "tocList": "<li><a href=\"#quick-facts\">Rychlá fakta</a></li><li><a href=\"#excursion\">Co výlet zahrnuje</a></li><li><a href=\"#no-sighting\">Když žraloka velrybího nenajdeme</a></li><li><a href=\"#group-size\">Sdílené výlety, velikost skupiny a soukromé výlety</a></li><li><a href=\"#who-can-join\">Kdo se může zúčastnit — plavci, slabší plavci a děti</a></li><li><a href=\"#responsible-encounters\">Bezpečnostní instruktáž a zodpovědné setkání se žraloky velrybími</a></li><li><a href=\"#weather\">Počasí a změny výletu</a></li><li><a href=\"#best-season\">Existuje nejlepší sezóna?</a></li><li><a href=\"#what-to-bring\">Co si vzít s sebou?</a></li><li><a href=\"#whats-included\">Co je zahrnuto</a></li><li><a href=\"#price\">Cena a rezervace</a></li><li><a href=\"#faq\">Často kladené otázky</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">Rychlá fakta</a></li><li><a href=\"#excursion\">Co výlet zahrnuje</a></li><li><a href=\"#no-sighting\">Když žraloka velrybího nenajdeme</a></li><li><a href=\"#group-size\">Sdílené výlety, velikost skupiny a soukromé výlety</a></li><li><a href=\"#who-can-join\">Kdo se může zúčastnit — plavci, slabší plavci a děti</a></li><li><a href=\"#responsible-encounters\">Bezpečnostní instruktáž a zodpovědné setkání se žraloky velrybími</a></li><li><a href=\"#weather\">Počasí a změny výletu</a></li><li><a href=\"#best-season\">Existuje nejlepší sezóna?</a></li><li><a href=\"#what-to-bring\">Co si vzít s sebou?</a></li><li><a href=\"#whats-included\">Co je zahrnuto</a></li><li><a href=\"#price\">Cena a rezervace</a></li><li><a href=\"#faq\">Často kladené otázky</a></li>",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20%C5%A0norchlov%C3%A1n%C3%AD%20se%20%C5%BEraloky%20velryb%C3%ADmi%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "mrMeta": {
       "title": "Šnorchlování s manty v Maamigili, atol Jižní Ari — Co očekávat",
@@ -921,7 +926,7 @@
       "faqQ10": "Co je zahrnuto ve výletu?",
       "faqA10": "Šnorchlovací vybavení, ručníky, čerstvé ovoce a voda.",
       "faqQ11": "Kolik stojí šnorchlování s mantami?",
-      "faqA11": "Od 85 USD za osobu jako samostatný výlet, cena podléhá potvrzení — nebo je zahrnuto v několika aktuálních dovolenkových balíčcích.",
+      "faqA11": "Od 85 USD za osobu jako samostatný výlet, cena podléhá potvrzení — nebo je zahrnuto v několika aktuálních <a href=\"holiday-packages.html\">dovolenkových balíčcích</a>.",
       "faqQ12": "Co se stane při špatném počasí?",
       "faqA12": "Podmínky kontrolujeme předem a dáme vám vědět, pokud bude nutné výlet odložit nebo zrušit, místo aby probíhal v nevhodném počasí.",
       "relatedTag": "Viz také",
@@ -930,10 +935,12 @@
       "relTag2": "Průvodce destinací",
       "relTag3": "Naplánujte si pobyt",
       "ctaTitle": "Zaplavte si po jejich boku sami",
-      "ctaText": "Šnorchlování s mantami lze rezervovat samostatně od 85 USD za osobu, nebo je zahrnuto v několika našich aktuálních dovolenkových balíčcích s transferem tam a zpět a ubytováním v Maamigili. Ověřte si dostupnost nebo se na nás obraťte přímo.",
+      "ctaText": "Šnorchlování s mantami je zahrnuté ve několika našich aktuálních dovolenkových balíčcích s transferem tam a zpět a ubytováním v Maamigili, nebo si ho lze rezervovat samostatně od 85 USD za osobu — prohlédněte si balíčky, nebo si rovnou ověřte dostupnost.",
       "ctaBook": "Ověřit dostupnost",
       "ctaWhatsapp": "Zeptat se přes WhatsApp",
-      "tocList": "<li><a href=\"#quick-facts\">Rychlý přehled</a></li><li><a href=\"#excursion\">Co výlet zahrnuje</a></li><li><a href=\"#where-we-search\">Kde naši průvodci hledají — a proč se místo mění</a></li><li><a href=\"#behavior\">Čisticí stanice, žraní a další chování mant</a></li><li><a href=\"#no-sighting\">Pokud mantu nenajdeme</a></li><li><a href=\"#group-size\">Společné výlety, velikost skupiny a soukromé výlety</a></li><li><a href=\"#who-can-join\">Kdo se může zúčastnit — plavci, slabší plavci a děti</a></li><li><a href=\"#responsible-encounters\">Bezpečnostní instruktáž a zodpovědná setkání s mantami</a></li><li><a href=\"#weather\">Počasí a změny výletu</a></li><li><a href=\"#best-season\">Existuje nejlepší období?</a></li><li><a href=\"#what-to-bring\">Co si vzít s sebou?</a></li><li><a href=\"#whats-included\">Co je zahrnuto</a></li><li><a href=\"#price\">Cena a rezervace</a></li><li><a href=\"#faq\">Časté dotazy</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">Rychlý přehled</a></li><li><a href=\"#excursion\">Co výlet zahrnuje</a></li><li><a href=\"#where-we-search\">Kde naši průvodci hledají — a proč se místo mění</a></li><li><a href=\"#behavior\">Čisticí stanice, žraní a další chování mant</a></li><li><a href=\"#no-sighting\">Pokud mantu nenajdeme</a></li><li><a href=\"#group-size\">Společné výlety, velikost skupiny a soukromé výlety</a></li><li><a href=\"#who-can-join\">Kdo se může zúčastnit — plavci, slabší plavci a děti</a></li><li><a href=\"#responsible-encounters\">Bezpečnostní instruktáž a zodpovědná setkání s mantami</a></li><li><a href=\"#weather\">Počasí a změny výletu</a></li><li><a href=\"#best-season\">Existuje nejlepší období?</a></li><li><a href=\"#what-to-bring\">Co si vzít s sebou?</a></li><li><a href=\"#whats-included\">Co je zahrnuto</a></li><li><a href=\"#price\">Cena a rezervace</a></li><li><a href=\"#faq\">Časté dotazy</a></li>",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20%C5%A0norchlov%C3%A1n%C3%AD%20s%20mantami%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "hpMeta": {
       "title": "Dovolenkové balíčky na Maledivy — žraloci velrybí, manty a další | Vilu Residence",
@@ -1020,7 +1027,7 @@
       "relTag3": "Naplánujte si Pobyt",
       "relTitle3": "Co dělat na Maamigili",
       "ctaTitle": "Ubytujte se přesně tam, kde žijí žraloci velrybí",
-      "ctaText": "Vilu Residence se nachází přímo na Maamigili — žádný přesun lodí do resortu, jen pár kroků od přístavu a výletů, které odtud vyjíždí.",
+      "ctaText": "Vilu Residence se nachází přímo na Maamigili — žádný přesun lodí do resortu, jen pár kroků od přístavu a výletů, které odtud vyjíždí. Podívejte se, jak naše dovolenkové balíčky spojují vše dohromady, nebo si rovnou ověřte dostupnost.",
       "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp",
       "linkGettingHere": "Podívejte se na aktuální ceny a časy transferů →",
@@ -1128,7 +1135,10 @@
       "faqA41": "Lehké, prodyšné oblečení, opalovací krém šetrný k útesům, skromný přehoz na pohyb po vesnici a lehkou vrstvu do deště, pokud cestujete ve vlhčích měsících.",
       "faqQ42": "Potřebuji cestovní pojištění pro návštěvu Maledivy?",
       "faqA42": "Tento průvodce nemá ověřený, aktuální zdroj o konkrétní maledivské povinnosti pojištění — aktuální pokyny si ověřte přímo u <a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">Maledivské imigrace</a> před cestou.",
-      "ctaPackagesLink": "Preferujete balíček se vším zahrnutým? <a href=\"holiday-packages.html\" style=\"color:rgba(255,255,255,.85)\">Viz dovolenkové balíčky →</a>"
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "relTag4": "Naplánujte si Pobyt",
+      "relTitle4": "Dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Pr%C5%AFvodce%20Maamigili%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "btMeta": {
       "title": "Nejlepší Doba pro Návštěvu Maledivy — Průvodce podle Sezóny",
@@ -1146,10 +1156,12 @@
       "relTag3": "Průvodce Destinací",
       "relTitle3": "Průvodce Jižním Ari Atolem",
       "ctaTitle": "Žraloci velrybí jsou tu v každé sezóně",
-      "ctaText": "Ať už se vám hodí jakýkoli měsíc, mořský život Jižního Ari tu bude. Zkontrolujte dostupnost nebo nás kontaktujte přímo.",
+      "ctaText": "Ať už se vám hodí jakýkoli měsíc, mořský život Jižního Ari tu bude — podívejte se, jak naše dovolenkové balíčky spojují vše dohromady, nebo si rovnou zkontrolujte dostupnost.",
       "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp",
-      "linkWhaleShark": "Přečtěte si více o sezóně žraloků velrybích v našem průvodci šnorchlováním →"
+      "linkWhaleShark": "Přečtěte si více o sezóně žraloků velrybích v našem průvodci šnorchlováním →",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Nejlep%C5%A1%C3%AD%20Doba%20N%C3%A1v%C5%A1t%C4%9Bvy%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "gvrMeta": {
       "title": "Penzion vs. Resort na Maledivách: Co je Lepší? — Upřímné Srovnání",
@@ -1167,11 +1179,13 @@
       "relTag3": "Naplánujte si Pobyt",
       "relTitle3": "Dovolenkové Balíčky",
       "ctaTitle": "Zjistěte, jaký je pobyt v penzionu skutečně",
-      "ctaText": "Vilu Residence se nachází přímo na Maamigili — žádný přesun lodí do resortu, jen pár kroků od přístavu a výletů, které odtud vyjíždí.",
+      "ctaText": "Každý dovolenkový balíček Vilu Residence zahrnuje váš pobyt zde — podívejte se, jak se ubytování a zážitky spojují dohromady, nebo si rovnou prohlédněte naše pokoje a ceny.",
       "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp",
       "linkCost": "Podívejte se na reálné cenové rozpětí v našem průvodci náklady →",
-      "linkRooms": "Podívejte se na naše pokoje a ceny →"
+      "linkRooms": "Podívejte se na naše pokoje a ceny →",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Penzion%20vs.%20Resort%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "costMeta": {
       "title": "Kolik Stojí Dovolená na Maledivách? — Cenový Průvodce 2026",
@@ -1193,7 +1207,9 @@
       "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp",
       "linkGettingHere": "Aktuální ceny transferu →",
-      "linkPackages": "Podívejte se na všechny naše aktuální ceny balíčků →"
+      "linkPackages": "Podívejte se na všechny naše aktuální ceny balíčků →",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Pr%C5%AFvodce%20N%C3%A1klady%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "cmpSnorkelMeta": {
       "title": "Nejlepší místní ostrovy na Maledivách pro šnorchlování",
@@ -1212,9 +1228,11 @@
       "relTag3": "Naplánujte si Pobyt",
       "relTitle3": "Dovolenkové balíčky",
       "ctaTitle": "Přesvědčte se sami, čím je Jižní Ari výjimečný",
-      "ctaText": "Vilu Residence vás ubytuje přímo na Maamigili, uprostřed celoročního mořského života Jižního Ari. Zkontrolujte dostupnost nebo se nás zeptejte přímo.",
+      "ctaText": "Vilu Residence vás ubytuje přímo na Maamigili, uprostřed celoročního mořského života Jižního Ari — podívejte se, jak naše dovolenkové balíčky spojují vše dohromady, nebo si rovnou zkontrolujte dostupnost.",
       "ctaBook": "Zkontrolovat dostupnost",
-      "ctaWhatsapp": "Zeptat se na WhatsApp"
+      "ctaWhatsapp": "Zeptat se na WhatsApp",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Nejlep%C5%A1%C3%AD%20Ostrovy%20pro%20%C5%A0norchlov%C3%A1n%C3%AD%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "cmpRegionsMeta": {
       "title": "Atol Jižní Ari vs. jiné oblasti Maledivy",
@@ -1233,9 +1251,11 @@
       "relTag3": "Plánování Cesty",
       "relTitle3": "Nejlepší Doba Návštěvy",
       "ctaTitle": "Jste připraveni zažít Jižní Ari na vlastní kůži?",
-      "ctaText": "Vilu Residence se nachází přímo uprostřed celoročního mořského života Jižního Ari. Zkontrolujte dostupnost nebo se nás zeptejte přímo.",
+      "ctaText": "Vilu Residence se nachází přímo uprostřed celoročního mořského života Jižního Ari — podívejte se, jak naše dovolenkové balíčky spojují vše dohromady, nebo si rovnou zkontrolujte dostupnost.",
       "ctaBook": "Zkontrolovat dostupnost",
-      "ctaWhatsapp": "Zeptat se na WhatsApp"
+      "ctaWhatsapp": "Zeptat se na WhatsApp",
+      "ctaPackages": "Zobrazit dovolenkové balíčky",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Ji%C5%BEn%C3%AD%20Ari%20vs.%20Jin%C3%A9%20Oblasti%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F"
     },
     "blogThingsMeta": {
       "title": "Co dělat na Maamigili, Jižní Ari Atol",

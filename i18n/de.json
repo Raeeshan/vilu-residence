@@ -562,7 +562,7 @@
       "h3": "Süd-Ari-Atoll",
       "p3": "Weiter von Malé entfernt (echte 1 Std. 45 Min. per Schnellboot oder 20 Minuten per Flugzeug), was den Kompromiss für das darstellt, was es bietet: ganzjährige Walhaie, regelmäßige Manta-Sichtungen und eine Mischung aus Resorts und lange etablierten lokalen Inseln wie Maamigili und Dhigurah, die es sowohl für Guesthouse-Reisende als auch für Resortgäste zugänglich macht.",
       "h4": "Die richtige Region wählen",
-      "p4": "Wenn die Minimierung der Transferzeit am wichtigsten ist, ist Nord-Malé kaum zu schlagen. Wenn ein bestimmtes, stark saisonales Naturereignis das Ziel ist, lohnt es sich, die Hanifaru-Bucht im Baa-Atoll einzuplanen. Wenn ganzjähriges Meeresleben und ein echter Aufenthalt auf einer lokalen Insel das sind, was Sie wollen, ist Süd-Ari genau dafür gemacht."
+      "p4": "Wenn die Minimierung der Transferzeit am wichtigsten ist, ist Nord-Malé kaum zu schlagen. Wenn ein bestimmtes, stark saisonales Naturereignis das Ziel ist, lohnt es sich, die Hanifaru-Bucht im Baa-Atoll einzuplanen. Wenn ganzjähriges Meeresleben und ein echter Aufenthalt auf einer lokalen Insel das sind, was Sie wollen, ist Süd-Ari genau dafür gemacht. Unsere Urlaubspakete bringen Unterkunft und Erlebnisse zusammen, falls das die Reise ist, die Sie planen."
     },
     "blogBestTime": {
       "title": "Beste Reisezeit für die Malediven",
@@ -592,7 +592,8 @@
       "h3": "Was Sie tatsächlich bekommen",
       "p3": "Ein Resort bietet Ihnen eine private Insel, oft mit Overwater-Villen und All-inclusive-Verpflegung, aber keinen Kontakt zum maledivischen Alltagsleben außer zum Personal. Ein Guesthouse bietet Ihnen eine echte Inselgemeinschaft, funktionierende lokale Läden und — weil Sie für weit weniger private Infrastruktur bezahlen — deutlich niedrigere Preise für eine Reise, die auf denselben Riffen und demselben Meeresleben aufbaut. Keines der beiden bietet das Erlebnis des anderen, das ist Absicht, kein Kompromiss.",
       "h4": "Eine wirklich ehrliche Einschätzung",
-      "p4": "Wenn völlige Privatsphäre und Fünf-Sterne-Service der Sinn der Reise sind, liefert ein Resort das auf eine Weise, die ein Guesthouse strukturell nicht kann. Wenn das Riff, die Walhaie und eine echte maledivische Insel — und ein niedrigerer Preis — der Sinn sind, liefert ein Guesthouse wie unseres das sehr gut."
+      "p4": "Wenn völlige Privatsphäre und Fünf-Sterne-Service der Sinn der Reise sind, liefert ein Resort das auf eine Weise, die ein Guesthouse strukturell nicht kann. Wenn das Riff, die Walhaie und eine echte maledivische Insel — und ein niedrigerer Preis — der Sinn sind, liefert ein Guesthouse wie unseres das sehr gut.",
+      "p5": "Eine Option verbindet beides: Unser Paket <a href=\"holiday-packages.html#ultimate-resort-island-odyssey\">Ultimate Resort &amp; Island Odyssey</a> ist das einzige Vilu-Residence-Urlaubspaket mit einem Tagesbesuch in einem benachbarten Resort — eine Möglichkeit, auch diese Seite der Malediven zu erleben, ohne den Aufenthaltsort zu wechseln."
     },
     "blogCost": {
       "title": "Wie viel kostet ein Malediven-Urlaub?",
@@ -716,7 +717,7 @@
       "faqQ3": "Was ist die beste Reisezeit?",
       "faqA3": "Die Tierwelt in Süd-Ari ist ganzjährig präsent, daher gibt es keinen einzelnen „besten\" Monat für die Tierwelt – Wetter und Seebedingungen sind die entscheidenderen saisonalen Faktoren. Siehe unseren vollständigen <a href=\"best-time-to-visit.html\">Ratgeber zur besten Reisezeit</a>.",
       "faqQ4": "Sollte ich auf einer lokalen Insel oder in einem Resort wohnen?",
-      "faqA4": "Beides sind gültige Optionen mit echten Abwägungen bei Kostenstruktur, Privatsphäre und Zugang zur lokalen Kultur. Siehe unseren vollständigen <a href=\"guesthouse-vs-resort.html\">Vergleich Gästehaus vs. Resort</a>.",
+      "faqA4": "Beides sind gültige Optionen mit echten Abwägungen bei Kostenstruktur, Privatsphäre und Zugang zur lokalen Kultur. Siehe unseren vollständigen <a href=\"guesthouse-vs-resort.html\">Vergleich Gästehaus vs. Resort</a>, oder unsere <a href=\"holiday-packages.html\">Urlaubspakete</a>, die einen Aufenthalt auf einer lokalen Insel mit den in diesem Guide beschriebenen Erlebnissen verbinden.",
       "faqQ5": "Wie komme ich von Malé zum Süd-Ari-Atoll?",
       "faqA5": "Entweder mit einem direkten Speedboot (etwa 1 Std. 45 Min.) oder einem Inlandsflug (etwa 20–30 Minuten) zum Villa International Airport in Maamigili.",
       "faqQ6": "Auf welcher Insel sollte ich mich niederlassen?",
@@ -740,9 +741,11 @@
       "relTag3": "Ihren Aufenthalt planen",
       "relTitle3": "Urlaubspakete",
       "ctaTitle": "Bereit, es selbst zu erleben?",
-      "ctaText": "Vilu Residence ist ein Gästehaus direkt auf Maamigili, der Insel im Herzen der Walhai-Gebiete des Süd-Ari-Atolls. Prüfen Sie die Verfügbarkeit oder schreiben Sie uns direkt auf WhatsApp.",
+      "ctaText": "Vilu Residence ist ein Gästehaus direkt auf Maamigili, der Insel im Herzen der Walhai-Gebiete des Süd-Ari-Atolls. Sehen Sie, wie unsere Urlaubspakete die Erlebnisse des Atolls zusammenbringen, oder prüfen Sie direkt die Verfügbarkeit.",
       "ctaBook": "Verfügbarkeit prüfen",
-      "ctaWhatsapp": "Auf WhatsApp fragen"
+      "ctaWhatsapp": "Auf WhatsApp fragen",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20S%C3%BCd-Ari-Atoll-Reisef%C3%BChrer%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "wsMeta": {
       "title": "Walhai-Schnorcheln in Maamigili, Süd-Ari-Atoll — Was Sie erwartet",
@@ -819,7 +822,7 @@
       "faqQ9": "Was kostet Walhai-Schnorcheln?",
       "faqA9": "Der aktuelle eigenständige Preis beträgt 85 USD pro Person für den gemeinsamen Ausflug, wobei es sich um einen betrieblichen Preis handelt, der sich ändern kann, sodass es sich lohnt, den aktuellen Preis direkt bei Vilu Residence zu bestätigen. Für einen einzelnen Teilnehmer oder eine private Tour können Aufpreise anfallen.",
       "faqQ10": "Ist Walhai-Schnorcheln in den Urlaubspaketen von Vilu enthalten?",
-      "faqA10": "Ja — es ist als Aktivität in jedem aktuellen Urlaubspaket von Vilu Residence enthalten, die zudem Unterkunft, Transfer und Frühstück zum jeweiligen Paketpreis bündeln.",
+      "faqA10": "Ja — es ist als Aktivität in jedem unserer aktuellen <a href=\"holiday-packages.html\">Urlaubspakete</a> enthalten, die zudem Unterkunft, Transfer und Frühstück zum jeweiligen Paketpreis bündeln.",
       "faqQ11": "Was passiert bei schlechtem Wetter?",
       "faqA11": "Vilu prüft vor jedem Ausflug Wetter und Seebedingungen. Sind die Bedingungen ungeeignet, werden die Gäste vor der Abfahrt informiert, und der Ausflug kann auf einen anderen Tag verschoben oder abgesagt werden — eine Buchung im Voraus garantiert nicht, dass der Ausflug genau wie geplant stattfindet.",
       "faqQ12": "Gibt es eine beste Jahreszeit, um Walhaie zu sehen?",
@@ -830,10 +833,12 @@
       "relTag2": "Reiseführer",
       "relTag3": "Aufenthalt planen",
       "ctaTitle": "Schwimmen Sie selbst mit ihnen",
-      "ctaText": "Walhai-Schnorcheln ist in jedem unserer aktuellen Urlaubspakete enthalten oder ab 85 USD pro Person separat buchbar — bestätigen Sie den aktuellen Preis und die Verfügbarkeit, oder fragen Sie uns direkt.",
+      "ctaText": "Walhai-Schnorcheln ist in jedem unserer aktuellen Urlaubspakete enthalten oder ab 85 USD pro Person separat buchbar — sehen Sie sich die Pakete an, oder prüfen Sie direkt die Verfügbarkeit und den aktuellen Einzelpreis.",
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
-      "tocList": "<li><a href=\"#quick-facts\">Kurzübersicht</a></li><li><a href=\"#excursion\">Was der Ausflug beinhaltet</a></li><li><a href=\"#no-sighting\">Wenn wir keinen Walhai finden</a></li><li><a href=\"#group-size\">Gemeinsame Touren, Gruppengröße & private Touren</a></li><li><a href=\"#who-can-join\">Wer kann teilnehmen — Schwimmer, ungeübte Schwimmer & Kinder</a></li><li><a href=\"#responsible-encounters\">Sicherheitseinweisung & verantwortungsvolle Walhai-Begegnungen</a></li><li><a href=\"#weather\">Wetter & Änderungen des Ausflugs</a></li><li><a href=\"#best-season\">Gibt es eine beste Saison?</a></li><li><a href=\"#what-to-bring\">Was sollten Sie mitbringen?</a></li><li><a href=\"#whats-included\">Was ist enthalten</a></li><li><a href=\"#price\">Preis & Buchung</a></li><li><a href=\"#faq\">Häufig gestellte Fragen</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">Kurzübersicht</a></li><li><a href=\"#excursion\">Was der Ausflug beinhaltet</a></li><li><a href=\"#no-sighting\">Wenn wir keinen Walhai finden</a></li><li><a href=\"#group-size\">Gemeinsame Touren, Gruppengröße & private Touren</a></li><li><a href=\"#who-can-join\">Wer kann teilnehmen — Schwimmer, ungeübte Schwimmer & Kinder</a></li><li><a href=\"#responsible-encounters\">Sicherheitseinweisung & verantwortungsvolle Walhai-Begegnungen</a></li><li><a href=\"#weather\">Wetter & Änderungen des Ausflugs</a></li><li><a href=\"#best-season\">Gibt es eine beste Saison?</a></li><li><a href=\"#what-to-bring\">Was sollten Sie mitbringen?</a></li><li><a href=\"#whats-included\">Was ist enthalten</a></li><li><a href=\"#price\">Preis & Buchung</a></li><li><a href=\"#faq\">Häufig gestellte Fragen</a></li>",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Walhai-Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "mrMeta": {
       "title": "Mantarochen-Schnorcheln in Maamigili, Süd-Ari-Atoll – Was Sie erwartet",
@@ -921,7 +926,7 @@
       "faqQ10": "Was ist beim Ausflug inbegriffen?",
       "faqA10": "Schnorchelausrüstung, Handtücher, frisches Obst und Wasser.",
       "faqQ11": "Wie viel kostet Mantarochen-Schnorcheln?",
-      "faqA11": "Ab 85 USD pro Person als Einzelausflug, vorbehaltlich Bestätigung – oder enthalten in mehreren aktuellen Urlaubspaketen.",
+      "faqA11": "Ab 85 USD pro Person als Einzelausflug, vorbehaltlich Bestätigung – oder enthalten in mehreren aktuellen <a href=\"holiday-packages.html\">Urlaubspaketen</a>.",
       "faqQ12": "Was passiert bei schlechtem Wetter?",
       "faqA12": "Wir prüfen die Bedingungen vorher und informieren Sie, falls der Ausflug verschoben oder abgesagt werden muss, statt ihn bei ungeeignetem Wetter durchzuführen.",
       "relatedTag": "Siehe auch",
@@ -930,10 +935,12 @@
       "relTag2": "Reiseführer",
       "relTag3": "Ihren Aufenthalt planen",
       "ctaTitle": "Gleiten Sie selbst an ihrer Seite",
-      "ctaText": "Mantarochen-Schnorcheln ist einzeln buchbar ab 85 USD pro Person oder in mehreren aktuellen Urlaubspaketen mit Transfer hin und zurück sowie Unterkunft auf Maamigili enthalten. Prüfen Sie die Verfügbarkeit oder fragen Sie uns direkt.",
+      "ctaText": "Mantarochen-Schnorcheln ist in mehreren unserer aktuellen Urlaubspakete mit Hin- und Rücktransfer sowie Unterkunft auf Maamigili enthalten, oder ab 85 USD pro Person separat buchbar — sehen Sie sich die Pakete an, oder prüfen Sie direkt die Verfügbarkeit.",
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
-      "tocList": "<li><a href=\"#quick-facts\">Kurzübersicht</a></li><li><a href=\"#excursion\">Was der Ausflug beinhaltet</a></li><li><a href=\"#where-we-search\">Wo unsere Guides suchen – und warum sich der Ort ändert</a></li><li><a href=\"#behavior\">Putzerstationen, Fressverhalten und anderes Manta-Verhalten</a></li><li><a href=\"#no-sighting\">Wenn wir keinen Mantarochen finden</a></li><li><a href=\"#group-size\">Gemeinsame Ausflüge, Gruppengröße & private Ausflüge</a></li><li><a href=\"#who-can-join\">Wer teilnehmen kann – Schwimmer, schwache Schwimmer & Kinder</a></li><li><a href=\"#responsible-encounters\">Sicherheitseinweisung & verantwortungsvolle Manta-Begegnungen</a></li><li><a href=\"#weather\">Wetter & Änderungen des Ausflugs</a></li><li><a href=\"#best-season\">Gibt es eine beste Jahreszeit?</a></li><li><a href=\"#what-to-bring\">Was Sie mitbringen sollten</a></li><li><a href=\"#whats-included\">Was ist inbegriffen</a></li><li><a href=\"#price\">Preis & Buchung</a></li><li><a href=\"#faq\">Häufig gestellte Fragen</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">Kurzübersicht</a></li><li><a href=\"#excursion\">Was der Ausflug beinhaltet</a></li><li><a href=\"#where-we-search\">Wo unsere Guides suchen – und warum sich der Ort ändert</a></li><li><a href=\"#behavior\">Putzerstationen, Fressverhalten und anderes Manta-Verhalten</a></li><li><a href=\"#no-sighting\">Wenn wir keinen Mantarochen finden</a></li><li><a href=\"#group-size\">Gemeinsame Ausflüge, Gruppengröße & private Ausflüge</a></li><li><a href=\"#who-can-join\">Wer teilnehmen kann – Schwimmer, schwache Schwimmer & Kinder</a></li><li><a href=\"#responsible-encounters\">Sicherheitseinweisung & verantwortungsvolle Manta-Begegnungen</a></li><li><a href=\"#weather\">Wetter & Änderungen des Ausflugs</a></li><li><a href=\"#best-season\">Gibt es eine beste Jahreszeit?</a></li><li><a href=\"#what-to-bring\">Was Sie mitbringen sollten</a></li><li><a href=\"#whats-included\">Was ist inbegriffen</a></li><li><a href=\"#price\">Preis & Buchung</a></li><li><a href=\"#faq\">Häufig gestellte Fragen</a></li>",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Mantarochen-Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "hpMeta": {
       "title": "Malediven Urlaubspakete — Walhaie, Mantarochen & mehr | Vilu Residence",
@@ -1020,7 +1027,7 @@
       "relTag3": "Aufenthalt Planen",
       "relTitle3": "Was man auf Maamigili unternehmen kann",
       "ctaTitle": "Übernachten Sie genau dort, wo die Walhaie sind",
-      "ctaText": "Vilu Residence liegt direkt auf Maamigili — kein Bootstransfer zu einem Resort, nur wenige Schritte vom Hafen und den Ausflügen entfernt.",
+      "ctaText": "Vilu Residence liegt direkt auf Maamigili — kein Bootstransfer zu einem Resort, nur wenige Schritte vom Hafen und den Ausflügen entfernt. Sehen Sie, wie unsere Urlaubspakete alles zusammenbringen, oder prüfen Sie direkt die Verfügbarkeit.",
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "linkGettingHere": "Aktuelle Transferpreise und Zeitpläne ansehen →",
@@ -1128,7 +1135,10 @@
       "faqA41": "Leichte, atmungsaktive Kleidung, riffverträglichen Sonnenschutz, eine dezente Überwurf-Kleidung für Wege durchs Dorf und eine leichte Regenschicht bei Reisen in den feuchteren Monaten.",
       "faqQ42": "Brauche ich eine Reiseversicherung für die Malediven?",
       "faqA42": "Dieser Reiseführer verfügt über keine verifizierte, aktuelle Quelle zu einer spezifischen maledivischen Versicherungspflicht – aktuelle Hinweise direkt bei der <a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">maledivischen Einwanderungsbehörde</a> prüfen, bevor Sie reisen.",
-      "ctaPackagesLink": "Lieber ein fertiges Paket? <a href=\"holiday-packages.html\" style=\"color:rgba(255,255,255,.85)\">Urlaubspakete ansehen →</a>"
+      "ctaPackages": "Urlaubspakete ansehen",
+      "relTag4": "Aufenthalt Planen",
+      "relTitle4": "Urlaubspakete",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Maamigili-Reisef%C3%BChrer%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "btMeta": {
       "title": "Beste Reisezeit für die Malediven — Ein Guide nach Jahreszeiten",
@@ -1146,10 +1156,12 @@
       "relTag3": "Reiseziel-Guide",
       "relTitle3": "Süd-Ari-Atoll-Guide",
       "ctaTitle": "Walhaie gibt es hier in jeder Saison",
-      "ctaText": "Welcher Monat auch immer zu Ihrem Budget und Zeitplan passt, das Meeresleben von Süd-Ari wird hier sein. Prüfen Sie die Verfügbarkeit oder schreiben Sie uns direkt.",
+      "ctaText": "Welcher Monat auch immer zu Ihrem Budget und Zeitplan passt, das Meeresleben von Süd-Ari wird hier sein — sehen Sie, wie unsere Urlaubspakete alles zusammenbringen, oder prüfen Sie direkt die Verfügbarkeit.",
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
-      "linkWhaleShark": "Mehr zur Walhai-Saison in unserem Walhai-Schnorchel-Guide →"
+      "linkWhaleShark": "Mehr zur Walhai-Saison in unserem Walhai-Schnorchel-Guide →",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Beste%20Reisezeit%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "gvrMeta": {
       "title": "Malediven Gästehaus vs. Resort: Was ist besser? — Ein ehrlicher Vergleich",
@@ -1167,11 +1179,13 @@
       "relTag3": "Aufenthalt Planen",
       "relTitle3": "Urlaubspakete",
       "ctaTitle": "Erleben Sie, wie ein Gästehausaufenthalt wirklich ist",
-      "ctaText": "Vilu Residence ist ein echtes lokales Gästehaus auf Maamigili — sehen Sie unsere Zimmer und Preise oder fragen Sie uns direkt.",
+      "ctaText": "Jedes Urlaubspaket von Vilu Residence beinhaltet Ihren Aufenthalt hier — sehen Sie, wie Unterkunft und Erlebnisse zusammenkommen, oder sehen Sie sich direkt unsere Zimmer und Preise an.",
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "linkCost": "Echte Preisspannen in unserem Kostenguide ansehen →",
-      "linkRooms": "Unsere Zimmer und Preise ansehen →"
+      "linkRooms": "Unsere Zimmer und Preise ansehen →",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20G%C3%A4stehaus%20vs.%20Resort%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "costMeta": {
       "title": "Was Kostet ein Malediven-Urlaub? — Preisguide 2026",
@@ -1193,7 +1207,9 @@
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "linkGettingHere": "Aktuelle Transferpreise →",
-      "linkPackages": "Alle unsere aktuellen Paketpreise ansehen →"
+      "linkPackages": "Alle unsere aktuellen Paketpreise ansehen →",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Urlaubskosten-Guide%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "cmpSnorkelMeta": {
       "title": "Die besten Lokalinseln der Malediven zum Schnorcheln",
@@ -1212,9 +1228,11 @@
       "relTag3": "Aufenthalt Planen",
       "relTitle3": "Urlaubspakete",
       "ctaTitle": "Überzeugen Sie sich selbst, was Süd-Ari besonders macht",
-      "ctaText": "Vilu Residence bringt Sie direkt nach Maamigili, mitten in Süd-Aris ganzjähriges Meeresleben. Prüfen Sie die Verfügbarkeit oder fragen Sie uns direkt.",
+      "ctaText": "Vilu Residence bringt Sie direkt nach Maamigili, mitten in Süd-Aris ganzjähriges Meeresleben — sehen Sie, wie unsere Urlaubspakete alles zusammenbringen, oder prüfen Sie direkt die Verfügbarkeit.",
       "ctaBook": "Verfügbarkeit prüfen",
-      "ctaWhatsapp": "Auf WhatsApp fragen"
+      "ctaWhatsapp": "Auf WhatsApp fragen",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Beste%20Inseln%20zum%20Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "cmpRegionsMeta": {
       "title": "Süd-Ari-Atoll im Vergleich zu anderen Malediven-Regionen",
@@ -1233,9 +1251,11 @@
       "relTag3": "Reiseplanung",
       "relTitle3": "Beste Reisezeit",
       "ctaTitle": "Bereit, Süd-Ari selbst zu erleben?",
-      "ctaText": "Vilu Residence liegt direkt inmitten von Süd-Aris ganzjährigem Meeresleben. Prüfen Sie die Verfügbarkeit oder fragen Sie uns direkt.",
+      "ctaText": "Vilu Residence liegt direkt inmitten von Süd-Aris ganzjährigem Meeresleben — sehen Sie, wie unsere Urlaubspakete alles zusammenbringen, oder prüfen Sie direkt die Verfügbarkeit.",
       "ctaBook": "Verfügbarkeit prüfen",
-      "ctaWhatsapp": "Auf WhatsApp fragen"
+      "ctaWhatsapp": "Auf WhatsApp fragen",
+      "ctaPackages": "Urlaubspakete ansehen",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20S%C3%BCd-Ari%20vs.%20Andere%20Regionen%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
     },
     "blogThingsMeta": {
       "title": "Was man auf Maamigili, Süd-Ari-Atoll, unternehmen kann",

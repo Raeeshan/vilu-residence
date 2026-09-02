@@ -562,7 +562,7 @@
       "h3": "南阿里环礁",
       "p3": "距离马累更远（快艇确实需要约1小时45分钟，或飞机约20分钟），这是为了换取它所提供的：全年可见的鲸鲨、定期的蝠鲼观赏，以及度假村与马米吉利、迪古拉等历史悠久的本地岛屿相结合，使民宿旅行者和度假村住客都能便捷抵达。",
       "h4": "如何选择地区",
-      "p4": "如果将接送时间降到最低最重要，北马累环礁很难被超越。如果目标是某个特定且高度季节性的自然事件，巴环礁的哈尼法鲁湾值得纳入行程规划。如果您想要的是全年不断的海洋生物和真正的本地岛屿住宿体验，南阿里正是为此而生。"
+      "p4": "如果将接送时间降到最低最重要，北马累环礁很难被超越。如果目标是某个特定且高度季节性的自然事件，巴环礁的哈尼法鲁湾值得纳入行程规划。如果您想要的是全年不断的海洋生物和真正的本地岛屿住宿体验，南阿里正是为此而生。 如果这正是您计划的旅行，我们的度假套餐会将住宿与体验结合在一起。"
     },
     "blogBestTime": {
       "title": "马尔代夫最佳旅行时间",
@@ -592,7 +592,8 @@
       "h3": "您实际获得的体验",
       "p3": "度假村为您提供一座私人岛屿，通常配有水上别墅和全包式餐饮，但除了工作人员外，几乎没有与马尔代夫本地生活的接触。民宿则为您提供真实的岛屿社区、正常营业的本地商店，并且——由于您为远少得多的私人基础设施付费——在围绕相同礁石和相同海洋生物打造的旅行中，价格显著更低。两者都不包含对方的体验，这是设计使然，而非妥协。",
       "h4": "一个真正诚实的看法",
-      "p4": "如果这次旅行的重点是完全的私密性和五星级服务，度假村能以民宿在结构上无法企及的方式提供这些。如果重点是礁石、鲸鲨和真实的马尔代夫岛屿——以及更低的价格——像我们这样的民宿能够很好地做到这一点。"
+      "p4": "如果这次旅行的重点是完全的私密性和五星级服务，度假村能以民宿在结构上无法企及的方式提供这些。如果重点是礁石、鲸鲨和真实的马尔代夫岛屿——以及更低的价格——像我们这样的民宿能够很好地做到这一点。",
+      "p5": "有一个选择可以兼顾两者:我们的<a href=\"holiday-packages.html#ultimate-resort-island-odyssey\">Ultimate Resort &amp; Island Odyssey</a>套餐是Vilu Residence唯一一个包含到附近度假村一日游的度假套餐——让您无需更换住宿地点，也能体验马尔代夫的这一面。"
     },
     "blogCost": {
       "title": "马尔代夫度假需要花多少钱？",
@@ -716,7 +717,7 @@
       "faqQ3": "一年中什么时候到访最好?",
       "faqA3": "南阿里的海洋生物全年都有出现,因此就野生动物而言并没有一个固定的「最佳」月份——天气和海况才是更主要的季节性因素。请参阅我们完整的<a href=\"best-time-to-visit.html\">最佳到访时间指南</a>。",
       "faqQ4": "我应该住在当地岛屿还是度假村?",
-      "faqA4": "两者都是可行的选择,各自在费用结构、私密性和接触当地文化方面有真实的权衡。请参阅我们完整的<a href=\"guesthouse-vs-resort.html\">民宿旅馆与度假村对比</a>。",
+      "faqA4": "两者都是可行的选择,各自在费用结构、私密性和接触当地文化方面有真实的权衡。请参阅我们完整的<a href=\"guesthouse-vs-resort.html\">民宿旅馆与度假村对比</a>,或查看我们的<a href=\"holiday-packages.html\">度假套餐</a>,将当地岛屿住宿与本指南所述的各项体验结合在一起。",
       "faqQ5": "从马累如何前往南阿里环礁?",
       "faqA5": "可以选择直达快艇(约1小时45分钟),或乘坐国内航班(约20-30分钟)前往马阿米吉利的维拉国际机场。",
       "faqQ6": "我应该以哪个岛屿为落脚点?",
@@ -740,9 +741,11 @@
       "relTag3": "规划您的行程",
       "relTitle3": "度假套餐",
       "ctaTitle": "准备好亲自体验了吗?",
-      "ctaText": "Vilu Residence是一家位于马阿米吉利的民宿式旅馆,地处南阿里环礁鲸鲨栖息地的核心地带。请查看空房情况,或直接通过WhatsApp联系我们。",
+      "ctaText": "Vilu Residence是一家位于马阿米吉利的民宿式旅馆,地处南阿里环礁鲸鲨栖息地的核心地带。了解我们的度假套餐如何将环礁的各项体验结合在一起,或直接查看空房情况。",
       "ctaBook": "查看空房情况",
-      "ctaWhatsapp": "通过WhatsApp咨询"
+      "ctaWhatsapp": "通过WhatsApp咨询",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E5%8D%97%E9%98%BF%E9%87%8C%E7%8E%AF%E7%A4%81%E6%8C%87%E5%8D%97%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "wsMeta": {
       "title": "马米吉利(南阿里环礁)鲸鲨浮潜 — 您可以期待什么",
@@ -819,7 +822,7 @@
       "faqQ9": "鲸鲨浮潜的费用是多少?",
       "faqA9": "目前拼团行程的单独价格为每人85美元,不过这是可能变动的运营价格,建议直接向维鲁度假屋确认最新价格。单人参加或私人行程可能需要支付额外费用。",
       "faqQ10": "维鲁的度假套餐中是否包含鲸鲨浮潜?",
-      "faqA10": "是的 —— 它作为一项活动包含在维鲁度假屋目前所有的度假套餐中,这些套餐还以套餐自身的价格包含住宿、接送和早餐。",
+      "faqA10": "是的 —— 它作为一项活动包含在我们目前所有的<a href=\"holiday-packages.html\">度假套餐</a>中,这些套餐还以套餐自身的价格包含住宿、接送和早餐。",
       "faqQ11": "如果天气不好会怎样?",
       "faqA11": "维鲁会在每次行程前检查天气和海况。如果条件不适宜,客人会在出发前获得通知,行程可能会被推迟到另一天或取消 —— 提前预订并不能保证行程一定会按原计划进行。",
       "faqQ12": "观赏鲸鲨是否有最佳季节?",
@@ -830,10 +833,12 @@
       "relTag2": "目的地指南",
       "relTag3": "规划您的住宿",
       "ctaTitle": "亲自与它们一同畅游",
-      "ctaText": "鲸鲨浮潜包含在我们目前所有的度假套餐中,也可单独预订,起价每人85美元 —— 请确认最新价格及空位情况,或直接向我们咨询。",
+      "ctaText": "鲸鲨浮潜包含在我们目前所有的度假套餐中,也可单独预订,起价每人85美元 —— 查看套餐详情,或直接确认最新单独价格及空位情况。",
       "ctaBook": "查看空位情况",
       "ctaWhatsapp": "通过WhatsApp咨询",
-      "tocList": "<li><a href=\"#quick-facts\">快速了解</a></li><li><a href=\"#excursion\">行程内容</a></li><li><a href=\"#no-sighting\">如果没能找到鲸鲨</a></li><li><a href=\"#group-size\">拼团行程、团队规模与私人行程</a></li><li><a href=\"#who-can-join\">谁可以参加 —— 游泳者、游泳能力一般者与儿童</a></li><li><a href=\"#responsible-encounters\">安全须知与负责任的鲸鲨互动方式</a></li><li><a href=\"#weather\">天气与行程变动</a></li><li><a href=\"#best-season\">是否有最佳季节?</a></li><li><a href=\"#what-to-bring\">您应该携带什么?</a></li><li><a href=\"#whats-included\">行程包含内容</a></li><li><a href=\"#price\">价格与预订</a></li><li><a href=\"#faq\">常见问题</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">快速了解</a></li><li><a href=\"#excursion\">行程内容</a></li><li><a href=\"#no-sighting\">如果没能找到鲸鲨</a></li><li><a href=\"#group-size\">拼团行程、团队规模与私人行程</a></li><li><a href=\"#who-can-join\">谁可以参加 —— 游泳者、游泳能力一般者与儿童</a></li><li><a href=\"#responsible-encounters\">安全须知与负责任的鲸鲨互动方式</a></li><li><a href=\"#weather\">天气与行程变动</a></li><li><a href=\"#best-season\">是否有最佳季节?</a></li><li><a href=\"#what-to-bring\">您应该携带什么?</a></li><li><a href=\"#whats-included\">行程包含内容</a></li><li><a href=\"#price\">价格与预订</a></li><li><a href=\"#faq\">常见问题</a></li>",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E9%B2%B8%E9%B2%A8%E6%B5%AE%E6%BD%9C%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "mrMeta": {
       "title": "马阿米吉利南阿里环礁蝠鲼浮潜——您需要知道的一切",
@@ -921,7 +926,7 @@
       "faqQ10": "行程包含哪些内容？",
       "faqA10": "浮潜装备、毛巾、新鲜水果和饮用水。",
       "faqQ11": "蝠鲼浮潜费用是多少？",
-      "faqA11": "单独行程每人85美元起,具体价格请以确认为准——或包含在多个现行度假套餐中。",
+      "faqA11": "单独行程每人85美元起,具体价格请以确认为准——或包含在多个现行<a href=\"holiday-packages.html\">度假套餐</a>中。",
       "faqQ12": "如果天气不好会怎样？",
       "faqA12": "我们会提前检查天气状况,如果天气不适宜,会通知您行程需要延期或取消,而不是在不适宜的天气下进行。",
       "relatedTag": "另请参阅",
@@ -930,10 +935,12 @@
       "relTag2": "目的地指南",
       "relTag3": "规划您的行程",
       "ctaTitle": "亲自与它们一同畅游",
-      "ctaText": "蝠鲼浮潜可单独预订,每人85美元起,也包含在我们多个现行度假套餐中,套餐含马阿米吉利往返接送和住宿。请查看空房情况或直接联系我们。",
+      "ctaText": "蝠鲼浮潜包含在我们多个现行度假套餐中,套餐含马阿米吉利往返接送和住宿,也可单独预订,每人85美元起 —— 查看套餐详情,或直接查看空房情况。",
       "ctaBook": "查看空房情况",
       "ctaWhatsapp": "通过WhatsApp咨询",
-      "tocList": "<li><a href=\"#quick-facts\">快速了解</a></li><li><a href=\"#excursion\">行程内容</a></li><li><a href=\"#where-we-search\">我们的向导在哪里寻找——地点为何会变化</a></li><li><a href=\"#behavior\">清洁站、觅食与蝠鲼的其他行为</a></li><li><a href=\"#no-sighting\">如果我们没有找到蝠鲼</a></li><li><a href=\"#group-size\">拼团行程、团队规模与私人行程</a></li><li><a href=\"#who-can-join\">谁可以参加——游泳者、游泳能力较弱者与儿童</a></li><li><a href=\"#responsible-encounters\">安全说明与负责任的蝠鲼相遇方式</a></li><li><a href=\"#weather\">天气与行程变动</a></li><li><a href=\"#best-season\">是否存在最佳季节？</a></li><li><a href=\"#what-to-bring\">需要携带什么？</a></li><li><a href=\"#whats-included\">行程包含内容</a></li><li><a href=\"#price\">价格与预订</a></li><li><a href=\"#faq\">常见问题</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">快速了解</a></li><li><a href=\"#excursion\">行程内容</a></li><li><a href=\"#where-we-search\">我们的向导在哪里寻找——地点为何会变化</a></li><li><a href=\"#behavior\">清洁站、觅食与蝠鲼的其他行为</a></li><li><a href=\"#no-sighting\">如果我们没有找到蝠鲼</a></li><li><a href=\"#group-size\">拼团行程、团队规模与私人行程</a></li><li><a href=\"#who-can-join\">谁可以参加——游泳者、游泳能力较弱者与儿童</a></li><li><a href=\"#responsible-encounters\">安全说明与负责任的蝠鲼相遇方式</a></li><li><a href=\"#weather\">天气与行程变动</a></li><li><a href=\"#best-season\">是否存在最佳季节？</a></li><li><a href=\"#what-to-bring\">需要携带什么？</a></li><li><a href=\"#whats-included\">行程包含内容</a></li><li><a href=\"#price\">价格与预订</a></li><li><a href=\"#faq\">常见问题</a></li>",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E8%9D%A0%E9%B2%BC%E6%B5%AE%E6%BD%9C%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "hpMeta": {
       "title": "马尔代夫度假套餐——鲸鲨、蝠鲼及更多 | Vilu Residence",
@@ -1020,7 +1027,7 @@
       "relTag3": "规划住宿",
       "relTitle3": "在马米吉利可以做的事情",
       "ctaTitle": "住在鲸鲨出没的地方",
-      "ctaText": "Vilu Residence就在马米吉利岛上——无需乘船前往度假村，步行即可到达港口和各项出海行程。",
+      "ctaText": "Vilu Residence就在马米吉利岛上——无需乘船前往度假村，步行即可到达港口和各项出海行程。了解我们的度假套餐如何将这一切结合在一起，或直接查看空房情况。",
       "ctaBook": "查看空房情况",
       "ctaWhatsapp": "通过WhatsApp咨询",
       "linkGettingHere": "查看当前交通价格与时刻表 →",
@@ -1128,7 +1135,10 @@
       "faqA41": "轻便透气的衣物、对珊瑚礁友好的防晒霜、在村庄内活动时穿着得体的罩衫，以及如果在较湿润的月份出行，还需准备一件轻便雨具。",
       "faqQ42": "造访马尔代夫需要旅行保险吗？",
       "faqA42": "本指南目前没有关于马尔代夫特定保险要求的、经核实的最新资料来源——出行前请直接向<a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">马尔代夫移民局</a>核实最新指引。",
-      "ctaPackagesLink": "更喜欢打包好的行程？<a href=\"holiday-packages.html\" style=\"color:rgba(255,255,255,.85)\">查看假期套餐 →</a>"
+      "ctaPackages": "查看假期套餐",
+      "relTag4": "规划住宿",
+      "relTitle4": "度假套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E9%A9%AC%E7%B1%B3%E5%90%89%E5%88%A9%E6%8C%87%E5%8D%97%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "btMeta": {
       "title": "马尔代夫最佳旅行时间——分季节指南",
@@ -1146,10 +1156,12 @@
       "relTag3": "目的地指南",
       "relTitle3": "南阿里环礁指南",
       "ctaTitle": "任何季节都能在这里遇见鲸鲨",
-      "ctaText": "无论哪个月份适合你的预算和时间安排，南阿里环礁的海洋生物都在这里。查看空房情况或直接联系我们。",
+      "ctaText": "无论哪个月份适合你的预算和时间安排，南阿里环礁的海洋生物都在这里 —— 了解我们的度假套餐如何将这一切结合在一起，或直接查看空房情况。",
       "ctaBook": "查看空房情况",
       "ctaWhatsapp": "通过WhatsApp咨询",
-      "linkWhaleShark": "在我们的鲸鲨浮潜指南中了解更多关于鲸鲨最佳时间的信息 →"
+      "linkWhaleShark": "在我们的鲸鲨浮潜指南中了解更多关于鲸鲨最佳时间的信息 →",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E6%97%85%E8%A1%8C%E6%97%B6%E9%97%B4%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "gvrMeta": {
       "title": "马尔代夫民宿还是度假村：哪个更好？——诚实对比",
@@ -1167,11 +1179,13 @@
       "relTag3": "规划住宿",
       "relTitle3": "度假套餐",
       "ctaTitle": "亲身体验民宿住宿是什么样子",
-      "ctaText": "Vilu Residence是马米吉利岛上真正的本地民宿——查看我们的客房与价格，或直接联系我们咨询。",
+      "ctaText": "每个Vilu Residence度假套餐都包含在这里的住宿——了解住宿与体验如何结合，或直接查看我们的客房与价格。",
       "ctaBook": "查看空房情况",
       "ctaWhatsapp": "通过WhatsApp咨询",
       "linkCost": "在我们的度假费用指南中查看真实价格区间 →",
-      "linkRooms": "查看我们的客房与价格 →"
+      "linkRooms": "查看我们的客房与价格 →",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E6%B0%91%E5%AE%BF%E5%AF%B9%E6%AF%94%E5%BA%A6%E5%81%87%E6%9D%91%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "costMeta": {
       "title": "马尔代夫度假需要花多少钱？——2026年价格指南",
@@ -1193,7 +1207,9 @@
       "ctaBook": "查看空房情况",
       "ctaWhatsapp": "通过WhatsApp咨询",
       "linkGettingHere": "当前交通价格 →",
-      "linkPackages": "查看我们当前所有套餐价格 →"
+      "linkPackages": "查看我们当前所有套餐价格 →",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E5%BA%A6%E5%81%87%E8%B4%B9%E7%94%A8%E6%8C%87%E5%8D%97%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "cmpSnorkelMeta": {
       "title": "马尔代夫最适合浮潜的本地岛屿",
@@ -1212,9 +1228,11 @@
       "relTag3": "规划住宿",
       "relTitle3": "度假套餐",
       "ctaTitle": "亲自体验南阿里的与众不同之处",
-      "ctaText": "Vilu Residence就位于马米吉利，处于南阿里全年海洋生物活动的中心地带。查看空房情况，或直接联系我们。",
+      "ctaText": "Vilu Residence就位于马米吉利，处于南阿里全年海洋生物活动的中心地带 —— 了解我们的度假套餐如何将这一切结合在一起，或直接查看空房情况。",
       "ctaBook": "查看空房情况",
-      "ctaWhatsapp": "通过WhatsApp咨询"
+      "ctaWhatsapp": "通过WhatsApp咨询",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E6%B5%AE%E6%BD%9C%E5%B2%9B%E5%B1%BF%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "cmpRegionsMeta": {
       "title": "南阿里环礁对比马尔代夫其他地区",
@@ -1233,9 +1251,11 @@
       "relTag3": "行程规划",
       "relTitle3": "最佳旅行时间",
       "ctaTitle": "准备好亲自体验南阿里了吗？",
-      "ctaText": "Vilu Residence就位于南阿里全年海洋生物活动的中心地带。查看空房情况，或直接联系我们。",
+      "ctaText": "Vilu Residence就位于南阿里全年海洋生物活动的中心地带 —— 了解我们的度假套餐如何将这一切结合在一起，或直接查看空房情况。",
       "ctaBook": "查看空房情况",
-      "ctaWhatsapp": "通过WhatsApp咨询"
+      "ctaWhatsapp": "通过WhatsApp咨询",
+      "ctaPackages": "查看假期套餐",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E5%8D%97%E9%98%BF%E9%87%8C%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96%E5%9C%B0%E5%8C%BA%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82"
     },
     "blogThingsMeta": {
       "title": "马米吉利（南阿里环礁）有哪些可做的事",

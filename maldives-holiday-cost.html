@@ -122,7 +122,7 @@
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogCost.h2">A real example</h2>
     <p data-i18n="blogCost.p2">To give one concrete data point: our own 4-night Island Explorer Getaway package is $450 per person (about $113/night per person), including round-trip speedboat transfer, accommodation, daily breakfast, and whale shark, manta, and turtle snorkeling. Longer packages bring the per-night rate down further — our 10-night package works out to roughly $94/night per person. These prices include transfers and activities, so they're not a like-for-like comparison to a bare room rate, but they give a sense of what a full guesthouse-based trip actually costs.</p>
-    <p class="exp-links"><a href="holiday-packages.html" data-i18n="costPage.linkPackages">See all our current package prices →</a></p>
+    <p class="exp-links"><a href="holiday-packages.html#island-explorer-getaway" data-i18n="costPage.linkPackages">See all our current package prices →</a></p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogCost.h3">What else to budget for</h2>
     <p data-i18n="blogCost.p3">International flights to Malé, the domestic flight or speedboat onward connection, and any add-on activities beyond what's included in a package are worth budgeting separately.</p>
@@ -152,10 +152,12 @@
     <h2 data-i18n="costPage.ctaTitle">See our real, current package prices</h2>
     <p data-i18n="costPage.ctaText">No hidden fees, no guessing — check our current packages or ask us directly for a quote tailored to your dates.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/#booking" data-i18n="costPage.ctaBook">Check Availability</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="costPage.ctaWhatsapp">Ask on WhatsApp</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="costPage.ctaPackages">View Holiday Packages</a>
+      <a class="btn-outline" data-i18n-href="costPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Hi!%20I%20was%20reading%20your%20Maldives%20Holiday%20Cost%20guide%20and%20would%20like%20help%20planning%20my%20Maldives%20holiday%20with%20Vilu." target="_blank" rel="noopener noreferrer" data-i18n="costPage.ctaWhatsapp">Ask on WhatsApp</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="costPage.ctaBook">Check Availability</a>
+      &nbsp;&middot;&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;&middot;&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -233,7 +235,7 @@ var I18N = { en: {
     relTag3: "Trip Planning", relTitle3: "Best Time to Visit",
     ctaTitle: "See our real, current package prices",
     ctaText: "No hidden fees, no guessing — check our current packages or ask us directly for a quote tailored to your dates.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   blogCost: {
     title: "How Much Does a <em>Maldives Holiday</em> Cost?",

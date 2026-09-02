@@ -562,7 +562,7 @@
       "h3": "Atoll de Sud Ari",
       "p3": "Plus éloigné de Malé (véritablement 1h45 en bateau rapide, ou 20 minutes en avion), ce qui est le compromis pour ce qu'il offre : des requins-baleines toute l'année, des observations régulières de raies manta, et un mélange de resorts et d'îles locales bien établies comme Maamigili et Dhigurah, le rendant accessible aussi bien aux voyageurs en guesthouse qu'aux clients de resorts.",
       "h4": "Choisir une région",
-      "p4": "Si minimiser le temps de transfert est la priorité, l'atoll de Malé Nord est difficile à battre. Si un événement naturel précis et fortement saisonnier est l'objectif, la baie de Hanifaru dans l'atoll de Baa vaut la peine d'être planifiée. Si la vie marine toute l'année et un véritable séjour sur une île locale sont ce que vous recherchez, Sud Ari est fait exactement pour cela."
+      "p4": "Si minimiser le temps de transfert est la priorité, l'atoll de Malé Nord est difficile à battre. Si un événement naturel précis et fortement saisonnier est l'objectif, la baie de Hanifaru dans l'atoll de Baa vaut la peine d'être planifiée. Si la vie marine toute l'année et un véritable séjour sur une île locale sont ce que vous recherchez, Sud Ari est fait exactement pour cela. Nos forfaits vacances associent hébergement et expériences si c'est le voyage que vous prévoyez."
     },
     "blogBestTime": {
       "title": "Meilleure période pour visiter les Maldives",
@@ -592,7 +592,8 @@
       "h3": "Ce que vous obtenez réellement",
       "p3": "Un resort vous offre une île privée, souvent avec des villas sur pilotis et une restauration tout compris, mais aucun contact avec la vie maldivienne locale au-delà du personnel. Une guesthouse vous offre une véritable communauté insulaire, des commerces locaux actifs, et — parce que vous payez pour bien moins d'infrastructure privée — des prix nettement plus bas pour un voyage construit autour des mêmes récifs et de la même vie marine. Aucun des deux n'inclut l'expérience de l'autre, par conception, pas par compromis.",
       "h4": "Un avis vraiment honnête",
-      "p4": "Si l'intimité totale et un service cinq étoiles sont l'objet du voyage, un resort l'offre d'une manière qu'une guesthouse ne peut structurellement pas égaler. Si le récif, les requins-baleines et une véritable île maldivienne — et un prix plus bas — sont l'objet, une guesthouse comme la nôtre le fait très bien."
+      "p4": "Si l'intimité totale et un service cinq étoiles sont l'objet du voyage, un resort l'offre d'une manière qu'une guesthouse ne peut structurellement pas égaler. Si le récif, les requins-baleines et une véritable île maldivienne — et un prix plus bas — sont l'objet, une guesthouse comme la nôtre le fait très bien.",
+      "p5": "Une option combine les deux : notre forfait <a href=\"holiday-packages.html#ultimate-resort-island-odyssey\">Ultimate Resort &amp; Island Odyssey</a> est le seul forfait vacances Vilu Residence à inclure une visite d'une journée dans un resort voisin — une façon de découvrir aussi cette facette des Maldives, sans changer de lieu de séjour."
     },
     "blogCost": {
       "title": "Combien coûtent des vacances aux Maldives ?",
@@ -716,7 +717,7 @@
       "faqQ3": "Quelle est la meilleure période de l'année pour visiter ?",
       "faqA3": "La faune marine de South Ari est présente toute l'année, il n'y a donc pas de « meilleur » mois unique pour la faune — la météo et les conditions de mer sont les facteurs saisonniers les plus déterminants. Consultez notre <a href=\"best-time-to-visit.html\">guide complet de la meilleure période pour visiter</a>.",
       "faqQ4": "Dois-je séjourner sur une île locale ou dans un complexe hôtelier ?",
-      "faqA4": "Les deux sont des choix valables avec de véritables compromis en matière de structure de coût, d'intimité et d'accès à la culture locale. Consultez notre <a href=\"guesthouse-vs-resort.html\">comparatif complet Pension vs. Complexe hôtelier</a>.",
+      "faqA4": "Les deux sont des choix valables avec de véritables compromis en matière de structure de coût, d'intimité et d'accès à la culture locale. Consultez notre <a href=\"guesthouse-vs-resort.html\">comparatif complet Pension vs. Complexe hôtelier</a>, ou nos <a href=\"holiday-packages.html\">forfaits vacances</a>, qui associent un séjour sur une île locale aux expériences décrites dans ce guide.",
       "faqQ5": "Comment me rendre à l'atoll de South Ari depuis Malé ?",
       "faqA5": "Soit par un hors-bord rapide direct (environ 1h45), soit par un vol intérieur (environ 20 à 30 minutes) jusqu'à l'aéroport international Villa de Maamigili.",
       "faqQ6": "Sur quelle île devrais-je m'installer ?",
@@ -740,9 +741,11 @@
       "relTag3": "Préparer votre séjour",
       "relTitle3": "Forfaits vacances",
       "ctaTitle": "Prêt à le découvrir par vous-même ?",
-      "ctaText": "Vilu Residence est une pension située directement sur Maamigili, l'île au cœur des zones de requins-baleines de l'atoll de South Ari. Vérifiez les disponibilités ou contactez-nous directement sur WhatsApp.",
+      "ctaText": "Vilu Residence est une pension située directement sur Maamigili, l'île au cœur des zones de requins-baleines de l'atoll de South Ari. Découvrez comment nos forfaits vacances rassemblent les expériences de l'atoll, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
-      "ctaWhatsapp": "Demander sur WhatsApp"
+      "ctaWhatsapp": "Demander sur WhatsApp",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Guide%20de%20l'atoll%20de%20Sud%20Ari%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "wsMeta": {
       "title": "Snorkeling avec les requins-baleines à Maamigili, atoll de Ari Sud — À quoi s'attendre",
@@ -819,7 +822,7 @@
       "faqQ9": "Combien coûte le snorkeling avec les requins-baleines ?",
       "faqA9": "Le tarif actuel seul est de 85 USD par personne pour l'excursion partagée, bien qu'il s'agisse d'un tarif opérationnel susceptible de changer, il est donc préférable de confirmer le tarif actuel directement auprès de Vilu Residence. Des frais supplémentaires peuvent s'appliquer pour un participant seul ou une excursion privée.",
       "faqQ10": "Le snorkeling avec les requins-baleines est-il inclus dans les forfaits vacances de Vilu ?",
-      "faqA10": "Oui — il est inclus comme activité dans chacun des forfaits vacances actuels de Vilu Residence, qui regroupent également l'hébergement, le transfert et le petit-déjeuner à leur propre tarif de forfait.",
+      "faqA10": "Oui — il est inclus comme activité dans chacun de nos <a href=\"holiday-packages.html\">forfaits vacances</a> actuels, qui regroupent également l'hébergement, le transfert et le petit-déjeuner à leur propre tarif de forfait.",
       "faqQ11": "Que se passe-t-il en cas de mauvais temps ?",
       "faqA11": "Vilu vérifie la météo et les conditions maritimes avant chaque excursion. Si les conditions ne sont pas appropriées, les hôtes en sont informés avant le départ et l'excursion peut être reportée à un autre jour ou annulée — une réservation à l'avance ne garantit pas que l'excursion se déroulera exactement comme prévu.",
       "faqQ12": "Y a-t-il une meilleure période de l'année pour voir des requins-baleines ?",
@@ -830,10 +833,12 @@
       "relTag2": "Guide de destination",
       "relTag3": "Planifiez votre séjour",
       "ctaTitle": "Nagez avec eux vous-même",
-      "ctaText": "Le snorkeling avec les requins-baleines est inclus dans chacun de nos forfaits vacances actuels, ou peut être réservé seul à partir de 85 USD par personne — confirmez le tarif actuel et vérifiez la disponibilité, ou demandez-nous directement.",
+      "ctaText": "Le snorkeling avec les requins-baleines est inclus dans chacun de nos forfaits vacances actuels, ou peut être réservé seul à partir de 85 USD par personne — consultez les forfaits, ou vérifiez directement la disponibilité et le tarif seul actuel.",
       "ctaBook": "Vérifier la disponibilité",
       "ctaWhatsapp": "Demander sur WhatsApp",
-      "tocList": "<li><a href=\"#quick-facts\">En bref</a></li><li><a href=\"#excursion\">Ce que comprend l'excursion</a></li><li><a href=\"#no-sighting\">Si nous ne trouvons pas de requin-baleine</a></li><li><a href=\"#group-size\">Excursions partagées, taille du groupe et excursions privées</a></li><li><a href=\"#who-can-join\">Qui peut participer — nageurs, nageurs peu expérimentés et enfants</a></li><li><a href=\"#responsible-encounters\">Briefing sécurité et rencontres responsables avec les requins-baleines</a></li><li><a href=\"#weather\">Météo et modifications d'excursion</a></li><li><a href=\"#best-season\">Existe-t-il une meilleure saison ?</a></li><li><a href=\"#what-to-bring\">Que devriez-vous emporter ?</a></li><li><a href=\"#whats-included\">Ce qui est inclus</a></li><li><a href=\"#price\">Tarif et réservation</a></li><li><a href=\"#faq\">Questions fréquentes</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">En bref</a></li><li><a href=\"#excursion\">Ce que comprend l'excursion</a></li><li><a href=\"#no-sighting\">Si nous ne trouvons pas de requin-baleine</a></li><li><a href=\"#group-size\">Excursions partagées, taille du groupe et excursions privées</a></li><li><a href=\"#who-can-join\">Qui peut participer — nageurs, nageurs peu expérimentés et enfants</a></li><li><a href=\"#responsible-encounters\">Briefing sécurité et rencontres responsables avec les requins-baleines</a></li><li><a href=\"#weather\">Météo et modifications d'excursion</a></li><li><a href=\"#best-season\">Existe-t-il une meilleure saison ?</a></li><li><a href=\"#what-to-bring\">Que devriez-vous emporter ?</a></li><li><a href=\"#whats-included\">Ce qui est inclus</a></li><li><a href=\"#price\">Tarif et réservation</a></li><li><a href=\"#faq\">Questions fréquentes</a></li>",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Snorkeling%20avec%20requins-baleines%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "mrMeta": {
       "title": "Snorkeling avec les raies manta à Maamigili, atoll de South Ari — À quoi s'attendre",
@@ -921,7 +926,7 @@
       "faqQ10": "Qu'est-ce qui est inclus dans l'excursion ?",
       "faqA10": "Le matériel de snorkeling, les serviettes, les fruits frais et l'eau.",
       "faqQ11": "Combien coûte le snorkeling avec les raies manta ?",
-      "faqA11": "À partir de 85 USD par personne pour l'excursion seule, sous réserve de confirmation — ou inclus dans plusieurs forfaits vacances actuels.",
+      "faqA11": "À partir de 85 USD par personne pour l'excursion seule, sous réserve de confirmation — ou inclus dans plusieurs <a href=\"holiday-packages.html\">forfaits vacances</a> actuels.",
       "faqQ12": "Que se passe-t-il en cas de mauvais temps ?",
       "faqA12": "Nous vérifions les conditions à l'avance et vous informerons si la sortie doit être reportée ou annulée plutôt que d'être maintenue par temps inadapté.",
       "relatedTag": "Voir aussi",
@@ -930,10 +935,12 @@
       "relTag2": "Guide de destination",
       "relTag3": "Préparer votre séjour",
       "ctaTitle": "Nagez à leurs côtés vous-même",
-      "ctaText": "Le snorkeling avec les raies manta est réservable seul à partir de 85 USD par personne, ou inclus dans plusieurs de nos forfaits vacances actuels avec transfert aller-retour et hébergement à Maamigili. Vérifiez les disponibilités ou contactez-nous directement.",
+      "ctaText": "Le snorkeling avec les raies manta est inclus dans plusieurs de nos forfaits vacances actuels avec transfert aller-retour et hébergement à Maamigili, ou réservable seul à partir de 85 USD par personne — consultez les forfaits, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
-      "tocList": "<li><a href=\"#quick-facts\">En bref</a></li><li><a href=\"#excursion\">Ce que comprend l'excursion</a></li><li><a href=\"#where-we-search\">Où cherchent nos guides — et pourquoi le lieu change</a></li><li><a href=\"#behavior\">Stations de nettoyage, alimentation et autres comportements des raies manta</a></li><li><a href=\"#no-sighting\">Si nous ne trouvons pas de raie manta</a></li><li><a href=\"#group-size\">Sorties partagées, taille du groupe et sorties privées</a></li><li><a href=\"#who-can-join\">Qui peut participer — nageurs, nageurs peu à l'aise et enfants</a></li><li><a href=\"#responsible-encounters\">Briefing sécurité et rencontres responsables avec les raies manta</a></li><li><a href=\"#weather\">Météo et changements de sortie</a></li><li><a href=\"#best-season\">Y a-t-il une meilleure saison ?</a></li><li><a href=\"#what-to-bring\">Que devriez-vous apporter ?</a></li><li><a href=\"#whats-included\">Ce qui est inclus</a></li><li><a href=\"#price\">Tarif et réservation</a></li><li><a href=\"#faq\">Questions fréquentes</a></li>"
+      "tocList": "<li><a href=\"#quick-facts\">En bref</a></li><li><a href=\"#excursion\">Ce que comprend l'excursion</a></li><li><a href=\"#where-we-search\">Où cherchent nos guides — et pourquoi le lieu change</a></li><li><a href=\"#behavior\">Stations de nettoyage, alimentation et autres comportements des raies manta</a></li><li><a href=\"#no-sighting\">Si nous ne trouvons pas de raie manta</a></li><li><a href=\"#group-size\">Sorties partagées, taille du groupe et sorties privées</a></li><li><a href=\"#who-can-join\">Qui peut participer — nageurs, nageurs peu à l'aise et enfants</a></li><li><a href=\"#responsible-encounters\">Briefing sécurité et rencontres responsables avec les raies manta</a></li><li><a href=\"#weather\">Météo et changements de sortie</a></li><li><a href=\"#best-season\">Y a-t-il une meilleure saison ?</a></li><li><a href=\"#what-to-bring\">Que devriez-vous apporter ?</a></li><li><a href=\"#whats-included\">Ce qui est inclus</a></li><li><a href=\"#price\">Tarif et réservation</a></li><li><a href=\"#faq\">Questions fréquentes</a></li>",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Snorkeling%20avec%20raies%20manta%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "hpMeta": {
       "title": "Forfaits vacances Maldives — Requins-baleines, raies manta et plus | Vilu Residence",
@@ -1020,7 +1027,7 @@
       "relTag3": "Planifier le Séjour",
       "relTitle3": "Que faire à Maamigili",
       "ctaTitle": "Séjournez là où vivent les requins-baleines",
-      "ctaText": "Vilu Residence se trouve directement à Maamigili — pas de transfert en bateau vers un resort, à quelques pas du port et des excursions.",
+      "ctaText": "Vilu Residence se trouve directement à Maamigili — pas de transfert en bateau vers un resort, à quelques pas du port et des excursions. Découvrez comment nos forfaits vacances rassemblent tout cela, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
       "linkGettingHere": "Voir les tarifs et horaires de transfert actuels →",
@@ -1128,7 +1135,10 @@
       "faqA41": "Des vêtements légers et respirants, une crème solaire respectueuse des récifs, une tenue de couverture modeste pour se déplacer dans le village, et une fine couche de pluie si vous voyagez pendant les mois humides.",
       "faqQ42": "Ai-je besoin d'une assurance voyage pour visiter les Maldives ?",
       "faqA42": "Ce guide ne dispose pas de source vérifiée et actuelle sur une obligation d'assurance maldivienne spécifique — vérifiez les indications actuelles directement auprès de l'<a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">Immigration des Maldives</a> avant de voyager.",
-      "ctaPackagesLink": "Vous préférez un itinéraire tout inclus ? <a href=\"holiday-packages.html\" style=\"color:rgba(255,255,255,.85)\">Voir les forfaits vacances →</a>"
+      "ctaPackages": "Voir les forfaits vacances",
+      "relTag4": "Planifier le Séjour",
+      "relTitle4": "Forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Guide%20de%20Maamigili%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "btMeta": {
       "title": "Meilleure Période pour Visiter les Maldives — Guide Saisonnier",
@@ -1146,10 +1156,12 @@
       "relTag3": "Guide de Destination",
       "relTitle3": "Guide de l'Atoll de Ari Sud",
       "ctaTitle": "Les requins-baleines sont ici en toute saison",
-      "ctaText": "Quel que soit le mois qui convient à votre budget et votre emploi du temps, la vie marine de Ari Sud sera là. Vérifiez les disponibilités ou contactez-nous directement.",
+      "ctaText": "Quel que soit le mois qui convient à votre budget et votre emploi du temps, la vie marine de Ari Sud sera là — découvrez comment nos forfaits vacances rassemblent tout cela, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
-      "linkWhaleShark": "En savoir plus sur la saison des requins-baleines dans notre guide de plongée avec les requins-baleines →"
+      "linkWhaleShark": "En savoir plus sur la saison des requins-baleines dans notre guide de plongée avec les requins-baleines →",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Meilleure%20P%C3%A9riode%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "gvrMeta": {
       "title": "Guesthouse vs Resort aux Maldives : Lequel Choisir ? — Une Comparaison Honnête",
@@ -1167,11 +1179,13 @@
       "relTag3": "Planifier le Séjour",
       "relTitle3": "Forfaits Vacances",
       "ctaTitle": "Découvrez à quoi ressemble vraiment un séjour en guesthouse",
-      "ctaText": "Vilu Residence est une vraie guesthouse locale à Maamigili — consultez nos chambres et tarifs, ou contactez-nous directement.",
+      "ctaText": "Chaque forfait vacances Vilu Residence inclut votre séjour ici — découvrez comment hébergement et expériences se combinent, ou consultez directement nos chambres et tarifs.",
       "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
       "linkCost": "Voir les fourchettes de prix réelles dans notre guide des coûts →",
-      "linkRooms": "Voir nos chambres et tarifs →"
+      "linkRooms": "Voir nos chambres et tarifs →",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Guesthouse%20vs%20Resort%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "costMeta": {
       "title": "Combien Coûtent des Vacances aux Maldives ? — Guide des Prix 2026",
@@ -1193,7 +1207,9 @@
       "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
       "linkGettingHere": "Tarifs de transfert actuels →",
-      "linkPackages": "Voir tous nos prix actuels de forfaits →"
+      "linkPackages": "Voir tous nos prix actuels de forfaits →",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Guide%20des%20Co%C3%BBts%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "cmpSnorkelMeta": {
       "title": "Les meilleures îles locales des Maldives pour le snorkeling",
@@ -1212,9 +1228,11 @@
       "relTag3": "Planifier le Séjour",
       "relTitle3": "Forfaits vacances",
       "ctaTitle": "Découvrez par vous-même ce qui distingue Sud Ari",
-      "ctaText": "Vilu Residence vous installe directement à Maamigili, au cœur de la vie marine de Sud Ari présente toute l'année. Vérifiez les disponibilités ou contactez-nous directement.",
+      "ctaText": "Vilu Residence vous installe directement à Maamigili, au cœur de la vie marine de Sud Ari présente toute l'année — découvrez comment nos forfaits vacances rassemblent tout cela, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
-      "ctaWhatsapp": "Demander sur WhatsApp"
+      "ctaWhatsapp": "Demander sur WhatsApp",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Meilleures%20%C3%8Eles%20pour%20le%20Snorkeling%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "cmpRegionsMeta": {
       "title": "L'atoll de Sud Ari face aux autres régions des Maldives",
@@ -1233,9 +1251,11 @@
       "relTag3": "Planification du Voyage",
       "relTitle3": "Meilleure Période",
       "ctaTitle": "Prêt à découvrir Sud Ari par vous-même ?",
-      "ctaText": "Vilu Residence est installé directement au cœur de la vie marine de Sud Ari présente toute l'année. Vérifiez les disponibilités ou contactez-nous directement.",
+      "ctaText": "Vilu Residence est installé directement au cœur de la vie marine de Sud Ari présente toute l'année — découvrez comment nos forfaits vacances rassemblent tout cela, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
-      "ctaWhatsapp": "Demander sur WhatsApp"
+      "ctaWhatsapp": "Demander sur WhatsApp",
+      "ctaPackages": "Voir les forfaits vacances",
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Sud%20Ari%20vs%20Autres%20R%C3%A9gions%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "blogThingsMeta": {
       "title": "Que faire à Maamigili, Atoll de Ari Sud",

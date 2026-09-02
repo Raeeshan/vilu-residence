@@ -142,6 +142,15 @@ function applyStaticTranslations($, dict, metaNs, i18nMode) {
     const val = getPath(dict.static, $(this).attr('data-i18n-aria-label'));
     if (val !== undefined) $(this).attr('aria-label', val);
   });
+  // Explicit whitelist for translating an <a> tag's href — deliberately not a
+  // generic arbitrary-attribute mechanism. Runs before rewriteResourcePaths()/
+  // rewriteHomepageBackLinks(), but both of those already skip anchor hrefs
+  // outright (see their own comments), so a full external URL written here is
+  // never touched again downstream.
+  $('[data-i18n-href]').each(function () {
+    const val = getPath(dict.static, $(this).attr('data-i18n-href'));
+    if (val !== undefined) $(this).attr('href', val);
+  });
   const seoTitle = getPath(dict.static, metaNs + '.title');
   if (seoTitle !== undefined) $('title').text(seoTitle);
   const seoDesc = getPath(dict.static, metaNs + '.description');
@@ -319,7 +328,7 @@ for (const p of PAGES) {
 // the page's real markup on every build, not a hand-maintained page→namespace
 // map, so a namespace rename/addition in the HTML is picked up automatically
 // and can never drift out of sync the way a manual table could.
-const DATA_I18N_ATTR_RE = /data-i18n(?:-html|-placeholder|-alt|-aria-label)?="([^"]+)"/g;
+const DATA_I18N_ATTR_RE = /data-i18n(?:-html|-placeholder|-alt|-aria-label|-href)?="([^"]+)"/g;
 function extractNamespaces(html) {
   const ns = new Set();
   let m;
@@ -698,4 +707,6 @@ module.exports = {
   getLangJsonSnapshots,
   keyLastChangedForLang,
   computeSitemapLastmod,
+  getPath,
+  applyStaticTranslations,
 };
