@@ -32,7 +32,13 @@
       ".git/**",
       "build-i18n-pages.js",
       "package.json",
-      "package-lock.json"
+      "package-lock.json",
+      "test/**",
+      "functions/**",
+      "firestore.rules",
+      "storage.rules",
+      "firestore.indexes.json",
+      "docs/**"
     ],
     "rewrites": [
       {
