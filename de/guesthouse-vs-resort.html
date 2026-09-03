@@ -10,6 +10,7 @@
   function gtag(){ dataLayer.push(arguments); }
 </script>
 <script src="/consent.js"></script>
+<script src="/analytics.js"></script>
 
 <script>
 (function(){
@@ -78,7 +79,7 @@
 }
 </script>
 </head>
-<body>
+<body data-page-type="guide" data-page-slug="guesthouse-vs-resort">
 
 <nav id="nav">
   <div class="nav-row-top">
@@ -90,7 +91,7 @@
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Urlaubspakete</a></li>
+    <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide" data-nav-group="packages">Urlaubspakete</a></li>
     <li class="nav-drop">
       <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Erlebnisse</button>
       <div class="nav-drop-panel" role="menu">
@@ -130,7 +131,7 @@
   </ul>
   <div class="nav-right">
     <div class="lang-switcher" aria-label="Language selector"></div>
-    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Urlaub planen</a>
+    <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Urlaub planen</a>
     <a class="nav-check-availability js-check-availability" href="/de/#booking" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
   </div>
   <div class="nav-mobile-right">
@@ -154,7 +155,7 @@
     <button class="mm-close" aria-label="Menü schließen" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
   </div>
   <div class="mm-body">
-    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Urlaubspakete</a>
+    <a class="mm-packages" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="pageNav.hpGuide">Urlaubspakete</a>
     <div class="mm-group">
       <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Erlebnisse</button>
       <div class="mm-group-panel">
@@ -192,15 +193,15 @@
       </div>
     </div>
     <div class="mm-ctas">
-      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Urlaub planen</a>
+      <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="navShell.planHoliday">Urlaub planen</a>
       <a class="mm-check-availability js-check-availability" href="/de/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
     </div>
     <div class="mm-lang">
       <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
-      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
-      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'mobile_menu'})">Viluresidence@gmail.com</a>
       <div class="mm-contact-social">
         <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
         <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -250,7 +251,7 @@
         <img class="related-card-img" src="/images/thumb_turtle_snorkelers_gallery.jpg" loading="lazy" alt="Holiday Cost Guide">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="gvrPage.relTag2">Budgetplanung</div><h4 data-i18n="gvrPage.relTitle2">Urlaubskosten-Guide</h4></div>
       </a>
-      <a class="related-card" href="holiday-packages.html">
+      <a class="related-card" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))">
         <img class="related-card-img" src="/images/whale_shark_2_gallery.jpg" loading="lazy" alt="Holiday Packages">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="gvrPage.relTag3">Aufenthalt Planen</div><h4 data-i18n="gvrPage.relTitle3">Urlaubspakete</h4></div>
       </a>
@@ -261,15 +262,15 @@
     <h2 data-i18n="gvrPage.ctaTitle">Erleben Sie, wie ein Gästehausaufenthalt wirklich ist</h2>
     <p data-i18n="gvrPage.ctaText">Jedes Urlaubspaket von Vilu Residence beinhaltet Ihren Aufenthalt hier — sehen Sie, wie Unterkunft und Erlebnisse zusammenkommen, oder sehen Sie sich direkt unsere Zimmer und Preise an.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="holiday-packages.html" data-i18n="gvrPage.ctaPackages">Urlaubspakete ansehen</a>
+      <a class="btn-primary" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="gvrPage.ctaPackages">Urlaubspakete ansehen</a>
       <a class="btn-outline" data-i18n-href="gvrPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20G%C3%A4stehaus%20vs.%20Resort%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen." target="_blank" rel="noopener noreferrer" data-i18n="gvrPage.ctaWhatsapp">Auf WhatsApp fragen</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
       <a href="/de/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="gvrPage.ctaBook">Verfügbarkeit prüfen</a>
       &nbsp;·&nbsp;
-      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
-      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
     </p>
   </div>
 </main>
@@ -283,7 +284,7 @@
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
         <p class="footer-desc" data-i18n="footer.desc">Ein einladendes Gästehaus im Süd-Ari-Atoll mit herzlichem Service und authentischen maledivischen Erlebnissen.</p>
-        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('phone_click',{location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('email_click',{location:'footer'})">Viluresidence@gmail.com</a></div>
+        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a></div>
         <div class="footer-social">
           <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
           <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -291,7 +292,7 @@
         </div>
       </div>
       <div class="footer-col"><h4 data-i18n="footer.explore">Entdecken</h4><ul>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Urlaubspakete</a></li>
+        <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide">Urlaubspakete</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Walhai-Schnorcheln</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Mantarochen-Schnorcheln</a></li>
         <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a></li>

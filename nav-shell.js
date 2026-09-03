@@ -165,6 +165,7 @@
   function initCheckAvailability(){
     document.querySelectorAll('.js-check-availability').forEach(function(el){
       el.addEventListener('click', function(e){
+        if (typeof window.trackEvent === 'function') window.trackEvent('availability_click', {source_context: 'navigation'});
         if (typeof window.openBookingPopup === 'function') {
           e.preventDefault();
           window.openBookingPopup();
@@ -173,6 +174,7 @@
     });
     document.querySelectorAll('.js-live-availability').forEach(function(el){
       el.addEventListener('click', function(e){
+        if (typeof window.trackEvent === 'function') window.trackEvent('availability_click', {source_context: 'navigation'});
         if (typeof window.openBookingPage === 'function') {
           e.preventDefault();
           window.openBookingPage();

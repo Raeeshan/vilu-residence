@@ -10,6 +10,7 @@
   function gtag(){ dataLayer.push(arguments); }
 </script>
 <script src="/consent.js"></script>
+<script src="/analytics.js"></script>
 
 <script>
 (function(){
@@ -104,7 +105,7 @@
 }
 </script>
 </head>
-<body>
+<body data-page-type="guide" data-page-slug="whale-shark-snorkeling">
 
 <nav id="nav">
   <div class="nav-row-top">
@@ -116,7 +117,7 @@
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
+    <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
     <li class="nav-drop">
       <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Zážitky</button>
       <div class="nav-drop-panel" role="menu">
@@ -156,7 +157,7 @@
   </ul>
   <div class="nav-right">
     <div class="lang-switcher" aria-label="Language selector"></div>
-    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Naplánujte dovolenku</a>
+    <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Naplánujte dovolenku</a>
     <a class="nav-check-availability js-check-availability" href="/sk/#booking" data-i18n="navShell.checkAvailability">Skontrolovať dostupnosť</a>
   </div>
   <div class="nav-mobile-right">
@@ -180,7 +181,7 @@
     <button class="mm-close" aria-label="Zavrieť menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
   </div>
   <div class="mm-body">
-    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
+    <a class="mm-packages" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
     <div class="mm-group">
       <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Zážitky</button>
       <div class="mm-group-panel">
@@ -218,15 +219,15 @@
       </div>
     </div>
     <div class="mm-ctas">
-      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Naplánujte dovolenku</a>
+      <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="navShell.planHoliday">Naplánujte dovolenku</a>
       <a class="mm-check-availability js-check-availability" href="/sk/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Skontrolovať dostupnosť</a>
     </div>
     <div class="mm-lang">
       <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
-      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
-      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'mobile_menu'})">Viluresidence@gmail.com</a>
       <div class="mm-contact-social">
         <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
         <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -369,7 +370,7 @@
         <img class="related-card-img" src="/images/thumb_whale_shark_2_gallery.jpg" loading="lazy" alt="South Ari Atoll Travel Guide">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="wsPage.relTag2">Sprievodca destináciou</div><h4 data-i18n="pageNav.saaGuide">Sprievodca atolom Južný Ari</h4></div>
       </a>
-      <a class="related-card" href="holiday-packages.html">
+      <a class="related-card" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))">
         <img class="related-card-img" src="/images/thumb_turtle_snorkelers_gallery.jpg" loading="lazy" alt="Holiday Packages">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="wsPage.relTag3">Naplánujte si pobyt</div><h4 data-i18n="pageNav.hpGuide">Dovolenkové balíčky</h4></div>
       </a>
@@ -380,15 +381,15 @@
     <h2 data-i18n="wsPage.ctaTitle">Zaplávajte si s nimi sami</h2>
     <p data-i18n="wsPage.ctaText">Šnorchlovanie so žralokmi veľrybími je zahrnuté v každom z našich aktuálnych dovolenkových balíkov, alebo si ho možno rezervovať samostatne od 85 USD na osobu — pozrite si balíky, alebo si rovno overte dostupnosť a aktuálnu samostatnú cenu.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="holiday-packages.html" data-i18n="wsPage.ctaPackages">Zobraziť dovolenkové balíčky</a>
+      <a class="btn-primary" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="wsPage.ctaPackages">Zobraziť dovolenkové balíčky</a>
       <a class="btn-outline" data-i18n-href="wsPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20%C5%A0norchlovanie%20so%20%C5%BEralokmi%20ve%C4%BEryb%C3%ADmi%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F" target="_blank" rel="noopener noreferrer" data-i18n="wsPage.ctaWhatsapp">Opýtať sa na WhatsApp</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
       <a href="/sk/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="wsPage.ctaBook">Skontrolovať dostupnosť</a>
       &nbsp;·&nbsp;
-      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
-      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
     </p>
   </div>
 </main>
@@ -402,7 +403,7 @@
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
         <p class="footer-desc" data-i18n="footer.desc">Pohostinný penzión v Južnom atole Ari ponúkajúci úprimné služby a autentické maldivské zážitky.</p>
-        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('phone_click',{location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('email_click',{location:'footer'})">Viluresidence@gmail.com</a></div>
+        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a></div>
         <div class="footer-social">
           <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
           <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -410,7 +411,7 @@
         </div>
       </div>
       <div class="footer-col"><h4 data-i18n="footer.explore">Objavujte</h4><ul>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
+        <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Šnorchlovanie so žralokmi veľrybími</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Šnorchlovanie s mantami</a></li>
         <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Čo Robiť na Maamigili</a></li>

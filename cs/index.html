@@ -44,6 +44,7 @@
   function gtag(){ dataLayer.push(arguments); }
 </script>
 <script src="/consent.js"></script>
+<script src="/analytics.js"></script>
 <link rel="canonical" href="https://viluresidence.net/cs/" id="canonical-link">
 <link rel="alternate" hreflang="en" href="https://viluresidence.net/">
 <link rel="alternate" hreflang="zh" href="https://viluresidence.net/zh/">
@@ -953,7 +954,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 }
 </style>
 </head>
-<body>
+<body data-page-type="home" data-page-slug="home">
 
 <!-- Single continuous scrim + accent glow, spanning the whole page in one
      element so there is no per-section boundary for it to seam at. Anchors
@@ -985,7 +986,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
+    <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
     <li class="nav-drop">
       <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Zážitky</button>
       <div class="nav-drop-panel" role="menu">
@@ -1025,7 +1026,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </ul>
   <div class="nav-right">
     <div class="lang-switcher" aria-label="Language selector"></div>
-    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+    <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
     <a class="nav-check-availability js-check-availability" href="#booking" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
   </div>
   <div class="nav-mobile-right">
@@ -1049,7 +1050,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <button class="mm-close" aria-label="Zavřít menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
   </div>
   <div class="mm-body">
-    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
+    <a class="mm-packages" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
     <div class="mm-group">
       <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Zážitky</button>
       <div class="mm-group-panel">
@@ -1087,15 +1088,15 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       </div>
     </div>
     <div class="mm-ctas">
-      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+      <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
       <a class="mm-check-availability js-check-availability" href="#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
     </div>
     <div class="mm-lang">
       <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
-      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
-      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'mobile_menu'})">Viluresidence@gmail.com</a>
       <div class="mm-contact-social">
         <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
         <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -1205,7 +1206,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <option value="1" selected="">1</option>
       </select>
     </div>
-    <button class="bb-btn" onclick="openBookingPageWithDates()" data-i18n="bookingBar.checkAvailability">Zkontrolovat dostupnost</button>
+    <button class="bb-btn" onclick="trackEvent('availability_click',{source_context:'homepage_booking_bar'});openBookingPageWithDates()" data-i18n="bookingBar.checkAvailability">Zkontrolovat dostupnost</button>
   </div>
 </div>
 
@@ -1521,7 +1522,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <h3 data-i18n="contact.contactUs">Kontaktujte Vilu Residence</h3>
         <div class="contact-details">
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.address">Adresa</div><div class="cd-value">Maamigili, South Ari Atoll, 00100<br>Republic of Maldives</div></div></div>
-          <div class="cd-item"><div class="cd-icon"><i class="ti ti-phone" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.phone">Telefon / WhatsApp</div><div class="cd-value"><a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'contact_details'})">+960 9903339</a></div></div></div>
+          <div class="cd-item"><div class="cd-icon"><i class="ti ti-phone" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.phone">Telefon / WhatsApp</div><div class="cd-value"><a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'contact_details'})">+960 9903339</a></div></div></div>
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-mail" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.email">E-mail</div><div class="cd-value"><a href="mailto:Viluresidence@gmail.com">Viluresidence@gmail.com</a></div></div></div>
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-clock" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.responseTime">Doba odezvy</div><div class="cd-value" data-i18n="contact.within24h">Do 24 hodin</div></div></div>
         </div>
@@ -1639,7 +1640,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
         <p class="footer-desc" data-i18n="footer.desc">Přívětivý penzion v Jižním atolu Ari nabízející upřímný přístup a autentické maledivské zážitky.</p>
-        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('phone_click',{location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('email_click',{location:'footer'})">Viluresidence@gmail.com</a></div>
+        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a></div>
         <div class="footer-social">
           <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
           <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -1647,7 +1648,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         </div>
       </div>
       <div class="footer-col"><h4 data-i18n="footer.explore">Objevujte</h4><ul>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
+        <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a></li>
         <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a></li>
@@ -1684,7 +1685,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
 </footer>
 
-<a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="floatingWhatsapp.ariaLabel" aria-label="Napište nám na WhatsApp" onclick="trackEvent('floating_whatsapp_click',{})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+<a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="floatingWhatsapp.ariaLabel" aria-label="Napište nám na WhatsApp" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'floating_button'})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
 
 <!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
 <div class="consent-bar" id="consentBar" role="region" aria-label="Souhlas s cookies a soukromím" data-i18n-aria-label="consent.barLabel" hidden="">
@@ -1798,9 +1799,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div style="margin-top:40px;padding:24px;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;text-align:center">
       <p style="font-size:var(--font-size-md);color:var(--muted);margin-bottom:12px" data-i18n="bfp.toComplete">Pro dokončení rezervace nás prosím kontaktujte přímo:</p>
       <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
-        <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
-        <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
-        <a href="https://wa.me/9609903339" onclick="trackEvent('whatsapp_click',{location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</a>
+        <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+        <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+        <a href="https://wa.me/9609903339" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</a>
       </div>
     </div>
   </div>
@@ -2478,7 +2479,7 @@ async function setLanguage(lang, opts){
   if (typeof bfpRenderRooms === 'function' && typeof _lastBfpArgs !== 'undefined' && _lastBfpArgs && document.getElementById('booking-full-page') && document.getElementById('booking-full-page').classList.contains('open')) bfpRenderRooms(_lastBfpArgs.rooms, _lastBfpArgs.ci, _lastBfpArgs.co, _lastBfpArgs.numRooms);
   if (typeof calRefreshIfOpen === 'function') calRefreshIfOpen();
   if (typeof refreshRoomCards === 'function' && typeof ROOMS !== 'undefined' && ROOMS.length) refreshRoomCards();
-  trackEvent('language_change', {lang: lang});
+  trackEvent('language_change', {}); // site_language common param already reflects the new lang, set above
 }
 
 function initLangSwitcher(){
@@ -3459,7 +3460,7 @@ function tcCheck(kind) {
   var isToday = dateEl.value === today;
   var isPastDate = dateEl.value < today;
 
-  var whatsappLink = ' <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'whatsapp_click\',{location:\'timing_tool\'})">'+t('timing.contactUs')+'</a>';
+  var whatsappLink = ' <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'contact_click\',{contact_method:\'whatsapp\',cta_location:\'timing_tool\'})">'+t('timing.contactUs')+'</a>';
   var cls, statusText;
   if (isPastDate) {
     cls = 'tight';
@@ -4241,8 +4242,8 @@ async function confirmGuestBooking(){
       '&#10003; '+t('bfp.confirmedLabel')+' '+okList+'<br>'+
       '&#10007; '+t('bfp.couldNotBookLabel')+' '+failList+'<br><br>'+
       tf('bfp.failedHelpText', {
-        email: '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)" onclick="trackEvent(\'email_click\',{location:\'booking_partial_fail\'})">'+t('bfp.emailUsLink')+'</a>',
-        whatsapp: '<a href="https://wa.me/9609903339" style="color:var(--teal)" onclick="trackEvent(\'whatsapp_click\',{location:\'booking_partial_fail\'})">'+t('bfp.whatsappLink')+'</a>'
+        email: '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)" onclick="trackEvent(\'contact_click\',{contact_method:\'email\',cta_location:\'booking_partial_fail\'})">'+t('bfp.emailUsLink')+'</a>',
+        whatsapp: '<a href="https://wa.me/9609903339" style="color:var(--teal)" onclick="trackEvent(\'contact_click\',{contact_method:\'whatsapp\',cta_location:\'booking_partial_fail\'})">'+t('bfp.whatsappLink')+'</a>'
       })
     );
     // Only the failed rooms remain pending — a retry (if the guest goes back
@@ -4253,8 +4254,8 @@ async function confirmGuestBooking(){
   } else {
     var allFailList = failed.map(function(f){ return td(f.roomName)+' — '+f.reason; }).join('; ');
     showGuestError(tf('bfp.allFailedPrefix', {list: allFailList})+' '
-      + '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)" onclick="trackEvent(\'email_click\',{location:\'booking_full_fail\'})">Viluresidence@gmail.com</a> '+t('booking.or')+' '
-      + '<a href="https://wa.me/9609903339" style="color:var(--teal)" onclick="trackEvent(\'whatsapp_click\',{location:\'booking_full_fail\'})">'+t('bfp.whatsappLink')+'</a>.');
+      + '<a href="mailto:Viluresidence@gmail.com" style="color:var(--teal)" onclick="trackEvent(\'contact_click\',{contact_method:\'email\',cta_location:\'booking_full_fail\'})">Viluresidence@gmail.com</a> '+t('booking.or')+' '
+      + '<a href="https://wa.me/9609903339" style="color:var(--teal)" onclick="trackEvent(\'contact_click\',{contact_method:\'whatsapp\',cta_location:\'booking_full_fail\'})">'+t('bfp.whatsappLink')+'</a>.');
   }
 }
 
@@ -4271,7 +4272,16 @@ function sendContactForm(){
   if(!name||!email||!msg){alert(t('alerts.fillAllFields'));return;}
   var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+(wantsFlight?'\nDomestic Flight transfer requested: Yes ($110/person)':'')+'\n\nMessage:\n'+msg;
   var body = encodeURIComponent(bodyText);
-  trackEvent('contact_form_submit', {package: pkg||null, rooms: rooms||null, domestic_flight: !!wantsFlight});
+  // A package-context submission (opened via a package's Enquire button)
+  // carries genuine package intent -> package_enquire. A plain "Contact
+  // Us" submission has no expressed package intent, so it stays the
+  // generic contact_click bucket (never gets a package_id) -- matches the
+  // Phase 11C-B rule that intent must come from the CTA, not the page.
+  if (pkg) {
+    trackEvent('package_enquire', {contact_method:'contact_form', package_id: window.viluAnalytics.resolvePackageId(pkg, pkg)});
+  } else {
+    trackEvent('contact_click', {contact_method:'contact_form', cta_location:'contact_form'});
+  }
   window.location.href = 'mailto:Viluresidence@gmail.com?subject=Enquiry%20from%20'+encodeURIComponent(name)+'&body='+body;
 }
 
@@ -4291,23 +4301,9 @@ function enquireAboutPackage(pkgName){
   if(contactSection) contactSection.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-// ══════════════════════════════════════════════════════
-// ANALYTICS — sends real events to GA4 via gtag(), and keeps firing a
-// CustomEvent so any future on-page listener (Meta Pixel, etc.) can hook in
-// without touching this function again.
-// ══════════════════════════════════════════════════════
-function trackEvent(name, data){
-  try {
-    document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
-    // Phase 11B: never transmit to GA4 without Analytics consent -- checked
-    // here (not just via Google's own Consent Mode signals) so a pre-consent
-    // event is discarded outright, not queued for later replay.
-    if (typeof gtag === 'function' && window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
-      gtag('event', name, data||{});
-    }
-    console.log('[track]', name, data||{});
-  } catch(e) {}
-}
+// ANALYTICS — trackEvent() now lives in analytics.js (Phase 11C), loaded
+// as a shared script tag in <head>. Removed here to eliminate the
+// duplicate implementation that used to live inline on this page.
 
 // ══════════════════════════════════════════════════════
 // HOLIDAY PACKAGES — live from Firestore `packages` collection. Only
@@ -4466,7 +4462,7 @@ function renderExperiences(pkgs, notesData){
       + '<p class="exp-desc">'+desc+'</p>'
       + '<div class="exp-price">'+priceLine+'</div>'
       + '<div class="exp-actions">'
-        + '<a class="exp-cta" href="https://wa.me/9609903339?text='+waText+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'experience_enquire_click\',{experience:\''+cfg.key+'\'})">'+t('experiences.enquireOn')+'</a>'
+        + '<a class="exp-cta" href="https://wa.me/9609903339?text='+waText+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'experience_enquire\',{contact_method:\'whatsapp\',experience_id:\''+cfg.key+'\'})">'+t('experiences.enquireOn')+'</a>'
         + '<a class="exp-see-packages" href="#holiday-packages">'+t('experiences.seePackages')+'</a>'
       + '</div>'
     + '</div>';
@@ -4516,7 +4512,7 @@ function renderHolidayPackages(pkgs, notesData){
       : (savingsPct>0 ? '<span class="hp-savings">'+tf('packages.saveVsRate',{pct:savingsPct,nights:baselineNights})+'</span>' : '');
     var upgradeAddedNames = upgradeAdded.map(function(a){ return td(a); });
     var nightWord = p.nights>1 ? t('packages.nights') : t('packages.night');
-    return '<div class="hp-card'+(p.badge?' hp-featured':'')+(p.badge&&isRose?' hp-featured-rose':'')+(isOrphan?' hp-card-center':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'">'
+    return '<div class="hp-card'+(p.badge?' hp-featured':'')+(p.badge&&isRose?' hp-featured-rose':'')+(isOrphan?' hp-card-center':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'" data-pkg-nights="'+p.nights+'">'
       + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'">'+td(p.badge)+'</div>' : '')
       + '<h3 class="hp-name">'+td(p.name)+'</h3>'
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">'+t('packages.pp')+' &middot; '+p.nights+' '+nightWord+'</span></div>'
@@ -4526,13 +4522,13 @@ function renderHolidayPackages(pkgs, notesData){
       + '<div class="hp-section"><div class="hp-section-label">'+t('packages.includes')+'</div><div class="hp-list">'+includesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">'+t('packages.activitiesLabel')+'</div><div class="hp-list hp-list-2col">'+activitiesHtml+'</div></div>'
       + '<div class="hp-section"><div class="hp-section-label">'+t('packages.addOns')+'</div><div class="hp-list">'+addOnsHtml+'</div></div>'
-      + (notesLines.length ? '<details class="hp-notes" ontoggle="if(this.open) trackEvent(\'package_expand_details\',{package:\''+p.id+'\',name:\''+safeName+'\'})">'
+      + (notesLines.length ? '<details class="hp-notes">'
           + '<summary>'+t('packages.goodToKnow')+'</summary>'
           + '<div class="hp-notes-body">'+notesHtml+'</div>'
         + '</details>' : '')
       + '<div class="hp-actions">'
         + '<button class="hp-enquire-btn" onclick="hpEnquire(\''+p.id+'\',\''+safeName+'\')">'+t('packages.enquireButton')+'</button>'
-        + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire_click\',{package:\''+p.id+'\',channel:\'whatsapp\'})">'+t('packages.askWhatsapp')+'</a>'
+        + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire\',{contact_method:\'whatsapp\',package_id:window.viluAnalytics.resolvePackageId(\''+safeName+'\',\''+p.id+'\')})">'+t('packages.askWhatsapp')+'</a>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -4545,7 +4541,7 @@ function renderHolidayPackages(pkgs, notesData){
         var id = entry.target.dataset.pkgId;
         if(!_hpSeenCards.has(id)){
           _hpMarkSeen(id);
-          trackEvent('package_card_view', {package: id, name: entry.target.dataset.pkgName});
+          trackEvent('package_view', {package_id: window.viluAnalytics.resolvePackageId(entry.target.dataset.pkgName, id), package_nights: Number(entry.target.dataset.pkgNights)||undefined});
         }
       }
     });
@@ -4558,7 +4554,7 @@ function renderHolidayPackages(pkgs, notesData){
 }
 
 function hpEnquire(id, name){
-  trackEvent('package_enquire_click', {package: id, channel: 'contact_form'});
+  trackEvent('package_enquire', {contact_method: 'contact_form', package_id: window.viluAnalytics.resolvePackageId(name, id)});
   enquireAboutPackage(name);
 }
 

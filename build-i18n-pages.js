@@ -716,26 +716,69 @@ function main() {
 
     // English itself also needs its #pkg-grid pre-rendered (the audit found
     // it empty in raw HTML too, since it's JS-populated for everyone,
-    // English included). Only the grid content is touched here — done as a
-    // surgical string replace, not a cheerio full-document rewrite, so
-    // nothing else in this hand-maintained source file's formatting shifts
-    // (cheerio's serializer otherwise collapses whitespace between tags,
-    // entity-encodes raw & in attributes, and adds ="" to boolean
-    // attributes like `crossorigin` — all harmless to a browser, but
-    // needless diff noise on a file real people read and hand-edit).
+    // English included). Only the grid's INNER content is touched here —
+    // done as a surgical string replace, not a cheerio full-document
+    // rewrite, so nothing else in this hand-maintained source file's
+    // formatting shifts (cheerio's serializer otherwise collapses
+    // whitespace between tags, entity-encodes raw & in attributes, and adds
+    // ="" to boolean attributes like `crossorigin` — all harmless to a
+    // browser, but needless diff noise on a file real people read and
+    // hand-edit).
+    //
+    // findDivInnerSpan() below locates the div's boundaries by scanning the
+    // RAW text directly (tracking <div>/</div> nesting depth), rather than
+    // by re-serializing through cheerio and string-matching the result
+    // against the original bytes. That round-trip approach was tried first
+    // and failed: the div's own opening tag can legitimately carry extra
+    // attributes (e.g. a `style` added by later visual work) that a fresh
+    // cheerio render of a bare `<div id="pkg-grid" class="pkg-grid">`
+    // template never reproduces, so the two serializations never matched
+    // even when the actual package content was logically in sync — this
+    // was the confirmed root cause of the stale-grid warning persisting
+    // across every previous build. Scanning raw text for the CURRENT div's
+    // exact span, and replacing only what's between its real opening and
+    // closing tags, is immune to that: the file's own opening/closing tags
+    // (and any attributes on them) are left completely untouched, and only
+    // the package-card markup inside is ever replaced.
+    function findDivInnerSpan(html, idAttr) {
+      const openTagRe = new RegExp(`<div[^>]*\\bid=["']${idAttr}["'][^>]*>`, 'i');
+      const openMatch = openTagRe.exec(html);
+      if (!openMatch) return null;
+      const innerStart = openMatch.index + openMatch[0].length;
+      const tagRe = /<div\b|<\/div>/gi;
+      tagRe.lastIndex = innerStart;
+      let depth = 1;
+      let m;
+      while ((m = tagRe.exec(html))) {
+        if (m[0].toLowerCase() === '</div>') {
+          depth--;
+          if (depth === 0) {
+            return { openTag: openMatch[0], innerStart, innerEnd: m.index, closeTag: m[0] };
+          }
+        } else {
+          depth++;
+        }
+      }
+      return null; // malformed / no matching close tag found
+    }
+
     if (pkgScript) {
       const $en = cheerio.load('<div id="pkg-grid" class="pkg-grid"></div>', { decodeEntities: false });
       prerenderPackageGrid($en, pkgScript.src, pkgScript.i18nEn, pkgScript.i18nEn, undefined);
-      const renderedDiv = $en.html($en('#pkg-grid')).trim();
-      const emptyDiv = '<div id="pkg-grid" class="pkg-grid"></div>';
-      if (srcHtml.indexOf(emptyDiv) === -1) {
-        console.warn(`WARNING: could not find exact empty #pkg-grid div in ${pageDef.source} to replace — skipping English self-update, check manually`);
-      } else if ((srcHtml.match(new RegExp(emptyDiv.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length > 1) {
-        console.warn(`WARNING: multiple exact matches for empty #pkg-grid div in ${pageDef.source} — skipping English self-update, check manually`);
+      const renderedInner = $en('#pkg-grid').html().trim();
+
+      const span = findDivInnerSpan(srcHtml, 'pkg-grid');
+      if (!span) {
+        console.warn(`WARNING: could not locate a well-formed #pkg-grid div in ${pageDef.source} — skipping English self-update, check manually`);
       } else {
-        const updatedSrcHtml = srcHtml.replace(emptyDiv, renderedDiv);
-        fs.writeFileSync(pageDef.source, updatedSrcHtml);
-        console.log(`Pre-rendered #pkg-grid in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+        const currentInner = srcHtml.slice(span.innerStart, span.innerEnd);
+        if (currentInner.trim() === renderedInner) {
+          // Already in sync -- no write, no console noise on every build.
+        } else {
+          const updatedSrcHtml = srcHtml.slice(0, span.innerStart) + renderedInner + srcHtml.slice(span.innerEnd);
+          fs.writeFileSync(pageDef.source, updatedSrcHtml);
+          console.log(`Pre-rendered #pkg-grid in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+        }
       }
     }
   }

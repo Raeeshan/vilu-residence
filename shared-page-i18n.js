@@ -10,21 +10,10 @@ var LANG_NAMES = {en:"English",zh:"中文",ru:"Русский",de:"Deutsch",it:"
 var RTL_LANGS = {ar:true};
 var currentLang = 'en';
 
-// ANALYTICS — identical to vilu-website.html's trackEvent(), defined here
-// once so all 8 standalone pages share it via shared-page-i18n.js instead
-// of duplicating the function per page.
-function trackEvent(name, data){
-  try {
-    document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
-    // Phase 11B: never transmit to GA4 without Analytics consent -- checked
-    // here (not just via Google's own Consent Mode signals) so a pre-consent
-    // event is discarded outright, not queued for later replay.
-    if (typeof gtag === 'function' && window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
-      gtag('event', name, data||{});
-    }
-    console.log('[track]', name, data||{});
-  } catch(e) {}
-}
+// ANALYTICS — trackEvent() now lives in analytics.js (Phase 11C), loaded
+// as its own shared script tag before this file on every standalone page.
+// Removed here to eliminate the duplicate implementation that used to
+// live in this file.
 
 function t(key){
   var parts = key.split('.');
@@ -144,6 +133,10 @@ async function setLanguage(lang, opts){
   } catch(e) {}
   applyTranslations();
   if (typeof renderDynamicContent === 'function') renderDynamicContent();
+  // setLanguage() only ever runs from a genuine lang-switcher change (see
+  // initLangSwitcher below) -- never from initPage()'s own initial-load
+  // path -- so this never fires on page load, only on a real switch.
+  if (typeof window.trackEvent === 'function') window.trackEvent('language_change', {});
 }
 
 function initLangSwitcher(){
@@ -172,6 +165,22 @@ function fillCurrentYear(){
   if (el) el.textContent = new Date().getFullYear();
 }
 
+// Phase 11C: guide-page FAQ tracking. Scoped to page_type==='guide' only --
+// holiday-packages.html (page_type==='package') already has its own
+// dedicated .faq-block handler with package-specific parameters, so this
+// is deliberately excluded there to avoid firing faq_expand twice for the
+// same physical toggle.
+function initGuideFaqTracking(){
+  if ((document.body.getAttribute('data-page-type') || '') !== 'guide') return;
+  if (typeof window.trackEvent !== 'function') return;
+  var guideSlug = document.body.getAttribute('data-page-slug') || null;
+  document.querySelectorAll('.faq-block details').forEach(function(details, i){
+    details.addEventListener('toggle', function(){
+      if (details.open) window.trackEvent('faq_expand', {content_type: 'guide', question_id: 'faq'+(i+1), guide_slug: guideSlug});
+    });
+  });
+}
+
 async function initPage(){
   var initial = detectInitialLang();
   initLangSwitcher();
@@ -184,5 +193,6 @@ async function initPage(){
   if (typeof renderDynamicContent === 'function') renderDynamicContent();
   initReveal();
   fillCurrentYear();
+  initGuideFaqTracking();
 }
 document.addEventListener('DOMContentLoaded', initPage);

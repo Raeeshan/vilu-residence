@@ -19,17 +19,19 @@
      is granted -- verified at the network level, not just via a JS
      variable. See consent.js. The page_not_found event itself is gated
      the same way: it never fires (and is never queued/replayed) unless
-     Analytics consent is already granted at the moment this page loads. -->
+     Analytics consent is already granted at the moment this page loads.
+     Phase 11C: routed through analytics.js's trackEvent() instead of a
+     direct gtag() call, so this page shares the same single consent-gated
+     tracking implementation as every other page. -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){ dataLayer.push(arguments); }
 </script>
 <script src="consent.js"></script>
+<script src="analytics.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    if (window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
-      gtag('event', 'page_not_found', { page_location: window.location.href, page_referrer: document.referrer });
-    }
+    trackEvent('page_not_found', {});
   });
 </script>
 <style>
@@ -43,7 +45,7 @@
   .nf-home{display:inline-block;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--navy);background:var(--gold-light);border-radius:8px;padding:14px 32px;text-decoration:none}
 </style>
 </head>
-<body>
+<body data-page-type="404" data-page-slug="404">
 <nav id="nav">
   <div class="nav-row-top">
     <a href="/" class="nav-logo">

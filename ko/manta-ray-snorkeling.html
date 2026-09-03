@@ -10,6 +10,7 @@
   function gtag(){ dataLayer.push(arguments); }
 </script>
 <script src="/consent.js"></script>
+<script src="/analytics.js"></script>
 
 <script>
 (function(){
@@ -104,7 +105,7 @@
 }
 </script>
 </head>
-<body>
+<body data-page-type="guide" data-page-slug="manta-ray-snorkeling">
 
 <nav id="nav">
   <div class="nav-row-top">
@@ -116,7 +117,7 @@
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">홀리데이 패키지</a></li>
+    <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide" data-nav-group="packages">홀리데이 패키지</a></li>
     <li class="nav-drop">
       <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">체험</button>
       <div class="nav-drop-panel" role="menu">
@@ -156,7 +157,7 @@
   </ul>
   <div class="nav-right">
     <div class="lang-switcher" aria-label="Language selector"></div>
-    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">휴가 계획하기</a>
+    <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">휴가 계획하기</a>
     <a class="nav-check-availability js-check-availability" href="/ko/#booking" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
   </div>
   <div class="nav-mobile-right">
@@ -180,7 +181,7 @@
     <button class="mm-close" aria-label="메뉴 닫기" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
   </div>
   <div class="mm-body">
-    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">홀리데이 패키지</a>
+    <a class="mm-packages" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="pageNav.hpGuide">홀리데이 패키지</a>
     <div class="mm-group">
       <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">체험</button>
       <div class="mm-group-panel">
@@ -218,15 +219,15 @@
       </div>
     </div>
     <div class="mm-ctas">
-      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">휴가 계획하기</a>
+      <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="navShell.planHoliday">휴가 계획하기</a>
       <a class="mm-check-availability js-check-availability" href="/ko/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
     </div>
     <div class="mm-lang">
       <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
-      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
-      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'mobile_menu'})">Viluresidence@gmail.com</a>
       <div class="mm-contact-social">
         <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
         <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -384,7 +385,7 @@
         <img class="related-card-img" src="/images/thumb_whale_shark_2_gallery.jpg" loading="lazy" alt="South Ari Atoll Travel Guide">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="mrPage.relTag2">여행지 가이드</div><h4 data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</h4></div>
       </a>
-      <a class="related-card" href="holiday-packages.html">
+      <a class="related-card" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))">
         <img class="related-card-img" src="/images/thumb_turtle_snorkelers_gallery.jpg" loading="lazy" alt="Holiday Packages">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="mrPage.relTag3">숙박 계획하기</div><h4 data-i18n="pageNav.hpGuide">홀리데이 패키지</h4></div>
       </a>
@@ -395,15 +396,15 @@
     <h2 data-i18n="mrPage.ctaTitle">직접 만타와 함께 헤엄쳐 보세요</h2>
     <p data-i18n="mrPage.ctaText">만타가오리 스노클링은 마미길리 왕복 픽업과 숙박이 포함된 저희의 현재 여러 휴가 패키지에 포함되어 있거나, 1인당 85달러부터 단독으로 예약하실 수 있습니다 — 패키지를 확인하시거나, 바로 예약 가능 여부를 확인하세요.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="holiday-packages.html" data-i18n="mrPage.ctaPackages">홀리데이 패키지 보기</a>
+      <a class="btn-primary" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="mrPage.ctaPackages">홀리데이 패키지 보기</a>
       <a class="btn-outline" data-i18n-href="mrPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EC%A5%90%EA%B0%80%EC%98%A4%EB%A6%AC%20%EC%8A%A4%EB%85%B8%ED%81%B4%EB%A7%81%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4." target="_blank" rel="noopener noreferrer" data-i18n="mrPage.ctaWhatsapp">WhatsApp으로 문의하기</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
       <a href="/ko/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="mrPage.ctaBook">예약 가능 여부 확인</a>
       &nbsp;·&nbsp;
-      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+      <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
-      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+      <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
     </p>
   </div>
 </main>
@@ -417,7 +418,7 @@
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
         <p class="footer-desc" data-i18n="footer.desc">사우스 아리 환초에 위치한 아늑한 게스트하우스로, 진정성 있는 서비스와 정통 몰디브 경험을 제공합니다.</p>
-        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('phone_click',{location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('email_click',{location:'footer'})">Viluresidence@gmail.com</a></div>
+        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a></div>
         <div class="footer-social">
           <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
           <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
@@ -425,7 +426,7 @@
         </div>
       </div>
       <div class="footer-col"><h4 data-i18n="footer.explore">둘러보기</h4><ul>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">홀리데이 패키지</a></li>
+        <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide">홀리데이 패키지</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">고래상어 스노클링</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">쥐가오리 스노클링</a></li>
         <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a></li>
