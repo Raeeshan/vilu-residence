@@ -245,43 +245,93 @@ body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;posit
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
 
-/* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;flex-direction:column;transition:all .4s}
+/* ── NAV — GLOBAL SHELL (Phase 10) — mirrors shared-page.css exactly,
+   duplicated here (not linked) to avoid cascade collisions with this
+   page's extensive existing inline stylesheet. Keep both in sync by hand
+   until the Phase 12 architecture review revisits consolidation. ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;flex-direction:column;transition:background .4s,box-shadow .4s,border-color .4s;background:transparent}
 nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bottom:1px solid rgba(34,211,238,.22);box-shadow:0 8px 30px rgba(0,10,20,.35)}
-.nav-row-top{display:flex;align-items:center;justify-content:center;position:relative;padding:14px 5vw 10px}
-.nav-row-bottom{display:flex;align-items:center;justify-content:space-between;padding:10px 5vw 14px;border-top:1px solid rgba(255,255,255,.08)}
-.nav-row-bottom-right{display:flex;align-items:center;gap:20px}
-.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-row-top{display:flex;align-items:center;gap:28px;padding:16px 5vw}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
 .nav-logo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 14px var(--glow)}
 .nav-logo-text{display:flex;flex-direction:column}
 .nav-logo-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;letter-spacing:.04em;color:var(--white);line-height:1}
 .nav-logo-sub{font-size:var(--font-size-xs);font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
-.nav-links{display:flex;gap:32px;list-style:none}
-.nav-links a{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;transition:color .25s}
-.nav-links a:hover{color:var(--gold-light);text-shadow:0 0 12px var(--glow)}
-.nav-book{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 24px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.nav-book:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(34,211,238,.4)}
-.nav-clock{display:flex;align-items:center;gap:8px}
-.nav-clock i{font-size:17px;color:var(--gold-light)}
+.nav-links{display:flex;align-items:center;gap:36px;list-style:none;flex:1;justify-content:center}
+.nav-links>li{position:relative;display:flex;align-items:center}
+.nav-links>li>a,.nav-drop-trigger{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 2px;transition:color .25s}
+.nav-links>li>a:hover,.nav-drop-trigger:hover{color:var(--gold-light);text-shadow:0 0 12px var(--glow)}
+.nav-drop-trigger i{font-size:11px;transition:transform .25s}
+.nav-drop.open .nav-drop-trigger i{transform:rotate(180deg)}
+.nav-active{color:var(--white) !important;position:relative}
+.nav-active::after{content:'';position:absolute;left:2px;right:2px;bottom:-8px;height:1.5px;background:var(--teal-light)}
+.nav-drop-panel{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(-6px);min-width:240px;background:var(--card);border:1px solid var(--card-border);border-radius:2px;box-shadow:0 20px 50px rgba(0,10,20,.5);padding:8px;display:flex;flex-direction:column;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease-out,transform .18s ease-out}
+.nav-drop.open .nav-drop-panel{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.nav-drop-panel a{font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:400;color:rgba(255,255,255,.75);text-decoration:none;padding:12px 16px;border-radius:2px;transition:background .2s,color .2s}
+.nav-drop-panel a:hover{background:rgba(34,211,238,.06);color:var(--white)}
+.nav-right{display:flex;align-items:center;gap:16px;flex-shrink:0}
 .lang-switcher{position:relative;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:6px 10px}
 .lang-switcher i{font-size:15px;color:var(--teal-light);pointer-events:none}
-.lang-switcher select{background:none;border:none;outline:none;appearance:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.04em;color:var(--white);cursor:pointer;padding-right:14px}
+.lang-switcher select{background:none;border:none;appearance:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.04em;color:var(--white);cursor:pointer;padding-right:14px}
 .lang-switcher select option{color:#000}
 .lang-switcher::after{content:'';position:absolute;right:9px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--teal-light);border-bottom:1.5px solid var(--teal-light);transform:translateY(-65%) rotate(45deg);pointer-events:none}
 .lang-switcher-mobile{align-self:flex-start;margin:4px 0}
-.nav-clock-text{display:flex;flex-direction:column;line-height:1.15}
-.nav-clock-label{font-size:var(--font-size-xs);font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
-.nav-clock-time{font-size:var(--font-size-base);font-weight:500;color:var(--white);letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.nav-mobile-right{display:none;align-items:center;gap:14px}
-.nav-clock-compact{display:none;align-items:center;gap:4px;font-size:var(--font-size-xs);color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
-.nav-clock-compact i{font-size:13px;color:var(--gold-light)}
-.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.btn-plan-holiday{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 22px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-block;white-space:nowrap}
+.btn-plan-holiday:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(34,211,238,.4)}
+.nav-check-availability{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55);text-decoration:none;white-space:nowrap;transition:color .2s}
+.nav-check-availability:hover{color:var(--white)}
+@media(max-width:1310px){.nav-check-availability{display:none}}
+.nav-mobile-right{display:none;align-items:center;gap:14px;margin-left:auto}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:10px;background:none;border:none;flex-shrink:0}
 .nav-hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:all .3s}
-.mobile-menu{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(10,22,40,.98);backdrop-filter:blur(20px);padding:24px 5vw;flex-direction:column;gap:0;z-index:999;border-bottom:1px solid rgba(34,211,238,.22)}
+.nav-logo:focus-visible,.nav-links>li>a:focus-visible,.nav-drop-trigger:focus-visible,.nav-drop-panel a:focus-visible,.lang-switcher select:focus-visible,.btn-plan-holiday:focus-visible,.nav-check-availability:focus-visible,.nav-hamburger:focus-visible{outline:2px solid var(--teal-light);outline-offset:3px;border-radius:2px}
+[dir="rtl"] .nav-drop-panel a{text-align:right}
+[dir="rtl"] .lang-switcher select{padding-right:0;padding-left:14px}
+[dir="rtl"] .lang-switcher::after{right:auto;left:9px}
+/* Determined empirically: real overflow is masked by .nav's position:fixed
+   (no document-level scrollbar), so it must be measured directly against
+   .nav-row-top's own right edge. Full nav (5 links + dropdowns + lang
+   switcher + both CTAs) stops fitting below ~1305px — Check Availability
+   drops first, above at 1310px. The reduced nav (without Check
+   Availability) itself stops fitting below ~1160px, so the mobile-drawer
+   crossover is 1180px, not the 1024px placeholder used during
+   implementation, which left real overflow (Plan Your Holiday clipping
+   past the header edge) across the whole 1025-1159px range. */
+@media(max-width:1180px){
+  .nav-links,.nav-right>.lang-switcher:not(.lang-switcher-mobile),.nav-right>.btn-plan-holiday{display:none}
+  .nav-mobile-right{display:flex}
+  .nav-hamburger{display:flex}
+}
+
+/* ── MOBILE DRAWER — full-screen cinematic overlay (mirrors shared-page.css) ── */
+.mobile-menu{display:none;position:fixed;inset:0;z-index:1100;background:rgba(6,16,28,.98);backdrop-filter:blur(20px);flex-direction:column;overflow-y:auto}
 .mobile-menu.open{display:flex}
-.mobile-menu a{padding:16px 0;font-size:var(--font-size-md);font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
-.mobile-menu a:hover{color:var(--gold)}
-.mobile-menu .m-book-btn{margin-top:20px;background:var(--gold);color:var(--navy);padding:14px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%}
+.mm-header{display:flex;align-items:center;justify-content:space-between;padding:16px 5vw;flex-shrink:0}
+.mm-header .nav-logo img{width:32px;height:32px}
+.mm-header .nav-logo-name{font-size:var(--font-size-lg)}
+.mm-close{background:none;border:none;color:var(--white);font-size:28px;line-height:1;cursor:pointer;padding:8px;flex-shrink:0}
+.mm-body{padding:8px 5vw 32px;display:flex;flex-direction:column;gap:4px;flex:1}
+.mm-packages{display:block;font-family:'Cormorant Garamond',serif;font-size:clamp(26px,6vw,32px);font-weight:500;color:var(--white);text-decoration:none;background:rgba(34,211,238,.06);border-radius:10px;padding:22px 20px;margin:12px 0 20px}
+.mm-group{border-bottom:1px solid rgba(255,255,255,.08)}
+.mm-group-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;color:var(--white);font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:18px 4px;cursor:pointer}
+.mm-group-trigger i{font-size:14px;color:var(--teal-light);transition:transform .25s}
+.mm-group.open .mm-group-trigger i{transform:rotate(180deg)}
+.mm-group-panel{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.mm-group.open .mm-group-panel{max-height:400px}
+.mm-group-panel a{display:block;padding:12px 4px 12px 16px;font-size:var(--font-size-base);color:rgba(255,255,255,.7);text-decoration:none}
+.mm-group-panel a:hover{color:var(--gold-light)}
+.mm-ctas{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.mm-ctas .btn-plan-holiday{text-align:center;padding:16px;font-size:var(--font-size-base)}
+.mm-ctas .mm-check-availability{text-align:center;padding:14px;border:1px solid rgba(255,255,255,.25);border-radius:2px;color:var(--white);text-decoration:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.mm-lang{margin-top:24px}
+.mm-lang .lang-switcher{width:100%;justify-content:center;padding:12px}
+.mm-contact{margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:10px;font-size:var(--font-size-sm)}
+.mm-contact a{color:rgba(255,255,255,.6);text-decoration:none}
+.mm-contact-social{display:flex;gap:12px;margin-top:4px}
+.mm-contact-social a{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.14);border-radius:50%;color:rgba(255,255,255,.6);font-size:16px}
+[dir="rtl"] .mm-group-panel a{padding:12px 16px 12px 4px}
+[dir="rtl"] .mm-contact-social{flex-direction:row-reverse}
+.mm-close:focus-visible,.mm-group-trigger:focus-visible,.mm-group-panel a:focus-visible,.mm-packages:focus-visible{outline:2px solid var(--teal-light);outline-offset:2px}
 
 /* ── HERO ── */
 #home{position:relative;height:100vh;height:100dvh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -579,7 +629,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 
 /* ── FOOTER ── */
 footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
-.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
 .footer-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .footer-brand-logo img{width:48px;height:48px;border-radius:50%;border:2px solid rgba(34,211,238,.4);object-fit:cover}
 .footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:400;color:var(--white)}
@@ -767,7 +817,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   #home{height:500px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{bottom:20px}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
-  .footer-top{grid-template-columns:1fr 1fr;gap:40px}
+  .footer-top{grid-template-columns:1.6fr 1fr 1fr;gap:32px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
   .g-item{aspect-ratio:4/3}
@@ -843,60 +893,135 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <span class="bubble bubble--soft" style="left:93%;width:4px;height:4px;animation-duration:10.8s;animation-delay:-8.6s;--wobble:8px"></span>
 </div>
 
-<!-- ══ NAVIGATION ══ -->
+<!-- ══ NAVIGATION (Phase 10 global shell) ══ -->
 <nav id="nav">
   <div class="nav-row-top">
-  <div class="nav-logo">
+  <a href="#home" class="nav-logo">
     <img src="images/vilu-logo.jpg" alt="Vilu Residence">
     <div class="nav-logo-text">
       <div class="nav-logo-name">Vilu Residence</div>
       <div class="nav-logo-sub">Maamigili · Maldives</div>
     </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Holiday Packages</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Experiences<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Whale Shark Snorkeling</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Manta Ray Snorkeling</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Things to Do in Maamigili</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">South Ari<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Maamigili Guide</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">South Ari Atoll Guide</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Best Local Islands for Snorkeling</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">South Ari vs Other Regions</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Stay<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="#about" role="menuitem">Vilu Residence</a>
+        <a href="#rooms" data-i18n="nav.rooms" role="menuitem">Rooms</a>
+        <a href="#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Live Availability</a>
+        <a href="#gallery" data-i18n="nav.gallery" role="menuitem">Gallery</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Plan Your Trip<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Best Time to Visit</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Maldives Holiday Cost</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Guesthouse vs Resort</a>
+        <a href="#travel-info" data-i18n="nav.travelInfo" role="menuitem">Travel Information</a>
+        <a href="#contact" data-i18n="nav.contact" role="menuitem">Contact</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Plan Your Holiday</a>
+    <a class="nav-check-availability js-check-availability" href="#booking" data-i18n="navShell.checkAvailability">Check Availability</a>
   </div>
   <div class="nav-mobile-right">
-    <div class="nav-clock-compact" aria-hidden="true"><i class="ti ti-clock" aria-hidden="true"></i><span id="navClockTimeCompact">--:--</span></div>
-    <div class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburger">
+    <button class="nav-hamburger" id="hamburger" aria-label="Open menu" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
       <span></span><span></span><span></span>
-    </div>
-  </div>
-  </div>
-  <div class="nav-row-bottom">
-  <ul class="nav-links">
-    <li><a href="#home" data-i18n="nav.home">Home</a></li>
-    <li><a href="#rooms" data-i18n="nav.rooms">Rooms</a></li>
-    <li><a href="#holiday-packages" data-i18n="nav.packages">Packages</a></li>
-    <li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li>
-    <li><a href="#about" data-i18n="nav.about">About</a></li>
-    <li><a href="#travel-info" data-i18n="nav.travelInfo">Travel Info</a></li>
-    <li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">FAQ</a></li>
-    <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
-  </ul>
-  <div class="nav-row-bottom-right">
-  <div class="nav-clock" aria-hidden="true">
-    <i class="ti ti-clock" aria-hidden="true"></i>
-    <div class="nav-clock-text">
-      <span class="nav-clock-label" data-i18n="nav.maldivesTime">Maldives Time</span>
-      <span class="nav-clock-time" id="navClockTime">--:--:--</span>
-    </div>
-  </div>
-  <div class="lang-switcher" aria-label="Language selector"></div>
-  <button class="nav-book" onclick="openBookingPopup()" data-i18n="nav.bookNow">Book Now</button>
+    </button>
   </div>
   </div>
 </nav>
 
-<!-- Mobile Menu -->
-<div class="mobile-menu" id="mobileMenu">
-  <a href="#home" onclick="closeMobileMenu()" data-i18n="nav.home">Home</a>
-  <a href="#rooms" onclick="closeMobileMenu()" data-i18n="nav.rooms">Rooms</a>
-  <a href="#holiday-packages" onclick="closeMobileMenu()" data-i18n="nav.packages">Packages</a>
-  <a href="#gallery" onclick="closeMobileMenu()" data-i18n="nav.gallery">Gallery</a>
-  <a href="#about" onclick="closeMobileMenu()" data-i18n="nav.about">About</a>
-  <a href="#travel-info" onclick="closeMobileMenu()" data-i18n="nav.travelInfo">Travel Info</a>
-  <a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq');closeMobileMenu()" data-i18n="travelInfo.tabFaq">FAQ</a>
-  <a href="#contact" onclick="closeMobileMenu()" data-i18n="nav.contact">Contact</a>
-  <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
-  <button class="m-book-btn" onclick="openBookingPopup();closeMobileMenu()" data-i18n="nav.bookYourStay">Book Your Stay</button>
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Site menu" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="#home" class="nav-logo" data-mm-close>
+      <img src="images/vilu-logo.jpg" alt="Vilu Residence">
+      <div class="nav-logo-text">
+        <div class="nav-logo-name">Vilu Residence</div>
+        <div class="nav-logo-sub">Maamigili · Maldives</div>
+      </div>
+    </a>
+    <button class="mm-close" aria-label="Close menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close>&times;</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close data-i18n="pageNav.hpGuide">Holiday Packages</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Experiences<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close data-i18n="pageNav.wsGuide">Whale Shark Snorkeling</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close data-i18n="pageNav.mrGuide">Manta Ray Snorkeling</a>
+        <a href="things-to-do-maamigili.html" data-mm-close data-i18n="pageNav.thingsGuide">Things to Do in Maamigili</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">South Ari<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close data-i18n="pageNav.maaGuide">Maamigili Guide</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close data-i18n="pageNav.saaGuide">South Ari Atoll Guide</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close data-i18n="pageNav.cmpSnorkelGuide">Best Local Islands for Snorkeling</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close data-i18n="pageNav.cmpRegionsGuide">South Ari vs Other Regions</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Stay<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel">
+        <a href="#about" data-mm-close >Vilu Residence</a>
+        <a href="#rooms" data-mm-close data-i18n="nav.rooms">Rooms</a>
+        <a href="#booking" class="js-live-availability" data-mm-close data-i18n="navShell.liveAvailability">Live Availability</a>
+        <a href="#gallery" data-mm-close data-i18n="nav.gallery">Gallery</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Plan Your Trip<i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close data-i18n="pageNav.btGuide">Best Time to Visit</a>
+        <a href="maldives-holiday-cost.html" data-mm-close data-i18n="pageNav.costGuide">Maldives Holiday Cost</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close data-i18n="pageNav.gvrGuide">Guesthouse vs Resort</a>
+        <a href="#travel-info" data-mm-close data-i18n="nav.travelInfo">Travel Information</a>
+        <a href="#contact" data-mm-close data-i18n="nav.contact">Contact</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close data-i18n="navShell.planHoliday">Plan Your Holiday</a>
+      <a class="mm-check-availability js-check-availability" href="#booking" data-mm-close data-i18n="navShell.checkAvailability">Check Availability</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ HERO ══ -->
@@ -1440,9 +1565,33 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigate</h4><ul><li><a href="#home" data-i18n="nav.home">Home</a></li><li><a href="#rooms" data-i18n="nav.rooms">Rooms</a></li><li><a href="#holiday-packages" data-i18n="nav.packages">Packages</a></li><li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li><li><a href="#about" data-i18n="about.tag">About Us</a></li><li><a href="#travel-info" data-i18n="nav.travelInfo">Travel Info</a></li><li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">FAQ</a></li><li><a href="#guides" data-i18n="nav.guides">Guides &amp; Blog</a></li><li><a href="#contact" data-i18n="nav.contact">Contact</a></li></ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.roomsHeading">Rooms</h4><ul><li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">Double Room</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">Deluxe Family Room</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">Deluxe Family Room with Open Deck</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li></ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.info">Info</h4><ul><li><a href="#booking" onclick="openBookingPage()" data-i18n="footer.bookDirect">Book Direct</a></li><li><a href="#contact" data-i18n="footer.enquiries">Enquiries</a></li><li><a href="#contact" data-i18n="footer.groups">Groups</a></li><li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">South Ari Atoll Guide</a></li><li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Maamigili Guide</a></li><li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Whale Shark Snorkeling</a></li><li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Manta Ray Snorkeling</a></li><li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Holiday Packages</a></li><li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Best Time to Visit</a></li><li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Guesthouse vs Resort</a></li><li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Holiday Cost Guide</a></li><li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Best Islands for Snorkeling</a></li><li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">South Ari vs Other Regions</a></li><li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Things to Do in Maamigili</a></li></ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Explore</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Holiday Packages</a></li>
+        <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Whale Shark Snorkeling</a></li>
+        <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Manta Ray Snorkeling</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Things to Do in Maamigili</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">Stay</h4><ul>
+        <li><a href="#about">Vilu Residence</a></li>
+        <li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">Double Room</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li>
+        <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">Deluxe Family Room</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li>
+        <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">Deluxe Family Room with Open Deck</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li>
+        <li><a href="#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Live Availability</a></li>
+        <li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">South Ari Guides</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Maamigili Guide</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">South Ari Atoll Guide</a></li>
+        <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Best Local Islands for Snorkeling</a></li>
+        <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">South Ari vs Other Regions</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">Plan</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Best Time to Visit</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Holiday Cost Guide</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Guesthouse vs Resort</a></li>
+        <li><a href="#travel-info" data-i18n="nav.travelInfo">Travel Info</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+      </ul></div>
     </div>
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">All rights reserved.</span></div>
@@ -2977,10 +3126,7 @@ const COLORS = {
   'Deluxe Family Room with Open Deck':'linear-gradient(135deg,#0e7490,#0d2545)',
 };
 
-// ── NAV SCROLL ──
-window.addEventListener('scroll', function(){
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
-});
+// ── NAV SCROLL (now handled by nav-shell.js, shared with all pages) ──
 
 // ── HERO PARALLAX ── background slideshow lags behind scroll (translated
 // down by a fraction of scrollY, inside the section's own upward scroll)
@@ -3066,9 +3212,7 @@ function loadHeroSlidesProgressively(){
 if (document.readyState === 'complete') loadHeroSlidesProgressively();
 else window.addEventListener('load', loadHeroSlidesProgressively);
 
-// ── MOBILE MENU ──
-function toggleMobileMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
-function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open');}
+// ── MOBILE MENU (now handled by nav-shell.js, shared with all pages) ──
 
 // ── REVEAL ON SCROLL ──
 var observer = new IntersectionObserver(function(entries){
@@ -4346,5 +4490,6 @@ document.addEventListener('keydown',function(e){
 });
 
 </script>
+<script src="nav-shell.js"></script>
 </body>
 </html>

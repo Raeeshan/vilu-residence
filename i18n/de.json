@@ -196,7 +196,10 @@
       "enquiries": "Anfragen",
       "groups": "Gruppen",
       "rights": "Alle Rechte vorbehalten.",
-      "managedBy": "Verwaltet von"
+      "managedBy": "Verwaltet von",
+      "explore": "Entdecken",
+      "southAriGuides": "Süd-Ari-Reiseführer",
+      "plan": "Planung"
     },
     "bookingPopup": {
       "title": "Buchen Sie Ihren Aufenthalt",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "Urlaubspakete ansehen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "ctaBook": "Verfügbarkeit prüfen"
+    },
+    "navShell": {
+      "experiences": "Erlebnisse",
+      "southAri": "Süd-Ari",
+      "stay": "Übernachten",
+      "planTrip": "Reise planen",
+      "liveAvailability": "Aktuelle Verfügbarkeit",
+      "planHoliday": "Urlaub planen",
+      "checkAvailability": "Verfügbarkeit prüfen",
+      "openMenu": "Menü öffnen",
+      "closeMenu": "Menü schließen",
+      "menuLabel": "Seitenmenü"
     }
   },
   "dynamic": {

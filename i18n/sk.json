@@ -196,7 +196,10 @@
       "enquiries": "Otázky",
       "groups": "Skupiny",
       "rights": "Všetky práva vyhradené.",
-      "managedBy": "Prevádzkuje"
+      "managedBy": "Prevádzkuje",
+      "explore": "Objavujte",
+      "southAriGuides": "Sprievodcovia Južný Ari",
+      "plan": "Plánovanie"
     },
     "bookingPopup": {
       "title": "Rezervujte si pobyt",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "Zobraziť dovolenkové balíčky",
       "ctaWhatsapp": "Opýtať sa na WhatsApp",
       "ctaBook": "Skontrolovať dostupnosť"
+    },
+    "navShell": {
+      "experiences": "Zážitky",
+      "southAri": "Južný Ari",
+      "stay": "Ubytovanie",
+      "planTrip": "Naplánujte cestu",
+      "liveAvailability": "Aktuálna dostupnosť",
+      "planHoliday": "Naplánujte dovolenku",
+      "checkAvailability": "Skontrolovať dostupnosť",
+      "openMenu": "Otvoriť menu",
+      "closeMenu": "Zavrieť menu",
+      "menuLabel": "Menu stránky"
     }
   },
   "dynamic": {

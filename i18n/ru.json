@@ -196,7 +196,10 @@
       "enquiries": "Вопросы",
       "groups": "Группы",
       "rights": "Все права защищены.",
-      "managedBy": "Управляется"
+      "managedBy": "Управляется",
+      "explore": "Исследовать",
+      "southAriGuides": "Гиды по Южному Ари",
+      "plan": "Планирование"
     },
     "bookingPopup": {
       "title": "Забронировать проживание",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "Смотреть туристические пакеты",
       "ctaWhatsapp": "Спросить в WhatsApp",
       "ctaBook": "Проверить доступность"
+    },
+    "navShell": {
+      "experiences": "Впечатления",
+      "southAri": "Южный Ари",
+      "stay": "Проживание",
+      "planTrip": "Спланировать поездку",
+      "liveAvailability": "Актуальная доступность",
+      "planHoliday": "Спланировать отдых",
+      "checkAvailability": "Проверить доступность",
+      "openMenu": "Открыть меню",
+      "closeMenu": "Закрыть меню",
+      "menuLabel": "Меню сайта"
     }
   },
   "dynamic": {

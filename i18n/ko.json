@@ -196,7 +196,10 @@
       "enquiries": "문의",
       "groups": "단체 문의",
       "rights": "모든 권리 보유.",
-      "managedBy": "운영"
+      "managedBy": "운영",
+      "explore": "둘러보기",
+      "southAriGuides": "사우스 아리 가이드",
+      "plan": "계획"
     },
     "bookingPopup": {
       "title": "숙박 예약하기",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "홀리데이 패키지 보기",
       "ctaWhatsapp": "왓츠앱으로 문의하기",
       "ctaBook": "예약 가능 여부 확인"
+    },
+    "navShell": {
+      "experiences": "체험",
+      "southAri": "사우스 아리",
+      "stay": "숙박",
+      "planTrip": "여행 계획",
+      "liveAvailability": "실시간 예약 가능 여부",
+      "planHoliday": "휴가 계획하기",
+      "checkAvailability": "예약 가능 여부 확인",
+      "openMenu": "메뉴 열기",
+      "closeMenu": "메뉴 닫기",
+      "menuLabel": "사이트 메뉴"
     }
   },
   "dynamic": {

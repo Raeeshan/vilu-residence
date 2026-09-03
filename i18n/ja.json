@@ -196,7 +196,10 @@
       "enquiries": "お問い合わせ",
       "groups": "団体のお客様",
       "rights": "全著作権所有。",
-      "managedBy": "運営"
+      "managedBy": "運営",
+      "explore": "探る",
+      "southAriGuides": "南アリガイド",
+      "plan": "計画"
     },
     "bookingPopup": {
       "title": "ご宿泊のご予約",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "ホリデーパッケージを見る",
       "ctaWhatsapp": "WhatsAppで問い合わせる",
       "ctaBook": "空室状況を確認する"
+    },
+    "navShell": {
+      "experiences": "体験",
+      "southAri": "南アリ",
+      "stay": "宿泊",
+      "planTrip": "旅の計画",
+      "liveAvailability": "最新の空室状況",
+      "planHoliday": "休暇を計画する",
+      "checkAvailability": "空室状況を確認",
+      "openMenu": "メニューを開く",
+      "closeMenu": "メニューを閉じる",
+      "menuLabel": "サイトメニュー"
     }
   },
   "dynamic": {

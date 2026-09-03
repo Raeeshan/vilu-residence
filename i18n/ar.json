@@ -196,7 +196,10 @@
       "enquiries": "الاستفسارات",
       "groups": "المجموعات",
       "rights": "جميع الحقوق محفوظة.",
-      "managedBy": "تتم الإدارة بواسطة"
+      "managedBy": "تتم الإدارة بواسطة",
+      "explore": "استكشف",
+      "southAriGuides": "أدلة جنوب آري",
+      "plan": "التخطيط"
     },
     "bookingPopup": {
       "title": "احجز إقامتك",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "عرض باقات العطلات",
       "ctaWhatsapp": "اسألوا عبر واتساب",
       "ctaBook": "تحقّقوا من التوفّر"
+    },
+    "navShell": {
+      "experiences": "التجارب",
+      "southAri": "جنوب آري",
+      "stay": "الإقامة",
+      "planTrip": "خطط لرحلتك",
+      "liveAvailability": "التوفر المباشر",
+      "planHoliday": "خطط لعطلتك",
+      "checkAvailability": "تحقق من التوفر",
+      "openMenu": "فتح القائمة",
+      "closeMenu": "إغلاق القائمة",
+      "menuLabel": "قائمة الموقع"
     }
   },
   "dynamic": {

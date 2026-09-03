@@ -196,7 +196,10 @@
       "enquiries": "咨询",
       "groups": "团体",
       "rights": "版权所有。",
-      "managedBy": "管理方"
+      "managedBy": "管理方",
+      "explore": "探索",
+      "southAriGuides": "南阿里指南",
+      "plan": "规划"
     },
     "bookingPopup": {
       "title": "预订您的住宿",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "查看假期套餐",
       "ctaWhatsapp": "通过 WhatsApp 咨询",
       "ctaBook": "查询空房情况"
+    },
+    "navShell": {
+      "experiences": "体验",
+      "southAri": "南阿里",
+      "stay": "住宿",
+      "planTrip": "规划行程",
+      "liveAvailability": "实时房态",
+      "planHoliday": "规划假期",
+      "checkAvailability": "查看空房",
+      "openMenu": "打开菜单",
+      "closeMenu": "关闭菜单",
+      "menuLabel": "网站菜单"
     }
   },
   "dynamic": {

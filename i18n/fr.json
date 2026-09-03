@@ -196,7 +196,10 @@
       "enquiries": "Renseignements",
       "groups": "Groupes",
       "rights": "Tous droits réservés.",
-      "managedBy": "Géré par"
+      "managedBy": "Géré par",
+      "explore": "Explorer",
+      "southAriGuides": "Guides de Sud Ari",
+      "plan": "Planifier"
     },
     "bookingPopup": {
       "title": "Réservez votre séjour",
@@ -1389,6 +1392,18 @@
       "ctaPackages": "Voir les forfaits vacances",
       "ctaWhatsapp": "Demander sur WhatsApp",
       "ctaBook": "Vérifier la disponibilité"
+    },
+    "navShell": {
+      "experiences": "Expériences",
+      "southAri": "Sud Ari",
+      "stay": "Séjour",
+      "planTrip": "Planifiez votre voyage",
+      "liveAvailability": "Disponibilité en direct",
+      "planHoliday": "Planifiez vos vacances",
+      "checkAvailability": "Vérifier la disponibilité",
+      "openMenu": "Ouvrir le menu",
+      "closeMenu": "Fermer le menu",
+      "menuLabel": "Menu du site"
     }
   },
   "dynamic": {
