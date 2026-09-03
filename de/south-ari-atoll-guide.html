@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="de" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-atoll-guide.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-atoll-guide.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -89,7 +88,7 @@
     { "@type": "Question", "name": "Do I need a diving certification to see whale sharks or manta rays?", "acceptedAnswer": { "@type": "Answer", "text": "No — whale shark and manta ray encounters in South Ari are generally accessible by snorkeling, so you don't typically need to be a certified diver to see either." } },
     { "@type": "Question", "name": "Is South Ari or North Ari better for whale sharks?", "acceptedAnswer": { "@type": "Answer", "text": "South Ari is the atoll most associated with year-round whale shark encounters. North Ari doesn't have the same aggregation, though it has its own diving and manta sites." } },
     { "@type": "Question", "name": "What's the best time of year to visit?", "acceptedAnswer": { "@type": "Answer", "text": "Marine life in South Ari is present year-round, so there isn't a single \"best\" month for wildlife — weather and sea conditions are the bigger seasonal factors. See our full Best Time to Visit guide." } },
-    { "@type": "Question", "name": "Should I stay on a local island or at a resort?", "acceptedAnswer": { "@type": "Answer", "text": "Both are valid choices with real trade-offs in cost structure, privacy, and access to local culture. See our full Guesthouse vs Resort comparison." } },
+    { "@type": "Question", "name": "Should I stay on a local island or at a resort?", "acceptedAnswer": { "@type": "Answer", "text": "Both are valid choices with real trade-offs in cost structure, privacy, and access to local culture. See our full Guesthouse vs Resort comparison, or see our Holiday Packages, which bundle a local-island stay with the experiences described in this guide." } },
     { "@type": "Question", "name": "How do I get to South Ari Atoll from Malé?", "acceptedAnswer": { "@type": "Answer", "text": "Either a direct speedboat (around 1h45m) or a domestic flight (around 20–30 minutes) into Maamigili's Villa International Airport." } },
     { "@type": "Question", "name": "Which island should I base myself on?", "acceptedAnswer": { "@type": "Answer", "text": "Maamigili has its own airport, and it's where Vilu Residence is based — our whale shark and manta excursions run from here. Read our full Maamigili Guide." } },
     { "@type": "Question", "name": "Can I dive in South Ari?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — South Ari has its own dive sites, though diving isn't something Vilu Residence operates directly. Diving runs through a certified, independent dive centre." } },
@@ -105,19 +104,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/de/" class="nav-logo">
+  <a href="/de/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Urlaubspakete</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Erlebnisse</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Walhai-Schnorcheln</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Mantarochen-Schnorcheln</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Was man auf Maamigili unternehmen kann</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">Süd-Ari</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Maamigili-Reiseführer</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">Süd-Ari-Atoll-Reiseführer</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Beste Inseln zum Schnorcheln</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">Süd-Ari vs. Andere Regionen</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Übernachten</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/de/#about" role="menuitem">Vilu Residence</a>
+        <a href="/de/#rooms" data-i18n="nav.rooms" role="menuitem">Zimmer</a>
+        <a href="/de/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Aktuelle Verfügbarkeit</a>
+        <a href="/de/#gallery" data-i18n="nav.gallery" role="menuitem">Galerie</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Reise planen</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Beste Reisezeit</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Urlaubskosten-Guide</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Gästehaus vs. Resort</a>
+        <a href="/de/#travel-info" data-i18n="nav.travelInfo" role="menuitem">Reiseinfos</a>
+        <a href="/de/#contact" data-i18n="nav.contact" role="menuitem">Kontakt</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Urlaub planen</a>
+    <a class="nav-check-availability js-check-availability" href="/de/#booking" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="Menü öffnen" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Seitenmenü" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/de/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/de/#booking" data-i18n="pageNav.bookNow">Jetzt buchen</a>
+    <button class="mm-close" aria-label="Menü schließen" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Urlaubspakete</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Erlebnisse</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">Walhai-Schnorcheln</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">Mantarochen-Schnorcheln</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">Süd-Ari</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">Maamigili-Reiseführer</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">Süd-Ari-Atoll-Reiseführer</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">Beste Inseln zum Schnorcheln</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">Süd-Ari vs. Andere Regionen</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Übernachten</button>
+      <div class="mm-group-panel">
+        <a href="/de/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/de/#rooms" data-mm-close="" data-i18n="nav.rooms">Zimmer</a>
+        <a href="/de/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Aktuelle Verfügbarkeit</a>
+        <a href="/de/#gallery" data-mm-close="" data-i18n="nav.gallery">Galerie</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Reise planen</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Beste Reisezeit</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Urlaubskosten-Guide</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Gästehaus vs. Resort</a>
+        <a href="/de/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">Reiseinfos</a>
+        <a href="/de/#contact" data-mm-close="" data-i18n="nav.contact">Kontakt</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Urlaub planen</a>
+      <a class="mm-check-availability js-check-availability" href="/de/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/whale_shark_2_gallery.jpg');background-image:image-set(url('/images/whale_shark_2_gallery.webp') type('image/webp'), url('/images/whale_shark_2_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -251,7 +364,7 @@
         <details><summary><span data-i18n="saaPage.faqQ1">Brauche ich eine Tauchzertifizierung, um Walhaie oder Mantarochen zu sehen?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA1">Nein – Begegnungen mit Walhaien und Mantarochen in Süd-Ari sind in der Regel durch Schnorcheln zugänglich, sodass Sie normalerweise keine Tauchzertifizierung benötigen, um beide zu sehen.</div></details>
         <details><summary><span data-i18n="saaPage.faqQ2">Ist Süd-Ari oder Nord-Ari besser für Walhaie?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA2">Süd-Ari ist das Atoll, das am stärksten mit ganzjährigen Walhai-Begegnungen in Verbindung gebracht wird. Nord-Ari hat nicht dieselbe Ansammlung, verfügt jedoch über eigene Tauch- und Mantarochen-Stellen.</div></details>
         <details><summary><span data-i18n="saaPage.faqQ3">Was ist die beste Reisezeit?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA3">Die Tierwelt in Süd-Ari ist ganzjährig präsent, daher gibt es keinen einzelnen „besten" Monat für die Tierwelt – Wetter und Seebedingungen sind die entscheidenderen saisonalen Faktoren. Siehe unseren vollständigen <a href="best-time-to-visit.html">Ratgeber zur besten Reisezeit</a>.</div></details>
-        <details><summary><span data-i18n="saaPage.faqQ4">Sollte ich auf einer lokalen Insel oder in einem Resort wohnen?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA4">Beides sind gültige Optionen mit echten Abwägungen bei Kostenstruktur, Privatsphäre und Zugang zur lokalen Kultur. Siehe unseren vollständigen <a href="guesthouse-vs-resort.html">Vergleich Gästehaus vs. Resort</a>.</div></details>
+        <details><summary><span data-i18n="saaPage.faqQ4">Sollte ich auf einer lokalen Insel oder in einem Resort wohnen?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA4">Beides sind gültige Optionen mit echten Abwägungen bei Kostenstruktur, Privatsphäre und Zugang zur lokalen Kultur. Siehe unseren vollständigen <a href="guesthouse-vs-resort.html">Vergleich Gästehaus vs. Resort</a>, oder unsere <a href="holiday-packages.html">Urlaubspakete</a>, die einen Aufenthalt auf einer lokalen Insel mit den in diesem Guide beschriebenen Erlebnissen verbinden.</div></details>
         <details><summary><span data-i18n="saaPage.faqQ5">Wie komme ich von Malé zum Süd-Ari-Atoll?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA5">Entweder mit einem direkten Speedboot (etwa 1 Std. 45 Min.) oder einem Inlandsflug (etwa 20–30 Minuten) zum Villa International Airport in Maamigili.</div></details>
         <details><summary><span data-i18n="saaPage.faqQ6">Auf welcher Insel sollte ich mich niederlassen?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA6">Maamigili verfügt über einen eigenen Flughafen und ist der Standort von Vilu Residence – unsere Walhai- und Manta-Ausflüge starten von hier aus. Lesen Sie unseren vollständigen <a href="maamigili-guide.html">Maamigili-Ratgeber</a>.</div></details>
         <details><summary><span data-i18n="saaPage.faqQ7">Kann ich in Süd-Ari tauchen?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="saaPage.faqA7">Ja – Süd-Ari verfügt über eigene Tauchplätze, auch wenn Tauchen nicht von Vilu Residence selbst angeboten wird. Tauchgänge laufen über ein zertifiziertes, unabhängiges Tauchzentrum.</div></details>
@@ -284,12 +397,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="saaPage.ctaTitle">Bereit, es selbst zu erleben?</h2>
-    <p data-i18n="saaPage.ctaText">Vilu Residence ist ein Gästehaus direkt auf Maamigili, der Insel im Herzen der Walhai-Gebiete des Süd-Ari-Atolls. Prüfen Sie die Verfügbarkeit oder schreiben Sie uns direkt auf WhatsApp.</p>
+    <p data-i18n="saaPage.ctaText">Vilu Residence ist ein Gästehaus direkt auf Maamigili, der Insel im Herzen der Walhai-Gebiete des Süd-Ari-Atolls. Sehen Sie, wie unsere Urlaubspakete die Erlebnisse des Atolls zusammenbringen, oder prüfen Sie direkt die Verfügbarkeit.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/de/#booking" data-i18n="saaPage.ctaBook">Verfügbarkeit prüfen</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="saaPage.ctaWhatsapp">Auf WhatsApp fragen</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="saaPage.ctaPackages">Urlaubspakete ansehen</a>
+      <a class="btn-outline" data-i18n-href="saaPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20S%C3%BCd-Ari-Atoll-Reisef%C3%BChrer%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen." target="_blank" rel="noopener noreferrer" data-i18n="saaPage.ctaWhatsapp">Auf WhatsApp fragen</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/de/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="saaPage.ctaBook">Verfügbarkeit prüfen</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -313,34 +428,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigation</h4><ul>
-        <li><a href="/de/" data-i18n="pageNav.home">Startseite</a></li>
-        <li><a href="/de/#rooms" data-i18n="nav.rooms">Zimmer</a></li>
-        <li><a href="/de/#holiday-packages" data-i18n="nav.packages">Pakete</a></li>
-        <li><a href="/de/#travel-info" data-i18n="nav.travelInfo">Reiseinfos</a></li>
-        <li><a href="/de/#contact" data-i18n="nav.contact">Kontakt</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">Reiseführer</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Süd-Ari-Atoll-Reiseführer</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Maamigili-Reiseführer</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Entdecken</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Urlaubspakete</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Walhai-Schnorcheln</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Mantarochen-Schnorcheln</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Urlaubspakete</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Beste Reisezeit</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Gästehaus vs. Resort</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Urlaubskosten-Guide</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">Übernachten</h4><ul>
+        <li><a href="/de/#about">Vilu Residence</a></li>
+        <li><a href="/de/#rooms" data-i18n="nav.rooms">Zimmer</a></li>
+        <li><a href="/de/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Aktuelle Verfügbarkeit</a></li>
+        <li><a href="/de/#gallery" data-i18n="nav.gallery">Galerie</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">Süd-Ari-Reiseführer</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Maamigili-Reiseführer</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Süd-Ari-Atoll-Reiseführer</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Beste Inseln zum Schnorcheln</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">Süd-Ari vs. Andere Regionen</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">Planung</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Beste Reisezeit</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Urlaubskosten-Guide</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Gästehaus vs. Resort</a></li>
+        <li><a href="/de/#travel-info" data-i18n="nav.travelInfo">Reiseinfos</a></li>
+        <li><a href="/de/#contact" data-i18n="nav.contact">Kontakt</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">Alle Rechte vorbehalten.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">Alle Rechte vorbehalten.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Verwaltet von</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Datenschutzeinstellungen</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookie- und Datenschutzeinwilligung" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Ihre Privatsphäre, Ihre Wahl</strong>
+      <p data-i18n="consent.message">Wir verwenden essenzielle Technologien, damit Vilu funktioniert. Mit Ihrer Erlaubnis möchten wir außerdem Analyse- und Marketing-Technologien nutzen, um zu verstehen, wie Besucher unsere Website nutzen.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Nicht erforderliche ablehnen</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Anpassen</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Alle akzeptieren</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Datenschutzeinstellungen</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Schließen" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Essenziell</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Immer aktiv</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Erforderlich für Buchung, Verfügbarkeit und grundlegende Website-Funktionen.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Präferenzen</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Präferenzen" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Speichert optionale Einstellungen, die Sie auf der Website vornehmen.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Analyse</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analyse" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Hilft uns zu verstehen, wie Besucher die Website nutzen.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Ermöglicht relevantere Angebote, wenn Sie später andere Websites besuchen.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Einstellungen speichern</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -426,7 +608,7 @@ var I18N = { en: {
     faqQ3: "What's the best time of year to visit?",
     faqA3: "Marine life in South Ari is present year-round, so there isn't a single \"best\" month for wildlife — weather and sea conditions are the bigger seasonal factors. See our full <a href=\"best-time-to-visit.html\">Best Time to Visit guide</a>.",
     faqQ4: "Should I stay on a local island or at a resort?",
-    faqA4: "Both are valid choices with real trade-offs in cost structure, privacy, and access to local culture. See our full <a href=\"guesthouse-vs-resort.html\">Guesthouse vs Resort comparison</a>.",
+    faqA4: "Both are valid choices with real trade-offs in cost structure, privacy, and access to local culture. See our full <a href=\"guesthouse-vs-resort.html\">Guesthouse vs Resort comparison</a>, or see our <a href=\"holiday-packages.html\">Holiday Packages</a>, which bundle a local-island stay with the experiences described in this guide.",
     faqQ5: "How do I get to South Ari Atoll from Malé?",
     faqA5: "Either a direct speedboat (around 1h45m) or a domestic flight (around 20–30 minutes) into Maamigili's Villa International Airport.",
     faqQ6: "Which island should I base myself on?",
@@ -446,13 +628,14 @@ var I18N = { en: {
     relTag2: "Experience Guide", relTitle2: "Manta Ray Snorkeling",
     relTag3: "Plan Your Stay", relTitle3: "Holiday Packages",
     ctaTitle: "Ready to see it for yourself?",
-    ctaText: "Vilu Residence is a guesthouse right on Maamigili, the island at the heart of South Ari Atoll's whale shark grounds. Check availability or message us directly on WhatsApp.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Vilu Residence is a guesthouse right on Maamigili, the island at the heart of South Ari Atoll's whale shark grounds. See how our holiday packages bring the atoll's experiences together, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   }
 }};
 var PAGE_META_NS = 'saaMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

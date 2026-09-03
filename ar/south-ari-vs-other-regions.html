@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -83,19 +82,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ar/" class="nav-logo">
+  <a href="/ar/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">باقات العطلات</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">التجارب</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">الغطس مع سمك القرش الحوتي</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">الغطس مع أشعة المانتا</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">أشياء للقيام بها في مامیغیلي</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">جنوب آري</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">دليل مامیغیلي</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">دليل أتول جنوب آري</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">أفضل الجزر للغطس السطحي</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">جنوب آري مقابل مناطق أخرى</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">الإقامة</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ar/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ar/#rooms" data-i18n="nav.rooms" role="menuitem">الغرف</a>
+        <a href="/ar/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">التوفر المباشر</a>
+        <a href="/ar/#gallery" data-i18n="nav.gallery" role="menuitem">معرض الصور</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">خطط لرحلتك</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">أفضل وقت للزيارة</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">دليل التكلفة</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">بيت الضيافة مقابل المنتجع</a>
+        <a href="/ar/#travel-info" data-i18n="nav.travelInfo" role="menuitem">معلومات السفر</a>
+        <a href="/ar/#contact" data-i18n="nav.contact" role="menuitem">اتصل بنا</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">خطط لعطلتك</a>
+    <a class="nav-check-availability js-check-availability" href="/ar/#booking" data-i18n="navShell.checkAvailability">تحقق من التوفر</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="فتح القائمة" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="قائمة الموقع" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ar/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ar/#booking" data-i18n="pageNav.bookNow">احجز الآن</a>
+    <button class="mm-close" aria-label="إغلاق القائمة" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">باقات العطلات</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">التجارب</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">الغطس مع سمك القرش الحوتي</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">الغطس مع أشعة المانتا</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">أشياء للقيام بها في مامیغیلي</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">جنوب آري</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">دليل مامیغیلي</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">دليل أتول جنوب آري</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">أفضل الجزر للغطس السطحي</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">جنوب آري مقابل مناطق أخرى</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">الإقامة</button>
+      <div class="mm-group-panel">
+        <a href="/ar/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ar/#rooms" data-mm-close="" data-i18n="nav.rooms">الغرف</a>
+        <a href="/ar/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">التوفر المباشر</a>
+        <a href="/ar/#gallery" data-mm-close="" data-i18n="nav.gallery">معرض الصور</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">خطط لرحلتك</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">أفضل وقت للزيارة</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">دليل التكلفة</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">بيت الضيافة مقابل المنتجع</a>
+        <a href="/ar/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">معلومات السفر</a>
+        <a href="/ar/#contact" data-mm-close="" data-i18n="nav.contact">اتصل بنا</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">خطط لعطلتك</a>
+      <a class="mm-check-availability js-check-availability" href="/ar/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">تحقق من التوفر</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/manta_ray_hd.jpg');background-image:image-set(url('/images/manta_ray_hd.webp') type('image/webp'), url('/images/manta_ray_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -110,7 +223,7 @@
     <p data-i18n="cmpRegions.intro">الأتولات الـ26 في المالديف ليست قابلة للتبادل — لكل منطقة طابعها الخاص، ومن المفيد الاختيار بناءً على ما تريده حقًا من الرحلة وليس فقط بناءً على القرب من ماليه.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h1">أتول شمال ماليه</h2>
-    <p data-i18n="cmpRegions.p1">أقرب مجموعة أتولات إلى مطار فيلانا الدولي، لذا فإن أوقات النقل قصيرة — غالبًا أقل من ساعة. يضم أعلى تركيز من المنتجعات وبعض أماكن ركوب الأمواج المعروفة على شعابه المرجانية الشرقية. القرب من العاصمة يجعله أيضًا المنطقة الأكثر زيارة.</p>
+    <p data-i18n="cmpRegions.p1">أقرب مجموعة أتولات إلى مطار فيلانا الدولي، لذا فإن أوقات النقل قصيرة — غالبًا أقل من ساعة. وهي واحدة من مناطق المنتجعات الرئيسية في المالديف، مع بعض أماكن ركوب الأمواج المعروفة على شعابه المرجانية الشرقية. القرب من العاصمة يجعله أيضًا المنطقة الأكثر زيارة.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h2">أتول باء</h2>
     <p data-i18n="cmpRegions.p2">المُصنف كمحمية للمحيط الحيوي من اليونسكو، يشتهر أتول باء بشكل رئيسي بخليج هانيفارو، أحد أفضل مواقع تجمع أشعة المانتا للتغذية الموثقة في العالم — رغم أن الوصول إليه موسمي ومنظم بشكل صارم لحماية المحمية.</p>
@@ -119,7 +232,7 @@
     <p data-i18n="cmpRegions.p3">أبعد عن ماليه (ساعة و45 دقيقة فعليًا بالقارب السريع، أو 20 دقيقة بالطائرة)، وهذا هو الثمن مقابل ما يقدمه: سمك قرش حوتي على مدار العام، ومشاهدات منتظمة لأشعة المانتا، ومزيج من المنتجعات والجزر المحلية العريقة مثل ماميجيلي ودهيقوراه، مما يجعله في متناول كل من مسافري النزل وضيوف المنتجعات.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h4">اختيار المنطقة</h2>
-    <p data-i18n="cmpRegions.p4">إذا كان تقليل وقت النقل هو الأهم، فمن الصعب منافسة شمال ماليه. إذا كان الهدف حدثًا طبيعيًا محددًا وموسميًا بشكل كبير، فإن خليج هانيفارو في أتول باء يستحق التخطيط له. إذا كان ما تبحث عنه هو حياة بحرية على مدار العام وإقامة أصيلة في جزيرة محلية، فإن جنوب آري مصمم لذلك بالضبط.</p>
+    <p data-i18n="cmpRegions.p4">إذا كان تقليل وقت النقل هو الأهم، فمن الصعب منافسة شمال ماليه. إذا كان الهدف حدثًا طبيعيًا محددًا وموسميًا بشكل كبير، فإن خليج هانيفارو في أتول باء يستحق التخطيط له. إذا كان ما تبحث عنه هو حياة بحرية على مدار العام وإقامة أصيلة في جزيرة محلية، فإن جنوب آري مصمم لذلك بالضبط. تجمع باقات عطلاتنا بين الإقامة والتجارب إذا كانت هذه هي الرحلة التي تخطط لها.</p>
     <p class="exp-links"><a href="holiday-packages.html" data-i18n="cmpRegionsPage.linkPackages">شاهد باقات عطلاتنا ←</a></p>
   </article>
 
@@ -144,12 +257,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="cmpRegionsPage.ctaTitle">هل أنت مستعد لتجربة جنوب آري بنفسك؟</h2>
-    <p data-i18n="cmpRegionsPage.ctaText">يقع Vilu Residence مباشرة في قلب الحياة البحرية على مدار العام في جنوب آري. تحقق من التوفر أو راسلنا مباشرة.</p>
+    <p data-i18n="cmpRegionsPage.ctaText">يقع Vilu Residence مباشرة في قلب الحياة البحرية على مدار العام في جنوب آري — شاهد كيف تجمع باقات عطلاتنا كل ذلك معًا، أو تحقق من التوفر مباشرة.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/ar/#booking" data-i18n="cmpRegionsPage.ctaBook">تحقق من التوفر</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="cmpRegionsPage.ctaWhatsapp">اسأل عبر واتساب</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="cmpRegionsPage.ctaPackages">عرض باقات العطلات</a>
+      <a class="btn-outline" data-i18n-href="cmpRegionsPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7!%20%D9%83%D9%86%D8%AA%20%D8%A3%D9%82%D8%B1%D8%A3%20%D8%AC%D9%86%D9%88%D8%A8%20%D8%A2%D8%B1%D9%8A%20%D9%85%D9%82%D8%A7%D8%A8%D9%84%20%D9%85%D9%86%D8%A7%D8%B7%D9%82%20%D8%A3%D8%AE%D8%B1%D9%89%20%D9%88%D8%A3%D8%B1%D8%BA%D8%A8%20%D9%81%D9%8A%20%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D8%AA%D8%AE%D8%B7%D9%8A%D8%B7%20%D8%B9%D8%B7%D9%84%D8%AA%D9%8A%20%D9%81%D9%8A%20%D8%A7%D9%84%D9%85%D8%A7%D9%84%D8%AF%D9%8A%D9%81%20%D9%85%D8%B9%20Vilu." target="_blank" rel="noopener noreferrer" data-i18n="cmpRegionsPage.ctaWhatsapp">اسأل عبر واتساب</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/ar/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="cmpRegionsPage.ctaBook">تحقق من التوفر</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -173,34 +288,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">التصفح</h4><ul>
-        <li><a href="/ar/" data-i18n="pageNav.home">الرئيسية</a></li>
-        <li><a href="/ar/#rooms" data-i18n="nav.rooms">الغرف</a></li>
-        <li><a href="/ar/#holiday-packages" data-i18n="nav.packages">الباقات</a></li>
-        <li><a href="/ar/#travel-info" data-i18n="nav.travelInfo">معلومات السفر</a></li>
-        <li><a href="/ar/#contact" data-i18n="nav.contact">اتصل بنا</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">الأدلة</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">دليل أتول جنوب آري</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">دليل مامیغیلي</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">استكشف</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">باقات العطلات</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">الغطس مع سمك القرش الحوتي</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">الغطس مع أشعة المانتا</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">باقات العطلات</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">أفضل وقت للزيارة</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">بيت الضيافة مقابل المنتجع</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">دليل التكلفة</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">أشياء للقيام بها في مامیغیلي</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">الإقامة</h4><ul>
+        <li><a href="/ar/#about">Vilu Residence</a></li>
+        <li><a href="/ar/#rooms" data-i18n="nav.rooms">الغرف</a></li>
+        <li><a href="/ar/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">التوفر المباشر</a></li>
+        <li><a href="/ar/#gallery" data-i18n="nav.gallery">معرض الصور</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">أدلة جنوب آري</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">دليل مامیغیلي</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">دليل أتول جنوب آري</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">أفضل الجزر للغطس السطحي</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">جنوب آري مقابل مناطق أخرى</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">أشياء للقيام بها في مامیغیلي</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">التخطيط</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">أفضل وقت للزيارة</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">دليل التكلفة</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">بيت الضيافة مقابل المنتجع</a></li>
+        <li><a href="/ar/#travel-info" data-i18n="nav.travelInfo">معلومات السفر</a></li>
+        <li><a href="/ar/#contact" data-i18n="nav.contact">اتصل بنا</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">جميع الحقوق محفوظة.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">جميع الحقوق محفوظة.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">تتم الإدارة بواسطة</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">خيارات الخصوصية</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="الموافقة على ملفات تعريف الارتباط والخصوصية" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">خصوصيتك، خيارك</strong>
+      <p data-i18n="consent.message">نستخدم تقنيات أساسية لتشغيل موقع فيلو. بإذنك، نود أيضًا استخدام تقنيات التحليلات والتسويق لفهم كيفية استخدام الزوار لموقعنا.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">رفض غير الأساسي</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">تخصيص</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">قبول الكل</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">تفضيلات الخصوصية</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="إغلاق" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">أساسي</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">نشط دائمًا</span>
+        </div>
+        <p data-i18n="consent.essential.desc">مطلوب للحجز والتحقق من التوفر والوظائف الأساسية للموقع.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">التفضيلات</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="التفضيلات" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">يتذكر الخيارات الاختيارية التي تقوم بها على الموقع.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">التحليلات</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="التحليلات" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">يساعدنا على فهم كيفية استخدام الزوار للموقع.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">التسويق</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="التسويق" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">يتيح عروضًا أكثر ملاءمة إذا قمت بزيارة مواقع أخرى لاحقًا.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">حفظ التفضيلات</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -225,25 +407,26 @@ var I18N = { en: {
     relTag2: "Destination Guide", relTitle2: "South Ari Atoll Guide",
     relTag3: "Trip Planning", relTitle3: "Best Time to Visit",
     ctaTitle: "Ready to experience South Ari for yourself?",
-    ctaText: "Vilu Residence is right in the middle of South Ari's year-round marine life. Check availability or ask us directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Vilu Residence is right in the middle of South Ari's year-round marine life — see how our holiday packages bring it together, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   cmpRegions: {
     title: "South Ari Atoll <em>vs Other Maldives Regions</em>",
     intro: "The Maldives' 26 atolls aren't interchangeable — each region has a different character, and it's worth choosing based on what you actually want from the trip rather than just proximity to Malé.",
     h1: "North Malé Atoll",
-    p1: "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It has the highest concentration of resorts and some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
+    p1: "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It's one of the Maldives' major resort regions, with some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
     h2: "Baa Atoll",
     p2: "Designated a UNESCO Biosphere Reserve, Baa Atoll is best known for Hanifaru Bay, one of the world's best-documented manta ray feeding aggregation sites — though access is seasonal and tightly regulated to protect the reserve.",
     h3: "South Ari Atoll",
     p3: "Further from Malé (a genuine 1h45m by speedboat, or 20 minutes by air), which is the trade-off for what it offers: year-round whale sharks, regular manta sightings, and a mix of resorts and long-established local islands like Maamigili and Dhigurah, making it accessible to guesthouse travelers as well as resort guests.",
     h4: "Choosing a region",
-    p4: "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that."
+    p4: "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that — our holiday packages bring accommodation and experiences together if that's the trip you're planning."
   }
 }};
 var PAGE_META_NS = 'cmpRegionsMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

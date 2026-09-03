@@ -34,14 +34,16 @@
 <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 <link rel="canonical" href="https://viluresidence.net/ko/" id="canonical-link">
 <link rel="alternate" hreflang="en" href="https://viluresidence.net/">
 <link rel="alternate" hreflang="zh" href="https://viluresidence.net/zh/">
@@ -55,9 +57,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <script type="application/ld+json">
 {
@@ -146,6 +145,35 @@
   --font-size-display: 48px;
   --font-size-display-lg: 64px;
 }
+
+/* ── SELF-HOSTED WEBFONTS (Phase 11B-P3) ──
+   Cormorant Garamond + DM Sans, mirrored from Google Fonts (v21/v17) at the
+   exact weights/styles/subsets already in use (latin, latin-ext, cyrillic --
+   the only scripts these two families actually cover; Arabic/CJK visitors
+   already fell back to the OS default font before this change, since neither
+   family ships Arabic or CJK glyphs -- unchanged by self-hosting).
+   SIL Open Font License 1.1 -- see fonts/webfonts/OFL-*.txt. */
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:300;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-300-italic-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:300;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-300-italic-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:300;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-300-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-400-italic-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-400-italic-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-400-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:300;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-300-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:300;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-300-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:300;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-300-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-400-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-600-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/webfonts/cormorant-garamond-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300;font-display:swap;src:url(/fonts/webfonts/dm-sans-300-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300;font-display:swap;src:url(/fonts/webfonts/dm-sans-300-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/webfonts/dm-sans-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/webfonts/dm-sans-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/webfonts/dm-sans-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/webfonts/dm-sans-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scroll-padding-top:140px}
@@ -243,43 +271,93 @@ body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;posit
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
 
-/* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;flex-direction:column;transition:all .4s}
+/* ── NAV — GLOBAL SHELL (Phase 10) — mirrors shared-page.css exactly,
+   duplicated here (not linked) to avoid cascade collisions with this
+   page's extensive existing inline stylesheet. Keep both in sync by hand
+   until the Phase 12 architecture review revisits consolidation. ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;flex-direction:column;transition:background .4s,box-shadow .4s,border-color .4s;background:transparent}
 nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bottom:1px solid rgba(34,211,238,.22);box-shadow:0 8px 30px rgba(0,10,20,.35)}
-.nav-row-top{display:flex;align-items:center;justify-content:center;position:relative;padding:14px 5vw 10px}
-.nav-row-bottom{display:flex;align-items:center;justify-content:space-between;padding:10px 5vw 14px;border-top:1px solid rgba(255,255,255,.08)}
-.nav-row-bottom-right{display:flex;align-items:center;gap:20px}
-.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-row-top{display:flex;align-items:center;gap:28px;padding:16px 5vw}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
 .nav-logo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 14px var(--glow)}
 .nav-logo-text{display:flex;flex-direction:column}
 .nav-logo-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;letter-spacing:.04em;color:var(--white);line-height:1}
 .nav-logo-sub{font-size:var(--font-size-xs);font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
-.nav-links{display:flex;gap:32px;list-style:none}
-.nav-links a{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;transition:color .25s}
-.nav-links a:hover{color:var(--gold-light);text-shadow:0 0 12px var(--glow)}
-.nav-book{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 24px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.nav-book:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(34,211,238,.4)}
-.nav-clock{display:flex;align-items:center;gap:8px}
-.nav-clock i{font-size:17px;color:var(--gold-light)}
+.nav-links{display:flex;align-items:center;gap:36px;list-style:none;flex:1;justify-content:center}
+.nav-links>li{position:relative;display:flex;align-items:center}
+.nav-links>li>a,.nav-drop-trigger{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 2px;transition:color .25s}
+.nav-links>li>a:hover,.nav-drop-trigger:hover{color:var(--gold-light);text-shadow:0 0 12px var(--glow)}
+.nav-drop-trigger i{font-size:11px;transition:transform .25s}
+.nav-drop.open .nav-drop-trigger i{transform:rotate(180deg)}
+.nav-active{color:var(--white) !important;position:relative}
+.nav-active::after{content:'';position:absolute;left:2px;right:2px;bottom:-8px;height:1.5px;background:var(--teal-light)}
+.nav-drop-panel{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(-6px);min-width:240px;background:var(--card);border:1px solid var(--card-border);border-radius:2px;box-shadow:0 20px 50px rgba(0,10,20,.5);padding:8px;display:flex;flex-direction:column;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease-out,transform .18s ease-out}
+.nav-drop.open .nav-drop-panel{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.nav-drop-panel a{font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:400;color:rgba(255,255,255,.75);text-decoration:none;padding:12px 16px;border-radius:2px;transition:background .2s,color .2s}
+.nav-drop-panel a:hover{background:rgba(34,211,238,.06);color:var(--white)}
+.nav-right{display:flex;align-items:center;gap:16px;flex-shrink:0}
 .lang-switcher{position:relative;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:6px 10px}
 .lang-switcher i{font-size:15px;color:var(--teal-light);pointer-events:none}
-.lang-switcher select{background:none;border:none;outline:none;appearance:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.04em;color:var(--white);cursor:pointer;padding-right:14px}
+.lang-switcher select{background:none;border:none;appearance:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.04em;color:var(--white);cursor:pointer;padding-right:14px}
 .lang-switcher select option{color:#000}
 .lang-switcher::after{content:'';position:absolute;right:9px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--teal-light);border-bottom:1.5px solid var(--teal-light);transform:translateY(-65%) rotate(45deg);pointer-events:none}
 .lang-switcher-mobile{align-self:flex-start;margin:4px 0}
-.nav-clock-text{display:flex;flex-direction:column;line-height:1.15}
-.nav-clock-label{font-size:var(--font-size-xs);font-weight:300;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
-.nav-clock-time{font-size:var(--font-size-base);font-weight:500;color:var(--white);letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.nav-mobile-right{display:none;align-items:center;gap:14px}
-.nav-clock-compact{display:none;align-items:center;gap:4px;font-size:var(--font-size-xs);color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
-.nav-clock-compact i{font-size:13px;color:var(--gold-light)}
-.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.btn-plan-holiday{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:10px 22px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-block;white-space:nowrap}
+.btn-plan-holiday:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(34,211,238,.4)}
+.nav-check-availability{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55);text-decoration:none;white-space:nowrap;transition:color .2s}
+.nav-check-availability:hover{color:var(--white)}
+@media(max-width:1310px){.nav-check-availability{display:none}}
+.nav-mobile-right{display:none;align-items:center;gap:14px;margin-left:auto}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:10px;background:none;border:none;flex-shrink:0}
 .nav-hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:all .3s}
-.mobile-menu{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(10,22,40,.98);backdrop-filter:blur(20px);padding:24px 5vw;flex-direction:column;gap:0;z-index:999;border-bottom:1px solid rgba(34,211,238,.22)}
+.nav-logo:focus-visible,.nav-links>li>a:focus-visible,.nav-drop-trigger:focus-visible,.nav-drop-panel a:focus-visible,.lang-switcher select:focus-visible,.btn-plan-holiday:focus-visible,.nav-check-availability:focus-visible,.nav-hamburger:focus-visible{outline:2px solid var(--teal-light);outline-offset:3px;border-radius:2px}
+[dir="rtl"] .nav-drop-panel a{text-align:right}
+[dir="rtl"] .lang-switcher select{padding-right:0;padding-left:14px}
+[dir="rtl"] .lang-switcher::after{right:auto;left:9px}
+/* Determined empirically: real overflow is masked by .nav's position:fixed
+   (no document-level scrollbar), so it must be measured directly against
+   .nav-row-top's own right edge. Full nav (5 links + dropdowns + lang
+   switcher + both CTAs) stops fitting below ~1305px — Check Availability
+   drops first, above at 1310px. The reduced nav (without Check
+   Availability) itself stops fitting below ~1160px, so the mobile-drawer
+   crossover is 1180px, not the 1024px placeholder used during
+   implementation, which left real overflow (Plan Your Holiday clipping
+   past the header edge) across the whole 1025-1159px range. */
+@media(max-width:1180px){
+  .nav-links,.nav-right>.lang-switcher:not(.lang-switcher-mobile),.nav-right>.btn-plan-holiday{display:none}
+  .nav-mobile-right{display:flex}
+  .nav-hamburger{display:flex}
+}
+
+/* ── MOBILE DRAWER — full-screen cinematic overlay (mirrors shared-page.css) ── */
+.mobile-menu{display:none;position:fixed;inset:0;z-index:1100;background:rgba(6,16,28,.98);backdrop-filter:blur(20px);flex-direction:column;overflow-y:auto}
 .mobile-menu.open{display:flex}
-.mobile-menu a{padding:16px 0;font-size:var(--font-size-md);font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
-.mobile-menu a:hover{color:var(--gold)}
-.mobile-menu .m-book-btn{margin-top:20px;background:var(--gold);color:var(--navy);padding:14px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%}
+.mm-header{display:flex;align-items:center;justify-content:space-between;padding:16px 5vw;flex-shrink:0}
+.mm-header .nav-logo img{width:32px;height:32px}
+.mm-header .nav-logo-name{font-size:var(--font-size-lg)}
+.mm-close{background:none;border:none;color:var(--white);font-size:28px;line-height:1;cursor:pointer;padding:8px;flex-shrink:0}
+.mm-body{padding:8px 5vw 32px;display:flex;flex-direction:column;gap:4px;flex:1}
+.mm-packages{display:block;font-family:'Cormorant Garamond',serif;font-size:clamp(26px,6vw,32px);font-weight:500;color:var(--white);text-decoration:none;background:rgba(34,211,238,.06);border-radius:10px;padding:22px 20px;margin:12px 0 20px}
+.mm-group{border-bottom:1px solid rgba(255,255,255,.08)}
+.mm-group-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;color:var(--white);font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:18px 4px;cursor:pointer}
+.mm-group-trigger i{font-size:14px;color:var(--teal-light);transition:transform .25s}
+.mm-group.open .mm-group-trigger i{transform:rotate(180deg)}
+.mm-group-panel{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.mm-group.open .mm-group-panel{max-height:400px}
+.mm-group-panel a{display:block;padding:12px 4px 12px 16px;font-size:var(--font-size-base);color:rgba(255,255,255,.7);text-decoration:none}
+.mm-group-panel a:hover{color:var(--gold-light)}
+.mm-ctas{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.mm-ctas .btn-plan-holiday{text-align:center;padding:16px;font-size:var(--font-size-base)}
+.mm-ctas .mm-check-availability{text-align:center;padding:14px;border:1px solid rgba(255,255,255,.25);border-radius:2px;color:var(--white);text-decoration:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.mm-lang{margin-top:24px}
+.mm-lang .lang-switcher{width:100%;justify-content:center;padding:12px}
+.mm-contact{margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:10px;font-size:var(--font-size-sm)}
+.mm-contact a{color:rgba(255,255,255,.6);text-decoration:none}
+.mm-contact-social{display:flex;gap:12px;margin-top:4px}
+.mm-contact-social a{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.14);border-radius:50%;color:rgba(255,255,255,.6);font-size:16px}
+[dir="rtl"] .mm-group-panel a{padding:12px 16px 12px 4px}
+[dir="rtl"] .mm-contact-social{flex-direction:row-reverse}
+.mm-close:focus-visible,.mm-group-trigger:focus-visible,.mm-group-panel a:focus-visible,.mm-packages:focus-visible{outline:2px solid var(--teal-light);outline-offset:2px}
 
 /* ── HERO ── */
 #home{position:relative;height:100vh;height:100dvh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -577,7 +655,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 
 /* ── FOOTER ── */
 footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
-.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
 .footer-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .footer-brand-logo img{width:48px;height:48px;border-radius:50%;border:2px solid rgba(34,211,238,.4);object-fit:cover}
 .footer-brand-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:400;color:var(--white)}
@@ -765,7 +843,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   #home{height:500px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{bottom:20px}
   .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
-  .footer-top{grid-template-columns:1fr 1fr;gap:40px}
+  .footer-top{grid-template-columns:1.6fr 1fr 1fr;gap:32px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
   .g-item{aspect-ratio:4/3}
@@ -818,6 +896,61 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   [dir="rtl"] .g-item-5{ grid-column:1/5; grid-row:2/3; }
   [dir="rtl"] .g-item-6{ grid-column:1/8; grid-row:3/4; }
 }
+
+/* ── CONSENT MANAGER (Phase 11B) ──
+   Bar sits above the floating WhatsApp button (z-index 900) but below the
+   mobile menu (1100); the panel dialog sits above everything so it can open
+   regardless of what else is on screen. */
+.consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:950;background:rgba(6,16,28,.97);backdrop-filter:blur(16px);border-top:1px solid var(--card-border);box-shadow:0 -12px 30px rgba(0,4,10,.4);padding:20px 5vw}
+.consent-bar[hidden]{display:none}
+.consent-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.consent-bar-text strong{display:block;font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:4px}
+.consent-bar-text p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;max-width:60ch;margin:0}
+.consent-bar-actions{display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.consent-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.04em;padding:11px 20px;border-radius:2px;cursor:pointer;white-space:nowrap;transition:all .25s}
+.consent-btn-reject{background:none;border:1px solid rgba(255,255,255,.3);color:var(--white)}
+.consent-btn-reject:hover{border-color:var(--white)}
+.consent-btn-customize{background:none;border:1px solid var(--card-border);color:var(--gold-light)}
+.consent-btn-customize:hover{border-color:var(--gold-light)}
+.consent-btn-accept{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;border:none;color:var(--navy)}
+.consent-btn-accept:hover{background-position:100% 0}
+
+.consent-panel-overlay{position:fixed;inset:0;z-index:1200;background:rgba(5,11,20,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:5vw}
+.consent-panel-overlay[hidden]{display:none}
+.consent-panel{width:100%;max-width:560px;max-height:85vh;overflow-y:auto;background:var(--navy2);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 30px 80px rgba(0,4,10,.6)}
+.consent-panel-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 24px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.consent-panel-header h2{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:500;color:var(--white);margin:0}
+.consent-panel-close{background:none;border:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer;padding:4px 8px;flex-shrink:0}
+.consent-panel-close:hover{color:var(--white)}
+.consent-panel-body{padding:8px 24px}
+.consent-row{padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.consent-row:last-child{border-bottom:none}
+.consent-row-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:6px}
+.consent-row-header>span:first-child{font-size:var(--font-size-base);font-weight:500;color:var(--white)}
+.consent-row p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;margin:0}
+.consent-locked{font-size:var(--font-size-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light);opacity:.8}
+.consent-toggle{position:relative;width:44px;height:24px;flex-shrink:0;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
+.consent-toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--white);transition:transform .2s}
+.consent-toggle[aria-checked="true"]{background:var(--teal);border-color:var(--teal-light)}
+.consent-toggle[aria-checked="true"] .consent-toggle-knob{transform:translateX(20px)}
+.consent-toggle:focus-visible{outline:2px solid var(--teal-light);outline-offset:2px}
+.consent-panel-footer{padding:16px 24px 24px}
+.consent-panel-footer .consent-btn{width:100%;text-align:center;padding:13px 20px}
+
+.footer-privacy-choices{background:none;border:none;padding:0;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);color:rgba(255,255,255,.35);text-decoration:underline;cursor:pointer;transition:color .2s}
+.footer-privacy-choices:hover{color:var(--gold-light)}
+
+.consent-btn:focus-visible,.consent-panel-close:focus-visible,.footer-privacy-choices:focus-visible{outline:2px solid var(--teal-light);outline-offset:3px}
+
+[dir="rtl"] .consent-toggle-knob{left:auto;right:2px}
+[dir="rtl"] .consent-toggle[aria-checked="true"] .consent-toggle-knob{transform:translateX(-20px)}
+[dir="rtl"] .consent-locked{margin-left:0}
+
+@media(max-width:700px){
+  .consent-bar-inner{flex-direction:column;align-items:stretch}
+  .consent-bar-actions{width:100%}
+  .consent-btn{flex:1}
+}
 </style>
 </head>
 <body>
@@ -841,60 +974,135 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <span class="bubble bubble--soft" style="left:93%;width:4px;height:4px;animation-duration:10.8s;animation-delay:-8.6s;--wobble:8px"></span>
 </div>
 
-<!-- ══ NAVIGATION ══ -->
+<!-- ══ NAVIGATION (Phase 10 global shell) ══ -->
 <nav id="nav">
   <div class="nav-row-top">
-  <div class="nav-logo">
+  <a href="#home" class="nav-logo">
     <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
     <div class="nav-logo-text">
       <div class="nav-logo-name">Vilu Residence</div>
       <div class="nav-logo-sub">Maamigili · Maldives</div>
     </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">홀리데이 패키지</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">체험</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">고래상어 스노클링</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">쥐가오리 스노클링</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">마미길리에서 할 수 있는 것들</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">사우스 아리</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">마미길리 가이드</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">사우스 아리 환초 가이드</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">스노클링 최고의 섬</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">사우스 아리 vs 다른 지역</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">숙박</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="#about" role="menuitem">Vilu Residence</a>
+        <a href="#rooms" data-i18n="nav.rooms" role="menuitem">객실</a>
+        <a href="#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">실시간 예약 가능 여부</a>
+        <a href="#gallery" data-i18n="nav.gallery" role="menuitem">갤러리</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">여행 계획</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">방문 최적기</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">비용 가이드</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">게스트하우스 대 리조트</a>
+        <a href="#travel-info" data-i18n="nav.travelInfo" role="menuitem">여행 정보</a>
+        <a href="#contact" data-i18n="nav.contact" role="menuitem">문의</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">휴가 계획하기</a>
+    <a class="nav-check-availability js-check-availability" href="#booking" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
   </div>
   <div class="nav-mobile-right">
-    <div class="nav-clock-compact" aria-hidden="true"><i class="ti ti-clock" aria-hidden="true"></i><span id="navClockTimeCompact">--:--</span></div>
-    <div class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburger">
+    <button class="nav-hamburger" id="hamburger" aria-label="메뉴 열기" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
       <span></span><span></span><span></span>
-    </div>
-  </div>
-  </div>
-  <div class="nav-row-bottom">
-  <ul class="nav-links">
-    <li><a href="#home" data-i18n="nav.home">홈</a></li>
-    <li><a href="#rooms" data-i18n="nav.rooms">객실</a></li>
-    <li><a href="#holiday-packages" data-i18n="nav.packages">패키지</a></li>
-    <li><a href="#gallery" data-i18n="nav.gallery">갤러리</a></li>
-    <li><a href="#about" data-i18n="nav.about">소개</a></li>
-    <li><a href="#travel-info" data-i18n="nav.travelInfo">여행 정보</a></li>
-    <li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">자주 묻는 질문</a></li>
-    <li><a href="#contact" data-i18n="nav.contact">문의</a></li>
-  </ul>
-  <div class="nav-row-bottom-right">
-  <div class="nav-clock" aria-hidden="true">
-    <i class="ti ti-clock" aria-hidden="true"></i>
-    <div class="nav-clock-text">
-      <span class="nav-clock-label" data-i18n="nav.maldivesTime">몰디브 현지 시간</span>
-      <span class="nav-clock-time" id="navClockTime">--:--:--</span>
-    </div>
-  </div>
-  <div class="lang-switcher" aria-label="Language selector"></div>
-  <button class="nav-book" onclick="openBookingPopup()" data-i18n="nav.bookNow">지금 예약하기</button>
+    </button>
   </div>
   </div>
 </nav>
 
-<!-- Mobile Menu -->
-<div class="mobile-menu" id="mobileMenu">
-  <a href="#home" onclick="closeMobileMenu()" data-i18n="nav.home">홈</a>
-  <a href="#rooms" onclick="closeMobileMenu()" data-i18n="nav.rooms">객실</a>
-  <a href="#holiday-packages" onclick="closeMobileMenu()" data-i18n="nav.packages">패키지</a>
-  <a href="#gallery" onclick="closeMobileMenu()" data-i18n="nav.gallery">갤러리</a>
-  <a href="#about" onclick="closeMobileMenu()" data-i18n="nav.about">소개</a>
-  <a href="#travel-info" onclick="closeMobileMenu()" data-i18n="nav.travelInfo">여행 정보</a>
-  <a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq');closeMobileMenu()" data-i18n="travelInfo.tabFaq">자주 묻는 질문</a>
-  <a href="#contact" onclick="closeMobileMenu()" data-i18n="nav.contact">문의</a>
-  <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
-  <button class="m-book-btn" onclick="openBookingPopup();closeMobileMenu()" data-i18n="nav.bookYourStay">숙박 예약하기</button>
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="사이트 메뉴" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="#home" class="nav-logo" data-mm-close="">
+      <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+      <div class="nav-logo-text">
+        <div class="nav-logo-name">Vilu Residence</div>
+        <div class="nav-logo-sub">Maamigili · Maldives</div>
+      </div>
+    </a>
+    <button class="mm-close" aria-label="메뉴 닫기" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">홀리데이 패키지</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">체험</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">고래상어 스노클링</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">쥐가오리 스노클링</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">사우스 아리</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">마미길리 가이드</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">스노클링 최고의 섬</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">사우스 아리 vs 다른 지역</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">숙박</button>
+      <div class="mm-group-panel">
+        <a href="#about" data-mm-close="">Vilu Residence</a>
+        <a href="#rooms" data-mm-close="" data-i18n="nav.rooms">객실</a>
+        <a href="#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">실시간 예약 가능 여부</a>
+        <a href="#gallery" data-mm-close="" data-i18n="nav.gallery">갤러리</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">여행 계획</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">방문 최적기</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">비용 가이드</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">게스트하우스 대 리조트</a>
+        <a href="#travel-info" data-mm-close="" data-i18n="nav.travelInfo">여행 정보</a>
+        <a href="#contact" data-mm-close="" data-i18n="nav.contact">문의</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">휴가 계획하기</a>
+      <a class="mm-check-availability js-check-availability" href="#booking" data-mm-close="" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ HERO ══ -->
@@ -1373,7 +1581,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       </article>
       <article class="guide-article reveal" id="guide-maamigili">
         <h3 data-i18n="guideMaa.title">마미길리 여행 가이드</h3>
-        <p data-i18n="guideMaa.intro">마미길리는 Vilu Residence가 자리한 섬입니다 — 사우스 아리 환초 남쪽 가장자리에 있는 지역 섬으로, 인구 2,300명이 넘는 환초에서 가장 크고 인구가 많은 섬입니다. 현지에서는 종종 "고래상어 섬"이라고 불리는데, 그 이유는 몇 단락 뒤에 분명해집니다.</p>
+        <p data-i18n="guideMaa.intro">마미길리는 Vilu Residence가 자리한 섬입니다 — 사우스 아리 환초 남쪽 가장자리에 있는 지역 섬으로, 2022년 인구조사에 따르면 인구 2,798명으로 환초에서 가장 크고 인구가 많은 섬입니다. 현지에서는 종종 "고래상어 섬"이라고 불리는데, 그 이유는 몇 단락 뒤에 분명해집니다.</p>
         <p class="exp-links"><a href="maamigili-guide.html"><span data-i18n="guides.linkMaaGuide">마미길리 전체 가이드 읽기</span></a></p>
       </article>
     </div>
@@ -1399,7 +1607,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       </article>
       <article class="guide-article reveal" id="blog-whale-shark-season">
         <h3 data-i18n="blogWhaleSeason.title">사우스 아리 환초에서 고래상어를 보기 가장 좋은 시기</h3>
-        <p data-i18n="blogWhaleSeason.intro">목격이 특정 이동 시기에 집중되는 전 세계 대부분의 고래상어 서식지와 달리, 사우스 아리 환초의 고래상어 서식은 연중 존재하는 것으로 기록되어 있습니다. 몰디브 고래상어 연구 프로그램의 연구자들은 2006년 이래 사우스 아리 해양보호구역(SAMPA)에서 500마리 이상의 개체를 사진으로 식별했으며, 이 개체군(주로 미성숙한 수컷)은 계절 주기로 이동하기보다 상주하는 것으로 보입니다.</p>
+        <p data-i18n="blogWhaleSeason.intro">목격이 특정 이동 시기에 집중되는 전 세계 대부분의 고래상어 서식지와 달리, 사우스 아리 환초의 고래상어 서식은 연중 존재하는 것으로 기록되어 있습니다. 몰디브 고래상어 연구 프로그램의 연구자들은 사우스 아리 해양보호구역(SAMPA)에서 수년간 개체를 사진으로 식별해 왔으며, 이 개체군(주로 미성숙한 수컷)은 강한 서식지 충실성을 보이며 계절 주기로 이동하기보다 상주합니다.</p>
         <p class="exp-links"><a href="whale-shark-snorkeling.html"><span data-i18n="saaPage.linkWhaleShark">고래상어 스노클링 전체 가이드 읽어보기 →</span></a></p>
       </article>
       <article class="guide-article reveal" id="blog-guesthouse-vs-resort">
@@ -1438,18 +1646,103 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">메뉴</h4><ul><li><a href="#home" data-i18n="nav.home">홈</a></li><li><a href="#rooms" data-i18n="nav.rooms">객실</a></li><li><a href="#holiday-packages" data-i18n="nav.packages">패키지</a></li><li><a href="#gallery" data-i18n="nav.gallery">갤러리</a></li><li><a href="#about" data-i18n="about.tag">소개</a></li><li><a href="#travel-info" data-i18n="nav.travelInfo">여행 정보</a></li><li><a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')" data-i18n="travelInfo.tabFaq">자주 묻는 질문</a></li><li><a href="#guides" data-i18n="nav.guides">가이드 &amp; 블로그</a></li><li><a href="#contact" data-i18n="nav.contact">문의</a></li></ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.roomsHeading">객실</h4><ul><li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">더블룸</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">디럭스 패밀리룸</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li><li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">디럭스 패밀리룸(오픈 데크 포함)</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li></ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.info">안내</h4><ul><li><a href="#booking" onclick="openBookingPage()" data-i18n="footer.bookDirect">직접 예약</a></li><li><a href="#contact" data-i18n="footer.enquiries">문의</a></li><li><a href="#contact" data-i18n="footer.groups">단체 문의</a></li><li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</a></li><li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">마미길리 가이드</a></li><li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">고래상어 스노클링</a></li><li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">쥐가오리 스노클링</a></li><li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">홀리데이 패키지</a></li><li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">방문 최적기</a></li><li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">게스트하우스 대 리조트</a></li><li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">비용 가이드</a></li><li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">스노클링 최고의 섬</a></li><li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">사우스 아리 vs 다른 지역</a></li><li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a></li></ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.explore">둘러보기</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">홀리데이 패키지</a></li>
+        <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">고래상어 스노클링</a></li>
+        <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">쥐가오리 스노클링</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">숙박</h4><ul>
+        <li><a href="#about">Vilu Residence</a></li>
+        <li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">더블룸</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li>
+        <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">디럭스 패밀리룸</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li>
+        <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">디럭스 패밀리룸(오픈 데크 포함)</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li>
+        <li><a href="#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">실시간 예약 가능 여부</a></li>
+        <li><a href="#gallery" data-i18n="nav.gallery">갤러리</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">사우스 아리 가이드</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">마미길리 가이드</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</a></li>
+        <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">스노클링 최고의 섬</a></li>
+        <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">사우스 아리 vs 다른 지역</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">계획</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">방문 최적기</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">비용 가이드</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">게스트하우스 대 리조트</a></li>
+        <li><a href="#travel-info" data-i18n="nav.travelInfo">여행 정보</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">문의</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
+      </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">모든 권리 보유.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">모든 권리 보유.</span></div>
       <div class="footer-pms-badge"><span data-i18n="footer.managedBy">운영</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">개인정보 선택</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="floatingWhatsapp.ariaLabel" aria-label="WhatsApp으로 채팅하기" onclick="trackEvent('floating_whatsapp_click',{})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="쿠키 및 개인정보 동의" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">고객님의 개인정보, 고객님의 선택</strong>
+      <p data-i18n="consent.message">Vilu 운영을 위해 필수 기술을 사용합니다. 고객님의 동의가 있으면 방문자가 저희 사이트를 어떻게 이용하는지 파악하기 위해 분석 및 마케팅 기술도 사용하고자 합니다.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">필수 외 거부</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">맞춤 설정</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">모두 동의</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">개인정보 환경설정</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="닫기" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">필수</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">항상 활성</span>
+        </div>
+        <p data-i18n="consent.essential.desc">예약, 이용 가능 여부 및 핵심 사이트 기능에 필요합니다.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">환경설정</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="환경설정" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">사이트에서 선택하신 선택적 항목을 기억합니다.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">분석</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="분석" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">방문자가 사이트를 어떻게 이용하는지 파악하는 데 도움이 됩니다.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">마케팅</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="마케팅" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">이후 다른 사이트를 방문할 때 더 관련성 높은 혜택을 제공합니다.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">환경설정 저장</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ══ BOOKING POPUP ══ -->
 <div class="booking-popup-overlay" id="bookingPopupOverlay" onclick="if(event.target===this)closeBookingPopup()">
@@ -1959,7 +2252,7 @@ en: {
     "title": "South Ari Atoll Travel Guide",
     "intro": "South Ari Atoll (locally Alif Dhaalu Atoll) sits in the central Maldives, a ring of reefs and sandbanks built around a string of inhabited local islands and resorts. It's one of 26 atolls that make up the country, and it's best known for one thing above all: whale sharks.",
     "h1": "Whale sharks, year-round",
-    "p1": "The South Ari Marine Protected Area (SAMPA), established in 2009, runs along a 14-kilometre reef shelf on the atoll's southern rim, from Maamigili in the west to Dhigurah in the east. Research published by the Maldives Whale Shark Research Programme — which has photo-identified more than 500 individual sharks since 2006 — has documented what's believed to be the only confirmed year-round whale shark aggregation anywhere in the world. Most of the sharks seen here are juvenile males, so sightings aren't tied to a narrow migration window the way they are in many other whale shark destinations.",
+    "p1": "The South Ari Marine Protected Area (SAMPA), established in 2009, runs along a 14-kilometre reef shelf on the atoll's southern rim, from Maamigili in the west to Dhigurah in the east. The Maldives Whale Shark Research Programme has studied and photo-identified individual whale sharks here for many years, and their research shows the aggregation is present year-round with strong site fidelity — continuous presence of the same individuals in one place, as documented here, is seen at only a few sites globally. Most of the sharks seen here are juvenile males, so sightings aren't tied to a narrow migration window the way they are in many other whale shark destinations.",
     "h2": "Manta rays",
     "p2": "Manta rays are also a regular sight in South Ari, with sightings possible throughout the year at several cleaning stations around the atoll — some sites are more active earlier in the year, others later, so exact timing is best confirmed locally when you book.",
     "h3": "Snorkeling and local island life",
@@ -1974,7 +2267,7 @@ en: {
   },
   "guideMaa": {
     "title": "Maamigili Travel Guide",
-    "intro": "Maamigili is the island Vilu Residence calls home — a local island on the southern rim of South Ari Atoll, and the largest and most populous island in the atoll, with a population of more than 2,300. Locally it's sometimes called \"Whale Shark Island,\" for reasons that will be obvious a few paragraphs down.",
+    "intro": "Maamigili is the island Vilu Residence calls home — a local island on the southern rim of South Ari Atoll, and the largest and most populous island in the atoll, with 2,798 residents as of the 2022 census. Locally it's sometimes called \"Whale Shark Island,\" for reasons that will be obvious a few paragraphs down.",
     "h1": "Getting around",
     "p1": "Maamigili is also the only island in South Ari Atoll with an airport — Villa International Airport, which opened as a domestic airport in October 2011 and was upgraded to international standards in 2013. It's a short domestic hop from Malé (about 20 minutes), or reachable by direct speedboat (around 1h45m).",
     "h2": "Why stay here",
@@ -1997,7 +2290,7 @@ en: {
     "title": "South Ari Atoll vs Other Maldives Regions",
     "intro": "The Maldives' 26 atolls aren't interchangeable — each region has a different character, and it's worth choosing based on what you actually want from the trip rather than just proximity to Malé.",
     "h1": "North Malé Atoll",
-    "p1": "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It has the highest concentration of resorts and some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
+    "p1": "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It's one of the Maldives' major resort regions, with some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
     "h2": "Baa Atoll",
     "p2": "Designated a UNESCO Biosphere Reserve, Baa Atoll is best known for Hanifaru Bay, one of the world's best-documented manta ray feeding aggregation sites — though access is seasonal and tightly regulated to protect the reserve.",
     "h3": "South Ari Atoll",
@@ -2017,7 +2310,7 @@ en: {
   },
   "blogWhaleSeason": {
     "title": "Best Time to See Whale Sharks in South Ari Atoll",
-    "intro": "Unlike most whale shark destinations worldwide, where sightings cluster around a specific migration window, South Ari Atoll's whale shark aggregation is documented as present year-round. Researchers with the Maldives Whale Shark Research Programme have photo-identified more than 500 individual sharks in the South Ari Marine Protected Area (SAMPA) since 2006, and the population — mostly juvenile males — appears to stay resident rather than migrate through on a seasonal cycle.",
+    "intro": "Unlike most whale shark destinations worldwide, where sightings cluster around a specific migration window, South Ari Atoll's whale shark aggregation is documented as present year-round. Researchers with the Maldives Whale Shark Research Programme have studied and photo-identified individual sharks in the South Ari Marine Protected Area (SAMPA) for many years, and the population — mostly juvenile males — shows strong site fidelity, staying resident rather than migrating through on a seasonal cycle.",
     "h1": "So does timing matter at all?",
     "p1": "Not in the way it does elsewhere. You don't need to plan a Maldives trip around a whale shark season the way you might for, say, Western Australia's Ningaloo Reef. That said, no single excursion can guarantee a sighting — conditions vary day to day the way they do with any wildlife encounter.",
     "h2": "What can affect a single day's chances",
@@ -2027,7 +2320,7 @@ en: {
     "title": "Maldives Guesthouse vs Resort: Which Is Better?",
     "intro": "Neither is objectively better — they're genuinely different trips, and the right one depends on what you're going to the Maldives for.",
     "h1": "The legal and cultural difference",
-    "p1": "Guesthouses on local islands only became legally possible in 2009, when Maldivian tourism law was opened up to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
+    "p1": "Guesthouses on local islands only became possible from 2009, when Maldivian tourism regulations changed to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
     "h2": "The price difference",
     "p2": "As a general rule (prices vary by season and property), guesthouses on local islands run considerably cheaper per night than resorts, often including breakfast in the rate. Resorts span a much wider range, from mid-range overwater options up to ultra-luxury private-island properties.",
     "h3": "What you actually get",
@@ -2975,10 +3268,7 @@ const COLORS = {
   'Deluxe Family Room with Open Deck':'linear-gradient(135deg,#0e7490,#0d2545)',
 };
 
-// ── NAV SCROLL ──
-window.addEventListener('scroll', function(){
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
-});
+// ── NAV SCROLL (now handled by nav-shell.js, shared with all pages) ──
 
 // ── HERO PARALLAX ── background slideshow lags behind scroll (translated
 // down by a fraction of scrollY, inside the section's own upward scroll)
@@ -3064,9 +3354,7 @@ function loadHeroSlidesProgressively(){
 if (document.readyState === 'complete') loadHeroSlidesProgressively();
 else window.addEventListener('load', loadHeroSlidesProgressively);
 
-// ── MOBILE MENU ──
-function toggleMobileMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
-function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open');}
+// ── MOBILE MENU (now handled by nav-shell.js, shared with all pages) ──
 
 // ── REVEAL ON SCROLL ──
 var observer = new IntersectionObserver(function(entries){
@@ -4011,7 +4299,10 @@ function enquireAboutPackage(pkgName){
 function trackEvent(name, data){
   try {
     document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
-    if (typeof gtag === 'function') {
+    // Phase 11B: never transmit to GA4 without Analytics consent -- checked
+    // here (not just via Google's own Consent Mode signals) so a pre-consent
+    // event is discarded outright, not queued for later replay.
+    if (typeof gtag === 'function' && window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
       gtag('event', name, data||{});
     }
     console.log('[track]', name, data||{});
@@ -4333,11 +4624,17 @@ function handleHolidayPackageDeepLink(){
 
 document.addEventListener('DOMContentLoaded', loadHolidayPackages);
 
+document.addEventListener('DOMContentLoaded', function(){
+  var el = document.getElementById('cur-yr');
+  if (el) el.textContent = new Date().getFullYear();
+});
+
 // ── KEYBOARD ESC ──
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){closeBookingPopup();closeBookingPage();closeGuestDetails();}
 });
 
 </script>
+<script src="/nav-shell.js"></script>
 
 </body></html>

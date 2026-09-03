@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="cs" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -83,19 +82,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/cs/" class="nav-logo">
+  <a href="/cs/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Zážitky</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Šnorchlování se žraloky velrybími</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Šnorchlování s mantami</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Co Dělat na Maamigili</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">Jižní Ari</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Průvodce Maamigili</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">Průvodce atolem Jižní Ari</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Nejlepší Ostrovy pro Šnorchlování</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">Jižní Ari vs. Jiné Oblasti</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Ubytování</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/cs/#about" role="menuitem">Vilu Residence</a>
+        <a href="/cs/#rooms" data-i18n="nav.rooms" role="menuitem">Pokoje</a>
+        <a href="/cs/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Aktuální dostupnost</a>
+        <a href="/cs/#gallery" data-i18n="nav.gallery" role="menuitem">Galerie</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Naplánujte cestu</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Nejlepší Doba Návštěvy</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Průvodce Náklady</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Penzion vs. Resort</a>
+        <a href="/cs/#travel-info" data-i18n="nav.travelInfo" role="menuitem">Info o cestě</a>
+        <a href="/cs/#contact" data-i18n="nav.contact" role="menuitem">Kontakt</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+    <a class="nav-check-availability js-check-availability" href="/cs/#booking" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="Otevřít menu" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menu webu" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/cs/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/cs/#booking" data-i18n="pageNav.bookNow">Rezervovat nyní</a>
+    <button class="mm-close" aria-label="Zavřít menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Zážitky</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">Jižní Ari</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">Nejlepší Ostrovy pro Šnorchlování</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">Jižní Ari vs. Jiné Oblasti</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Ubytování</button>
+      <div class="mm-group-panel">
+        <a href="/cs/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/cs/#rooms" data-mm-close="" data-i18n="nav.rooms">Pokoje</a>
+        <a href="/cs/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a>
+        <a href="/cs/#gallery" data-mm-close="" data-i18n="nav.gallery">Galerie</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Naplánujte cestu</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Průvodce Náklady</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a>
+        <a href="/cs/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">Info o cestě</a>
+        <a href="/cs/#contact" data-mm-close="" data-i18n="nav.contact">Kontakt</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+      <a class="mm-check-availability js-check-availability" href="/cs/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/manta_ray_hd.jpg');background-image:image-set(url('/images/manta_ray_hd.webp') type('image/webp'), url('/images/manta_ray_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -110,7 +223,7 @@
     <p data-i18n="cmpRegions.intro">26 atolů Maledivy není zaměnitelných — každý region má odlišný charakter a vyplatí se vybírat na základě toho, co skutečně chcete z cesty získat, nejen podle blízkosti k Malé.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h1">Atol Severní Malé</h2>
-    <p data-i18n="cmpRegions.p1">Skupina atolů nejblíže mezinárodnímu letišti Velana, takže časy transferu jsou krátké — často pod hodinu. Má nejvyšší koncentraci resortů a několik známých surfových míst na svých východních útesech. Blízkost hlavního města z něj také dělá nejnavštěvovanější region.</p>
+    <p data-i18n="cmpRegions.p1">Skupina atolů nejblíže mezinárodnímu letišti Velana, takže časy transferu jsou krátké — často pod hodinu. Je to jeden z hlavních resortových regionů Maledivy, s několika známými surfovými místy na svých východních útesech. Blízkost hlavního města z něj také dělá nejnavštěvovanější region.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h2">Atol Baa</h2>
     <p data-i18n="cmpRegions.p2">Atol Baa, označený za biosférickou rezervaci UNESCO, je nejznámější díky zálivu Hanifaru, jednomu z nejlépe zdokumentovaných míst shromažďování mant za potravou na světě — ačkoli přístup je sezónní a přísně regulovaný na ochranu rezervace.</p>
@@ -119,7 +232,7 @@
     <p data-i18n="cmpRegions.p3">Dále od Malé (skutečných 1h45m rychločlunem, nebo 20 minut letadlem), což je kompromis za to, co nabízí: celoroční žraloky velrybí, pravidelná pozorování mant a kombinaci resortů a dlouho zavedených místních ostrovů jako Maamigili a Dhigurah, díky čemuž je dostupný jak pro cestovatele v penzionech, tak pro hosty resortů.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h4">Výběr regionu</h2>
-    <p data-i18n="cmpRegions.p4">Pokud je minimalizace času transferu nejdůležitější, atol Severní Malé je těžké překonat. Pokud je cílem konkrétní, výrazně sezónní přírodní událost, vyplatí se naplánovat záliv Hanifaru v atolu Baa. Pokud chcete celoroční mořský život a skutečný pobyt na místním ostrově, Jižní Ari je stvořen přesně pro to.</p>
+    <p data-i18n="cmpRegions.p4">Pokud je minimalizace času transferu nejdůležitější, atol Severní Malé je těžké překonat. Pokud je cílem konkrétní, výrazně sezónní přírodní událost, vyplatí se naplánovat záliv Hanifaru v atolu Baa. Pokud chcete celoroční mořský život a skutečný pobyt na místním ostrově, Jižní Ari je stvořen přesně pro to. Naše dovolenkové balíčky spojují ubytování a zážitky dohromady, pokud právě takový výlet plánujete.</p>
     <p class="exp-links"><a href="holiday-packages.html" data-i18n="cmpRegionsPage.linkPackages">Podívejte se na naše dovolenkové balíčky →</a></p>
   </article>
 
@@ -144,12 +257,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="cmpRegionsPage.ctaTitle">Jste připraveni zažít Jižní Ari na vlastní kůži?</h2>
-    <p data-i18n="cmpRegionsPage.ctaText">Vilu Residence se nachází přímo uprostřed celoročního mořského života Jižního Ari. Zkontrolujte dostupnost nebo se nás zeptejte přímo.</p>
+    <p data-i18n="cmpRegionsPage.ctaText">Vilu Residence se nachází přímo uprostřed celoročního mořského života Jižního Ari — podívejte se, jak naše dovolenkové balíčky spojují vše dohromady, nebo si rovnou zkontrolujte dostupnost.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/cs/#booking" data-i18n="cmpRegionsPage.ctaBook">Zkontrolovat dostupnost</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="cmpRegionsPage.ctaWhatsapp">Zeptat se na WhatsApp</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="cmpRegionsPage.ctaPackages">Zobrazit dovolenkové balíčky</a>
+      <a class="btn-outline" data-i18n-href="cmpRegionsPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20Ji%C5%BEn%C3%AD%20Ari%20vs.%20Jin%C3%A9%20Oblasti%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F" target="_blank" rel="noopener noreferrer" data-i18n="cmpRegionsPage.ctaWhatsapp">Zeptat se na WhatsApp</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/cs/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="cmpRegionsPage.ctaBook">Zkontrolovat dostupnost</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -173,34 +288,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigace</h4><ul>
-        <li><a href="/cs/" data-i18n="pageNav.home">Domů</a></li>
-        <li><a href="/cs/#rooms" data-i18n="nav.rooms">Pokoje</a></li>
-        <li><a href="/cs/#holiday-packages" data-i18n="nav.packages">Balíčky</a></li>
-        <li><a href="/cs/#travel-info" data-i18n="nav.travelInfo">Info o cestě</a></li>
-        <li><a href="/cs/#contact" data-i18n="nav.contact">Kontakt</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">Průvodci</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Objevujte</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Průvodce Náklady</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">Ubytování</h4><ul>
+        <li><a href="/cs/#about">Vilu Residence</a></li>
+        <li><a href="/cs/#rooms" data-i18n="nav.rooms">Pokoje</a></li>
+        <li><a href="/cs/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a></li>
+        <li><a href="/cs/#gallery" data-i18n="nav.gallery">Galerie</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">Průvodci Jižní Ari</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Nejlepší Ostrovy pro Šnorchlování</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">Jižní Ari vs. Jiné Oblasti</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">Plánování</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Průvodce Náklady</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a></li>
+        <li><a href="/cs/#travel-info" data-i18n="nav.travelInfo">Info o cestě</a></li>
+        <li><a href="/cs/#contact" data-i18n="nav.contact">Kontakt</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">Všechna práva vyhrazena.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">Všechna práva vyhrazena.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Spravuje</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Nastavení soukromí</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Souhlas s cookies a soukromím" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Vaše soukromí, vaše volba</strong>
+      <p data-i18n="consent.message">Používáme nezbytné technologie, aby Vilu fungovalo. S vaším svolením bychom také rádi používali analytické a marketingové technologie, abychom pochopili, jak návštěvníci naši stránku používají.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Odmítnout nepovinné</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Přizpůsobit</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Přijmout vše</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Předvolby soukromí</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Zavřít" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Nezbytné</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Vždy aktivní</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Nutné pro rezervaci, dostupnost a základní funkce stránky.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Předvolby</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Předvolby" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Zapamatuje si volitelná nastavení, která na stránce provedete.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Analytika</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analytika" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Pomáhá nám pochopit, jak návštěvníci stránku používají.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Umožňuje relevantnější nabídky při pozdější návštěvě jiných stránek.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Uložit předvolby</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -225,25 +407,26 @@ var I18N = { en: {
     relTag2: "Destination Guide", relTitle2: "South Ari Atoll Guide",
     relTag3: "Trip Planning", relTitle3: "Best Time to Visit",
     ctaTitle: "Ready to experience South Ari for yourself?",
-    ctaText: "Vilu Residence is right in the middle of South Ari's year-round marine life. Check availability or ask us directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Vilu Residence is right in the middle of South Ari's year-round marine life — see how our holiday packages bring it together, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   cmpRegions: {
     title: "South Ari Atoll <em>vs Other Maldives Regions</em>",
     intro: "The Maldives' 26 atolls aren't interchangeable — each region has a different character, and it's worth choosing based on what you actually want from the trip rather than just proximity to Malé.",
     h1: "North Malé Atoll",
-    p1: "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It has the highest concentration of resorts and some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
+    p1: "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It's one of the Maldives' major resort regions, with some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
     h2: "Baa Atoll",
     p2: "Designated a UNESCO Biosphere Reserve, Baa Atoll is best known for Hanifaru Bay, one of the world's best-documented manta ray feeding aggregation sites — though access is seasonal and tightly regulated to protect the reserve.",
     h3: "South Ari Atoll",
     p3: "Further from Malé (a genuine 1h45m by speedboat, or 20 minutes by air), which is the trade-off for what it offers: year-round whale sharks, regular manta sightings, and a mix of resorts and long-established local islands like Maamigili and Dhigurah, making it accessible to guesthouse travelers as well as resort guests.",
     h4: "Choosing a region",
-    p4: "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that."
+    p4: "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that — our holiday packages bring accommodation and experiences together if that's the trip you're planning."
   }
 }};
 var PAGE_META_NS = 'cmpRegionsMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

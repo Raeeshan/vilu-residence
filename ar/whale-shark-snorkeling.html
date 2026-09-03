@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/whale-shark-snorkeling.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/whale-shark-snorkeling.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/whale-shark-snorkeling.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -98,7 +97,7 @@
     { "@type": "Question", "name": "What's included in the excursion?", "acceptedAnswer": { "@type": "Answer", "text": "Snorkeling equipment, towels, fresh fruit, and water are included." } },
     { "@type": "Question", "name": "What should I bring?", "acceptedAnswer": { "@type": "Answer", "text": "Swimwear worn under your clothes, reef-safe (mineral) sunscreen, a hat and sunglasses for the boat, a change of clothes for afterward, and your own camera or GoPro if you'd like photos of the encounter." } },
     { "@type": "Question", "name": "How much does whale shark snorkeling cost?", "acceptedAnswer": { "@type": "Answer", "text": "The current standalone price is USD 85 per person for the shared excursion, though this is an operational price that can change, so it's worth confirming the current rate with Vilu Residence directly. Additional charges may apply for a single participant or a private trip." } },
-    { "@type": "Question", "name": "Is whale shark snorkeling included in Vilu's holiday packages?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — it's included as an activity in every one of Vilu Residence's current holiday packages, which also bundle in accommodation, transfer, and breakfast at their own package pricing." } },
+    { "@type": "Question", "name": "Is whale shark snorkeling included in Vilu's holiday packages?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — it's included as an activity in every one of our current Holiday Packages, which also bundle in accommodation, transfer, and breakfast at their own package pricing." } },
     { "@type": "Question", "name": "What happens if the weather is bad?", "acceptedAnswer": { "@type": "Answer", "text": "Vilu checks weather and sea conditions before every excursion. If conditions aren't suitable, guests are informed before departure and the trip may be postponed to another day or cancelled — booking in advance doesn't guarantee the excursion will run exactly as scheduled." } },
     { "@type": "Question", "name": "Is there a best time of year to see whale sharks?", "acceptedAnswer": { "@type": "Answer", "text": "South Ari Atoll is one of the few places in the world where whale sharks can be encountered throughout the year, with no strong seasonal pattern documented for individual sightings. Good weather can mean clearer visibility and a more comfortable snorkel, but it doesn't mean a higher chance of a sighting on any given day." } }
   ]
@@ -109,19 +108,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ar/" class="nav-logo">
+  <a href="/ar/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">باقات العطلات</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">التجارب</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">الغطس مع سمك القرش الحوتي</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">الغطس مع أشعة المانتا</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">أشياء للقيام بها في مامیغیلي</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">جنوب آري</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">دليل مامیغیلي</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">دليل أتول جنوب آري</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">أفضل الجزر للغطس السطحي</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">جنوب آري مقابل مناطق أخرى</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">الإقامة</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ar/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ar/#rooms" data-i18n="nav.rooms" role="menuitem">الغرف</a>
+        <a href="/ar/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">التوفر المباشر</a>
+        <a href="/ar/#gallery" data-i18n="nav.gallery" role="menuitem">معرض الصور</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">خطط لرحلتك</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">أفضل وقت للزيارة</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">دليل التكلفة</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">بيت الضيافة مقابل المنتجع</a>
+        <a href="/ar/#travel-info" data-i18n="nav.travelInfo" role="menuitem">معلومات السفر</a>
+        <a href="/ar/#contact" data-i18n="nav.contact" role="menuitem">اتصل بنا</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">خطط لعطلتك</a>
+    <a class="nav-check-availability js-check-availability" href="/ar/#booking" data-i18n="navShell.checkAvailability">تحقق من التوفر</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="فتح القائمة" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="قائمة الموقع" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ar/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ar/#booking" data-i18n="pageNav.bookNow">احجز الآن</a>
+    <button class="mm-close" aria-label="إغلاق القائمة" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">باقات العطلات</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">التجارب</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">الغطس مع سمك القرش الحوتي</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">الغطس مع أشعة المانتا</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">أشياء للقيام بها في مامیغیلي</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">جنوب آري</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">دليل مامیغیلي</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">دليل أتول جنوب آري</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">أفضل الجزر للغطس السطحي</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">جنوب آري مقابل مناطق أخرى</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">الإقامة</button>
+      <div class="mm-group-panel">
+        <a href="/ar/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ar/#rooms" data-mm-close="" data-i18n="nav.rooms">الغرف</a>
+        <a href="/ar/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">التوفر المباشر</a>
+        <a href="/ar/#gallery" data-mm-close="" data-i18n="nav.gallery">معرض الصور</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">خطط لرحلتك</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">أفضل وقت للزيارة</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">دليل التكلفة</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">بيت الضيافة مقابل المنتجع</a>
+        <a href="/ar/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">معلومات السفر</a>
+        <a href="/ar/#contact" data-mm-close="" data-i18n="nav.contact">اتصل بنا</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">خطط لعطلتك</a>
+      <a class="mm-check-availability js-check-availability" href="/ar/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">تحقق من التوفر</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/whale_shark_hd.jpg');background-image:image-set(url('/images/whale_shark_hd.webp') type('image/webp'), url('/images/whale_shark_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -237,7 +350,7 @@
         <details><summary><span data-i18n="wsPage.faqQ7">ما هو مشمول في الرحلة؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA7">معدات الغطس والمناشف والفاكهة الطازجة والماء مشمولة.</div></details>
         <details><summary><span data-i18n="wsPage.faqQ8">ماذا ينبغي أن أُحضر؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA8">ملابس سباحة تُلبَس تحت ملابسك، واقي شمس آمن للشعاب المرجانية (معدني)، قبعة ونظارة شمسية للقارب، ملابس بديلة لما بعد الرحلة، وكاميرتك الخاصة أو GoPro إن أردت صوراً من اللقاء.</div></details>
         <details><summary><span data-i18n="wsPage.faqQ9">كم تكلفة الغطس مع سمك القرش الحوتي؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA9">السعر المستقل الحالي هو 85 دولاراً أمريكياً للشخص للرحلة الجماعية، رغم أن هذا سعر تشغيلي قابل للتغيير، لذا يستحق تأكيد السعر الحالي مع فيلو ريزيدنس مباشرة. قد تُطبَّق رسوم إضافية لمشارك واحد أو رحلة خاصة.</div></details>
-        <details><summary><span data-i18n="wsPage.faqQ10">هل الغطس مع سمك القرش الحوتي مشمول في باقات فيلو السياحية؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA10">نعم — إنه مُدرج كنشاط في كل باقة من باقات فيلو ريزيدنس السياحية الحالية، والتي تجمع أيضاً الإقامة والنقل والإفطار بسعر الباقة الخاص بها.</div></details>
+        <details><summary><span data-i18n="wsPage.faqQ10">هل الغطس مع سمك القرش الحوتي مشمول في باقات فيلو السياحية؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA10">نعم — إنه مُدرج كنشاط في كل باقة من <a href="holiday-packages.html">باقات العطلات</a> الحالية لدينا، والتي تجمع أيضاً الإقامة والنقل والإفطار بسعر الباقة الخاص بها.</div></details>
         <details><summary><span data-i18n="wsPage.faqQ11">ماذا يحدث إذا كان الطقس سيئاً؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA11">تتحقق فيلو من الطقس وأحوال البحر قبل كل رحلة. إذا لم تكن الأحوال مناسبة، يُبلَّغ الضيوف قبل المغادرة وقد تُؤجَّل الرحلة إلى يوم آخر أو تُلغى — الحجز المسبق لا يضمن أن تسير الرحلة كما هو مقرر تماماً.</div></details>
         <details><summary><span data-i18n="wsPage.faqQ12">هل يوجد أفضل وقت في السنة لمشاهدة سمك القرش الحوتي؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="wsPage.faqA12">جنوب أري أتول هو أحد الأماكن القليلة في العالم التي يمكن فيها مشاهدة سمك القرش الحوتي على مدار العام، دون نمط موسمي قوي موثّق للمشاهدات الفردية. قد يعني الطقس الجيد رؤية أوضح وغطساً أكثر راحة، لكنه لا يعني فرصة أعلى للمشاهدة في أي يوم معيّن.</div></details>
       </div>
@@ -265,12 +378,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="wsPage.ctaTitle">اسبح معهم بنفسك</h2>
-    <p data-i18n="wsPage.ctaText">الغطس مع سمك القرش الحوتي مُدرج في كل باقة من باقاتنا السياحية الحالية، أو يمكن حجزه بشكل منفصل ابتداءً من 85 دولاراً للشخص — أكّد السعر الحالي وتحقق من التوفر، أو اسألنا مباشرة.</p>
+    <p data-i18n="wsPage.ctaText">الغطس مع سمك القرش الحوتي مُدرج في كل باقة من باقاتنا السياحية الحالية، أو يمكن حجزه بشكل منفصل ابتداءً من 85 دولاراً للشخص — اطّلع على الباقات، أو تحقق من التوفر وأكّد السعر المنفصل الحالي مباشرة.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/ar/#booking" data-i18n="wsPage.ctaBook">تحقق من التوفر</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="wsPage.ctaWhatsapp">اسأل عبر واتساب</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="wsPage.ctaPackages">عرض باقات العطلات</a>
+      <a class="btn-outline" data-i18n-href="wsPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7!%20%D9%83%D9%86%D8%AA%20%D8%A3%D9%82%D8%B1%D8%A3%20%D8%A7%D9%84%D8%BA%D8%B7%D8%B3%20%D9%85%D8%B9%20%D8%B3%D9%85%D9%83%20%D8%A7%D9%84%D9%82%D8%B1%D8%B4%20%D8%A7%D9%84%D8%AD%D9%88%D8%AA%D9%8A%20%D9%88%D8%A3%D8%B1%D8%BA%D8%A8%20%D9%81%D9%8A%20%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D8%AA%D8%AE%D8%B7%D9%8A%D8%B7%20%D8%B9%D8%B7%D9%84%D8%AA%D9%8A%20%D9%81%D9%8A%20%D8%A7%D9%84%D9%85%D8%A7%D9%84%D8%AF%D9%8A%D9%81%20%D9%85%D8%B9%20Vilu." target="_blank" rel="noopener noreferrer" data-i18n="wsPage.ctaWhatsapp">اسأل عبر واتساب</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/ar/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="wsPage.ctaBook">تحقق من التوفر</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -294,34 +409,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">التصفح</h4><ul>
-        <li><a href="/ar/" data-i18n="pageNav.home">الرئيسية</a></li>
-        <li><a href="/ar/#rooms" data-i18n="nav.rooms">الغرف</a></li>
-        <li><a href="/ar/#holiday-packages" data-i18n="nav.packages">الباقات</a></li>
-        <li><a href="/ar/#travel-info" data-i18n="nav.travelInfo">معلومات السفر</a></li>
-        <li><a href="/ar/#contact" data-i18n="nav.contact">اتصل بنا</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">الأدلة</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">دليل أتول جنوب آري</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">دليل مامیغیلي</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">استكشف</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">باقات العطلات</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">الغطس مع سمك القرش الحوتي</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">الغطس مع أشعة المانتا</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">باقات العطلات</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">أفضل وقت للزيارة</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">بيت الضيافة مقابل المنتجع</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">دليل التكلفة</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">أشياء للقيام بها في مامیغیلي</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">الإقامة</h4><ul>
+        <li><a href="/ar/#about">Vilu Residence</a></li>
+        <li><a href="/ar/#rooms" data-i18n="nav.rooms">الغرف</a></li>
+        <li><a href="/ar/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">التوفر المباشر</a></li>
+        <li><a href="/ar/#gallery" data-i18n="nav.gallery">معرض الصور</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">أدلة جنوب آري</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">دليل مامیغیلي</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">دليل أتول جنوب آري</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">أفضل الجزر للغطس السطحي</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">جنوب آري مقابل مناطق أخرى</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">أشياء للقيام بها في مامیغیلي</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">التخطيط</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">أفضل وقت للزيارة</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">دليل التكلفة</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">بيت الضيافة مقابل المنتجع</a></li>
+        <li><a href="/ar/#travel-info" data-i18n="nav.travelInfo">معلومات السفر</a></li>
+        <li><a href="/ar/#contact" data-i18n="nav.contact">اتصل بنا</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">جميع الحقوق محفوظة.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">جميع الحقوق محفوظة.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">تتم الإدارة بواسطة</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">خيارات الخصوصية</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="الموافقة على ملفات تعريف الارتباط والخصوصية" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">خصوصيتك، خيارك</strong>
+      <p data-i18n="consent.message">نستخدم تقنيات أساسية لتشغيل موقع فيلو. بإذنك، نود أيضًا استخدام تقنيات التحليلات والتسويق لفهم كيفية استخدام الزوار لموقعنا.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">رفض غير الأساسي</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">تخصيص</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">قبول الكل</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">تفضيلات الخصوصية</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="إغلاق" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">أساسي</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">نشط دائمًا</span>
+        </div>
+        <p data-i18n="consent.essential.desc">مطلوب للحجز والتحقق من التوفر والوظائف الأساسية للموقع.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">التفضيلات</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="التفضيلات" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">يتذكر الخيارات الاختيارية التي تقوم بها على الموقع.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">التحليلات</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="التحليلات" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">يساعدنا على فهم كيفية استخدام الزوار للموقع.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">التسويق</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="التسويق" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">يتيح عروضًا أكثر ملاءمة إذا قمت بزيارة مواقع أخرى لاحقًا.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">حفظ التفضيلات</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -405,7 +587,7 @@ var I18N = { en: {
     faqQ9: "How much does whale shark snorkeling cost?",
     faqA9: "The current standalone price is USD 85 per person for the shared excursion, though this is an operational price that can change, so it's worth confirming the current rate with Vilu Residence directly. Additional charges may apply for a single participant or a private trip.",
     faqQ10: "Is whale shark snorkeling included in Vilu's holiday packages?",
-    faqA10: "Yes — it's included as an activity in every one of Vilu Residence's current holiday packages, which also bundle in accommodation, transfer, and breakfast at their own package pricing.",
+    faqA10: "Yes — it's included as an activity in every one of our current <a href=\"holiday-packages.html\">Holiday Packages</a>, which also bundle in accommodation, transfer, and breakfast at their own package pricing.",
     faqQ11: "What happens if the weather is bad?",
     faqA11: "Vilu checks weather and sea conditions before every excursion. If conditions aren't suitable, guests are informed before departure and the trip may be postponed to another day or cancelled — booking in advance doesn't guarantee the excursion will run exactly as scheduled.",
     faqQ12: "Is there a best time of year to see whale sharks?",
@@ -413,13 +595,14 @@ var I18N = { en: {
     relatedTag: "See Also", relatedTitle: "More of <em>South Ari Atoll</em>",
     relTag1: "Experience Guide", relTag2: "Destination Guide", relTag3: "Plan Your Stay",
     ctaTitle: "Swim with them yourself",
-    ctaText: "Whale shark snorkeling is included in every one of our current holiday packages, or bookable on its own from USD 85pp — confirm the current price and check availability, or ask us directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Whale shark snorkeling is included in every one of our current holiday packages, or bookable on its own from USD 85pp — see the packages, or check availability and confirm the current standalone price directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   }
 }};
 var PAGE_META_NS = 'wsMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="cs" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/manta-ray-snorkeling.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/manta-ray-snorkeling.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/manta-ray-snorkeling.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -109,19 +108,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/cs/" class="nav-logo">
+  <a href="/cs/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Zážitky</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Šnorchlování se žraloky velrybími</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Šnorchlování s mantami</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Co Dělat na Maamigili</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">Jižní Ari</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Průvodce Maamigili</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">Průvodce atolem Jižní Ari</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Nejlepší Ostrovy pro Šnorchlování</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">Jižní Ari vs. Jiné Oblasti</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Ubytování</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/cs/#about" role="menuitem">Vilu Residence</a>
+        <a href="/cs/#rooms" data-i18n="nav.rooms" role="menuitem">Pokoje</a>
+        <a href="/cs/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Aktuální dostupnost</a>
+        <a href="/cs/#gallery" data-i18n="nav.gallery" role="menuitem">Galerie</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Naplánujte cestu</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Nejlepší Doba Návštěvy</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Průvodce Náklady</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Penzion vs. Resort</a>
+        <a href="/cs/#travel-info" data-i18n="nav.travelInfo" role="menuitem">Info o cestě</a>
+        <a href="/cs/#contact" data-i18n="nav.contact" role="menuitem">Kontakt</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+    <a class="nav-check-availability js-check-availability" href="/cs/#booking" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="Otevřít menu" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menu webu" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/cs/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/cs/#booking" data-i18n="pageNav.bookNow">Rezervovat nyní</a>
+    <button class="mm-close" aria-label="Zavřít menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Zážitky</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">Jižní Ari</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">Nejlepší Ostrovy pro Šnorchlování</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">Jižní Ari vs. Jiné Oblasti</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Ubytování</button>
+      <div class="mm-group-panel">
+        <a href="/cs/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/cs/#rooms" data-mm-close="" data-i18n="nav.rooms">Pokoje</a>
+        <a href="/cs/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a>
+        <a href="/cs/#gallery" data-mm-close="" data-i18n="nav.gallery">Galerie</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Naplánujte cestu</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Průvodce Náklady</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a>
+        <a href="/cs/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">Info o cestě</a>
+        <a href="/cs/#contact" data-mm-close="" data-i18n="nav.contact">Kontakt</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+      <a class="mm-check-availability js-check-availability" href="/cs/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/manta_ray_hd.jpg');background-image:image-set(url('/images/manta_ray_hd.webp') type('image/webp'), url('/images/manta_ray_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -253,7 +366,7 @@
         <details><summary><span data-i18n="mrPage.faqQ8">Mohou se zúčastnit slabší plavci?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="mrPage.faqA8">Možná — sdělte to předem našemu personálu nebo průvodci, aby pochopili, jakou podporu byste mohli potřebovat. Na každé lodi jsou k dispozici zdarma záchranné vesty, přesto však stále záleží na úsudku průvodce daného dne a na stavu moře.</div></details>
         <details><summary><span data-i18n="mrPage.faqQ9">Mohou se zúčastnit děti?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="mrPage.faqA9">Možná, se souhlasem rodiče a za předpokladu, že jejich plavecká úroveň bude sdělena předem. Dětem, které neumí dobře plavat, se nedoporučuje vstup do vody, jsou ale vítány na palubě a mohou platit obvyklé poplatky.</div></details>
         <details><summary><span data-i18n="mrPage.faqQ10">Co je zahrnuto ve výletu?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="mrPage.faqA10">Šnorchlovací vybavení, ručníky, čerstvé ovoce a voda.</div></details>
-        <details><summary><span data-i18n="mrPage.faqQ11">Kolik stojí šnorchlování s mantami?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="mrPage.faqA11">Od 85 USD za osobu jako samostatný výlet, cena podléhá potvrzení — nebo je zahrnuto v několika aktuálních dovolenkových balíčcích.</div></details>
+        <details><summary><span data-i18n="mrPage.faqQ11">Kolik stojí šnorchlování s mantami?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="mrPage.faqA11">Od 85 USD za osobu jako samostatný výlet, cena podléhá potvrzení — nebo je zahrnuto v několika aktuálních <a href="holiday-packages.html">dovolenkových balíčcích</a>.</div></details>
         <details><summary><span data-i18n="mrPage.faqQ12">Co se stane při špatném počasí?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="mrPage.faqA12">Podmínky kontrolujeme předem a dáme vám vědět, pokud bude nutné výlet odložit nebo zrušit, místo aby probíhal v nevhodném počasí.</div></details>
       </div>
     </section>
@@ -280,12 +393,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="mrPage.ctaTitle">Zaplavte si po jejich boku sami</h2>
-    <p data-i18n="mrPage.ctaText">Šnorchlování s mantami lze rezervovat samostatně od 85 USD za osobu, nebo je zahrnuto v několika našich aktuálních dovolenkových balíčcích s transferem tam a zpět a ubytováním v Maamigili. Ověřte si dostupnost nebo se na nás obraťte přímo.</p>
+    <p data-i18n="mrPage.ctaText">Šnorchlování s mantami je zahrnuté ve několika našich aktuálních dovolenkových balíčcích s transferem tam a zpět a ubytováním v Maamigili, nebo si ho lze rezervovat samostatně od 85 USD za osobu — prohlédněte si balíčky, nebo si rovnou ověřte dostupnost.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/cs/#booking" data-i18n="mrPage.ctaBook">Ověřit dostupnost</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="mrPage.ctaWhatsapp">Zeptat se přes WhatsApp</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="mrPage.ctaPackages">Zobrazit dovolenkové balíčky</a>
+      <a class="btn-outline" data-i18n-href="mrPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20%C5%A0norchlov%C3%A1n%C3%AD%20s%20mantami%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F" target="_blank" rel="noopener noreferrer" data-i18n="mrPage.ctaWhatsapp">Zeptat se přes WhatsApp</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/cs/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="mrPage.ctaBook">Ověřit dostupnost</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -309,34 +424,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigace</h4><ul>
-        <li><a href="/cs/" data-i18n="pageNav.home">Domů</a></li>
-        <li><a href="/cs/#rooms" data-i18n="nav.rooms">Pokoje</a></li>
-        <li><a href="/cs/#holiday-packages" data-i18n="nav.packages">Balíčky</a></li>
-        <li><a href="/cs/#travel-info" data-i18n="nav.travelInfo">Info o cestě</a></li>
-        <li><a href="/cs/#contact" data-i18n="nav.contact">Kontakt</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">Průvodci</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Objevujte</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Průvodce Náklady</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">Ubytování</h4><ul>
+        <li><a href="/cs/#about">Vilu Residence</a></li>
+        <li><a href="/cs/#rooms" data-i18n="nav.rooms">Pokoje</a></li>
+        <li><a href="/cs/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a></li>
+        <li><a href="/cs/#gallery" data-i18n="nav.gallery">Galerie</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">Průvodci Jižní Ari</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Nejlepší Ostrovy pro Šnorchlování</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">Jižní Ari vs. Jiné Oblasti</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">Plánování</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Průvodce Náklady</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a></li>
+        <li><a href="/cs/#travel-info" data-i18n="nav.travelInfo">Info o cestě</a></li>
+        <li><a href="/cs/#contact" data-i18n="nav.contact">Kontakt</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">Všechna práva vyhrazena.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">Všechna práva vyhrazena.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Spravuje</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Nastavení soukromí</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Souhlas s cookies a soukromím" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Vaše soukromí, vaše volba</strong>
+      <p data-i18n="consent.message">Používáme nezbytné technologie, aby Vilu fungovalo. S vaším svolením bychom také rádi používali analytické a marketingové technologie, abychom pochopili, jak návštěvníci naši stránku používají.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Odmítnout nepovinné</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Přizpůsobit</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Přijmout vše</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Předvolby soukromí</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Zavřít" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Nezbytné</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Vždy aktivní</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Nutné pro rezervaci, dostupnost a základní funkce stránky.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Předvolby</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Předvolby" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Zapamatuje si volitelná nastavení, která na stránce provedete.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Analytika</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analytika" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Pomáhá nám pochopit, jak návštěvníci stránku používají.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Umožňuje relevantnější nabídky při pozdější návštěvě jiných stránek.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Uložit předvolby</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -431,19 +613,20 @@ var I18N = { en: {
     faqQ10: "What's included in the excursion?",
     faqA10: "Snorkeling equipment, towels, fresh fruit, and water.",
     faqQ11: "How much does manta ray snorkeling cost?",
-    faqA11: "From USD 85 per person as a standalone excursion, subject to confirmation — or included in several current holiday packages.",
+    faqA11: "From USD 85 per person as a standalone excursion, subject to confirmation — or included in several current <a href=\"holiday-packages.html\">Holiday Packages</a>.",
     faqQ12: "What happens if the weather is bad?",
     faqA12: "We check conditions beforehand and will let you know if the trip needs to be postponed or cancelled rather than running it in unsuitable weather.",
     relatedTag: "See Also", relatedTitle: "More of <em>South Ari Atoll</em>",
     relTag1: "Experience Guide", relTag2: "Destination Guide", relTag3: "Plan Your Stay",
     ctaTitle: "Glide alongside them yourself",
-    ctaText: "Manta ray snorkeling is bookable on its own from USD 85pp, or included in several of our current holiday packages with round-trip transfer and accommodation on Maamigili. Check availability or ask us directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Manta ray snorkeling is included in several of our current holiday packages with round-trip transfer and accommodation on Maamigili, or bookable on its own from USD 85pp — see the packages, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   }
 }};
 var PAGE_META_NS = 'mrMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

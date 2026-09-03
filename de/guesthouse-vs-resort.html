@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="de" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -83,19 +82,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/de/" class="nav-logo">
+  <a href="/de/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Urlaubspakete</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Erlebnisse</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Walhai-Schnorcheln</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Mantarochen-Schnorcheln</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Was man auf Maamigili unternehmen kann</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">Süd-Ari</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Maamigili-Reiseführer</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">Süd-Ari-Atoll-Reiseführer</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Beste Inseln zum Schnorcheln</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">Süd-Ari vs. Andere Regionen</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Übernachten</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/de/#about" role="menuitem">Vilu Residence</a>
+        <a href="/de/#rooms" data-i18n="nav.rooms" role="menuitem">Zimmer</a>
+        <a href="/de/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Aktuelle Verfügbarkeit</a>
+        <a href="/de/#gallery" data-i18n="nav.gallery" role="menuitem">Galerie</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Reise planen</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Beste Reisezeit</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Urlaubskosten-Guide</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Gästehaus vs. Resort</a>
+        <a href="/de/#travel-info" data-i18n="nav.travelInfo" role="menuitem">Reiseinfos</a>
+        <a href="/de/#contact" data-i18n="nav.contact" role="menuitem">Kontakt</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Urlaub planen</a>
+    <a class="nav-check-availability js-check-availability" href="/de/#booking" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="Menü öffnen" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Seitenmenü" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/de/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/de/#booking" data-i18n="pageNav.bookNow">Jetzt buchen</a>
+    <button class="mm-close" aria-label="Menü schließen" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Urlaubspakete</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Erlebnisse</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">Walhai-Schnorcheln</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">Mantarochen-Schnorcheln</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">Süd-Ari</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">Maamigili-Reiseführer</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">Süd-Ari-Atoll-Reiseführer</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">Beste Inseln zum Schnorcheln</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">Süd-Ari vs. Andere Regionen</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Übernachten</button>
+      <div class="mm-group-panel">
+        <a href="/de/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/de/#rooms" data-mm-close="" data-i18n="nav.rooms">Zimmer</a>
+        <a href="/de/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Aktuelle Verfügbarkeit</a>
+        <a href="/de/#gallery" data-mm-close="" data-i18n="nav.gallery">Galerie</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Reise planen</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Beste Reisezeit</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Urlaubskosten-Guide</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Gästehaus vs. Resort</a>
+        <a href="/de/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">Reiseinfos</a>
+        <a href="/de/#contact" data-mm-close="" data-i18n="nav.contact">Kontakt</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Urlaub planen</a>
+      <a class="mm-check-availability js-check-availability" href="/de/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/manta_ray_hd.jpg');background-image:image-set(url('/images/manta_ray_hd.webp') type('image/webp'), url('/images/manta_ray_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -110,7 +223,7 @@
     <p data-i18n="blogGvr.intro">Keines von beiden ist objektiv besser — es sind wirklich unterschiedliche Reisen, und die richtige Wahl hängt davon ab, wofür Sie auf die Malediven reisen.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogGvr.h1">Der rechtliche und kulturelle Unterschied</h2>
-    <p data-i18n="blogGvr.p1">Guesthouses auf lokalen Inseln wurden erst 2009 legal möglich, als das maledivische Tourismusgesetz geöffnet wurde, um kleine Hotels und Guesthouses auf bewohnten Inseln zuzulassen, nicht nur auf privaten Resortinseln. Diese Änderung betrifft mehr als nur die Logistik: Lokale Inseln folgen dem islamischen Recht in Bezug auf Alkohol und Kleidung, was bedeutet, dass kein Alkohol ausgeschenkt wird und Badebekleidung auf einen ausgewiesenen Bikini-Strand statt der ganzen Insel beschränkt ist. Resortinseln, die unbewohnt und privat betrieben werden, erlauben Alkohol und Badebekleidung an allen Stränden.</p>
+    <p data-i18n="blogGvr.p1">Guesthouses auf lokalen Inseln wurden erst ab 2009 möglich, als die maledivischen Tourismusbestimmungen geändert wurden, um kleine Hotels und Guesthouses auf bewohnten Inseln zuzulassen, nicht nur auf privaten Resortinseln. Diese Änderung betrifft mehr als nur die Logistik: Lokale Inseln folgen dem islamischen Recht in Bezug auf Alkohol und Kleidung, was bedeutet, dass kein Alkohol ausgeschenkt wird und Badebekleidung auf einen ausgewiesenen Bikini-Strand statt der ganzen Insel beschränkt ist. Resortinseln, die unbewohnt und privat betrieben werden, erlauben Alkohol und Badebekleidung an allen Stränden.</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogGvr.h2">Der Preisunterschied</h2>
     <p data-i18n="blogGvr.p2">Als allgemeine Regel (Preise variieren je nach Saison und Unterkunft) sind Guesthouses auf lokalen Inseln pro Nacht deutlich günstiger als Resorts, oft inklusive Frühstück im Preis. Resorts decken eine viel breitere Spanne ab, von Mittelklasse-Overwater-Optionen bis hin zu ultraluxuriösen privaten Inselanlagen.</p>
@@ -121,6 +234,7 @@
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogGvr.h4">Eine wirklich ehrliche Einschätzung</h2>
     <p data-i18n="blogGvr.p4">Wenn völlige Privatsphäre und Fünf-Sterne-Service der Sinn der Reise sind, liefert ein Resort das auf eine Weise, die ein Guesthouse strukturell nicht kann. Wenn das Riff, die Walhaie und eine echte maledivische Insel — und ein niedrigerer Preis — der Sinn sind, liefert ein Guesthouse wie unseres das sehr gut.</p>
+    <p data-i18n="blogGvr.p5">Eine Option verbindet beides: Unser Paket <a href="holiday-packages.html#ultimate-resort-island-odyssey">Ultimate Resort &amp; Island Odyssey</a> ist das einzige Vilu-Residence-Urlaubspaket mit einem Tagesbesuch in einem benachbarten Resort — eine Möglichkeit, auch diese Seite der Malediven zu erleben, ohne den Aufenthaltsort zu wechseln.</p>
     <p class="exp-links"><a href="/de/#rooms" data-i18n="gvrPage.linkRooms">Unsere Zimmer und Preise ansehen →</a></p>
   </article>
 
@@ -145,12 +259,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="gvrPage.ctaTitle">Erleben Sie, wie ein Gästehausaufenthalt wirklich ist</h2>
-    <p data-i18n="gvrPage.ctaText">Vilu Residence ist ein echtes lokales Gästehaus auf Maamigili — sehen Sie unsere Zimmer und Preise oder fragen Sie uns direkt.</p>
+    <p data-i18n="gvrPage.ctaText">Jedes Urlaubspaket von Vilu Residence beinhaltet Ihren Aufenthalt hier — sehen Sie, wie Unterkunft und Erlebnisse zusammenkommen, oder sehen Sie sich direkt unsere Zimmer und Preise an.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/de/#booking" data-i18n="gvrPage.ctaBook">Verfügbarkeit prüfen</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="gvrPage.ctaWhatsapp">Auf WhatsApp fragen</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="gvrPage.ctaPackages">Urlaubspakete ansehen</a>
+      <a class="btn-outline" data-i18n-href="gvrPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20G%C3%A4stehaus%20vs.%20Resort%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen." target="_blank" rel="noopener noreferrer" data-i18n="gvrPage.ctaWhatsapp">Auf WhatsApp fragen</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/de/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="gvrPage.ctaBook">Verfügbarkeit prüfen</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -174,34 +290,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Navigation</h4><ul>
-        <li><a href="/de/" data-i18n="pageNav.home">Startseite</a></li>
-        <li><a href="/de/#rooms" data-i18n="nav.rooms">Zimmer</a></li>
-        <li><a href="/de/#holiday-packages" data-i18n="nav.packages">Pakete</a></li>
-        <li><a href="/de/#travel-info" data-i18n="nav.travelInfo">Reiseinfos</a></li>
-        <li><a href="/de/#contact" data-i18n="nav.contact">Kontakt</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">Reiseführer</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Süd-Ari-Atoll-Reiseführer</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Maamigili-Reiseführer</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Entdecken</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Urlaubspakete</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Walhai-Schnorcheln</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Mantarochen-Schnorcheln</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Urlaubspakete</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Beste Reisezeit</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Gästehaus vs. Resort</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Urlaubskosten-Guide</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">Übernachten</h4><ul>
+        <li><a href="/de/#about">Vilu Residence</a></li>
+        <li><a href="/de/#rooms" data-i18n="nav.rooms">Zimmer</a></li>
+        <li><a href="/de/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Aktuelle Verfügbarkeit</a></li>
+        <li><a href="/de/#gallery" data-i18n="nav.gallery">Galerie</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">Süd-Ari-Reiseführer</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Maamigili-Reiseführer</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Süd-Ari-Atoll-Reiseführer</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Beste Inseln zum Schnorcheln</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">Süd-Ari vs. Andere Regionen</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Was man auf Maamigili unternehmen kann</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">Planung</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Beste Reisezeit</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Urlaubskosten-Guide</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Gästehaus vs. Resort</a></li>
+        <li><a href="/de/#travel-info" data-i18n="nav.travelInfo">Reiseinfos</a></li>
+        <li><a href="/de/#contact" data-i18n="nav.contact">Kontakt</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">Alle Rechte vorbehalten.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">Alle Rechte vorbehalten.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Verwaltet von</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Datenschutzeinstellungen</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookie- und Datenschutzeinwilligung" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Ihre Privatsphäre, Ihre Wahl</strong>
+      <p data-i18n="consent.message">Wir verwenden essenzielle Technologien, damit Vilu funktioniert. Mit Ihrer Erlaubnis möchten wir außerdem Analyse- und Marketing-Technologien nutzen, um zu verstehen, wie Besucher unsere Website nutzen.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Nicht erforderliche ablehnen</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Anpassen</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Alle akzeptieren</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Datenschutzeinstellungen</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Schließen" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Essenziell</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Immer aktiv</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Erforderlich für Buchung, Verfügbarkeit und grundlegende Website-Funktionen.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Präferenzen</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Präferenzen" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Speichert optionale Einstellungen, die Sie auf der Website vornehmen.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Analyse</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analyse" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Hilft uns zu verstehen, wie Besucher die Website nutzen.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Ermöglicht relevantere Angebote, wenn Sie später andere Websites besuchen.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Einstellungen speichern</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -227,25 +410,27 @@ var I18N = { en: {
     relTag2: "Budgeting", relTitle2: "Holiday Cost Guide",
     relTag3: "Plan Your Stay", relTitle3: "Holiday Packages",
     ctaTitle: "See what a guesthouse stay actually looks like",
-    ctaText: "Vilu Residence is a real local-island guesthouse on Maamigili — check our rooms and rates, or ask us anything directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Every Vilu Residence holiday package includes your stay here — see how accommodation and experiences come together, or check our rooms and rates directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   blogGvr: {
     title: "Maldives Guesthouse <em>vs Resort</em>",
     intro: "Neither is objectively better — they're genuinely different trips, and the right one depends on what you're going to the Maldives for.",
     h1: "The legal and cultural difference",
-    p1: "Guesthouses on local islands only became legally possible in 2009, when Maldivian tourism law was opened up to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
+    p1: "Guesthouses on local islands only became possible from 2009, when Maldivian tourism regulations changed to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
     h2: "The price difference",
     p2: "As a general rule (prices vary by season and property), guesthouses on local islands run considerably cheaper per night than resorts, often including breakfast in the rate. Resorts span a much wider range, from mid-range overwater options up to ultra-luxury private-island properties.",
     h3: "What you actually get",
     p3: "A resort gets you a private island, often with overwater villas and all-inclusive dining, and no contact with local Maldivian life beyond staff. A guesthouse gets you a real island community, working local shops, and — because you're paying for far less private infrastructure — meaningfully lower prices for a trip built around the same reefs and marine life. Neither includes the other's experience by design, not by compromise.",
     h4: "A genuinely honest take",
-    p4: "If total privacy and five-star service are the point of the trip, a resort delivers that in a way a guesthouse structurally can't. If the point is the reef, the whale sharks, and a real Maldivian island — and a lower price — a guesthouse like ours delivers that well."
+    p4: "If total privacy and five-star service are the point of the trip, a resort delivers that in a way a guesthouse structurally can't. If the point is the reef, the whale sharks, and a real Maldivian island — and a lower price — a guesthouse like ours delivers that well.",
+    p5: "One option splits the difference: our <a href=\"holiday-packages.html#ultimate-resort-island-odyssey\">Ultimate Resort &amp; Island Odyssey</a> package is the one Vilu Residence holiday package that includes a day visit to a neighboring resort — a way to see that side of the Maldives too, without changing where you're staying."
   }
 }};
 var PAGE_META_NS = 'gvrMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

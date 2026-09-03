@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ru" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -56,9 +58,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/maamigili-guide.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/maamigili-guide.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/maamigili-guide.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -119,8 +118,8 @@
     { "@type": "Question", "name": "How many flights run between Malé and Maamigili daily?", "acceptedAnswer": { "@type": "Answer", "text": "Typically 3–5 flights a day, mainly operated by Flyme (Villa Air)." } },
     { "@type": "Question", "name": "Do I need a boat transfer after landing at Villa International Airport?", "acceptedAnswer": { "@type": "Answer", "text": "No — the airport is on Maamigili itself, so there's no separate boat transfer to reach the island, unlike many resort-island destinations elsewhere in the Maldives." } },
     { "@type": "Question", "name": "Can I see whale sharks near Maamigili year-round?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — the South Ari Marine Protected Area's resident population is sighted essentially every week of every month." } },
-    { "@type": "Question", "name": "Is the whale shark population near Maamigili migratory?", "acceptedAnswer": { "@type": "Answer", "text": "No — researchers describe it as the world's only documented resident whale shark aggregation, mostly juvenile males that stay rather than migrate through." } },
-    { "@type": "Question", "name": "How many whale sharks have been identified in South Ari Atoll?", "acceptedAnswer": { "@type": "Answer", "text": "More than 500 individuals, photo-identified and catalogued by the Maldives Whale Shark Research Programme since 2006." } },
+    { "@type": "Question", "name": "Is the whale shark population near Maamigili migratory?", "acceptedAnswer": { "@type": "Answer", "text": "No — research (Harvey-Carroll et al., 2021) shows the population has strong site fidelity and is present year-round, mostly juvenile males that stay rather than migrate through. Continuous presence of the same individuals in one place like this is documented at only a few sites globally." } },
+    { "@type": "Question", "name": "How many whale sharks have been identified in South Ari Atoll?", "acceptedAnswer": { "@type": "Answer", "text": "The Maldives Whale Shark Research Programme has studied and photo-identified individual whale sharks in South Ari for many years, using each shark's unique spot pattern the way a fingerprint identifies a person." } },
     { "@type": "Question", "name": "What is the best time of year to see whale sharks near Maamigili?", "acceptedAnswer": { "@type": "Answer", "text": "Any time — sightings happen year-round, though their position along the reef shifts seasonally, west-leaning December–April and east-leaning May–November." } },
     { "@type": "Question", "name": "Can I touch a whale shark while snorkeling?", "acceptedAnswer": { "@type": "Answer", "text": "No — touching, chasing, or otherwise disturbing whale sharks is prohibited in the Marine Protected Area; responsible operators enforce a distance-based code of conduct." } },
     { "@type": "Question", "name": "Are manta rays found near Maamigili too?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — Maamigili Beyru, the reef along the island's outer edge, is a known manta ray site alongside its whale sharks." } },
@@ -158,19 +157,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ru/" class="nav-logo">
+  <a href="/ru/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">Туристические пакеты</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Впечатления</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Снорклинг с китовыми акулами</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Снорклинг с мантами</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Чем заняться на Маамигили</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">Южный Ари</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Гид по Маамигили</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">Путеводитель по атоллу Южный Ари</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Лучшие острова для снорклинга</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">Южный Ари против других регионов</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Проживание</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ru/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ru/#rooms" data-i18n="nav.rooms" role="menuitem">Номера</a>
+        <a href="/ru/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Актуальная доступность</a>
+        <a href="/ru/#gallery" data-i18n="nav.gallery" role="menuitem">Галерея</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Спланировать поездку</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Лучшее время для визита</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Стоимость отдыха</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Гестхаус против курорта</a>
+        <a href="/ru/#travel-info" data-i18n="nav.travelInfo" role="menuitem">О поездке</a>
+        <a href="/ru/#contact" data-i18n="nav.contact" role="menuitem">Контакты</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">Спланировать отдых</a>
+    <a class="nav-check-availability js-check-availability" href="/ru/#booking" data-i18n="navShell.checkAvailability">Проверить доступность</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="Открыть меню" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Меню сайта" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ru/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ru/#booking" data-i18n="pageNav.bookNow">Забронировать</a>
+    <button class="mm-close" aria-label="Закрыть меню" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">Туристические пакеты</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Впечатления</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">Снорклинг с китовыми акулами</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">Снорклинг с мантами</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">Чем заняться на Маамигили</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">Южный Ари</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">Гид по Маамигили</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">Путеводитель по атоллу Южный Ари</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">Лучшие острова для снорклинга</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">Южный Ари против других регионов</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Проживание</button>
+      <div class="mm-group-panel">
+        <a href="/ru/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ru/#rooms" data-mm-close="" data-i18n="nav.rooms">Номера</a>
+        <a href="/ru/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Актуальная доступность</a>
+        <a href="/ru/#gallery" data-mm-close="" data-i18n="nav.gallery">Галерея</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Спланировать поездку</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Лучшее время для визита</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Стоимость отдыха</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Гестхаус против курорта</a>
+        <a href="/ru/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">О поездке</a>
+        <a href="/ru/#contact" data-mm-close="" data-i18n="nav.contact">Контакты</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">Спланировать отдых</a>
+      <a class="mm-check-availability js-check-availability" href="/ru/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Проверить доступность</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/whale_shark_hd.jpg');background-image:image-set(url('/images/whale_shark_hd.webp') type('image/webp'), url('/images/whale_shark_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -209,7 +322,7 @@
       <h2 class="section-title" style="margin-top:44px" data-i18n="guideMaa.hWhyVisit">Почему стоит посетить Маамигили?</h2>
       <p data-i18n="guideMaa.whyVisitIntro">Три вещи выделяют его среди направлений, доминирующих при первом поиске поездки на Мальдивы:</p>
       <div class="card-grid">
-        <div class="info-card"><i class="ti ti-fish" aria-hidden="true"></i><h4 data-i18n="guideMaa.whyVisit1h">Китовые акулы круглый год, совсем рядом</h4><p data-i18n="guideMaa.whyVisit1p">Охраняемая морская зона Южного Ари, непосредственно граничащая с Маамигили, является единственным задокументированным в мире местом <em>постоянного обитания</em> скопления китовых акул — присутствующих каждый месяц года, а не во время сезонной миграции. Полные подробности смотрите ниже в разделе Китовые акулы.</p></div>
+        <div class="info-card"><i class="ti ti-fish" aria-hidden="true"></i><h4 data-i18n="guideMaa.whyVisit1h">Китовые акулы круглый год, совсем рядом</h4><p data-i18n="guideMaa.whyVisit1p">Охраняемая морская зона Южного Ари, непосредственно граничащая с Маамигили, является местом обитания <em>постоянного</em> скопления китовых акул — присутствующих каждый месяц года, а не во время сезонной миграции. Такое непрерывное, верное конкретному месту присутствие исследования документируют лишь в очень немногих местах мира. Полные подробности смотрите ниже в разделе Китовые акулы.</p></div>
         <div class="info-card"><i class="ti ti-plane-tilt" aria-hidden="true"></i><h4 data-i18n="guideMaa.whyVisit2h">Аэропорт прямо на острове</h4><p data-i18n="guideMaa.whyVisit2p">Международный аэропорт Вилла расположен на собственной намывной территории Маамигили — единственный аэропорт в Южном Ари Атолле. Многие поездки на Мальдивы означают внутренний перелёт <em>а затем</em> отдельный переезд на скоростном катере до другого острова. Здесь же приземление и прибытие происходят почти одновременно.</p></div>
         <div class="info-card"><i class="ti ti-home" aria-hidden="true"></i><h4 data-i18n="guideMaa.whyVisit3h">Настоящая островная жизнь, курортный уровень доступа</h4><p data-i18n="guideMaa.whyVisit3p">Проживание на местном острове, а не в частном курорте, означает прямую близость к тем же рифам, местам обитания китовых акул и скатов манта, по ценам гестхауса, в окружении реально функционирующего сообщества, а не изолированного закрытого комплекса.</p></div>
       </div>
@@ -231,7 +344,7 @@
 
     <section id="best-time">
       <h2 class="section-title" style="margin-top:44px" data-i18n="guideMaa.hBestTime">Лучшее время для посещения Маамигили</h2>
-      <p data-i18n="guideMaa.btP1">Когда вы разобрались, как добраться, следующий действительно важный вопрос — когда. На Мальдивах два муссонных сезона: северо-восточный муссон (более сухой сезон, примерно с ноября/января по апрель) и юго-западный муссон (более влажный сезон, примерно с середины мая по ноябрь), с декабрём и апрелем в качестве переходных месяцев. (<a href="https://www.maldives.com/weather" target="_blank" rel="noopener">Maldives.com</a>; <a href="https://www.thisislandlife.com/travel/maldives-weather-by-month/" target="_blank" rel="noopener">This Island Life</a>)</p>
+      <p data-i18n="guideMaa.btP1">Когда вы разобрались, как добраться, следующий действительно важный вопрос — когда. На Мальдивах два муссонных сезона: северо-восточный муссон (более сухой сезон, примерно с декабря по апрель, хотя точные границы меняются год от года) и юго-западный муссон (более влажный сезон, примерно с середины мая по ноябрь), с декабрём и апрелем в качестве переходных месяцев. (<a href="https://www.maldives.com/weather" target="_blank" rel="noopener">Maldives.com</a>; <a href="https://www.thisislandlife.com/travel/maldives-weather-by-month/" target="_blank" rel="noopener">This Island Life</a>)</p>
       <p data-i18n="guideMaa.btP2">Китовые акулы не следуют этому календарю так, как большая часть морской жизни, — постоянная популяция Южного Ари присутствует независимо от сезона, с наблюдениями «каждую неделю каждого месяца», по данным программы Maldives Whale Shark Research Programme. Меняется их положение вдоль рифа: ближе к западу во время северо-восточного муссона с декабря по апрель, ближе к востоку во время юго-западного муссона с мая по ноябрь. (<a href="https://oceanographicmagazine.com/features/whale-shark-south-ari-maldives/" target="_blank" rel="noopener">Oceanographic Magazine</a>; <a href="https://resortlife.travel/maldives-whale-sharks" target="_blank" rel="noopener">ResortLife</a>)</p>
       <p data-i18n="guideMaa.btP3">Скаты манта более сезонны: наблюдения вокруг Маамигили Бейру достигают пика во время северо-восточного муссона, примерно с февраля по апрель, когда региональные течения выносят популяции манта именно к Южному Ари. (<a href="https://airial.travel/attractions/maldives/maamigili/maamigili-beyru-wfkqRkS7" target="_blank" rel="noopener">Airial Travel</a>)</p>
       <div class="table-wrap" style="overflow-x:auto" data-i18n="guideMaa.btTable"><table><thead><tr><th>Сезон</th><th>Месяцы</th><th>Погода</th><th>Китовые акулы</th><th>Скаты манта</th></tr></thead><tbody><tr><td>Северо-восточный муссон (сухой)</td><td>Дек/Янв–Апр</td><td>Жарко, солнечно, спокойнее море</td><td>Присутствуют, ближе к западу</td><td>Пик сезона (Фев–Апр)</td></tr><tr><td>Переходный период</td><td>Апр, Дек</td><td>Переменчиво</td><td>Присутствуют</td><td>Переменчиво</td></tr><tr><td>Юго-западный муссон (влажный)</td><td>Май–Ноя</td><td>Теплее, больше осадков, иногда неспокойное море севернее</td><td>Присутствуют, ближе к востоку</td><td>Ниже вероятность</td></tr></tbody></table></div>
@@ -242,7 +355,7 @@
     <section id="weather">
       <h2 class="section-title" style="margin-top:44px" data-i18n="guideMaa.hWeather">Погода</h2>
       <p data-i18n="guideMaa.weatherP1">Климат Маамигили следует общему мальдивскому образцу: неизменно тёплый круглый год, с дневными максимумами обычно 29–31°C (84–88°F) и ночными минимумами редко ниже 25°C (77°F). Среднегодовые значения составляют примерно 25–32°C. (<a href="https://weather-and-climate.com/average-monthly-Rainfall-Temperature-Sunshine-in-Maldives" target="_blank" rel="noopener">Weather-and-Climate.com</a>; <a href="https://www.thisislandlife.com/travel/maldives-weather-by-month/" target="_blank" rel="noopener">This Island Life</a>)</p>
-      <p data-i18n="guideMaa.weatherP2">Дожди редки в сухой сезон с ноября по апрель. Более влажный юго-западный муссон длится примерно с мая по октябрь/ноябрь, причём сентябрь обычно самый дождливый месяц, со средним количеством осадков около 243 мм. Даже в свой пик мальдивский муссон заметно мягче, чем во многих соседних странах Южной и Юго-Восточной Азии — норма это короткие, сильные ливни, а не многодневные затяжные дожди. (<a href="https://www.maldives.com/weather" target="_blank" rel="noopener">Maldives.com</a>; <a href="https://www.climatestotravel.com/climate/maldives" target="_blank" rel="noopener">Climates to Travel</a>)</p>
+      <p data-i18n="guideMaa.weatherP2">Дожди редки в сухой сезон, примерно с декабря по апрель. Более влажный юго-западный муссон длится примерно с мая по октябрь/ноябрь, причём сентябрь обычно самый дождливый месяц, со средним количеством осадков около 243 мм. Даже в свой пик мальдивский муссон заметно мягче, чем во многих соседних странах Южной и Юго-Восточной Азии — норма это короткие, сильные ливни, а не многодневные затяжные дожди. (<a href="https://www.maldives.com/weather" target="_blank" rel="noopener">Maldives.com</a>; <a href="https://www.climatestotravel.com/climate/maldives" target="_blank" rel="noopener">Climates to Travel</a>)</p>
       <img class="content-img" src="/images/vilu-residence-guests-maamigili-sunset.jpg" loading="lazy" alt="Sunset over Maamigili Island, South Ari Atoll, Maldives">
       <div class="tip-box">
         <i class="ti ti-bulb" aria-hidden="true"></i>
@@ -252,8 +365,8 @@
 
     <section id="whale-sharks">
       <h2 class="section-title" style="margin-top:44px" data-i18n="guideMaa.hWhaleSharks">Китовые акулы</h2>
-      <p data-i18n="guideMaa.wsP1">Охраняемая морская зона Южного Ари, непосредственно граничащая с Маамигили, содержит то, что исследователи описывают как единственное в мире задокументированное скопление <em>постоянно обитающих</em> китовых акул — преимущественно молодых самцов, которые остаются вдоль полосы рифа протяжённостью около 14 км каждый месяц года, а не проходят транзитом при сезонной миграции, как это делают китовые акулы почти везде, где они встречаются. (<a href="https://blog.padi.com/diving-maldives-south-ari-marine-protected-area/" target="_blank" rel="noopener">PADI</a>; <a href="https://oceanographicmagazine.com/features/whale-shark-south-ari-maldives/" target="_blank" rel="noopener">Oceanographic Magazine</a>)</p>
-      <p data-i18n="guideMaa.wsP2">Программа Maldives Whale Shark Research Programme с 2006 года фотографически идентифицировала и занесла в каталог более 500 отдельных китовых акул в этом районе, используя уникальный рисунок пятен каждой акулы — так же, как отпечаток пальца идентифицирует человека. (<a href="https://resortlife.travel/maldives-whale-sharks" target="_blank" rel="noopener">ResortLife</a>)</p>
+      <p data-i18n="guideMaa.wsP1">Охраняемая морская зона Южного Ари, непосредственно граничащая с Маамигили, является местом обитания <em>постоянно живущего</em> скопления китовых акул — преимущественно молодых самцов, которые остаются вдоль полосы рифа протяжённостью около 14 км каждый месяц года, а не проходят транзитом при сезонной миграции, как это делают китовые акулы почти везде, где они встречаются. Рецензируемые научные исследования описывают такой тип непрерывного, верного месту присутствия как наблюдаемый лишь в очень немногих местах мира. (<a href="https://blog.padi.com/diving-maldives-south-ari-marine-protected-area/" target="_blank" rel="noopener">PADI</a>; <a href="https://www.nature.com/articles/s41598-020-79101-8" target="_blank" rel="noopener">Harvey-Carroll и др., Scientific Reports 2021</a>)</p>
+      <p data-i18n="guideMaa.wsP2">Программа Maldives Whale Shark Research Programme на протяжении многих лет изучает и фотографически идентифицирует отдельных китовых акул в этом районе, используя уникальный рисунок пятен каждой акулы — так же, как отпечаток пальца идентифицирует человека. (<a href="https://resortlife.travel/maldives-whale-sharks" target="_blank" rel="noopener">ResortLife</a>)</p>
       <img class="content-img" src="/images/whale_shark_2_gallery.jpg" loading="lazy" alt="Whale shark in the South Ari Marine Protected Area near Maamigili, Maldives">
       <p data-i18n="guideMaa.wsP3">Исследователи полагают, что молодые особи используют Южный Ари как вторичный питомник — местные условия подходят для их потребностей в питании и терморегуляции до достижения зрелости примерно к 30 годам, что во многом объясняет, почему наблюдения остаются настолько надёжными по сравнению с мигрирующими популяциями китовых акул в других местах. Их положение вдоль рифа смещается вместе с муссоном — ближе к западу с декабря по апрель, ближе к востоку с мая по ноябрь, — но сами наблюдения происходят практически каждую неделю круглый год. (<a href="https://oceanographicmagazine.com/features/whale-shark-south-ari-maldives/" target="_blank" rel="noopener">Oceanographic Magazine</a>)</p>
       <div class="warning-box">
@@ -372,8 +485,8 @@
         <details><summary><span data-i18n="maaPage.faqQ9">Сколько рейсов в день связывают Мале и Маамигили?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA9">Обычно 3–5 рейсов в день, в основном выполняемых Flyme (Villa Air).</div></details>
         <details><summary><span data-i18n="maaPage.faqQ10">Нужен ли мне переезд на лодке после приземления в Международном аэропорту Вилла?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA10">Нет — аэропорт расположен прямо на Маамигили, поэтому отдельный переезд на лодке до острова не требуется, в отличие от многих курортных направлений в других частях Мальдив.</div></details>
         <details><summary><span data-i18n="maaPage.faqQ11">Могу ли я видеть китовых акул возле Маамигили круглый год?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA11">Да — постоянная популяция Охраняемой морской зоны Южного Ари наблюдается практически каждую неделю каждого месяца.</div></details>
-        <details><summary><span data-i18n="maaPage.faqQ12">Мигрирует ли популяция китовых акул возле Маамигили?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA12">Нет — исследователи описывают её как единственное в мире задокументированное постоянное скопление китовых акул, преимущественно молодых самцов, которые остаются, а не мигрируют.</div></details>
-        <details><summary><span data-i18n="maaPage.faqQ13">Сколько китовых акул было идентифицировано в Южном Ари Атолле?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA13">Более 500 особей, фотографически идентифицированных и занесённых в каталог программой Maldives Whale Shark Research Programme с 2006 года.</div></details>
+        <details><summary><span data-i18n="maaPage.faqQ12">Мигрирует ли популяция китовых акул возле Маамигили?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA12">Нет — исследования (Harvey-Carroll и др., 2021) показывают, что эта популяция демонстрирует высокую верность месту обитания и присутствует круглый год, преимущественно молодые самцы, которые остаются, а не мигрируют. Такое непрерывное присутствие одних и тех же особей в одном месте задокументировано лишь в очень немногих местах мира.</div></details>
+        <details><summary><span data-i18n="maaPage.faqQ13">Сколько китовых акул было идентифицировано в Южном Ари Атолле?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA13">Программа Maldives Whale Shark Research Programme на протяжении многих лет изучает и фотографически идентифицирует отдельных китовых акул в Южном Ари.</div></details>
         <details><summary><span data-i18n="maaPage.faqQ14">Какое лучшее время года для наблюдения за китовыми акулами возле Маамигили?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA14">Любое время — наблюдения происходят круглый год, хотя их положение вдоль рифа меняется по сезонам: ближе к западу с декабря по апрель и ближе к востоку с мая по ноябрь.</div></details>
         <details><summary><span data-i18n="maaPage.faqQ15">Могу ли я прикоснуться к китовой акуле во время снорклинга?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA15">Нет — прикосновение, преследование или иное беспокойство китовых акул запрещено в Охраняемой морской зоне; ответственные операторы соблюдают кодекс поведения на основе дистанции.</div></details>
         <details><summary><span data-i18n="maaPage.faqQ16">Встречаются ли возле Маамигили также скаты манта?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="maaPage.faqA16">Да — Маамигили Бейру, риф вдоль внешнего края острова, известен как место обитания скатов манта наряду с китовыми акулами.</div></details>
@@ -430,22 +543,27 @@
         <img class="related-card-img" src="/images/vilu-residence-sandbank-bbq-beach-dining.jpg" loading="lazy" alt="Things to Do in Maamigili">
         <div class="related-card-body"><div class="related-card-tag" data-i18n="maaPage.relTag3">Планирование поездки</div><h4 data-i18n="maaPage.relTitle3">Чем заняться на Маамигили</h4></div>
       </a>
+      <a class="related-card" href="holiday-packages.html">
+        <img class="related-card-img" src="/images/thumb_turtle_snorkelers_gallery.jpg" loading="lazy" alt="Holiday Packages">
+        <div class="related-card-body"><div class="related-card-tag" data-i18n="maaPage.relTag4">Планирование поездки</div><h4 data-i18n="maaPage.relTitle4">Туристические пакеты</h4></div>
+      </a>
     </div>
   </div>
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="maaPage.ctaTitle">Остановитесь там, где живут китовые акулы</h2>
-    <p data-i18n="maaPage.ctaText">Vilu Residence находится прямо на острове Маамигили — никакого катера до курорта, всего в двух шагах от гавани и экскурсий.</p>
+    <p data-i18n="maaPage.ctaText">Vilu Residence находится прямо на острове Маамигили — никакого катера до курорта, всего в двух шагах от гавани и экскурсий. Посмотрите, как наши пакеты отдыха объединяют всё это, или сразу проверьте наличие мест.</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/ru/#booking" data-i18n="maaPage.ctaBook">Проверить наличие</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="maaPage.ctaWhatsapp">Спросить в WhatsApp</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="maaPage.ctaPackages">Смотреть туристические пакеты</a>
+      <a class="btn-outline" data-i18n-href="maaPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9C%D0%B5%D0%BD%D1%8F%20%D0%B7%D0%B0%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D0%BE%D0%B2%D0%B0%D0%BB%20%D0%B2%D0%B0%D1%88%20%D0%93%D0%B8%D0%B4%20%D0%BF%D0%BE%20%D0%9C%D0%B0%D0%B0%D0%BC%D0%B8%D0%B3%D0%B8%D0%BB%D0%B8%20%E2%80%94%20%D0%BD%D0%B5%20%D0%BC%D0%BE%D0%B3%D0%BB%D0%B8%20%D0%B1%D1%8B%20%D0%B2%D1%8B%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%87%D1%8C%20%D1%81%D0%BF%D0%BB%D0%B0%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D1%82%D1%8C%20%D0%BE%D1%82%D0%B4%D1%8B%D1%85%20%D0%BD%D0%B0%20%D0%9C%D0%B0%D0%BB%D1%8C%D0%B4%D0%B8%D0%B2%D0%B0%D1%85%20%D1%81%20Vilu%3F" target="_blank" rel="noopener noreferrer" data-i18n="maaPage.ctaWhatsapp">Спросить в WhatsApp</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/ru/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="maaPage.ctaBook">Проверить наличие</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
     </p>
-    <p style="margin-top:10px" data-i18n="maaPage.ctaPackagesLink">Предпочитаете готовый пакет? <a href="holiday-packages.html" style="color:rgba(255,255,255,.85)">Смотрите пакеты отдыха →</a></p>
   </div>
 </main>
 
@@ -465,34 +583,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">Навигация</h4><ul>
-        <li><a href="/ru/" data-i18n="pageNav.home">Главная</a></li>
-        <li><a href="/ru/#rooms" data-i18n="nav.rooms">Номера</a></li>
-        <li><a href="/ru/#holiday-packages" data-i18n="nav.packages">Пакеты</a></li>
-        <li><a href="/ru/#travel-info" data-i18n="nav.travelInfo">О поездке</a></li>
-        <li><a href="/ru/#contact" data-i18n="nav.contact">Контакты</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">Гиды</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Путеводитель по атоллу Южный Ари</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Гид по Маамигили</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Исследовать</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Туристические пакеты</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Снорклинг с китовыми акулами</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Снорклинг с мантами</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">Туристические пакеты</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Лучшее время для визита</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Гестхаус против курорта</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Стоимость отдыха</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Чем заняться на Маамигили</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">Проживание</h4><ul>
+        <li><a href="/ru/#about">Vilu Residence</a></li>
+        <li><a href="/ru/#rooms" data-i18n="nav.rooms">Номера</a></li>
+        <li><a href="/ru/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Актуальная доступность</a></li>
+        <li><a href="/ru/#gallery" data-i18n="nav.gallery">Галерея</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">Гиды по Южному Ари</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Гид по Маамигили</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Путеводитель по атоллу Южный Ари</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Лучшие острова для снорклинга</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">Южный Ари против других регионов</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Чем заняться на Маамигили</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">Планирование</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Лучшее время для визита</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Стоимость отдыха</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Гестхаус против курорта</a></li>
+        <li><a href="/ru/#travel-info" data-i18n="nav.travelInfo">О поездке</a></li>
+        <li><a href="/ru/#contact" data-i18n="nav.contact">Контакты</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">Все права защищены.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">Все права защищены.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Управляется</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Настройки конфиденциальности</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Согласие на использование файлов cookie и обработку данных" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Ваша конфиденциальность, ваш выбор</strong>
+      <p data-i18n="consent.message">Мы используем обязательные технологии для работы Vilu. С вашего разрешения мы также хотели бы использовать аналитические и маркетинговые технологии, чтобы понимать, как посетители используют наш сайт.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Отклонить необязательные</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Настроить</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Принять все</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Настройки конфиденциальности</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Закрыть" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Обязательные</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Всегда активны</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Необходимы для бронирования, проверки доступности и основных функций сайта.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Предпочтения</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Предпочтения" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Запоминает необязательные настройки, которые вы выбираете на сайте.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Аналитика</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Аналитика" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Помогает понять, как посетители используют сайт.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Маркетинг</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Маркетинг" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Позволяет показывать более релевантные предложения при посещении других сайтов позже.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Сохранить настройки</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -528,8 +713,8 @@ var I18N = { en: {
     faqQ9: "How many flights run between Malé and Maamigili daily?", faqA9: "Typically 3–5 flights a day, mainly operated by Flyme (Villa Air).",
     faqQ10: "Do I need a boat transfer after landing at Villa International Airport?", faqA10: "No — the airport is on Maamigili itself, so there's no separate boat transfer to reach the island, unlike many resort-island destinations elsewhere in the Maldives.",
     faqQ11: "Can I see whale sharks near Maamigili year-round?", faqA11: "Yes — the South Ari Marine Protected Area's resident population is sighted essentially every week of every month.",
-    faqQ12: "Is the whale shark population near Maamigili migratory?", faqA12: "No — researchers describe it as the world's only documented resident whale shark aggregation, mostly juvenile males that stay rather than migrate through.",
-    faqQ13: "How many whale sharks have been identified in South Ari Atoll?", faqA13: "More than 500 individuals, photo-identified and catalogued by the Maldives Whale Shark Research Programme since 2006.",
+    faqQ12: "Is the whale shark population near Maamigili migratory?", faqA12: "No — research (Harvey-Carroll et al., 2021) shows the population has strong site fidelity and is present year-round, mostly juvenile males that stay rather than migrate through. Continuous presence of the same individuals in one place like this is documented at only a few sites globally.",
+    faqQ13: "How many whale sharks have been identified in South Ari Atoll?", faqA13: "The Maldives Whale Shark Research Programme has studied and photo-identified individual whale sharks in South Ari for many years, using each shark's unique spot pattern the way a fingerprint identifies a person.",
     faqQ14: "What is the best time of year to see whale sharks near Maamigili?", faqA14: "Any time — sightings happen year-round, though their position along the reef shifts seasonally, west-leaning December–April and east-leaning May–November.",
     faqQ15: "Can I touch a whale shark while snorkeling?", faqA15: "No — touching, chasing, or otherwise disturbing whale sharks is prohibited in the Marine Protected Area; responsible operators enforce a distance-based code of conduct.",
     faqQ16: "Are manta rays found near Maamigili too?", faqA16: "Yes — Maamigili Beyru, the reef along the island's outer edge, is a known manta ray site alongside its whale sharks.",
@@ -563,10 +748,10 @@ var I18N = { en: {
     relTag1: "Destination Guide", relTitle1: "South Ari Atoll Guide",
     relTag2: "Experience Guide", relTitle2: "Whale Shark Snorkeling",
     relTag3: "Plan Your Stay", relTitle3: "Things to Do in Maamigili",
+    relTag4: "Plan Your Stay", relTitle4: "Holiday Packages",
     ctaTitle: "Stay right where the whale sharks are",
-    ctaText: "Vilu Residence is a guesthouse on Maamigili itself — no boat transfer to a resort, just steps from the harbour and the excursions that leave from it.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp",
-    ctaPackagesLink: "Prefer a bundled itinerary? <a href=\"holiday-packages.html\" style=\"color:rgba(255,255,255,.85)\">See Holiday Packages →</a>"
+    ctaText: "Vilu Residence is a guesthouse on Maamigili itself — no boat transfer to a resort, just steps from the harbour and the excursions that leave from it. See how our holiday packages bring it all together, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   guideMaa: {
     title: "Maamigili <em>Travel Guide</em>",
@@ -583,7 +768,7 @@ var I18N = { en: {
     hWhyVisit: "Why Visit Maamigili?",
     whyVisitIntro: "Three things set it apart from the destinations that dominate a first Maldives search:",
     whyVisit1h: "Year-round whale sharks, close by",
-    whyVisit1p: "The South Ari Marine Protected Area, which borders Maamigili directly, hosts the world's only documented <em>resident</em> whale shark aggregation — present every month of the year, not on a seasonal migration. See Whale Sharks below for the full detail.",
+    whyVisit1p: "The South Ari Marine Protected Area, which borders Maamigili directly, hosts a <em>resident</em> whale shark aggregation present every month of the year, not on a seasonal migration — the kind of continuous, site-faithful presence peer-reviewed research finds at only a few places worldwide. See Whale Sharks below for the full detail.",
     whyVisit2h: "An airport on the island itself",
     whyVisit2p: "Villa International Airport sits on Maamigili's own reclaimed land — the only airport in South Ari Atoll. Many Maldivian trips mean a domestic flight <em>and then</em> a separate speedboat to a different island. Here, landing and arriving are close to the same event.",
     whyVisit3h: "Real island life, resort-level access",
@@ -597,7 +782,7 @@ var I18N = { en: {
     htrP1: "Because Villa International Airport (IATA: VAM) is physically on Maamigili, arriving by air skips the separate boat transfer that many other Maldivian destinations require after landing — often a 30–90 minute speedboat leg to reach the actual resort island. The airport opened as a domestic facility on 1 October 2011 and was upgraded to international standards on 1 March 2013, so some travelers can fly in on an international connection without transiting through Malé at all. (<a href=\"https://en.wikipedia.org/wiki/Villa_International_Airport_Maamigili\" target=\"_blank\" rel=\"noopener\">Wikipedia</a>)",
     htrLink: "Exact current prices and flight schedules change often enough that they're better checked live than quoted here: <a href=\"/#travel-info\">see current transfer prices and schedules →</a>",
     hBestTime: "Best Time to Visit Maamigili",
-    btP1: "Once you know how you're getting in, the next real question is when. The Maldives runs on two monsoon seasons: the northeast monsoon (the drier season, roughly November/January through April) and the southwest monsoon (the wetter season, mid-May through November), with December and April as transitional months. (<a href=\"https://www.maldives.com/weather\" target=\"_blank\" rel=\"noopener\">Maldives.com</a>; <a href=\"https://www.thisislandlife.com/travel/maldives-weather-by-month/\" target=\"_blank\" rel=\"noopener\">This Island Life</a>)",
+    btP1: "Once you know how you're getting in, the next real question is when. The Maldives runs on two monsoon seasons: the northeast monsoon (the drier season, roughly December through April, though the exact turnover varies year to year) and the southwest monsoon (the wetter season, mid-May through November), with December and April as transitional months. (<a href=\"https://www.maldives.com/weather\" target=\"_blank\" rel=\"noopener\">Maldives.com</a>; <a href=\"https://www.thisislandlife.com/travel/maldives-weather-by-month/\" target=\"_blank\" rel=\"noopener\">This Island Life</a>)",
     btP2: "Whale sharks don't follow that calendar the way most marine life does — South Ari's resident population is there regardless of season, with sightings \"every week of every month\" according to the Maldives Whale Shark Research Programme. What does shift is their position along the reef: more toward the west during the December–April northeast monsoon, more toward the east during the May–November southwest monsoon. (<a href=\"https://oceanographicmagazine.com/features/whale-shark-south-ari-maldives/\" target=\"_blank\" rel=\"noopener\">Oceanographic Magazine</a>; <a href=\"https://resortlife.travel/maldives-whale-sharks\" target=\"_blank\" rel=\"noopener\">ResortLife</a>)",
     btP3: "Manta rays are more seasonal: sightings around Maamigili Beyru peak during the northeast monsoon, roughly February to April, when regional currents push manta populations toward South Ari specifically. (<a href=\"https://airial.travel/attractions/maldives/maamigili/maamigili-beyru-wfkqRkS7\" target=\"_blank\" rel=\"noopener\">Airial Travel</a>)",
     btTable: "<table><thead><tr><th>Season</th><th>Months</th><th>Weather</th><th>Whale sharks</th><th>Manta rays</th></tr></thead><tbody><tr><td>Northeast monsoon (dry)</td><td>Dec/Jan–Apr</td><td>Hot, sunny, calmer seas</td><td>Present, more toward the west</td><td>Peak season (Feb–Apr)</td></tr><tr><td>Transitional</td><td>Apr, Dec</td><td>Mixed</td><td>Present</td><td>Variable</td></tr><tr><td>Southwest monsoon (wet)</td><td>May–Nov</td><td>Warmer, more rainfall, occasional rough seas further north</td><td>Present, more toward the east</td><td>Lower likelihood</td></tr></tbody></table>",
@@ -605,11 +790,11 @@ var I18N = { en: {
     btLink: "For a fuller month-by-month breakdown across the whole Maldives, not just South Ari: <a href=\"best-time-to-visit.html\">Best Time to Visit guide →</a>",
     hWeather: "Weather",
     weatherP1: "Maamigili's climate follows the wider Maldives pattern: consistently warm year-round, with daytime highs typically 29–31°C (84–88°F) and nighttime lows rarely below 25°C (77°F). Averages across the year run roughly 25–32°C. (<a href=\"https://weather-and-climate.com/average-monthly-Rainfall-Temperature-Sunshine-in-Maldives\" target=\"_blank\" rel=\"noopener\">Weather-and-Climate.com</a>; <a href=\"https://www.thisislandlife.com/travel/maldives-weather-by-month/\" target=\"_blank\" rel=\"noopener\">This Island Life</a>)",
-    weatherP2: "Rain is rare during the November–April dry season. The wetter southwest monsoon runs roughly May through October/November, with September typically the wettest month, averaging around 243mm of rainfall. Even at its wettest, the Maldivian monsoon is markedly milder than in many neighboring South and Southeast Asian countries — short, heavy showers rather than sustained multi-day rain are the norm. (<a href=\"https://www.maldives.com/weather\" target=\"_blank\" rel=\"noopener\">Maldives.com</a>; <a href=\"https://www.climatestotravel.com/climate/maldives\" target=\"_blank\" rel=\"noopener\">Climates to Travel</a>)",
+    weatherP2: "Rain is rare during the dry season, roughly December to April. The wetter southwest monsoon runs roughly May through October/November, with September typically the wettest month, averaging around 243mm of rainfall. Even at its wettest, the Maldivian monsoon is markedly milder than in many neighboring South and Southeast Asian countries — short, heavy showers rather than sustained multi-day rain are the norm. (<a href=\"https://www.maldives.com/weather\" target=\"_blank\" rel=\"noopener\">Maldives.com</a>; <a href=\"https://www.climatestotravel.com/climate/maldives\" target=\"_blank\" rel=\"noopener\">Climates to Travel</a>)",
     weatherTip: "<strong>Pack for heat and humidity year-round</strong> rather than planning an entire wardrobe around \"avoiding rain.\" Light, breathable clothing, reef-safe sunscreen, and one light rain layer for the wetter months will cover you in any season.",
     hWhaleSharks: "Whale Sharks",
-    wsP1: "The South Ari Marine Protected Area, directly bordering Maamigili, holds what researchers describe as the world's only documented <em>resident</em> whale shark aggregation — predominantly juvenile males that stay along a roughly 14-km reef shelf every month of the year, rather than passing through on a seasonal migration the way whale sharks do almost everywhere else they're found. (<a href=\"https://blog.padi.com/diving-maldives-south-ari-marine-protected-area/\" target=\"_blank\" rel=\"noopener\">PADI</a>; <a href=\"https://oceanographicmagazine.com/features/whale-shark-south-ari-maldives/\" target=\"_blank\" rel=\"noopener\">Oceanographic Magazine</a>)",
-    wsP2: "The Maldives Whale Shark Research Programme has photo-identified and catalogued more than 500 individual whale sharks in the area since 2006, using each shark's unique spot pattern the way a fingerprint identifies a person. (<a href=\"https://resortlife.travel/maldives-whale-sharks\" target=\"_blank\" rel=\"noopener\">ResortLife</a>)",
+    wsP1: "The South Ari Marine Protected Area, directly bordering Maamigili, holds a <em>resident</em> whale shark aggregation — predominantly juvenile males that stay along a roughly 14-km reef shelf every month of the year, rather than passing through on a seasonal migration the way whale sharks do almost everywhere else they're found. Peer-reviewed research describes this kind of continuous, site-faithful presence as occurring at only a few sites globally. (<a href=\"https://blog.padi.com/diving-maldives-south-ari-marine-protected-area/\" target=\"_blank\" rel=\"noopener\">PADI</a>; <a href=\"https://www.nature.com/articles/s41598-020-79101-8\" target=\"_blank\" rel=\"noopener\">Harvey-Carroll et al., Scientific Reports 2021</a>)",
+    wsP2: "The Maldives Whale Shark Research Programme has studied and photo-identified individual whale sharks here for many years, using each shark's unique spot pattern the way a fingerprint identifies a person. (<a href=\"https://resortlife.travel/maldives-whale-sharks\" target=\"_blank\" rel=\"noopener\">ResortLife</a>)",
     wsP3: "Researchers believe the juveniles use South Ari as a secondary nursery — conditions here suit their feeding and thermoregulation needs until they reach maturity around 30 years of age, which is a large part of why sightings stay this reliable compared to migratory whale shark populations elsewhere. Their position along the reef shifts with the monsoon — west-leaning December through April, east-leaning May through November — but the sightings themselves happen essentially every week, all year. (<a href=\"https://oceanographicmagazine.com/features/whale-shark-south-ari-maldives/\" target=\"_blank\" rel=\"noopener\">Oceanographic Magazine</a>)",
     wsWarning: "<strong>The reef is a protected zone.</strong> Fishing, anchoring on the reef, and chasing or touching whale sharks are all prohibited. Book with an operator that visibly enforces in-water conduct — a set distance, no touching, no flash photography — before every trip. It's not just an ethics preference: a shark that feels harassed dives and leaves faster, so a well-run trip is a better trip too. (<a href=\"https://airial.travel/attractions/maldives/maamigili/maamigili-beyru-wfkqRkS7\" target=\"_blank\" rel=\"noopener\">Airial Travel</a>)",
     wsLink: "For excursion-level detail — what a trip actually involves, what to expect in the water: <a href=\"whale-shark-snorkeling.html\">full Whale Shark Snorkeling guide →</a>",
@@ -664,6 +849,7 @@ var I18N = { en: {
 var PAGE_META_NS = 'maaMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

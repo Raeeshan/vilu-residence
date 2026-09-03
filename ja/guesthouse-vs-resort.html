@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ja" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/guesthouse-vs-resort.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/guesthouse-vs-resort.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/guesthouse-vs-resort.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -83,19 +82,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ja/" class="nav-logo">
+  <a href="/ja/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">ホリデーパッケージ</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">体験</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">ジンベエザメシュノーケリング</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">マンタシュノーケリング</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">マーミジリでできること</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">南アリ</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">マーミギリガイド</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">南アリ環礁ガイド</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">シュノーケリングに最適な島</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">南アリと他地域の比較</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">宿泊</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ja/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ja/#rooms" data-i18n="nav.rooms" role="menuitem">客室</a>
+        <a href="/ja/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">最新の空室状況</a>
+        <a href="/ja/#gallery" data-i18n="nav.gallery" role="menuitem">ギャラリー</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">旅の計画</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">ベストシーズン</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">費用ガイド</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">ゲストハウス対リゾート</a>
+        <a href="/ja/#travel-info" data-i18n="nav.travelInfo" role="menuitem">旅の情報</a>
+        <a href="/ja/#contact" data-i18n="nav.contact" role="menuitem">お問い合わせ</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">休暇を計画する</a>
+    <a class="nav-check-availability js-check-availability" href="/ja/#booking" data-i18n="navShell.checkAvailability">空室状況を確認</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="メニューを開く" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="サイトメニュー" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ja/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ja/#booking" data-i18n="pageNav.bookNow">今すぐ予約</a>
+    <button class="mm-close" aria-label="メニューを閉じる" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">体験</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">ジンベエザメシュノーケリング</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">マンタシュノーケリング</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">マーミジリでできること</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">南アリ</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">マーミギリガイド</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">シュノーケリングに最適な島</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">南アリと他地域の比較</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">宿泊</button>
+      <div class="mm-group-panel">
+        <a href="/ja/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ja/#rooms" data-mm-close="" data-i18n="nav.rooms">客室</a>
+        <a href="/ja/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">最新の空室状況</a>
+        <a href="/ja/#gallery" data-mm-close="" data-i18n="nav.gallery">ギャラリー</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">旅の計画</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">ベストシーズン</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">費用ガイド</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a>
+        <a href="/ja/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">旅の情報</a>
+        <a href="/ja/#contact" data-mm-close="" data-i18n="nav.contact">お問い合わせ</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">休暇を計画する</a>
+      <a class="mm-check-availability js-check-availability" href="/ja/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">空室状況を確認</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/manta_ray_hd.jpg');background-image:image-set(url('/images/manta_ray_hd.webp') type('image/webp'), url('/images/manta_ray_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -110,7 +223,7 @@
     <p data-i18n="blogGvr.intro">どちらが客観的に優れているというわけではありません——それらは本質的に異なる旅であり、正しい選択はモルディブに何を求めているかによります。</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogGvr.h1">法律上・文化上の違い</h2>
-    <p data-i18n="blogGvr.p1">地元の島でのゲストハウスが法的に可能になったのは2009年になってからで、モルディブの観光法が改正され、プライベートリゾートアイランドだけでなく有人島にも小規模なホテルやゲストハウスが認められるようになりました。この変化は物流以上の意味を持ちます：地元の島ではアルコールと服装に関するイスラム法に従うため、アルコールは提供されず、水着は島全体ではなく指定のビキニビーチに限定されます。無人で私営されるリゾートアイランドでは、すべてのビーチでアルコールと水着が認められています。</p>
+    <p data-i18n="blogGvr.p1">地元の島でのゲストハウスが可能になったのは2009年以降のことで、モルディブの観光規制が変更され、プライベートリゾートアイランドだけでなく有人島にも小規模なホテルやゲストハウスが認められるようになりました。この変化は物流以上の意味を持ちます：地元の島ではアルコールと服装に関するイスラム法に従うため、アルコールは提供されず、水着は島全体ではなく指定のビキニビーチに限定されます。無人で私営されるリゾートアイランドでは、すべてのビーチでアルコールと水着が認められています。</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogGvr.h2">価格の違い</h2>
     <p data-i18n="blogGvr.p2">一般的な目安として（価格は季節や施設によって異なります）、地元の島のゲストハウスは1泊あたりリゾートよりかなり安く、多くの場合朝食が料金に含まれます。リゾートははるかに幅広い価格帯をカバーし、中価格帯のオーバーウォーターオプションから超豪華なプライベートアイランド物件まであります。</p>
@@ -121,6 +234,7 @@
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="blogGvr.h4">本当に正直な見解</h2>
     <p data-i18n="blogGvr.p4">完全なプライバシーと五つ星のサービスが旅の目的であれば、リゾートはゲストハウスが構造的に太刀打ちできない形でそれを提供します。リーフ、ジンベエザメ、そして本物のモルディブの島——そしてより低い価格——が目的であれば、当施設のようなゲストハウスがそれを十分に提供します。</p>
+    <p data-i18n="blogGvr.p5">両方のいいとこ取りをする選択肢もあります——<a href="holiday-packages.html#ultimate-resort-island-odyssey">Ultimate Resort &amp; Island Odyssey</a>パッケージは、近隣リゾートへの日帰り訪問が含まれるVilu Residence唯一のホリデーパッケージです——宿泊先を変えることなく、モルディブのそちらの側面も体験できる方法です。</p>
     <p class="exp-links"><a href="/ja/#rooms" data-i18n="gvrPage.linkRooms">客室と料金を見る →</a></p>
   </article>
 
@@ -145,12 +259,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="gvrPage.ctaTitle">ゲストハウス滞在が実際どんなものか見てみましょう</h2>
-    <p data-i18n="gvrPage.ctaText">Vilu Residenceはマーミギリにある本物のローカルゲストハウスです——客室と料金をご確認いただくか、直接お問い合わせください。</p>
+    <p data-i18n="gvrPage.ctaText">Vilu Residenceのすべてのホリデーパッケージに、こちらでのご滞在が含まれています — 宿泊と体験がどのように組み合わさるかご覧いただくか、直接客室と料金をご確認ください。</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/ja/#booking" data-i18n="gvrPage.ctaBook">空室状況を確認する</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="gvrPage.ctaWhatsapp">WhatsAppで問い合わせる</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="gvrPage.ctaPackages">ホリデーパッケージを見る</a>
+      <a class="btn-outline" data-i18n-href="gvrPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF%E3%80%82%E3%82%B2%E3%82%B9%E3%83%88%E3%83%8F%E3%82%A6%E3%82%B9%E5%AF%BE%E3%83%AA%E3%82%BE%E3%83%BC%E3%83%88%E3%82%92%E6%8B%9D%E8%A6%8B%E3%81%97%E3%80%81Vilu%E3%81%A8%E4%B8%80%E7%B7%92%E3%81%AB%E3%83%A2%E3%83%AB%E3%83%87%E3%82%A3%E3%83%96%E6%97%85%E8%A1%8C%E3%81%AE%E8%A8%88%E7%94%BB%E3%82%92%E6%89%8B%E4%BC%9D%E3%81%A3%E3%81%A6%E3%81%84%E3%81%9F%E3%81%A0%E3%81%8D%E3%81%9F%E3%81%84%E3%81%A7%E3%81%99%E3%80%82" target="_blank" rel="noopener noreferrer" data-i18n="gvrPage.ctaWhatsapp">WhatsAppで問い合わせる</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/ja/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="gvrPage.ctaBook">空室状況を確認する</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -174,34 +290,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">ナビゲーション</h4><ul>
-        <li><a href="/ja/" data-i18n="pageNav.home">ホーム</a></li>
-        <li><a href="/ja/#rooms" data-i18n="nav.rooms">客室</a></li>
-        <li><a href="/ja/#holiday-packages" data-i18n="nav.packages">パッケージ</a></li>
-        <li><a href="/ja/#travel-info" data-i18n="nav.travelInfo">旅の情報</a></li>
-        <li><a href="/ja/#contact" data-i18n="nav.contact">お問い合わせ</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">ガイド</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">マーミギリガイド</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">探る</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">ジンベエザメシュノーケリング</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">マンタシュノーケリング</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">ベストシーズン</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">費用ガイド</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">マーミジリでできること</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">宿泊</h4><ul>
+        <li><a href="/ja/#about">Vilu Residence</a></li>
+        <li><a href="/ja/#rooms" data-i18n="nav.rooms">客室</a></li>
+        <li><a href="/ja/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">最新の空室状況</a></li>
+        <li><a href="/ja/#gallery" data-i18n="nav.gallery">ギャラリー</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">南アリガイド</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">マーミギリガイド</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">シュノーケリングに最適な島</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">南アリと他地域の比較</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">マーミジリでできること</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">計画</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">ベストシーズン</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">費用ガイド</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a></li>
+        <li><a href="/ja/#travel-info" data-i18n="nav.travelInfo">旅の情報</a></li>
+        <li><a href="/ja/#contact" data-i18n="nav.contact">お問い合わせ</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">全著作権所有。</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">全著作権所有。</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">運営</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">プライバシー設定</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookieとプライバシーの同意" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">お客様のプライバシー、お客様の選択</strong>
+      <p data-i18n="consent.message">Viluの運営には必須の技術を使用しています。お客様の許可をいただければ、サイトの利用状況を把握するために分析およびマーケティング技術も使用させていただきます。</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">必須以外を拒否</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">カスタマイズ</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">すべて同意する</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">プライバシー設定</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="閉じる" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">必須</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">常に有効</span>
+        </div>
+        <p data-i18n="consent.essential.desc">予約、空室状況、サイトの基本機能に必要です。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">設定</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="設定" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">サイト上で行った任意の選択を記憶します。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">分析</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="分析" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">訪問者がサイトをどのように利用しているかを把握するのに役立ちます。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">マーケティング</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="マーケティング" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">後で他のサイトを訪問した際に、より関連性の高い広告を表示できるようにします。</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">設定を保存</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -227,25 +410,27 @@ var I18N = { en: {
     relTag2: "Budgeting", relTitle2: "Holiday Cost Guide",
     relTag3: "Plan Your Stay", relTitle3: "Holiday Packages",
     ctaTitle: "See what a guesthouse stay actually looks like",
-    ctaText: "Vilu Residence is a real local-island guesthouse on Maamigili — check our rooms and rates, or ask us anything directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Every Vilu Residence holiday package includes your stay here — see how accommodation and experiences come together, or check our rooms and rates directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   blogGvr: {
     title: "Maldives Guesthouse <em>vs Resort</em>",
     intro: "Neither is objectively better — they're genuinely different trips, and the right one depends on what you're going to the Maldives for.",
     h1: "The legal and cultural difference",
-    p1: "Guesthouses on local islands only became legally possible in 2009, when Maldivian tourism law was opened up to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
+    p1: "Guesthouses on local islands only became possible from 2009, when Maldivian tourism regulations changed to allow small hotels and guesthouses on inhabited islands, not just private resort islands. That change matters beyond logistics: local islands follow Islamic law around alcohol and dress, meaning no alcohol is served and swimwear is restricted to a designated bikini beach rather than the whole island. Resort islands, being uninhabited and privately run, allow alcohol and swimwear on all beaches.",
     h2: "The price difference",
     p2: "As a general rule (prices vary by season and property), guesthouses on local islands run considerably cheaper per night than resorts, often including breakfast in the rate. Resorts span a much wider range, from mid-range overwater options up to ultra-luxury private-island properties.",
     h3: "What you actually get",
     p3: "A resort gets you a private island, often with overwater villas and all-inclusive dining, and no contact with local Maldivian life beyond staff. A guesthouse gets you a real island community, working local shops, and — because you're paying for far less private infrastructure — meaningfully lower prices for a trip built around the same reefs and marine life. Neither includes the other's experience by design, not by compromise.",
     h4: "A genuinely honest take",
-    p4: "If total privacy and five-star service are the point of the trip, a resort delivers that in a way a guesthouse structurally can't. If the point is the reef, the whale sharks, and a real Maldivian island — and a lower price — a guesthouse like ours delivers that well."
+    p4: "If total privacy and five-star service are the point of the trip, a resort delivers that in a way a guesthouse structurally can't. If the point is the reef, the whale sharks, and a real Maldivian island — and a lower price — a guesthouse like ours delivers that well.",
+    p5: "One option splits the difference: our <a href=\"holiday-packages.html#ultimate-resort-island-odyssey\">Ultimate Resort &amp; Island Odyssey</a> package is the one Vilu Residence holiday package that includes a day visit to a neighboring resort — a way to see that side of the Maldives too, without changing where you're staying."
   }
 }};
 var PAGE_META_NS = 'gvrMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

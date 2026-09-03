@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ja" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/holiday-packages.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/holiday-packages.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/holiday-packages.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -99,19 +98,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ja/" class="nav-logo">
+  <a href="/ja/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">ホリデーパッケージ</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">体験</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">ジンベエザメシュノーケリング</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">マンタシュノーケリング</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">マーミジリでできること</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">南アリ</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">マーミギリガイド</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">南アリ環礁ガイド</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">シュノーケリングに最適な島</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">南アリと他地域の比較</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">宿泊</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ja/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ja/#rooms" data-i18n="nav.rooms" role="menuitem">客室</a>
+        <a href="/ja/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">最新の空室状況</a>
+        <a href="/ja/#gallery" data-i18n="nav.gallery" role="menuitem">ギャラリー</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">旅の計画</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">ベストシーズン</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">費用ガイド</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">ゲストハウス対リゾート</a>
+        <a href="/ja/#travel-info" data-i18n="nav.travelInfo" role="menuitem">旅の情報</a>
+        <a href="/ja/#contact" data-i18n="nav.contact" role="menuitem">お問い合わせ</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">休暇を計画する</a>
+    <a class="nav-check-availability js-check-availability" href="/ja/#booking" data-i18n="navShell.checkAvailability">空室状況を確認</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="メニューを開く" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="サイトメニュー" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ja/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ja/#booking" data-i18n="pageNav.bookNow">今すぐ予約</a>
+    <button class="mm-close" aria-label="メニューを閉じる" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">体験</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">ジンベエザメシュノーケリング</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">マンタシュノーケリング</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">マーミジリでできること</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">南アリ</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">マーミギリガイド</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">シュノーケリングに最適な島</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">南アリと他地域の比較</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">宿泊</button>
+      <div class="mm-group-panel">
+        <a href="/ja/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ja/#rooms" data-mm-close="" data-i18n="nav.rooms">客室</a>
+        <a href="/ja/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">最新の空室状況</a>
+        <a href="/ja/#gallery" data-mm-close="" data-i18n="nav.gallery">ギャラリー</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">旅の計画</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">ベストシーズン</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">費用ガイド</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a>
+        <a href="/ja/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">旅の情報</a>
+        <a href="/ja/#contact" data-mm-close="" data-i18n="nav.contact">お問い合わせ</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">休暇を計画する</a>
+      <a class="mm-check-availability js-check-availability" href="/ja/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">空室状況を確認</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/turtle_snorkelers_gallery.jpg');background-image:image-set(url('/images/turtle_snorkelers_gallery.webp') type('image/webp'), url('/images/turtle_snorkelers_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -235,33 +348,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">ナビゲーション</h4><ul>
-        <li><a href="/ja/" data-i18n="pageNav.home">ホーム</a></li>
-        <li><a href="/ja/#rooms" data-i18n="nav.rooms">客室</a></li>
-        <li><a href="/ja/#travel-info" data-i18n="nav.travelInfo">旅の情報</a></li>
-        <li><a href="/ja/#contact" data-i18n="nav.contact">お問い合わせ</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">ガイド</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">マーミギリガイド</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">探る</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">ジンベエザメシュノーケリング</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">マンタシュノーケリング</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">ベストシーズン</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">費用ガイド</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">マーミジリでできること</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">宿泊</h4><ul>
+        <li><a href="/ja/#about">Vilu Residence</a></li>
+        <li><a href="/ja/#rooms" data-i18n="nav.rooms">客室</a></li>
+        <li><a href="/ja/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">最新の空室状況</a></li>
+        <li><a href="/ja/#gallery" data-i18n="nav.gallery">ギャラリー</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">南アリガイド</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">マーミギリガイド</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">シュノーケリングに最適な島</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">南アリと他地域の比較</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">マーミジリでできること</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">計画</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">ベストシーズン</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">費用ガイド</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a></li>
+        <li><a href="/ja/#travel-info" data-i18n="nav.travelInfo">旅の情報</a></li>
+        <li><a href="/ja/#contact" data-i18n="nav.contact">お問い合わせ</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">全著作権所有。</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">全著作権所有。</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">運営</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">プライバシー設定</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookieとプライバシーの同意" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">お客様のプライバシー、お客様の選択</strong>
+      <p data-i18n="consent.message">Viluの運営には必須の技術を使用しています。お客様の許可をいただければ、サイトの利用状況を把握するために分析およびマーケティング技術も使用させていただきます。</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">必須以外を拒否</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">カスタマイズ</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">すべて同意する</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">プライバシー設定</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="閉じる" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">必須</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">常に有効</span>
+        </div>
+        <p data-i18n="consent.essential.desc">予約、空室状況、サイトの基本機能に必要です。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">設定</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="設定" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">サイト上で行った任意の選択を記憶します。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">分析</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="分析" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">訪問者がサイトをどのように利用しているかを把握するのに役立ちます。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">マーケティング</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="マーケティング" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">後で他のサイトを訪問した際に、より関連性の高い広告を表示できるようにします。</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">設定を保存</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="pkg-sticky-cta" id="pkg-sticky-cta">
   <a class="pkg-sticky-cta-link" id="pkg-sticky-cta-link" href="https://wa.me/9609903339?text=Hi!%20I%27m%20planning%20a%20Maldives%20holiday%20and%20would%20like%20help%20choosing%20a%20package." target="_blank" rel="noopener noreferrer" onclick="trackEvent('package_sticky_cta_click',{entry_guide:_hpEntryGuide})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i><span data-i18n="hpPage.stickyText">パッケージ選びにお悩みですか? Viluにご相談ください</span></a>
@@ -546,6 +727,7 @@ if (typeof document !== 'undefined' && document.addEventListener) {
 }
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

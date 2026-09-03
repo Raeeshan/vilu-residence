@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ko" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/things-to-do-maamigili.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/things-to-do-maamigili.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/things-to-do-maamigili.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -99,19 +98,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ko/" class="nav-logo">
+  <a href="/ko/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">홀리데이 패키지</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">체험</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">고래상어 스노클링</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">쥐가오리 스노클링</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">마미길리에서 할 수 있는 것들</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">사우스 아리</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">마미길리 가이드</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">사우스 아리 환초 가이드</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">스노클링 최고의 섬</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">사우스 아리 vs 다른 지역</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">숙박</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ko/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ko/#rooms" data-i18n="nav.rooms" role="menuitem">객실</a>
+        <a href="/ko/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">실시간 예약 가능 여부</a>
+        <a href="/ko/#gallery" data-i18n="nav.gallery" role="menuitem">갤러리</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">여행 계획</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">방문 최적기</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">비용 가이드</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">게스트하우스 대 리조트</a>
+        <a href="/ko/#travel-info" data-i18n="nav.travelInfo" role="menuitem">여행 정보</a>
+        <a href="/ko/#contact" data-i18n="nav.contact" role="menuitem">문의</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">휴가 계획하기</a>
+    <a class="nav-check-availability js-check-availability" href="/ko/#booking" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="메뉴 열기" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="사이트 메뉴" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ko/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ko/#booking" data-i18n="pageNav.bookNow">지금 예약하기</a>
+    <button class="mm-close" aria-label="메뉴 닫기" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">홀리데이 패키지</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">체험</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">고래상어 스노클링</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">쥐가오리 스노클링</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">사우스 아리</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">마미길리 가이드</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">스노클링 최고의 섬</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">사우스 아리 vs 다른 지역</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">숙박</button>
+      <div class="mm-group-panel">
+        <a href="/ko/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ko/#rooms" data-mm-close="" data-i18n="nav.rooms">객실</a>
+        <a href="/ko/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">실시간 예약 가능 여부</a>
+        <a href="/ko/#gallery" data-mm-close="" data-i18n="nav.gallery">갤러리</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">여행 계획</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">방문 최적기</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">비용 가이드</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">게스트하우스 대 리조트</a>
+        <a href="/ko/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">여행 정보</a>
+        <a href="/ko/#contact" data-mm-close="" data-i18n="nav.contact">문의</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">휴가 계획하기</a>
+      <a class="mm-check-availability js-check-availability" href="/ko/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/turtle_snorkelers_gallery.jpg');background-image:image-set(url('/images/turtle_snorkelers_gallery.webp') type('image/webp'), url('/images/turtle_snorkelers_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -297,34 +410,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">메뉴</h4><ul>
-        <li><a href="/ko/" data-i18n="pageNav.home">홈</a></li>
-        <li><a href="/ko/#rooms" data-i18n="nav.rooms">객실</a></li>
-        <li><a href="/ko/#holiday-packages" data-i18n="nav.packages">패키지</a></li>
-        <li><a href="/ko/#travel-info" data-i18n="nav.travelInfo">여행 정보</a></li>
-        <li><a href="/ko/#contact" data-i18n="nav.contact">문의</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">가이드</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">마미길리 가이드</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">둘러보기</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">홀리데이 패키지</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">고래상어 스노클링</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">쥐가오리 스노클링</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">홀리데이 패키지</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">방문 최적기</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">게스트하우스 대 리조트</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">비용 가이드</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">숙박</h4><ul>
+        <li><a href="/ko/#about">Vilu Residence</a></li>
+        <li><a href="/ko/#rooms" data-i18n="nav.rooms">객실</a></li>
+        <li><a href="/ko/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">실시간 예약 가능 여부</a></li>
+        <li><a href="/ko/#gallery" data-i18n="nav.gallery">갤러리</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">사우스 아리 가이드</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">마미길리 가이드</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">사우스 아리 환초 가이드</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">스노클링 최고의 섬</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">사우스 아리 vs 다른 지역</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">마미길리에서 할 수 있는 것들</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">계획</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">방문 최적기</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">비용 가이드</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">게스트하우스 대 리조트</a></li>
+        <li><a href="/ko/#travel-info" data-i18n="nav.travelInfo">여행 정보</a></li>
+        <li><a href="/ko/#contact" data-i18n="nav.contact">문의</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">모든 권리 보유.</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">모든 권리 보유.</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">운영</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">개인정보 선택</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="쿠키 및 개인정보 동의" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">고객님의 개인정보, 고객님의 선택</strong>
+      <p data-i18n="consent.message">Vilu 운영을 위해 필수 기술을 사용합니다. 고객님의 동의가 있으면 방문자가 저희 사이트를 어떻게 이용하는지 파악하기 위해 분석 및 마케팅 기술도 사용하고자 합니다.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">필수 외 거부</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">맞춤 설정</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">모두 동의</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">개인정보 환경설정</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="닫기" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">필수</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">항상 활성</span>
+        </div>
+        <p data-i18n="consent.essential.desc">예약, 이용 가능 여부 및 핵심 사이트 기능에 필요합니다.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">환경설정</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="환경설정" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">사이트에서 선택하신 선택적 항목을 기억합니다.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">분석</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="분석" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">방문자가 사이트를 어떻게 이용하는지 파악하는 데 도움이 됩니다.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">마케팅</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="마케팅" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">이후 다른 사이트를 방문할 때 더 관련성 높은 혜택을 제공합니다.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">환경설정 저장</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -447,6 +627,7 @@ var I18N = { en: {
 var PAGE_META_NS = 'ttdMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

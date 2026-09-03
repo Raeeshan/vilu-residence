@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="zh" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/best-time-to-visit.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/best-time-to-visit.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/best-time-to-visit.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -83,19 +82,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/zh/" class="nav-logo">
+  <a href="/zh/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">度假套餐</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">体验</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">鲸鲨浮潜</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">蝠鲼浮潜</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">马米吉利有哪些可做的事</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">南阿里</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">马米吉利指南</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">南阿里环礁指南</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">最佳浮潜岛屿</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">南阿里对比其他地区</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">住宿</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/zh/#about" role="menuitem">Vilu Residence</a>
+        <a href="/zh/#rooms" data-i18n="nav.rooms" role="menuitem">客房</a>
+        <a href="/zh/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">实时房态</a>
+        <a href="/zh/#gallery" data-i18n="nav.gallery" role="menuitem">图库</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">规划行程</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">最佳旅行时间</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">度假费用指南</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">民宿对比度假村</a>
+        <a href="/zh/#travel-info" data-i18n="nav.travelInfo" role="menuitem">旅行信息</a>
+        <a href="/zh/#contact" data-i18n="nav.contact" role="menuitem">联系我们</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">规划假期</a>
+    <a class="nav-check-availability js-check-availability" href="/zh/#booking" data-i18n="navShell.checkAvailability">查看空房</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="打开菜单" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="网站菜单" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/zh/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/zh/#booking" data-i18n="pageNav.bookNow">立即预订</a>
+    <button class="mm-close" aria-label="关闭菜单" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">度假套餐</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">体验</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">鲸鲨浮潜</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">蝠鲼浮潜</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">马米吉利有哪些可做的事</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">南阿里</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">马米吉利指南</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">南阿里环礁指南</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">最佳浮潜岛屿</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">南阿里对比其他地区</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">住宿</button>
+      <div class="mm-group-panel">
+        <a href="/zh/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/zh/#rooms" data-mm-close="" data-i18n="nav.rooms">客房</a>
+        <a href="/zh/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">实时房态</a>
+        <a href="/zh/#gallery" data-mm-close="" data-i18n="nav.gallery">图库</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">规划行程</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">最佳旅行时间</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">度假费用指南</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">民宿对比度假村</a>
+        <a href="/zh/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">旅行信息</a>
+        <a href="/zh/#contact" data-mm-close="" data-i18n="nav.contact">联系我们</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">规划假期</a>
+      <a class="mm-check-availability js-check-availability" href="/zh/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">查看空房</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/whale_shark_2_gallery.jpg');background-image:image-set(url('/images/whale_shark_2_gallery.webp') type('image/webp'), url('/images/whale_shark_2_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -141,12 +254,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="btPage.ctaTitle">任何季节都能在这里遇见鲸鲨</h2>
-    <p data-i18n="btPage.ctaText">无论哪个月份适合你的预算和时间安排，南阿里环礁的海洋生物都在这里。查看空房情况或直接联系我们。</p>
+    <p data-i18n="btPage.ctaText">无论哪个月份适合你的预算和时间安排，南阿里环礁的海洋生物都在这里 —— 了解我们的度假套餐如何将这一切结合在一起，或直接查看空房情况。</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/zh/#booking" data-i18n="btPage.ctaBook">查看空房情况</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="btPage.ctaWhatsapp">通过WhatsApp咨询</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="btPage.ctaPackages">查看假期套餐</a>
+      <a class="btn-outline" data-i18n-href="btPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%E6%82%A8%E5%A5%BD%EF%BC%81%E6%88%91%E7%9C%8B%E4%BA%86%E6%82%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E6%97%85%E8%A1%8C%E6%97%B6%E9%97%B4%EF%BC%8C%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%BE%97%E5%88%B0%E5%B8%AE%E5%8A%A9%E6%9D%A5%E8%A7%84%E5%88%92%E6%88%91%E5%9C%A8%E9%A9%AC%E5%B0%94%E4%BB%A3%E5%A4%AB%E4%B8%8EVilu%E7%9A%84%E5%81%87%E6%9C%9F%E3%80%82" target="_blank" rel="noopener noreferrer" data-i18n="btPage.ctaWhatsapp">通过WhatsApp咨询</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/zh/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="btPage.ctaBook">查看空房情况</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -170,34 +285,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">导航</h4><ul>
-        <li><a href="/zh/" data-i18n="pageNav.home">首页</a></li>
-        <li><a href="/zh/#rooms" data-i18n="nav.rooms">客房</a></li>
-        <li><a href="/zh/#holiday-packages" data-i18n="nav.packages">套餐</a></li>
-        <li><a href="/zh/#travel-info" data-i18n="nav.travelInfo">旅行信息</a></li>
-        <li><a href="/zh/#contact" data-i18n="nav.contact">联系我们</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">指南</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南阿里环礁指南</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">马米吉利指南</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">探索</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">度假套餐</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">鲸鲨浮潜</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">蝠鲼浮潜</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">度假套餐</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">最佳旅行时间</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">民宿对比度假村</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">度假费用指南</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">马米吉利有哪些可做的事</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">住宿</h4><ul>
+        <li><a href="/zh/#about">Vilu Residence</a></li>
+        <li><a href="/zh/#rooms" data-i18n="nav.rooms">客房</a></li>
+        <li><a href="/zh/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">实时房态</a></li>
+        <li><a href="/zh/#gallery" data-i18n="nav.gallery">图库</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">南阿里指南</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">马米吉利指南</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南阿里环礁指南</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">最佳浮潜岛屿</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">南阿里对比其他地区</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">马米吉利有哪些可做的事</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">规划</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">最佳旅行时间</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">度假费用指南</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">民宿对比度假村</a></li>
+        <li><a href="/zh/#travel-info" data-i18n="nav.travelInfo">旅行信息</a></li>
+        <li><a href="/zh/#contact" data-i18n="nav.contact">联系我们</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">版权所有。</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">版权所有。</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">管理方</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">隐私选择</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookie 与隐私同意" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">您的隐私，由您选择</strong>
+      <p data-i18n="consent.message">我们使用必要的技术来维持 Vilu 网站的运行。在您允许的情况下，我们还希望使用分析和营销技术，以了解访客如何使用我们的网站。</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">拒绝非必要项</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">自定义</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">全部接受</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">隐私偏好设置</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="关闭" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">必要</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">始终有效</span>
+        </div>
+        <p data-i18n="consent.essential.desc">预订、查询空房及网站核心功能所必需。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">偏好设置</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="偏好设置" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">记住您在网站上所做的可选设置。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">分析</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="分析" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">帮助我们了解访客如何使用本网站。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">营销</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="营销" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">让您日后访问其他网站时看到更相关的优惠信息。</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">保存偏好设置</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -222,8 +404,8 @@ var I18N = { en: {
     relTag2: "Plan Your Stay", relTitle2: "Holiday Packages",
     relTag3: "Destination Guide", relTitle3: "South Ari Atoll Guide",
     ctaTitle: "Any season works for whale sharks here",
-    ctaText: "Whatever month suits your budget and schedule, South Ari Atoll's marine life will be here. Check availability or ask us directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Whatever month suits your budget and schedule, South Ari Atoll's marine life will be here — see how our holiday packages bring it together, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   blogBestTime: {
     title: "Best Time to Visit <em>the Maldives</em>",
@@ -239,6 +421,7 @@ var I18N = { en: {
 var PAGE_META_NS = 'btMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>

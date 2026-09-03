@@ -1,13 +1,15 @@
 <!DOCTYPE html><html lang="ja" dir="ltr"><head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="/consent.js"></script>
 
 <script>
 (function(){
@@ -51,9 +53,6 @@
 <link rel="alternate" hreflang="sk" href="https://viluresidence.net/sk/south-ari-vs-other-regions.html">
 <link rel="alternate" hreflang="cs" href="https://viluresidence.net/cs/south-ari-vs-other-regions.html">
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-vs-other-regions.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
 <script type="application/ld+json">
@@ -83,19 +82,133 @@
 
 <nav id="nav">
   <div class="nav-row-top">
-    <a href="/ja/" class="nav-logo">
+  <a href="/ja/" class="nav-logo">
+    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">Vilu Residence</div>
+      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide" data-nav-group="packages">ホリデーパッケージ</a></li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">体験</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">ジンベエザメシュノーケリング</a>
+        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">マンタシュノーケリング</a>
+        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">マーミジリでできること</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">南アリ</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">マーミギリガイド</a>
+        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">南アリ環礁ガイド</a>
+        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">シュノーケリングに最適な島</a>
+        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">南アリと他地域の比較</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">宿泊</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="/ja/#about" role="menuitem">Vilu Residence</a>
+        <a href="/ja/#rooms" data-i18n="nav.rooms" role="menuitem">客室</a>
+        <a href="/ja/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">最新の空室状況</a>
+        <a href="/ja/#gallery" data-i18n="nav.gallery" role="menuitem">ギャラリー</a>
+      </div>
+    </li>
+    <li class="nav-drop">
+      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">旅の計画</button>
+      <div class="nav-drop-panel" role="menu">
+        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">ベストシーズン</a>
+        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">費用ガイド</a>
+        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">ゲストハウス対リゾート</a>
+        <a href="/ja/#travel-info" data-i18n="nav.travelInfo" role="menuitem">旅の情報</a>
+        <a href="/ja/#contact" data-i18n="nav.contact" role="menuitem">お問い合わせ</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher" aria-label="Language selector"></div>
+    <a class="btn-plan-holiday" href="holiday-packages.html" data-i18n="navShell.planHoliday">休暇を計画する</a>
+    <a class="nav-check-availability js-check-availability" href="/ja/#booking" data-i18n="navShell.checkAvailability">空室状況を確認</a>
+  </div>
+  <div class="nav-mobile-right">
+    <button class="nav-hamburger" id="hamburger" aria-label="メニューを開く" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer (Phase 10 global shell) -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="サイトメニュー" data-i18n-aria-label="navShell.menuLabel">
+  <div class="mm-header">
+    <a href="/ja/" class="nav-logo" data-mm-close="">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
-      <a class="nav-book" href="/ja/#booking" data-i18n="pageNav.bookNow">今すぐ予約</a>
+    <button class="mm-close" aria-label="メニューを閉じる" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+  </div>
+  <div class="mm-body">
+    <a class="mm-packages" href="holiday-packages.html" data-mm-close="" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">体験</button>
+      <div class="mm-group-panel">
+        <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">ジンベエザメシュノーケリング</a>
+        <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">マンタシュノーケリング</a>
+        <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">マーミジリでできること</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">南アリ</button>
+      <div class="mm-group-panel">
+        <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">マーミギリガイド</a>
+        <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a>
+        <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">シュノーケリングに最適な島</a>
+        <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">南アリと他地域の比較</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">宿泊</button>
+      <div class="mm-group-panel">
+        <a href="/ja/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/ja/#rooms" data-mm-close="" data-i18n="nav.rooms">客室</a>
+        <a href="/ja/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">最新の空室状況</a>
+        <a href="/ja/#gallery" data-mm-close="" data-i18n="nav.gallery">ギャラリー</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">旅の計画</button>
+      <div class="mm-group-panel">
+        <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">ベストシーズン</a>
+        <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">費用ガイド</a>
+        <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a>
+        <a href="/ja/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">旅の情報</a>
+        <a href="/ja/#contact" data-mm-close="" data-i18n="nav.contact">お問い合わせ</a>
+      </div>
+    </div>
+    <div class="mm-ctas">
+      <a class="btn-plan-holiday" href="holiday-packages.html" data-mm-close="" data-i18n="navShell.planHoliday">休暇を計画する</a>
+      <a class="mm-check-availability js-check-availability" href="/ja/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">空室状況を確認</a>
+    </div>
+    <div class="mm-lang">
+      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+    </div>
+    <div class="mm-contact">
+      <a href="tel:+9609903339" onclick="trackEvent('phone_click',{location:'mobile_menu'})">+960 9903339</a>
+      <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('email_click',{location:'mobile_menu'})">Viluresidence@gmail.com</a>
+      <div class="mm-contact-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
   </div>
-</nav>
+</div>
 
 <header class="page-header" style="background-image:url('/images/manta_ray_hd.jpg');background-image:image-set(url('/images/manta_ray_hd.webp') type('image/webp'), url('/images/manta_ray_hd.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
@@ -110,7 +223,7 @@
     <p data-i18n="cmpRegions.intro">モルディブの26の環礁は互換性のあるものではありません——各地域には異なる特徴があり、単にマレへの近さだけでなく、旅行に本当に求めるものに基づいて選ぶ価値があります。</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h1">北マレ環礁</h2>
-    <p data-i18n="cmpRegions.p1">ヴェラナ国際空港に最も近い環礁群のため、送迎時間は短く——多くの場合1時間未満です。リゾートの集中度が最も高く、東側のリーフにはよく知られたサーフスポットもあります。首都に近いことから、最も訪問者が多い地域でもあります。</p>
+    <p data-i18n="cmpRegions.p1">ヴェラナ国際空港に最も近い環礁群のため、送迎時間は短く——多くの場合1時間未満です。モルディブ有数のリゾート地域の一つで、東側のリーフにはよく知られたサーフスポットもあります。首都に近いことから、最も訪問者が多い地域でもあります。</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h2">バア環礁</h2>
     <p data-i18n="cmpRegions.p2">ユネスコ生物圏保護区に指定されているバア環礁は、世界で最もよく記録されているマンタの摂餌群生地の一つ、ハニファル湾で最もよく知られています——ただしアクセスは季節限定で、保護区を守るために厳しく規制されています。</p>
@@ -119,7 +232,7 @@
     <p data-i18n="cmpRegions.p3">マレからは遠く（実際にスピードボートで1時間45分、または飛行機で20分）、それが提供するもの——一年中のジンベエザメ、定期的なマンタの目撃、そしてマーミジリやディグラのような長く定着した地元の島々とリゾートの組み合わせ——との引き換えであり、ゲストハウス旅行者にもリゾートゲストにもアクセスしやすくなっています。</p>
 
     <h2 class="section-title" style="margin-top:36px" data-i18n="cmpRegions.h4">地域の選び方</h2>
-    <p data-i18n="cmpRegions.p4">送迎時間の短縮を最優先するなら、北マレ環礁に勝るものはありません。特定の、非常に季節性の高い自然イベントが目的なら、バア環礁のハニファル湾を計画する価値があります。一年中の海洋生物と本物の地元島滞在を求めるなら、南アリはまさにそのために作られています。</p>
+    <p data-i18n="cmpRegions.p4">送迎時間の短縮を最優先するなら、北マレ環礁に勝るものはありません。特定の、非常に季節性の高い自然イベントが目的なら、バア環礁のハニファル湾を計画する価値があります。一年中の海洋生物と本物の地元島滞在を求めるなら、南アリはまさにそのために作られています。 そのような旅を計画されているなら、当施設のホリデーパッケージが宿泊と体験を一つにまとめます。</p>
     <p class="exp-links"><a href="holiday-packages.html" data-i18n="cmpRegionsPage.linkPackages">ホリデーパッケージを見る →</a></p>
   </article>
 
@@ -144,12 +257,14 @@
 
   <div class="cta-band reveal" style="margin-top:60px;margin-bottom:60px">
     <h2 data-i18n="cmpRegionsPage.ctaTitle">南アリをご自身で体験する準備はできましたか？</h2>
-    <p data-i18n="cmpRegionsPage.ctaText">Vilu Residenceは南アリの一年中続く海洋生物のただ中に位置しています。空室状況を確認するか、直接お問い合わせください。</p>
+    <p data-i18n="cmpRegionsPage.ctaText">Vilu Residenceは南アリの一年中続く海洋生物のただ中に位置しています — ホリデーパッケージがどのようにすべてをまとめているかご覧いただくか、直接空室状況をご確認ください。</p>
     <div class="cta-buttons">
-      <a class="btn-primary" href="/ja/#booking" data-i18n="cmpRegionsPage.ctaBook">空室状況を確認する</a>
-      <a class="btn-outline" href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" data-i18n="cmpRegionsPage.ctaWhatsapp">WhatsAppで問い合わせる</a>
+      <a class="btn-primary" href="holiday-packages.html" data-i18n="cmpRegionsPage.ctaPackages">ホリデーパッケージを見る</a>
+      <a class="btn-outline" data-i18n-href="cmpRegionsPage.ctaWhatsappHref" href="https://wa.me/9609903339?text=%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF%E3%80%82%E5%8D%97%E3%82%A2%E3%83%AA%E3%81%A8%E4%BB%96%E5%9C%B0%E5%9F%9F%E3%81%AE%E6%AF%94%E8%BC%83%E3%82%92%E6%8B%9D%E8%A6%8B%E3%81%97%E3%80%81Vilu%E3%81%A8%E4%B8%80%E7%B7%92%E3%81%AB%E3%83%A2%E3%83%AB%E3%83%87%E3%82%A3%E3%83%96%E6%97%85%E8%A1%8C%E3%81%AE%E8%A8%88%E7%94%BB%E3%82%92%E6%89%8B%E4%BC%9D%E3%81%A3%E3%81%A6%E3%81%84%E3%81%9F%E3%81%A0%E3%81%8D%E3%81%9F%E3%81%84%E3%81%A7%E3%81%99%E3%80%82" target="_blank" rel="noopener noreferrer" data-i18n="cmpRegionsPage.ctaWhatsapp">WhatsAppで問い合わせる</a>
     </div>
     <p style="margin-top:18px;font-size:var(--font-size-sm)">
+      <a href="/ja/#booking" style="color:rgba(255,255,255,.85);text-decoration:none" data-i18n="cmpRegionsPage.ctaBook">空室状況を確認する</a>
+      &nbsp;·&nbsp;
       <a href="tel:+9609903339" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('phone_click',{location:'cta_band'})"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
       &nbsp;·&nbsp;
       <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.85);text-decoration:none" onclick="trackEvent('email_click',{location:'cta_band'})"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
@@ -173,34 +288,101 @@
           <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
         </div>
       </div>
-      <div class="footer-col"><h4 data-i18n="footer.navigate">ナビゲーション</h4><ul>
-        <li><a href="/ja/" data-i18n="pageNav.home">ホーム</a></li>
-        <li><a href="/ja/#rooms" data-i18n="nav.rooms">客室</a></li>
-        <li><a href="/ja/#holiday-packages" data-i18n="nav.packages">パッケージ</a></li>
-        <li><a href="/ja/#travel-info" data-i18n="nav.travelInfo">旅の情報</a></li>
-        <li><a href="/ja/#contact" data-i18n="nav.contact">お問い合わせ</a></li>
-      </ul></div>
-      <div class="footer-col"><h4 data-i18n="pageNav.guidesHeading">ガイド</h4><ul>
-        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a></li>
-        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">マーミギリガイド</a></li>
+      <div class="footer-col"><h4 data-i18n="footer.explore">探る</h4><ul>
+        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">ジンベエザメシュノーケリング</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">マンタシュノーケリング</a></li>
-        <li><a href="holiday-packages.html" data-i18n="pageNav.hpGuide">ホリデーパッケージ</a></li>
-        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">ベストシーズン</a></li>
-        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a></li>
-        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">費用ガイド</a></li>
+        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">マーミジリでできること</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="navShell.stay">宿泊</h4><ul>
+        <li><a href="/ja/#about">Vilu Residence</a></li>
+        <li><a href="/ja/#rooms" data-i18n="nav.rooms">客室</a></li>
+        <li><a href="/ja/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">最新の空室状況</a></li>
+        <li><a href="/ja/#gallery" data-i18n="nav.gallery">ギャラリー</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">南アリガイド</h4><ul>
+        <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">マーミギリガイド</a></li>
+        <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南アリ環礁ガイド</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">シュノーケリングに最適な島</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">南アリと他地域の比較</a></li>
-        <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">マーミジリでできること</a></li>
+      </ul></div>
+      <div class="footer-col"><h4 data-i18n="footer.plan">計画</h4><ul>
+        <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">ベストシーズン</a></li>
+        <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">費用ガイド</a></li>
+        <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">ゲストハウス対リゾート</a></li>
+        <li><a href="/ja/#travel-info" data-i18n="nav.travelInfo">旅の情報</a></li>
+        <li><a href="/ja/#contact" data-i18n="nav.contact">お問い合わせ</a></li>
+        <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Vilu Residence Maamigili. <span data-i18n="footer.rights">全著作権所有。</span></div>
+      <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">全著作権所有。</span></div>
+      <div class="footer-pms-badge"><span data-i18n="footer.managedBy">運営</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">プライバシー設定</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookieとプライバシーの同意" data-i18n-aria-label="consent.barLabel" hidden="">
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">お客様のプライバシー、お客様の選択</strong>
+      <p data-i18n="consent.message">Viluの運営には必須の技術を使用しています。お客様の許可をいただければ、サイトの利用状況を把握するために分析およびマーケティング技術も使用させていただきます。</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">必須以外を拒否</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">カスタマイズ</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">すべて同意する</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden="">
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">プライバシー設定</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="閉じる" data-i18n-aria-label="consent.close">×</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">必須</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">常に有効</span>
+        </div>
+        <p data-i18n="consent.essential.desc">予約、空室状況、サイトの基本機能に必要です。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">設定</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="設定" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">サイト上で行った任意の選択を記憶します。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">分析</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="分析" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">訪問者がサイトをどのように利用しているかを把握するのに役立ちます。</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">マーケティング</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="マーケティング" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">後で他のサイトを訪問した際に、より関連性の高い広告を表示できるようにします。</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">設定を保存</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {
@@ -225,25 +407,26 @@ var I18N = { en: {
     relTag2: "Destination Guide", relTitle2: "South Ari Atoll Guide",
     relTag3: "Trip Planning", relTitle3: "Best Time to Visit",
     ctaTitle: "Ready to experience South Ari for yourself?",
-    ctaText: "Vilu Residence is right in the middle of South Ari's year-round marine life. Check availability or ask us directly.",
-    ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
+    ctaText: "Vilu Residence is right in the middle of South Ari's year-round marine life — see how our holiday packages bring it together, or check availability directly.",
+    ctaPackages: "View Holiday Packages", ctaBook: "Check Availability", ctaWhatsapp: "Ask on WhatsApp"
   },
   cmpRegions: {
     title: "South Ari Atoll <em>vs Other Maldives Regions</em>",
     intro: "The Maldives' 26 atolls aren't interchangeable — each region has a different character, and it's worth choosing based on what you actually want from the trip rather than just proximity to Malé.",
     h1: "North Malé Atoll",
-    p1: "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It has the highest concentration of resorts and some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
+    p1: "The closest atoll cluster to Velana International Airport, so transfer times are short — often under an hour. It's one of the Maldives' major resort regions, with some well-known surf breaks on its eastern reefs. Being close to the capital also means it's the most heavily visited region.",
     h2: "Baa Atoll",
     p2: "Designated a UNESCO Biosphere Reserve, Baa Atoll is best known for Hanifaru Bay, one of the world's best-documented manta ray feeding aggregation sites — though access is seasonal and tightly regulated to protect the reserve.",
     h3: "South Ari Atoll",
     p3: "Further from Malé (a genuine 1h45m by speedboat, or 20 minutes by air), which is the trade-off for what it offers: year-round whale sharks, regular manta sightings, and a mix of resorts and long-established local islands like Maamigili and Dhigurah, making it accessible to guesthouse travelers as well as resort guests.",
     h4: "Choosing a region",
-    p4: "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that."
+    p4: "If minimizing transfer time matters most, North Malé is hard to beat. If a specific, tightly seasonal wildlife event is the goal, Baa Atoll's Hanifaru Bay is worth planning around. If year-round marine life and a genuine local-island stay are what you want, South Ari is built for exactly that — our holiday packages bring accommodation and experiences together if that's the trip you're planning."
   }
 }};
 var PAGE_META_NS = 'cmpRegionsMeta';
 </script>
 <script src="/shared-page-i18n.js"></script>
+<script src="/nav-shell.js"></script>
 
 
 </body></html>
