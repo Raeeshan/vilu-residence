@@ -164,6 +164,11 @@ function initReveal(){
   document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
 }
 
+function fillCurrentYear(){
+  var el = document.getElementById('cur-yr');
+  if (el) el.textContent = new Date().getFullYear();
+}
+
 async function initPage(){
   var initial = detectInitialLang();
   initLangSwitcher();
@@ -175,5 +180,6 @@ async function initPage(){
   }
   if (typeof renderDynamicContent === 'function') renderDynamicContent();
   initReveal();
+  fillCurrentYear();
 }
 document.addEventListener('DOMContentLoaded', initPage);

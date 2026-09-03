@@ -9,6 +9,11 @@ const IMAGE_SITEMAP_NS = 'http://www.google.com/schemas/sitemap-image/1.1';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
 const RTL_LANGS = { ar: true };
 
+// Footer copyright year — derived from the Maldives timezone rather than the
+// build machine's local clock, so it's correct regardless of where/when the
+// predeploy build runs. Standard-library Intl only, no dependency.
+const CURRENT_YEAR = new Intl.DateTimeFormat('en-US', { timeZone: 'Indian/Maldives', year: 'numeric' }).format(new Date());
+
 const PAGES = [
   { source: 'vilu-website.html', outFile: 'index.html', metaNs: 'seo', i18nMode: 'homepage' },
   { source: 'whale-shark-snorkeling.html', outFile: 'whale-shark-snorkeling.html', metaNs: 'wsMeta', i18nMode: 'standalone' },
@@ -651,6 +656,7 @@ function main() {
       rewriteResourcePaths($);
       if (pageDef.i18nMode === 'standalone') rewriteHomepageBackLinks($, lang);
       if (pkgScript) prerenderPackageGrid($, pkgScript.src, dict.static, pkgScript.i18nEn, dict.dynamic);
+      $('#cur-yr').text(CURRENT_YEAR);
       $('html').attr('lang', lang);
       $('html').attr('dir', RTL_LANGS[lang] ? 'rtl' : 'ltr');
       const outDir = path.join('.', lang);
@@ -659,6 +665,29 @@ function main() {
       totalGenerated++;
     }
     console.log(`Generated ${pageDef.source} -> /{lang}/${pageDef.outFile}`);
+
+    // English itself also needs its #cur-yr copyright-year marker updated —
+    // it's set client-side for everyone (including English) as a fallback,
+    // but crawlers and non-JS clients should see the correct year directly
+    // in raw HTML. Surgical regex replace, not a cheerio full-document
+    // rewrite, for the same reason as the #pkg-grid self-update below.
+    // Exactly one marker is expected per page; zero or multiple means the
+    // content is ambiguous, so we warn and skip rather than guess.
+    {
+      const yearMarkerRe = /(<span id="cur-yr">)\d{4}(<\/span>)/g;
+      const yearMatches = srcHtml.match(yearMarkerRe) || [];
+      if (yearMatches.length === 0) {
+        console.warn(`WARNING: no #cur-yr marker found in ${pageDef.source} — skipping English self-update, check manually`);
+      } else if (yearMatches.length > 1) {
+        console.warn(`WARNING: multiple #cur-yr markers found in ${pageDef.source} — skipping English self-update, check manually`);
+      } else {
+        const updatedYearHtml = srcHtml.replace(yearMarkerRe, `$1${CURRENT_YEAR}$2`);
+        if (updatedYearHtml !== srcHtml) {
+          fs.writeFileSync(pageDef.source, updatedYearHtml);
+          console.log(`Updated #cur-yr in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+        }
+      }
+    }
 
     // English itself also needs its #pkg-grid pre-rendered (the audit found
     // it empty in raw HTML too, since it's JS-populated for everyone,
