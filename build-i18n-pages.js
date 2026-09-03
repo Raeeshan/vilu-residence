@@ -27,6 +27,11 @@ const PAGES = [
   { source: 'best-local-islands-snorkeling.html', outFile: 'best-local-islands-snorkeling.html', metaNs: 'cmpSnorkelMeta', i18nMode: 'standalone' },
   { source: 'south-ari-vs-other-regions.html', outFile: 'south-ari-vs-other-regions.html', metaNs: 'cmpRegionsMeta', i18nMode: 'standalone' },
   { source: 'things-to-do-maamigili.html', outFile: 'things-to-do-maamigili.html', metaNs: 'blogThingsMeta', i18nMode: 'standalone' },
+  // Legal pages (Phase 11B-P5): intentionally NOT added to SITEMAP_PAGE_SOURCE
+  // below -- utility/trust pages stay out of the XML sitemap and noindexed,
+  // per the P4/P4R/P5 decision, in every language.
+  { source: 'privacy-policy.html', outFile: 'privacy-policy.html', metaNs: 'privacyMeta', i18nMode: 'standalone' },
+  { source: 'cookies.html', outFile: 'cookies.html', metaNs: 'cookiesMeta', i18nMode: 'standalone' },
 ];
 
 const RESOURCE_ATTRS = ['src', 'href', 'data-src', 'srcset', 'data-srcset', 'poster'];
@@ -105,6 +110,25 @@ function rewriteHomepageBackLinks($, lang) {
     const href = el.attr('href');
     if (href === '/') { el.attr('href', '/' + lang + '/'); return; }
     if (href.startsWith('/#')) { el.attr('href', '/' + lang + href); return; }
+  });
+}
+
+// The two English-only legal pages (privacy-policy.html, cookies.html) are
+// the only standalone pages WITHOUT a per-language duplicate under /{lang}/
+// -- every other cross-page link stays a bare relative filename because a
+// same-name file genuinely exists in the same output directory (see
+// rewriteResourcePaths' comment). Legal-page links use a root-absolute href
+// instead (/privacy-policy.html), so once P5 localizes those two pages this
+// rewrites the link to the matching localized copy. Runs for every page in
+// every language, both homepage and standalone -- both templates' footers
+// link to the legal pages the same way.
+function rewriteLegalLinks($, lang) {
+  $('a[href]').each(function () {
+    const el = $(this);
+    const href = el.attr('href');
+    if (href === '/privacy-policy.html' || href === '/cookies.html') {
+      el.attr('href', '/' + lang + href);
+    }
   });
 }
 
@@ -655,6 +679,7 @@ function main() {
       rewriteHreflangAndCanonical($, lang, pageDef.outFile);
       rewriteResourcePaths($);
       if (pageDef.i18nMode === 'standalone') rewriteHomepageBackLinks($, lang);
+      rewriteLegalLinks($, lang);
       if (pkgScript) prerenderPackageGrid($, pkgScript.src, dict.static, pkgScript.i18nEn, dict.dynamic);
       $('#cur-yr').text(CURRENT_YEAR);
       $('html').attr('lang', lang);
