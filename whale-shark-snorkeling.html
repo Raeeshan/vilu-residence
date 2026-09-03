@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- Google Analytics 4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="consent.js"></script>
 
 <script>
 (function(){
@@ -454,11 +456,70 @@
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">All rights reserved.</span></div>
       <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Managed by</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Privacy Choices</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookie and privacy consent" data-i18n-aria-label="consent.barLabel" hidden>
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Your privacy, your choice</strong>
+      <p data-i18n="consent.message">We use essential technologies to make Vilu work. With your permission, we'd also like to use analytics and marketing technologies to understand how visitors use our site.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Reject Non-Essential</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Customize</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Accept All</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden>
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Privacy Preferences</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Close" data-i18n-aria-label="consent.close">&times;</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Essential</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Always Active</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Required for booking, availability, and core site functionality.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Preferences</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Preferences" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Remembers optional choices you make on the site.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Analytics</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analytics" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Helps us understand how visitors use the site.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Enables more relevant offers if you visit other sites later.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Save Preferences</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var I18N = { en: {

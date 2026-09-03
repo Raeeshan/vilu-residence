@@ -1404,6 +1404,35 @@
       "openMenu": "打开菜单",
       "closeMenu": "关闭菜单",
       "menuLabel": "网站菜单"
+    },
+    "consent": {
+      "title": "您的隐私，由您选择",
+      "message": "我们使用必要的技术来维持 Vilu 网站的运行。在您允许的情况下，我们还希望使用分析和营销技术，以了解访客如何使用我们的网站。",
+      "rejectAll": "拒绝非必要项",
+      "customize": "自定义",
+      "acceptAll": "全部接受",
+      "panelTitle": "隐私偏好设置",
+      "close": "关闭",
+      "barLabel": "Cookie 与隐私同意",
+      "alwaysActive": "始终有效",
+      "save": "保存偏好设置",
+      "privacyChoices": "隐私选择",
+      "essential": {
+        "title": "必要",
+        "desc": "预订、查询空房及网站核心功能所必需。"
+      },
+      "preferences": {
+        "title": "偏好设置",
+        "desc": "记住您在网站上所做的可选设置。"
+      },
+      "analytics": {
+        "title": "分析",
+        "desc": "帮助我们了解访客如何使用本网站。"
+      },
+      "marketing": {
+        "title": "营销",
+        "desc": "让您日后访问其他网站时看到更相关的优惠信息。"
+      }
     }
   },
   "dynamic": {

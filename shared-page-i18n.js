@@ -16,7 +16,10 @@ var currentLang = 'en';
 function trackEvent(name, data){
   try {
     document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
-    if (typeof gtag === 'function') {
+    // Phase 11B: never transmit to GA4 without Analytics consent -- checked
+    // here (not just via Google's own Consent Mode signals) so a pre-consent
+    // event is discarded outright, not queued for later replay.
+    if (typeof gtag === 'function' && window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
       gtag('event', name, data||{});
     }
     console.log('[track]', name, data||{});

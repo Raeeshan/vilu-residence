@@ -1404,6 +1404,35 @@
       "openMenu": "Ouvrir le menu",
       "closeMenu": "Fermer le menu",
       "menuLabel": "Menu du site"
+    },
+    "consent": {
+      "title": "Votre vie privée, votre choix",
+      "message": "Nous utilisons des technologies essentielles pour faire fonctionner Vilu. Avec votre permission, nous aimerions également utiliser des technologies d'analyse et de marketing pour comprendre comment les visiteurs utilisent notre site.",
+      "rejectAll": "Refuser le non essentiel",
+      "customize": "Personnaliser",
+      "acceptAll": "Tout accepter",
+      "panelTitle": "Préférences de confidentialité",
+      "close": "Fermer",
+      "barLabel": "Consentement aux cookies et à la confidentialité",
+      "alwaysActive": "Toujours actif",
+      "save": "Enregistrer les préférences",
+      "privacyChoices": "Choix de confidentialité",
+      "essential": {
+        "title": "Essentiel",
+        "desc": "Requis pour la réservation, la disponibilité et les fonctionnalités essentielles du site."
+      },
+      "preferences": {
+        "title": "Préférences",
+        "desc": "Mémorise les choix facultatifs que vous faites sur le site."
+      },
+      "analytics": {
+        "title": "Analyse",
+        "desc": "Nous aide à comprendre comment les visiteurs utilisent le site."
+      },
+      "marketing": {
+        "title": "Marketing",
+        "desc": "Permet des offres plus pertinentes si vous visitez d'autres sites par la suite."
+      }
     }
   },
   "dynamic": {

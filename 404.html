@@ -16,14 +16,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="shared-page.css">
-<!-- Google Analytics 4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. The page_not_found event itself is gated
+     the same way: it never fires (and is never queued/replayed) unless
+     Analytics consent is already granted at the moment this page loads. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
-  gtag('event', 'page_not_found', { page_location: window.location.href, page_referrer: document.referrer });
+  function gtag(){ dataLayer.push(arguments); }
+</script>
+<script src="consent.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if (window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
+      gtag('event', 'page_not_found', { page_location: window.location.href, page_referrer: document.referrer });
+    }
+  });
 </script>
 <style>
   .nf-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 5vw;background:linear-gradient(180deg,var(--abyss) 0%,var(--navy) 60%,var(--navy2) 100%)}
@@ -66,6 +76,66 @@
   <a class="nf-home" href="/">Back to Homepage</a>
 </div>
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══
+     This page has no i18n pipeline (noindex, English-only redirect page),
+     so its consent copy is plain English rather than data-i18n-driven. -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookie and privacy consent" hidden>
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong>Your privacy, your choice</strong>
+      <p>We use essential technologies to make Vilu work. With your permission, we'd also like to use analytics and marketing technologies to understand how visitors use our site.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject">Reject Non-Essential</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen">Customize</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept">Accept All</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden>
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle">Privacy Preferences</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span>Essential</span>
+          <span class="consent-locked">Always Active</span>
+        </div>
+        <p>Required for booking, availability, and core site functionality.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span>Preferences</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Preferences"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p>Remembers optional choices you make on the site.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span>Analytics</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analytics"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p>Helps us understand how visitors use the site.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span>Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p>Enables more relevant offers if you visit other sites later.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave">Save Preferences</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // Minimal, standalone language switcher for this page only — links to the
 // equivalent /{lang}/ homepage rather than trying to preserve a specific

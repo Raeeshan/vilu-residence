@@ -1404,6 +1404,35 @@
       "openMenu": "Otvoriť menu",
       "closeMenu": "Zavrieť menu",
       "menuLabel": "Menu stránky"
+    },
+    "consent": {
+      "title": "Vaše súkromie, vaša voľba",
+      "message": "Používame nevyhnutné technológie, aby Vilu fungovalo. S vaším súhlasom by sme chceli použiť aj analytické a marketingové technológie, aby sme pochopili, ako návštevníci používajú našu stránku.",
+      "rejectAll": "Odmietnuť nepovinné",
+      "customize": "Prispôsobiť",
+      "acceptAll": "Prijať všetko",
+      "panelTitle": "Predvoľby súkromia",
+      "close": "Zavrieť",
+      "barLabel": "Súhlas s cookies a súkromím",
+      "alwaysActive": "Vždy aktívne",
+      "save": "Uložiť predvoľby",
+      "privacyChoices": "Nastavenia súkromia",
+      "essential": {
+        "title": "Nevyhnutné",
+        "desc": "Potrebné pre rezerváciu, dostupnosť a základné funkcie stránky."
+      },
+      "preferences": {
+        "title": "Predvoľby",
+        "desc": "Zapamätá si voliteľné nastavenia, ktoré urobíte na stránke."
+      },
+      "analytics": {
+        "title": "Analytika",
+        "desc": "Pomáha nám pochopiť, ako návštevníci používajú stránku."
+      },
+      "marketing": {
+        "title": "Marketing",
+        "desc": "Umožňuje relevantnejšie ponuky pri návšteve iných stránok neskôr."
+      }
     }
   },
   "dynamic": {

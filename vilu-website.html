@@ -36,14 +36,16 @@
 <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<!-- Google Analytics 4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-1EPZ71Q331"></script>
+<!-- Consent Mode bootstrap (Phase 11B) -- must run before consent.js and
+     before any Google tag. Under Basic Consent Mode, the actual GA4
+     script is never requested from Google's CDN until Analytics consent
+     is granted -- verified at the network level, not just via a JS
+     variable. See consent.js. -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-1EPZ71Q331');
+  function gtag(){ dataLayer.push(arguments); }
 </script>
+<script src="consent.js"></script>
 <link rel="canonical" href="https://viluresidence.net/" id="canonical-link">
 <link rel="alternate" hreflang="en" href="https://viluresidence.net/">
 <link rel="alternate" hreflang="zh" href="https://viluresidence.net/zh/">
@@ -870,6 +872,61 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   [dir="rtl"] .g-item-5{ grid-column:1/5; grid-row:2/3; }
   [dir="rtl"] .g-item-6{ grid-column:1/8; grid-row:3/4; }
 }
+
+/* ── CONSENT MANAGER (Phase 11B) ──
+   Bar sits above the floating WhatsApp button (z-index 900) but below the
+   mobile menu (1100); the panel dialog sits above everything so it can open
+   regardless of what else is on screen. */
+.consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:950;background:rgba(6,16,28,.97);backdrop-filter:blur(16px);border-top:1px solid var(--card-border);box-shadow:0 -12px 30px rgba(0,4,10,.4);padding:20px 5vw}
+.consent-bar[hidden]{display:none}
+.consent-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.consent-bar-text strong{display:block;font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:4px}
+.consent-bar-text p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;max-width:60ch;margin:0}
+.consent-bar-actions{display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.consent-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.04em;padding:11px 20px;border-radius:2px;cursor:pointer;white-space:nowrap;transition:all .25s}
+.consent-btn-reject{background:none;border:1px solid rgba(255,255,255,.3);color:var(--white)}
+.consent-btn-reject:hover{border-color:var(--white)}
+.consent-btn-customize{background:none;border:1px solid var(--card-border);color:var(--gold-light)}
+.consent-btn-customize:hover{border-color:var(--gold-light)}
+.consent-btn-accept{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;border:none;color:var(--navy)}
+.consent-btn-accept:hover{background-position:100% 0}
+
+.consent-panel-overlay{position:fixed;inset:0;z-index:1200;background:rgba(5,11,20,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:5vw}
+.consent-panel-overlay[hidden]{display:none}
+.consent-panel{width:100%;max-width:560px;max-height:85vh;overflow-y:auto;background:var(--navy2);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 30px 80px rgba(0,4,10,.6)}
+.consent-panel-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 24px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.consent-panel-header h2{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:500;color:var(--white);margin:0}
+.consent-panel-close{background:none;border:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer;padding:4px 8px;flex-shrink:0}
+.consent-panel-close:hover{color:var(--white)}
+.consent-panel-body{padding:8px 24px}
+.consent-row{padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.consent-row:last-child{border-bottom:none}
+.consent-row-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:6px}
+.consent-row-header>span:first-child{font-size:var(--font-size-base);font-weight:500;color:var(--white)}
+.consent-row p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;margin:0}
+.consent-locked{font-size:var(--font-size-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light);opacity:.8}
+.consent-toggle{position:relative;width:44px;height:24px;flex-shrink:0;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
+.consent-toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--white);transition:transform .2s}
+.consent-toggle[aria-checked="true"]{background:var(--teal);border-color:var(--teal-light)}
+.consent-toggle[aria-checked="true"] .consent-toggle-knob{transform:translateX(20px)}
+.consent-toggle:focus-visible{outline:2px solid var(--teal-light);outline-offset:2px}
+.consent-panel-footer{padding:16px 24px 24px}
+.consent-panel-footer .consent-btn{width:100%;text-align:center;padding:13px 20px}
+
+.footer-privacy-choices{background:none;border:none;padding:0;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);color:rgba(255,255,255,.35);text-decoration:underline;cursor:pointer;transition:color .2s}
+.footer-privacy-choices:hover{color:var(--gold-light)}
+
+.consent-btn:focus-visible,.consent-panel-close:focus-visible,.footer-privacy-choices:focus-visible{outline:2px solid var(--teal-light);outline-offset:3px}
+
+[dir="rtl"] .consent-toggle-knob{left:auto;right:2px}
+[dir="rtl"] .consent-toggle[aria-checked="true"] .consent-toggle-knob{transform:translateX(-20px)}
+[dir="rtl"] .consent-locked{margin-left:0}
+
+@media(max-width:700px){
+  .consent-bar-inner{flex-direction:column;align-items:stretch}
+  .consent-bar-actions{width:100%}
+  .consent-btn{flex:1}
+}
 </style>
 </head>
 <body>
@@ -1596,11 +1653,70 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">All rights reserved.</span></div>
       <div class="footer-pms-badge"><span data-i18n="footer.managedBy">Managed by</span> <span>Vilu PMS</span></div>
+      <button type="button" class="footer-privacy-choices" id="footerPrivacyChoices" data-i18n="consent.privacyChoices">Privacy Choices</button>
     </div>
   </div>
 </footer>
 
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="floatingWhatsapp.ariaLabel" aria-label="Chat with us on WhatsApp" onclick="trackEvent('floating_whatsapp_click',{})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+
+<!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
+<div class="consent-bar" id="consentBar" role="region" aria-label="Cookie and privacy consent" data-i18n-aria-label="consent.barLabel" hidden>
+  <div class="consent-bar-inner">
+    <div class="consent-bar-text">
+      <strong data-i18n="consent.title">Your privacy, your choice</strong>
+      <p data-i18n="consent.message">We use essential technologies to make Vilu work. With your permission, we'd also like to use analytics and marketing technologies to understand how visitors use our site.</p>
+    </div>
+    <div class="consent-bar-actions">
+      <button type="button" class="consent-btn consent-btn-reject" id="consentReject" data-i18n="consent.rejectAll">Reject Non-Essential</button>
+      <button type="button" class="consent-btn consent-btn-customize" id="consentCustomizeOpen" data-i18n="consent.customize">Customize</button>
+      <button type="button" class="consent-btn consent-btn-accept" id="consentAccept" data-i18n="consent.acceptAll">Accept All</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-panel-overlay" id="consentPanelOverlay" hidden>
+  <div class="consent-panel" id="consentPanel" role="dialog" aria-modal="true" aria-labelledby="consentPanelTitle">
+    <div class="consent-panel-header">
+      <h2 id="consentPanelTitle" data-i18n="consent.panelTitle">Privacy Preferences</h2>
+      <button type="button" class="consent-panel-close" id="consentPanelClose" aria-label="Close" data-i18n-aria-label="consent.close">&times;</button>
+    </div>
+    <div class="consent-panel-body">
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.essential.title">Essential</span>
+          <span class="consent-locked" data-i18n="consent.alwaysActive">Always Active</span>
+        </div>
+        <p data-i18n="consent.essential.desc">Required for booking, availability, and core site functionality.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.preferences.title">Preferences</span>
+          <button type="button" class="consent-toggle" id="consentTogglePreferences" role="switch" aria-checked="false" aria-label="Preferences" data-i18n-aria-label="consent.preferences.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.preferences.desc">Remembers optional choices you make on the site.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.analytics.title">Analytics</span>
+          <button type="button" class="consent-toggle" id="consentToggleAnalytics" role="switch" aria-checked="false" aria-label="Analytics" data-i18n-aria-label="consent.analytics.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.analytics.desc">Helps us understand how visitors use the site.</p>
+      </div>
+      <div class="consent-row">
+        <div class="consent-row-header">
+          <span data-i18n="consent.marketing.title">Marketing</span>
+          <button type="button" class="consent-toggle" id="consentToggleMarketing" role="switch" aria-checked="false" aria-label="Marketing" data-i18n-aria-label="consent.marketing.title"><span class="consent-toggle-knob"></span></button>
+        </div>
+        <p data-i18n="consent.marketing.desc">Enables more relevant offers if you visit other sites later.</p>
+      </div>
+    </div>
+    <div class="consent-panel-footer">
+      <button type="button" class="consent-btn consent-btn-accept" id="consentSave" data-i18n="consent.save">Save Preferences</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ══ BOOKING POPUP ══ -->
 <div class="booking-popup-overlay" id="bookingPopupOverlay" onclick="if(event.target===this)closeBookingPopup()">
@@ -4157,7 +4273,10 @@ function enquireAboutPackage(pkgName){
 function trackEvent(name, data){
   try {
     document.dispatchEvent(new CustomEvent('vilu:track', {detail: {name: name, data: data||{}, ts: Date.now()}}));
-    if (typeof gtag === 'function') {
+    // Phase 11B: never transmit to GA4 without Analytics consent -- checked
+    // here (not just via Google's own Consent Mode signals) so a pre-consent
+    // event is discarded outright, not queued for later replay.
+    if (typeof gtag === 'function' && window.viluConsent && window.viluConsent.isAnalyticsAllowed()) {
       gtag('event', name, data||{});
     }
     console.log('[track]', name, data||{});

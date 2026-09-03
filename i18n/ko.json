@@ -1404,6 +1404,35 @@
       "openMenu": "메뉴 열기",
       "closeMenu": "메뉴 닫기",
       "menuLabel": "사이트 메뉴"
+    },
+    "consent": {
+      "title": "고객님의 개인정보, 고객님의 선택",
+      "message": "Vilu 운영을 위해 필수 기술을 사용합니다. 고객님의 동의가 있으면 방문자가 저희 사이트를 어떻게 이용하는지 파악하기 위해 분석 및 마케팅 기술도 사용하고자 합니다.",
+      "rejectAll": "필수 외 거부",
+      "customize": "맞춤 설정",
+      "acceptAll": "모두 동의",
+      "panelTitle": "개인정보 환경설정",
+      "close": "닫기",
+      "barLabel": "쿠키 및 개인정보 동의",
+      "alwaysActive": "항상 활성",
+      "save": "환경설정 저장",
+      "privacyChoices": "개인정보 선택",
+      "essential": {
+        "title": "필수",
+        "desc": "예약, 이용 가능 여부 및 핵심 사이트 기능에 필요합니다."
+      },
+      "preferences": {
+        "title": "환경설정",
+        "desc": "사이트에서 선택하신 선택적 항목을 기억합니다."
+      },
+      "analytics": {
+        "title": "분석",
+        "desc": "방문자가 사이트를 어떻게 이용하는지 파악하는 데 도움이 됩니다."
+      },
+      "marketing": {
+        "title": "마케팅",
+        "desc": "이후 다른 사이트를 방문할 때 더 관련성 높은 혜택을 제공합니다."
+      }
     }
   },
   "dynamic": {
