@@ -199,7 +199,9 @@
       "managedBy": "Verwaltet von",
       "explore": "Entdecken",
       "southAriGuides": "Süd-Ari-Reiseführer",
-      "plan": "Planung"
+      "plan": "Planung",
+      "brandLine": "Erleben Sie Süd-Ari.",
+      "positioning": "Premium-Urlaubsplanung für die Malediven von Maamigili im Süd-Ari-Atoll – Walhaie, Mantarochen und das Leben auf einer Einheimischeninsel, mit unserem eigenen Gästehaus mit sechs Zimmern, dem Vilu Residence, als Basis."
     },
     "bookingPopup": {
       "title": "Buchen Sie Ihren Aufenthalt",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "Verfügbarkeit prüfen",
       "openMenu": "Menü öffnen",
       "closeMenu": "Menü schließen",
-      "menuLabel": "Seitenmenü"
+      "menuLabel": "Seitenmenü",
+      "mainNav": "Hauptnavigation",
+      "destination": "Reiseziel",
+      "planning": "Planung",
+      "theme": "Design",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "Zu Cinematic Dark wechseln",
+      "switchToLight": "Zu Island Luxury Light wechseln"
     },
     "consent": {
       "title": "Ihre Privatsphäre, Ihre Wahl",

@@ -199,7 +199,9 @@
       "managedBy": "Управляется",
       "explore": "Исследовать",
       "southAriGuides": "Гиды по Южному Ари",
-      "plan": "Планирование"
+      "plan": "Планирование",
+      "brandLine": "Откройте Южный Ари.",
+      "positioning": "Премиальное планирование отдыха на Мальдивах из Маамигили, атолл Южный Ари, — китовые акулы, манты и жизнь местного острова, с нашим собственным гостевым домом на шесть номеров, Vilu Residence, в качестве базы."
     },
     "bookingPopup": {
       "title": "Забронировать проживание",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "Проверить доступность",
       "openMenu": "Открыть меню",
       "closeMenu": "Закрыть меню",
-      "menuLabel": "Меню сайта"
+      "menuLabel": "Меню сайта",
+      "mainNav": "Основная навигация",
+      "destination": "Направление",
+      "planning": "Планирование",
+      "theme": "Тема",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "Переключить на Cinematic Dark",
+      "switchToLight": "Переключить на Island Luxury Light"
     },
     "consent": {
       "title": "Ваша конфиденциальность, ваш выбор",

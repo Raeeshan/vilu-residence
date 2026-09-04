@@ -451,7 +451,22 @@
     "mobile_menu_id": "mobileMenu",
     "footer_legal_hrefs": ["/privacy-policy.html", "/cookies.html"],
     "language_select_aria_label": "Language",
-    "language_select_source": "shared-page-i18n.js"
+    "language_select_source": "shared-page-i18n.js",
+    "shell": {
+      "$comment": "Phase 12B-D global shell contracts: disclosure navigation (no ARIA menu roles), accessible drawer hooks, localized theme labels, footer destinations, exact social set, no framework/external UI, no internal-tool exposure. Decorative CSS values are deliberately not asserted.",
+      "nav_landmark_i18n_key": "navShell.mainNav",
+      "dropdown_panel_ids": ["navPanelExperiences", "navPanelSouthAri", "navPanelStay"],
+      "mobile_panel_ids": ["mmPanelExperiences", "mmPanelSouthAri", "mmPanelStay"],
+      "forbidden_in_nav": ["role=\"menu\"", "role=\"menuitem\""],
+      "drawer_required_markers": ["role=\"dialog\"", "aria-modal=\"true\"", "class=\"mm-close\"", "data-mm-close", "lang-switcher-mobile", "class=\"mm-lang\""],
+      "theme_i18n_keys": ["navShell.theme", "navShell.themeDark", "navShell.themeLight", "navShell.switchToDark", "navShell.switchToLight"],
+      "shell_i18n_keys": ["navShell.mainNav", "navShell.destination", "navShell.planning", "footer.brandLine", "footer.positioning"],
+      "social_hrefs": ["https://www.instagram.com/vilu_residence/", "https://www.facebook.com/ViluResidence/", "https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html"],
+      "footer_required_markers": ["footer-brandline", "footer-contact", "id=\"footerPrivacyChoices\"", "Vilu PMS", "tel:+9609903339", "mailto:Viluresidence@gmail.com"],
+      "forbidden_shell_hrefs": ["href=\"#\"", "vilu-unified.html", "vilu-agency-portal.html", "/docs/", "/test/", "firestore"],
+      "forbidden_frameworks": ["bootstrap", "tailwind", "cdn.jsdelivr", "unpkg.com", "cdnjs.cloudflare", "fontawesome", "fonts.googleapis.com", "react-dom", "vue.global"],
+      "forbidden_event_names": ["package_enquire_click", "experience_enquire_click"]
+    }
   },
 
   "performance": {

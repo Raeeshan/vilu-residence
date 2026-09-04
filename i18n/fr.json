@@ -199,7 +199,9 @@
       "managedBy": "Géré par",
       "explore": "Explorer",
       "southAriGuides": "Guides de Sud Ari",
-      "plan": "Planifier"
+      "plan": "Planifier",
+      "brandLine": "Vivez South Ari.",
+      "positioning": "Organisation premium de vacances aux Maldives depuis Maamigili, atoll d'Ari Sud – requins-baleines, raies mantas et vie insulaire locale, avec notre propre maison d'hôtes de six chambres, Vilu Residence, comme point de départ."
     },
     "bookingPopup": {
       "title": "Réservez votre séjour",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "Vérifier la disponibilité",
       "openMenu": "Ouvrir le menu",
       "closeMenu": "Fermer le menu",
-      "menuLabel": "Menu du site"
+      "menuLabel": "Menu du site",
+      "mainNav": "Navigation principale",
+      "destination": "Destination",
+      "planning": "Préparation",
+      "theme": "Thème",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "Passer en Cinematic Dark",
+      "switchToLight": "Passer en Island Luxury Light"
     },
     "consent": {
       "title": "Votre vie privée, votre choix",

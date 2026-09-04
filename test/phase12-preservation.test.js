@@ -549,6 +549,95 @@ section('Navigation / footer IA');
     }
   });
   test('nav-shell.js is loaded by every content page', () => { for (const p of CONTENT_PAGES) assert.ok(/<script[^>]+src="\/?nav-shell\.js"/.test(read(p.file)), p.file); });
+
+  // ── Phase 12B-D global shell contracts ──
+  const S = N.shell;
+  const navBlock = (h) => { const s = h.indexOf('<nav id="nav"'); return h.slice(s, h.indexOf('</nav>', s)); };
+  const drawerBlock = (h) => {
+    // From the drawer's opening tag to the close of .mobile-menu: the social row is the
+    // last child, followed by </div> ×4 (social, mm-contact, mm-body, mobile-menu).
+    const s = h.indexOf('id="mobileMenu"'); let i = h.indexOf('mm-contact-social', s);
+    for (let n = 0; n < 4 && i > 0; n++) i = h.indexOf('</div>', i + 1);
+    return h.slice(s, i > 0 ? i + 6 : undefined);
+  };
+  const footerBlock = (h) => { const s = h.indexOf('<footer'); return h.slice(s, h.indexOf('</footer>', s)); };
+  test('header is a labelled navigation landmark using a disclosure pattern (no ARIA menu roles) with aria-controls → existing panel ids', () => {
+    for (const p of CONTENT_PAGES) {
+      const h = read(p.file); const nav = navBlock(h);
+      assert.ok(nav.includes(`data-i18n-aria-label="${S.nav_landmark_i18n_key}"`) && /<nav id="nav" aria-label="[^"]+"/.test(nav), p.file + ' landmark label');
+      for (const bad of S.forbidden_in_nav) assert.ok(!nav.includes(bad), `${p.file} still uses ${bad}`);
+      for (const id of S.dropdown_panel_ids) assert.ok(nav.includes(`aria-controls="${id}"`) && nav.includes(`id="${id}"`), `${p.file} ${id}`);
+      for (const m of nav.matchAll(/<button[^>]*class="nav-drop-trigger"[^>]*>/g)) assert.ok(/aria-expanded="false"/.test(m[0]) && /type="button"/.test(m[0]), p.file + ' trigger semantics');
+      assert.ok(nav.includes(`aria-controls="${N.mobile_menu_id}"`) && nav.includes('aria-expanded="false"'), p.file + ' hamburger');
+    }
+  });
+  test('mobile drawer keeps its accessibility hooks (dialog, close, group panels, language + theme mounts)', () => {
+    for (const p of CONTENT_PAGES) {
+      const d = drawerBlock(read(p.file));
+      for (const mk of S.drawer_required_markers) assert.ok(d.includes(mk), `${p.file} drawer missing ${mk}`);
+      for (const id of S.mobile_panel_ids) assert.ok(d.includes(`aria-controls="${id}"`) && d.includes(`id="${id}"`), `${p.file} ${id}`);
+    }
+  });
+  test('every nav destination is also reachable from the mobile drawer', () => {
+    for (const p of CONTENT_PAGES) {
+      const d = drawerBlock(read(p.file));
+      for (const href of N.required_hrefs) {
+        if (href === '/') continue;
+        const ok = d.includes(`href="${href}"`) || (href.startsWith('/#') && p.url_path === '/' && d.includes(`href="${href.slice(1)}"`));
+        assert.ok(ok, `${p.file} drawer missing ${href}`);
+      }
+    }
+  });
+  test('theme-switch labels are localized: keys in all 10 language files, consumed by theme.js through the i18n engine', () => {
+    for (const l of M.languages) {
+      const j = JSON.parse(read(`i18n/${l}.json`));
+      for (const k of S.theme_i18n_keys.concat(S.shell_i18n_keys)) {
+        const v = k.split('.').reduce((o, s) => (o ? o[s] : undefined), j.static);
+        assert.ok(typeof v === 'string' && v.length > 0, `${l}: ${k}`);
+      }
+    }
+    const js = read('theme.js');
+    assert.ok(js.includes("window.t(") && js.includes("'navShell.'"));
+    for (const k of ['themeDark', 'themeLight', 'switchToDark', 'switchToLight']) assert.ok(js.includes(k), k);
+    assert.ok(js.includes("'data-i18n-aria-label'") && js.includes("'data-i18n'"), 'switch re-translates on language change');
+  });
+  test('shell i18n keys are wired in the markup (nav landmark, panel eyebrows, footer brand line)', () => {
+    for (const p of CONTENT_PAGES) {
+      const h = read(p.file);
+      for (const k of ['navShell.destination', 'navShell.planning', 'footer.brandLine', 'footer.positioning']) assert.ok(h.includes(`data-i18n="${k}"`), `${p.file} ${k}`);
+    }
+  });
+  test('language selector: 11 languages in the shared engine, a selector in the header and in the drawer of every content page', () => {
+    const src = read(N.language_select_source);
+    for (const l of ['en'].concat(M.languages)) assert.ok(new RegExp(`\\b${l}:"`).test(src), l);
+    for (const p of CONTENT_PAGES) { const h = read(p.file); assert.ok((h.match(/class="lang-switcher/g) || []).length >= 2, p.file); }
+  });
+  test('footer keeps its brand statement, contact block, PMS attribution, Privacy Choices and legal links on every content page', () => {
+    for (const p of CONTENT_PAGES) {
+      const f = footerBlock(read(p.file));
+      for (const mk of S.footer_required_markers) assert.ok(f.includes(mk), `${p.file} footer missing ${mk}`);
+      for (const href of N.footer_legal_hrefs) assert.ok(f.includes(`href="${href}"`), `${p.file} ${href}`);
+    }
+  });
+  test('social links: exactly the three verified destinations, labelled, and no placeholder or internal hrefs anywhere in the shell', () => {
+    for (const p of CONTENT_PAGES) {
+      const h = read(p.file); const shell = navBlock(h) + drawerBlock(h) + footerBlock(h);
+      for (const s of S.social_hrefs) assert.ok(footerBlock(h).includes(`href="${s}"`), `${p.file} missing ${s}`);
+      for (const m of shell.matchAll(/href="https:\/\/(www\.)?(instagram|facebook|tripadvisor)\.com[^"]*"/g)) assert.ok(S.social_hrefs.includes(m[0].slice(6, -1)), `${p.file} unexpected social ${m[0]}`);
+      for (const m of shell.matchAll(/<a [^>]*href="https:\/\/(www\.)?(instagram|facebook|tripadvisor)\.com[^>]*>/g)) assert.ok(/aria-label="[^"]+"/.test(m[0]), `${p.file} social link without label`);
+      for (const bad of S.forbidden_shell_hrefs) assert.ok(!shell.includes(bad), `${p.file} shell contains ${bad}`);
+    }
+  });
+  test('no framework, external UI library or external font was introduced; no legacy event names', () => {
+    const files = fs.readdirSync(ROOT).filter(f => /\.(html|css|js)$/.test(f) && !M.internal_tools.files.includes(f));
+    for (const f of files) {
+      const c = read(f);
+      // Only loaded resources count (src/href/url()), not prose or comments.
+      const refs = [...c.matchAll(/(?:src|href)="([^"]+)"|url\((['"]?)([^)'"]+)\2\)/g)].map(m => (m[1] || m[3] || '').toLowerCase());
+      for (const r of refs) for (const bad of S.forbidden_frameworks) assert.ok(!r.includes(bad), `${f} loads ${r}`);
+      for (const ev of S.forbidden_event_names) assert.ok(!c.includes(ev), `${f} uses ${ev}`);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------

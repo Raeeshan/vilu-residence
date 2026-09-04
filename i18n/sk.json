@@ -199,7 +199,9 @@
       "managedBy": "Prevádzkuje",
       "explore": "Objavujte",
       "southAriGuides": "Sprievodcovia Južný Ari",
-      "plan": "Plánovanie"
+      "plan": "Plánovanie",
+      "brandLine": "Zažite Južné Ari.",
+      "positioning": "Prémiové plánovanie dovolenky na Maldivách z Maamigili na atole Južné Ari – veľrybie žraloky, manty a život na miestnom ostrove, s naším vlastným penziónom so šiestimi izbami, Vilu Residence, ako základňou."
     },
     "bookingPopup": {
       "title": "Rezervujte si pobyt",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "Skontrolovať dostupnosť",
       "openMenu": "Otvoriť menu",
       "closeMenu": "Zavrieť menu",
-      "menuLabel": "Menu stránky"
+      "menuLabel": "Menu stránky",
+      "mainNav": "Hlavná navigácia",
+      "destination": "Destinácia",
+      "planning": "Plánovanie",
+      "theme": "Vzhľad",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "Prepnúť na Cinematic Dark",
+      "switchToLight": "Prepnúť na Island Luxury Light"
     },
     "consent": {
       "title": "Vaše súkromie, vaša voľba",

@@ -199,7 +199,9 @@
       "managedBy": "運営",
       "explore": "探る",
       "southAriGuides": "南アリガイド",
-      "plan": "計画"
+      "plan": "計画",
+      "brandLine": "サウスアリを体験する。",
+      "positioning": "サウスアリ環礁マーミギリ発、プレミアムなモルディブ休暇プランニング。ジンベエザメ、マンタ、ローカルアイランドの暮らしを、当館所有の全6室のゲストハウス「Vilu Residence」を拠点に。"
     },
     "bookingPopup": {
       "title": "ご宿泊のご予約",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "空室状況を確認",
       "openMenu": "メニューを開く",
       "closeMenu": "メニューを閉じる",
-      "menuLabel": "サイトメニュー"
+      "menuLabel": "サイトメニュー",
+      "mainNav": "メインナビゲーション",
+      "destination": "目的地",
+      "planning": "旅の計画",
+      "theme": "テーマ",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "Cinematic Dark に切り替える",
+      "switchToLight": "Island Luxury Light に切り替える"
     },
     "consent": {
       "title": "お客様のプライバシー、お客様の選択",

@@ -199,7 +199,9 @@
       "managedBy": "تتم الإدارة بواسطة",
       "explore": "استكشف",
       "southAriGuides": "أدلة جنوب آري",
-      "plan": "التخطيط"
+      "plan": "التخطيط",
+      "brandLine": "اختبر جنوب آري.",
+      "positioning": "تخطيط عطلات فاخر في المالديف من مامجيلي، جنوب أري أتول — أسماك قرش الحوت وأسماك الراي المانتا وحياة الجزيرة المحلية، مع دار ضيافتنا الخاصة المكوّنة من ست غرف، فيلو ريزيدنس، كنقطة انطلاق لكم."
     },
     "bookingPopup": {
       "title": "احجز إقامتك",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "تحقق من التوفر",
       "openMenu": "فتح القائمة",
       "closeMenu": "إغلاق القائمة",
-      "menuLabel": "قائمة الموقع"
+      "menuLabel": "قائمة الموقع",
+      "mainNav": "التنقل الرئيسي",
+      "destination": "الوجهة",
+      "planning": "التخطيط",
+      "theme": "المظهر",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "التبديل إلى Cinematic Dark",
+      "switchToLight": "التبديل إلى Island Luxury Light"
     },
     "consent": {
       "title": "خصوصيتك، خيارك",

@@ -199,7 +199,9 @@
       "managedBy": "Spravuje",
       "explore": "Objevujte",
       "southAriGuides": "Průvodci Jižní Ari",
-      "plan": "Plánování"
+      "plan": "Plánování",
+      "brandLine": "Zažijte Jižní Ari.",
+      "positioning": "Prémiové plánování dovolené na Maledivách z Maamigili na atolu Jižní Ari – žraloci velrybí, manty a život na místním ostrově, s naším vlastním penzionem se šesti pokoji, Vilu Residence, jako základnou."
     },
     "bookingPopup": {
       "title": "Rezervujte si pobyt",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "Zkontrolovat dostupnost",
       "openMenu": "Otevřít menu",
       "closeMenu": "Zavřít menu",
-      "menuLabel": "Menu webu"
+      "menuLabel": "Menu webu",
+      "mainNav": "Hlavní navigace",
+      "destination": "Destinace",
+      "planning": "Plánování",
+      "theme": "Vzhled",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "Přepnout na Cinematic Dark",
+      "switchToLight": "Přepnout na Island Luxury Light"
     },
     "consent": {
       "title": "Vaše soukromí, vaše volba",

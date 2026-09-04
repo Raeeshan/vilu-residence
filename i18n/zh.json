@@ -199,7 +199,9 @@
       "managedBy": "管理方",
       "explore": "探索",
       "southAriGuides": "南阿里指南",
-      "plan": "规划"
+      "plan": "规划",
+      "brandLine": "体验南阿里。",
+      "positioning": "从南阿里环礁马米吉利出发的高端马尔代夫度假规划——鲸鲨、蝠鲼与本地岛屿生活，以我们自有的六间客房民宿 Vilu Residence 为基地。"
     },
     "bookingPopup": {
       "title": "预订您的住宿",
@@ -1403,7 +1405,15 @@
       "checkAvailability": "查看空房",
       "openMenu": "打开菜单",
       "closeMenu": "关闭菜单",
-      "menuLabel": "网站菜单"
+      "menuLabel": "网站菜单",
+      "mainNav": "主导航",
+      "destination": "目的地",
+      "planning": "行程规划",
+      "theme": "主题",
+      "themeDark": "Cinematic Dark",
+      "themeLight": "Island Luxury Light",
+      "switchToDark": "切换到 Cinematic Dark",
+      "switchToLight": "切换到 Island Luxury Light"
     },
     "consent": {
       "title": "您的隐私，由您选择",

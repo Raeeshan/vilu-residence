@@ -77,14 +77,23 @@
   // ── Switch component (sun/moon, self-hosted inline SVG from Tabler Icons) ──
   var SUN = '<svg class="ts-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/></svg>';
   var MOON = '<svg class="ts-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg>';
-  var LABEL_LIGHT = 'Island Luxury Light theme';
+  // ── Localized labels (Phase 12B-D) ──
+  // English lives here as the fallback; the other ten languages come from the
+  // page's existing i18n engine (i18n/{lang}.json → static.navShell.*) through
+  // the same global t() that the homepage and shared-page-i18n.js expose. The
+  // data-i18n / data-i18n-aria-label attributes let that engine re-translate
+  // the switch on a language change without any theme-specific hook.
+  var EN = { theme: 'Theme', themeDark: 'Cinematic Dark', themeLight: 'Island Luxury Light', switchToDark: 'Switch to Cinematic Dark', switchToLight: 'Switch to Island Luxury Light' };
+  function tr(key){
+    try { if (typeof window.t === 'function') { var v = window.t('navShell.' + key); if (typeof v === 'string' && v) return v; } } catch (e) {}
+    return EN[key];
+  }
 
   function makeSwitch(withText){
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'theme-switch';
     b.setAttribute('role', 'switch');
-    b.setAttribute('aria-label', LABEL_LIGHT);
     b.setAttribute('data-theme-switch', '');
     b.innerHTML = MOON + SUN + (withText ? '<span class="ts-text"></span>' : '');
     b.addEventListener('click', function(){ apply(current === 'dark' ? 'light' : 'dark'); });
@@ -93,12 +102,18 @@
 
   function updateSwitches(){
     var isLight = current === 'light';
+    var currentKey = isLight ? 'themeLight' : 'themeDark';        // name of the CURRENT theme (visible text)
+    var actionKey = isLight ? 'switchToDark' : 'switchToLight';    // destination (title)
     var list = document.querySelectorAll('[data-theme-switch]');
     for (var i = 0; i < list.length; i++) {
-      list[i].setAttribute('aria-checked', isLight ? 'true' : 'false');
-      list[i].setAttribute('title', isLight ? 'Switch to Cinematic Dark' : 'Switch to Island Luxury Light');
-      var t = list[i].querySelector('.ts-text');
-      if (t) t.textContent = isLight ? 'Island Luxury Light' : 'Cinematic Dark';   // names the CURRENT theme, matching the icon and aria-checked
+      var b = list[i];
+      b.setAttribute('aria-checked', isLight ? 'true' : 'false');
+      // The switch is named after the light theme; aria-checked carries its state.
+      b.setAttribute('aria-label', tr('themeLight'));
+      b.setAttribute('data-i18n-aria-label', 'navShell.themeLight');
+      b.setAttribute('title', tr(actionKey));
+      var t = b.querySelector('.ts-text');
+      if (t) { t.textContent = tr(currentKey); t.setAttribute('data-i18n', 'navShell.' + currentKey); }
     }
   }
 
@@ -120,6 +135,14 @@
       var t = e.target && e.target.closest ? e.target.closest('#consentAccept,#consentReject,#consentSave') : null;
       if (t) setTimeout(function(){ persist(current); }, 0);
     });
+    // The i18n engines load non-English dictionaries asynchronously and, on
+    // every apply, write the active language onto <html lang>. Watching that
+    // attribute re-labels the switch (title included) the moment a dictionary
+    // lands or the visitor changes language — no engine-specific hook needed.
+    try {
+      new MutationObserver(function(){ updateSwitches(); }).observe(root, { attributes: true, attributeFilter: ['lang'] });
+    } catch (e) {}
+    window.addEventListener('load', function(){ setTimeout(updateSwitches, 0); });
   }
 
   // Follow a change made in another tab (only reaches here if it was persisted, i.e. consented).

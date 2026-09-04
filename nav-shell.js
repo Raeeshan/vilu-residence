@@ -118,7 +118,27 @@
         if (drop.classList.contains('open')) { drop.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); }
         else open();
       });
-      trigger.addEventListener('focus', open);
+      var suppressFocusOpen = false;
+      trigger.addEventListener('focus', function(){ if (!suppressFocusOpen) open(); });
+      // Disclosure keyboard model (Phase 12B-D): ArrowDown from the trigger
+      // enters the panel; Up/Down move between links; Escape returns to the
+      // trigger without re-opening. Plain Tab keeps its natural order (the
+      // panel is in DOM flow).
+      function panelLinks(){ return Array.prototype.slice.call(drop.querySelectorAll('.nav-drop-panel a[href]')); }
+      function focusTrigger(){ suppressFocusOpen = true; trigger.focus(); suppressFocusOpen = false; }
+      trigger.addEventListener('keydown', function(e){
+        if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); open(); var l = panelLinks(); if (l.length) l[0].focus(); }
+      });
+      drop.addEventListener('keydown', function(e){
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Escape') return;
+        if (e.target === trigger) return;   // handled above
+        var l = panelLinks(); var i = l.indexOf(document.activeElement);
+        if (e.key === 'Escape') { if (drop.classList.contains('open')) { e.stopPropagation(); closeAllDropdowns(); focusTrigger(); } return; }
+        if (i < 0) return;
+        e.preventDefault();
+        var next = e.key === 'ArrowDown' ? (i + 1) % l.length : (i - 1 + l.length) % l.length;
+        l[next].focus();
+      });
     });
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape') closeAllDropdowns();
@@ -140,9 +160,11 @@
     'south-ari-atoll-guide.html': 'south-ari',
     'best-local-islands-snorkeling.html': 'south-ari',
     'south-ari-vs-other-regions.html': 'south-ari',
-    'best-time-to-visit.html': 'plan',
-    'maldives-holiday-cost.html': 'plan',
-    'guesthouse-vs-resort.html': 'plan',
+    // Phase 12B-D: the planning guides live under the "South Ari" panel
+    // (Destination / Planning columns) — the former "Plan Your Trip" group.
+    'best-time-to-visit.html': 'south-ari',
+    'maldives-holiday-cost.html': 'south-ari',
+    'guesthouse-vs-resort.html': 'south-ari',
     'holiday-packages.html': 'packages'
   };
   function initActiveGroup(){

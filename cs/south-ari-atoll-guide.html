@@ -105,64 +105,69 @@
 </head>
 <body data-page-type="guide" data-page-slug="south-ari-atoll-guide">
 
-<nav id="nav">
+<nav id="nav" aria-label="Hlavní navigace" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
-  <a href="/cs/" class="nav-logo">
-    <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
-    <div class="nav-logo-text">
-      <div class="nav-logo-name">Vilu Residence</div>
-      <div class="nav-logo-sub">Maamigili · Maldives</div>
+    <a href="/cs/" class="nav-logo">
+      <img src="/images/vilu-logo.jpg" alt="Vilu Residence" width="44" height="44">
+      <div class="nav-logo-text">
+        <div class="nav-logo-name">Vilu Residence</div>
+        <div class="nav-logo-sub">Maamigili · Maldives</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
+      <li class="nav-drop">
+        <button type="button" class="nav-drop-trigger" aria-expanded="false" aria-controls="navPanelExperiences" data-nav-group="experiences"><span data-i18n="navShell.experiences">Zážitky</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+        <div class="nav-drop-panel" id="navPanelExperiences">
+          <div class="nav-panel-col">
+            <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a>
+            <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a>
+            <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a>
+          </div>
+        </div>
+      </li>
+      <li class="nav-drop">
+        <button type="button" class="nav-drop-trigger" aria-expanded="false" aria-controls="navPanelSouthAri" data-nav-group="south-ari"><span data-i18n="navShell.southAri">Jižní Ari</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+        <div class="nav-drop-panel nav-drop-panel-wide" id="navPanelSouthAri">
+          <div class="nav-panel-col">
+            <span class="nav-panel-eyebrow" data-i18n="navShell.destination">Destinace</span>
+            <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a>
+            <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a>
+            <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">Nejlepší Ostrovy pro Šnorchlování</a>
+            <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">Jižní Ari vs. Jiné Oblasti</a>
+          </div>
+          <div class="nav-panel-col">
+            <span class="nav-panel-eyebrow" data-i18n="navShell.planning">Plánování</span>
+            <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a>
+            <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Průvodce Náklady</a>
+            <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a>
+            <a href="/cs/#travel-info" data-i18n="nav.travelInfo">Info o cestě</a>
+          </div>
+        </div>
+      </li>
+      <li class="nav-drop">
+        <button type="button" class="nav-drop-trigger" aria-expanded="false" aria-controls="navPanelStay" data-nav-group="stay"><span data-i18n="navShell.stay">Ubytování</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+        <div class="nav-drop-panel" id="navPanelStay">
+          <div class="nav-panel-col">
+            <a href="/cs/#about">Vilu Residence</a>
+            <a href="/cs/#rooms" data-i18n="nav.rooms">Pokoje</a>
+            <a href="/cs/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a>
+            <a href="/cs/#gallery" data-i18n="nav.gallery">Galerie</a>
+            <a href="/cs/#contact" data-i18n="nav.contact">Kontakt</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-right">
+      <div class="lang-switcher" aria-label="Language selector"></div>
+      <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+      <a class="nav-check-availability js-check-availability" href="/cs/#booking" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
     </div>
-  </a>
-  <ul class="nav-links">
-    <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide" data-nav-group="packages">Dovolenkové balíčky</a></li>
-    <li class="nav-drop">
-      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.experiences" data-nav-group="experiences">Zážitky</button>
-      <div class="nav-drop-panel" role="menu">
-        <a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide" role="menuitem">Šnorchlování se žraloky velrybími</a>
-        <a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide" role="menuitem">Šnorchlování s mantami</a>
-        <a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide" role="menuitem">Co Dělat na Maamigili</a>
-      </div>
-    </li>
-    <li class="nav-drop">
-      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.southAri" data-nav-group="south-ari">Jižní Ari</button>
-      <div class="nav-drop-panel" role="menu">
-        <a href="maamigili-guide.html" data-i18n="pageNav.maaGuide" role="menuitem">Průvodce Maamigili</a>
-        <a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide" role="menuitem">Průvodce atolem Jižní Ari</a>
-        <a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide" role="menuitem">Nejlepší Ostrovy pro Šnorchlování</a>
-        <a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide" role="menuitem">Jižní Ari vs. Jiné Oblasti</a>
-      </div>
-    </li>
-    <li class="nav-drop">
-      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.stay" data-nav-group="stay">Ubytování</button>
-      <div class="nav-drop-panel" role="menu">
-        <a href="/cs/#about" role="menuitem">Vilu Residence</a>
-        <a href="/cs/#rooms" data-i18n="nav.rooms" role="menuitem">Pokoje</a>
-        <a href="/cs/#booking" class="js-live-availability" data-i18n="navShell.liveAvailability" role="menuitem">Aktuální dostupnost</a>
-        <a href="/cs/#gallery" data-i18n="nav.gallery" role="menuitem">Galerie</a>
-      </div>
-    </li>
-    <li class="nav-drop">
-      <button class="nav-drop-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="navShell.planTrip" data-nav-group="plan">Naplánujte cestu</button>
-      <div class="nav-drop-panel" role="menu">
-        <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide" role="menuitem">Nejlepší Doba Návštěvy</a>
-        <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide" role="menuitem">Průvodce Náklady</a>
-        <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide" role="menuitem">Penzion vs. Resort</a>
-        <a href="/cs/#travel-info" data-i18n="nav.travelInfo" role="menuitem">Info o cestě</a>
-        <a href="/cs/#contact" data-i18n="nav.contact" role="menuitem">Kontakt</a>
-      </div>
-    </li>
-  </ul>
-  <div class="nav-right">
-    <div class="lang-switcher" aria-label="Language selector"></div>
-    <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
-    <a class="nav-check-availability js-check-availability" href="/cs/#booking" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
-  </div>
-  <div class="nav-mobile-right">
-    <button class="nav-hamburger" id="hamburger" aria-label="Otevřít menu" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+    <div class="nav-mobile-right">
+      <button type="button" class="nav-hamburger" id="hamburger" aria-label="Otevřít menu" data-i18n-aria-label="navShell.openMenu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -170,49 +175,49 @@
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menu webu" data-i18n-aria-label="navShell.menuLabel">
   <div class="mm-header">
     <a href="/cs/" class="nav-logo" data-mm-close="">
-      <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+      <img src="/images/vilu-logo.jpg" alt="Vilu Residence" width="44" height="44">
       <div class="nav-logo-text">
         <div class="nav-logo-name">Vilu Residence</div>
         <div class="nav-logo-sub">Maamigili · Maldives</div>
       </div>
     </a>
-    <button class="mm-close" aria-label="Zavřít menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
+    <button type="button" class="mm-close" aria-label="Zavřít menu" data-i18n-aria-label="navShell.closeMenu" data-mm-close="">×</button>
   </div>
   <div class="mm-body">
-    <a class="mm-packages" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a>
+    <a class="mm-packages" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-mm-close="">
+      <span class="mm-packages-eyebrow" data-i18n="navShell.planHoliday">Naplánujte dovolenou</span>
+      <span class="mm-packages-title" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</span>
+    </a>
     <div class="mm-group">
-      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.experiences">Zážitky</button>
-      <div class="mm-group-panel">
+      <button type="button" class="mm-group-trigger" aria-expanded="false" aria-controls="mmPanelExperiences"><span data-i18n="navShell.experiences">Zážitky</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel" id="mmPanelExperiences">
         <a href="whale-shark-snorkeling.html" data-mm-close="" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a>
         <a href="manta-ray-snorkeling.html" data-mm-close="" data-i18n="pageNav.mrGuide">Šnorchlování s mantami</a>
         <a href="things-to-do-maamigili.html" data-mm-close="" data-i18n="pageNav.thingsGuide">Co Dělat na Maamigili</a>
       </div>
     </div>
     <div class="mm-group">
-      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.southAri">Jižní Ari</button>
-      <div class="mm-group-panel">
+      <button type="button" class="mm-group-trigger" aria-expanded="false" aria-controls="mmPanelSouthAri"><span data-i18n="navShell.southAri">Jižní Ari</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel" id="mmPanelSouthAri">
+        <span class="mm-eyebrow" data-i18n="navShell.destination">Destinace</span>
         <a href="maamigili-guide.html" data-mm-close="" data-i18n="pageNav.maaGuide">Průvodce Maamigili</a>
         <a href="south-ari-atoll-guide.html" data-mm-close="" data-i18n="pageNav.saaGuide">Průvodce atolem Jižní Ari</a>
         <a href="best-local-islands-snorkeling.html" data-mm-close="" data-i18n="pageNav.cmpSnorkelGuide">Nejlepší Ostrovy pro Šnorchlování</a>
         <a href="south-ari-vs-other-regions.html" data-mm-close="" data-i18n="pageNav.cmpRegionsGuide">Jižní Ari vs. Jiné Oblasti</a>
-      </div>
-    </div>
-    <div class="mm-group">
-      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.stay">Ubytování</button>
-      <div class="mm-group-panel">
-        <a href="/cs/#about" data-mm-close="">Vilu Residence</a>
-        <a href="/cs/#rooms" data-mm-close="" data-i18n="nav.rooms">Pokoje</a>
-        <a href="/cs/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a>
-        <a href="/cs/#gallery" data-mm-close="" data-i18n="nav.gallery">Galerie</a>
-      </div>
-    </div>
-    <div class="mm-group">
-      <button class="mm-group-trigger" aria-expanded="false" data-i18n="navShell.planTrip">Naplánujte cestu</button>
-      <div class="mm-group-panel">
+        <span class="mm-eyebrow" data-i18n="navShell.planning">Plánování</span>
         <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Nejlepší Doba Návštěvy</a>
         <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Průvodce Náklady</a>
         <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Penzion vs. Resort</a>
         <a href="/cs/#travel-info" data-mm-close="" data-i18n="nav.travelInfo">Info o cestě</a>
+      </div>
+    </div>
+    <div class="mm-group">
+      <button type="button" class="mm-group-trigger" aria-expanded="false" aria-controls="mmPanelStay"><span data-i18n="navShell.stay">Ubytování</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      <div class="mm-group-panel" id="mmPanelStay">
+        <a href="/cs/#about" data-mm-close="">Vilu Residence</a>
+        <a href="/cs/#rooms" data-mm-close="" data-i18n="nav.rooms">Pokoje</a>
+        <a href="/cs/#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Aktuální dostupnost</a>
+        <a href="/cs/#gallery" data-mm-close="" data-i18n="nav.gallery">Galerie</a>
         <a href="/cs/#contact" data-mm-close="" data-i18n="nav.contact">Kontakt</a>
       </div>
     </div>
@@ -417,20 +422,23 @@
 
 <footer>
   <div class="footer-inner">
-    <div class="footer-top">
-      <div>
+    <div class="footer-hero">
+      <div class="footer-hero-brand">
         <div class="footer-brand-logo">
-          <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
+          <img src="/images/vilu-logo.jpg" alt="Vilu Residence" width="48" height="48">
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
-        <p class="footer-desc" data-i18n="footer.desc">Přívětivý penzion v Jižním atolu Ari nabízející upřímný přístup a autentické maledivské zážitky.</p>
-        <div style="font-size:var(--font-size-sm)"><a href="tel:+9609903339" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a> · <a href="mailto:Viluresidence@gmail.com" style="color:rgba(255,255,255,.6);text-decoration:none" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a></div>
-        <div class="footer-social">
-          <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
-          <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
-          <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+        <p class="footer-brandline" data-i18n="footer.brandLine">Zažijte Jižní Ari.</p>
+      </div>
+      <div class="footer-hero-text">
+        <p class="footer-desc" data-i18n="footer.positioning">Prémiové plánování dovolené na Maledivách z Maamigili na atolu Jižní Ari – žraloci velrybí, manty a život na místním ostrově, s naším vlastním penzionem se šesti pokoji, Vilu Residence, jako základnou.</p>
+        <div class="footer-ctas">
+          <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Naplánujte dovolenou</a>
+          <a class="footer-availability js-check-availability" href="/cs/#booking" data-i18n="navShell.checkAvailability">Zkontrolovat dostupnost</a>
         </div>
       </div>
+    </div>
+    <div class="footer-top">
       <div class="footer-col"><h4 data-i18n="footer.explore">Objevujte</h4><ul>
         <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide">Dovolenkové balíčky</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">Šnorchlování se žraloky velrybími</a></li>
@@ -458,6 +466,19 @@
         <li><a href="/cs/privacy-policy.html">Privacy Policy</a></li>
         <li><a href="/cs/cookies.html">Cookies &amp; Technology</a></li>
       </ul></div>
+    </div>
+    <div class="footer-contact">
+      <div class="footer-contact-links">
+        <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a>
+        <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a>
+        <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'footer'})">WhatsApp</a>
+        <span class="footer-address">Maamigili, South Ari Atoll, Maldives</span>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/ViluResidence/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook" aria-hidden="true"></i></a>
+        <a href="https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html" target="_blank" rel="noopener noreferrer" aria-label="TripAdvisor"><i class="ti ti-brand-tripadvisor" aria-hidden="true"></i></a>
+      </div>
     </div>
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="cur-yr">2026</span> Vilu Residence Maamigili. <span data-i18n="footer.rights">Všechna práva vyhrazena.</span></div>
