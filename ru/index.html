@@ -498,12 +498,13 @@ section{position:relative}
 .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,60px);font-weight:300;line-height:1.1;letter-spacing:-.01em}
 
 /* ── QUICK BOOKING BAR ── */
-.booking-bar{background:var(--navy2);border-top:2px solid var(--gold);border-bottom:1px solid rgba(255,255,255,.06);padding:0 5vw}
+.booking-bar{background:var(--navy2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:0 5vw}
 .booking-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:stretch;gap:0;height:72px}
-.bb-field{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 20px;border-right:1px solid rgba(255,255,255,.08)}
+.bb-field{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 20px;border-right:1px solid var(--border)}
 .bb-field:first-child{padding-left:0}
-.bb-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.bb-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .bb-input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--white);width:100%;cursor:pointer}
+.bb-field:focus-within{box-shadow:inset 0 -2px 0 var(--teal-light)}
 .bb-input::placeholder{color:rgba(255,255,255,.4)}
 .bb-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 /* Native <select> popups otherwise default to a plain white OS panel,
@@ -514,8 +515,8 @@ section{position:relative}
    native light popup regardless — an accepted limitation of <select>. */
 select.bb-input{color-scheme:dark}
 select.bb-input option{background-color:var(--navy2);color:var(--white)}
-.bb-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:0 32px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s;white-space:nowrap}
-.bb-btn:hover{background-position:100% 0}
+.bb-btn{background:none;color:var(--white);border:1px solid var(--border);padding:0 32px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .3s,color .3s;white-space:nowrap}
+.bb-btn:hover{border-color:var(--gold);color:var(--gold-light)}
 
 /* ── ROOMS ── */
 #rooms{color:var(--text);padding:100px 0;position:relative}
@@ -644,7 +645,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-notes summary::after{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;content:"\ea5f";transition:transform .25s}
 .hp-notes[open] summary::after{transform:rotate(180deg)}
 .hp-notes-body{display:flex;flex-direction:column;gap:4px;margin-top:10px}
-.hp-notes-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:rgba(255,255,255,.55);padding:3px 0;line-height:1.5}
+.hp-notes-line{display:flex;align-items:flex-start;gap:8px;font-size:var(--font-size-xs);color:var(--muted);padding:3px 0;line-height:1.5}
 .hp-notes-line::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;color:var(--muted);flex-shrink:0;margin-top:2px;font-size:var(--font-size-sm);content:"\eac5"}
 .hp-actions{margin-top:auto;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:10px}
 .hp-enquire-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:14px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
@@ -669,16 +670,16 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .la-field .bwf-input,.la-field .bwf-select{font-size:var(--font-size-sm);padding:10px 10px}
 .la-field{display:flex;flex-direction:column;gap:6px;text-align:left}
 .la-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
-.bwf-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
-.bwf-input:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
-.bwf-input::placeholder{color:rgba(255,255,255,.3)}
+.bwf-input{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
+.bwf-input:focus,.bwf-select:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
+.bwf-input::placeholder{color:var(--muted)}
 .bwf-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
-.bwf-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
+.bwf-select{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
 .bwf-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:12px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;white-space:nowrap}
 .bwf-btn:hover{background-position:100% 0;box-shadow:0 10px 26px rgba(34,211,238,.4)}
 .la-btn{height:42px}
-.bwf-note{font-size:var(--font-size-xs);color:rgba(255,255,255,.4);letter-spacing:.04em;margin-top:16px;text-align:center}
-.la-viewall{display:block;margin:24px auto 0;background:none;border:1px solid rgba(255,255,255,.25);color:var(--white);padding:12px 28px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+.bwf-note{font-size:var(--font-size-xs);color:var(--muted);letter-spacing:.04em;margin-top:16px;text-align:center}
+.la-viewall{display:block;margin:24px auto 0;background:none;border:1px solid var(--border);color:var(--white);padding:12px 28px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s}
 .la-viewall:hover{border-color:var(--gold);color:var(--gold-light)}
 @media(max-width:900px){
   .la-row{grid-template-columns:1fr 1fr;gap:12px}
@@ -770,7 +771,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .cf-fields{display:flex;flex-direction:column;gap:16px}
 .cf-field label{display:block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
 .cf-field input,.cf-field textarea,.cf-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
-.cf-field input:focus,.cf-field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.15)}
+.cf-field input:focus,.cf-field textarea:focus,.cf-field select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.15)}
 .cf-field textarea{height:100px;resize:vertical}
 .cf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .cf-btn{width:100%;background:var(--teal);color:var(--white);border:none;padding:16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
@@ -821,6 +822,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .bfp-search-grid{display:grid;grid-template-columns:1fr 1fr 80px 80px 90px auto;gap:16px;align-items:end}
 .bfp-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
 .bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none}
+.bfp-field input:focus,.bfp-field select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.2)}
 .bfp-search-btn{background:var(--teal);color:var(--white);border:none;padding:11px 24px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s}
 .bfp-search-btn:hover{background:var(--teal-light);box-shadow:0 8px 22px rgba(14,116,144,.35)}
 .bfp-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
@@ -848,15 +850,15 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 
 /* ── TRAVEL INFO (top-level tabs wrapping Getting Here / Timing Checker / FAQ) ── */
 .ti-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
-.ti-tab{display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:8px;color:var(--muted);padding:14px 24px;cursor:pointer;transition:all .25s}
+.ti-tab{display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:14px 24px;cursor:pointer;transition:all .25s}
 .ti-tab i{font-size:18px}
 .ti-tab.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
-.ti-tab:not(.on):hover{color:var(--white);border-color:rgba(255,255,255,.3)}
+.ti-tab:not(.on):hover{color:var(--white);border-color:var(--gold-light)}
 @media(max-width:600px){.ti-tab{flex:1 1 auto;justify-content:center;padding:12px 16px}}
 
 /* ── GETTING HERE ── */
 .gh-sub{font-size:var(--font-size-lg);color:var(--muted);max-width:60ch;line-height:1.65;margin-bottom:32px}
-.gh-tabs{display:inline-flex;border:1px solid rgba(255,255,255,.18);border-radius:2px;overflow:hidden;margin-bottom:32px}
+.gh-tabs{display:inline-flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;margin-bottom:32px}
 .gh-tab{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;color:var(--muted);padding:12px 28px;cursor:pointer;transition:all .25s}
 .gh-tab.on{background:var(--gold);color:var(--navy)}
 .gh-tab:not(.on):hover{color:var(--white)}
@@ -877,12 +879,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 @media(max-width:800px){.gh-grid{grid-template-columns:1fr}}
 
 /* ── TRANSFER TIMING CHECKER ── */
-.tc-tabs{display:inline-flex;border:1px solid rgba(255,255,255,.18);border-radius:2px;overflow:hidden;margin-bottom:32px}
+.tc-tabs{display:inline-flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;margin-bottom:32px}
 .tc-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:28px 26px;display:flex;flex-direction:column;gap:24px;max-width:640px}
 .tc-field{display:flex;flex-direction:column;gap:10px}
 .tc-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .tc-inputs{display:flex;gap:10px;flex-wrap:wrap}
-.tc-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;color-scheme:dark}
+.tc-input{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;color-scheme:dark}
+.tc-input:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
 .tc-check-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:10px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background-position .3s}
 .tc-check-btn:hover{background-position:100% 0}
 .tc-result{display:none;padding:14px 16px;border-radius:8px;font-size:var(--font-size-sm);line-height:1.6}
@@ -900,9 +903,10 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .faq-controls{display:flex;flex-direction:column;gap:16px;margin-bottom:32px}
 .faq-search{position:relative;max-width:420px}
 .faq-search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
-.faq-search input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:11px 14px 11px 40px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none}
+.faq-search input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:11px 14px 11px 40px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none}
+.faq-search input:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
 .faq-cats{display:flex;gap:8px;flex-wrap:wrap}
-.faq-cat-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
+.faq-cat-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
 .faq-cat-btn.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
 /* <details>/<summary> -- native, keyboard/screen-reader operable with zero
    JS required for the open/close mechanic (Phase 12B-E2B §18). */
@@ -984,7 +988,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
    These overrides cover the spots that use physical (left/right) values
    instead of logical ones, where the default would NOT mirror on its own. */
 [dir="rtl"] { text-align: right; }
-[dir="rtl"] .bb-field{ border-right:none; border-left:1px solid rgba(255,255,255,.08); }
+[dir="rtl"] .bb-field{ border-right:none; border-left:1px solid var(--border); }
 [dir="rtl"] .bb-field:first-of-type{ padding-left:20px; }
 [dir="rtl"] .bb-field:last-of-type{ border-left:none; padding-left:0; }
 [dir="rtl"] .room-card-badge{ left:auto; right:16px; }
@@ -1290,28 +1294,6 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
 </section>
 
-<!-- ══ EXPERIENCES ══ -->
-<section id="experiences">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag" data-i18n="experiences.tag">Фирменные экскурсии</div>
-      <h2 class="section-title" style="color:var(--text)"><span data-i18n="experiences.titlePrefix">Наши</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="experiences.titleEmphasis">впечатления</em></h2>
-      <p class="gh-sub" style="margin-top:16px" data-i18n="experiences.subtitle">Каждая из экскурсий ниже включена в один или несколько наших пакетов отдыха, представленных выше — вот что на самом деле включает в себя каждая из них.</p>
-    </div>
-    <div class="exp-grid reveal" id="exp-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Загрузка пакетов…</div>
-    </div>
-    <p class="exp-links reveal">
-      <span data-i18n="experiences.linksIntro">Вопросы о трансферах или расписании?</span>
-      <a href="#travel-info" onclick="if(typeof seSwitchTab==='function')seSwitchTab('getting-here')"><span data-i18n="experiences.linkGettingHere">Как добраться</span></a>
-      ·
-      <a href="#faq"><span data-i18n="experiences.linkFaq">прочитайте наш FAQ</span></a>
-      ·
-      <a href="#contact"><span data-i18n="experiences.linkContact">свяжитесь с нами напрямую</span></a>
-    </p>
-  </div>
-</section>
-
 <!-- ══ CINEMATIC STORY: ABOVE → DESCENT → BELOW → RETURN → HOMECOMING (Phase 12B-E2A) ══
      Progressive-enhancement contract: every piece of real content below (headings,
      copy, links, the Homecoming photo) is fully visible in the base CSS with zero
@@ -1371,6 +1353,29 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <h2 class="vc-heading vc-heading-sm" data-i18n="homecoming.display">And this is where you'll call home.</h2>
     <p class="vc-story-sub vc-homecoming-fact"><span data-i18n="homecoming.rooms">Six rooms.</span> <span data-i18n="homecoming.personal">A more personal stay.</span></p>
     <a href="#rooms" class="btn-primary" data-i18n="homecoming.cta" onclick="trackEvent('cta_click',{source_context:'homecoming'})">See the Rooms</a>
+  </div>
+</section>
+
+
+<!-- ══ EXPERIENCES ══ -->
+<section id="experiences">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag" data-i18n="experiences.tag">Фирменные экскурсии</div>
+      <h2 class="section-title" style="color:var(--text)"><span data-i18n="experiences.titlePrefix">Наши</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="experiences.titleEmphasis">впечатления</em></h2>
+      <p class="gh-sub" style="margin-top:16px" data-i18n="experiences.subtitle">Каждая из экскурсий ниже включена в один или несколько наших пакетов отдыха, представленных выше — вот что на самом деле включает в себя каждая из них.</p>
+    </div>
+    <div class="exp-grid reveal" id="exp-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Загрузка пакетов…</div>
+    </div>
+    <p class="exp-links reveal">
+      <span data-i18n="experiences.linksIntro">Вопросы о трансферах или расписании?</span>
+      <a href="#travel-info" onclick="if(typeof seSwitchTab==='function')seSwitchTab('getting-here')"><span data-i18n="experiences.linkGettingHere">Как добраться</span></a>
+      ·
+      <a href="#faq"><span data-i18n="experiences.linkFaq">прочитайте наш FAQ</span></a>
+      ·
+      <a href="#contact"><span data-i18n="experiences.linkContact">свяжитесь с нами напрямую</span></a>
+    </p>
   </div>
 </section>
 
@@ -1530,12 +1535,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <h2 class="section-title"><span data-i18n="guides.titlePrefix">Гиды и</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="guides.titleEmphasis">советы путешественникам</em></h2>
       <p class="gh-sub" data-i18n="guides.intro">Всё, что мы знаем об атолле Южный Ари, острове Маамигили и планировании поездки на Мальдивы — на основе реальных исследований, чтобы помочь вам спланировать поездку, а не просто заполнить страницу.</p>
     </div>
-    <div class="ti-tabs">
-      <button class="ti-tab on" id="se-tab-destinations" onclick="seSwitchTab('destinations')"><i class="ti ti-map-2" aria-hidden="true"></i> <span data-i18n="guides.tabDestinations">Путеводители</span></button>
-      <button class="ti-tab" id="se-tab-compare" onclick="seSwitchTab('compare')"><i class="ti ti-arrows-diff" aria-hidden="true"></i> <span data-i18n="guides.tabCompare">Сравнения</span></button>
-      <button class="ti-tab" id="se-tab-blog" onclick="seSwitchTab('blog')"><i class="ti ti-notebook" aria-hidden="true"></i> <span data-i18n="guides.tabBlog">Блог о путешествиях</span></button>
-      <button class="ti-tab" id="se-tab-getting-here" onclick="seSwitchTab('getting-here')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> <span data-i18n="travelInfo.tabGettingHere">Как добраться</span></button>
-      <button class="ti-tab" id="se-tab-timing" onclick="seSwitchTab('timing')"><i class="ti ti-clock-check" aria-hidden="true"></i> <span data-i18n="travelInfo.tabTiming">Проверка времени</span></button>
+    <div class="ti-tabs" role="tablist">
+      <button class="ti-tab on" id="se-tab-destinations" role="tab" aria-selected="true" onclick="seSwitchTab('destinations')"><i class="ti ti-map-2" aria-hidden="true"></i> <span data-i18n="guides.tabDestinations">Путеводители</span></button>
+      <button class="ti-tab" id="se-tab-compare" role="tab" aria-selected="false" onclick="seSwitchTab('compare')"><i class="ti ti-arrows-diff" aria-hidden="true"></i> <span data-i18n="guides.tabCompare">Сравнения</span></button>
+      <button class="ti-tab" id="se-tab-blog" role="tab" aria-selected="false" onclick="seSwitchTab('blog')"><i class="ti ti-notebook" aria-hidden="true"></i> <span data-i18n="guides.tabBlog">Блог о путешествиях</span></button>
+      <button class="ti-tab" id="se-tab-getting-here" role="tab" aria-selected="false" onclick="seSwitchTab('getting-here')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> <span data-i18n="travelInfo.tabGettingHere">Как добраться</span></button>
+      <button class="ti-tab" id="se-tab-timing" role="tab" aria-selected="false" onclick="seSwitchTab('timing')"><i class="ti ti-clock-check" aria-hidden="true"></i> <span data-i18n="travelInfo.tabTiming">Проверка времени</span></button>
     </div>
 
     <div class="ti-panel" id="se-panel-destinations">
@@ -1658,7 +1663,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <i class="ti ti-brand-google" aria-hidden="true"></i> <span data-i18n="reviews.readOnGoogle">Читать наши отзывы на Google</span>
     </a>
     <div class="tr-assurances">
-      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Best rate guaranteed, book direct with us</span></div>
+      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Better rates when you book direct with us</span></div>
       <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Free cancellation on every direct booking</span></div>
       <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17% &amp; Green Tax included in every rate</span></div>
     </div>
@@ -2166,7 +2171,7 @@ en: {
     "tag": "Signature Excursions",
     "titlePrefix": "Our",
     "titleEmphasis": "experiences",
-    "subtitle": "Every excursion below is included in one or more of our holiday packages above — here's what each one actually involves.",
+    "subtitle": "Every excursion below is included in one or more of our holiday packages — here's what each one actually involves.",
     "startingFrom": "From ${price} pp, included in {count} package{plural}",
     "seePackages": "See packages that include this",
     "enquireOn": "Ask on WhatsApp",
@@ -2197,7 +2202,7 @@ en: {
     "titlePrefix": "Reserve your",
     "titleEmphasis": "escape",
     "intro": "Book directly with us for the best rates and personalised service. No booking fees, flexible policies.",
-    "perk1": "Best rate guaranteed, book direct with us",
+    "perk1": "Better rates when you book direct with us",
     "perk2": "Instant confirmation via email",
     "perk3": "Personalised welcome & local insights",
     "perk4": "Activities & transfers arrangeable",
@@ -2302,7 +2307,7 @@ en: {
     "titleEmphasis": "reviews",
     "subtitle": "Hear directly from guests who've stayed with us at Vilu Residence.",
     "readOnGoogle": "Read Our Reviews on Google",
-    "assurance1": "Best rate guaranteed, book direct with us",
+    "assurance1": "Better rates when you book direct with us",
     "assurance2": "Free cancellation on every direct booking",
     "assurance3": "TGST 17% & Green Tax included in every rate"
   },
@@ -2352,13 +2357,13 @@ en: {
   "bookingPopup": {
     "title": "Book Your Stay",
     "searchAvailability": "Search Availability →",
-    "bestRates": "Best rates guaranteed · Direct booking only"
+    "bestRates": "Better rates · Direct booking only"
   },
   "bfp": {
     "bookYourStay": "Vilu Residence — Book Your Stay",
     "close": "Close",
     "findRoom": "Find your perfect room",
-    "roomsAvailable": "6 rooms available in South Ari Atoll, Maamigili · Direct booking, best rates guaranteed",
+    "roomsAvailable": "6 rooms available in South Ari Atoll, Maamigili · Direct booking, better rates",
     "checkin": "Check-in",
     "checkout": "Check-out",
     "adults": "Adults",
@@ -3126,7 +3131,7 @@ var SE_PANELS = {
 function seSwitchTab(tab) {
   Object.keys(SE_TABS).forEach(function(k){
     var tabEl = document.getElementById(SE_TABS[k]);
-    if (tabEl) tabEl.classList.toggle('on', k === tab);
+    if (tabEl) { tabEl.classList.toggle('on', k === tab); tabEl.setAttribute('aria-selected', k === tab ? 'true' : 'false'); }
     var panelEl = document.getElementById(SE_PANELS[k]);
     if (panelEl) panelEl.style.display = (k === tab) ? '' : 'none';
   });
@@ -3911,14 +3916,39 @@ function renderFAQ() {
   faqWireExpandTracking(listEl);
 }
 
-// trackEvent('faq_expand', ...) fires only on a genuine user-initiated open
-// (native <details> 'toggle' event, filtered to el.open===true) -- never on
-// page init, programmatic re-render, closing, or language change, since
-// renderFAQ() never sets the `open` attribute itself.
+// trackEvent('faq_expand', ...) fires only on a genuine user-initiated open.
+// Phase 12B-E2C: el.open===true alone isn't a durable guard -- any future
+// script that sets details.open = true would also fire <details>'s native
+// 'toggle' event and get silently tracked as a real user action.
+//
+// The event's OWN e.isTrusted is NOT a working guard here (verified by
+// direct test, not assumed): per spec, <details> fires 'toggle' as a
+// browser-internal, trusted event whenever `open` changes -- including when
+// a script sets the `open` property directly, and even when a script calls
+// summary.click() (which invokes summary's real activation behavior). So
+// e.isTrusted on the 'toggle' event itself is true in all of those cases,
+// not just real user input.
+//
+// The actual robust signal is e.isTrusted on the INPUT event that precedes
+// the state change: a real click/Enter/Space always dispatches a genuinely
+// trusted 'click'/'keydown' DOM event first; el.open = true does not fire
+// any click/keydown at all; summary.click() fires a click event, but one
+// with isTrusted:false (the synthetic-click spec). So a short-lived flag,
+// armed only by a trusted click/keydown on <summary> and consumed by the
+// very next 'toggle', is what actually distinguishes them -- confirmed via
+// a CDP trusted-input test (real click/Enter/Space) against untrusted paths
+// (.open=true, summary.click()).
 function faqWireExpandTracking(listEl){
   listEl.querySelectorAll('.faq-item').forEach(function(el){
+    var summary = el.querySelector('summary');
+    var trustedActivation = false;
+    if (summary) {
+      summary.addEventListener('click', function(e){ if (e.isTrusted) trustedActivation = true; });
+      summary.addEventListener('keydown', function(e){ if (e.isTrusted && (e.key === 'Enter' || e.key === ' ')) trustedActivation = true; });
+    }
     el.addEventListener('toggle', function(){
-      if (el.open) trackEvent('faq_expand', {faq_question: el.getAttribute('data-faq-q')});
+      if (el.open && trustedActivation) trackEvent('faq_expand', {faq_question: el.getAttribute('data-faq-q')});
+      trustedActivation = false;
     });
   });
 }

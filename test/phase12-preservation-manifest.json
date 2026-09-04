@@ -394,7 +394,7 @@
     "switch_selector": "[data-theme-switch]",
     "brand_reference": { "--vilu-amber": "#c29147" },
     "dark_tokens": { "--bg": "#06101c", "--bg-secondary": "#0a1628", "--surface": "#0f2140", "--surface-secondary": "#14294a", "--text": "#f3f7fb", "--text-muted": "#9db4c6", "--accent": "#e0a752", "--accent-ink": "#1a0f04", "--accent-text": "#e0a752", "--border": "rgba(243,247,251,.12)" },
-    "light_tokens": { "--bg": "#f6f1e8", "--bg-secondary": "#efe8dc", "--surface": "#fffdf9", "--surface-secondary": "#f1ebe0", "--text": "#1d2430", "--text-muted": "#5c6674", "--accent": "#ad701f", "--accent-ink": "#1a0f04", "--accent-text": "#925f1c", "--border": "rgba(29,36,48,.14)" },
+    "light_tokens": { "--bg": "#f6f1e8", "--bg-secondary": "#efe8dc", "--surface": "#fffdf9", "--surface-secondary": "#f1ebe0", "--text": "#1d2430", "--text-muted": "#5c6674", "--accent": "#ad701f", "--accent-ink": "#1a0f04", "--accent-text": "#925f1c", "--border": "rgba(29,36,48,.14)", "--teal": "#0e7490" },
     "contrast_minimums": {
       "$comment": "WCAG 2.x ratios computed by the harness from the token values above. accent-ink sits ON the accent fill (button text, normal size => 4.5:1); accent-text sits on --bg/--surface (links => 4.5:1); the fill itself vs --bg is a UI component edge (3:1).",
       "accent_ink_on_accent": 4.5,

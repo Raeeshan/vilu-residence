@@ -717,10 +717,26 @@ section('Phase 12B-E2B — complete cinematic homepage contracts');
       assert.ok(new RegExp(`<label for="${id}"`).test(h), id);
     }
   });
-  test('faq_expand fires only on a genuine user-initiated <details> open, never on render/close/init', () => {
+  test('faq_expand fires only on a genuine TRUSTED user-initiated <details> open, never on render/close/init/programmatic-open', () => {
     assert.ok(/<details class="faq-item"/.test(h), 'FAQ items are semantic <details>');
-    assert.ok(h.includes("el.addEventListener('toggle', function(){\n      if (el.open) trackEvent('faq_expand'"), 'guarded to el.open only');
+    // Phase 12B-E2C: e.isTrusted on the <details> 'toggle' event itself is NOT
+    // a working guard (verified live: <details> fires 'toggle' as trusted
+    // even when a script sets `open` directly, or calls summary.click()).
+    // The real guard has to check isTrusted on the INPUT event (click/keydown
+    // on <summary>) that precedes the toggle, via a short-lived flag.
+    assert.ok(h.includes("summary.addEventListener('click', function(e){ if (e.isTrusted) trustedActivation = true; });"), 'summary click sets the trusted-activation flag only when isTrusted');
+    assert.ok(h.includes("summary.addEventListener('keydown', function(e){ if (e.isTrusted && (e.key === 'Enter' || e.key === ' ')) trustedActivation = true; });"), 'summary keydown sets the flag only for a trusted Enter/Space');
+    assert.ok(h.includes("if (el.open && trustedActivation) trackEvent('faq_expand'"), 'toggle handler requires both open===true and the trusted-activation flag');
+    assert.ok(h.includes('trustedActivation = false;\n    });\n  });'), 'flag is consumed (reset) on every toggle, so it cannot leak into a later unrelated toggle');
     assert.ok(!/renderFAQ\(\)[^}]*setAttribute\('open'/.test(h), 'renderFAQ never force-opens an item');
+  });
+  test('no hardcoded rgba(255,255,255,...) text color regression on package-card body text (must adapt in Light theme)', () => {
+    for (const cls of ['.hp-hook', '.hp-line', '.hp-notes-line', '.wiv-points li']) {
+      const rule = new RegExp(cls.replace(/[.\s]/g, '\\$&') + '\\{[^}]*\\}');
+      const m = h.match(rule);
+      assert.ok(m, `${cls} rule not found`);
+      assert.ok(!/color:\s*rgba\(255,255,255/.test(m[0]), `${cls} still hardcodes white text: ${m[0]}`);
+    }
   });
   test('FAQ has a real static no-JS fallback (not an empty shell)', () => {
     const faqSection = h.slice(h.indexOf('<section id="faq">'), h.indexOf('</section>', h.indexOf('<section id="faq">')));
@@ -757,8 +773,24 @@ section('Phase 12B-E2B — complete cinematic homepage contracts');
     for (const id of ['se-tab-destinations','se-tab-compare','se-tab-blog','se-tab-getting-here','se-tab-timing']) assert.ok(se.includes(`id="${id}"`), id);
     assert.ok(!se.includes('id="ti-panel-faq"') && !se.includes('id="se-panel-faq"'), 'FAQ tab removed from this bar');
   });
+  test('South Ari Expertise tabs expose real tab semantics (role=tab/tablist + aria-selected toggled by seSwitchTab)', () => {
+    const se = h.slice(h.indexOf('<section id="travel-info">'), h.indexOf('</section>', h.indexOf('<section id="travel-info">')));
+    assert.ok(se.includes('class="ti-tabs" role="tablist"'), 'tab bar exposes role=tablist');
+    for (const id of ['se-tab-destinations','se-tab-compare','se-tab-blog','se-tab-getting-here','se-tab-timing']) {
+      assert.ok(new RegExp(`id="${id}" role="tab" aria-selected="(true|false)"`).test(se), `${id} exposes role=tab + aria-selected`);
+    }
+    assert.ok(h.includes("tabEl.setAttribute('aria-selected', k === tab ? 'true' : 'false')"), 'seSwitchTab keeps aria-selected in sync with the active tab');
+  });
   test('final homepage section order matches the approved narrative', () => {
-    const order = ['id="home"', 'id="what-is-vilu"', 'id="holiday-packages"', 'id="experiences"', 'id="vc-above"', 'id="vc-homecoming"', 'id="rooms"', 'id="booking"', 'id="travel-info"', 'id="reviews"', 'id="faq"', 'id="gallery"', 'id="closing"', 'id="contact"', '<footer'];
+    // Phase 12B-E2C: Experiences moved from between Packages and Above to
+    // between Homecoming and Rooms -- honest review found the compact chip
+    // list (still a real, functional/utility-register block) sitting
+    // directly before Above blunted the Packages -> Above emotional turn by
+    // stacking two utility sections back to back. Repositioning it after the
+    // cinematic arc completes gives Packages a direct handoff into Above,
+    // and gives Experiences a more natural home next to Rooms/Availability's
+    // own practical register. No content, links, or tracking moved or changed.
+    const order = ['id="home"', 'id="what-is-vilu"', 'id="holiday-packages"', 'id="vc-above"', 'id="vc-homecoming"', 'id="experiences"', 'id="rooms"', 'id="booking"', 'id="travel-info"', 'id="reviews"', 'id="faq"', 'id="gallery"', 'id="closing"', 'id="contact"', '<footer'];
     let pos = -1;
     for (const marker of order) {
       const next = h.indexOf(marker, pos + 1);

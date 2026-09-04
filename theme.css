@@ -132,6 +132,19 @@
   --toggle-track:rgba(29,36,48,.18);
   --toggle-knob:#ffffff;
   --toggle-knob-on:#1a0f04;
+
+  /* --teal is a legacy alias (line 98 above) onto --surface-secondary, which
+     is correct by coincidence in Dark (a dark navy that reads as an accent)
+     but breaks in Light, where --surface-secondary is redefined as a near-
+     white neutral surface tone -- every --teal consumer (room prices, Book
+     Now/Enquire/Send buttons, contact icons/labels, the floating WhatsApp
+     button) would render pale-on-pale. Overriding --teal here, scoped to
+     Light only, restores a real legible accent without touching a single
+     Dark-theme rule. #0e7490 is not a new invented color -- it is the exact
+     brand teal already hardcoded in this file's own rgba(14,116,144,...)
+     box-shadows (verified: contrast vs both --surface #fffdf9 and --bg
+     #f6f1e8 clears WCAG AA for normal text, ~5.4:1 and ~4.8:1). */
+  --teal:#0e7490;
 }
 
 @media (max-width:700px){
