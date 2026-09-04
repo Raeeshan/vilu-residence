@@ -462,8 +462,10 @@
       "theme_i18n_keys": ["navShell.theme", "navShell.themeDark", "navShell.themeLight", "navShell.switchToDark", "navShell.switchToLight"],
       "shell_i18n_keys": ["navShell.mainNav", "navShell.destination", "navShell.planning", "footer.brandLine", "footer.positioning"],
       "social_hrefs": ["https://www.instagram.com/vilu_residence/", "https://www.facebook.com/ViluResidence/", "https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html"],
-      "footer_required_markers": ["footer-brandline", "footer-contact", "id=\"footerPrivacyChoices\"", "Vilu PMS", "tel:+9609903339", "mailto:Viluresidence@gmail.com"],
+      "footer_required_markers": ["footer-brandline", "footer-contact", "id=\"footerPrivacyChoices\"", "tel:+9609903339", "mailto:Viluresidence@gmail.com"],
       "forbidden_shell_hrefs": ["href=\"#\"", "vilu-unified.html", "vilu-agency-portal.html", "/docs/", "/test/", "firestore"],
+      "public_exposure_principle": "Maximum public discoverability for traveler-facing content; minimum unnecessary public exposure of internal technical architecture. The public shell (header, drawer, footer) must not advertise PMS/internal-system names, the Agency Portal, admin routes, development tooling, build or test infrastructure, or Firestore/business implementation details. Functional PMS contracts (booking_pms section) stay fully protected — this governs public display only.",
+      "forbidden_public_shell_phrases": ["Managed by Vilu PMS", "Vilu PMS", "Powered by", "Built with", "Firebase", "Firestore", "Agency Portal", "vilu-unified", "PMS"],
       "forbidden_frameworks": ["bootstrap", "tailwind", "cdn.jsdelivr", "unpkg.com", "cdnjs.cloudflare", "fontawesome", "fonts.googleapis.com", "react-dom", "vue.global"],
       "forbidden_event_names": ["package_enquire_click", "experience_enquire_click"]
     }

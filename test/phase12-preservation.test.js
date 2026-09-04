@@ -628,6 +628,18 @@ section('Navigation / footer IA');
       for (const bad of S.forbidden_shell_hrefs) assert.ok(!shell.includes(bad), `${p.file} shell contains ${bad}`);
     }
   });
+  test('public shell exposes no internal architecture (no PMS/Agency/Firestore/tooling phrases, no internal-tool links) on source and generated pages', () => {
+    // PUBLIC VILU PRINCIPLE: maximum traveler discoverability, minimum technical exposure.
+    const stripTags = (s) => s.replace(/<[^>]+>/g, ' ');
+    const check = (rel, h) => {
+      const shellHtml = navBlock(h) + drawerBlock(h) + footerBlock(h);
+      const visible = stripTags(shellHtml);
+      for (const phrase of S.forbidden_public_shell_phrases) assert.ok(!new RegExp('(^|[^A-Za-z_])' + phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^A-Za-z_])', 'i').test(visible), `${rel} shell shows "${phrase}"`);
+      for (const f of M.internal_tools.files) assert.ok(!shellHtml.includes(f), `${rel} shell links ${f}`);
+    };
+    for (const p of CONTENT_PAGES) check(p.file, read(p.file));
+    for (const l of M.languages) for (const p of CONTENT_PAGES) { const rel = `${l}/${p.generated_out_file || p.file}`; check(rel, read(rel)); }
+  });
   test('no framework, external UI library or external font was introduced; no legacy event names', () => {
     const files = fs.readdirSync(ROOT).filter(f => /\.(html|css|js)$/.test(f) && !M.internal_tools.files.includes(f));
     for (const f of files) {

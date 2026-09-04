@@ -211,6 +211,12 @@ First-touch only, 30-day fixed timestamp, `vilu_attribution` v1 in localStorage,
 
 `vilu-unified.html` (PMS) and `vilu-agency-portal.html` are physical files served by Hosting (HTTP 200) and rely on `<meta name="robots" content="noindex, nofollow">` plus `robots.txt` `Disallow`. **robots.txt and noindex are search-engine directives, not authentication or access-control mechanisms.** These interfaces must not be described as secured merely because indexing is discouraged. Classification: **P4 — pre-existing PMS/Agency security residual / separate future security project.** Phase 12 must not expose additional public links to them (machine-checked: no public page links to either file), not worsen their discoverability, not modify their authentication/security architecture, and not fold PMS security remediation into the cinematic redesign.
 
+### 12.1 Public Vilu principle (Phase 12B-D1)
+
+**Maximum public discoverability for traveler-facing content. Minimum unnecessary public exposure of internal technical architecture.**
+
+Publicly expose: destinations, guides, holiday packages, Vilu Residence, availability, contact, traveler information, brand information. Do not unnecessarily advertise in public markup: PMS or internal-system naming, the Agency Portal, admin systems, development tooling, build architecture, testing infrastructure, or private Firestore/business implementation details. The former footer line "Managed by Vilu PMS" was removed under this principle (12B-D1); the harness now asserts that the public shell (header, drawer, footer) of every source and generated page contains no such phrases and no internal-tool links. This governs *public display only*: the functional PMS contracts in §6 (including the internal `BroadcastChannel('vilu_pms')` identifier) remain fully protected and unchanged. The full fingerprint/security-hardening project stays a separate later phase.
+
 ---
 
 ## 13. Navigation / footer IA (P1 function; P0 destinations)
