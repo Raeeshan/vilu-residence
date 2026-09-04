@@ -57,6 +57,7 @@
 <link rel="alternate" hreflang="x-default" href="https://viluresidence.net/south-ari-atoll-guide.html">
 <link rel="stylesheet" href="/fonts/tabler-icons-subset.css">
 <link rel="stylesheet" href="/shared-page.css">
+<noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -249,21 +250,24 @@
 </header>
 
 <main class="section-inner" style="padding-top:56px">
-  <article class="content-block reveal">
-    <nav aria-label="Table of contents" class="toc-block">
+  <div class="guide-layout">
+    <aside class="guide-toc-rail">
+      <nav aria-label="Table of contents" class="toc-block">
       <h2 class="section-title" data-i18n="saaPage.tocHeading">На этой странице</h2>
       <ol data-i18n="saaPage.tocList"><li><a href="#quick-facts">Кратко</a></li><li><a href="#geography">География и ориентация</a></li><li><a href="#south-vs-north">Южный Ари против Северного Ари</a></li><li><a href="#whale-sharks">Китовые акулы</a></li><li><a href="#manta-rays">Манта-скаты</a></li><li><a href="#snorkeling-diving">Снорклинг и дайвинг</a></li><li><a href="#local-islands">Местные острова Южного Ари</a></li><li><a href="#culture">Жизнь на местных островах — культура, одежда и пляжи для купальников</a></li><li><a href="#getting-there">Как добраться и передвигаться</a></li><li><a href="#best-time">Лучшее время для посещения</a></li><li><a href="#where-to-stay">Где остановиться</a></li><li><a href="#what-else">Чем ещё заняться</a></li><li><a href="#food">Еда</a></li><li><a href="#trip-length">Продолжительность поездки и примерный маршрут</a></li><li><a href="#responsible">Ответственный морской туризм</a></li><li><a href="#faq">Часто задаваемые вопросы</a></li></ol>
     </nav>
+    </aside>
+    <article class="content-block reveal">
 
     <p data-i18n="saaPage.intro">Атолл Южный Ари (официально атолл Алифу Даалу) — центральный мальдивский атолл примерно в 75 км к югу от Мале, состоящий из кольца рифов вокруг сочетания курортов и обитаемых местных островов. Он наиболее известен китовыми акулами и манта-скатами, в целом доступными как для снорклинга, так и для дайвинга, а также местными островами, такими как Маамигили — с собственным внутренним аэропортом, — что делает его одной из наиболее практичных частей Мальдив для путешественника, останавливающегося в гестхаусе, а не только для гостя курорта. Этот путеводитель охватывает атолл в целом; подробности на уровне экскурсий смотрите в наших путеводителях по китовым акулам и манта-скатам, а также в путеводителе по Маамигили.</p>
 
     <section id="quick-facts">
       <h2 class="section-title" data-i18n="saaPage.hQuickFacts">Кратко</h2>
       <div class="card-grid" style="margin-top:24px">
-        <div class="info-card"><i class="ti ti-map-pin" aria-hidden="true"></i><h4 data-i18n="saaPage.factLabel1">Расположение</h4><p data-i18n="saaPage.factValue1">Центральные Мальдивы, примерно в 75 км к югу от Мале.</p></div>
-        <div class="info-card"><i class="ti ti-map-2" aria-hidden="true"></i><h4 data-i18n="saaPage.factLabel2">Тип атолла</h4><p data-i18n="saaPage.factValue2">Кольцевой атолл — административный код Алифу Даалу.</p></div>
-        <div class="info-card"><i class="ti ti-swimming" aria-hidden="true"></i><h4 data-i18n="saaPage.factLabel3">Известен благодаря</h4><p data-i18n="saaPage.factValue3">Китовым акулам и манта-скатам, в целом доступным для снорклинга.</p></div>
-        <div class="info-card"><i class="ti ti-plane-tilt" aria-hidden="true"></i><h4 data-i18n="saaPage.factLabel4">Как добраться</h4><p data-i18n="saaPage.factValue4">Внутренний рейс (~20–30 мин) или скоростная лодка (~1ч45м) из Мале.</p></div>
+        <div class="info-card"><i class="ti ti-map-pin" aria-hidden="true"></i><h3 data-i18n="saaPage.factLabel1">Расположение</h3><p data-i18n="saaPage.factValue1">Центральные Мальдивы, примерно в 75 км к югу от Мале.</p></div>
+        <div class="info-card"><i class="ti ti-map-2" aria-hidden="true"></i><h3 data-i18n="saaPage.factLabel2">Тип атолла</h3><p data-i18n="saaPage.factValue2">Кольцевой атолл — административный код Алифу Даалу.</p></div>
+        <div class="info-card"><i class="ti ti-swimming" aria-hidden="true"></i><h3 data-i18n="saaPage.factLabel3">Известен благодаря</h3><p data-i18n="saaPage.factValue3">Китовым акулам и манта-скатам, в целом доступным для снорклинга.</p></div>
+        <div class="info-card"><i class="ti ti-plane-tilt" aria-hidden="true"></i><h3 data-i18n="saaPage.factLabel4">Как добраться</h3><p data-i18n="saaPage.factValue4">Внутренний рейс (~20–30 мин) или скоростная лодка (~1ч45м) из Мале.</p></div>
       </div>
     </section>
 
@@ -292,7 +296,8 @@
     <section id="snorkeling-diving">
       <h2 class="section-title" style="margin-top:44px" data-i18n="saaPage.hSnorkelDive">Снорклинг и дайвинг</h2>
       <p data-i18n="saaPage.snorkelDiveP1">Встречи с китовыми акулами и манта-скатами в Южном Ари в целом доступны для снорклинга — обычно для этого не требуется сертификация дайвера. Дайвинг также доступен в Южном Ари, со своими дайв-сайтами, затонувшими кораблями и каналами, но Vilu Residence не организует его напрямую; дайвинг проходит через сертифицированный независимый дайв-центр, и стоит уточнить у него напрямую сайты, требования и цены.</p>
-      <img class="content-img" src="/images/vilu-residence-maamigili-island-buggy-tour.jpg" loading="lazy" alt="Exploring a local island in South Ari Atoll, near Maamigili">
+      <img class="content-img guide-breakout reveal" src="/images/vilu-residence-maamigili-island-buggy-tour.jpg" loading="lazy" alt="Exploring a local island in South Ari Atoll, near Maamigili">
+      <p class="guide-breakout-caption">Exploring a local island in South Ari Atoll — daily island life sits alongside the reef, not apart from it.</p>
     </section>
 
     <section id="local-islands">
@@ -305,10 +310,10 @@
 
       <h3 style="margin-top:28px" data-i18n="saaPage.hOtherIslands">Другие местные острова, о которых стоит знать</h3>
       <div class="card-grid" style="margin-top:24px">
-        <div class="info-card"><i class="ti ti-beach" aria-hidden="true"></i><h4>Dhigurah</h4><p data-i18n="saaPage.island1Desc">Известен как «Длинный остров» на дивехи, с одним из самых длинных пляжей атолла и лагуной, часто ассоциируемой с наблюдениями манта-скатов.</p></div>
-        <div class="info-card"><i class="ti ti-anchor" aria-hidden="true"></i><h4>Dhangethi</h4><p data-i18n="saaPage.island2Desc">Небольшой остров с собственным береговым рифом и пляжем для купальников, часто упоминаемый как база для дайвинга.</p></div>
-        <div class="info-card"><i class="ti ti-fish" aria-hidden="true"></i><h4>Omadhoo</h4><p data-i18n="saaPage.island3Desc">Более тихий рыбацкий остров со своим пляжем для купальников.</p></div>
-        <div class="info-card"><i class="ti ti-building-bank" aria-hidden="true"></i><h4>Mahibadhoo</h4><p data-i18n="saaPage.island4Desc">Часто описывается как административный центр атолла, где расположен офис атолла.</p></div>
+        <div class="info-card"><i class="ti ti-beach" aria-hidden="true"></i><h3>Dhigurah</h3><p data-i18n="saaPage.island1Desc">Известен как «Длинный остров» на дивехи, с одним из самых длинных пляжей атолла и лагуной, часто ассоциируемой с наблюдениями манта-скатов.</p></div>
+        <div class="info-card"><i class="ti ti-anchor" aria-hidden="true"></i><h3>Dhangethi</h3><p data-i18n="saaPage.island2Desc">Небольшой остров с собственным береговым рифом и пляжем для купальников, часто упоминаемый как база для дайвинга.</p></div>
+        <div class="info-card"><i class="ti ti-fish" aria-hidden="true"></i><h3>Omadhoo</h3><p data-i18n="saaPage.island3Desc">Более тихий рыбацкий остров со своим пляжем для купальников.</p></div>
+        <div class="info-card"><i class="ti ti-building-bank" aria-hidden="true"></i><h3>Mahibadhoo</h3><p data-i18n="saaPage.island4Desc">Часто описывается как административный центр атолла, где расположен офис атолла.</p></div>
       </div>
       <p style="margin-top:16px" data-i18n="saaPage.otherIslandsClosing">В атолле есть и другие обитаемые острова, у каждого свой повседневный ритм — стоит расспросить об этом на месте, если вы хотите исследовать что-то за пределами Маамигили.</p>
     </section>
@@ -354,9 +359,9 @@
       <h2 class="section-title" style="margin-top:44px" data-i18n="saaPage.hTripLength">Продолжительность поездки и примерный маршрут</h2>
       <p data-i18n="saaPage.tripLengthP1">Сколько времени провести в Южном Ари, зависит от того, что вы хотите успеть — снорклинг с китовыми акулами, снорклинг с манта-скатами, время на рифе и несколько более спокойных островных дней складываются по-разному в зависимости от ваших приоритетов. Поскольку наблюдения и экскурсии зависят от погоды и морских условий, стоит заложить в планы некоторую гибкость, а не строго фиксированное расписание. Вот простой план на 3 дня в качестве отправной точки — не единственный способ построить поездку, а лишь один практический пример.</p>
       <div class="card-grid" style="margin-top:24px">
-        <div class="info-card"><i class="ti ti-sunset-2" aria-hidden="true"></i><h4 data-i18n="saaPage.day1Title">День 1</h4><p data-i18n="saaPage.day1Desc">Прибытие, размещение и знакомство с островом. Вечером — необязательный круиз на закате.</p></div>
-        <div class="info-card"><i class="ti ti-fish" aria-hidden="true"></i><h4 data-i18n="saaPage.day2Title">День 2</h4><p data-i18n="saaPage.day2Desc">Утром — снорклинг с китовыми акулами, днём — экскурсия к манта-скатам; куда именно, зависит от недавних наблюдений и условий.</p></div>
-        <div class="info-card"><i class="ti ti-beach" aria-hidden="true"></i><h4 data-i18n="saaPage.day3Title">День 3</h4><p data-i18n="saaPage.day3Desc">Утром — поездка на песчаную отмель, время на прогулку по местному острову, затем отъезд.</p></div>
+        <div class="info-card"><i class="ti ti-sunset-2" aria-hidden="true"></i><h3 data-i18n="saaPage.day1Title">День 1</h3><p data-i18n="saaPage.day1Desc">Прибытие, размещение и знакомство с островом. Вечером — необязательный круиз на закате.</p></div>
+        <div class="info-card"><i class="ti ti-fish" aria-hidden="true"></i><h3 data-i18n="saaPage.day2Title">День 2</h3><p data-i18n="saaPage.day2Desc">Утром — снорклинг с китовыми акулами, днём — экскурсия к манта-скатам; куда именно, зависит от недавних наблюдений и условий.</p></div>
+        <div class="info-card"><i class="ti ti-beach" aria-hidden="true"></i><h3 data-i18n="saaPage.day3Title">День 3</h3><p data-i18n="saaPage.day3Desc">Утром — поездка на песчаную отмель, время на прогулку по местному острову, затем отъезд.</p></div>
       </div>
     </section>
 
@@ -383,6 +388,7 @@
       </div>
     </section>
   </article>
+  </div>
 
   <div class="reveal" style="margin-top:20px">
     <div class="section-tag" data-i18n="saaPage.relatedTag">Читайте также</div>
@@ -390,15 +396,15 @@
     <div class="related-strip">
       <a class="related-card" href="whale-shark-snorkeling.html">
         <img class="related-card-img" src="/images/thumb_whale_shark_hd.jpg" loading="lazy" alt="Whale Shark Snorkeling">
-        <div class="related-card-body"><div class="related-card-tag" data-i18n="saaPage.relTag1">Путеводитель по впечатлениям</div><h4 data-i18n="saaPage.relTitle1">Снорклинг с китовыми акулами</h4></div>
+        <div class="related-card-body"><div class="related-card-tag" data-i18n="saaPage.relTag1">Путеводитель по впечатлениям</div><h3 data-i18n="saaPage.relTitle1">Снорклинг с китовыми акулами</h3></div>
       </a>
       <a class="related-card" href="manta-ray-snorkeling.html">
         <img class="related-card-img" src="/images/thumb_manta_ray_hd.jpg" loading="lazy" alt="Manta Ray Snorkeling">
-        <div class="related-card-body"><div class="related-card-tag" data-i18n="saaPage.relTag2">Путеводитель по впечатлениям</div><h4 data-i18n="saaPage.relTitle2">Снорклинг с манта-скатами</h4></div>
+        <div class="related-card-body"><div class="related-card-tag" data-i18n="saaPage.relTag2">Путеводитель по впечатлениям</div><h3 data-i18n="saaPage.relTitle2">Снорклинг с манта-скатами</h3></div>
       </a>
       <a class="related-card" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))">
         <img class="related-card-img" src="/images/thumb_turtle_snorkelers_gallery.jpg" loading="lazy" alt="Holiday Packages">
-        <div class="related-card-body"><div class="related-card-tag" data-i18n="saaPage.relTag3">Планируйте поездку</div><h4 data-i18n="saaPage.relTitle3">Пакеты отдыха</h4></div>
+        <div class="related-card-body"><div class="related-card-tag" data-i18n="saaPage.relTag3">Планируйте поездку</div><h3 data-i18n="saaPage.relTitle3">Пакеты отдыха</h3></div>
       </a>
     </div>
   </div>

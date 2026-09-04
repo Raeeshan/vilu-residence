@@ -152,11 +152,19 @@ function initReveal(){
     document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
     return;
   }
+  // Phase 12D-A: a fixed .15 threshold can never be crossed by an element taller
+  // than ~6-7x the viewport height (its intersection ratio physically can't reach
+  // 15%), so .visible is never added and it stays opacity:0 forever. Confirmed as
+  // a pre-existing, site-wide defect (reproduced on production today) -- out of
+  // scope to fix globally in this phase, so the lower, always-reachable threshold
+  // below applies only on data-page-type="guide" pages; every other page keeps the
+  // exact original .15 threshold and behavior, unchanged.
+  var threshold = (document.body.getAttribute('data-page-type') === 'guide') ? .01 : .15;
   var observer = new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
     });
-  }, {threshold:.15});
+  }, {threshold: threshold});
   document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
 }
 

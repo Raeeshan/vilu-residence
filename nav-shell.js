@@ -215,6 +215,61 @@
     }
   }
 
+  // ── GUIDE/DESTINATION EDITORIAL SYSTEM (Phase 12D-A) ──
+  // No-op on any page without a .toc-block (package page, homepage). The
+  // <ol> of real anchor links is the entire no-JS/reduced-motion contract:
+  // it is visible and functional by default; this only adds a mobile
+  // collapse affordance and, where lightweight, an active-section
+  // highlight. Neither is required for the TOC to work.
+  function initGuideToc(){
+    var tocBlocks = document.querySelectorAll('.toc-block');
+    if (!tocBlocks.length) return;
+
+    tocBlocks.forEach(function(toc, tocIndex){
+      var heading = toc.querySelector('.section-title');
+      var list = toc.querySelector('ol');
+      if (!heading || !list) return;
+      var listId = list.id || ('guideTocList' + tocIndex);
+      list.id = listId;
+      var toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'toc-toggle';
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-controls', listId);
+      toggle.innerHTML = '<i class="ti ti-chevron-down" aria-hidden="true"></i>';
+      heading.appendChild(toggle);
+      toggle.addEventListener('click', function(){
+        var open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        toc.classList.toggle('toc-collapsed', open);
+      });
+    });
+
+    // Active-section highlight -- purely decorative, skipped entirely if
+    // IntersectionObserver isn't available (content/navigation still work).
+    if (typeof IntersectionObserver === 'undefined') return;
+    var links = document.querySelectorAll('.toc-block ol a[href^="#"]');
+    if (!links.length) return;
+    var linkByTarget = {};
+    var targets = [];
+    links.forEach(function(a){
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (!el) return;
+      linkByTarget[id] = a;
+      targets.push(el);
+    });
+    if (!targets.length) return;
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = linkByTarget[entry.target.id];
+        if (!link) return;
+        link.classList.toggle('toc-active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    targets.forEach(function(el){ observer.observe(el); });
+  }
+
   function init(){
     initHeaderScroll();
     initDrawer();
@@ -222,6 +277,7 @@
     initActiveGroup();
     initCheckAvailability();
     initBookingHashHandoff();
+    initGuideToc();
   }
 
   if (document.readyState === 'loading') {

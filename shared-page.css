@@ -222,11 +222,19 @@ section{padding:80px 0;position:relative}
 .info-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px;transition:transform .3s ease,box-shadow .3s ease}
 .info-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,4,10,.3)}
 .info-card i{font-size:24px;color:var(--gold-light);margin-bottom:12px;display:block}
-.info-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:8px}
+.info-card h3,.info-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:8px}
 .info-card p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6}
 
 /* ── TABLE OF CONTENTS (guide pages with many sections, e.g. maamigili-guide.html) ── */
-.toc-block{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:20px 24px;margin-top:24px}
+/* position:static overrides a pre-existing, already-live site-wide defect:
+   the bare `nav{position:fixed;...}` element selector (meant only for the
+   real #nav site header) also matches this TOC's own <nav> element, since
+   .toc-block never declared its own `position`. Phase 12D-A's new sticky
+   TOC rail surfaced this severely (the TOC floated fixed over the hero);
+   this fix is corrective for every guide page that already ships this
+   <nav class="toc-block">, not just the 4 in this stage's scope, and has
+   no effect on the homepage/package page (neither has a .toc-block). */
+.toc-block{position:static;background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:20px 24px;margin-top:24px}
 .toc-block .section-title{font-size:var(--font-size-xl);margin-bottom:10px}
 .toc-block ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 20px;counter-reset:toc}
 .toc-block ol li{counter-increment:toc;font-size:var(--font-size-sm)}
@@ -287,6 +295,92 @@ section{padding:80px 0;position:relative}
 .related-card-body{padding:18px 20px}
 .related-card-tag{font-size:var(--font-size-xs);letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
 .related-card h3,.related-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-lg);font-weight:600;color:var(--white);margin:0}
+
+/* ══ Phase 12D-A: Guide / Destination Editorial System ══
+   Page-scoped to body[data-page-type="guide"] so nothing here can affect
+   the homepage or the frozen Holiday Packages page. Builds on the
+   existing, already-shared component vocabulary (.toc-block/.content-
+   block/.card-grid/.info-card/.tip-box/.warning-box/.content-img/
+   .related-strip/.cta-band) rather than replacing it -- every guide's
+   own headings/paragraphs/links/FAQ/schema stay exactly as authored;
+   this only adds layout, motion and a few new component classes. */
+
+/* Hero motion: reuses the exact pcHeroSettle/pcFadeUp keyframes proven on
+   the package page (Phase 12C-C) -- ::after carries the scale-settle
+   since ::before is already the shared darkening gradient overlay, so
+   paint order stays base-bg -> ::after (photo) -> ::before (gradient) ->
+   .page-header-inner (text). No new hero markup: the breadcrumb/H1/
+   subtitle already on every guide page get the stagger directly. */
+body[data-page-type="guide"] .page-header::after{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background-image:inherit;background-position:center;background-size:cover;
+  transform-origin:center;
+}
+@media (prefers-reduced-motion:no-preference){
+  body[data-page-type="guide"] .page-header::after{animation:pcHeroSettle 1100ms cubic-bezier(.16,1,.3,1) both}
+  body[data-page-type="guide"] .breadcrumbs{animation:pcFadeUp 450ms ease both;animation-delay:.1s}
+  body[data-page-type="guide"] .page-h1{animation:pcFadeUp 450ms ease both;animation-delay:.22s}
+  body[data-page-type="guide"] .page-sub{animation:pcFadeUp 450ms ease both;animation-delay:.34s}
+}
+
+/* Two-zone desktop composition: a quiet sticky TOC rail beside the
+   reading column. Below 1100px this collapses to a single column with
+   the TOC (now a mobile "On this page" disclosure) stacked above the
+   article, in the same order the inline TOC already appeared in. */
+body[data-page-type="guide"] .guide-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:start}
+@media(min-width:1100px){
+  body[data-page-type="guide"] .guide-layout{grid-template-columns:236px minmax(0,1fr);gap:48px}
+  body[data-page-type="guide"] .guide-toc-rail{position:sticky;top:96px;align-self:start;max-height:calc(100vh - 120px);overflow-y:auto}
+  body[data-page-type="guide"] .guide-toc-rail .toc-block{padding:18px 20px}
+  body[data-page-type="guide"] .guide-toc-rail .toc-block ol{grid-template-columns:1fr}
+  body[data-page-type="guide"] .guide-toc-rail .section-title{font-size:var(--font-size-lg)}
+}
+/* Mobile "On this page" disclosure: a plain button appended into the TOC
+   heading by nav-shell.js (initGuideToc) -- content-visible-by-default,
+   since without JS the <ol> simply has no collapse mechanism at all and
+   stays fully shown. */
+.toc-toggle{display:none}
+@media(max-width:1099px){
+  .toc-block .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .toc-toggle{display:inline-flex;align-items:center;justify-content:center;background:none;border:none;color:var(--gold-light);cursor:pointer;padding:4px;font-size:18px;transition:transform .25s}
+  .toc-collapsed ol{display:none}
+  .toc-toggle[aria-expanded="false"] i{transform:rotate(-90deg)}
+}
+/* Active-section highlight (decorative only, added by IntersectionObserver
+   when available -- see nav-shell.js). */
+.toc-block a.toc-active{color:var(--gold-light);text-decoration:underline}
+
+/* Cinematic image breakout: ONE strong image moment per guide, wider than
+   the reading column, with a restrained clip-path reveal on scroll-entry
+   (mirrors the Featured Journeys treatment on the package page). Applied
+   alongside the existing .content-img class, not replacing it. */
+body[data-page-type="guide"] .guide-breakout{max-height:520px}
+@media(min-width:1100px){
+  body[data-page-type="guide"] .guide-breakout{width:calc(100% + 160px);margin-inline:-80px;max-width:none}
+}
+body[data-page-type="guide"] .guide-breakout-caption{font-size:var(--font-size-xs);color:var(--muted);text-align:center;margin-top:-12px;margin-bottom:20px;font-style:italic}
+@media (prefers-reduced-motion:no-preference){
+  body[data-page-type="guide"] .guide-breakout.reveal{clip-path:inset(0 0 8% 0);transition:clip-path 1100ms cubic-bezier(.16,1,.3,1),opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1),filter 1s cubic-bezier(.16,1,.3,1)}
+  body[data-page-type="guide"] .guide-breakout.reveal.visible{clip-path:inset(0 0 0 0)}
+}
+
+/* Editorial "commercial bridge" -- upgrades the existing (previously
+   unstyled, plain-paragraph) .exp-links class used site-wide for the
+   inline "Read our X guide ->" / "See our packages ->" links, so a bridge
+   reads as a distinct, quiet invitation rather than another paragraph.
+   Zero markup change: every guide already wraps these links in .exp-links. */
+.exp-links{display:block;max-width:none;margin:24px 0;padding:14px 18px;background:var(--card);border:1px solid var(--card-border);border-inline-start:3px solid var(--gold-light);border-radius:8px;font-size:var(--font-size-sm)}
+.exp-links a{font-weight:600}
+
+/* Small category eyebrow for existing tip-box/warning-box/info-card
+   instances (GOOD TO KNOW / WILDLIFE NOTE / LOCAL TIP / PLANNING NOTE) --
+   labels facts already present in the guide's own copy, invents nothing. */
+.box-label{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);margin-bottom:6px}
+.warning-box .box-label{color:var(--warn)}
+
+@media(max-width:900px){
+  body[data-page-type="guide"] .guide-breakout{margin-inline:0}
+}
 
 /* ── FOOTER — GLOBAL SHELL (Phase 10): brand + 4 link groups
    (Explore / Stay / South Ari Guides / Plan), identical on every page ── */

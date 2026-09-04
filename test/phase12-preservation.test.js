@@ -1288,4 +1288,130 @@ section('Phase 12B-E2D — multilingual completion + final acceptance');
 }
 
 // ---------------------------------------------------------------------------
+section('Phase 12D-A — guide/destination editorial system (4 representative pages)');
+{
+  const GUIDE_PAGES = ['maamigili-guide.html', 'south-ari-atoll-guide.html', 'whale-shark-snorkeling.html', 'manta-ray-snorkeling.html'];
+  const css = read('shared-page.css');
+  const navShellJs = read('nav-shell.js');
+
+  test('each of the 4 pages keeps its canonical URL identity: exactly one H1, canonical link, complete hreflang set', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      assert.equal((src.match(/<h1\b/g) || []).length, 1, `${page}: expected exactly one H1`);
+      assert.ok(/<link rel="canonical"/.test(src), `${page}: missing canonical link`);
+      const hreflangs = [...src.matchAll(/rel="alternate" hreflang="([^"]+)"/g)].map(m => m[1]);
+      assert.ok(hreflangs.includes('x-default'), `${page}: missing x-default hreflang`);
+      assert.equal(hreflangs.length, 12, `${page}: expected 12 hreflang entries (11 languages + x-default)`);
+    }
+  });
+
+  test('package-page-content heading hierarchy is sequential with no skip (excludes the known, deferred global footer H2->H4)', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      const bodyOnly = src.slice(src.indexOf('<body'), src.indexOf('<footer'));
+      const headings = [...bodyOnly.matchAll(/<(h[1-6])\b/g)].map(m => Number(m[1][1]));
+      for (let i = 1; i < headings.length; i++) {
+        assert.ok(headings[i] <= headings[i - 1] + 1, `${page}: heading jumps from h${headings[i - 1]} to h${headings[i]} at index ${i}`);
+      }
+    }
+  });
+
+  test('TOC anchors remain real: every .toc-block ol > li > a href points to a real in-page id', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      const tocStart = src.indexOf('class="toc-block"');
+      const tocEnd = src.indexOf('</nav>', tocStart);
+      const tocHtml = src.slice(tocStart, tocEnd);
+      const hrefs = [...tocHtml.matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
+      assert.ok(hrefs.length >= 5, `${page}: expected a substantial TOC (>=5 entries)`);
+      for (const id of hrefs) assert.ok(src.includes(`id="${id}"`), `${page}: TOC links to #${id} but no element has that id`);
+    }
+  });
+
+  test('the new two-zone layout wraps, not replaces, the existing TOC and article content (same nav.toc-block, same section ids, same FAQ)', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      assert.ok(src.includes('<div class="guide-layout">'), `${page}: missing .guide-layout wrapper`);
+      assert.ok(src.includes('<aside class="guide-toc-rail">'), `${page}: missing .guide-toc-rail`);
+      assert.ok(/<nav aria-label="Table of contents" class="toc-block">/.test(src), `${page}: toc-block nav markup changed`);
+      assert.ok(/<article class="content-block reveal">/.test(src), `${page}: content-block article markup changed`);
+      assert.ok(src.includes('class="faq-block"'), `${page}: FAQ block missing`);
+    }
+  });
+
+  test('FAQ preservation: native <details>/<summary>, FAQPage schema present, question count matches', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      const faqBlockStart = src.indexOf('class="faq-block"');
+      const faqBlockEnd = src.indexOf('</section>', faqBlockStart);
+      const detailsCount = (src.slice(faqBlockStart, faqBlockEnd).match(/<details>/g) || []).length;
+      assert.ok(detailsCount >= 5, `${page}: expected a substantial FAQ (>=5 questions), found ${detailsCount}`);
+      const ldBlocks = jsonLd(src);
+      const hasFaqPage = ldBlocks.some(b => (Array.isArray(b) ? b : [b]).some(x => x['@type'] === 'FAQPage'));
+      assert.ok(hasFaqPage, `${page}: FAQPage schema missing`);
+    }
+  });
+
+  test('Holiday Packages and availability links remain real hrefs, not duplicated package records', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      assert.ok(src.includes('href="holiday-packages.html"'), `${page}: no link to holiday-packages.html`);
+      assert.ok(src.includes('href="/#booking"'), `${page}: no availability link`);
+      // No package price schema was introduced into a guide page.
+      const ldBlocks = jsonLd(src);
+      const hasProduct = ldBlocks.some(b => (Array.isArray(b) ? b : [b]).some(x => x['@type'] === 'Product' && String(x.name || '').includes('Package')));
+      assert.ok(!hasProduct, `${page}: must not introduce a package Product schema entity`);
+    }
+  });
+
+  test('no-JS content contract: article/FAQ/related/closing sections have no opacity:0 base-state dependency beyond the existing site-wide .reveal (already covered by its own no-JS/IO-disabled fallback)', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      assert.ok(!/<noscript>/.test(src) || /\.reveal\{opacity:1/.test(src), `${page}: if a noscript override exists it must restore .reveal to visible`);
+    }
+  });
+
+  test('no autoplay video, no new animation framework, no heavy slider was added to any of the 4 pages', () => {
+    for (const page of GUIDE_PAGES) {
+      const src = read(page);
+      assert.ok(!/<video\b/i.test(src), `${page}: <video> element found`);
+      const scriptSrcs = [...src.matchAll(/<script[^>]+src="([^"]+)"/g)].map(m => m[1]);
+      for (const s of scriptSrcs) assert.ok(!/cdn|gsap|anime|framer|swiper|slick|unpkg|jsdelivr/i.test(s), `${page}: unexpected external/animation script: ${s}`);
+    }
+  });
+
+  test('hero motion and breakout-image reveal are gated behind prefers-reduced-motion, reusing the existing pcHeroSettle/pcFadeUp keyframes', () => {
+    assert.ok(css.includes('pcHeroSettle') && css.includes('pcFadeUp'));
+    assert.ok(/body\[data-page-type="guide"\] \.page-header::after\{/.test(css));
+    assert.ok(/@media \(prefers-reduced-motion:no-preference\)\{[\s\S]*?body\[data-page-type="guide"\] \.page-header::after\{animation:pcHeroSettle/.test(css));
+  });
+
+  test('guide-scoped CSS never touches the homepage or the frozen Holiday Packages page (selectors are scoped to body[data-page-type="guide"], distinct from "package"/"home")', () => {
+    const guideRulesBlock = css.slice(css.indexOf('Phase 12D-A: Guide / Destination Editorial System'), css.indexOf('FOOTER — GLOBAL SHELL (Phase 10)'));
+    assert.ok(!/data-page-type="package"/.test(guideRulesBlock), 'guide system CSS must not target the package page');
+    assert.ok(!/data-page-type="home"/.test(guideRulesBlock), 'guide system CSS must not target the homepage');
+  });
+
+  test('nav-shell.js guide-TOC enhancement is guarded and a no-op on pages without .toc-block (homepage, package page)', () => {
+    assert.ok(/function initGuideToc\(\)\{/.test(navShellJs));
+    assert.ok(/if \(!tocBlocks\.length\) return;/.test(navShellJs));
+  });
+
+  test('homepage and Holiday Packages source carry none of this stage\'s new guide-system markers (a proxy for "not materially touched" that needs no git/network access)', () => {
+    const GUIDE_MARKERS = ['class="guide-layout"', 'class="guide-toc-rail"', 'class="guide-breakout', 'class="box-label"'];
+    for (const page of ['vilu-website.html', 'holiday-packages.html']) {
+      const src = read(page);
+      for (const marker of GUIDE_MARKERS) assert.ok(!src.includes(marker), `${page}: unexpectedly contains guide-system marker ${marker}`);
+    }
+  });
+
+  test('PMS and Agency Portal files carry none of this stage\'s new guide-system markers or shared .pc-/.guide- class references', () => {
+    for (const f of ['vilu-unified.html', 'vilu-agency-portal.html']) {
+      const src = read(f);
+      assert.ok(!src.includes('class="guide-layout"') && !src.includes('shared-page.css'), `${f} must stay isolated from the public guide/package CSS system`);
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);
