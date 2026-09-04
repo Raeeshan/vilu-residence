@@ -122,7 +122,7 @@
   --accent:#ad701f;
   --accent-hover:#c07f2b;
   --accent-text:#925f1c;
-  --accent-ink:#fff8ef;
+  --accent-ink:#1a0f04;          /* dark ink on the amber fill: 4.59:1 (ivory #fff8ef only reached 3.90:1) */
   --accent-soft:rgba(173,112,31,.12);
   --border:rgba(29,36,48,.14);
   --border-strong:rgba(29,36,48,.32);
@@ -131,7 +131,7 @@
   --shadow-card:0 20px 50px rgba(29,36,48,.10);
   --toggle-track:rgba(29,36,48,.18);
   --toggle-knob:#ffffff;
-  --toggle-knob-on:#fff8ef;
+  --toggle-knob-on:#1a0f04;
 }
 
 @media (max-width:700px){
@@ -193,6 +193,23 @@ nav.scrolled .lang-switcher select{color:var(--text)}
 .mm-ctas .mm-check-availability{border-color:var(--border-strong)}
 
 /* ══════════════ BUTTONS ══════════════ */
+/* Semantic model: --accent = filled accent background, --accent-ink = the
+   foreground placed ON that fill (dark in both themes), --accent-text = the
+   accent used as text/links on the page background. Every selector that
+   paints the amber fill — including legacy homepage rules that still say
+   color:var(--navy) or color:var(--white) — is pinned to --accent-ink here
+   so no alias can resolve to ivory/white text on #ad701f. */
+/* Prefixed with `html` so the pin outranks same-specificity legacy rules that
+   sit in <style> blocks later in the document (the homepage carries some). */
+html .btn-primary,html .btn-plan-holiday,html .consent-btn-accept,html .mm-ctas .btn-plan-holiday,html .bb-btn,html .bwf-btn,html .tc-check-btn,html .pkg-badge,html .hp-badge,
+html .room-book-btn:hover,html .hp-enquire-btn:hover,html .exp-cta:hover,html .cf-btn:hover,html .bfp-search-btn:hover,html .bfp-book-btn:hover,
+html .vilu-cal-day.range-start,html .vilu-cal-day.range-end,html .ti-tab.on,html .gh-tab.on,html .cd-icon,html .floating-whatsapp,html .floating-whatsapp:hover,html .footer-social a:hover{color:var(--accent-ink)}
+html .btn-primary,html .btn-plan-holiday,html .consent-btn-accept{background-color:var(--accent);background-image:none}
+/* Two homepage booking buttons (booking + about sections) still carry the
+   legacy inline style="background:var(--gold);color:var(--navy)". Inline
+   styles outrank every sheet, so the ink is pinned with !important here until
+   the homepage stage removes those attributes (recorded for 12B-E). */
+.btn-primary[style],.btn-plan-holiday[style]{color:var(--accent-ink) !important;background:var(--accent) !important}
 .btn-primary,.btn-plan-holiday,.consent-btn-accept,.mm-ctas .btn-plan-holiday{background:var(--accent);background-image:none;color:var(--accent-ink);border-radius:var(--radius-btn)}
 .btn-primary:hover,.btn-plan-holiday:hover,.consent-btn-accept:hover{background:var(--accent-hover);background-image:none;color:var(--accent-ink);box-shadow:0 8px 24px var(--accent-soft)}
 .btn-outline{background:transparent;color:var(--text);border-color:var(--border-strong);border-radius:var(--radius-btn)}
@@ -261,7 +278,8 @@ footer{border-top:1px solid var(--border)}
 .theme-switch .ts-sun{display:none}
 :root[data-theme="light"] .theme-switch .ts-sun{display:block}
 :root[data-theme="light"] .theme-switch .ts-moon{display:none}
-nav.scrolled .theme-switch{color:var(--text)}
+nav:not(.scrolled) .theme-switch{color:var(--on-media);border-color:rgba(243,247,251,.45)}
+nav.scrolled .theme-switch{color:var(--text);border-color:var(--border-strong)}
 .nav-right>.theme-switch{margin-inline-end:0}
 .mm-lang{display:flex;flex-direction:column;gap:12px}
 .mm-lang .theme-switch{width:100%;height:48px;border-radius:var(--radius-btn);gap:10px;font-family:var(--font-body);font-size:var(--fs-small);letter-spacing:.06em;text-transform:uppercase}

@@ -334,6 +334,43 @@ section('Theme foundation — dual theme tokens, state, persistence policy (Phas
     for (const [k, v] of Object.entries(T.light_tokens)) assert.ok(block.includes(`${k}:${norm(v)}`), `${k} ${v}`);
     assert.notEqual(T.light_tokens['--accent'], T.dark_tokens['--accent']);
   });
+  // ── Accent contrast contract (12B-C1) ──
+  const rgbOf = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const lum = (c) => { const a = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return .2126 * a[0] + .7152 * a[1] + .0722 * a[2]; };
+  const contrast = (a, b) => { const l1 = lum(rgbOf(a)), l2 = lum(rgbOf(b)); return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05); };
+  const isDarkInk = (h) => lum(rgbOf(h)) < 0.05;
+  test('accent ink is a DARK foreground in both themes (never white/ivory on amber)', () => {
+    assert.ok(isDarkInk(T.dark_tokens['--accent-ink']), 'dark');
+    assert.ok(isDarkInk(T.light_tokens['--accent-ink']), 'light');
+    assert.equal(T.light_tokens['--accent'], '#ad701f'); assert.equal(T.light_tokens['--accent-text'], '#925f1c'); assert.equal(T.dark_tokens['--accent'], '#e0a752');
+  });
+  for (const [name, tok] of [['dark', T.dark_tokens], ['light', T.light_tokens]]) {
+    test(`${name} theme WCAG contrast: ink on accent, accent-text on bg/surface, text and muted on bg, fill edge vs bg`, () => {
+      const m = T.contrast_minimums;
+      const c1 = contrast(tok['--accent-ink'], tok['--accent']); assert.ok(c1 >= m.accent_ink_on_accent, `accent-ink on accent ${c1.toFixed(2)}`);
+      const c2 = contrast(tok['--accent-text'], tok['--bg']); assert.ok(c2 >= m.accent_text_on_bg, `accent-text on bg ${c2.toFixed(2)}`);
+      const c3 = contrast(tok['--accent-text'], tok['--surface']); assert.ok(c3 >= m.accent_text_on_surface, `accent-text on surface ${c3.toFixed(2)}`);
+      const c4 = contrast(tok['--text'], tok['--bg']); assert.ok(c4 >= m.text_on_bg, `text on bg ${c4.toFixed(2)}`);
+      const c5 = contrast(tok['--text-muted'], tok['--bg']); assert.ok(c5 >= m.text_muted_on_bg, `muted on bg ${c5.toFixed(2)}`);
+      const c6 = contrast(tok['--accent'], tok['--bg']); assert.ok(c6 >= m.accent_fill_vs_bg, `accent fill vs bg ${c6.toFixed(2)}`);
+    });
+  }
+  const cssNoComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  test('every filled-amber component selector is pinned to color:var(--accent-ink) in theme.css', () => {
+    const blocks = [...cssNoComments.matchAll(/([^{}]+)\{([^}]*)\}/g)].map(m => ({ sel: m[1].replace(/\s+/g, ' ').trim().replace(/^html /, '').replace(/,\s*html /g, ','), body: norm(m[2]) }));
+    for (const sel of T.filled_amber_selectors) {
+      const hit = blocks.find(b => b.sel.split(',').map(s => s.trim()).includes(sel) && b.body.includes('color:var(--accent-ink)'));
+      assert.ok(hit, sel + ' not pinned to --accent-ink');
+    }
+  });
+  test('no theme.css rule that paints background:var(--accent) sets a white/ivory/page-colour foreground', () => {
+    for (const m of cssNoComments.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+      const body = norm(m[2]);
+      if (!body.includes('background:var(--accent)') && !body.includes('background-color:var(--accent)')) continue;
+      for (const bad of T.forbidden_foreground_on_accent) assert.ok(!body.includes('color:' + norm(bad) + ';') && !body.endsWith('color:' + norm(bad)), `${m[1].trim()} uses ${bad} on the accent fill`);
+    }
+    assert.ok(!/--accent-ink:\s*#fff8ef/i.test(css) && !/--accent-ink:\s*#fff\b/i.test(css));
+  });
   test('retired cyan --gold semantic: legacy names alias the amber accent', () => {
     for (const [k, v] of Object.entries(T.legacy_aliases_retired_semantic)) assert.ok(normCss.includes(`${k}:${norm(v)}`), k);
     assert.ok(!/--gold:\s*#22d3ee/i.test(css));
