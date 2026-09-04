@@ -442,6 +442,131 @@ section('Phase 12C-C — premium motion + deep-link hardening');
 }
 
 // ---------------------------------------------------------------------------
+section('Phase 12C-D — multilingual, accessibility, analytics completion');
+{
+  const hp = read('holiday-packages.html');
+  const css = read('shared-page.css');
+  const items = M.packages.items;
+  const slugs = items.map(i => i.id);
+  const NEW_12C_KEYS = ['planHoliday','emailVilu','viewJourney','viewDetails','heroEyebrow','heroDisplay','verifiedLine','featuredTag','featuredTitle','collectionTag','collectionTitle','durationTag','durationTitle'];
+  // Strips <script>...</script> and HTML comments so an English-leakage
+  // check only ever looks at real page text, never at this codebase's own
+  // (never-translated) code/documentation comments -- e.g. "...every .reveal
+  // section on this page (intro, Featured Journeys, Duration Guide...)"
+  // appears verbatim in every language's generated file and is not a leak.
+  function stripScripts(s) { return s.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '').replace(/<!--[\s\S]*?-->/g, ''); }
+
+  test('all 10 languages have every new 12C-B/C hpPage key, non-empty (no English-fallback gaps)', () => {
+    for (const lang of M.languages) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, 'i18n', lang + '.json'), 'utf8'));
+      const hpPage = (dict.static && dict.static.hpPage) || {};
+      for (const k of NEW_12C_KEYS) {
+        assert.ok(k in hpPage, `${lang}: missing hpPage.${k}`);
+        assert.ok(String(hpPage[k] || '').trim().length > 0, `${lang}: hpPage.${k} is empty`);
+      }
+    }
+  });
+
+  test('critical package-page UI strings do not leak into translated pages as literal English', () => {
+    const CRITICAL_ENGLISH = ['Featured Journeys', 'Full Collection', 'Duration Guide', 'Plan This Holiday', 'Email Vilu', 'View Journey', 'View Details'];
+    for (const lang of M.languages) {
+      const generated = stripScripts(read(path.join(lang, 'holiday-packages.html')));
+      for (const phrase of CRITICAL_ENGLISH) {
+        assert.ok(!generated.includes(phrase), `${lang}/holiday-packages.html still shows English "${phrase}"`);
+      }
+    }
+  });
+
+  test('FAQ trusted-user tracking: armed only by a real click/Enter/Space on <summary>, consumed once per toggle (ports the proven homepage E2C pattern, not e.isTrusted on toggle)', () => {
+    assert.ok(/summary\.addEventListener\('click', function\(e\)\{ if \(e\.isTrusted\) trustedActivation = true; \}\)/.test(hp), 'trusted click arm not found');
+    assert.ok(/summary\.addEventListener\('keydown', function\(e\)\{ if \(e\.isTrusted && \(e\.key === 'Enter' \|\| e\.key === ' '\)\) trustedActivation = true; \}\)/.test(hp), 'trusted keydown arm not found');
+    assert.ok(/if \(details\.open && trustedActivation\) trackEvent\('faq_expand'/.test(hp), 'toggle handler must require trustedActivation, not just details.open');
+    assert.ok(/trustedActivation = false;/.test(hp), 'trustedActivation must be reset after every toggle (armed once, consumed once)');
+    // The old, insufficient bare-toggle pattern and the stray answer-div
+    // onclick this stage removed must both be gone.
+    assert.ok(!/details\.addEventListener\('toggle', function\(\)\{\s*\n\s*if \(details\.open\) trackEvent\('faq_expand'/.test(hp), 'old untrusted bare-toggle FAQ tracking must be removed');
+    assert.ok(!/class="faq-a"[^>]*onclick="trackEvent\('faq_expand'/.test(hp), 'stray onclick on a .faq-a answer div must be removed');
+  });
+
+  test('package_view analytics observes only the 9 canonical Full Collection records (Featured/Duration carry no data-pkg-slug)', () => {
+    const featuredBlock = hp.slice(hp.indexOf('id="pkg-featured"'), hp.indexOf('id="pkg-grid"'));
+    const durationBlock = hp.slice(hp.indexOf('id="pkg-duration"'), hp.indexOf('hp-section', hp.indexOf('id="pkg-duration"')));
+    assert.ok(!featuredBlock.includes('data-pkg-slug') && !durationBlock.includes('data-pkg-slug'));
+    assert.ok(hp.includes(`document.querySelectorAll('#pkg-grid .pc-pkg')`));
+  });
+
+  test('package_enquire fires for both WhatsApp (Plan This Holiday) and Email Vilu, with package_id/package_nights/contact_method — never a legacy event name', () => {
+    for (const it of items) {
+      assert.ok(hp.includes(`trackEvent('package_enquire',{contact_method:'whatsapp',package_id:'${it.id}',package_nights:${it.nights}`), `${it.id} missing whatsapp package_enquire wiring`);
+      assert.ok(hp.includes(`trackEvent('package_enquire',{contact_method:'email',package_id:'${it.id}',package_nights:${it.nights}`), `${it.id} missing email package_enquire wiring`);
+    }
+    assert.ok(!/trackEvent\('enquire_/.test(hp), 'no legacy enquire_* event names');
+  });
+
+  test('availability_click is separate from package_enquire (Check live availability never fires package_enquire)', () => {
+    for (const it of items) {
+      assert.ok(hp.includes(`trackEvent('availability_click',{source_context:'package',package_id:'${it.id}'`), `${it.id} missing availability_click wiring`);
+    }
+    // Structural guarantee: the .pkg-cta-alt anchor's own onclick is the only
+    // handler on that element, and it names availability_click, never
+    // package_enquire, for any package.
+    const altOnclicks = [...hp.matchAll(/class="pkg-cta-alt"[^>]*onclick="([^"]*)"/g)].map(m => m[1]);
+    assert.ok(altOnclicks.length >= 9);
+    for (const oc of altOnclicks) assert.ok(oc.includes('availability_click') && !oc.includes('package_enquire'));
+  });
+
+  test('translated package pages keep canonical (English, untranslated) slugs as both ids and hrefs', () => {
+    for (const lang of M.languages) {
+      const generated = read(path.join(lang, 'holiday-packages.html'));
+      for (const slug of slugs) {
+        assert.ok(generated.includes(`id="${slug}"`), `${lang}: missing id="${slug}"`);
+        assert.ok(generated.includes(`href="#${slug}"`), `${lang}: missing href="#${slug}"`);
+      }
+    }
+  });
+
+  test('heading hierarchy for package-page-owned content is sequential with no skip (h1 -> h2 -> h3), independent of the shared site-wide footer', () => {
+    const bodyOnly = hp.slice(hp.indexOf('<header class="page-header"'), hp.indexOf('<footer'));
+    const headings = [...bodyOnly.matchAll(/<(h[1-6])\b/g)].map(m => Number(m[1][1]));
+    assert.equal(headings.filter(h => h === 1).length, 1, 'exactly one H1');
+    for (let i = 1; i < headings.length; i++) {
+      assert.ok(headings[i] <= headings[i - 1] + 1, `heading level jumps from h${headings[i-1]} to h${headings[i]} (index ${i})`);
+    }
+  });
+
+  test('exactly 9 Product/Offer schema entities, no duplicate Product from Featured Journeys, plus BreadcrumbList and FAQPage intact', () => {
+    const types = jsonLdTypes(hp);
+    assert.equal(types.filter(t => t === 'Product').length, 9);
+    assert.ok(types.includes('BreadcrumbList'));
+    assert.ok(types.includes('FAQPage'));
+  });
+
+  test('no internal/private architecture markers in shipped source (PMS, Firestore, Agency Portal, supplier/commission language, AI-tool references)', () => {
+    const forbidden = ['Firestore', 'Agency Portal', 'vilu-unified', 'supplier rate', 'commission', 'Claude', 'ChatGPT', 'Anthropic'];
+    for (const term of forbidden) assert.ok(!hp.includes(term), `forbidden internal term "${term}" found in holiday-packages.html`);
+  });
+
+  test('reduced-motion safety: package-page motion additions are gated behind prefers-reduced-motion, and the site-wide neutralizer also zeroes transition-delay (staggers)', () => {
+    assert.ok(css.includes('pcHeroSettle') && css.includes('@media (prefers-reduced-motion:no-preference)'));
+    const block = css.slice(css.indexOf('prefers-reduced-motion:reduce'), css.indexOf('prefers-reduced-motion:reduce') + 400);
+    assert.ok(/transition-delay:0ms\s*!important/.test(block));
+  });
+
+  test('no-JS content contract: a page-scoped noscript override keeps every .reveal section visible without JavaScript', () => {
+    assert.ok(/<noscript><style>\.reveal\{opacity:1!important;transform:none!important;filter:none!important\}<\/style><\/noscript>/.test(hp));
+  });
+
+  test('RTL logical-direction hooks: badge position and Featured layout use logical (not physical left/right) properties', () => {
+    assert.ok(css.includes('inset-inline-start:28px'), '.pkg-badge must stay on the logical inset-inline-start');
+    assert.ok(!/\.pc-featured\{[^}]*\bleft:/.test(css) && !/\.pc-duration\{[^}]*\bleft:/.test(css), 'new package layout containers must not hardcode physical left/right');
+  });
+
+  test('light-theme package price contrast fix: .pkg-price gets a scoped, darker accent override in Light (matches the established :root[data-theme] override pattern)', () => {
+    assert.ok(/:root\[data-theme="light"\]\s*\.pkg-price\{color:#8a5a1a\}/.test(css));
+  });
+}
+
+// ---------------------------------------------------------------------------
 section('Analytics — canonical events, dimensions, attribution');
 {
   const an = read('analytics.js');

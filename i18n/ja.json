@@ -1031,7 +1031,20 @@
       "relTag6": "プランニングガイド",
       "ctaEmail": "メールを送る",
       "ctaAccom": "宿泊だけを別に手配されたい場合は、こちらから最新の空室状況をご確認ください &rarr;",
-      "stickyText": "パッケージ選びにお悩みですか? Viluにご相談ください"
+      "stickyText": "パッケージ選びにお悩みですか? Viluにご相談ください",
+      "planHoliday": "この旅を計画する",
+      "emailVilu": "Viluにメールを送る",
+      "viewJourney": "旅を見る",
+      "viewDetails": "詳細を見る",
+      "heroEyebrow": "Viluホリデーコレクション",
+      "heroDisplay": "南アリでの旅を選んでください。",
+      "verifiedLine": "すべての旅には往復送迎、Vilu Residenceでの滞在、毎日の朝食、そしてジンベエザメ、マンタ、ウミガメとのシュノーケリングが含まれます。",
+      "featuredTag": "注目の旅",
+      "featuredTitle": "3つの始め方",
+      "collectionTag": "全コレクション",
+      "collectionTitle": "9つすべての旅",
+      "durationTag": "滞在日数で選ぶ",
+      "durationTitle": "4泊から11泊まで"
     },
     "maaMeta": {
       "title": "マーミギリ旅行ガイド — Vilu Residenceの故郷の島",

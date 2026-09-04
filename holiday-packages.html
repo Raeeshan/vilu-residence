@@ -336,7 +336,7 @@
   <div class="hp-section reveal" style="margin-top:48px;max-width:none">
     <h2 class="section-title" data-i18n="hpPage.faqTitle">Frequently asked questions</h2>
     <div class="faq-block">
-      <details><summary><span data-i18n="hpPage.faqQ1">Is the round-trip transfer really included?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="hpPage.faqA1" onclick="trackEvent('faq_expand',{content_type:'package',question_id:'faq1'})">Yes — every package on this page includes round-trip speedboat transfer between Malé and Maamigili, already included in the price shown.</div></details>
+      <details><summary><span data-i18n="hpPage.faqQ1">Is the round-trip transfer really included?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="hpPage.faqA1">Yes — every package on this page includes round-trip speedboat transfer between Malé and Maamigili, already included in the price shown.</div></details>
       <details><summary><span data-i18n="hpPage.faqQ2">What accommodation is included?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="hpPage.faqA2">Every package includes your stay at Vilu Residence in Maamigili — see the exact accommodation line on the package you're interested in above for the specifics of that package.</div></details>
       <details><summary><span data-i18n="hpPage.faqQ3">Can I book accommodation without choosing a holiday package?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="hpPage.faqA3">Yes — if you'd prefer to arrange your activities separately, you can check Vilu Residence's live accommodation availability through our booking engine. Breakfast is included with your stay either way.</div></details>
       <details><summary><span data-i18n="hpPage.faqQ4">Do I need to pay a deposit to enquire, or to hold a package?</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><div class="faq-a" data-i18n="hpPage.faqA4">No. Enquiring is free and doesn't commit you to anything. We don't collect deposits, prepayment, or card details online for direct bookings — payment is made in person, in cash (USD or EUR), during your stay.</div></details>
@@ -848,11 +848,28 @@ if (typeof document !== 'undefined' && document.addEventListener) {
     pkgObserveCardViews();
   });
 
-  // FAQ expand tracking (mirrors the homepage's faq_expand pattern).
+  // FAQ expand tracking — Phase 12C-D: ports the proven homepage E2C
+  // trusted-user strategy (see faqWireExpandTracking() in vilu-website.html)
+  // in place of the old bare toggle listener this page still carried.
+  // el.open===true / e.isTrusted on 'toggle' are NOT working guards here —
+  // <details> fires a genuinely trusted 'toggle' whenever `open` changes,
+  // including from `details.open = true` or `summary.click()`. The actual
+  // signal is a trusted click/Enter/Space on <summary> immediately
+  // preceding the toggle: armed here, consumed (checked + reset) on the
+  // very next 'toggle', so programmatic opens and synthetic clicks never
+  // fire faq_expand, and translation re-renders (which only rewrite the
+  // data-i18n text nodes inside, never touch `open`) can't either.
   document.addEventListener('DOMContentLoaded', function(){
     document.querySelectorAll('.faq-block details').forEach(function(details, i){
+      var summary = details.querySelector('summary');
+      var trustedActivation = false;
+      if (summary) {
+        summary.addEventListener('click', function(e){ if (e.isTrusted) trustedActivation = true; });
+        summary.addEventListener('keydown', function(e){ if (e.isTrusted && (e.key === 'Enter' || e.key === ' ')) trustedActivation = true; });
+      }
       details.addEventListener('toggle', function(){
-        if (details.open) trackEvent('faq_expand', {content_type: 'package', question_id: 'faq'+(i+1), guide_slug: _hpGuideSlug});
+        if (details.open && trustedActivation) trackEvent('faq_expand', {content_type: 'package', question_id: 'faq'+(i+1), guide_slug: _hpGuideSlug});
+        trustedActivation = false;
       });
     });
     document.querySelectorAll('.related-strip .related-card').forEach(function(card){

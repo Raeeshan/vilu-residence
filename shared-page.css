@@ -330,6 +330,14 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .pkg-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--white);margin-top:8px}
 .pkg-price-row{display:flex;align-items:baseline;gap:8px;margin:10px 0 4px}
 .pkg-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:600;color:var(--teal-light,var(--gold-light))}
+/* Phase 12C-D contrast audit: .pkg-price (used only on holiday-packages.html)
+   measured 4.04:1 in Light against its card background -- below the 4.5:1
+   normal-text target (17px/600 isn't reliably "large text" under WCAG's
+   bold threshold). Dark already clears 7.48:1, untouched. Scoped exactly
+   like the existing :root[data-theme="dark"] .room-price-amount override
+   (vilu-website.html) -- a darker shade of the same gold hue, not a color-
+   family change, measured at ~5.8:1 against rgb(255,253,249). */
+:root[data-theme="light"] .pkg-price{color:#8a5a1a}
 .pkg-price-unit{font-size:var(--font-size-xs);color:var(--muted)}
 .pkg-pernight{font-size:var(--font-size-xs);color:var(--muted);margin-bottom:14px}
 .pkg-desc{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;margin-bottom:16px}
