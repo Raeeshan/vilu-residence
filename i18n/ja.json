@@ -21,7 +21,10 @@
       "scroll": "スクロール",
       "statRooms": "客室",
       "statService": "おもてなし",
-      "statMemories": "思い出"
+      "statMemories": "思い出",
+      "ctaPrimary": "ホリデーパッケージを見る",
+      "ctaSecondary": "空室状況を確認",
+      "display": "南アリを、体験する。"
     },
     "bookingBar": {
       "checkin": "チェックイン",
@@ -110,7 +113,12 @@
       "unavailable": "現在パッケージは一時的にご利用いただけません。",
       "contactUsLink": "直接お問い合わせ",
       "directly": "ください。",
-      "seeExperiences": "各エクスカーションの実際の内容を見る"
+      "seeExperiences": "各エクスカーションの実際の内容を見る",
+      "featuredTag": "おすすめ",
+      "more": "件",
+      "moreLabel": "その他のパッケージ",
+      "viewFullDetails": "詳細をすべて見る →",
+      "viewPackage": "パッケージを見る"
     },
     "booking": {
       "tag": "ご予約",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "空室状況を確認 →",
       "orBrowseAllRooms": "すべての客室を見る",
       "directBookingsOnly": "直接予約のみ",
-      "or": "または"
+      "or": "または",
+      "labelCheckin": "チェックイン",
+      "labelCheckout": "チェックアウト",
+      "labelGuests": "人数",
+      "labelRooms": "客室数",
+      "reframeEyebrow": "宿泊先を別に手配したい方へ",
+      "reframeHeadline": "Vilu Residenceの空室状況をリアルタイムで確認。"
     },
     "gettingHere": {
       "tag": "移動情報",
@@ -159,7 +173,10 @@
       "titlePrefix": "お客様の",
       "titleEmphasis": "レビューを見る",
       "subtitle": "Vilu Residence にご宿泊いただいたお客様の声をご紹介します。",
-      "readOnGoogle": "Googleでレビューを見る"
+      "readOnGoogle": "Googleでレビューを見る",
+      "assurance1": "直接予約でお得な料金",
+      "assurance2": "直接予約はすべてキャンセル無料",
+      "assurance3": "TGST17％とグリーン税はすべての料金に含まれています"
     },
     "contact": {
       "tag": "お問い合わせ",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "プライバシーポリシー",
       "cookiesTech": "クッキーと技術"
+    },
+    "above": {
+      "eyebrow": "南アリの上へ",
+      "displayLine1": "ひとつの島。",
+      "displayLine2": "発見を待つ、ひとつの海。",
+      "sub": "南アリ環礁——モルディブの中心にある、太陽に温められたおだやかな海岸。Viluはここを拠点に、その周りのすべてをご案内します。"
+    },
+    "below": {
+      "eyebrow": "南アリの水中へ",
+      "displayLine1": "ジンベエザメ。",
+      "displayLine2": "マンタ。",
+      "displayLine3": "ウミガメ。",
+      "sub": "南アリはジンベエザメ、マンタ、ウミガメをはじめ豊かな海洋生物で知られています。野生生物との遭遇を保証するものではありません。",
+      "linkGuide": "南アリの海洋生物 →",
+      "linkManta": "マンタシュノーケリング →",
+      "linkWhale": "ジンベエザメシュノーケリング →"
+    },
+    "closing": {
+      "contactHint": "まずはご相談されたい方は、",
+      "cta": "ホリデーパッケージを見る",
+      "ctaSecondary": "空室状況を確認",
+      "headline": "あなたの南アリの物語は、ここから始まります。"
+    },
+    "descent": {
+      "caption": "南アリのリーフへ、静かに降りていく"
+    },
+    "homecoming": {
+      "cta": "客室を見る",
+      "display": "ここが、あなたの「ただいま」の場所になる。",
+      "eyebrow": "Vilu Residence",
+      "personal": "もっと個人的な滞在を。",
+      "rooms": "客室は6室のみ。"
+    },
+    "whatIsVilu": {
+      "body": "休暇の計画、海の体験、そして地元ならではの知識——さらに、宿泊が必要なときのために、マーミジリにある私たち自身の6室の拠り所があります。",
+      "eyebrow": "私たちについて",
+      "headline": "Viluは、あなたを南アリへと導く入り口です。",
+      "point1": "フロントデスクではなく、一人ひとりに向き合うおもてなし——すべてのゲストの滞在を個別に計画します。",
+      "point2": "島めぐりと地元の食も滞在の一部——シュノーケリングだけではありません。",
+      "point3": "設計から生まれる、ブティックで親密な空間——60室ではなく、6室だけ。"
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "2階に位置する広々としたデラックスファミリールームは、専用のオープンデッキ、エアコン、快適なダブルベッド、モダンな専用バスルーム、フラットスクリーンテレビを備えています。ご家族や小グループのために設計されており、快適さとくつろぎの完璧な組み合わせをご提供いたします。",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "お支払いは到着時に現金（USDまたはEUR）のみとなります——デポジット、前払い、カード情報をオンラインで収集することはございません",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "直接ご予約の場合は無料でキャンセルいただけます——事前のお支払いが一切ないため、キャンセルによって費用が発生することはありません",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA（Booking.com、Airbnbなど）経由でのご予約は、当施設ではなくそのプラットフォーム独自のキャンセルポリシーが適用されます"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA（Booking.com、Airbnbなど）経由でのご予約は、当施設ではなくそのプラットフォーム独自のキャンセルポリシーが適用されます",
+    "Garden view": "ガーデンビュー"
   }
 }

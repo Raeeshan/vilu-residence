@@ -21,7 +21,10 @@
       "scroll": "مرر للأسفل",
       "statRooms": "الغرف",
       "statService": "رعاية الضيوف",
-      "statMemories": "الذكريات"
+      "statMemories": "الذكريات",
+      "ctaPrimary": "استكشفوا باقات العطلات",
+      "ctaSecondary": "تحقّقوا من التوفر",
+      "display": "عيشوا تجربة جنوب أري."
     },
     "bookingBar": {
       "checkin": "تسجيل الوصول",
@@ -110,7 +113,12 @@
       "unavailable": "الباقات غير متوفرة مؤقتًا — يرجى",
       "contactUsLink": "التواصل معنا",
       "directly": "مباشرة.",
-      "seeExperiences": "شاهد ما تتضمنه كل رحلة بالفعل"
+      "seeExperiences": "شاهد ما تتضمنه كل رحلة بالفعل",
+      "featuredTag": "مميزة",
+      "more": "أخرى",
+      "moreLabel": "المزيد من الباقات",
+      "viewFullDetails": "عرض جميع التفاصيل ←",
+      "viewPackage": "عرض الباقة"
     },
     "booking": {
       "tag": "الحجوزات",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "تحقق من التوفر →",
       "orBrowseAllRooms": "تصفح جميع الغرف",
       "directBookingsOnly": "الحجز المباشر فقط",
-      "or": "أو"
+      "or": "أو",
+      "labelCheckin": "تسجيل الوصول",
+      "labelCheckout": "تسجيل المغادرة",
+      "labelGuests": "الضيوف",
+      "labelRooms": "الغرف",
+      "reframeEyebrow": "تفضّلون ترتيب الإقامة بشكل منفصل؟",
+      "reframeHeadline": "تحقّقوا من التوفر الفوري في فيلو ريزيدنس."
     },
     "gettingHere": {
       "tag": "معلومات السفر",
@@ -159,7 +173,10 @@
       "titlePrefix": "اقرأ",
       "titleEmphasis": "تقييماتنا",
       "subtitle": "استمع مباشرة إلى ضيوفنا الذين أقاموا معنا في فيلو ريزيدنس.",
-      "readOnGoogle": "اقرأ تقييماتنا على Google"
+      "readOnGoogle": "اقرأ تقييماتنا على Google",
+      "assurance1": "أسعار أفضل عند الحجز المباشر معنا",
+      "assurance2": "إلغاء مجاني لكل حجز مباشر",
+      "assurance3": "ضريبة TGST 17% وضريبة الخضرة مشمولتان في كل سعر"
     },
     "contact": {
       "tag": "تواصل معنا",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "سياسة الخصوصية",
       "cookiesTech": "ملفات تعريف الارتباط والتقنية"
+    },
+    "above": {
+      "eyebrow": "فوق جنوب آري",
+      "displayLine1": "جزيرة واحدة.",
+      "displayLine2": "محيط كامل لاكتشافه.",
+      "sub": "جنوب أري أتول: شاطئ هادئ دافئته الشمس في قلب المالديف — ونقطة انطلاق فيلو لاستكشاف كل ما حوله."
+    },
+    "below": {
+      "eyebrow": "تحت جنوب آري",
+      "displayLine1": "أسماك القرش الحوتية.",
+      "displayLine2": "أشعة المانتا.",
+      "displayLine3": "السلاحف البحرية.",
+      "sub": "تشتهر جنوب أري بأسماك القرش الحوتية وأشعة المانتا والسلاحف البحرية وحياة بحرية غنية. لا يمكن ضمان مشاهدة الحياة البرية أبدًا.",
+      "linkGuide": "الحياة البحرية في جنوب أري ←",
+      "linkManta": "الغطس مع أشعة المانتا ←",
+      "linkWhale": "الغطس مع أسماك القرش الحوتية ←"
+    },
+    "closing": {
+      "contactHint": "أو إذا كنتم تفضّلون التحدث أولًا،",
+      "cta": "استكشفوا باقات العطلات",
+      "ctaSecondary": "تحقّقوا من التوفر",
+      "headline": "قصتكم في جنوب أري تبدأ من هنا."
+    },
+    "descent": {
+      "caption": "نزولًا نحو شعاب جنوب أري"
+    },
+    "homecoming": {
+      "cta": "شاهدوا الغرف",
+      "display": "وهنا ستشعرون بأنكم في بيتكم.",
+      "eyebrow": "فيلو ريزيدنس",
+      "personal": "إقامة أكثر شخصية.",
+      "rooms": "ست غرف."
+    },
+    "whatIsVilu": {
+      "body": "تخطيط للعطلات وتجارب بحرية ومعرفة محلية — إلى جانب بيتنا المكوّن من ست غرف في مامجيلي متى احتجتم مكانًا للإقامة.",
+      "eyebrow": "من نحن",
+      "headline": "فيلو هو طريقكم إلى جنوب أري.",
+      "point1": "اهتمام شخصي، لا مجرد مكتب استقبال — نخطط لإقامة كل ضيف على حدة.",
+      "point2": "التنقل بين الجزر والمأكولات المحلية جزء من إقامتكم، وليس الغطس فقط.",
+      "point3": "بوتيك حميم بالتصميم — ست غرف، لا ستون."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "تقع غرفة العائلة الديلوكس الفسيحة في الطابق الأول، وتتميز بشرفة خاصة مفتوحة وتكييف الهواء وسرير مزدوج مريح وحمام خاص عصري وتلفزيون بشاشة مسطحة. صُممت للعائلات أو المجموعات الصغيرة، وتوفر المزيج المثالي من الراحة والاسترخاء لإقامتكم.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "الدفع نقدًا فقط (بالدولار الأمريكي أو اليورو) عند الوصول — لا يتم تحصيل أي عربون أو دفعة مقدمة أو بيانات بطاقة عبر الإنترنت",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "إلغاء مجاني للحجوزات المباشرة — وبما أنه لا يتم تحصيل أي دفعة مقدمًا أبدًا، فإن الإلغاء لا يترتب عليه أي رسوم على الإطلاق",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "تخضع الحجوزات عبر منصات الحجز الخارجية (مثل Booking.com وAirbnb وغيرها) لسياسة الإلغاء الخاصة بتلك المنصة، وليس سياستنا"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "تخضع الحجوزات عبر منصات الحجز الخارجية (مثل Booking.com وAirbnb وغيرها) لسياسة الإلغاء الخاصة بتلك المنصة، وليس سياستنا",
+    "Garden view": "إطلالة على الحديقة"
   }
 }

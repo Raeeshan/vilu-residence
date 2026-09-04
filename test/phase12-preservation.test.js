@@ -801,4 +801,119 @@ section('Phase 12B-E2B — complete cinematic homepage contracts');
 }
 
 // ---------------------------------------------------------------------------
+section('Phase 12B-E2D — multilingual completion + final acceptance');
+{
+  const h = read('vilu-website.html');
+  const LANGS = ['ar', 'cs', 'de', 'fr', 'it', 'ja', 'ko', 'ru', 'sk', 'zh'];
+
+  // The 45 keys E2C's audit found missing from every non-English i18n/{lang}.json
+  // (git log confirms this predates E2C/E2D — the whole `above`/`descent`/`below`/
+  // `homecoming`/`whatIsVilu`/`closing` namespaces plus a handful of individual
+  // keys simply never got added to any of the 9 dictionaries when Phase 12B's
+  // cinematic homepage introduced them). This list is intentionally the exact
+  // audited set, not a broader "every i18n key" sweep — a parity check this
+  // specific stays meaningful without becoming a brittle full-dictionary diff.
+  const PHASE12B_KEYS = [
+    'above.eyebrow', 'above.displayLine1', 'above.displayLine2', 'above.sub',
+    'below.eyebrow', 'below.displayLine1', 'below.displayLine2', 'below.displayLine3', 'below.sub', 'below.linkGuide', 'below.linkManta', 'below.linkWhale',
+    'descent.caption',
+    'homecoming.eyebrow', 'homecoming.display', 'homecoming.rooms', 'homecoming.personal', 'homecoming.cta',
+    'whatIsVilu.eyebrow', 'whatIsVilu.headline', 'whatIsVilu.body', 'whatIsVilu.point1', 'whatIsVilu.point2', 'whatIsVilu.point3',
+    'hero.display', 'hero.ctaPrimary', 'hero.ctaSecondary',
+    'packages.featuredTag', 'packages.more', 'packages.moreLabel', 'packages.viewFullDetails', 'packages.viewPackage',
+    'booking.reframeEyebrow', 'booking.reframeHeadline', 'booking.labelCheckin', 'booking.labelCheckout', 'booking.labelGuests', 'booking.labelRooms',
+    'reviews.assurance1', 'reviews.assurance2', 'reviews.assurance3',
+    'closing.headline', 'closing.cta', 'closing.ctaSecondary', 'closing.contactHint',
+  ];
+  test(`the audited Phase 12B key list itself has ${PHASE12B_KEYS.length} entries (sanity check on this test, not the site)`, () => {
+    assert.equal(PHASE12B_KEYS.length, 45); // precise audited count (E2C's report used "~23" as a rough estimate before this audit ran)
+  });
+  function getPath(obj, dotted) { return dotted.split('.').reduce((o, k) => (o ? o[k] : undefined), obj); }
+  for (const lang of LANGS) {
+    test(`i18n/${lang}.json: all ${PHASE12B_KEYS.length} Phase 12B homepage keys present with non-empty translated values`, () => {
+      const dict = JSON.parse(read(`i18n/${lang}.json`));
+      const missing = PHASE12B_KEYS.filter(k => {
+        const v = getPath(dict.static, k);
+        return typeof v !== 'string' || v.length === 0;
+      });
+      assert.deepEqual(missing, [], `${lang}.json missing/empty: ${missing.join(', ')}`);
+    });
+  }
+  test('every generated homepage (English + 10 languages) exposes a real, non-placeholder #hp-grid before any JS runs', () => {
+    // Guards the no-JS package-discovery fallback (E2D §11): the raw HTML
+    // must never again ship only the "Loading packages…" placeholder.
+    assert.ok(!/id="hp-grid"[^>]*>\s*<div[^>]*data-i18n="packages\.loading"/.test(h), 'English source #hp-grid still shows only the loading placeholder');
+    // Bounded to the actual #hp-grid markup region -- a naive whole-file count
+    // would also match the literal `class="hp-rail-item"` string inside
+    // renderHolidayPackages()'s own JS source further down the same file.
+    const hpGridRegion = h.slice(h.indexOf('id="hp-grid"'), h.indexOf('class="exp-links'));
+    const railCount = (hpGridRegion.match(/class="hp-rail-item"/g) || []).length;
+    assert.equal(railCount, 9, 'English #hp-grid should prerender all 9 packages');
+    for (const it of M.packages.items) {
+      assert.ok(h.includes(`id="package-${it.id}"`) && h.includes(`href="holiday-packages.html#${it.id}"`), `${it.id} missing a real prerendered deep link`);
+    }
+    for (const lang of LANGS) {
+      const lh = read(`${lang}/index.html`);
+      const lRegion = lh.slice(lh.indexOf('id="hp-grid"'), lh.indexOf('class="exp-links'));
+      const lRailCount = (lRegion.match(/class="hp-rail-item"/g) || []).length;
+      assert.equal(lRailCount, 9, `${lang}/index.html #hp-grid should prerender all 9 packages`);
+    }
+  });
+  test('#hp-grid no-JS fallback is generated from holiday-packages.html’s own PACKAGES array (build-i18n-pages.js), not a second hand-authored dataset', () => {
+    const build = read('build-i18n-pages.js');
+    assert.ok(build.includes('function extractHomepagePackagesSource()') && build.includes("fs.readFileSync('holiday-packages.html'"), 'homepage fallback must import PACKAGES from holiday-packages.html at build time');
+    assert.ok(!/var\s+HOMEPAGE_PACKAGES\s*=\s*\[/.test(build) && !/const\s+HOMEPAGE_PACKAGES\s*=\s*\[/.test(build), 'no second hand-maintained package array in the build script');
+  });
+  test('renderHolidayPackages() itself is untouched by the no-JS fallback work (live Firestore path unaffected)', () => {
+    // The fallback is a small independent renderer in build-i18n-pages.js
+    // specifically BECAUSE renderHolidayPackages() unconditionally constructs
+    // `new IntersectionObserver` and calls loadHpTerms()/handleHolidayPackageDeepLink()
+    // with no defensive guards -- reusing it in a build-time vm sandbox would
+    // require adding guards to booking-adjacent runtime code just to satisfy
+    // a build script. Confirm those calls are still there, unguarded, exactly
+    // as approved -- i.e. this stage did not quietly rewrite that function.
+    assert.ok(h.includes('var hpViewObserver = new IntersectionObserver('), 'renderHolidayPackages() IntersectionObserver construction unchanged');
+    assert.ok(h.includes('loadHpTerms();') && h.includes('handleHolidayPackageDeepLink();'), 'renderHolidayPackages() side effects unchanged');
+  });
+  test('.room-price-amount: Dark gets a legible scoped override, Light keeps the E2C --teal fix untouched', () => {
+    assert.ok(h.includes('.room-price-amount{font-size:var(--font-size-3xl);font-weight:600;color:var(--teal)}'), 'base rule (Light-theme-correct via the E2C --teal fix) must be unchanged');
+    assert.ok(h.includes(':root[data-theme="dark"] .room-price-amount{color:var(--teal-light)}'), 'Dark-only override present, scoped to this one selector');
+    // --teal itself (the token every OTHER component still relies on: WhatsApp
+    // button, primary buttons, contact controls/icons) must not have been
+    // touched in either theme block -- this is the exact "don't cause another
+    // token regression" requirement.
+    const themeCss = read('theme.css');
+    assert.ok(/--teal:var\(--surface-secondary\);/.test(themeCss), 'Dark --teal alias (theme.css :root) unchanged');
+    assert.ok(themeCss.includes('--teal:#0e7490;'), 'Light --teal override (the E2C fix) unchanged');
+  });
+  test('room-price-amount Dark contrast clears WCAG AA (>=4.5:1) against the room-card background', () => {
+    // #14294a (the old Dark --teal-derived color) on #0f2140 (--card/--surface)
+    // measured ~1.10:1 -- a real failure, not merely borderline. --teal-light
+    // (#e0a752, the same token .hp-price already uses for the Holiday
+    // Packages price) measures far above AA here.
+    const rgbOf = (hx) => [1, 3, 5].map(i => parseInt(hx.slice(i, i + 2), 16));
+    const lum = (c) => { const a = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return .2126 * a[0] + .7152 * a[1] + .0722 * a[2]; };
+    const contrast = (a, b) => { const l1 = lum(rgbOf(a)), l2 = lum(rgbOf(b)); return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05); };
+    const dark = M.theme.dark_tokens;
+    const c = contrast(dark['--accent'], dark['--surface']); // --teal-light resolves to --accent; --card resolves to --surface
+    assert.ok(c >= 4.5, `Dark room-price contrast ${c.toFixed(2)}:1, need >=4.5:1`);
+  });
+  test('room-card-badge dynamic translations cover both "Garden View" and "Garden view" (Firestore case variant confirmed live)', () => {
+    // td() is an exact-string lookup (analytics.js's DYNAMIC_I18N), so a room
+    // whose Firestore `view` field is literally "Garden view" (lowercase v --
+    // confirmed via ROOMS[0].view over a real HTTP-served /de/ page, not
+    // file://, which has its own unrelated language-detection quirk) never
+    // matched the pre-existing "Garden View" (capital V) dynamic key. Every
+    // language's dynamic dict needs BOTH exact strings covered.
+    for (const lang of LANGS) {
+      const dict = JSON.parse(read(`i18n/${lang}.json`));
+      const cap = dict.dynamic && dict.dynamic['Garden View'];
+      const lower = dict.dynamic && dict.dynamic['Garden view'];
+      assert.ok(cap, `${lang}.json missing "Garden View" (capital V) dynamic translation`);
+      assert.equal(lower, cap, `${lang}.json "Garden view" (lowercase v) should alias the same translation as "Garden View"`);
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);

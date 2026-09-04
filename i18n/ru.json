@@ -21,7 +21,10 @@
       "scroll": "Прокрутите",
       "statRooms": "Номеров",
       "statService": "Забота о госте",
-      "statMemories": "Впечатления"
+      "statMemories": "Впечатления",
+      "ctaPrimary": "Смотреть пакеты отдыха",
+      "ctaSecondary": "Проверить доступность",
+      "display": "Откройте для себя Южный Ари."
     },
     "bookingBar": {
       "checkin": "Заезд",
@@ -110,7 +113,12 @@
       "unavailable": "Пакеты временно недоступны — пожалуйста,",
       "contactUsLink": "свяжитесь с нами",
       "directly": "напрямую.",
-      "seeExperiences": "Узнайте, что на самом деле включает каждая экскурсия"
+      "seeExperiences": "Узнайте, что на самом деле включает каждая экскурсия",
+      "featuredTag": "Рекомендуем",
+      "more": "ещё",
+      "moreLabel": "Больше пакетов",
+      "viewFullDetails": "Смотреть все детали →",
+      "viewPackage": "Смотреть пакет"
     },
     "booking": {
       "tag": "Бронирование",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "Проверить наличие →",
       "orBrowseAllRooms": "посмотреть все номера",
       "directBookingsOnly": "Только прямое бронирование",
-      "or": "Или"
+      "or": "Или",
+      "labelCheckin": "Заезд",
+      "labelCheckout": "Выезд",
+      "labelGuests": "Гости",
+      "labelRooms": "Номера",
+      "reframeEyebrow": "Предпочитаете организовать проживание отдельно?",
+      "reframeHeadline": "Проверьте актуальную доступность номеров в Vilu Residence."
     },
     "gettingHere": {
       "tag": "Логистика поездки",
@@ -159,7 +173,10 @@
       "titlePrefix": "Читайте наши",
       "titleEmphasis": "отзывы",
       "subtitle": "Узнайте мнение гостей, которые останавливались в Vilu Residence.",
-      "readOnGoogle": "Читать наши отзывы на Google"
+      "readOnGoogle": "Читать наши отзывы на Google",
+      "assurance1": "Более выгодные цены при прямом бронировании у нас",
+      "assurance2": "Бесплатная отмена при любом прямом бронировании",
+      "assurance3": "TGST 17% и «зелёный» налог включены в каждый тариф"
     },
     "contact": {
       "tag": "Свяжитесь с нами",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "Политика конфиденциальности",
       "cookiesTech": "Cookie и технологии"
+    },
+    "above": {
+      "eyebrow": "Над Южным Ари",
+      "displayLine1": "Один остров.",
+      "displayLine2": "Целый океан, который предстоит открыть.",
+      "sub": "Южный Ари Атолл: неспешный, прогретый солнцем берег в самом сердце Мальдив — и домашняя база Vilu для знакомства со всем, что вокруг."
+    },
+    "below": {
+      "eyebrow": "Под Южным Ари",
+      "displayLine1": "Китовые акулы.",
+      "displayLine2": "Скаты манта.",
+      "displayLine3": "Черепахи.",
+      "sub": "Южный Ари известен китовыми акулами, скатами манта, черепахами и богатой морской жизнью. Встречи с дикой природой никогда не гарантированы.",
+      "linkGuide": "Морская жизнь Южного Ари →",
+      "linkManta": "Снорклинг со скатами манта →",
+      "linkWhale": "Снорклинг с китовыми акулами →"
+    },
+    "closing": {
+      "contactHint": "Или если вы хотите сначала всё обсудить,",
+      "cta": "Смотреть пакеты отдыха",
+      "ctaSecondary": "Проверить доступность",
+      "headline": "Ваша история на Южном Ари начинается здесь."
+    },
+    "descent": {
+      "caption": "Спуск к рифу Южного Ари"
+    },
+    "homecoming": {
+      "cta": "Смотреть номера",
+      "display": "И именно здесь вы почувствуете себя как дома.",
+      "eyebrow": "Vilu Residence",
+      "personal": "Более личное проживание.",
+      "rooms": "Шесть номеров."
+    },
+    "whatIsVilu": {
+      "body": "Планирование отдыха, морские впечатления и знание местности — а также наш собственный дом на шесть номеров в Маамигили, если вам нужно, где остановиться.",
+      "eyebrow": "Кто мы",
+      "headline": "Vilu — ваш путь на Южный Ари.",
+      "point1": "Индивидуальное внимание, а не стойка регистрации — пребывание каждого гостя мы планируем отдельно.",
+      "point2": "Путешествия между островами и местная кухня — часть вашего отдыха, а не только снорклинг.",
+      "point3": "Камерность и стиль бутик-отеля по замыслу — шесть номеров, а не шестьдесят."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "Наш просторный номер Deluxe Family Room, расположенный на втором этаже, оснащён собственной открытой террасой, кондиционером, удобной двуспальной кроватью, современной собственной ванной комнатой и телевизором с плоским экраном. Разработан для семей или небольших групп и предлагает идеальное сочетание комфорта и отдыха.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Оплата только наличными (в долларах США или евро) по прибытии — депозит, предоплата или данные карты онлайн не собираются",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Бесплатная отмена для прямых бронирований — поскольку оплата никогда не берётся заранее, отмена никогда не влечёт за собой расходов",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Бронирования через OTA (Booking.com, Airbnb и т. д.) подчиняются политике отмены соответствующей платформы, а не нашей"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Бронирования через OTA (Booking.com, Airbnb и т. д.) подчиняются политике отмены соответствующей платформы, а не нашей",
+    "Garden view": "Вид на сад"
   }
 }

@@ -21,7 +21,10 @@
       "scroll": "向下滚动",
       "statRooms": "客房",
       "statService": "贴心服务",
-      "statMemories": "回忆"
+      "statMemories": "回忆",
+      "ctaPrimary": "探索假日套餐",
+      "ctaSecondary": "查询空房情况",
+      "display": "体验南阿里。"
     },
     "bookingBar": {
       "checkin": "入住",
@@ -110,7 +113,12 @@
       "unavailable": "套餐暂时无法预订——请",
       "contactUsLink": "直接联系我们",
       "directly": "。",
-      "seeExperiences": "查看每项游览实际包含的内容"
+      "seeExperiences": "查看每项游览实际包含的内容",
+      "featuredTag": "精选",
+      "more": "项",
+      "moreLabel": "更多套餐",
+      "viewFullDetails": "查看完整详情 →",
+      "viewPackage": "查看套餐"
     },
     "booking": {
       "tag": "预订",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "查询空房 →",
       "orBrowseAllRooms": "浏览所有客房",
       "directBookingsOnly": "仅限直接预订",
-      "or": "或"
+      "or": "或",
+      "labelCheckin": "入住日期",
+      "labelCheckout": "退房日期",
+      "labelGuests": "入住人数",
+      "labelRooms": "房间数",
+      "reframeEyebrow": "更想单独安排住宿？",
+      "reframeHeadline": "实时查询 Vilu Residence 的空房情况。"
     },
     "gettingHere": {
       "tag": "交通信息",
@@ -159,7 +173,10 @@
       "titlePrefix": "查看我们的",
       "titleEmphasis": "评价",
       "subtitle": "聆听曾入住 Vilu Residence 的客人的真实分享。",
-      "readOnGoogle": "在Google上查看我们的评价"
+      "readOnGoogle": "在Google上查看我们的评价",
+      "assurance1": "直接向我们预订，享更优惠价格",
+      "assurance2": "所有直接预订均可免费取消",
+      "assurance3": "每个价格均已包含17%的TGST税及绿色税"
     },
     "contact": {
       "tag": "联系方式",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "隐私政策",
       "cookiesTech": "Cookie 与技术"
+    },
+    "above": {
+      "eyebrow": "南阿里之上",
+      "displayLine1": "一座岛屿。",
+      "displayLine2": "一整片等待探索的海洋。",
+      "sub": "南阿里环礁：马尔代夫中心一片被阳光温柔晒暖的悠然海岸——也是维鲁探索周边一切的家。"
+    },
+    "below": {
+      "eyebrow": "南阿里之下",
+      "displayLine1": "鲸鲨。",
+      "displayLine2": "蝠鲼。",
+      "displayLine3": "海龟。",
+      "sub": "南阿里以鲸鲨、蝠鲼、海龟及丰富的海洋生物闻名。野生动物的出现无法保证。",
+      "linkGuide": "南阿里的海洋生物 →",
+      "linkManta": "蝠鲼浮潜 →",
+      "linkWhale": "鲸鲨浮潜 →"
+    },
+    "closing": {
+      "contactHint": "如果您想先聊一聊，",
+      "cta": "探索假日套餐",
+      "ctaSecondary": "查询空房情况",
+      "headline": "您的南阿里故事，从这里开始。"
+    },
+    "descent": {
+      "caption": "缓缓下潜，靠近南阿里的珊瑚礁"
+    },
+    "homecoming": {
+      "cta": "查看客房",
+      "display": "而这里，就是您归属的地方。",
+      "eyebrow": "Vilu Residence",
+      "personal": "更贴心的住宿体验。",
+      "rooms": "仅六间客房。"
+    },
+    "whatIsVilu": {
+      "body": "假期规划、海洋体验与本地知识——需要落脚之处时，还有我们在马米吉利仅有六间客房的家。",
+      "eyebrow": "关于我们",
+      "headline": "维鲁，是您通往南阿里的方式。",
+      "point1": "个性化的关怀，而非前台式的接待——每一位客人的行程都为其量身规划。",
+      "point2": "跳岛游和本地美食都融入您的旅程，而不只是浮潜。",
+      "point3": "精品而私密，是我们的设计初衷——六间客房，而非六十间。"
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "我们宽敞的豪华家庭房位于二楼，设有私人开放式露台、空调、舒适的双人床、现代化的私人浴室和平板电视。专为家庭或小团体设计，为您的住宿提供舒适与放松的完美结合。",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "仅接受抵达时现金付款（美元或欧元）——绝不在线收取押金、预付款或银行卡信息",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "直接预订可免费取消——由于从未提前收取任何款项，取消预订不会产生任何费用",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "通过在线旅行社（OTA，如Booking.com、Airbnb等）预订的，适用该平台自身的取消政策，而非我们的政策"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "通过在线旅行社（OTA，如Booking.com、Airbnb等）预订的，适用该平台自身的取消政策，而非我们的政策",
+    "Garden view": "花园景观"
   }
 }

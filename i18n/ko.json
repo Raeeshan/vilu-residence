@@ -21,7 +21,10 @@
       "scroll": "스크롤",
       "statRooms": "객실",
       "statService": "고객 케어",
-      "statMemories": "추억"
+      "statMemories": "추억",
+      "ctaPrimary": "홀리데이 패키지 둘러보기",
+      "ctaSecondary": "예약 가능 여부 확인",
+      "display": "사우스 아리를 경험하세요."
     },
     "bookingBar": {
       "checkin": "체크인",
@@ -110,7 +113,12 @@
       "unavailable": "패키지가 일시적으로 제공되지 않습니다 — ",
       "contactUsLink": "문의해 주세요",
       "directly": "직접 문의 바랍니다.",
-      "seeExperiences": "각 액티비티가 실제로 무엇을 포함하는지 확인하기"
+      "seeExperiences": "각 액티비티가 실제로 무엇을 포함하는지 확인하기",
+      "featuredTag": "추천",
+      "more": "개 더",
+      "moreLabel": "더 많은 패키지",
+      "viewFullDetails": "전체 세부정보 보기 →",
+      "viewPackage": "패키지 보기"
     },
     "booking": {
       "tag": "예약",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "예약 가능 여부 확인 →",
       "orBrowseAllRooms": "전체 객실 둘러보기",
       "directBookingsOnly": "직접 예약만 가능",
-      "or": "또는"
+      "or": "또는",
+      "labelCheckin": "체크인",
+      "labelCheckout": "체크아웃",
+      "labelGuests": "인원",
+      "labelRooms": "객실 수",
+      "reframeEyebrow": "숙소를 따로 준비하고 싶으신가요?",
+      "reframeHeadline": "Vilu Residence의 실시간 예약 가능 여부를 확인하세요."
     },
     "gettingHere": {
       "tag": "교통 안내",
@@ -159,7 +173,10 @@
       "titlePrefix": "저희",
       "titleEmphasis": "후기 보기",
       "subtitle": "빌루 레지던스에 머무신 손님들의 생생한 후기를 확인해 보세요.",
-      "readOnGoogle": "구글에서 후기 보기"
+      "readOnGoogle": "구글에서 후기 보기",
+      "assurance1": "저희와 직접 예약하면 더 나은 요금",
+      "assurance2": "모든 직접 예약, 무료 취소",
+      "assurance3": "모든 요금에 TGST 17%와 그린세 포함"
     },
     "contact": {
       "tag": "문의하기",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "개인정보처리방침",
       "cookiesTech": "쿠키 및 기술"
+    },
+    "above": {
+      "eyebrow": "사우스 아리, 그 위로",
+      "displayLine1": "하나의 섬.",
+      "displayLine2": "발견해야 할 하나의 바다.",
+      "sub": "사우스 아리 환초: 몰디브 한가운데 자리한, 태양이 은은히 데운 잔잔한 해안 — 그리고 그 주변 모든 것을 탐험하는 빌루의 거점입니다."
+    },
+    "below": {
+      "eyebrow": "사우스 아리, 그 아래로",
+      "displayLine1": "고래상어.",
+      "displayLine2": "만타가오리.",
+      "displayLine3": "바다거북.",
+      "sub": "사우스 아리는 고래상어, 만타가오리, 바다거북을 비롯한 풍부한 해양 생물로 잘 알려져 있습니다. 야생동물과의 만남은 결코 보장되지 않습니다.",
+      "linkGuide": "사우스 아리의 해양 생물 →",
+      "linkManta": "만타가오리 스노클링 →",
+      "linkWhale": "고래상어 스노클링 →"
+    },
+    "closing": {
+      "contactHint": "먼저 상담을 원하신다면,",
+      "cta": "홀리데이 패키지 둘러보기",
+      "ctaSecondary": "예약 가능 여부 확인",
+      "headline": "당신의 사우스 아리 이야기가 여기서 시작됩니다."
+    },
+    "descent": {
+      "caption": "사우스 아리의 산호초를 향해 내려가며"
+    },
+    "homecoming": {
+      "cta": "객실 보기",
+      "display": "그리고 이곳이, 당신의 집이 되어줄 곳입니다.",
+      "eyebrow": "Vilu Residence",
+      "personal": "더욱 개인적인 머무름.",
+      "rooms": "단 여섯 개의 객실."
+    },
+    "whatIsVilu": {
+      "body": "휴가 계획, 바다에서의 경험, 그리고 현지 지식까지 — 그리고 머무를 곳이 필요할 땐, 마미길리에 있는 저희만의 여섯 개 객실 보금자리가 있습니다.",
+      "eyebrow": "빌루 소개",
+      "headline": "빌루는 당신을 사우스 아리로 이끄는 문입니다.",
+      "point1": "프런트 데스크가 아닌, 한 분 한 분을 위한 맞춤 응대 — 모든 게스트의 머무름을 개별적으로 계획합니다.",
+      "point2": "섬 투어와 현지 요리도 머무름의 일부입니다 — 스노클링만이 아닙니다.",
+      "point3": "설계부터 부티크하고 아늑하게 — 예순 개가 아닌, 여섯 개의 객실."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "2층에 위치한 넓은 디럭스 패밀리 룸은 전용 오픈 데크, 에어컨, 편안한 더블 침대, 모던한 전용 욕실, 평면 TV를 갖추고 있습니다. 가족이나 소그룹을 위해 설계되었으며, 편안함과 휴식의 완벽한 조화를 제공합니다.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "결제는 도착 시 현금(미국 달러 또는 유로)으로만 이루어지며, 보증금, 선불금 또는 카드 정보를 온라인으로 수집하지 않습니다",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "다이렉트 예약은 무료로 취소 가능합니다 — 사전에 결제가 이루어지지 않으므로 취소 시 어떠한 비용도 발생하지 않습니다",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA(Booking.com, Airbnb 등)를 통한 예약은 저희가 아닌 해당 플랫폼 자체의 취소 정책을 따릅니다"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA(Booking.com, Airbnb 등)를 통한 예약은 저희가 아닌 해당 플랫폼 자체의 취소 정책을 따릅니다",
+    "Garden view": "가든 뷰"
   }
 }

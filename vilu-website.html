@@ -541,6 +541,17 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .room-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--sand2);padding-top:16px}
 .room-price{font-family:'Cormorant Garamond',serif}
 .room-price-amount{font-size:var(--font-size-3xl);font-weight:600;color:var(--teal)}
+/* Phase 12B-E2D: --teal is a legacy alias onto --surface-secondary (see
+   theme.css). In Dark that alias happens to be a dark navy (#14294a) sitting
+   on a room-card body that is itself a near-identical dark navy (--card,
+   #0f2140) -- a genuine 1.10:1 contrast failure, not merely "borderline".
+   Scoped to this one selector, Dark only, so the E2C Light-theme --teal fix
+   (#0e7490, 5.27:1 here) and every other --teal consumer (WhatsApp button,
+   primary buttons, contact controls/icons) are completely untouched.
+   --teal-light resolves to --accent, the same token already used for the
+   Holiday Packages price (.hp-price), so this also keeps the two "big
+   serif price" treatments on the page visually consistent (7.48:1 in Dark). */
+:root[data-theme="dark"] .room-price-amount{color:var(--teal-light)}
 .room-price-label{font-size:var(--font-size-xs);color:var(--muted)}
 .room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .3s}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
@@ -959,15 +970,38 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   /* Cinematic hero content (eyebrow + H1 + display line + sub + 2 stacked
      CTAs) needs more vertical room than the old badge/title/subtitle-only
      layout this 500px box was originally sized for — sized generously here
-     and re-verified empirically per section 10/35 of this stage's testing. */
-  #home{height:640px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+     and re-verified empirically per section 10/35 of this stage's testing.
+     Phase 12B-E2D: +40px (640->680) -- the English secondary CTA label fits
+     on one line, but several locales' translated "Check Availability" wrap
+     to two lines at this width (measured worst case: Russian, 29px overlap
+     between the taller stacked-CTA block and the fixed-bottom .hero-scroll
+     hint below it), and .hero-scroll's own position doesn't reflow with CTA
+     height since it's absolutely positioned. The extra height is real slack
+     for every language, not a per-language hack -- CSS has no clean way to
+     scope by content language, and the box is flex-centered either way, so
+     English (which never needed the extra room) just gets a touch more
+     breathing space above/below the same centered content instead. */
+  #home{height:680px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{bottom:20px}
   .contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1.6fr 1fr 1fr;gap:32px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
   .g-item{aspect-ratio:4/3}
+  /* Phase 12B-E2D: the mobile rule below only ever hid the 3rd/4th .bb-field
+     (Guests/Rooms) -- it never accounted for the sibling .bb-btn, which kept
+     its fixed height:72px row + white-space:nowrap width, unshrinkable next
+     to the 2 remaining fields. English's "Check Availability" just barely
+     fit; longer translated labels (measured: German "Verfügbarkeit prüfen"
+     74px past the viewport edge) squeezed the Check-in/Check-out <input>s
+     until their date values visually truncated. Wrapping the button onto
+     its own full-width row below the two remaining fields, instead of
+     forcing it to share theirs, removes the squeeze for every language
+     rather than special-casing the ones long enough to trigger it today. */
+  .booking-bar-inner{flex-wrap:wrap;height:auto}
   .bb-field:nth-child(n+3){display:none}
+  .bb-field{flex:1 1 50%;padding:14px 20px}
+  .bb-btn{flex:1 1 100%;padding:16px 0}
   .bfp-search-grid{grid-template-columns:1fr 1fr;gap:12px}
   .bfp-search-grid .bfp-field:nth-child(n+3){display:none}
 }
@@ -1287,9 +1321,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <h2 class="section-title" style="color:var(--text)"><span data-i18n="packages.titlePrefix">Curated</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="packages.titleEmphasis">island escapes</em></h2>
       <p class="gh-sub" style="margin-top:16px" data-i18n="packages.subtitle">Daily breakfast and round-trip speedboat transfers included on every package. Pick the length that fits your trip, then add half or full board if you'd like.</p>
     </div>
-    <div class="hp-grid reveal" id="hp-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Loading packages…</div>
-    </div>
+    <div class="hp-grid reveal" id="hp-grid"><div class="hp-rail-wrap"><div class="hp-rail"><div class="hp-rail-item" id="package-island-explorer-getaway" data-pkg-id="island-explorer-getaway" data-pkg-name="Island Explorer Getaway" data-pkg-nights="4"><h3 class="hp-rail-name">Island Explorer Getaway</h3><div class="hp-rail-meta">$450 pp &middot; 4 nights</div><p class="hp-rail-hook">Four days of whale shark and manta ray snorkeling, right in the reef just off shore.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#island-explorer-getaway">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-reef-sunset-adventure" data-pkg-id="reef-sunset-adventure" data-pkg-name="Reef & Sunset Adventure" data-pkg-nights="5"><h3 class="hp-rail-name">Reef & Sunset Adventure</h3><div class="hp-rail-meta">$550 pp &middot; 5 nights</div><p class="hp-rail-hook">Snorkel with whale sharks by day, then watch the sky turn gold on a sunset cruise over the same reef.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#reef-sunset-adventure">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-island-serenity-escape" data-pkg-id="island-serenity-escape" data-pkg-name="Island Serenity Escape" data-pkg-nights="6"><h3 class="hp-rail-name">Island Serenity Escape</h3><div class="hp-rail-meta">$650 pp &middot; 6 nights</div><p class="hp-rail-hook">Six easy days of reef snorkeling, ocean sunsets, and a private picnic on your own stretch of sandbank.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#island-serenity-escape">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-maldives-dream-bliss" data-pkg-id="maldives-dream-bliss" data-pkg-name="Maldives Dream Bliss" data-pkg-nights="7"><h3 class="hp-rail-name">Maldives Dream Bliss</h3><div class="hp-rail-meta">$700 pp &middot; 7 nights</div><p class="hp-rail-hook">A full week built around whale sharks, manta rays, and a sandbank trip, finishing with a dolphin cruise at dusk.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#maldives-dream-bliss">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-ultimate-island-relaxation" data-pkg-id="ultimate-island-relaxation" data-pkg-name="Ultimate Island Relaxation" data-pkg-nights="8"><h3 class="hp-rail-name">Ultimate Island Relaxation</h3><div class="hp-rail-meta">$790 pp &middot; 8 nights</div><p class="hp-rail-hook">Eight days to slow all the way down. Reef snorkeling, a private sandbank picnic, and sunset cruises, with nowhere else to be.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-island-relaxation">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-grand-maldives-escape" data-pkg-id="grand-maldives-escape" data-pkg-name="Grand Maldives Escape" data-pkg-nights="9"><h3 class="hp-rail-name">Grand Maldives Escape</h3><div class="hp-rail-meta">$880 pp &middot; 9 nights</div><p class="hp-rail-hook">Nine days that fit in everything. Dolphins at dawn, mantas by day, and a private picnic on your own sandbank.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#grand-maldives-escape">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-ultimate-maldives-odyssey" data-pkg-id="ultimate-maldives-odyssey" data-pkg-name="Ultimate Maldives Odyssey" data-pkg-nights="10"><h3 class="hp-rail-name">Ultimate Maldives Odyssey</h3><div class="hp-rail-meta">$940 pp &middot; 10 nights</div><p class="hp-rail-hook">Ten full days with every signature experience Vilu Residence offers, from whale sharks to a private sandbank picnic, at our best per-night rate.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-maldives-odyssey">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-ultimate-resort-island-odyssey" data-pkg-id="ultimate-resort-island-odyssey" data-pkg-name="Ultimate Resort & Island Odyssey" data-pkg-nights="11"><h3 class="hp-rail-name">Ultimate Resort & Island Odyssey</h3><div class="hp-rail-meta">$1300 pp &middot; 11 nights</div><p class="hp-rail-hook">Eleven nights with everything included. Spend a full day exploring a neighboring resort, cast a line under lantern light on a night fishing trip, and share a private dinner on the beach, on top of every signature experience we offer.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-resort-island-odyssey">View Package &rarr;</a></div></div><div class="hp-rail-item" id="package-honeymoon-dream-escape" data-pkg-id="honeymoon-dream-escape" data-pkg-name="Honeymoon Dream Escape" data-pkg-nights="10"><h3 class="hp-rail-name">Honeymoon Dream Escape</h3><div class="hp-rail-meta">$1100 pp &middot; 10 nights</div><p class="hp-rail-hook">Ten nights designed for two. Watch the sun go down over a private beach dinner, head out on a lantern-lit night fishing trip, and enjoy every signature experience in between, all on your own stretch of ocean.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#honeymoon-dream-escape">View Package &rarr;</a></div></div></div></div></div>
     <p class="exp-links reveal">
       <a href="#experiences"><span data-i18n="packages.seeExperiences">See what each excursion actually involves</span></a>
     </p>

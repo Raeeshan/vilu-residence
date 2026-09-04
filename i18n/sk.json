@@ -21,7 +21,10 @@
       "scroll": "Posunúť",
       "statRooms": "Izby",
       "statService": "Starostlivosť o hostí",
-      "statMemories": "Spomienky"
+      "statMemories": "Spomienky",
+      "ctaPrimary": "Preskúmať dovolenkové balíky",
+      "ctaSecondary": "Skontrolovať dostupnosť",
+      "display": "Zažite Južný Ari."
     },
     "bookingBar": {
       "checkin": "Príchod",
@@ -110,7 +113,12 @@
       "unavailable": "Balíčky sú dočasne nedostupné — prosím",
       "contactUsLink": "kontaktujte nás",
       "directly": "priamo.",
-      "seeExperiences": "Pozrite si, čo skutočne zahŕňa každý výlet"
+      "seeExperiences": "Pozrite si, čo skutočne zahŕňa každý výlet",
+      "featuredTag": "Odporúčame",
+      "more": "ďalšie",
+      "moreLabel": "Ďalšie balíky",
+      "viewFullDetails": "Zobraziť všetky podrobnosti →",
+      "viewPackage": "Zobraziť balík"
     },
     "booking": {
       "tag": "Rezervácie",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "Overiť dostupnosť →",
       "orBrowseAllRooms": "prezrite si všetky izby",
       "directBookingsOnly": "Len priame rezervácie",
-      "or": "Alebo"
+      "or": "Alebo",
+      "labelCheckin": "Príchod",
+      "labelCheckout": "Odchod",
+      "labelGuests": "Hostia",
+      "labelRooms": "Izby",
+      "reframeEyebrow": "Chcete si ubytovanie zariadiť samostatne?",
+      "reframeHeadline": "Skontrolujte aktuálnu dostupnosť vo Vilu Residence."
     },
     "gettingHere": {
       "tag": "Doprava a logistika",
@@ -159,7 +173,10 @@
       "titlePrefix": "Prečítajte si naše",
       "titleEmphasis": "recenzie",
       "subtitle": "Vypočujte si priamo hostí, ktorí u nás vo Vilu Residence už boli ubytovaní.",
-      "readOnGoogle": "Prečítajte si naše recenzie na Google"
+      "readOnGoogle": "Prečítajte si naše recenzie na Google",
+      "assurance1": "Lepšie ceny pri priamej rezervácii u nás",
+      "assurance2": "Bezplatné zrušenie pri každej priamej rezervácii",
+      "assurance3": "TGST 17 % a ekologická daň sú súčasťou každej ceny"
     },
     "contact": {
       "tag": "Kontaktujte nás",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "Zásady ochrany osobných údajov",
       "cookiesTech": "Cookies a technológie"
+    },
+    "above": {
+      "eyebrow": "Nad Južným Ari",
+      "displayLine1": "Jeden ostrov.",
+      "displayLine2": "Celý oceán na objavovanie.",
+      "sub": "Južný Ari Atol: pokojné, slnkom prehriate pobrežie v srdci Maldiv — a domovská základňa Vilu na objavovanie všetkého navôkol."
+    },
+    "below": {
+      "eyebrow": "Pod Južným Ari",
+      "displayLine1": "Žraloky veľrybie.",
+      "displayLine2": "Raje manta.",
+      "displayLine3": "Korytnačky.",
+      "sub": "Južný Ari je známy žralokmi veľrybími, rajami manta, korytnačkami a bohatým morským životom. Pozorovanie voľne žijúcich zvierat nikdy nemožno zaručiť.",
+      "linkGuide": "Morský život Južného Ari →",
+      "linkManta": "Šnorchlovanie s rajami manta →",
+      "linkWhale": "Šnorchlovanie so žralokmi veľrybími →"
+    },
+    "closing": {
+      "contactHint": "Alebo ak si to chcete najprv prebrať,",
+      "cta": "Preskúmať dovolenkové balíky",
+      "ctaSecondary": "Skontrolovať dostupnosť",
+      "headline": "Váš príbeh na Južnom Ari sa začína tu."
+    },
+    "descent": {
+      "caption": "Zostup k útesu Južného Ari"
+    },
+    "homecoming": {
+      "cta": "Pozrieť izby",
+      "display": "A práve tu sa budete cítiť ako doma.",
+      "eyebrow": "Vilu Residence",
+      "personal": "Osobnejší pobyt.",
+      "rooms": "Šesť izieb."
+    },
+    "whatIsVilu": {
+      "body": "Plánovanie dovolenky, morské zážitky a miestne znalosti — a náš vlastný domov so šiestimi izbami v Maamigili, kedykoľvek potrebujete kde bývať.",
+      "eyebrow": "Kto sme",
+      "headline": "Vilu je vaša brána na Južný Ari.",
+      "point1": "Osobný prístup, nie recepcia — pobyt každého hosťa plánujeme individuálne.",
+      "point2": "Spoznávanie ostrovov a miestna kuchyňa sú súčasťou pobytu, nielen šnorchlovanie.",
+      "point3": "Butikové a komorné z princípu — šesť izieb, nie šesťdesiat."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "Naša priestranná izba Deluxe Family Room na prvom poschodí má vlastnú otvorenú terasu, klimatizáciu, pohodlnú manželskú posteľ, moderný vlastný kúpeľ a televízor s plochou obrazovkou. Navrhnutá pre rodiny alebo malé skupiny, ponúka dokonalé spojenie pohodlia a relaxu pre váš pobyt.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Platba iba v hotovosti (USD alebo EUR) pri príchode — online sa nevyberá žiadna záloha, platba vopred ani údaje o karte",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Bezplatné zrušenie priamych rezervácií — keďže platba sa nikdy nevyberá vopred, zrušenie nikdy nespôsobí žiadny poplatok",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Rezervácie cez OTA (Booking.com, Airbnb atď.) sa riadia storno politikou danej platformy, nie našou"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Rezervácie cez OTA (Booking.com, Airbnb atď.) sa riadia storno politikou danej platformy, nie našou",
+    "Garden view": "Výhľad do záhrady"
   }
 }

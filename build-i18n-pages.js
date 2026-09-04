@@ -275,6 +275,84 @@ function prerenderPackageGrid($, mainScriptSrc, dict, i18nEn, dynamicDict) {
   if (grid.length) grid.html(html);
 }
 
+// ── Homepage #hp-grid no-JS fallback (Phase 12B-E2D) ──
+//
+// The homepage's own renderHolidayPackages() (vilu-website.html) is NOT
+// reused here the way renderPackageGridHtml() reuses holiday-packages.html's
+// renderDynamicContent() above -- renderHolidayPackages() unconditionally
+// constructs `new IntersectionObserver(...)` and calls loadHpTerms() /
+// handleHolidayPackageDeepLink() with no defensive "typeof X === undefined"
+// guards (unlike pkgObserveCardViews(), which does guard), so running it in
+// a bare vm sandbox throws. Rather than risk a subtle bug in that
+// booking-adjacent function by adding guards to it just to satisfy a build
+// script, this is a small, independent, read-only renderer: same PACKAGES
+// array (imported from holiday-packages.html, never re-typed here -- exactly
+// the "don't duplicate commercial data" requirement), routed through the
+// same td()/t() translation helpers already used for every other prerender
+// in this file, emitting the SAME .hp-rail-item markup/classes
+// renderHolidayPackages() itself uses (already fully styled, zero new CSS).
+// It only ever fills the pre-JS placeholder; renderHolidayPackages() still
+// unconditionally overwrites #hp-grid's entire innerHTML once JS + Firestore
+// load, exactly as it does today -- this function's output is never visible
+// to a JS-enabled visitor for longer than first paint.
+// Extracts the `I18N.en` object literal straight out of the homepage's own
+// inline script by bracket-matching the raw text (same technique as
+// findDivInnerSpan() below), then evaluating ONLY that isolated object
+// literal expression -- never the surrounding script. Deliberately NOT
+// extractPageScript()'s vm.runInContext(fullScriptSrc, ...): that runs every
+// top-level statement in the homepage's (much larger, DOM-wiring) script,
+// which this narrow need doesn't require and shouldn't risk.
+function extractHomepageI18nEn() {
+  var srcHtml = fs.readFileSync('vilu-website.html', 'utf8');
+  var marker = 'var I18N = {';
+  var start = srcHtml.indexOf(marker);
+  if (start === -1) return null;
+  var i = start + marker.length - 1; // land on the opening '{'
+  var depth = 0, started = false;
+  for (; i < srcHtml.length; i++) {
+    var c = srcHtml[i];
+    if (c === '{') { depth++; started = true; }
+    else if (c === '}') { depth--; if (started && depth === 0) { i++; break; } }
+  }
+  var objText = srcHtml.slice(start + 'var I18N = '.length, i);
+  var sandbox = {};
+  vm.createContext(sandbox);
+  vm.runInContext('this.I18N_OBJ = ' + objText + ';', sandbox, { timeout: 5000 });
+  return sandbox.I18N_OBJ && sandbox.I18N_OBJ.en;
+}
+
+function extractHomepagePackagesSource() {
+  var srcHtml = fs.readFileSync('holiday-packages.html', 'utf8');
+  var $orig = cheerio.load(srcHtml, { decodeEntities: false });
+  var pkgScript = extractPageScript($orig);
+  if (!pkgScript) return null;
+  var sandbox = {};
+  vm.createContext(sandbox);
+  vm.runInContext(
+    pkgScript.src + '\nthis.PACKAGES_DATA = (typeof PACKAGES !== "undefined") ? PACKAGES : null;',
+    sandbox,
+    { timeout: 5000 }
+  );
+  return sandbox.PACKAGES_DATA;
+}
+
+function renderHomepagePackageFallback(packages, dict, i18nEn, dynamicDict) {
+  var t = makeT(dict, i18nEn);
+  var td = makeTd(dynamicDict);
+  var items = packages.map(function (p) {
+    var nightWord = p.nights > 1 ? t('packages.nights') : t('packages.night');
+    return '<div class="hp-rail-item" id="package-' + p.slug + '" data-pkg-id="' + p.slug + '" data-pkg-name="' + td(p.name).replace(/"/g, '&quot;') + '" data-pkg-nights="' + p.nights + '">'
+      + '<h3 class="hp-rail-name">' + td(p.name) + '</h3>'
+      + '<div class="hp-rail-meta">$' + p.price + ' ' + t('packages.pp') + ' &middot; ' + p.nights + ' ' + nightWord + '</div>'
+      + '<p class="hp-rail-hook">' + td(p.desc || '') + '</p>'
+      + '<div class="hp-rail-actions">'
+        + '<a class="hp-rail-view" href="holiday-packages.html#' + p.slug + '">' + t('packages.viewPackage') + ' &rarr;</a>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+  return '<div class="hp-rail-wrap"><div class="hp-rail">' + items + '</div></div>';
+}
+
 // ── Sitemap <lastmod> maintenance ──
 //
 // Derives lastmod from real git commit history of each URL's SOURCE files
@@ -670,6 +748,14 @@ function main() {
       if (!pkgScript) console.warn(`WARNING: ${pageDef.source} marked hasPackageGrid but no renderDynamicContent() script found`);
     }
 
+    let homepagePackages = null, homepageI18nEn = null;
+    if (pageDef.source === 'vilu-website.html') {
+      homepagePackages = extractHomepagePackagesSource();
+      homepageI18nEn = extractHomepageI18nEn();
+      if (!homepagePackages) console.warn(`WARNING: could not extract PACKAGES from holiday-packages.html for the #hp-grid no-JS fallback`);
+      if (!homepageI18nEn) console.warn(`WARNING: could not extract I18N.en from vilu-website.html for the #hp-grid no-JS fallback`);
+    }
+
     for (const lang of LANGS) {
       const dictPath = `i18n/${lang}.json`;
       if (!fs.existsSync(dictPath)) { console.warn(`SKIPPED ${pageDef.source}/${lang}: no ${dictPath}`); continue; }
@@ -681,6 +767,10 @@ function main() {
       if (pageDef.i18nMode === 'standalone') rewriteHomepageBackLinks($, lang);
       rewriteLegalLinks($, lang);
       if (pkgScript) prerenderPackageGrid($, pkgScript.src, dict.static, pkgScript.i18nEn, dict.dynamic);
+      if (pageDef.source === 'vilu-website.html' && homepagePackages && homepageI18nEn) {
+        const hpGrid = $('#hp-grid');
+        if (hpGrid.length) hpGrid.html(renderHomepagePackageFallback(homepagePackages, dict.static, homepageI18nEn, dict.dynamic));
+      }
       $('#cur-yr').text(CURRENT_YEAR);
       $('html').attr('lang', lang);
       $('html').attr('dir', RTL_LANGS[lang] ? 'rtl' : 'ltr');
@@ -778,6 +868,27 @@ function main() {
           const updatedSrcHtml = srcHtml.slice(0, span.innerStart) + renderedInner + srcHtml.slice(span.innerEnd);
           fs.writeFileSync(pageDef.source, updatedSrcHtml);
           console.log(`Pre-rendered #pkg-grid in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+        }
+      }
+    }
+
+    // Same surgical self-update, for the homepage's #hp-grid no-JS fallback
+    // (Phase 12B-E2D). English also gets nothing but a static "Loading
+    // packages…" placeholder pre-JS -- this closes that gap for / exactly
+    // as the block above already does for holiday-packages.html.
+    if (pageDef.source === 'vilu-website.html' && homepagePackages && homepageI18nEn) {
+      const renderedInner = renderHomepagePackageFallback(homepagePackages, homepageI18nEn, homepageI18nEn, undefined).trim();
+      const span = findDivInnerSpan(srcHtml, 'hp-grid');
+      if (!span) {
+        console.warn(`WARNING: could not locate a well-formed #hp-grid div in ${pageDef.source} — skipping English self-update, check manually`);
+      } else {
+        const currentInner = srcHtml.slice(span.innerStart, span.innerEnd);
+        if (currentInner.trim() === renderedInner) {
+          // Already in sync -- no write, no console noise on every build.
+        } else {
+          const updatedSrcHtml = srcHtml.slice(0, span.innerStart) + renderedInner + srcHtml.slice(span.innerEnd);
+          fs.writeFileSync(pageDef.source, updatedSrcHtml);
+          console.log(`Pre-rendered #hp-grid in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
         }
       }
     }

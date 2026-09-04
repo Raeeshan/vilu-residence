@@ -21,7 +21,10 @@
       "scroll": "Scorri",
       "statRooms": "Camere",
       "statService": "Cura degli Ospiti",
-      "statMemories": "Ricordi"
+      "statMemories": "Ricordi",
+      "ctaPrimary": "Scoprite i pacchetti vacanza",
+      "ctaSecondary": "Verificate la disponibilità",
+      "display": "Vivete Ari Sud."
     },
     "bookingBar": {
       "checkin": "Check-in",
@@ -110,7 +113,12 @@
       "unavailable": "I pacchetti non sono temporaneamente disponibili — si prega di",
       "contactUsLink": "contattarci",
       "directly": "direttamente.",
-      "seeExperiences": "Scopri cosa comporta davvero ogni escursione"
+      "seeExperiences": "Scopri cosa comporta davvero ogni escursione",
+      "featuredTag": "In evidenza",
+      "more": "altro",
+      "moreLabel": "Altri pacchetti",
+      "viewFullDetails": "Vedi tutti i dettagli →",
+      "viewPackage": "Vedi il pacchetto"
     },
     "booking": {
       "tag": "Prenotazioni",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "Verifica Disponibilità →",
       "orBrowseAllRooms": "sfoglia tutte le camere",
       "directBookingsOnly": "Solo prenotazioni dirette",
-      "or": "O"
+      "or": "O",
+      "labelCheckin": "Check-in",
+      "labelCheckout": "Check-out",
+      "labelGuests": "Ospiti",
+      "labelRooms": "Camere",
+      "reframeEyebrow": "Preferite organizzare l'alloggio separatamente?",
+      "reframeHeadline": "Verificate la disponibilità in tempo reale al Vilu Residence."
     },
     "gettingHere": {
       "tag": "Logistica di Viaggio",
@@ -159,7 +173,10 @@
       "titlePrefix": "Leggi le nostre",
       "titleEmphasis": "recensioni",
       "subtitle": "Ascolta direttamente gli ospiti che hanno soggiornato da noi a Vilu Residence.",
-      "readOnGoogle": "Leggi le Nostre Recensioni su Google"
+      "readOnGoogle": "Leggi le Nostre Recensioni su Google",
+      "assurance1": "Tariffe migliori prenotando direttamente con noi",
+      "assurance2": "Cancellazione gratuita su ogni prenotazione diretta",
+      "assurance3": "TGST 17% e tassa verde incluse in ogni tariffa"
     },
     "contact": {
       "tag": "Contattaci",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "Informativa sulla privacy",
       "cookiesTech": "Cookie &amp; Technology"
+    },
+    "above": {
+      "eyebrow": "Sopra Ari Sud",
+      "displayLine1": "Un'isola.",
+      "displayLine2": "Un intero oceano da scoprire.",
+      "sub": "L'Atollo di Ari Sud: una costa tranquilla e baciata dal sole nel cuore delle Maldive — la base di Vilu per esplorare tutto ciò che la circonda."
+    },
+    "below": {
+      "eyebrow": "Sotto Ari Sud",
+      "displayLine1": "Squali balena.",
+      "displayLine2": "Manta.",
+      "displayLine3": "Tartarughe.",
+      "sub": "Ari Sud è nota per squali balena, manta, tartarughe e una ricca vita marina. Gli avvistamenti di fauna selvatica non sono mai garantiti.",
+      "linkGuide": "La vita marina di Ari Sud →",
+      "linkManta": "Snorkeling con le manta →",
+      "linkWhale": "Snorkeling con gli squali balena →"
+    },
+    "closing": {
+      "contactHint": "Oppure, se preferite parlarne prima,",
+      "cta": "Scoprite i pacchetti vacanza",
+      "ctaSecondary": "Verificate la disponibilità",
+      "headline": "La vostra storia a Ari Sud inizia qui."
+    },
+    "descent": {
+      "caption": "Discesa verso la barriera corallina di Ari Sud"
+    },
+    "homecoming": {
+      "cta": "Guardate le camere",
+      "display": "Ed è qui che vi sentirete a casa.",
+      "eyebrow": "Vilu Residence",
+      "personal": "Un soggiorno più personale.",
+      "rooms": "Sei camere."
+    },
+    "whatIsVilu": {
+      "body": "Pianificazione della vacanza, esperienze marine e conoscenza del territorio — con la nostra casa di sei camere a Maamigili per quando vi serve un posto dove stare.",
+      "eyebrow": "Chi siamo",
+      "headline": "Vilu è la vostra porta d'accesso ad Ari Sud.",
+      "point1": "Attenzione personalizzata, non una reception — ogni ospite viene seguito individualmente.",
+      "point2": "Island hopping e cucina locale fanno parte del soggiorno, non solo lo snorkeling.",
+      "point3": "Boutique e intimo per scelta — sei camere, non sessanta."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "Situata al primo piano, la nostra spaziosa Deluxe Family Room dispone di una terrazza privata, aria condizionata, un comodo letto matrimoniale, un bagno privato moderno e una TV a schermo piatto. Pensata per famiglie o piccoli gruppi, offre il perfetto equilibrio tra comfort e relax per il vostro soggiorno.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Pagamento solo in contanti (USD o EUR) all'arrivo — nessun deposito, pagamento anticipato o dato della carta viene raccolto online",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Cancellazione gratuita per le prenotazioni dirette — poiché non viene mai richiesto un pagamento anticipato, la cancellazione non comporta mai alcun costo",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Le prenotazioni tramite OTA (Booking.com, Airbnb, ecc.) seguono la politica di cancellazione di quella piattaforma, non la nostra"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Le prenotazioni tramite OTA (Booking.com, Airbnb, ecc.) seguono la politica di cancellazione di quella piattaforma, non la nostra",
+    "Garden view": "Vista giardino"
   }
 }

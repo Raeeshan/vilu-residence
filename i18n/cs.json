@@ -21,7 +21,10 @@
       "scroll": "Posunout",
       "statRooms": "Pokoje",
       "statService": "Péče o hosty",
-      "statMemories": "Vzpomínky"
+      "statMemories": "Vzpomínky",
+      "ctaPrimary": "Prozkoumat balíčky dovolené",
+      "ctaSecondary": "Zkontrolovat dostupnost",
+      "display": "Zažijte Jižní Ari."
     },
     "bookingBar": {
       "checkin": "Příjezd",
@@ -110,7 +113,12 @@
       "unavailable": "Balíčky jsou dočasně nedostupné — prosím",
       "contactUsLink": "kontaktujte nás",
       "directly": "přímo.",
-      "seeExperiences": "Podívejte se, co skutečně zahrnuje každý výlet"
+      "seeExperiences": "Podívejte se, co skutečně zahrnuje každý výlet",
+      "featuredTag": "Doporučené",
+      "more": "další",
+      "moreLabel": "Další balíčky",
+      "viewFullDetails": "Zobrazit všechny podrobnosti →",
+      "viewPackage": "Zobrazit balíček"
     },
     "booking": {
       "tag": "Rezervace",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "Zkontrolovat dostupnost →",
       "orBrowseAllRooms": "prohlédnout všechny pokoje",
       "directBookingsOnly": "Pouze přímé rezervace",
-      "or": "Nebo"
+      "or": "Nebo",
+      "labelCheckin": "Příjezd",
+      "labelCheckout": "Odjezd",
+      "labelGuests": "Hosté",
+      "labelRooms": "Pokoje",
+      "reframeEyebrow": "Chcete si ubytování zařídit zvlášť?",
+      "reframeHeadline": "Zkontrolujte aktuální dostupnost ve Vilu Residence."
     },
     "gettingHere": {
       "tag": "Doprava",
@@ -159,7 +173,10 @@
       "titlePrefix": "Přečtěte si naše",
       "titleEmphasis": "recenze",
       "subtitle": "Poslechněte si přímo hosty, kteří u nás ve Vilu Residence pobývali.",
-      "readOnGoogle": "Přečtěte si naše recenze na Google"
+      "readOnGoogle": "Přečtěte si naše recenze na Google",
+      "assurance1": "Lepší ceny při přímé rezervaci u nás",
+      "assurance2": "Bezplatné zrušení u každé přímé rezervace",
+      "assurance3": "TGST 17 % a ekologická daň jsou zahrnuty v každé ceně"
     },
     "contact": {
       "tag": "Spojte se s námi",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "Zásady ochrany osobních údajů",
       "cookiesTech": "Cookies a technologie"
+    },
+    "above": {
+      "eyebrow": "Nad Jižním Ari",
+      "displayLine1": "Jeden ostrov.",
+      "displayLine2": "Celý oceán k objevování.",
+      "sub": "Jižní Ari Atol: pomalé, sluncem prohřáté pobřeží v srdci Malediv — a domovská základna Vilu pro objevování všeho kolem."
+    },
+    "below": {
+      "eyebrow": "Pod Jižním Ari",
+      "displayLine1": "Žraloci velrybí.",
+      "displayLine2": "Rejnoci manta.",
+      "displayLine3": "Želvy.",
+      "sub": "Jižní Ari je známý svými žraloky velrybími, rejnoky manta, želvami a bohatým mořským životem. Pozorování divoké přírody nikdy nelze zaručit.",
+      "linkGuide": "Mořský život Jižního Ari →",
+      "linkManta": "Šnorchlování s rejnoky manta →",
+      "linkWhale": "Šnorchlování se žraloky velrybími →"
+    },
+    "closing": {
+      "contactHint": "Nebo pokud si to chcete nejdřív probrat,",
+      "cta": "Prozkoumat balíčky dovolené",
+      "ctaSecondary": "Zkontrolovat dostupnost",
+      "headline": "Váš příběh na Jižním Ari začíná právě tady."
+    },
+    "descent": {
+      "caption": "Sestup k útesům Jižního Ari"
+    },
+    "homecoming": {
+      "cta": "Prohlédnout pokoje",
+      "display": "A tady se budete cítit jako doma.",
+      "eyebrow": "Vilu Residence",
+      "personal": "Osobnější pobyt.",
+      "rooms": "Šest pokojů."
+    },
+    "whatIsVilu": {
+      "body": "Plánování dovolené, mořské zážitky a místní znalosti — a náš vlastní šestipokojový domov v Maamigili, kdykoli potřebujete kde bydlet.",
+      "eyebrow": "Kdo jsme",
+      "headline": "Vilu je vaše brána na Jižní Ari.",
+      "point1": "Osobní přístup, ne recepce — pobyt každého hosta plánujeme individuálně.",
+      "point2": "Poznávání ostrovů a místní kuchyně jsou součástí pobytu, ne jen šnorchlování.",
+      "point3": "Butikové a komorní z principu — šest pokojů, ne šedesát."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "Náš prostorný pokoj Deluxe Family Room v prvním patře má vlastní otevřenou terasu, klimatizaci, pohodlnou manželskou postel, moderní vlastní koupelnu a televizi s plochou obrazovkou. Navržen pro rodiny nebo malé skupiny, nabízí dokonalé spojení pohodlí a relaxace pro váš pobyt.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Platba pouze v hotovosti (USD nebo EUR) při příjezdu — online se nevybírá žádná záloha, platba předem ani údaje o kartě",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Bezplatné zrušení přímých rezervací — jelikož platba není nikdy vybírána předem, zrušení nikdy nezpůsobí žádný poplatek",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Rezervace přes OTA (Booking.com, Airbnb atd.) se řídí storno politikou dané platformy, nikoli naší"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Rezervace přes OTA (Booking.com, Airbnb atd.) se řídí storno politikou dané platformy, nikoli naší",
+    "Garden view": "Výhled do zahrady"
   }
 }

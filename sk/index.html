@@ -539,6 +539,17 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .room-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--sand2);padding-top:16px}
 .room-price{font-family:'Cormorant Garamond',serif}
 .room-price-amount{font-size:var(--font-size-3xl);font-weight:600;color:var(--teal)}
+/* Phase 12B-E2D: --teal is a legacy alias onto --surface-secondary (see
+   theme.css). In Dark that alias happens to be a dark navy (#14294a) sitting
+   on a room-card body that is itself a near-identical dark navy (--card,
+   #0f2140) -- a genuine 1.10:1 contrast failure, not merely "borderline".
+   Scoped to this one selector, Dark only, so the E2C Light-theme --teal fix
+   (#0e7490, 5.27:1 here) and every other --teal consumer (WhatsApp button,
+   primary buttons, contact controls/icons) are completely untouched.
+   --teal-light resolves to --accent, the same token already used for the
+   Holiday Packages price (.hp-price), so this also keeps the two "big
+   serif price" treatments on the page visually consistent (7.48:1 in Dark). */
+:root[data-theme="dark"] .room-price-amount{color:var(--teal-light)}
 .room-price-label{font-size:var(--font-size-xs);color:var(--muted)}
 .room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .3s}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
@@ -957,15 +968,38 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   /* Cinematic hero content (eyebrow + H1 + display line + sub + 2 stacked
      CTAs) needs more vertical room than the old badge/title/subtitle-only
      layout this 500px box was originally sized for — sized generously here
-     and re-verified empirically per section 10/35 of this stage's testing. */
-  #home{height:640px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+     and re-verified empirically per section 10/35 of this stage's testing.
+     Phase 12B-E2D: +40px (640->680) -- the English secondary CTA label fits
+     on one line, but several locales' translated "Check Availability" wrap
+     to two lines at this width (measured worst case: Russian, 29px overlap
+     between the taller stacked-CTA block and the fixed-bottom .hero-scroll
+     hint below it), and .hero-scroll's own position doesn't reflow with CTA
+     height since it's absolutely positioned. The extra height is real slack
+     for every language, not a per-language hack -- CSS has no clean way to
+     scope by content language, and the box is flex-centered either way, so
+     English (which never needed the extra room) just gets a touch more
+     breathing space above/below the same centered content instead. */
+  #home{height:680px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{bottom:20px}
   .contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1.6fr 1fr 1fr;gap:32px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
   .g-item{aspect-ratio:4/3}
+  /* Phase 12B-E2D: the mobile rule below only ever hid the 3rd/4th .bb-field
+     (Guests/Rooms) -- it never accounted for the sibling .bb-btn, which kept
+     its fixed height:72px row + white-space:nowrap width, unshrinkable next
+     to the 2 remaining fields. English's "Check Availability" just barely
+     fit; longer translated labels (measured: German "Verfügbarkeit prüfen"
+     74px past the viewport edge) squeezed the Check-in/Check-out <input>s
+     until their date values visually truncated. Wrapping the button onto
+     its own full-width row below the two remaining fields, instead of
+     forcing it to share theirs, removes the squeeze for every language
+     rather than special-casing the ones long enough to trigger it today. */
+  .booking-bar-inner{flex-wrap:wrap;height:auto}
   .bb-field:nth-child(n+3){display:none}
+  .bb-field{flex:1 1 50%;padding:14px 20px}
+  .bb-btn{flex:1 1 100%;padding:16px 0}
   .bfp-search-grid{grid-template-columns:1fr 1fr;gap:12px}
   .bfp-search-grid .bfp-field:nth-child(n+3){display:none}
 }
@@ -1246,11 +1280,11 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <div class="vc-hero-content">
     <div class="vc-eyebrow" data-i18n="hero.badge">Južný atol Ari · Maldivy</div>
     <h1 class="hero-title vc-hero-title"><span data-i18n="hero.titlePrefix">Vilu</span><br><em data-i18n="hero.titleEmphasis">Residence</em></h1>
-    <p class="vc-display" data-i18n="hero.display">Experience South Ari.</p>
+    <p class="vc-display" data-i18n="hero.display">Zažite Južný Ari.</p>
     <p class="vc-hero-sub" data-i18n="hero.subtitle">Vrelý a pohostinný penzión v srdci Maldiv</p>
     <div class="vc-hero-ctas">
-      <a href="#holiday-packages" class="btn-primary" data-i18n="hero.ctaPrimary" onclick="trackEvent('cta_click',{source_context:'hero_primary'})">Explore Holiday Packages</a>
-      <button type="button" class="vc-cta-secondary" data-i18n="hero.ctaSecondary" onclick="trackEvent('availability_click',{source_context:'hero_secondary'});openBookingPage()">Check Availability</button>
+      <a href="#holiday-packages" class="btn-primary" data-i18n="hero.ctaPrimary" onclick="trackEvent('cta_click',{source_context:'hero_primary'})">Preskúmať dovolenkové balíky</a>
+      <button type="button" class="vc-cta-secondary" data-i18n="hero.ctaSecondary" onclick="trackEvent('availability_click',{source_context:'hero_secondary'});openBookingPage()">Skontrolovať dostupnosť</button>
     </div>
   </div>
   <div class="hero-scroll" aria-hidden="true">
@@ -1266,13 +1300,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      repeating its photo/"six rooms" moment, which Homecoming now owns. ══ -->
 <section id="what-is-vilu">
   <div class="section-inner" style="max-width:760px">
-    <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Who We Are</div>
-    <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu is your way into South Ari.</h2>
-    <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Holiday planning, marine experiences and local knowledge — with our own six-room home in Maamigili when you need somewhere to stay.</p>
+    <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Kto sme</div>
+    <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu je vaša brána na Južný Ari.</h2>
+    <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Plánovanie dovolenky, morské zážitky a miestne znalosti — a náš vlastný domov so šiestimi izbami v Maamigili, kedykoľvek potrebujete kde bývať.</p>
     <ul class="wiv-points">
-      <li data-i18n="whatIsVilu.point1">Personalised attention, not a front desk — every guest is planned for individually.</li>
-      <li data-i18n="whatIsVilu.point2">Island hopping and local cuisine woven into your stay, not just snorkeling.</li>
-      <li data-i18n="whatIsVilu.point3">Boutique and intimate by design — six rooms, not sixty.</li>
+      <li data-i18n="whatIsVilu.point1">Osobný prístup, nie recepcia — pobyt každého hosťa plánujeme individuálne.</li>
+      <li data-i18n="whatIsVilu.point2">Spoznávanie ostrovov a miestna kuchyňa sú súčasťou pobytu, nielen šnorchlovanie.</li>
+      <li data-i18n="whatIsVilu.point3">Butikové a komorné z princípu — šesť izieb, nie šesťdesiat.</li>
     </ul>
   </div>
 </section>
@@ -1285,9 +1319,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <h2 class="section-title" style="color:var(--text)"><span data-i18n="packages.titlePrefix">Starostlivo vybrané</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="packages.titleEmphasis">ostrovné pobyty</em></h2>
       <p class="gh-sub" style="margin-top:16px" data-i18n="packages.subtitle">Denné raňajky a spiatočný transfer rýchloloďou sú súčasťou každého balíčka. Vyberte si dĺžku pobytu, ktorá vám vyhovuje, a podľa želania si pridajte polpenziu alebo plnú penziu.</p>
     </div>
-    <div class="hp-grid reveal" id="hp-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Načítavajú sa balíčky…</div>
-    </div>
+    <div class="hp-grid reveal" id="hp-grid"><div class="hp-rail-wrap"><div class="hp-rail"><div class="hp-rail-item" id="package-island-explorer-getaway" data-pkg-id="island-explorer-getaway" data-pkg-name="Dobrodružný ostrovný pobyt" data-pkg-nights="4"><h3 class="hp-rail-name">Dobrodružný ostrovný pobyt</h3><div class="hp-rail-meta">$450 /os. · 4 nocí</div><p class="hp-rail-hook">Štyri dni šnorchlovania so žralokmi veľrybími a mantami priamo pri útese neďaleko pobrežia.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#island-explorer-getaway">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-reef-sunset-adventure" data-pkg-id="reef-sunset-adventure" data-pkg-name="Dobrodružstvo útesu a západu slnka" data-pkg-nights="5"><h3 class="hp-rail-name">Dobrodružstvo útesu a západu slnka</h3><div class="hp-rail-meta">$550 /os. · 5 nocí</div><p class="hp-rail-hook">Šnorchlujte so žralokmi veľrybími cez deň a potom sledujte, ako sa obloha sfarbuje do zlata počas plavby za západom slnka nad tým istým útesom.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#reef-sunset-adventure">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-island-serenity-escape" data-pkg-id="island-serenity-escape" data-pkg-name="Pokojný ostrovný útek" data-pkg-nights="6"><h3 class="hp-rail-name">Pokojný ostrovný útek</h3><div class="hp-rail-meta">$650 /os. · 6 nocí</div><p class="hp-rail-hook">Šesť pokojných dní šnorchlovania pri útese, oceánskych západov slnka a súkromného pikniku na vlastnej pieskovej lavici.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#island-serenity-escape">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-maldives-dream-bliss" data-pkg-id="maldives-dream-bliss" data-pkg-name="Vysnívaná maldivská blaženosť" data-pkg-nights="7"><h3 class="hp-rail-name">Vysnívaná maldivská blaženosť</h3><div class="hp-rail-meta">$700 /os. · 7 nocí</div><p class="hp-rail-hook">Celý týždeň postavený okolo žralokov veľrybích, mánt a výletu na pieskovú lavicu, zakončený plavbou za delfínmi za súmraku.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#maldives-dream-bliss">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-ultimate-island-relaxation" data-pkg-id="ultimate-island-relaxation" data-pkg-name="Dokonalý ostrovný oddych" data-pkg-nights="8"><h3 class="hp-rail-name">Dokonalý ostrovný oddych</h3><div class="hp-rail-meta">$790 /os. · 8 nocí</div><p class="hp-rail-hook">Osem dní na to, aby ste si konečne oddýchli. Šnorchlovanie pri útese, súkromný piknik na pieskovej lavici a plavby za západom slnka — bez potreby byť kdekoľvek inde.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-island-relaxation">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-grand-maldives-escape" data-pkg-id="grand-maldives-escape" data-pkg-name="Veľkolepý útek na Maldivy" data-pkg-nights="9"><h3 class="hp-rail-name">Veľkolepý útek na Maldivy</h3><div class="hp-rail-meta">$880 /os. · 9 nocí</div><p class="hp-rail-hook">Deväť dní, do ktorých sa zmestí všetko. Delfíny za úsvitu, manty cez deň a súkromný piknik na vlastnej pieskovej lavici.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#grand-maldives-escape">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-ultimate-maldives-odyssey" data-pkg-id="ultimate-maldives-odyssey" data-pkg-name="Dokonalá maldivská odysea" data-pkg-nights="10"><h3 class="hp-rail-name">Dokonalá maldivská odysea</h3><div class="hp-rail-meta">$940 /os. · 10 nocí</div><p class="hp-rail-hook">Desať celých dní so všetkými charakteristickými zážitkami, ktoré Vilu Residence ponúka, od žralokov veľrybích až po súkromný piknik na pieskovej lavici, za našu najvýhodnejšiu cenu za noc.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-maldives-odyssey">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-ultimate-resort-island-odyssey" data-pkg-id="ultimate-resort-island-odyssey" data-pkg-name="Dokonalá odysea rezortu a ostrova" data-pkg-nights="11"><h3 class="hp-rail-name">Dokonalá odysea rezortu a ostrova</h3><div class="hp-rail-meta">$1300 /os. · 11 nocí</div><p class="hp-rail-hook">Jedenásť nocí so všetkým zahrnutým. Strávte celý deň objavovaním susedného rezortu, zahoďte udicu pri svetle lampášov počas nočného rybolovu a vychutnajte si súkromnú večeru na pláži — a k tomu všetky naše charakteristické zážitky.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-resort-island-odyssey">Zobraziť balík →</a></div></div><div class="hp-rail-item" id="package-honeymoon-dream-escape" data-pkg-id="honeymoon-dream-escape" data-pkg-name="Vysnívaný útek pre novomanželov" data-pkg-nights="10"><h3 class="hp-rail-name">Vysnívaný útek pre novomanželov</h3><div class="hp-rail-meta">$1100 /os. · 10 nocí</div><p class="hp-rail-hook">Desať nocí stvorených pre dvoch. Sledujte západ slnka pri súkromnej večeri na pláži, vydajte sa na nočný rybolov pri svetle lampášov a užite si medzitým všetky naše charakteristické zážitky — všetko na vlastnom kúsku oceánu.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#honeymoon-dream-escape">Zobraziť balík →</a></div></div></div></div></div>
     <p class="exp-links reveal">
       <a href="#experiences"><span data-i18n="packages.seeExperiences">Pozrite si, čo skutočne zahŕňa každý výlet</span></a>
     </p>
@@ -1306,14 +1338,14 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div class="vc-scrim-soft"></div>
   </div>
   <div class="vc-story-inner">
-    <div class="vc-eyebrow" data-i18n="above.eyebrow">Above South Ari</div>
-    <h2 class="vc-heading vc-heading-lg"><span data-i18n="above.displayLine1">One island.</span><br><span data-i18n="above.displayLine2">A whole ocean to discover.</span></h2>
-    <p class="vc-story-sub" data-i18n="above.sub">South Ari Atoll: a slow, sun-warmed shoreline in the heart of the Maldives — and Vilu's home base for exploring everything around it.</p>
+    <div class="vc-eyebrow" data-i18n="above.eyebrow">Nad Južným Ari</div>
+    <h2 class="vc-heading vc-heading-lg"><span data-i18n="above.displayLine1">Jeden ostrov.</span><br><span data-i18n="above.displayLine2">Celý oceán na objavovanie.</span></h2>
+    <p class="vc-story-sub" data-i18n="above.sub">Južný Ari Atol: pokojné, slnkom prehriate pobrežie v srdci Maldiv — a domovská základňa Vilu na objavovanie všetkého navôkol.</p>
   </div>
 </section>
 
 <section id="vc-descent" class="vc-descent" aria-hidden="true">
-  <div class="vc-descent-caption" id="vc-descent-caption" data-i18n="descent.caption">Descending toward South Ari's reef</div>
+  <div class="vc-descent-caption" id="vc-descent-caption" data-i18n="descent.caption">Zostup k útesu Južného Ari</div>
 </section>
 
 <section id="vc-below" class="vc-story vc-below">
@@ -1328,13 +1360,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div class="vc-whale"><img src="/images/motion/whale-shark.webp" alt="" loading="lazy"></div>
   </div>
   <div class="vc-story-inner vc-below-text">
-    <div class="vc-eyebrow" data-i18n="below.eyebrow">Below South Ari</div>
-    <h2 class="vc-heading vc-heading-sm vc-heading-light"><span data-i18n="below.displayLine1">Whale sharks.</span><br><span data-i18n="below.displayLine2">Manta rays.</span><br><span data-i18n="below.displayLine3">Turtles.</span></h2>
-    <p class="vc-story-sub" data-i18n="below.sub">South Ari is known for whale sharks, manta rays, turtles and rich marine life. Wildlife sightings are never guaranteed.</p>
+    <div class="vc-eyebrow" data-i18n="below.eyebrow">Pod Južným Ari</div>
+    <h2 class="vc-heading vc-heading-sm vc-heading-light"><span data-i18n="below.displayLine1">Žraloky veľrybie.</span><br><span data-i18n="below.displayLine2">Raje manta.</span><br><span data-i18n="below.displayLine3">Korytnačky.</span></h2>
+    <p class="vc-story-sub" data-i18n="below.sub">Južný Ari je známy žralokmi veľrybími, rajami manta, korytnačkami a bohatým morským životom. Pozorovanie voľne žijúcich zvierat nikdy nemožno zaručiť.</p>
     <div class="vc-below-links">
-      <a href="whale-shark-snorkeling.html" data-i18n="below.linkWhale">Whale Shark Snorkeling →</a>
-      <a href="manta-ray-snorkeling.html" data-i18n="below.linkManta">Manta Ray Snorkeling →</a>
-      <a href="south-ari-atoll-guide.html" data-i18n="below.linkGuide">South Ari marine life →</a>
+      <a href="whale-shark-snorkeling.html" data-i18n="below.linkWhale">Šnorchlovanie so žralokmi veľrybími →</a>
+      <a href="manta-ray-snorkeling.html" data-i18n="below.linkManta">Šnorchlovanie s rajami manta →</a>
+      <a href="south-ari-atoll-guide.html" data-i18n="below.linkGuide">Morský život Južného Ari →</a>
     </div>
   </div>
 </section>
@@ -1350,9 +1382,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
   <div class="vc-story-inner vc-homecoming-text">
     <div class="vc-eyebrow" data-i18n="homecoming.eyebrow">Vilu Residence</div>
-    <h2 class="vc-heading vc-heading-sm" data-i18n="homecoming.display">And this is where you'll call home.</h2>
-    <p class="vc-story-sub vc-homecoming-fact"><span data-i18n="homecoming.rooms">Six rooms.</span> <span data-i18n="homecoming.personal">A more personal stay.</span></p>
-    <a href="#rooms" class="btn-primary" data-i18n="homecoming.cta" onclick="trackEvent('cta_click',{source_context:'homecoming'})">See the Rooms</a>
+    <h2 class="vc-heading vc-heading-sm" data-i18n="homecoming.display">A práve tu sa budete cítiť ako doma.</h2>
+    <p class="vc-story-sub vc-homecoming-fact"><span data-i18n="homecoming.rooms">Šesť izieb.</span> <span data-i18n="homecoming.personal">Osobnejší pobyt.</span></p>
+    <a href="#rooms" class="btn-primary" data-i18n="homecoming.cta" onclick="trackEvent('cta_click',{source_context:'homecoming'})">Pozrieť izby</a>
   </div>
 </section>
 
@@ -1503,12 +1535,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      rather than a two-column marketing split. ══ -->
 <section id="booking">
   <div class="section-inner" style="max-width:820px">
-    <div class="la-eyebrow" data-i18n="booking.reframeEyebrow">Prefer to arrange accommodation separately?</div>
-    <h2 class="section-title" data-i18n="booking.reframeHeadline">Check live availability at Vilu Residence.</h2>
+    <div class="la-eyebrow" data-i18n="booking.reframeEyebrow">Chcete si ubytovanie zariadiť samostatne?</div>
+    <h2 class="section-title" data-i18n="booking.reframeHeadline">Skontrolujte aktuálnu dostupnosť vo Vilu Residence.</h2>
     <div class="la-widget">
       <div class="la-row">
-        <div class="la-field"><label for="bwf-ci" data-i18n="booking.labelCheckin">Check-in</label><input type="text" class="bwf-input vilu-date-input" id="bwf-ci"></div>
-        <div class="la-field"><label for="bwf-co" data-i18n="booking.labelCheckout">Check-out</label><input type="text" class="bwf-input vilu-date-input" id="bwf-co"></div>
+        <div class="la-field"><label for="bwf-ci" data-i18n="booking.labelCheckin">Príchod</label><input type="text" class="bwf-input vilu-date-input" id="bwf-ci"></div>
+        <div class="la-field"><label for="bwf-co" data-i18n="booking.labelCheckout">Odchod</label><input type="text" class="bwf-input vilu-date-input" id="bwf-co"></div>
         <div class="la-field la-field-sm"><label for="bwf-ad" data-i18n="booking.adults">Dospelí</label>
           <select class="bwf-select" id="bwf-ad"><option value="1" data-i18n="booking.adult1">1 dospelý</option><option value="2" selected="" data-i18n="booking.adult2">2 dospelí</option><option value="3" data-i18n="booking.adult3">3 dospelí</option></select>
         </div>
@@ -1663,9 +1695,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <i class="ti ti-brand-google" aria-hidden="true"></i> <span data-i18n="reviews.readOnGoogle">Prečítajte si naše recenzie na Google</span>
     </a>
     <div class="tr-assurances">
-      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Better rates when you book direct with us</span></div>
-      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Free cancellation on every direct booking</span></div>
-      <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17% &amp; Green Tax included in every rate</span></div>
+      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Lepšie ceny pri priamej rezervácii u nás</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Bezplatné zrušenie pri každej priamej rezervácii</span></div>
+      <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17 % a ekologická daň sú súčasťou každej ceny</span></div>
     </div>
   </div>
 </section>
@@ -1736,12 +1768,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      repeat the hero composition. Max 2 CTAs. ══ -->
 <section id="closing">
   <div class="section-inner" style="text-align:center;max-width:680px">
-    <h2 class="cc-headline" data-i18n="closing.headline">Your South Ari story starts here.</h2>
+    <h2 class="cc-headline" data-i18n="closing.headline">Váš príbeh na Južnom Ari sa začína tu.</h2>
     <div class="cc-ctas">
-      <a href="#holiday-packages" class="btn-primary" data-i18n="closing.cta" onclick="trackEvent('cta_click',{source_context:'closing'})">Explore Holiday Packages</a>
-      <button type="button" class="btn-outline" onclick="trackEvent('availability_click',{source_context:'closing'});openBookingPage()" data-i18n="closing.ctaSecondary">Check Availability</button>
+      <a href="#holiday-packages" class="btn-primary" data-i18n="closing.cta" onclick="trackEvent('cta_click',{source_context:'closing'})">Preskúmať dovolenkové balíky</a>
+      <button type="button" class="btn-outline" onclick="trackEvent('availability_click',{source_context:'closing'});openBookingPage()" data-i18n="closing.ctaSecondary">Skontrolovať dostupnosť</button>
     </div>
-    <p class="cc-contact-hint"><span data-i18n="closing.contactHint">Or if you'd rather talk it through first,</span> <a href="#contact" onclick="trackEvent('contact_click',{contact_method:'section_link',cta_location:'closing'})" data-i18n="contact.contactUs">Kontaktujte Vilu Residence</a></p>
+    <p class="cc-contact-hint"><span data-i18n="closing.contactHint">Alebo ak si to chcete najprv prebrať,</span> <a href="#contact" onclick="trackEvent('contact_click',{contact_method:'section_link',cta_location:'closing'})" data-i18n="contact.contactUs">Kontaktujte Vilu Residence</a></p>
   </div>
 </section>
 

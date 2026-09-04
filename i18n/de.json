@@ -21,7 +21,10 @@
       "scroll": "Scrollen",
       "statRooms": "Zimmer",
       "statService": "Gästebetreuung",
-      "statMemories": "Erinnerungen"
+      "statMemories": "Erinnerungen",
+      "ctaPrimary": "Urlaubspakete entdecken",
+      "ctaSecondary": "Verfügbarkeit prüfen",
+      "display": "Erleben Sie Süd-Ari."
     },
     "bookingBar": {
       "checkin": "Check-in",
@@ -110,7 +113,12 @@
       "unavailable": "Pakete sind vorübergehend nicht verfügbar — bitte",
       "contactUsLink": "kontaktieren Sie uns",
       "directly": "direkt.",
-      "seeExperiences": "Sehen Sie, was jeder Ausflug tatsächlich beinhaltet"
+      "seeExperiences": "Sehen Sie, was jeder Ausflug tatsächlich beinhaltet",
+      "featuredTag": "Empfohlen",
+      "more": "weitere",
+      "moreLabel": "Weitere Pakete",
+      "viewFullDetails": "Alle Details ansehen →",
+      "viewPackage": "Paket ansehen"
     },
     "booking": {
       "tag": "Reservierungen",
@@ -136,7 +144,13 @@
       "checkAvailabilityArrow": "Verfügbarkeit prüfen →",
       "orBrowseAllRooms": "alle Zimmer durchsehen",
       "directBookingsOnly": "Nur Direktbuchungen",
-      "or": "Oder"
+      "or": "Oder",
+      "labelCheckin": "Anreise",
+      "labelCheckout": "Abreise",
+      "labelGuests": "Gäste",
+      "labelRooms": "Zimmer",
+      "reframeEyebrow": "Möchten Sie die Unterkunft separat organisieren?",
+      "reframeHeadline": "Prüfen Sie die aktuelle Verfügbarkeit im Vilu Residence."
     },
     "gettingHere": {
       "tag": "Anreiseinformationen",
@@ -159,7 +173,10 @@
       "titlePrefix": "Lesen Sie unsere",
       "titleEmphasis": "Bewertungen",
       "subtitle": "Hören Sie direkt von Gästen, die bei Vilu Residence übernachtet haben.",
-      "readOnGoogle": "Unsere Bewertungen auf Google lesen"
+      "readOnGoogle": "Unsere Bewertungen auf Google lesen",
+      "assurance1": "Bessere Preise bei Direktbuchung",
+      "assurance2": "Kostenlose Stornierung bei jeder Direktbuchung",
+      "assurance3": "TGST 17 % und Umweltsteuer in jedem Preis inbegriffen"
     },
     "contact": {
       "tag": "Kontaktieren Sie uns",
@@ -1547,6 +1564,46 @@
     "footerLegal": {
       "privacyPolicy": "Datenschutzerklärung",
       "cookiesTech": "Cookies &amp; Technik"
+    },
+    "above": {
+      "eyebrow": "Über Süd-Ari",
+      "displayLine1": "Eine Insel.",
+      "displayLine2": "Ein ganzer Ozean zu entdecken.",
+      "sub": "Süd-Ari-Atoll: eine ruhige, sonnenwarme Küste im Herzen der Malediven — und Vilus Ausgangspunkt, um alles darum herum zu entdecken."
+    },
+    "below": {
+      "eyebrow": "Unter Süd-Ari",
+      "displayLine1": "Walhaie.",
+      "displayLine2": "Mantarochen.",
+      "displayLine3": "Schildkröten.",
+      "sub": "Süd-Ari ist bekannt für Walhaie, Mantarochen, Schildkröten und reiche Meeresfauna. Tierbeobachtungen können nie garantiert werden.",
+      "linkGuide": "Meeresleben in Süd-Ari →",
+      "linkManta": "Schnorcheln mit Mantarochen →",
+      "linkWhale": "Schnorcheln mit Walhaien →"
+    },
+    "closing": {
+      "contactHint": "Oder wenn Sie lieber erst darüber sprechen möchten,",
+      "cta": "Urlaubspakete entdecken",
+      "ctaSecondary": "Verfügbarkeit prüfen",
+      "headline": "Ihre Geschichte in Süd-Ari beginnt hier."
+    },
+    "descent": {
+      "caption": "Abstieg zum Riff von Süd-Ari"
+    },
+    "homecoming": {
+      "cta": "Zimmer ansehen",
+      "display": "Und genau hier werden Sie sich zu Hause fühlen.",
+      "eyebrow": "Vilu Residence",
+      "personal": "Ein persönlicherer Aufenthalt.",
+      "rooms": "Sechs Zimmer."
+    },
+    "whatIsVilu": {
+      "body": "Urlaubsplanung, Erlebnisse im Meer und lokales Wissen — mit unserem eigenen Sechs-Zimmer-Zuhause in Maamigili, falls Sie einen Ort zum Übernachten brauchen.",
+      "eyebrow": "Wer wir sind",
+      "headline": "Vilu ist Ihr Zugang zu Süd-Ari.",
+      "point1": "Persönliche Betreuung statt Rezeption — jeder Gast wird individuell geplant.",
+      "point2": "Inselhopping und lokale Küche sind Teil Ihres Aufenthalts, nicht nur Schnorcheln.",
+      "point3": "Boutique und intim by design — sechs Zimmer, nicht sechzig."
     }
   },
   "dynamic": {
@@ -1663,6 +1720,7 @@
     "Located on the first floor, our spacious Deluxe Family Room features a private open deck, air conditioning, a comfortable double bed, a modern private bathroom, and a flat-screen TV. Designed for families or small groups, it offers the perfect blend of comfort and relaxation for your stay.": "Unser geräumiges Deluxe Family Room im ersten Stock verfügt über eine private offene Terrasse, Klimaanlage, ein bequemes Doppelbett, ein modernes eigenes Bad und einen Flachbildfernseher. Für Familien oder kleine Gruppen konzipiert, bietet es die perfekte Mischung aus Komfort und Entspannung für Ihren Aufenthalt.",
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Zahlung nur bar (USD oder EUR) bei Ankunft — keine Anzahlung, Vorauszahlung oder Kartendaten werden online erhoben",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Kostenlose Stornierung für Direktbuchungen — da niemals im Voraus bezahlt wird, entstehen bei einer Stornierung keine Kosten",
-    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA-Buchungen (Booking.com, Airbnb usw.) unterliegen der Stornierungsbedingung der jeweiligen Plattform, nicht unserer"
+    "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA-Buchungen (Booking.com, Airbnb usw.) unterliegen der Stornierungsbedingung der jeweiligen Plattform, nicht unserer",
+    "Garden view": "Gartenblick"
   }
 }

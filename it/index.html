@@ -539,6 +539,17 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .room-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--sand2);padding-top:16px}
 .room-price{font-family:'Cormorant Garamond',serif}
 .room-price-amount{font-size:var(--font-size-3xl);font-weight:600;color:var(--teal)}
+/* Phase 12B-E2D: --teal is a legacy alias onto --surface-secondary (see
+   theme.css). In Dark that alias happens to be a dark navy (#14294a) sitting
+   on a room-card body that is itself a near-identical dark navy (--card,
+   #0f2140) -- a genuine 1.10:1 contrast failure, not merely "borderline".
+   Scoped to this one selector, Dark only, so the E2C Light-theme --teal fix
+   (#0e7490, 5.27:1 here) and every other --teal consumer (WhatsApp button,
+   primary buttons, contact controls/icons) are completely untouched.
+   --teal-light resolves to --accent, the same token already used for the
+   Holiday Packages price (.hp-price), so this also keeps the two "big
+   serif price" treatments on the page visually consistent (7.48:1 in Dark). */
+:root[data-theme="dark"] .room-price-amount{color:var(--teal-light)}
 .room-price-label{font-size:var(--font-size-xs);color:var(--muted)}
 .room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .3s}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
@@ -957,15 +968,38 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   /* Cinematic hero content (eyebrow + H1 + display line + sub + 2 stacked
      CTAs) needs more vertical room than the old badge/title/subtitle-only
      layout this 500px box was originally sized for — sized generously here
-     and re-verified empirically per section 10/35 of this stage's testing. */
-  #home{height:640px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+     and re-verified empirically per section 10/35 of this stage's testing.
+     Phase 12B-E2D: +40px (640->680) -- the English secondary CTA label fits
+     on one line, but several locales' translated "Check Availability" wrap
+     to two lines at this width (measured worst case: Russian, 29px overlap
+     between the taller stacked-CTA block and the fixed-bottom .hero-scroll
+     hint below it), and .hero-scroll's own position doesn't reflow with CTA
+     height since it's absolutely positioned. The extra height is real slack
+     for every language, not a per-language hack -- CSS has no clean way to
+     scope by content language, and the box is flex-centered either way, so
+     English (which never needed the extra room) just gets a touch more
+     breathing space above/below the same centered content instead. */
+  #home{height:680px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{bottom:20px}
   .contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1.6fr 1fr 1fr;gap:32px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
   .g-item{aspect-ratio:4/3}
+  /* Phase 12B-E2D: the mobile rule below only ever hid the 3rd/4th .bb-field
+     (Guests/Rooms) -- it never accounted for the sibling .bb-btn, which kept
+     its fixed height:72px row + white-space:nowrap width, unshrinkable next
+     to the 2 remaining fields. English's "Check Availability" just barely
+     fit; longer translated labels (measured: German "Verfügbarkeit prüfen"
+     74px past the viewport edge) squeezed the Check-in/Check-out <input>s
+     until their date values visually truncated. Wrapping the button onto
+     its own full-width row below the two remaining fields, instead of
+     forcing it to share theirs, removes the squeeze for every language
+     rather than special-casing the ones long enough to trigger it today. */
+  .booking-bar-inner{flex-wrap:wrap;height:auto}
   .bb-field:nth-child(n+3){display:none}
+  .bb-field{flex:1 1 50%;padding:14px 20px}
+  .bb-btn{flex:1 1 100%;padding:16px 0}
   .bfp-search-grid{grid-template-columns:1fr 1fr;gap:12px}
   .bfp-search-grid .bfp-field:nth-child(n+3){display:none}
 }
@@ -1246,11 +1280,11 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <div class="vc-hero-content">
     <div class="vc-eyebrow" data-i18n="hero.badge">Atollo di Ari Sud · Maldive</div>
     <h1 class="hero-title vc-hero-title"><span data-i18n="hero.titlePrefix">Vilu</span><br><em data-i18n="hero.titleEmphasis">Residence</em></h1>
-    <p class="vc-display" data-i18n="hero.display">Experience South Ari.</p>
+    <p class="vc-display" data-i18n="hero.display">Vivete Ari Sud.</p>
     <p class="vc-hero-sub" data-i18n="hero.subtitle">Una guesthouse calda e accogliente nel cuore delle Maldive</p>
     <div class="vc-hero-ctas">
-      <a href="#holiday-packages" class="btn-primary" data-i18n="hero.ctaPrimary" onclick="trackEvent('cta_click',{source_context:'hero_primary'})">Explore Holiday Packages</a>
-      <button type="button" class="vc-cta-secondary" data-i18n="hero.ctaSecondary" onclick="trackEvent('availability_click',{source_context:'hero_secondary'});openBookingPage()">Check Availability</button>
+      <a href="#holiday-packages" class="btn-primary" data-i18n="hero.ctaPrimary" onclick="trackEvent('cta_click',{source_context:'hero_primary'})">Scoprite i pacchetti vacanza</a>
+      <button type="button" class="vc-cta-secondary" data-i18n="hero.ctaSecondary" onclick="trackEvent('availability_click',{source_context:'hero_secondary'});openBookingPage()">Verificate la disponibilità</button>
     </div>
   </div>
   <div class="hero-scroll" aria-hidden="true">
@@ -1266,13 +1300,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      repeating its photo/"six rooms" moment, which Homecoming now owns. ══ -->
 <section id="what-is-vilu">
   <div class="section-inner" style="max-width:760px">
-    <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Who We Are</div>
-    <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu is your way into South Ari.</h2>
-    <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Holiday planning, marine experiences and local knowledge — with our own six-room home in Maamigili when you need somewhere to stay.</p>
+    <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Chi siamo</div>
+    <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu è la vostra porta d'accesso ad Ari Sud.</h2>
+    <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Pianificazione della vacanza, esperienze marine e conoscenza del territorio — con la nostra casa di sei camere a Maamigili per quando vi serve un posto dove stare.</p>
     <ul class="wiv-points">
-      <li data-i18n="whatIsVilu.point1">Personalised attention, not a front desk — every guest is planned for individually.</li>
-      <li data-i18n="whatIsVilu.point2">Island hopping and local cuisine woven into your stay, not just snorkeling.</li>
-      <li data-i18n="whatIsVilu.point3">Boutique and intimate by design — six rooms, not sixty.</li>
+      <li data-i18n="whatIsVilu.point1">Attenzione personalizzata, non una reception — ogni ospite viene seguito individualmente.</li>
+      <li data-i18n="whatIsVilu.point2">Island hopping e cucina locale fanno parte del soggiorno, non solo lo snorkeling.</li>
+      <li data-i18n="whatIsVilu.point3">Boutique e intimo per scelta — sei camere, non sessanta.</li>
     </ul>
   </div>
 </section>
@@ -1285,9 +1319,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <h2 class="section-title" style="color:var(--text)"><span data-i18n="packages.titlePrefix">Fughe</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="packages.titleEmphasis">sull'isola su misura</em></h2>
       <p class="gh-sub" style="margin-top:16px" data-i18n="packages.subtitle">Colazione giornaliera e transfer in speedboat andata e ritorno inclusi in ogni pacchetto. Scegli la durata più adatta al tuo viaggio, poi aggiungi la mezza pensione o la pensione completa se lo desideri.</p>
     </div>
-    <div class="hp-grid reveal" id="hp-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Caricamento pacchetti…</div>
-    </div>
+    <div class="hp-grid reveal" id="hp-grid"><div class="hp-rail-wrap"><div class="hp-rail"><div class="hp-rail-item" id="package-island-explorer-getaway" data-pkg-id="island-explorer-getaway" data-pkg-name="Avventura da Esploratore dell'Isola" data-pkg-nights="4"><h3 class="hp-rail-name">Avventura da Esploratore dell'Isola</h3><div class="hp-rail-meta">$450 a persona · 4 notti</div><p class="hp-rail-hook">Quattro giorni di snorkeling con squali balena e manta, proprio sulla barriera corallina a pochi passi dalla riva.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#island-explorer-getaway">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-reef-sunset-adventure" data-pkg-id="reef-sunset-adventure" data-pkg-name="Avventura tra Barriera Corallina e Tramonto" data-pkg-nights="5"><h3 class="hp-rail-name">Avventura tra Barriera Corallina e Tramonto</h3><div class="hp-rail-meta">$550 a persona · 5 notti</div><p class="hp-rail-hook">Fai snorkeling con gli squali balena di giorno, poi guarda il cielo tingersi d'oro in una crociera al tramonto sulla stessa barriera corallina.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#reef-sunset-adventure">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-island-serenity-escape" data-pkg-id="island-serenity-escape" data-pkg-name="Fuga di Serenità sull'Isola" data-pkg-nights="6"><h3 class="hp-rail-name">Fuga di Serenità sull'Isola</h3><div class="hp-rail-meta">$650 a persona · 6 notti</div><p class="hp-rail-hook">Sei giorni rilassanti di snorkeling sulla barriera corallina, tramonti sull'oceano e un picnic privato sul tuo tratto di banco di sabbia.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#island-serenity-escape">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-maldives-dream-bliss" data-pkg-id="maldives-dream-bliss" data-pkg-name="Estasi da Sogno alle Maldive" data-pkg-nights="7"><h3 class="hp-rail-name">Estasi da Sogno alle Maldive</h3><div class="hp-rail-meta">$700 a persona · 7 notti</div><p class="hp-rail-hook">Una settimana intera dedicata a squali balena, manta e un'escursione al banco di sabbia, con una crociera al tramonto tra i delfini per finire.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#maldives-dream-bliss">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-ultimate-island-relaxation" data-pkg-id="ultimate-island-relaxation" data-pkg-name="Il Relax Definitivo sull'Isola" data-pkg-nights="8"><h3 class="hp-rail-name">Il Relax Definitivo sull'Isola</h3><div class="hp-rail-meta">$790 a persona · 8 notti</div><p class="hp-rail-hook">Otto giorni per rallentare del tutto. Snorkeling sulla barriera corallina, un picnic privato al banco di sabbia e crociere al tramonto, senza nient'altro da fare.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-island-relaxation">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-grand-maldives-escape" data-pkg-id="grand-maldives-escape" data-pkg-name="Grande Fuga alle Maldive" data-pkg-nights="9"><h3 class="hp-rail-name">Grande Fuga alle Maldive</h3><div class="hp-rail-meta">$880 a persona · 9 notti</div><p class="hp-rail-hook">Nove giorni in cui entra tutto. Delfini all'alba, manta di giorno e un picnic privato sul tuo banco di sabbia personale.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#grand-maldives-escape">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-ultimate-maldives-odyssey" data-pkg-id="ultimate-maldives-odyssey" data-pkg-name="L'Odissea Definitiva alle Maldive" data-pkg-nights="10"><h3 class="hp-rail-name">L'Odissea Definitiva alle Maldive</h3><div class="hp-rail-meta">$940 a persona · 10 notti</div><p class="hp-rail-hook">Dieci giorni interi con ogni esperienza esclusiva offerta da Vilu Residence, dagli squali balena a un picnic privato al banco di sabbia, alla nostra migliore tariffa per notte.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-maldives-odyssey">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-ultimate-resort-island-odyssey" data-pkg-id="ultimate-resort-island-odyssey" data-pkg-name="L'Odissea Definitiva tra Resort e Isole" data-pkg-nights="11"><h3 class="hp-rail-name">L'Odissea Definitiva tra Resort e Isole</h3><div class="hp-rail-meta">$1300 a persona · 11 notti</div><p class="hp-rail-hook">Undici notti con tutto incluso. Trascorri un'intera giornata esplorando un resort vicino, lancia la lenza a lume di lanterna in una battuta di pesca notturna e condividi una cena privata in spiaggia, oltre a ogni esperienza esclusiva che offriamo.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#ultimate-resort-island-odyssey">Vedi il pacchetto →</a></div></div><div class="hp-rail-item" id="package-honeymoon-dream-escape" data-pkg-id="honeymoon-dream-escape" data-pkg-name="Fuga da Sogno per la Luna di Miele" data-pkg-nights="10"><h3 class="hp-rail-name">Fuga da Sogno per la Luna di Miele</h3><div class="hp-rail-meta">$1100 a persona · 10 notti</div><p class="hp-rail-hook">Dieci notti pensate per due. Guarda il sole tramontare durante una cena privata in spiaggia, parti per una battuta di pesca notturna a lume di lanterna e goditi ogni esperienza esclusiva nel mezzo, tutto sul tuo tratto di oceano privato.</p><div class="hp-rail-actions"><a class="hp-rail-view" href="holiday-packages.html#honeymoon-dream-escape">Vedi il pacchetto →</a></div></div></div></div></div>
     <p class="exp-links reveal">
       <a href="#experiences"><span data-i18n="packages.seeExperiences">Scopri cosa comporta davvero ogni escursione</span></a>
     </p>
@@ -1306,14 +1338,14 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div class="vc-scrim-soft"></div>
   </div>
   <div class="vc-story-inner">
-    <div class="vc-eyebrow" data-i18n="above.eyebrow">Above South Ari</div>
-    <h2 class="vc-heading vc-heading-lg"><span data-i18n="above.displayLine1">One island.</span><br><span data-i18n="above.displayLine2">A whole ocean to discover.</span></h2>
-    <p class="vc-story-sub" data-i18n="above.sub">South Ari Atoll: a slow, sun-warmed shoreline in the heart of the Maldives — and Vilu's home base for exploring everything around it.</p>
+    <div class="vc-eyebrow" data-i18n="above.eyebrow">Sopra Ari Sud</div>
+    <h2 class="vc-heading vc-heading-lg"><span data-i18n="above.displayLine1">Un'isola.</span><br><span data-i18n="above.displayLine2">Un intero oceano da scoprire.</span></h2>
+    <p class="vc-story-sub" data-i18n="above.sub">L'Atollo di Ari Sud: una costa tranquilla e baciata dal sole nel cuore delle Maldive — la base di Vilu per esplorare tutto ciò che la circonda.</p>
   </div>
 </section>
 
 <section id="vc-descent" class="vc-descent" aria-hidden="true">
-  <div class="vc-descent-caption" id="vc-descent-caption" data-i18n="descent.caption">Descending toward South Ari's reef</div>
+  <div class="vc-descent-caption" id="vc-descent-caption" data-i18n="descent.caption">Discesa verso la barriera corallina di Ari Sud</div>
 </section>
 
 <section id="vc-below" class="vc-story vc-below">
@@ -1328,13 +1360,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div class="vc-whale"><img src="/images/motion/whale-shark.webp" alt="" loading="lazy"></div>
   </div>
   <div class="vc-story-inner vc-below-text">
-    <div class="vc-eyebrow" data-i18n="below.eyebrow">Below South Ari</div>
-    <h2 class="vc-heading vc-heading-sm vc-heading-light"><span data-i18n="below.displayLine1">Whale sharks.</span><br><span data-i18n="below.displayLine2">Manta rays.</span><br><span data-i18n="below.displayLine3">Turtles.</span></h2>
-    <p class="vc-story-sub" data-i18n="below.sub">South Ari is known for whale sharks, manta rays, turtles and rich marine life. Wildlife sightings are never guaranteed.</p>
+    <div class="vc-eyebrow" data-i18n="below.eyebrow">Sotto Ari Sud</div>
+    <h2 class="vc-heading vc-heading-sm vc-heading-light"><span data-i18n="below.displayLine1">Squali balena.</span><br><span data-i18n="below.displayLine2">Manta.</span><br><span data-i18n="below.displayLine3">Tartarughe.</span></h2>
+    <p class="vc-story-sub" data-i18n="below.sub">Ari Sud è nota per squali balena, manta, tartarughe e una ricca vita marina. Gli avvistamenti di fauna selvatica non sono mai garantiti.</p>
     <div class="vc-below-links">
-      <a href="whale-shark-snorkeling.html" data-i18n="below.linkWhale">Whale Shark Snorkeling →</a>
-      <a href="manta-ray-snorkeling.html" data-i18n="below.linkManta">Manta Ray Snorkeling →</a>
-      <a href="south-ari-atoll-guide.html" data-i18n="below.linkGuide">South Ari marine life →</a>
+      <a href="whale-shark-snorkeling.html" data-i18n="below.linkWhale">Snorkeling con gli squali balena →</a>
+      <a href="manta-ray-snorkeling.html" data-i18n="below.linkManta">Snorkeling con le manta →</a>
+      <a href="south-ari-atoll-guide.html" data-i18n="below.linkGuide">La vita marina di Ari Sud →</a>
     </div>
   </div>
 </section>
@@ -1350,9 +1382,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
   <div class="vc-story-inner vc-homecoming-text">
     <div class="vc-eyebrow" data-i18n="homecoming.eyebrow">Vilu Residence</div>
-    <h2 class="vc-heading vc-heading-sm" data-i18n="homecoming.display">And this is where you'll call home.</h2>
-    <p class="vc-story-sub vc-homecoming-fact"><span data-i18n="homecoming.rooms">Six rooms.</span> <span data-i18n="homecoming.personal">A more personal stay.</span></p>
-    <a href="#rooms" class="btn-primary" data-i18n="homecoming.cta" onclick="trackEvent('cta_click',{source_context:'homecoming'})">See the Rooms</a>
+    <h2 class="vc-heading vc-heading-sm" data-i18n="homecoming.display">Ed è qui che vi sentirete a casa.</h2>
+    <p class="vc-story-sub vc-homecoming-fact"><span data-i18n="homecoming.rooms">Sei camere.</span> <span data-i18n="homecoming.personal">Un soggiorno più personale.</span></p>
+    <a href="#rooms" class="btn-primary" data-i18n="homecoming.cta" onclick="trackEvent('cta_click',{source_context:'homecoming'})">Guardate le camere</a>
   </div>
 </section>
 
@@ -1503,8 +1535,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      rather than a two-column marketing split. ══ -->
 <section id="booking">
   <div class="section-inner" style="max-width:820px">
-    <div class="la-eyebrow" data-i18n="booking.reframeEyebrow">Prefer to arrange accommodation separately?</div>
-    <h2 class="section-title" data-i18n="booking.reframeHeadline">Check live availability at Vilu Residence.</h2>
+    <div class="la-eyebrow" data-i18n="booking.reframeEyebrow">Preferite organizzare l'alloggio separatamente?</div>
+    <h2 class="section-title" data-i18n="booking.reframeHeadline">Verificate la disponibilità in tempo reale al Vilu Residence.</h2>
     <div class="la-widget">
       <div class="la-row">
         <div class="la-field"><label for="bwf-ci" data-i18n="booking.labelCheckin">Check-in</label><input type="text" class="bwf-input vilu-date-input" id="bwf-ci"></div>
@@ -1663,9 +1695,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <i class="ti ti-brand-google" aria-hidden="true"></i> <span data-i18n="reviews.readOnGoogle">Leggi le Nostre Recensioni su Google</span>
     </a>
     <div class="tr-assurances">
-      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Better rates when you book direct with us</span></div>
-      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Free cancellation on every direct booking</span></div>
-      <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17% &amp; Green Tax included in every rate</span></div>
+      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Tariffe migliori prenotando direttamente con noi</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Cancellazione gratuita su ogni prenotazione diretta</span></div>
+      <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17% e tassa verde incluse in ogni tariffa</span></div>
     </div>
   </div>
 </section>
@@ -1736,12 +1768,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      repeat the hero composition. Max 2 CTAs. ══ -->
 <section id="closing">
   <div class="section-inner" style="text-align:center;max-width:680px">
-    <h2 class="cc-headline" data-i18n="closing.headline">Your South Ari story starts here.</h2>
+    <h2 class="cc-headline" data-i18n="closing.headline">La vostra storia a Ari Sud inizia qui.</h2>
     <div class="cc-ctas">
-      <a href="#holiday-packages" class="btn-primary" data-i18n="closing.cta" onclick="trackEvent('cta_click',{source_context:'closing'})">Explore Holiday Packages</a>
-      <button type="button" class="btn-outline" onclick="trackEvent('availability_click',{source_context:'closing'});openBookingPage()" data-i18n="closing.ctaSecondary">Check Availability</button>
+      <a href="#holiday-packages" class="btn-primary" data-i18n="closing.cta" onclick="trackEvent('cta_click',{source_context:'closing'})">Scoprite i pacchetti vacanza</a>
+      <button type="button" class="btn-outline" onclick="trackEvent('availability_click',{source_context:'closing'});openBookingPage()" data-i18n="closing.ctaSecondary">Verificate la disponibilità</button>
     </div>
-    <p class="cc-contact-hint"><span data-i18n="closing.contactHint">Or if you'd rather talk it through first,</span> <a href="#contact" onclick="trackEvent('contact_click',{contact_method:'section_link',cta_location:'closing'})" data-i18n="contact.contactUs">Contatta Vilu Residence</a></p>
+    <p class="cc-contact-hint"><span data-i18n="closing.contactHint">Oppure, se preferite parlarne prima,</span> <a href="#contact" onclick="trackEvent('contact_click',{contact_method:'section_link',cta_location:'closing'})" data-i18n="contact.contactUs">Contatta Vilu Residence</a></p>
   </div>
 </section>
 
