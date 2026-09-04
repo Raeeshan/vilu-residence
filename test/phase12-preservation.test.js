@@ -230,6 +230,91 @@ section('Packages — locked nine-package commercial contract');
 }
 
 // ---------------------------------------------------------------------------
+section('Phase 12C-B — Featured Journeys + Full Collection + Duration Guide structure');
+{
+  const hp = read('holiday-packages.html');
+  const PACKAGES = evalBlock(hp, /var PACKAGES = \[/, '\n];', 'PACKAGES');
+  const items = M.packages.items;
+  const slugs = items.map(i => i.id);
+
+  test('each canonical package slug id="..." appears exactly once in the source (one canonical DOM id per package)', () => {
+    for (const slug of slugs) {
+      const count = (hp.match(new RegExp(`id="${slug}"`, 'g')) || []).length;
+      assert.equal(count, 1, `id="${slug}" should appear exactly once, found ${count}`);
+    }
+  });
+
+  test('Full Collection contains all 9 canonical packages as <details> elements, in canonical order', () => {
+    // Scoped to the prerendered #pkg-grid..#pkg-duration span so the matching stays inside
+    // the actual markup and never picks up the "'+p.slug+'"-style literal from the JS
+    // template source (renderDynamicContent) further down the same file.
+    const gridStart = hp.indexOf('id="pkg-grid"');
+    const durationStart = hp.indexOf('id="pkg-duration"');
+    assert.ok(gridStart >= 0 && durationStart > gridStart, '#pkg-grid..#pkg-duration span not found');
+    const gridBlock = hp.slice(gridStart, durationStart);
+    const found = [...gridBlock.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)].map(m => m[1]);
+    assert.deepEqual(found, slugs);
+  });
+
+  test('Featured Journeys section exists and links only to real canonical package targets', () => {
+    const start = hp.indexOf('id="pkg-featured"');
+    assert.ok(start >= 0, '#pkg-featured container not found');
+    const end = hp.indexOf('id="pkg-grid"', start);
+    assert.ok(end > start, '#pkg-grid should follow #pkg-featured');
+    const featuredBlock = hp.slice(start, end);
+    const hrefs = [...featuredBlock.matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
+    assert.equal(hrefs.length, 3, 'expected exactly 3 Featured Journeys panels');
+    for (const h of hrefs) assert.ok(slugs.includes(h), `Featured Journeys href #${h} is not a canonical package id`);
+    // Featured panels are pure navigation: no duplicate canonical id, no data-pkg-* tracking attributes.
+    assert.ok(!/id="[^"]*"/.test(featuredBlock.replace(/id="pkg-featured"/, '')), 'Featured Journeys panels must not carry their own id attributes');
+    assert.ok(!featuredBlock.includes('data-pkg-slug'), 'Featured Journeys panels must not carry data-pkg-slug (single-sourced package_view tracking from the Full Collection only)');
+  });
+
+  test('Duration Guide lists all 9 packages, sorted by nights, each linking to its canonical id', () => {
+    const start = hp.indexOf('id="pkg-duration"');
+    assert.ok(start >= 0, '#pkg-duration container not found');
+    // Bounded to the next real section wrapper so the match stays inside the prerendered
+    // markup and never reaches the "'+p.slug+'"-style literal in the JS template source.
+    const end = hp.indexOf('hp-section', start);
+    assert.ok(end > start, 'next section boundary after #pkg-duration not found');
+    const durationBlock = hp.slice(start, end);
+    const hrefs = [...durationBlock.matchAll(/class="pc-duration-row" href="#([^"]+)"/g)].map(m => m[1]);
+    assert.equal(hrefs.length, 9, 'expected all 9 packages in the Duration Guide');
+    sameSet(hrefs, slugs);
+    const sortedByNights = items.slice().sort((a, b) => a.nights - b.nights).map(i => i.id);
+    assert.deepEqual(hrefs, sortedByNights, 'Duration Guide rows must be sorted by nights ascending');
+    assert.ok(!/\$\d+\s*(\/|per)\s*night/i.test(durationBlock), 'Duration Guide must not present price-per-night');
+  });
+
+  test('every package renders its full detail (Includes/Activities/Add-Ons) in crawlable, no-JS-safe static HTML', () => {
+    for (const p of PACKAGES) {
+      const detailStart = hp.indexOf(`id="${p.slug}"`);
+      assert.ok(detailStart >= 0, `${p.slug} not found`);
+      const detailEnd = hp.indexOf('</details>', detailStart);
+      const block = hp.slice(detailStart, detailEnd);
+      for (const inc of p.includes) assert.ok(block.includes(inc.replace(/'/g, '&#39;')) || block.includes(inc), `${p.slug} missing include "${inc}"`);
+      for (const act of p.activities) assert.ok(block.includes(act), `${p.slug} missing activity "${act}"`);
+      for (const ao of p.addons) assert.ok(block.includes(ao), `${p.slug} missing add-on "${ao}"`);
+    }
+  });
+
+  test('package detail is inside a native <details>/<summary> disclosure (no-JS-safe, keyboard-operable, no modal)', () => {
+    for (const slug of slugs) {
+      assert.ok(hp.includes(`<details class="pc-pkg reveal visible" id="${slug}"`), `${slug} is not a native <details> element`);
+    }
+    assert.ok(!/class="[^"]*modal/i.test(hp.slice(hp.indexOf('id="pkg-grid"'), hp.indexOf('id="pkg-duration"'))), 'package detail must not use a modal pattern');
+  });
+
+  test('PMS files remain untouched by the package-page CSS redesign (no .pc- prefixed classes, no shared-page.css coupling)', () => {
+    for (const f of M.internal_tools.files) {
+      const pms = read(f);
+      assert.ok(!/class="[^"]*\bpc-[a-z-]+/.test(pms), `${f} must not reference .pc- prefixed package-redesign classes`);
+      assert.ok(!pms.includes('shared-page.css'), `${f} must not load shared-page.css`);
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 section('Analytics — canonical events, dimensions, attribution');
 {
   const an = read('analytics.js');

@@ -231,15 +231,19 @@ function makeTf(tFn) {
 
 // Runs the page's own inline script (containing PACKAGES + renderDynamicContent)
 // in a sandbox, then calls renderDynamicContent() and captures what it wrote
-// into #pkg-grid.
+// into #pkg-grid (Full Collection), #pkg-featured (Featured Journeys,
+// Phase 12C-B), and #pkg-duration (Duration Guide, Phase 12C-B).
 function renderPackageGridHtml(mainScriptSrc, dict, i18nEn, dynamicDict) {
-  var capturedHtml = '';
-  var mockGrid = {
-    set innerHTML(val) { capturedHtml = val; },
-    get innerHTML() { return capturedHtml; },
-  };
+  var captured = {};
+  function mockEl(id) {
+    return {
+      set innerHTML(val) { captured[id] = val; },
+      get innerHTML() { return captured[id] || ''; },
+    };
+  }
+  var TARGET_IDS = ['pkg-grid', 'pkg-featured', 'pkg-duration'];
   var sandbox = {
-    document: { getElementById: function (id) { return id === 'pkg-grid' ? mockGrid : null; } },
+    document: { getElementById: function (id) { return TARGET_IDS.indexOf(id) !== -1 ? mockEl(id) : null; } },
     t: makeT(dict, i18nEn),
     td: makeTd(dynamicDict),
     tf: null,
@@ -248,7 +252,7 @@ function renderPackageGridHtml(mainScriptSrc, dict, i18nEn, dynamicDict) {
   sandbox.tf = makeTf(sandbox.t);
   vm.createContext(sandbox);
   vm.runInContext(mainScriptSrc + '\nrenderDynamicContent();', sandbox, { timeout: 5000 });
-  return capturedHtml;
+  return captured;
 }
 
 // Extracts the main inline <script> (the one defining I18N/PACKAGES/
@@ -270,9 +274,11 @@ function extractPageScript($) {
 }
 
 function prerenderPackageGrid($, mainScriptSrc, dict, i18nEn, dynamicDict) {
-  var html = renderPackageGridHtml(mainScriptSrc, dict, i18nEn, dynamicDict);
-  var grid = $('#pkg-grid');
-  if (grid.length) grid.html(html);
+  var captured = renderPackageGridHtml(mainScriptSrc, dict, i18nEn, dynamicDict);
+  ['pkg-grid', 'pkg-featured', 'pkg-duration'].forEach(function (id) {
+    var el = $('#' + id);
+    if (el.length && captured[id] !== undefined) el.html(captured[id]);
+  });
 }
 
 // ── Homepage #hp-grid no-JS fallback (Phase 12B-E2D) ──
@@ -853,22 +859,35 @@ function main() {
     }
 
     if (pkgScript) {
-      const $en = cheerio.load('<div id="pkg-grid" class="pkg-grid"></div>', { decodeEntities: false });
-      prerenderPackageGrid($en, pkgScript.src, pkgScript.i18nEn, pkgScript.i18nEn, undefined);
-      const renderedInner = $en('#pkg-grid').html().trim();
-
-      const span = findDivInnerSpan(srcHtml, 'pkg-grid');
-      if (!span) {
-        console.warn(`WARNING: could not locate a well-formed #pkg-grid div in ${pageDef.source} — skipping English self-update, check manually`);
-      } else {
-        const currentInner = srcHtml.slice(span.innerStart, span.innerEnd);
-        if (currentInner.trim() === renderedInner) {
-          // Already in sync -- no write, no console noise on every build.
-        } else {
-          const updatedSrcHtml = srcHtml.slice(0, span.innerStart) + renderedInner + srcHtml.slice(span.innerEnd);
-          fs.writeFileSync(pageDef.source, updatedSrcHtml);
-          console.log(`Pre-rendered #pkg-grid in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+      // Phase 12C-B: three containers now (Full Collection, Featured
+      // Journeys, Duration Guide), rendered together by one
+      // renderDynamicContent() call. Each div is updated against the
+      // CURRENT (possibly already-updated-this-pass) working copy of the
+      // source text, not the original snapshot — inserting real content
+      // into an earlier div shifts every byte position after it, so a
+      // later span computed from a stale copy would corrupt the file.
+      const capturedEn = renderPackageGridHtml(pkgScript.src, pkgScript.i18nEn, pkgScript.i18nEn, undefined);
+      let workingHtml = srcHtml;
+      let anyChanged = false;
+      for (const id of ['pkg-grid', 'pkg-featured', 'pkg-duration']) {
+        const renderedInner = (capturedEn[id] || '').trim();
+        const span = findDivInnerSpan(workingHtml, id);
+        if (!span) {
+          console.warn(`WARNING: could not locate a well-formed #${id} div in ${pageDef.source} — skipping English self-update for it, check manually`);
+          continue;
         }
+        const currentInner = workingHtml.slice(span.innerStart, span.innerEnd);
+        if (currentInner.trim() === renderedInner) continue; // already in sync
+        workingHtml = workingHtml.slice(0, span.innerStart) + renderedInner + workingHtml.slice(span.innerEnd);
+        anyChanged = true;
+        console.log(`Pre-rendered #${id} in English source: ${pageDef.source} (surgical replace, rest of file untouched)`);
+      }
+      if (anyChanged) {
+        fs.writeFileSync(pageDef.source, workingHtml);
+        // Nothing later in this pageDef's own iteration reads srcHtml again
+        // (the #hp-grid block below is scoped to vilu-website.html's
+        // separate iteration) -- srcHtml itself is `const` and intentionally
+        // left untouched here.
       }
     }
 
