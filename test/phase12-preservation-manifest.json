@@ -375,9 +375,29 @@
   },
 
   "storage_keys": {
-    "localStorage": ["vilu_consent", "vilu_attribution", "vilu_lang", "hp_seen_cards", "vilu_rooms", "vilu_website"],
-    "sessionStorage": ["vilu_guide_handoff"],
-    "broadcast_channel": "vilu_pms"
+    "localStorage": ["vilu_consent", "vilu_attribution", "vilu_lang", "hp_seen_cards", "vilu_rooms", "vilu_website", "vilu_theme"],
+    "sessionStorage": ["vilu_guide_handoff", "vilu_theme"],
+    "broadcast_channel": "vilu_pms",
+    "code_files_referencing_keys": ["vilu-website.html", "analytics.js", "consent.js", "nav-shell.js", "shared-page-i18n.js", "theme.js"]
+  },
+
+  "theme": {
+    "$comment": "Phase 12B-C dual-theme foundation (approved 12B-B). Owner: theme system. Purpose: manual Cinematic Dark / Island Luxury Light preference. Persistence: Preferences-consent gated (localStorage vilu_theme) with a sessionStorage-only fallback; first-ever visit is Cinematic Dark and prefers-color-scheme is never consulted. Theme selection must never load GA or emit analytics.",
+    "css_file": "theme.css",
+    "js_file": "theme.js",
+    "root_attribute": "data-theme",
+    "valid_values": ["dark", "light"],
+    "default_theme": "dark",
+    "storage_key": "vilu_theme",
+    "owner": "theme system",
+    "public_api": "window.viluTheme",
+    "switch_selector": "[data-theme-switch]",
+    "brand_reference": { "--vilu-amber": "#c29147" },
+    "dark_tokens": { "--bg": "#06101c", "--bg-secondary": "#0a1628", "--surface": "#0f2140", "--surface-secondary": "#14294a", "--text": "#f3f7fb", "--text-muted": "#9db4c6", "--accent": "#e0a752", "--accent-ink": "#1a0f04", "--border": "rgba(243,247,251,.12)" },
+    "light_tokens": { "--bg": "#f6f1e8", "--bg-secondary": "#efe8dc", "--surface": "#fffdf9", "--surface-secondary": "#f1ebe0", "--text": "#1d2430", "--text-muted": "#5c6674", "--accent": "#ad701f", "--accent-text": "#925f1c", "--border": "rgba(29,36,48,.14)" },
+    "legacy_aliases_retired_semantic": { "--gold": "var(--accent)", "--teal-light": "var(--accent)", "--ocean": "var(--accent)" },
+    "forbidden_in_theme_js": ["prefers-color-scheme", "googletagmanager", "gtag(", "trackEvent("],
+    "forbidden_in_theme_css": ["prefers-color-scheme", "fonts.googleapis.com", "@import"]
   },
 
   "booking_pms": {

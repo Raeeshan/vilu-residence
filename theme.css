@@ -1,0 +1,275 @@
+/* ══════════════════════════════════════════════════════════════
+   VILU THEME FOUNDATION — Phase 12B-C
+   Dual-theme design tokens (Cinematic Dark / Island Luxury Light),
+   typography scale, spacing/layout tokens and the theme switch.
+
+   Loaded LAST in <head> on every public page (after shared-page.css or
+   the homepage's inline stylesheet) so its :root tokens win the cascade.
+   Theme state lives on <html data-theme="dark|light"> (theme.js).
+   First-ever visit = Cinematic Dark; the operating-system colour-scheme
+   preference is deliberately NOT consulted (approved 12B-B decision 3).
+
+   Brand reference (constant in both themes):
+     --vilu-amber  #C29147  — measured from the golden coconut in the logo
+   Interface variants:
+     dark  --accent #E0A752  (buttons carry dark ink, never white)
+     light --accent #AD701F  / --accent-text #925F1C for readable links
+
+   LEGACY ALIASES: shared-page.css and the homepage inline stylesheet still
+   reference the Phase 10 palette (--navy, --gold, --teal-light, --white,
+   --card …). Those names are kept below as deliberate aliases onto the new
+   semantic tokens so no existing selector breaks. The old "--gold = cyan"
+   semantic is retired: --gold now resolves to the Vilu amber accent.
+   Later Phase 12 stages migrate components to the semantic names and
+   delete the aliases.
+   ══════════════════════════════════════════════════════════════ */
+
+:root{
+  color-scheme:dark;
+
+  /* ── Brand constant ── */
+  --vilu-amber:#c29147;
+
+  /* ── Cinematic Dark (default) ── */
+  --bg:#06101c;
+  --bg-secondary:#0a1628;
+  --surface:#0f2140;
+  --surface-secondary:#14294a;
+  --text:#f3f7fb;
+  --text-muted:#9db4c6;
+  --accent:#e0a752;
+  --accent-hover:#ecbd7a;
+  --accent-text:#e0a752;
+  --accent-ink:#1a0f04;
+  --accent-soft:rgba(224,167,82,.14);
+  --border:rgba(243,247,251,.12);
+  --border-strong:rgba(243,247,251,.3);
+  --overlay:rgba(6,16,28,.78);
+  --nav-scrolled-bg:rgba(6,16,28,.86);
+  --on-media:#f3f7fb;           /* text placed over photography/video, both themes */
+  --shadow-card:0 20px 50px rgba(0,4,10,.35);
+  --toggle-track:rgba(243,247,251,.14);
+  --toggle-knob:#ffffff;
+  --toggle-knob-on:#1a0f04;
+
+  /* ── Typography ── */
+  --font-display:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --font-body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fs-body:17px;
+  --lh-body:1.65;
+  --fs-lead:20px;
+  --fs-small:14px;
+  --fs-label:12px;
+  --fs-h1:clamp(40px,6vw,64px);
+  --fs-h2:clamp(30px,4.2vw,44px);
+  --fs-h3:clamp(22px,2.4vw,28px);
+  --fs-display:clamp(52px,7vw,104px);
+  --tracking-label:.18em;
+
+  /* ── Spacing / layout (8px rhythm) ── */
+  --space-1:8px; --space-2:16px; --space-3:24px; --space-4:32px;
+  --space-5:48px; --space-6:64px; --space-7:96px; --space-8:128px;
+  --section-gap:96px;
+  --container:1280px;
+  --container-editorial:1120px;
+  --measure:680px;
+  --gutter:clamp(20px,5vw,48px);
+
+  /* ── Radius / surface language ── */
+  --radius-none:0;
+  --radius-btn:2px;
+  --radius-field:4px;
+  --radius-card:6px;
+  --radius-sheet:14px;
+
+  /* ── Legacy aliases (Phase 10 names → semantic tokens) ── */
+  --navy:var(--bg-secondary);
+  --navy2:var(--surface);
+  --abyss:var(--bg);
+  --sand:var(--surface);
+  --card:var(--surface);
+  --card-border:var(--border);
+  --white:var(--text);
+  --muted:var(--text-muted);
+  --gold:var(--accent);
+  --gold-light:var(--accent-hover);
+  --teal-light:var(--accent);
+  --ocean:var(--accent);
+  --teal:var(--surface-secondary);
+  --glow:var(--accent-soft);
+  --surface-glow:var(--bg-secondary);
+
+  /* Legacy type scale, re-based for readability (was 11/12/13/14/16/18) */
+  --font-size-xs:12px;
+  --font-size-sm:14px;
+  --font-size-base:17px;
+  --font-size-md:17px;
+  --font-size-lg:19px;
+  --font-size-xl:21px;
+  --font-size-2xl:23px;
+  --font-size-3xl:27px;
+}
+
+/* ── Island Luxury Light: an editorial ivory system, not an inversion ── */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f6f1e8;
+  --bg-secondary:#efe8dc;
+  --surface:#fffdf9;
+  --surface-secondary:#f1ebe0;
+  --text:#1d2430;
+  --text-muted:#5c6674;
+  --accent:#ad701f;
+  --accent-hover:#c07f2b;
+  --accent-text:#925f1c;
+  --accent-ink:#fff8ef;
+  --accent-soft:rgba(173,112,31,.12);
+  --border:rgba(29,36,48,.14);
+  --border-strong:rgba(29,36,48,.32);
+  --overlay:rgba(29,36,48,.55);
+  --nav-scrolled-bg:rgba(246,241,232,.9);
+  --shadow-card:0 20px 50px rgba(29,36,48,.10);
+  --toggle-track:rgba(29,36,48,.18);
+  --toggle-knob:#ffffff;
+  --toggle-knob-on:#fff8ef;
+}
+
+@media (max-width:700px){
+  :root{--fs-body:16.5px;--fs-lead:18px;--section-gap:64px;--font-size-base:16.5px;--font-size-md:16.5px;--font-size-lg:18px;--font-size-xl:20px}
+}
+
+/* ══════════════ BASE ══════════════ */
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:var(--fs-body);line-height:var(--lh-body);transition:background-color .4s ease,color .4s ease}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+/* Sitewide focus ring in the accent — visible in both themes */
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* Editorial widths */
+.section-inner{max-width:var(--container-editorial)}
+section{padding:var(--section-gap) 0}
+@media (max-width:600px){section{padding:var(--section-gap) 0}}
+.content-block p,.content-list,.hp-section,.page-sub-text{max-width:var(--measure)}
+
+/* Text placed over photography stays light in both themes: re-declare the
+   legacy aliases inside those containers so descendants keep light type. */
+.page-header,.hero-content,.hero-stats,.hero-scroll,.g-overlay,
+nav:not(.scrolled),.mobile-menu{--white:var(--on-media);--text:var(--on-media)}
+.page-header,.hero-content{color:var(--on-media)}
+
+/* ══════════════ NAV (shared shell) ══════════════ */
+nav.scrolled{background:var(--nav-scrolled-bg);border-bottom:1px solid var(--border);box-shadow:none}
+nav.scrolled .nav-links>li>a,nav.scrolled .nav-drop-trigger,nav.scrolled .nav-check-availability{color:var(--text-muted)}
+nav.scrolled .nav-links>li>a:hover,nav.scrolled .nav-drop-trigger:hover,nav.scrolled .nav-check-availability:hover{color:var(--text);text-shadow:none}
+nav.scrolled .nav-active{color:var(--text) !important}
+.nav-links>li>a:hover,.nav-drop-trigger:hover{color:var(--accent-hover);text-shadow:none}
+.nav-active::after{background:var(--accent)}
+.nav-logo img{border-color:var(--vilu-amber);box-shadow:none}
+.nav-logo-sub,.footer-brand-sub,.section-tag,.related-card-tag,.pkg-section-label,.footer-col h4{color:var(--accent)}
+:root[data-theme="light"] .section-tag,:root[data-theme="light"] .related-card-tag,:root[data-theme="light"] .pkg-section-label,:root[data-theme="light"] .footer-col h4,:root[data-theme="light"] .footer-brand-sub{color:var(--accent-text)}
+.nav-drop-panel{background:var(--surface);border-color:var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
+.nav-drop-panel a{color:var(--text-muted);font-size:15px}
+.nav-drop-panel a:hover{background:var(--accent-soft);color:var(--text)}
+nav.scrolled .lang-switcher{background:var(--surface-secondary);border-color:var(--border)}
+nav.scrolled .lang-switcher select{color:var(--text)}
+.lang-switcher i,.lang-switcher::after{color:var(--accent);border-color:var(--accent)}
+/* Keep the header's small caps at their measured Phase 10 sizes so the
+   1180/1310px crossovers still hold after the body scale increase; the new
+   40px theme switch is paid for by tightening the link gap (36→28px) and the
+   row padding (5vw→4vw) so "Check Availability" still fits at 1366px. */
+.nav-row-top{padding-left:4vw;padding-right:4vw}
+.nav-links{gap:28px}
+.nav-right{gap:12px}
+.nav-links>li>a,.nav-drop-trigger,.btn-plan-holiday{font-size:12px}
+.nav-check-availability,.lang-switcher select{font-size:12px}
+.mm-group-panel a{font-size:15px;color:var(--text-muted)}
+.mm-contact a,.mm-contact-social a{color:var(--text-muted);border-color:var(--border)}
+.mm-group,.mm-contact{border-color:var(--border)}
+.mobile-menu{background:var(--bg)}
+:root[data-theme="light"] .mobile-menu{--white:var(--text);--text:#1d2430}
+.mm-packages{background:var(--accent-soft)}
+.mm-group-trigger i{color:var(--accent)}
+.mm-ctas .mm-check-availability{border-color:var(--border-strong)}
+
+/* ══════════════ BUTTONS ══════════════ */
+.btn-primary,.btn-plan-holiday,.consent-btn-accept,.mm-ctas .btn-plan-holiday{background:var(--accent);background-image:none;color:var(--accent-ink);border-radius:var(--radius-btn)}
+.btn-primary:hover,.btn-plan-holiday:hover,.consent-btn-accept:hover{background:var(--accent-hover);background-image:none;color:var(--accent-ink);box-shadow:0 8px 24px var(--accent-soft)}
+.btn-outline{background:transparent;color:var(--text);border-color:var(--border-strong);border-radius:var(--radius-btn)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent-text);box-shadow:none}
+.page-header .btn-outline,.hero-content .btn-outline{color:var(--on-media);border-color:rgba(243,247,251,.55)}
+.page-header .btn-outline:hover,.hero-content .btn-outline:hover{color:var(--on-media);border-color:var(--accent)}
+.pkg-badge{background:var(--accent);color:var(--accent-ink);border-radius:var(--radius-btn)}
+.floating-whatsapp{background:var(--accent);color:var(--accent-ink)}
+.floating-whatsapp:hover{background:var(--accent-hover);color:var(--accent-ink)}
+.footer-social a:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* ══════════════ TYPOGRAPHY HOOKS ══════════════ */
+.page-h1{text-shadow:none}
+.page-h1 em,.section-title em,.hero-title em{color:var(--accent)}
+.content-block h3{color:var(--accent-text);font-family:var(--font-display);font-size:var(--fs-h3);font-weight:400;line-height:1.2}
+.content-block a,.breadcrumbs a,.hp-soft-link,.toc-block a:hover,.pkg-cta-alt:hover{color:var(--accent-text)}
+.content-block p,.content-list li,.hp-section p{line-height:var(--lh-body)}
+.toc-block ol li::before{color:var(--accent)}
+.tip-box{border-left-color:var(--accent)}
+.tip-box i,.info-card i{color:var(--accent)}
+.faq-block summary i,.pkg-sticky-cta-link i{color:var(--accent)}
+
+/* ══════════════ SURFACES ══════════════ */
+.info-card,.toc-block,.tip-box,.related-card,.pkg-card,.faq-block details,.table-wrap table,.consent-panel,.pkg-sticky-cta,.cta-band{background:var(--surface);border-color:var(--border);border-radius:var(--radius-card);box-shadow:none}
+.pkg-card{box-shadow:var(--shadow-card)}
+.pkg-card:hover,.related-card:hover,.info-card:hover{box-shadow:var(--shadow-card)}
+.pkg-img{border-radius:var(--radius-card) var(--radius-card) 0 0}
+.content-img,.hp-accom-img{border-radius:var(--radius-card);border-color:var(--border)}
+.table-wrap th{background:var(--accent-soft);color:var(--accent-text)}
+.table-wrap th,.table-wrap td{border-color:var(--border)}
+.faq-block details:hover,.faq-block details[open]{border-color:var(--accent)}
+.cta-band{background:var(--surface);border:1px solid var(--border)}
+.content-block{border-color:var(--border)}
+.pkg-price{color:var(--accent)}
+
+/* ══════════════ FOOTER ══════════════ */
+footer{border-top:1px solid var(--border)}
+.footer-desc,.footer-col ul a,.footer-copy,.footer-social a,.footer-privacy-choices,.mm-contact a{color:var(--text-muted)}
+.footer-col ul a{font-size:15px}
+.footer-col ul a:hover,.footer-privacy-choices:hover{color:var(--accent-text)}
+.footer-social a{border-color:var(--border)}
+.footer-brand-logo img{border-color:var(--vilu-amber)}
+.footer-bottom{border-color:var(--border)}
+
+/* ══════════════ CONSENT (presentation only — ids/behaviour unchanged) ══════════════ */
+.consent-bar{background:var(--surface);border-top:1px solid var(--border);box-shadow:var(--shadow-card)}
+.consent-panel-overlay{background:var(--overlay)}
+.consent-panel{border-radius:var(--radius-sheet)}
+.consent-panel-header,.consent-row{border-color:var(--border)}
+.consent-btn{border-radius:var(--radius-btn)}
+.consent-btn-reject{border-color:var(--border-strong);color:var(--text)}
+.consent-btn-reject:hover{border-color:var(--text)}
+.consent-btn-customize{border-color:var(--border-strong);color:var(--accent-text)}
+.consent-btn-customize:hover{border-color:var(--accent)}
+.consent-locked{color:var(--accent-text)}
+.consent-toggle{background:var(--toggle-track);border-color:var(--border-strong)}
+.consent-toggle-knob{background:var(--toggle-knob)}
+.consent-toggle[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.consent-toggle[aria-checked="true"] .consent-toggle-knob{background:var(--toggle-knob-on)}
+
+/* ══════════════ THEME SWITCH (rendered by theme.js) ══════════════ */
+.theme-switch{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;padding:0;margin:0;border:1px solid var(--border-strong);border-radius:999px;background:transparent;color:inherit;cursor:pointer;flex-shrink:0;transition:border-color .25s,background-color .25s,color .25s}
+.theme-switch:hover{border-color:var(--accent);color:var(--accent)}
+.theme-switch:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.theme-switch svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.theme-switch .ts-sun{display:none}
+:root[data-theme="light"] .theme-switch .ts-sun{display:block}
+:root[data-theme="light"] .theme-switch .ts-moon{display:none}
+nav.scrolled .theme-switch{color:var(--text)}
+.nav-right>.theme-switch{margin-inline-end:0}
+.mm-lang{display:flex;flex-direction:column;gap:12px}
+.mm-lang .theme-switch{width:100%;height:48px;border-radius:var(--radius-btn);gap:10px;font-family:var(--font-body);font-size:var(--fs-small);letter-spacing:.06em;text-transform:uppercase}
+.nav-mobile-right .theme-switch{width:44px;height:44px;min-width:44px}
+.mm-lang .theme-switch .ts-text{display:inline}
+.theme-switch .ts-text{display:none}
+@media (max-width:1180px){.nav-right>.theme-switch{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  body,.theme-switch{transition:none}
+}

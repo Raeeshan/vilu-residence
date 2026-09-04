@@ -304,9 +304,84 @@ for (const [f, hash] of Object.entries(M.file_fingerprints)) {
 // ---------------------------------------------------------------------------
 section('Storage contract');
 test('localStorage / sessionStorage keys still referenced by shipped code', () => {
-  const corpus = ['vilu-website.html', 'analytics.js', 'consent.js', 'nav-shell.js', 'shared-page-i18n.js'].map(read).join('\n');
+  const corpus = M.storage_keys.code_files_referencing_keys.map(read).join('\n');
   for (const k of M.storage_keys.localStorage.concat(M.storage_keys.sessionStorage)) assert.ok(corpus.includes(`'${k}'`) || corpus.includes(`"${k}"`), k);
 });
+
+// ---------------------------------------------------------------------------
+section('Theme foundation — dual theme tokens, state, persistence policy (Phase 12B-C)');
+{
+  const T = M.theme;
+  const norm = (s) => s.replace(/\s+/g, '').toLowerCase();
+  function cssBlock(css, selector) {
+    const i = css.indexOf(selector + '{');
+    assert.ok(i >= 0, 'missing block ' + selector);
+    return norm(css.slice(i, css.indexOf('}', i)));
+  }
+  test(`${T.css_file} and ${T.js_file} exist`, () => { assert.ok(exists(T.css_file)); assert.ok(exists(T.js_file)); });
+  const css = exists(T.css_file) ? read(T.css_file) : '';
+  const js = exists(T.js_file) ? read(T.js_file) : '';
+  const normCss = norm(css);
+  test('brand reference --vilu-amber is the measured logo coconut', () => {
+    for (const [k, v] of Object.entries(T.brand_reference)) assert.ok(normCss.includes(`${k}:${norm(v)}`), k);
+  });
+  test('Cinematic Dark tokens on :root (the default theme)', () => {
+    const block = cssBlock(css, ':root');
+    for (const [k, v] of Object.entries(T.dark_tokens)) assert.ok(block.includes(`${k}:${norm(v)}`), `${k} ${v}`);
+  });
+  test('Island Luxury Light tokens on :root[data-theme="light"] (own surfaces, own accent, own link amber — not an inversion)', () => {
+    const block = cssBlock(css, ':root[data-theme="light"]');
+    for (const [k, v] of Object.entries(T.light_tokens)) assert.ok(block.includes(`${k}:${norm(v)}`), `${k} ${v}`);
+    assert.notEqual(T.light_tokens['--accent'], T.dark_tokens['--accent']);
+  });
+  test('retired cyan --gold semantic: legacy names alias the amber accent', () => {
+    for (const [k, v] of Object.entries(T.legacy_aliases_retired_semantic)) assert.ok(normCss.includes(`${k}:${norm(v)}`), k);
+    assert.ok(!/--gold:\s*#22d3ee/i.test(css));
+  });
+  test('theme.css never consults prefers-color-scheme and loads no external font', () => {
+    for (const f of T.forbidden_in_theme_css) assert.ok(!css.includes(f), f);
+  });
+  test(`theme.js contract: key '${T.storage_key}', default '${T.default_theme}', valid ${JSON.stringify(T.valid_values)}, public API ${T.public_api}`, () => {
+    assert.ok(js.includes(`KEY = '${T.storage_key}'`));
+    assert.ok(js.includes(`DEFAULT_THEME = '${T.default_theme}'`));
+    for (const v of T.valid_values) assert.ok(new RegExp(`\\b${v}: true`).test(js), v);
+    assert.ok(js.includes(T.public_api + ' ='));
+    assert.ok(js.includes(`root.setAttribute('${T.root_attribute}'`));
+  });
+  test('theme persistence is Preferences-consent gated via the consent.js public API, with a sessionStorage fallback', () => {
+    assert.ok(js.includes('window.viluConsent') && js.includes('categories.preferences === true'));
+    assert.ok(js.includes('sessionStorage.setItem(KEY') && js.includes('localStorage.setItem(KEY') && js.includes('localStorage.removeItem(KEY'));
+  });
+  test('theme.js never decides by OS scheme, never loads GA, never emits analytics', () => {
+    for (const f of T.forbidden_in_theme_js) assert.ok(!js.includes(f), f);
+  });
+  test('theme switch is an accessible role="switch" with aria-checked and a label', () => {
+    assert.ok(js.includes("setAttribute('role', 'switch')") && js.includes("'aria-checked'") && js.includes("setAttribute('aria-label'"));
+    assert.ok(js.includes(`'${T.switch_selector.slice(1, -1)}'`));
+  });
+  test('every source page boots dark statically (<html data-theme="dark">), loads theme.js after consent.js/analytics.js, and theme.css last in <head>', () => {
+    for (const p of M.pages) {
+      const h = read(p.file);
+      assert.ok(/<html lang="en" data-theme="dark">/.test(h), p.file + ' html tag');
+      const head = headOf(h);
+      const iConsent = head.indexOf('src="consent.js"'), iAnalytics = head.indexOf('src="analytics.js"'), iTheme = head.indexOf(`src="${T.js_file}"`), iCss = head.lastIndexOf(`href="${T.css_file}"`);
+      assert.ok(iConsent >= 0 && iAnalytics > iConsent && iTheme > iAnalytics, p.file + ' script order');
+      assert.ok(iCss >= 0, p.file + ' theme.css');
+      const lastSheet = Math.max(...[...head.matchAll(/<link rel="stylesheet"[^>]*>/g)].map(m => m.index));
+      assert.ok(head.lastIndexOf('<link rel="stylesheet" href="' + T.css_file) === lastSheet, p.file + ' theme.css must be the last stylesheet');
+    }
+  });
+  test('generated language pages keep data-theme="dark" and root-absolute /theme.js + /theme.css', () => {
+    for (const l of M.languages) for (const p of CONTENT_PAGES) {
+      const rel = `${l}/${p.generated_out_file || p.file}`; const h = read(rel);
+      assert.ok(/data-theme="dark"/.test(h.match(/<html[^>]*>/)[0]), rel + ' html tag');
+      assert.ok(h.includes(`src="/${T.js_file}"`) && h.includes(`href="/${T.css_file}"`), rel + ' theme assets');
+    }
+  });
+  test('internal PMS/agency tools are untouched by the theme foundation', () => {
+    for (const f of M.internal_tools.files) assert.ok(!read(f).includes(T.js_file) && !read(f).includes(T.css_file), f);
+  });
+}
 
 // ---------------------------------------------------------------------------
 section('Booking / PMS — structural preservation (read-only; no Firestore access)');
