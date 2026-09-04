@@ -350,7 +350,7 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-hero-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   linear-gradient(180deg,rgba(4,12,22,.62) 0%,rgba(4,12,22,.14) 26%,rgba(4,12,22,.06) 50%,rgba(4,12,22,.22) 78%,rgba(3,10,18,.66) 100%)}
 .vc-hero-content{position:relative;z-index:5;text-align:center;padding:0 5vw;max-width:820px;will-change:transform,opacity}
-.vc-eyebrow{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);border:1px solid rgba(34,211,238,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
+.vc-eyebrow{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);background:rgba(4,12,22,.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border:1px solid rgba(34,211,238,.45);text-shadow:0 1px 4px rgba(0,0,0,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
 .vc-hero-title{margin-bottom:14px}
 .vc-display{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;color:var(--gold-light);font-size:clamp(30px,4.6vw,52px);line-height:1.05;letter-spacing:.01em;margin-bottom:22px;animation:fadeUp .8s .15s ease both}
 .vc-hero-sub{font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:rgba(255,255,255,.68);max-width:44ch;margin:0 auto 34px;line-height:1.6;animation:fadeUp .8s .22s ease both}
@@ -1283,7 +1283,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <div class="vc-story-inner vc-below-text">
     <div class="vc-eyebrow" data-i18n="below.eyebrow">Below South Ari</div>
     <h2 class="vc-heading vc-heading-sm vc-heading-light"><span data-i18n="below.displayLine1">Whale sharks.</span><br><span data-i18n="below.displayLine2">Manta rays.</span><br><span data-i18n="below.displayLine3">Turtles.</span></h2>
-    <p class="vc-story-sub" data-i18n="below.sub">South Ari Atoll's reef is home to whale sharks and manta rays year-round, alongside turtles and healthy reef life — never a guaranteed sighting, always a real chance.</p>
+    <p class="vc-story-sub" data-i18n="below.sub">South Ari is known for whale sharks, manta rays, turtles and rich marine life. Wildlife sightings are never guaranteed.</p>
     <div class="vc-below-links">
       <a href="whale-shark-snorkeling.html" data-i18n="below.linkWhale">Whale Shark Snorkeling →</a>
       <a href="manta-ray-snorkeling.html" data-i18n="below.linkManta">Manta Ray Snorkeling →</a>
@@ -2047,7 +2047,7 @@ en: {
     "displayLine1": "Whale sharks.",
     "displayLine2": "Manta rays.",
     "displayLine3": "Turtles.",
-    "sub": "South Ari Atoll's reef is home to whale sharks and manta rays year-round, alongside turtles and healthy reef life — never a guaranteed sighting, always a real chance.",
+    "sub": "South Ari is known for whale sharks, manta rays, turtles and rich marine life. Wildlife sightings are never guaranteed.",
     "linkWhale": "Whale Shark Snorkeling →",
     "linkManta": "Manta Ray Snorkeling →",
     "linkGuide": "South Ari marine life →"
@@ -3527,9 +3527,14 @@ else window.addEventListener('load', vcInitCinematicStory);
     var vh = window.innerHeight;
     if(rect.bottom < 0 || rect.top > vh) return;
     var progress = (vh - rect.top) / (rect.height + vh);
+    // Phase 12B-E2A1: the caption was reaching full emphasis too early
+    // (18% into the section) and holding a long plateau, so the Below
+    // heading could peek in before the descent read as finished. Fade-in
+    // is now slower/later (0->34%) and the plateau shorter, so ABOVE ->
+    // gradual descent -> BELOW reads as a real sequence, not an instant cut.
     var op = 1;
-    if(progress < .18) op = progress / .18;
-    else if(progress > .55) op = Math.max(1 - (progress - .55) / .3, 0);
+    if(progress < .34) op = progress / .34;
+    else if(progress > .64) op = Math.max(1 - (progress - .64) / .28, 0);
     descent.style.setProperty('--descent-msg-op', String(Math.max(0, Math.min(1, op))));
   }
   window.addEventListener('scroll', function(){
