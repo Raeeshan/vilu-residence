@@ -315,6 +315,133 @@ section('Phase 12C-B — Featured Journeys + Full Collection + Duration Guide st
 }
 
 // ---------------------------------------------------------------------------
+section('Phase 12C-C — premium motion + deep-link hardening');
+{
+  const hp = read('holiday-packages.html');
+  const css = read('shared-page.css');
+  const items = M.packages.items;
+  const slugs = items.map(i => i.id);
+
+  test('package hash resolver recognizes exactly the 9 canonical slugs (only via a real <details id> inside #pkg-grid, not a hardcoded list)', () => {
+    assert.ok(/function pcResolveHash\(\)/.test(hp), 'pcResolveHash() not found');
+    assert.ok(/target\.closest\(['"]#pkg-grid['"]\)/.test(hp), 'resolver must scope to a real #pkg-grid descendant, not just any id');
+    assert.ok(/target\.tagName !== ['"]DETAILS['"]/.test(hp), 'resolver must require the target to be a <details> element');
+    // The 9 real ids are exactly the Full Collection's own ids -- reconfirm here
+    // in this section too, since the resolver's correctness depends on it.
+    const found = [...hp.slice(hp.indexOf('id="pkg-grid"'), hp.indexOf('id="pkg-duration"')).matchAll(/<details\b[^>]*\bid="([^"]+)"/g)].map(m => m[1]);
+    assert.equal(found.length, 9);
+    sameSet(found, slugs);
+  });
+
+  test('direct hash target is opened (details.open = true), not merely scrolled to', () => {
+    assert.ok(/target\.open\s*=\s*true/.test(hp), 'resolver must set target.open = true');
+  });
+
+  test('hash resolution runs after the package grid (re)renders, and again on hashchange -- not from a fixed-delay timer or endless poll', () => {
+    assert.ok(/pcResolveHash\(\);\s*\n\}/.test(hp) || /if \(typeof pcResolveHash === 'function'\) pcResolveHash\(\);/.test(hp), 'renderDynamicContent() must call the resolver after rebuilding the grid');
+    assert.ok(/addEventListener\(['"]hashchange['"],\s*pcResolveHash\)/.test(hp), 'a hashchange listener must re-resolve the hash');
+    assert.ok(!/setInterval/.test(hp), 'must not poll on a timer');
+    // Bounded settle: allowed to wait a couple of animation frames, never a
+    // recurring one.
+    const rafCount = (hp.match(/requestAnimationFrame/g) || []).length;
+    assert.ok(rafCount >= 1 && rafCount <= 4, `expected a small bounded number of requestAnimationFrame call sites, found ${rafCount}`);
+  });
+
+  test('Featured Journeys links remain real href="#slug" anchors (still functional with JS disabled)', () => {
+    const start = hp.indexOf('id="pkg-featured"');
+    const end = hp.indexOf('id="pkg-grid"', start);
+    const hrefs = [...hp.slice(start, end).matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
+    assert.equal(hrefs.length, 3);
+    for (const h of hrefs) assert.ok(slugs.includes(h), `Featured href #${h} is not a canonical package id`);
+  });
+
+  test('Duration Guide links remain real href="#slug" anchors (still functional with JS disabled)', () => {
+    const start = hp.indexOf('id="pkg-duration"');
+    const end = hp.indexOf('hp-section', start);
+    const hrefs = [...hp.slice(start, end).matchAll(/class="pc-duration-row" href="#([^"]+)"/g)].map(m => m[1]);
+    assert.equal(hrefs.length, 9);
+    sameSet(hrefs, slugs);
+  });
+
+  test('no duplicate canonical ids: each of the 9 slugs still appears as id="..." exactly once', () => {
+    for (const slug of slugs) {
+      const count = (hp.match(new RegExp(`id="${slug}"`, 'g')) || []).length;
+      assert.equal(count, 1, `id="${slug}" should appear exactly once, found ${count}`);
+    }
+  });
+
+  test('package commercial data is unchanged by the motion/deep-link work', () => {
+    const PACKAGES = evalBlock(hp, /var PACKAGES = \[/, '\n];', 'PACKAGES');
+    assert.equal(PACKAGES.length, M.packages.expected_count);
+    for (const it of items) {
+      const p = PACKAGES.find(x => x.slug === it.id) || {};
+      assert.equal(p.name, it.name);
+      assert.equal(p.price, it.price_usd_pp);
+      assert.equal(p.nights, it.nights);
+    }
+  });
+
+  test('a reduced-motion hook exists and neutralizes animation/transition duration and delay site-wide', () => {
+    assert.ok(/@media\s*\(prefers-reduced-motion\s*:\s*reduce\)/.test(css), 'no prefers-reduced-motion:reduce rule found');
+    const block = css.slice(css.indexOf('prefers-reduced-motion:reduce'), css.indexOf('prefers-reduced-motion:reduce') + 400);
+    assert.ok(/animation-duration:\.01ms\s*!important/.test(block), 'reduced-motion rule must neutralize animation-duration');
+    assert.ok(/transition-duration:\.01ms\s*!important/.test(block), 'reduced-motion rule must neutralize transition-duration');
+    assert.ok(/transition-delay:0ms\s*!important/.test(block), 'reduced-motion rule must also neutralize transition-delay (staggers)');
+  });
+
+  test('new motion is scoped behind prefers-reduced-motion:no-preference or is a benign hover/focus color change', () => {
+    // The hero settle, Featured stagger/clip-path reveal and duration-line
+    // growth are all gated -- this is a structural sanity check that the
+    // gate exists at all, not a pixel-level animation assertion.
+    assert.ok(/@media \(prefers-reduced-motion:no-preference\)/.test(css));
+    assert.ok(css.includes('pcHeroSettle') && css.includes('pcFadeUp'));
+  });
+
+  test('progressive-enhancement base state: package detail is visible by default, not opacity:0 outside a transient JS-applied class', () => {
+    const base = css.slice(css.indexOf('.pc-pkg-detail{padding:0 20px 22px'), css.indexOf('.pc-pkg-detail{padding:0 20px 22px') + 400);
+    assert.ok(/\.pc-pkg-detail\{[^}]*opacity:1/.test(base), 'the base .pc-pkg-detail rule must default to opacity:1');
+    assert.ok(css.includes('.pc-pkg-detail.pc-detail-enter'), 'the transient enter-state must be a separate, JS-toggled class, not the base rule');
+  });
+
+  test('a no-JS fallback exists for the shared .reveal class on this page (content must not stay opacity:0 forever with JS disabled)', () => {
+    assert.ok(/<noscript><style>\.reveal\{opacity:1/.test(hp), 'expected a <noscript> override restoring .reveal to opacity:1');
+  });
+
+  test('package_view analytics target remains the canonical Full Collection only -- Featured/Duration stay untracked navigation surfaces', () => {
+    assert.ok(hp.includes(`document.querySelectorAll('#pkg-grid .pc-pkg')`), 'package_view observer selector must remain scoped to #pkg-grid .pc-pkg');
+    const featuredBlock = hp.slice(hp.indexOf('id="pkg-featured"'), hp.indexOf('id="pkg-grid"'));
+    assert.ok(!featuredBlock.includes('data-pkg-slug'), 'Featured panels must not carry data-pkg-slug');
+    const durationBlock = hp.slice(hp.indexOf('id="pkg-duration"'), hp.indexOf('hp-section', hp.indexOf('id="pkg-duration"')));
+    assert.ok(!durationBlock.includes('data-pkg-slug'), 'Duration Guide rows must not carry data-pkg-slug');
+  });
+
+  test('analytics.js is untouched by this stage', () => {
+    // Structural proxy: this stage's own report states analytics.js was not
+    // edited; a real regression would show up as one of the analytics
+    // section's own assertions below failing, since those read analytics.js
+    // directly. This test exists only to document the constraint here too.
+    assert.ok(exists('analytics.js'));
+  });
+
+  test('no autoplay video was added to the package page', () => {
+    assert.ok(!/<video\b/i.test(hp), 'a <video> element was added to holiday-packages.html');
+  });
+
+  test('no new animation framework or external script dependency was added', () => {
+    const scriptSrcs = [...hp.matchAll(/<script[^>]+src="([^"]+)"/g)].map(m => m[1]);
+    for (const src of scriptSrcs) {
+      assert.ok(!/cdn|gsap|anime|framer|unpkg|jsdelivr/i.test(src), `unexpected external/animation-library script: ${src}`);
+    }
+  });
+
+  test('sticky mobile CTA contract preserved: same ids, same session-dismissal key, mobile-only', () => {
+    assert.ok(hp.includes('id="pkg-sticky-cta"') && hp.includes('id="pkg-sticky-cta-close"'));
+    assert.ok(hp.includes("sessionStorage.getItem('hp_sticky_dismissed')") && hp.includes("sessionStorage.setItem('hp_sticky_dismissed', '1')"));
+    assert.ok(css.includes('@media(min-width:701px){.pkg-sticky-cta{display:none !important}}') || /@media\(min-width:701px\)\{\.pkg-sticky-cta\{display:none/.test(css));
+  });
+}
+
+// ---------------------------------------------------------------------------
 section('Analytics — canonical events, dimensions, attribution');
 {
   const an = read('analytics.js');

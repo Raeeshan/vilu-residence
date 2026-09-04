@@ -318,7 +318,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .reveal{opacity:0;transform:translateY(40px) scale(.97);filter:blur(6px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1),filter 1s cubic-bezier(.16,1,.3,1)}
 .reveal.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
 @media (prefers-reduced-motion:reduce){
-  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;transition-delay:0ms !important;scroll-behavior:auto !important}
 }
 
 /* ── PACKAGE CARDS (Holiday Packages page) ── */
@@ -337,8 +337,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .pkg-list{list-style:none;font-size:var(--font-size-sm);color:var(--muted);line-height:1.7}
 .pkg-cta{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .pkg-cta a{flex:1;text-align:center;font-size:var(--font-size-xs);padding:12px 14px}
-.pkg-cta-alt{display:block;text-align:center;margin-top:10px;font-size:var(--font-size-xs);color:var(--muted);text-decoration:none}
-.pkg-cta-alt:hover{color:var(--gold-light);text-decoration:underline}
+.pkg-cta-alt{display:block;text-align:center;margin-top:10px;font-size:var(--font-size-xs);color:var(--muted);text-decoration:none;transition:color var(--pc-micro,220ms) ease,letter-spacing var(--pc-micro,220ms) ease}
+.pkg-cta-alt:hover{color:var(--gold-light);text-decoration:underline;letter-spacing:.008em}
 
 /* ══ Phase 12C-B: Holiday Packages editorial redesign ══
    Page-scoped `.pc-` namespace (holiday-packages.html only) so nothing here
@@ -359,9 +359,17 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
    not three equal cards. */
 .pc-featured{display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:20px;margin-top:32px}
 .pc-featured-panel{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;text-decoration:none;box-shadow:0 20px 50px rgba(0,4,10,.3);transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s}
-.pc-featured-panel:hover{transform:translateY(-4px);box-shadow:0 26px 60px rgba(14,116,144,.2)}
 .pc-featured-flagship{grid-row:1 / 3}
-.pc-featured-img{width:100%;object-fit:cover;display:block}
+.pc-featured-img{width:100%;object-fit:cover;display:block;transition:transform var(--pc-interface,450ms) var(--pc-ease,cubic-bezier(.16,1,.3,1))}
+/* Featured hover — desktop pointer devices only (item 7): panel lift + tiny
+   image zoom + arrow nudge. Touch/no-hover devices get none of this, so
+   there is no hover-dependent affordance a touch visitor could miss. */
+@media (hover:hover) and (pointer:fine){
+  .pc-featured-panel:hover{transform:translateY(-4px);box-shadow:0 26px 60px rgba(14,116,144,.2)}
+  .pc-featured-panel:hover .pc-featured-img{transform:scale(1.03)}
+  .pc-featured-panel:hover .pc-arrow{transform:translateX(4px)}
+}
+.pc-arrow{display:inline-block;transition:transform var(--pc-micro,220ms) var(--pc-ease,ease)}
 .pc-featured-secondary .pc-featured-img{aspect-ratio:16/9}
 .pc-featured-body{padding:22px;display:flex;flex-direction:column;flex-shrink:0}
 .pc-featured-flagship .pc-featured-body{padding:30px}
@@ -401,15 +409,50 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .pc-pkg-toggle{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;color:var(--gold-light);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;text-align:center;width:52px}
 .pc-pkg-toggle i{font-size:18px;transition:transform .25s}
 .pc-pkg[open] .pc-pkg-toggle i{transform:rotate(180deg)}
-.pc-pkg-detail{padding:0 20px 22px;border-top:1px solid var(--border);margin-top:2px}
+.pc-pkg-detail{padding:0 20px 22px;border-top:1px solid var(--border);margin-top:2px;opacity:1;transform:translateY(0);transition:opacity var(--pc-interface,400ms) var(--pc-ease,cubic-bezier(.16,1,.3,1)),transform var(--pc-interface,400ms) var(--pc-ease,cubic-bezier(.16,1,.3,1))}
 .pc-pkg-detail .pkg-section-label:first-child{margin-top:16px}
 .pc-pkg-save{font-size:var(--font-size-xs);color:var(--muted);margin-top:6px}
+/* Decorative reveal-on-open only (item 9/24) — native <details> already
+   shows this content instantly and correctly with zero JS/CSS; JS (see
+   holiday-packages.html) briefly applies this class right as a package
+   opens so the content settles in rather than snapping, then removes it.
+   The base rule above is always the fully-visible resting state, so a
+   visitor with JS disabled, or whose JS runs before this class exists,
+   or under reduced motion, sees the exact same fully-visible content. */
+.pc-pkg-detail.pc-detail-enter{opacity:0;transform:translateY(8px);transition:none}
+/* One-shot confirmation after arriving via a package deep link (item 18) —
+   never a flash/glow, and only ever applied then removed by JS once. */
+.pc-pkg.pc-deep-link-emphasis{border-color:var(--gold-light);transition:border-color 1.1s var(--pc-ease,ease)}
 
 /* Duration Guide: a restrained vertical list, never a spreadsheet-style
    matrix and never a price-per-night figure (Phase 12C-B §4/§15/§21). */
-.pc-duration{display:flex;flex-direction:column;gap:1px;margin-top:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.pc-duration-row{display:flex;align-items:baseline;gap:16px;padding:14px 20px;background:var(--card);text-decoration:none;transition:background .2s;flex-wrap:wrap}
+.pc-duration{display:flex;flex-direction:column;gap:1px;margin-top:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative}
+.pc-duration-row{display:flex;align-items:baseline;gap:16px;padding:14px 20px;background:var(--card);text-decoration:none;transition:background .2s,border-color var(--pc-interface,450ms) var(--pc-ease,ease);flex-wrap:wrap;border-inline-start:2px solid transparent}
 .pc-duration-row:hover{background:var(--surface-secondary,var(--card))}
+/* One elegant, decorative motion idea for this section (item 11): a thin
+   progression line grows down the list as it enters view, and each row's
+   left edge picks up a brief accent, sequenced roughly as the line reaches
+   it. Content itself (text, prices, links) is never gated behind this --
+   the pseudo-element and border-accent are purely decorative additions on
+   top of rows that are already fully visible, so this degrades to "no
+   line, plain rows" with zero JS/motion/reduced-motion support. */
+@media (prefers-reduced-motion:no-preference){
+  .pc-duration.reveal::before{
+    content:'';position:absolute;inset-inline-start:0;top:0;width:2px;height:0;background:var(--gold-light);
+    transition:height 1s var(--pc-ease,cubic-bezier(.16,1,.3,1)) .1s;
+  }
+  .pc-duration.reveal.visible::before{height:100%}
+  .pc-duration-row:nth-child(n+1){transition-delay:0ms}
+  .pc-duration-row:nth-child(n+2){transition-delay:45ms}
+  .pc-duration-row:nth-child(n+3){transition-delay:90ms}
+  .pc-duration-row:nth-child(n+4){transition-delay:135ms}
+  .pc-duration-row:nth-child(n+5){transition-delay:180ms}
+  .pc-duration-row:nth-child(n+6){transition-delay:225ms}
+  .pc-duration-row:nth-child(n+7){transition-delay:270ms}
+  .pc-duration-row:nth-child(n+8){transition-delay:315ms}
+  .pc-duration-row:nth-child(n+9){transition-delay:360ms}
+  .pc-duration.reveal.visible .pc-duration-row{border-inline-start-color:var(--gold-light)}
+}
 .pc-duration-nights{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-lg);font-weight:600;color:var(--white);min-width:90px}
 .pc-duration-name{flex:1;min-width:150px;font-size:var(--font-size-sm);color:var(--muted)}
 .pc-duration-price{font-size:var(--font-size-sm);color:var(--white);white-space:nowrap}
@@ -430,6 +473,63 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
   .pc-duration-nights{min-width:64px;font-size:var(--font-size-base)}
 }
 
+/* ══ Phase 12C-C: premium package-page motion + deep-link hardening ══
+   Page-scoped motion tokens -- holiday-packages.html only, via the same
+   body[data-page-type="package"] scope already used to keep hero styling
+   off every other page that loads this stylesheet. Three levels per the
+   approved spec: micro (buttons/badges/chevrons), interface (package
+   expansion/reveal/sticky CTA), cinematic (hero, Featured imagery). */
+body[data-page-type="package"]{
+  --pc-micro:220ms; --pc-interface:450ms; --pc-cinematic:1100ms;
+  --pc-ease:cubic-bezier(.16,1,.3,1);
+}
+
+/* Hero entrance -- pure CSS, no JS, plays once per page paint (so it also
+   runs correctly with JS fully disabled). The image settle lives on ::after
+   (::before is already the page's darkening gradient overlay) at a negative
+   z-index so paint order stays: base bg -> ::after (animated photo copy) ->
+   ::before (gradient) -> .page-header-inner (text) -- i.e. the gradient's
+   legibility contrast is never covered by the new layer. Text gets its own
+   opacity+translateY stagger, entirely separate from the image's scale, per
+   the "one dominant reveal" rule -- a clip-path mask was tried and dropped:
+   combined with the scale settle it read as fussy, not premium (item 5). */
+body[data-page-type="package"] .page-header::after{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background-image:inherit;background-position:center;background-size:cover;
+  transform-origin:center;
+}
+@media (prefers-reduced-motion:no-preference){
+  body[data-page-type="package"] .page-header::after{animation:pcHeroSettle var(--pc-cinematic) var(--pc-ease) both}
+  body[data-page-type="package"] .pc-hero-eyebrow{animation:pcFadeUp var(--pc-interface) var(--pc-ease) both;animation-delay:.15s}
+  body[data-page-type="package"] .page-h1{animation:pcFadeUp var(--pc-interface) var(--pc-ease) both;animation-delay:.3s}
+  body[data-page-type="package"] .pc-hero-display{animation:pcFadeUp var(--pc-interface) var(--pc-ease) both;animation-delay:.45s}
+}
+@keyframes pcHeroSettle{from{transform:scale(1.035)}to{transform:scale(1)}}
+@keyframes pcFadeUp{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}
+
+/* Featured Journeys premium reveal (item 6) -- the three panels arrive as a
+   restrained cascade (0/80/160ms), each panel's own image getting the
+   cinematic-length settle since it is the single dominant reveal per panel;
+   deliberately NOT also staggering every individual text line inside each
+   panel on top of that -- see the 12C-C report's motion-quality note on
+   why that reads as over-engineered rather than more premium. */
+@media (prefers-reduced-motion:no-preference){
+  #pkg-featured.reveal .pc-featured-panel{opacity:0;transform:translateY(16px);transition:opacity var(--pc-interface) var(--pc-ease),transform var(--pc-interface) var(--pc-ease)}
+  #pkg-featured.reveal.visible .pc-featured-panel{opacity:1;transform:translateY(0)}
+  #pkg-featured.reveal .pc-featured-panel:nth-child(1){transition-delay:0ms}
+  #pkg-featured.reveal .pc-featured-panel:nth-child(2){transition-delay:80ms}
+  #pkg-featured.reveal .pc-featured-panel:nth-child(3){transition-delay:160ms}
+  #pkg-featured.reveal .pc-featured-img{clip-path:inset(0 0 6% 0);transition:clip-path var(--pc-cinematic) var(--pc-ease),transform var(--pc-cinematic) var(--pc-ease)}
+  #pkg-featured.reveal.visible .pc-featured-img{clip-path:inset(0 0 0 0)}
+}
+
+/* Mobile: shorter travel, no stagger, no image mask -- item 21/30. */
+@media (max-width:600px){
+  #pkg-featured.reveal .pc-featured-panel{transform:translateY(8px)}
+  #pkg-featured.reveal .pc-featured-panel:nth-child(1),#pkg-featured.reveal .pc-featured-panel:nth-child(2),#pkg-featured.reveal .pc-featured-panel:nth-child(3){transition-delay:0ms}
+  #pkg-featured.reveal .pc-featured-img{clip-path:none}
+}
+
 /* ── HOLIDAY PACKAGES: intro / accommodation / trust sections ── */
 .hp-section{max-width:70ch}
 .hp-section p{font-size:var(--font-size-base);color:var(--muted);line-height:1.75;margin-top:10px}
@@ -448,12 +548,20 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 }
 
 /* ── HOLIDAY PACKAGES: generic mobile sticky CTA (non-package-aware) ── */
-.pkg-sticky-cta{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:800;background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 12px 30px rgba(0,4,10,.4);padding:12px 16px;align-items:center;justify-content:space-between;gap:10px;transform:translateY(140%);transition:transform .3s ease;display:none}
-.pkg-sticky-cta.visible{display:flex;transform:translateY(0)}
+/* Phase 12C-C (item 20): switched the show/hide mechanism from display:none
+   (which cannot transition) to visibility+opacity+transform, so the bar now
+   actually enters/leaves with a translateY+opacity settle instead of
+   snapping into place -- no bounce, no pulse, single one-shot transition
+   each way. visibility:hidden keeps it out of the accessibility tree and
+   tab order exactly like display:none did (no a11y change), and the
+   transitioned visibility flip is delayed on the way out / instant on the
+   way in so it stays paintable for the full fade. */
+.pkg-sticky-cta{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:800;background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 12px 30px rgba(0,4,10,.4);padding:12px 16px;align-items:center;justify-content:space-between;gap:10px;transform:translateY(140%);opacity:0;visibility:hidden;pointer-events:none;transition:transform var(--pc-interface,350ms) var(--pc-ease,ease),opacity var(--pc-interface,350ms) var(--pc-ease,ease),visibility 0s linear var(--pc-interface,350ms);display:flex}
+.pkg-sticky-cta.visible{transform:translateY(0);opacity:1;visibility:visible;pointer-events:auto;transition:transform var(--pc-interface,350ms) var(--pc-ease,ease),opacity var(--pc-interface,350ms) var(--pc-ease,ease),visibility 0s linear}
 .pkg-sticky-cta-link{color:var(--white);text-decoration:none;font-size:var(--font-size-sm);font-weight:500;flex:1}
 .pkg-sticky-cta-link i{color:var(--teal-light);margin-right:6px}
 .pkg-sticky-cta-close{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px;flex-shrink:0}
-@media(min-width:701px){.pkg-sticky-cta.visible{display:none}}
+@media(min-width:701px){.pkg-sticky-cta{display:none !important}}
 /* Reserved bottom clearance while the sticky bar is showing, so content at
    the very end of the page (closing CTA, footer) can still be scrolled clear
    of the bar's fixed footprint. Toggled by JS alongside .visible; removed on

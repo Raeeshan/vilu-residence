@@ -98,6 +98,18 @@
 <link rel="stylesheet" href="/theme.css">
 </head>
 <body data-page-type="package" data-page-slug="holiday-packages">
+<!-- Progressive-enhancement safety (Phase 12C-C item 7/24-26): the shared
+     .reveal class (used site-wide, not introduced by this page) relies on
+     shared-page-i18n.js's initReveal() to add .visible and make its content
+     opaque -- with JS fully disabled that script never runs, so every
+     .reveal section on this page (intro, Featured Journeys, Duration
+     Guide, etc.) would otherwise stay at its CSS opacity:0 base state
+     forever, even though the content itself is fully present in the DOM.
+     This noscript override is the standard, zero-risk fix: browsers only
+     apply it when JS is disabled, so it has no effect at all on the normal
+     JS-enabled experience. Scoped to this page only, not shared-page.css,
+     to keep the change's blast radius to exactly the page this stage owns. -->
+<noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 
 <nav id="nav" aria-label="Основная навигация" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
@@ -274,7 +286,7 @@
        no duplicated Includes/Activities/Add-Ons here (Phase 12C-B §9/§10).
        Rendered by renderDynamicContent(); prerendered into this file's own
        raw HTML by build-i18n-pages.js, same pattern as #pkg-grid below. -->
-  <div id="pkg-featured" class="pc-featured reveal"><a class="pc-featured-panel pc-featured-flagship" href="#maldives-dream-bliss"><img class="pc-featured-img" src="/images/dolphin_pod_gallery.jpg" alt="Pod of dolphins swimming off the coast of South Ari Atoll" loading="lazy"><div class="pc-featured-body"><span class="pkg-badge pc-featured-badge">Самый популярный</span><div class="pc-featured-name">Мальдивское блаженство мечты</div><div class="pc-featured-meta"><span class="pkg-price">$700</span> <span class="pkg-price-unit">с человека · 7 ночей</span></div><p class="pc-featured-hook">Целая неделя, построенная вокруг китовых акул, скатов манта и поездки на песчаную отмель, а завершается всё круизом с дельфинами на закате.</p><span class="pc-featured-link">View Journey →</span></div></a><a class="pc-featured-panel pc-featured-secondary" href="#ultimate-maldives-odyssey"><img class="pc-featured-img" src="/images/whale_shark_2_gallery.jpg" alt="Whale shark feeding near the surface off Maamigili, Maldives" loading="lazy"><div class="pc-featured-body"><span class="pkg-badge pc-featured-badge">Лучшая цена</span><div class="pc-featured-name">Незабываемая одиссея по Мальдивам</div><div class="pc-featured-meta"><span class="pkg-price">$940</span> <span class="pkg-price-unit">с человека · 10 ночей</span></div><p class="pc-featured-hook">Десять полных дней со всеми фирменными впечатлениями, которые предлагает Vilu Residence — от китовых акул до приватного пикника на песчаной отмели — по нашему лучшему тарифу за ночь.</p><span class="pc-featured-link">View Journey →</span></div></a><a class="pc-featured-panel pc-featured-secondary" href="#honeymoon-dream-escape"><img class="pc-featured-img" src="/images/vilu-residence-couple-sunset-beach-maldives.jpg" alt="Couple watching the sunset on the beach at Vilu Residence, Maldives" loading="lazy"><div class="pc-featured-body"><span class="pkg-badge pc-featured-badge">Специальное предложение для медового месяца</span><div class="pc-featured-name">Медовый месяц мечты</div><div class="pc-featured-meta"><span class="pkg-price">$1100</span> <span class="pkg-price-unit">с человека · 10 ночей</span></div><p class="pc-featured-hook">Десять ночей, созданных для двоих. Наблюдайте закат за романтическим ужином на пляже, отправьтесь на ночную рыбалку при свете фонаря и насладитесь всеми фирменными впечатлениями — и всё это на вашем личном участке океана.</p><span class="pc-featured-link">View Journey →</span></div></a></div>
+  <div id="pkg-featured" class="pc-featured reveal"><a class="pc-featured-panel pc-featured-flagship" href="#maldives-dream-bliss"><img class="pc-featured-img" src="/images/dolphin_pod_gallery.jpg" alt="Pod of dolphins swimming off the coast of South Ari Atoll" loading="lazy"><div class="pc-featured-body"><span class="pkg-badge pc-featured-badge">Самый популярный</span><div class="pc-featured-name">Мальдивское блаженство мечты</div><div class="pc-featured-meta"><span class="pkg-price">$700</span> <span class="pkg-price-unit">с человека · 7 ночей</span></div><p class="pc-featured-hook">Целая неделя, построенная вокруг китовых акул, скатов манта и поездки на песчаную отмель, а завершается всё круизом с дельфинами на закате.</p><span class="pc-featured-link">View Journey <span class="pc-arrow">→</span></span></div></a><a class="pc-featured-panel pc-featured-secondary" href="#ultimate-maldives-odyssey"><img class="pc-featured-img" src="/images/whale_shark_2_gallery.jpg" alt="Whale shark feeding near the surface off Maamigili, Maldives" loading="lazy"><div class="pc-featured-body"><span class="pkg-badge pc-featured-badge">Лучшая цена</span><div class="pc-featured-name">Незабываемая одиссея по Мальдивам</div><div class="pc-featured-meta"><span class="pkg-price">$940</span> <span class="pkg-price-unit">с человека · 10 ночей</span></div><p class="pc-featured-hook">Десять полных дней со всеми фирменными впечатлениями, которые предлагает Vilu Residence — от китовых акул до приватного пикника на песчаной отмели — по нашему лучшему тарифу за ночь.</p><span class="pc-featured-link">View Journey <span class="pc-arrow">→</span></span></div></a><a class="pc-featured-panel pc-featured-secondary" href="#honeymoon-dream-escape"><img class="pc-featured-img" src="/images/vilu-residence-couple-sunset-beach-maldives.jpg" alt="Couple watching the sunset on the beach at Vilu Residence, Maldives" loading="lazy"><div class="pc-featured-body"><span class="pkg-badge pc-featured-badge">Специальное предложение для медового месяца</span><div class="pc-featured-name">Медовый месяц мечты</div><div class="pc-featured-meta"><span class="pkg-price">$1100</span> <span class="pkg-price-unit">с человека · 10 ночей</span></div><p class="pc-featured-hook">Десять ночей, созданных для двоих. Наблюдайте закат за романтическим ужином на пляже, отправьтесь на ночную рыбалку при свете фонаря и насладитесь всеми фирменными впечатлениями — и всё это на вашем личном участке океана.</p><span class="pc-featured-link">View Journey <span class="pc-arrow">→</span></span></div></a></div>
 
   <div class="hp-section reveal" style="margin-top:56px">
     <div class="section-tag" data-i18n="hpPage.collectionTag">The Full Collection</div>
@@ -733,7 +745,7 @@ function renderDynamicContent(){
           + '<div class="pc-featured-name">'+td(p.name)+'</div>'
           + '<div class="pc-featured-meta"><span class="pkg-price">$'+p.price+'</span> <span class="pkg-price-unit">'+t('hpPage.ppLabel')+' · '+p.nights+' '+nightWord+'</span></div>'
           + '<p class="pc-featured-hook">'+td(p.desc)+'</p>'
-          + '<span class="pc-featured-link">'+t('hpPage.viewJourney')+' &rarr;</span>'
+          + '<span class="pc-featured-link">'+t('hpPage.viewJourney')+' <span class="pc-arrow">&rarr;</span></span>'
         + '</div>'
       + '</a>';
     }).join('');
@@ -762,6 +774,13 @@ function renderDynamicContent(){
   }
 
   pkgObserveCardViews();
+  // Phase 12C-C item 14: the package grid above was just (re)built, so this
+  // is the one moment guaranteed to run AFTER real <details id="slug">
+  // elements exist -- resolving the hash HERE, rather than from a separate
+  // DOMContentLoaded listener racing this render, is the actual fix for the
+  // race 12C-A found. Also re-runs correctly after a language switch
+  // rebuilds the grid (setLanguage() calls renderDynamicContent() again).
+  if (typeof pcResolveHash === 'function') pcResolveHash();
 }
 var PAGE_META_NS = 'hpMeta';
 
@@ -845,6 +864,115 @@ if (typeof document !== 'undefined' && document.addEventListener) {
 }
 
 // ══════════════════════════════════════════════════════
+// Phase 12C-C: package deep-link hardening (items 13-18).
+//
+// Contract: holiday-packages.html#<slug> must reliably open the canonical
+// package and scroll it into view below the fixed nav, for a direct load,
+// a Featured Journey click, a Duration Guide click, a manual hash edit,
+// and browser Back/Forward -- without racing the package-grid (re)render
+// (see the pcResolveHash() call at the end of renderDynamicContent() above,
+// which is the actual fix for the race 12C-A found) and without ever
+// closing a package the visitor already opened themselves.
+//
+// Guarded on `typeof document` for the same reason as every other browser-
+// only block in this file — inert no-op under the static-build tooling's
+// documentless Node sandbox.
+// ══════════════════════════════════════════════════════
+if (typeof document !== 'undefined' && document.addEventListener) {
+  (function(){
+    function prefersReducedMotion(){
+      try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) { return false; }
+    }
+    function navOffset(){
+      var nav = document.getElementById('nav');
+      return (nav ? nav.offsetHeight : 0) + 16;
+    }
+    // One-shot, bounded settle: native <details>.open=true and the resulting
+    // layout change are synchronous, but geometry can lag a paint on some
+    // engines -- two animation frames (never a poll, never a timer loop) is
+    // the smallest reliable wait, then this stops. See item 14.
+    function afterLayoutSettles(fn){
+      requestAnimationFrame(function(){ requestAnimationFrame(fn); });
+    }
+    function emphasize(target){
+      if (prefersReducedMotion()) return;
+      target.classList.add('pc-deep-link-emphasis');
+      setTimeout(function(){ target.classList.remove('pc-deep-link-emphasis'); }, 1200);
+    }
+    function scrollToTarget(target){
+      var top = target.getBoundingClientRect().top + window.scrollY - navOffset();
+      window.scrollTo({ top: top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    }
+    // Focus is deliberately NOT forced here (item 13 permits skipping it
+    // when it could create an accessibility problem): <summary> is already
+    // natively focusable and reachable by normal tab order, and yanking
+    // focus on every hashchange/back/forward — including ones the visitor
+    // didn't directly click — is a well-known disorientation risk for
+    // keyboard/AT users. Visual scroll position + a brief emphasis is the
+    // safer confirmation.
+    function openAndScroll(target){
+      if (!target.open) target.open = true;
+      afterLayoutSettles(function(){
+        scrollToTarget(target);
+        emphasize(target);
+      });
+    }
+    function pcResolveHash(){
+      var raw = window.location.hash.replace(/^#/, '');
+      if (!raw) return;
+      var slug;
+      try { slug = decodeURIComponent(raw); } catch(e) { slug = raw; }
+      var target = document.getElementById(slug);
+      // Only ever acts on a real canonical Full Collection record — never
+      // opens/scrolls anything for an unrelated in-page id (item 13/35).
+      if (!target || target.tagName !== 'DETAILS' || !target.closest('#pkg-grid')) return;
+      openAndScroll(target);
+    }
+    window.pcResolveHash = pcResolveHash;
+
+    // Featured Journey / Duration Guide clicks (items 16/17): both remain
+    // real <a href="#slug"> the whole time — no-JS visitors get the
+    // browser's own native anchor jump and land on the real record. With
+    // JS, intercept just enough to replace the raw native jump (which has
+    // no header-offset awareness and would land the heading under the
+    // fixed nav) with the same positioning pcResolveHash() already does.
+    document.addEventListener('click', function(e){
+      var a = e.target.closest('#pkg-featured a[href^="#"], #pkg-duration a[href^="#"]');
+      if (!a) return;
+      var slug = a.getAttribute('href').slice(1);
+      var target = document.getElementById(slug);
+      if (!target || target.tagName !== 'DETAILS' || !target.closest('#pkg-grid')) return;
+      e.preventDefault();
+      if (window.location.hash === '#' + slug) { openAndScroll(target); }
+      else { window.location.hash = slug; }
+    });
+
+    // Manual hash edits, browser Back/Forward (item 15): does not touch any
+    // other package's open/closed state — a visitor who opened several
+    // packages themselves keeps them open.
+    window.addEventListener('hashchange', pcResolveHash);
+
+    // Package-detail reveal-on-open (item 9) — purely decorative layer on
+    // top of native <details>, which has already shown the content
+    // correctly and instantly with zero JS by the time this runs. One
+    // delegated listener (native `toggle` does not bubble, but DOES reach a
+    // capture-phase ancestor listener) instead of one per package.
+    var grid = document.getElementById('pkg-grid');
+    if (grid) {
+      grid.addEventListener('toggle', function(e){
+        var details = e.target;
+        if (!details || details.tagName !== 'DETAILS' || !details.open) return;
+        var content = details.querySelector('.pc-pkg-detail');
+        if (!content) return;
+        content.classList.add('pc-detail-enter');
+        void content.offsetHeight; // force reflow so the enter state paints before removal
+        content.classList.remove('pc-detail-enter');
+      }, true);
+    }
+  })();
+}
+
+// ══════════════════════════════════════════════════════
 // Generic mobile sticky CTA — v1, simplified per approved spec: not
 // package-aware, no IntersectionObserver-driven package selection. Shows
 // once the visitor scrolls past the header/intro, mobile widths only,
@@ -873,6 +1001,11 @@ if (typeof document !== 'undefined' && document.addEventListener) {
         // (closing CTA, footer) can still be scrolled clear of the bar's
         // fixed footprint — removed immediately on dismiss below.
         document.body.classList.add('pkg-sticky-clearance');
+        // Phase 12C-C item 43: this listener's only job is deciding WHEN to
+        // show the bar once; once that has happened there is nothing left
+        // for it to do, so it removes itself instead of running on every
+        // scroll tick for the rest of the page's life.
+        window.removeEventListener('scroll', maybeShow);
       }
     }
     window.addEventListener('scroll', maybeShow, {passive:true});
