@@ -32,8 +32,23 @@ function test(name, fn) {
 function section(t) { console.log(`\n# ${t}`); }
 
 const cache = new Map();
+// Line endings are normalized to LF here so every assertion below tests the
+// SAME source logic regardless of the checkout's line-ending representation.
+// core.autocrlf=true (a standard, expected Windows git setting -- left
+// untouched, not something this harness should fight) converts LF blobs to
+// CRLF on checkout; a handful of assertions match multi-line literal text
+// (e.g. faqWireExpandTracking's closing braces), and those hardcode `\n`.
+// Without this, the exact same commit can show a different preservation
+// result purely depending on which machine/worktree checked it out -- a
+// false regression signal, not a real one. Two call sites intentionally
+// read raw bytes instead of going through read() and are correctly left
+// alone: the consent.js/analytics.js sha256 baseline fingerprint check
+// (line-ending changes to those files SHOULD be caught, byte-exactness is
+// the point) and the harness's own self-referential no-network-import check
+// (a single-line regex test, already checkout-format-independent).
+function normalizeLineEndings(s) { return s.replace(/\r\n?/g, '\n'); }
 function read(rel) {
-  if (!cache.has(rel)) cache.set(rel, fs.readFileSync(path.join(ROOT, rel), 'utf8'));
+  if (!cache.has(rel)) cache.set(rel, normalizeLineEndings(fs.readFileSync(path.join(ROOT, rel), 'utf8')));
   return cache.get(rel);
 }
 function exists(rel) { return fs.existsSync(path.join(ROOT, rel)); }
@@ -74,6 +89,26 @@ function evalBlock(src, startRe, endStr, varName) {
 
 const CONTENT_PAGES = M.pages.filter(p => p.translated !== false);       // 14 (everything except 404)
 const SITEMAP_PAGES = M.pages.filter(p => p.in_sitemap);                  // 12
+
+// ---------------------------------------------------------------------------
+section('Test harness self-check — line-ending normalization (Phase 12B-E2F)');
+{
+  test('normalizeLineEndings() makes LF and CRLF (and lone-CR) input produce identical output', () => {
+    const lf = 'trustedActivation = false;\n    });\n  });';
+    const crlf = 'trustedActivation = false;\r\n    });\r\n  });';
+    const cr = 'trustedActivation = false;\r    });\r  });';
+    assert.equal(normalizeLineEndings(crlf), lf);
+    assert.equal(normalizeLineEndings(cr), lf);
+    assert.equal(normalizeLineEndings(lf), lf); // already-LF input is a no-op
+  });
+  test('read() returns LF-normalized content regardless of the checked-out file\'s actual line endings', () => {
+    // Doesn't assert a specific line-ending byte in vilu-website.html (that's
+    // a checkout-time artifact, not something this suite should pin down) --
+    // only that whatever read() hands back never contains a \r, so every
+    // multi-line literal match downstream is checkout-format-independent.
+    assert.ok(!read('vilu-website.html').includes('\r'), 'read() output must never contain \\r');
+  });
+}
 
 // ---------------------------------------------------------------------------
 section('URLs / SEO — English source pages');
