@@ -34,7 +34,7 @@
       "jsonld_types": ["LodgingBusiness", "Organization", "BreadcrumbList"],
       "faq_count": 0,
       "required_ids": ["booking", "booking-full-page", "bookingPopupOverlay", "rooms", "hp-grid", "exp-grid", "faq-list", "hamburger", "mobileMenu", "gh-grid"],
-      "required_anchors": ["#about", "#rooms", "#booking", "#gallery", "#travel-info", "#contact", "#holiday-packages", "#experiences"]
+      "required_anchors": ["#what-is-vilu", "#rooms", "#booking", "#gallery", "#travel-info", "#contact", "#holiday-packages", "#experiences", "#faq", "#closing"]
     },
     {
       "file": "holiday-packages.html",
@@ -444,7 +444,8 @@
   "navigation": {
     "$comment": "Required destinations reachable from the shared header on every content page (holiday-packages.html used as reference markup).",
     "reference_page": "holiday-packages.html",
-    "required_hrefs": ["/", "holiday-packages.html", "whale-shark-snorkeling.html", "manta-ray-snorkeling.html", "things-to-do-maamigili.html", "maamigili-guide.html", "south-ari-atoll-guide.html", "best-local-islands-snorkeling.html", "south-ari-vs-other-regions.html", "best-time-to-visit.html", "maldives-holiday-cost.html", "guesthouse-vs-resort.html", "/#about", "/#rooms", "/#booking", "/#gallery", "/#travel-info", "/#contact"],
+    "$comment_about": "Phase 12B-E2B replaced the homepage's #about section with #what-is-vilu (old About content absorbed into it / Homecoming); the other 13 content pages' shared nav copy is untouched this stage and still legitimately points at /#about -- see the two dedicated 'about-link' tests below rather than the generic required_hrefs loop, which can't express a homepage-only exception.",
+    "required_hrefs": ["/", "holiday-packages.html", "whale-shark-snorkeling.html", "manta-ray-snorkeling.html", "things-to-do-maamigili.html", "maamigili-guide.html", "south-ari-atoll-guide.html", "best-local-islands-snorkeling.html", "south-ari-vs-other-regions.html", "best-time-to-visit.html", "maldives-holiday-cost.html", "guesthouse-vs-resort.html", "/#rooms", "/#booking", "/#gallery", "/#travel-info", "/#contact"],
     "home_href_alternatives": ["/", "#home", "/#home"],
     "required_classes": ["nav-drop", "nav-drop-trigger", "nav-drop-panel", "js-check-availability", "js-live-availability", "btn-plan-holiday", "lang-switcher", "nav-hamburger"],
     "hamburger_id": "hamburger",

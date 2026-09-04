@@ -550,6 +550,24 @@ section('Navigation / footer IA');
   });
   test('nav-shell.js is loaded by every content page', () => { for (const p of CONTENT_PAGES) assert.ok(/<script[^>]+src="\/?nav-shell\.js"/.test(read(p.file)), p.file); });
 
+  // Phase 12B-E2B: the homepage's #about section became #what-is-vilu (old
+  // About content absorbed there / into Homecoming); every OTHER content
+  // page's shared nav copy is untouched this stage and must still point at
+  // /#about -- required_hrefs can't express a homepage-only exception, so
+  // this is asserted explicitly instead (see the manifest's $comment_about).
+  test('non-homepage content pages still link "Vilu Residence" nav destination to /#about (unchanged this stage)', () => {
+    for (const p of CONTENT_PAGES) {
+      if (p.url_path === '/') continue;
+      assert.ok(read(p.file).includes('href="/#about"'), p.file);
+    }
+  });
+  test('homepage nav + footer link "Vilu Residence" destination to #what-is-vilu, not the removed #about', () => {
+    const h = read('vilu-website.html');
+    assert.ok(h.includes('href="#what-is-vilu"'), 'missing href="#what-is-vilu"');
+    assert.ok(!h.includes('href="#about"'), 'stale href="#about" still present');
+    assert.ok(!/id="about"/.test(h), '#about section should be removed, not just unlinked');
+  });
+
   // ── Phase 12B-D global shell contracts ──
   const S = N.shell;
   const navBlock = (h) => { const s = h.indexOf('<nav id="nav"'); return h.slice(s, h.indexOf('</nav>', s)); };
@@ -666,6 +684,89 @@ test('self-hosted webfonts remain (shared-page.css -> /fonts/webfonts/, font-dis
   assert.ok(!/font-display\s*:\s*(block|auto|optional)/.test(css));
   assert.ok(exists(M.performance.icon_font_css));
 });
+
+// ---------------------------------------------------------------------------
+section('Phase 12B-E2B — complete cinematic homepage contracts');
+{
+  const h = read('vilu-website.html');
+  const GUIDE_HREFS = [
+    'south-ari-atoll-guide.html', 'maamigili-guide.html', 'best-local-islands-snorkeling.html',
+    'south-ari-vs-other-regions.html', 'best-time-to-visit.html', 'whale-shark-snorkeling.html',
+    'guesthouse-vs-resort.html', 'maldives-holiday-cost.html', 'things-to-do-maamigili.html'
+  ];
+  test('all 9 guide links remain, each with related_content_click tracking', () => {
+    for (const href of GUIDE_HREFS) {
+      const re = new RegExp(`<a href="${href}" onclick="trackEvent\\('related_content_click'`);
+      assert.ok(re.test(h), href);
+    }
+  });
+  test('homepage package rail/featured links point at holiday-packages.html#<slug> (real anchors, no JS-only nav)', () => {
+    assert.ok(h.includes("href=\"holiday-packages.html#'+slug+'\""), 'featured card view-full-details link');
+    assert.ok(h.includes("href=\"holiday-packages.html#'+slug+'\">'+t('packages.viewPackage')"), 'rail item view-package link');
+  });
+  test('every package (featured + rail) still carries id="package-<slug>" + data-pkg-id/name/nights for package_view + deep-link handling', () => {
+    assert.ok(/id="package-'\+slug\+'"[^>]*data-pkg-id="'\+p\.id\+'"/.test(h), 'featured card attrs');
+    assert.ok(/hp-rail-item" id="package-'\+slug\+'"[^>]*data-pkg-id="'\+p\.id\+'"/.test(h), 'rail item attrs');
+    assert.ok(h.includes("document.querySelectorAll('#hp-grid [data-pkg-id]').forEach(function(card){ hpViewObserver.observe(card); })"), 'package_view observer covers both featured + rail');
+  });
+  test('package names use semantic <h3> in both the featured card and rail items', () => {
+    assert.ok(h.includes('<h3 class="hp-name">') && h.includes('<h3 class="hp-rail-name">'), 'package h3s');
+  });
+  test('Live Availability fields use real <label for> associations (accessibility)', () => {
+    for (const id of ['bwf-ci', 'bwf-co', 'bwf-ad', 'bwf-ch']) {
+      assert.ok(new RegExp(`<label for="${id}"`).test(h), id);
+    }
+  });
+  test('faq_expand fires only on a genuine user-initiated <details> open, never on render/close/init', () => {
+    assert.ok(/<details class="faq-item"/.test(h), 'FAQ items are semantic <details>');
+    assert.ok(h.includes("el.addEventListener('toggle', function(){\n      if (el.open) trackEvent('faq_expand'"), 'guarded to el.open only');
+    assert.ok(!/renderFAQ\(\)[^}]*setAttribute\('open'/.test(h), 'renderFAQ never force-opens an item');
+  });
+  test('FAQ has a real static no-JS fallback (not an empty shell)', () => {
+    const faqSection = h.slice(h.indexOf('<section id="faq">'), h.indexOf('</section>', h.indexOf('<section id="faq">')));
+    assert.ok((faqSection.match(/<details class="faq-item">/g) || []).length >= 3, 'static fallback has real fallback questions');
+  });
+  test('real Google review link preserved with review_link_click tracking (no invented ratings/counts)', () => {
+    assert.ok(h.includes('https://share.google/pvHqwMzmtKflnZyPo') && h.includes("trackEvent('review_link_click'"), 'review link + tracking');
+    for (const bad of ['★', '4.9', '5.0 stars', 'reviews)']) assert.ok(!h.includes(bad), `unexpected fabricated rating marker: ${bad}`);
+  });
+  test('gallery keeps all 6 real Vilu image assets as crawlable <img src> (not JS-only backgrounds)', () => {
+    const GALLERY_IMAGES = [
+      'vilu-residence-bikini-beach-maldives.jpg', 'vilu-residence-guests-maamigili-sunset.jpg',
+      'vilu-residence-guests-lagoon-maldives.jpg', 'vilu-residence-couple-sunset-beach-maldives.jpg',
+      'vilu-residence-maamigili-island-buggy-tour.jpg', 'vilu-residence-sandbank-bbq-beach-dining.jpg'
+    ];
+    for (const img of GALLERY_IMAGES) assert.ok(h.includes(`<img class="ga-img" src="https://viluresidence.net/images/${img}"`), img);
+  });
+  test('closing conversion uses the approved line + exactly 2 CTAs to the approved destinations', () => {
+    const closing = h.slice(h.indexOf('<section id="closing">'), h.indexOf('</section>', h.indexOf('<section id="closing">')));
+    assert.ok(closing.includes('Your South Ari story starts here.'));
+    assert.ok(closing.includes('href="#holiday-packages"') && closing.includes("openBookingPage()"));
+    assert.equal((closing.match(/class="btn-primary"|class="btn-outline"/g) || []).length, 2, 'exactly 2 primary/secondary CTAs');
+  });
+  test('legacy #about section removed, not just unlinked; Homecoming remains the single accommodation-photo moment', () => {
+    assert.ok(!/id="about"/.test(h));
+    assert.ok(!h.includes('about-float-card'), 'old duplicate "6 rooms" float card removed');
+    assert.ok(!h.includes('style="background:var(--gold);color:var(--navy)"'), 'legacy inline amber button style removed');
+  });
+  test('Experiences section is a compact chip rail, not a second full card grid duplicating Above/Below', () => {
+    assert.ok(h.includes('class="exp-chip"') && !h.includes('class="exp-card"'), 'exp-card grid replaced by exp-chip rail');
+  });
+  test('South Ari Expertise merges Guides + Getting Here + Timing Checker under one 5-tab bar; FAQ is its own section', () => {
+    const se = h.slice(h.indexOf('<section id="travel-info">'), h.indexOf('</section>', h.indexOf('<section id="travel-info">')));
+    for (const id of ['se-tab-destinations','se-tab-compare','se-tab-blog','se-tab-getting-here','se-tab-timing']) assert.ok(se.includes(`id="${id}"`), id);
+    assert.ok(!se.includes('id="ti-panel-faq"') && !se.includes('id="se-panel-faq"'), 'FAQ tab removed from this bar');
+  });
+  test('final homepage section order matches the approved narrative', () => {
+    const order = ['id="home"', 'id="what-is-vilu"', 'id="holiday-packages"', 'id="experiences"', 'id="vc-above"', 'id="vc-homecoming"', 'id="rooms"', 'id="booking"', 'id="travel-info"', 'id="reviews"', 'id="faq"', 'id="gallery"', 'id="closing"', 'id="contact"', '<footer'];
+    let pos = -1;
+    for (const marker of order) {
+      const next = h.indexOf(marker, pos + 1);
+      assert.ok(next > pos, `${marker} out of order (expected after previous section)`);
+      pos = next;
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);

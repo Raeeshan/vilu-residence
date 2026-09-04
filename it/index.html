@@ -542,43 +542,23 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .room-book-btn{background:var(--teal);color:var(--white);border:none;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .3s}
 .room-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 18px rgba(14,116,144,.4)}
 
-/* ── ABOUT ── */
-/* Cinematic treatment: larger confident display type + wider negative space; section padding (100px) unchanged for rhythm consistency, spacing added via grid gap/margins instead */
-#about{padding:100px 0;overflow:hidden;position:relative}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;margin-top:64px}
-.about-visual{position:relative}
-.about-img-frame{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,var(--teal) 0%,var(--ocean) 100%) center/cover;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 30px 70px rgba(0,10,20,.45)}
-.about-img-frame.has-photo{background-image:url('https://viluresidence.net/images/vilu-residence-courtyard-terrace-maamigili.jpg')}
-.about-img-frame::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.14) 0%,transparent 60%)}
-.about-logo-big{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.3);object-fit:cover}
-.about-float-card{position:absolute;bottom:-24px;right:-24px;background:linear-gradient(135deg,var(--gold),var(--gold-light));padding:24px 28px;border-radius:6px;box-shadow:0 16px 34px rgba(0,10,20,.4)}
-.about-float-num{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-display);font-weight:300;color:var(--navy);line-height:1}
-.about-float-text{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);opacity:.7;margin-top:4px}
-.about-text .section-tag{color:var(--gold);margin-bottom:20px}
-.about-text .section-title{color:var(--white);font-size:clamp(38px,6vw,76px)}
-.about-desc{font-size:var(--font-size-lg);color:rgba(255,255,255,.65);line-height:1.85;margin-top:30px;margin-bottom:40px;max-width:46ch}
-.about-features{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:44px}
-.about-feature{display:flex;align-items:flex-start;gap:12px}
-.af-icon{width:32px;height:32px;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:var(--font-size-md);color:var(--gold-light)}
-.af-text{font-size:var(--font-size-base);color:rgba(255,255,255,.6);line-height:1.5}
-.af-title{font-size:var(--font-size-base);font-weight:500;color:var(--white);margin-bottom:2px}
+/* ── WHAT IS VILU ── (Phase 12B-E2B; replaces the old About section, whose
+   CSS is removed below rather than left as dead weight -- see .wiv-points.) */
+.wiv-points{display:flex;flex-direction:column;gap:14px;margin-top:28px;max-width:56ch}
+.wiv-points li{font-size:var(--font-size-base);color:var(--muted);line-height:1.6;padding-left:22px;position:relative;list-style:none}
+.wiv-points li::before{content:'';position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
 
 /* ── GALLERY ── */
-#gallery{padding:100px 0;position:relative}.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(3,240px);gap:6px;margin-top:60px}
-.g-item{overflow:hidden;border-radius:6px;position:relative;cursor:pointer}
-.g-item:hover .g-overlay{opacity:1}
-.g-item-1{grid-column:1/6;grid-row:1/4}
-.g-item-2{grid-column:6/9;grid-row:1/2}
-.g-item-3{grid-column:9/13;grid-row:1/2}
-.g-item-4{grid-column:6/9;grid-row:2/3}
-.g-item-5{grid-column:9/13;grid-row:2/3}
-.g-item-6{grid-column:6/13;grid-row:3/4}
-/* Oversized + absolutely positioned so a per-tile scroll parallax (JS sets
-   --py, transform-only/GPU, rAF-throttled, skipped under reduced-motion —
-   same pattern as the hero) never reveals empty edges. */
-.g-bg{position:absolute;top:-8%;left:0;width:100%;height:116%;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.16,1,.3,1);transform:translateY(var(--py,0px)) scale(var(--pz,1))}
-.g-item:hover .g-bg{--pz:1.1}
-.g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,.75) 0%,transparent 60%);opacity:0;transition:opacity .35s;display:flex;align-items:flex-end;padding:20px}
-.g-label{font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;color:var(--white)}
+/* ── PHASE 12B-E2B: restrained horizontal moment rail, not a dense masonry
+   wall -- same 6 real images. Rail scrolls internally; the page does not
+   (same proven mobile-overflow-safe rail pattern used for packages). ── */
+#gallery{padding:90px 0;position:relative}
+.ga-rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:44px;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.ga-item{position:relative;flex:0 0 min(70vw,420px);aspect-ratio:4/5;border-radius:8px;overflow:hidden;scroll-snap-align:start}
+.ga-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.ga-item:hover .ga-img{transform:scale(1.06)}
+.ga-label{position:absolute;left:16px;bottom:14px;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.06em;color:var(--white);text-shadow:0 2px 8px rgba(0,0,0,.6)}
+@media(max-width:600px){.ga-item{flex-basis:78vw}}
 
 /* ── HOLIDAY PACKAGES ──
    Sparing cinematic touch only: an ambient glow behind the header, purely
@@ -589,8 +569,29 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 #holiday-packages::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:900px;max-width:140vw;height:420px;background:radial-gradient(ellipse 50% 50% at 50% 0%,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none;z-index:0}
 #holiday-packages .section-inner{position:relative;z-index:1}
 #holiday-packages .section-tag{color:var(--teal)}
-.hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
-.hp-card-center{grid-column:2}
+/* ── PHASE 12B-E2B: one featured package + a compact editorial rail for the
+   rest, replacing the old 9-equal-cards grid (anti-congestion contract). ── */
+.hp-featured-wrap{margin-top:52px;display:flex;justify-content:center}
+.hp-rail-wrap{margin-top:44px}
+.hp-rail-label{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.hp-rail{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch}
+.hp-rail-item{flex:0 0 min(78vw,280px);scroll-snap-align:start;background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:22px;display:flex;flex-direction:column;transition:border-color .25s,transform .25s}
+.hp-rail-item:hover{border-color:rgba(34,211,238,.35);transform:translateY(-3px)}
+.hp-rail-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light);background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);padding:3px 10px;border-radius:20px;margin-bottom:10px;align-self:flex-start}
+.hp-rail-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.25}
+.hp-rail-meta{font-size:var(--font-size-sm);color:var(--teal-light);font-weight:600;margin-bottom:10px}
+.hp-rail-hook{font-size:var(--font-size-sm);color:var(--muted);line-height:1.55;margin-bottom:16px;flex-grow:1}
+.hp-rail-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+.hp-rail-view{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-light);text-decoration:none}
+.hp-rail-view:hover{color:var(--white)}
+.hp-rail-wa{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(34,211,238,.1);color:var(--teal-light);text-decoration:none;flex-shrink:0;transition:background .2s,color .2s}
+.hp-rail-wa:hover{background:var(--teal);color:var(--white)}
+.hp-line{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6}
+.hp-view-full{display:block;text-align:center;font-size:var(--font-size-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding-top:4px}
+.hp-view-full:hover{color:var(--gold-light)}
+.hp-featured-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;box-shadow:0 24px 70px rgba(0,4,10,.4);padding:40px;display:flex;flex-direction:column;position:relative;max-width:620px;width:100%;transition:box-shadow .35s}
+.hp-badge-featured{background:linear-gradient(135deg,var(--teal),var(--teal-light) 55%,var(--teal));color:var(--navy)}
+.hp-badge-featured::before{content:none}
 .hp-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:32px;display:flex;flex-direction:column;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,border-color .35s}
 .hp-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(0,4,10,.5);border-color:rgba(34,211,238,.35)}
 .hp-card.hp-featured{border-color:rgba(34,211,238,.4)}
@@ -610,7 +611,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-rate-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0 20px;font-size:var(--font-size-sm);color:var(--muted)}
 .hp-savings{display:inline-block;font-size:var(--font-size-xs);font-weight:700;letter-spacing:.02em;color:#34d399;background:rgba(5,150,105,.15);padding:3px 10px;border-radius:20px}
 .hp-specialty-tag{display:inline-block;font-size:var(--font-size-xs);font-weight:700;letter-spacing:.02em;color:var(--rose-light);background:rgba(216,143,168,.15);padding:3px 10px;border-radius:20px}
-.hp-hook{font-size:var(--font-size-base);color:rgba(255,255,255,.8);line-height:1.65;margin-bottom:26px;padding-left:14px;border-left:2px solid var(--teal);font-style:italic}
+.hp-hook{font-size:var(--font-size-base);color:var(--muted);line-height:1.65;margin-bottom:26px;padding-left:14px;border-left:2px solid var(--teal);font-style:italic}
 .hp-section{border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-top:10px}
 .hp-section-label{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-light);margin-bottom:6px}
 .hp-list{display:flex;flex-direction:column}
@@ -654,62 +655,62 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 @keyframes hpPulse{0%,100%{box-shadow:0 20px 60px rgba(0,4,10,.35)}50%{box-shadow:0 0 0 4px var(--gold-light),0 20px 60px rgba(0,4,10,.35)}}
 .hp-card.hp-pulse{animation:hpPulse 1.4s ease}
 @media(max-width:900px){
-  .hp-grid{display:flex;grid-template-columns:none;align-items:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:18px;margin:52px -5vw 0;padding:0 5vw 10px;-webkit-overflow-scrolling:touch}
-  .hp-card{flex:0 0 min(84vw,280px);min-width:0;scroll-snap-align:start}
-  .hp-card:hover{transform:none}
+  .hp-featured-card{padding:28px;max-width:none}
+  .hp-rail{margin:0 -5vw;padding:0 5vw 10px}
 }
 
-/* ── BOOKING SECTION ── */
-#booking{padding:100px 0;position:relative}.booking-split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-.booking-info .section-tag{color:var(--gold)}
-.booking-info .section-title{color:var(--white);margin-bottom:24px}
-.booking-info p{font-size:var(--font-size-lg);color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:32px}
-.booking-perks{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
-.booking-perk{display:flex;align-items:center;gap:12px;font-size:var(--font-size-base);color:rgba(255,255,255,.7)}
-.bp-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0;box-shadow:0 0 8px var(--gold)}
-.booking-widget-frame{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border:1px solid rgba(34,211,238,.22);border-radius:10px;padding:32px;text-align:center;box-shadow:0 20px 50px rgba(0,10,20,.35)}
-.bwf-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:300;color:var(--white);margin-bottom:8px}
-.bwf-sub{font-size:var(--font-size-base);color:rgba(255,255,255,.5);margin-bottom:28px}
-.bwf-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
-.bwf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.bwf-field{display:flex;flex-direction:column;gap:6px;text-align:left}
-.bwf-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
+/* ── LIVE AVAILABILITY (Phase 12B-E2B) ── one quiet instrument, not a
+   two-column marketing split. Booking action only (anti-congestion §33). */
+#booking{padding:90px 0;position:relative}
+.la-eyebrow{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+#booking .section-title{color:var(--white);margin-bottom:32px;font-size:clamp(30px,3.6vw,42px)}
+.la-widget{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border:1px solid rgba(34,211,238,.22);border-radius:10px;padding:28px;box-shadow:0 20px 50px rgba(0,10,20,.35)}
+.la-row{display:grid;grid-template-columns:minmax(128px,1.2fr) minmax(128px,1.2fr) minmax(118px,1fr) minmax(130px,1fr) auto;gap:14px;align-items:end}
+.la-field .bwf-input,.la-field .bwf-select{font-size:var(--font-size-sm);padding:10px 10px}
+.la-field{display:flex;flex-direction:column;gap:6px;text-align:left}
+.la-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
 .bwf-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
 .bwf-input:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
 .bwf-input::placeholder{color:rgba(255,255,255,.3)}
 .bwf-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 .bwf-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
-.bwf-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;margin-bottom:12px}
+.bwf-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:12px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;white-space:nowrap}
 .bwf-btn:hover{background-position:100% 0;box-shadow:0 10px 26px rgba(34,211,238,.4)}
-.bwf-note{font-size:var(--font-size-xs);color:rgba(255,255,255,.35);letter-spacing:.04em}
+.la-btn{height:42px}
+.bwf-note{font-size:var(--font-size-xs);color:rgba(255,255,255,.4);letter-spacing:.04em;margin-top:16px;text-align:center}
+.la-viewall{display:block;margin:24px auto 0;background:none;border:1px solid rgba(255,255,255,.25);color:var(--white);padding:12px 28px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+.la-viewall:hover{border-color:var(--gold);color:var(--gold-light)}
+@media(max-width:900px){
+  .la-row{grid-template-columns:1fr 1fr;gap:12px}
+  .la-btn{grid-column:1/-1;height:auto;padding:14px}
+}
 
 /* ── EXPERIENCES ── mirrors .hp-card's look/responsive behavior exactly (same
    card, grid, and mobile scroll-snap pattern as Holiday Packages) so this new
    section reads as part of the same design language rather than a new one. */
-#experiences{padding:100px 0}
-.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
-.exp-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:32px;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,border-color .35s}
-.exp-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(0,4,10,.5);border-color:rgba(34,211,238,.35)}
-.exp-icon{width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,.12);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:var(--font-size-xl);color:var(--gold-light)}
-.exp-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:10px;line-height:1.2}
-.exp-desc{font-size:var(--font-size-base);color:rgba(255,255,255,.75);line-height:1.65;margin-bottom:18px;flex-grow:1}
-.exp-price{font-size:var(--font-size-sm);color:var(--teal-light);font-weight:600;margin-bottom:20px}
-.exp-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
-.exp-cta{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--teal);color:var(--white);text-decoration:none;padding:12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .3s}
-.exp-cta:hover{background:var(--teal-light);color:var(--navy)}
-.exp-cta::before{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;content:"\ec74"}
-.exp-see-packages{text-align:center;font-size:var(--font-size-xs);color:var(--muted);text-decoration:none}
-.exp-see-packages:hover{color:var(--gold-light)}
+/* ── PHASE 12B-E2B: compact chip list, not a second big card grid right
+   after the marine sequence's neighbor (Packages) — the whale shark/manta
+   story already carries the emotional weight; this is quick, scannable
+   discovery only. ── */
+#experiences{padding:70px 0}
+.exp-grid{display:flex;flex-direction:column;gap:2px;margin-top:36px;max-width:820px}
+.exp-chip{display:flex;align-items:flex-start;gap:18px;padding:18px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
+.exp-chip:first-child{padding-top:0}
+.exp-chip:last-child{border-bottom:none}
+.exp-chip>i{font-size:22px;color:var(--gold-light);margin-top:4px;flex-shrink:0;width:24px;text-align:center}
+.exp-chip-body{flex:1;min-width:0}
+.exp-chip-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-lg);font-weight:600;color:var(--text);margin-bottom:4px}
+.exp-chip-desc{font-size:var(--font-size-sm);color:var(--muted);line-height:1.55;margin-bottom:8px}
+.exp-chip-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.exp-chip-price{font-size:var(--font-size-xs);color:var(--teal-light);font-weight:600}
+.exp-chip-wa{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.04em;color:var(--gold-light);text-decoration:none;white-space:nowrap}
+.exp-chip-wa:hover{color:var(--white)}
 .exp-links{text-align:center;margin-top:36px;font-size:var(--font-size-sm);color:var(--muted)}
 .exp-links a{color:var(--teal-light);text-decoration:none}
 .exp-links a:hover{color:var(--gold-light)}
 .floating-whatsapp{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--teal);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 24px rgba(0,4,10,.4);z-index:900;transition:transform .25s,background .25s;text-decoration:none}
 .floating-whatsapp:hover{background:var(--teal-light);color:var(--navy);transform:scale(1.08)}
 @media(max-width:600px){.floating-whatsapp{bottom:16px;right:16px;width:50px;height:50px;font-size:22px}}
-@media(max-width:900px){
-  .exp-grid{display:flex;grid-template-columns:none;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;gap:18px;margin:52px -5vw 0;padding:0 5vw 10px;-webkit-overflow-scrolling:touch}
-  .exp-card{flex:0 0 min(84vw,280px);min-width:0;scroll-snap-align:start}
-}
 
 /* ── AVAILABILITY CALENDAR (booked dates blocked from live PMS/Supabase data) ── */
 .vilu-date-input{cursor:pointer}
@@ -740,7 +741,19 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .vilu-cal-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
 /* ── CONTACT ── */
-#travel-info{padding:100px 0;position:relative}#reviews{padding:100px 0;position:relative}#contact{color:var(--text);padding:100px 0;position:relative}#contact .section-tag{color:var(--teal)}
+#travel-info{padding:100px 0;position:relative}
+#reviews{padding:80px 0;position:relative}
+.tr-assurances{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.08)}
+.tr-assurance{display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm);color:var(--muted)}
+.tr-assurance i{color:var(--gold-light);font-size:16px}
+#closing{padding:100px 0}
+.cc-headline{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:clamp(30px,4.2vw,48px);color:var(--gold-light);line-height:1.2;margin-bottom:32px}
+.cc-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.cc-contact-hint{margin-top:28px;font-size:var(--font-size-sm);color:var(--muted)}
+.cc-contact-hint a{color:var(--teal-light);text-decoration:none}
+.cc-contact-hint a:hover{color:var(--gold-light)}
+#contact{color:var(--text);padding:90px 0;position:relative}#contact .section-tag{color:var(--teal)}
+.ct-title{font-size:clamp(28px,3.4vw,38px) !important}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:60px}
 .map-embed{width:100%;aspect-ratio:16/7;border-radius:10px;overflow:hidden;border:1px solid var(--card-border);box-shadow:0 20px 60px rgba(0,4,10,.35);margin-top:48px}
 .map-embed iframe{width:100%;height:100%;border:0;display:block}
@@ -891,26 +904,23 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .faq-cats{display:flex;gap:8px;flex-wrap:wrap}
 .faq-cat-btn{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
 .faq-cat-btn.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+/* <details>/<summary> -- native, keyboard/screen-reader operable with zero
+   JS required for the open/close mechanic (Phase 12B-E2B §18). */
 .faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .25s}
 .faq-item:hover{border-color:rgba(34,211,238,.35)}
-.faq-question{width:100%;text-align:left;background:none;border:none;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;color:var(--white)}
-.faq-question i{color:var(--teal-light);transition:transform .25s;flex-shrink:0}
-.faq-item.open .faq-question i{transform:rotate(180deg)}
-.faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-question{width:100%;list-style:none;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;color:var(--white)}
+.faq-question::-webkit-details-marker{display:none}
+.faq-question::after{font-family:"tabler-icons";speak:none;font-style:normal;font-weight:normal;content:"\ea5f";color:var(--teal-light);transition:transform .25s;flex-shrink:0}
+.faq-item[open] .faq-question::after{transform:rotate(180deg)}
 .faq-answer-inner{padding:0 20px 20px;color:var(--muted);font-size:var(--font-size-sm);line-height:1.7}
 .faq-cat-pill{display:block;font-size:var(--font-size-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
 [dir="rtl"] .faq-question{text-align:right}
 [dir="rtl"] .faq-search i{left:auto;right:14px}
 [dir="rtl"] .faq-search input{padding:11px 40px 11px 14px}
 
-/* ── GUIDES & TRAVEL BLOG ── */
-#guides{padding:100px 0;position:relative}
-.guides-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
-.guides-tab{display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:8px;color:var(--muted);padding:14px 24px;cursor:pointer;transition:all .25s}
-.guides-tab i{font-size:18px}
-.guides-tab.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
-.guides-tab:not(.on):hover{color:var(--white);border-color:rgba(255,255,255,.3)}
-@media(max-width:600px){.guides-tab{flex:1 1 auto;justify-content:center;padding:12px 16px}}
+/* ── GUIDES & TRAVEL BLOG ── (guide-article/guide-list only; the tab bar
+   itself now lives under South Ari Expertise's shared .ti-tab styling,
+   Phase 12B-E2B) */
 .guide-article{padding-bottom:36px;margin-bottom:36px;border-bottom:1px solid rgba(255,255,255,.08)}
 .guide-article:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .guide-article h3{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:600;color:var(--white);margin-bottom:14px}
@@ -946,7 +956,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      and re-verified empirically per section 10/35 of this stage's testing. */
   #home{height:640px;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .hero-scroll{bottom:20px}
-  .about-grid,.booking-split,.contact-grid{grid-template-columns:1fr;gap:48px}
+  .contact-grid{grid-template-columns:1fr;gap:48px}
   .footer-top{grid-template-columns:1.6fr 1fr 1fr;gap:32px}
   .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .g-item-1,.g-item-2,.g-item-3,.g-item-4,.g-item-5,.g-item-6{grid-column:auto;grid-row:auto}
@@ -1122,7 +1132,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <button type="button" class="nav-drop-trigger" aria-expanded="false" aria-controls="navPanelStay" data-nav-group="stay"><span data-i18n="navShell.stay">Soggiorno</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
         <div class="nav-drop-panel" id="navPanelStay">
           <div class="nav-panel-col">
-            <a href="#about">Vilu Residence</a>
+            <a href="#what-is-vilu">Vilu Residence</a>
             <a href="#rooms" data-i18n="nav.rooms">Camere</a>
             <a href="#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">Disponibilità in tempo reale</a>
             <a href="#gallery" data-i18n="nav.gallery">Galleria</a>
@@ -1187,7 +1197,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div class="mm-group">
       <button type="button" class="mm-group-trigger" aria-expanded="false" aria-controls="mmPanelStay"><span data-i18n="navShell.stay">Soggiorno</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
       <div class="mm-group-panel" id="mmPanelStay">
-        <a href="#about" data-mm-close="">Vilu Residence</a>
+        <a href="#what-is-vilu" data-mm-close="">Vilu Residence</a>
         <a href="#rooms" data-mm-close="" data-i18n="nav.rooms">Camere</a>
         <a href="#booking" class="js-live-availability" data-mm-close="" data-i18n="navShell.liveAvailability">Disponibilità in tempo reale</a>
         <a href="#gallery" data-mm-close="" data-i18n="nav.gallery">Galleria</a>
@@ -1242,6 +1252,63 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <div class="hero-scroll" aria-hidden="true">
     <span data-i18n="hero.scroll">Scorri</span>
     <div class="scroll-line"></div>
+  </div>
+</section>
+
+
+<!-- ══ WHAT IS VILU ── quiet editorial positioning bridge (Phase 12B-E2B).
+     Absorbs the factual content that used to live in the old #about section
+     (personalised attention, island hopping, local cuisine) without
+     repeating its photo/"six rooms" moment, which Homecoming now owns. ══ -->
+<section id="what-is-vilu">
+  <div class="section-inner" style="max-width:760px">
+    <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Who We Are</div>
+    <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu is your way into South Ari.</h2>
+    <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Holiday planning, marine experiences and local knowledge — with our own six-room home in Maamigili when you need somewhere to stay.</p>
+    <ul class="wiv-points">
+      <li data-i18n="whatIsVilu.point1">Personalised attention, not a front desk — every guest is planned for individually.</li>
+      <li data-i18n="whatIsVilu.point2">Island hopping and local cuisine woven into your stay, not just snorkeling.</li>
+      <li data-i18n="whatIsVilu.point3">Boutique and intimate by design — six rooms, not sixty.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══ HOLIDAY PACKAGES ══ -->
+<section id="holiday-packages">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag" data-i18n="packages.tag">Pacchetti Vacanza</div>
+      <h2 class="section-title" style="color:var(--text)"><span data-i18n="packages.titlePrefix">Fughe</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="packages.titleEmphasis">sull'isola su misura</em></h2>
+      <p class="gh-sub" style="margin-top:16px" data-i18n="packages.subtitle">Colazione giornaliera e transfer in speedboat andata e ritorno inclusi in ogni pacchetto. Scegli la durata più adatta al tuo viaggio, poi aggiungi la mezza pensione o la pensione completa se lo desideri.</p>
+    </div>
+    <div class="hp-grid reveal" id="hp-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Caricamento pacchetti…</div>
+    </div>
+    <p class="exp-links reveal">
+      <a href="#experiences"><span data-i18n="packages.seeExperiences">Scopri cosa comporta davvero ogni escursione</span></a>
+    </p>
+  </div>
+</section>
+
+<!-- ══ EXPERIENCES ══ -->
+<section id="experiences">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag" data-i18n="experiences.tag">Escursioni Esclusive</div>
+      <h2 class="section-title" style="color:var(--text)"><span data-i18n="experiences.titlePrefix">Le nostre</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="experiences.titleEmphasis">esperienze</em></h2>
+      <p class="gh-sub" style="margin-top:16px" data-i18n="experiences.subtitle">Ogni escursione qui sotto è inclusa in uno o più dei nostri pacchetti vacanza sopra elencati – ecco cosa comporta realmente ciascuna.</p>
+    </div>
+    <div class="exp-grid reveal" id="exp-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Caricamento pacchetti…</div>
+    </div>
+    <p class="exp-links reveal">
+      <span data-i18n="experiences.linksIntro">Domande sui trasferimenti o sugli orari?</span>
+      <a href="#travel-info" onclick="if(typeof seSwitchTab==='function')seSwitchTab('getting-here')"><span data-i18n="experiences.linkGettingHere">Come arrivare</span></a>
+      ·
+      <a href="#faq"><span data-i18n="experiences.linkFaq">leggi le nostre FAQ</span></a>
+      ·
+      <a href="#contact"><span data-i18n="experiences.linkContact">contattaci direttamente</span></a>
+    </p>
   </div>
 </section>
 
@@ -1426,162 +1493,106 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
 </section>
 
-<!-- ══ HOLIDAY PACKAGES ══ -->
-<section id="holiday-packages">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag" data-i18n="packages.tag">Pacchetti Vacanza</div>
-      <h2 class="section-title" style="color:var(--text)"><span data-i18n="packages.titlePrefix">Fughe</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="packages.titleEmphasis">sull'isola su misura</em></h2>
-      <p class="gh-sub" style="margin-top:16px" data-i18n="packages.subtitle">Colazione giornaliera e transfer in speedboat andata e ritorno inclusi in ogni pacchetto. Scegli la durata più adatta al tuo viaggio, poi aggiungi la mezza pensione o la pensione completa se lo desideri.</p>
-    </div>
-    <div class="hp-grid reveal" id="hp-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Caricamento pacchetti…</div>
-    </div>
-    <p class="exp-links reveal">
-      <a href="#experiences"><span data-i18n="packages.seeExperiences">Scopri cosa comporta davvero ogni escursione</span></a>
-    </p>
-  </div>
-</section>
-
-<!-- ══ EXPERIENCES ══ -->
-<section id="experiences">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag" data-i18n="experiences.tag">Escursioni Esclusive</div>
-      <h2 class="section-title" style="color:var(--text)"><span data-i18n="experiences.titlePrefix">Le nostre</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="experiences.titleEmphasis">esperienze</em></h2>
-      <p class="gh-sub" style="margin-top:16px" data-i18n="experiences.subtitle">Ogni escursione qui sotto è inclusa in uno o più dei nostri pacchetti vacanza sopra elencati – ecco cosa comporta realmente ciascuna.</p>
-    </div>
-    <div class="exp-grid reveal" id="exp-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)" data-i18n="packages.loading">Caricamento pacchetti…</div>
-    </div>
-    <p class="exp-links reveal">
-      <span data-i18n="experiences.linksIntro">Domande sui trasferimenti o sugli orari?</span>
-      <a href="#travel-info"><span data-i18n="experiences.linkGettingHere">Come arrivare</span></a>
-      ·
-      <a href="#travel-info" onclick="if(typeof tiSwitchTab==='function')tiSwitchTab('faq')"><span data-i18n="experiences.linkFaq">leggi le nostre FAQ</span></a>
-      ·
-      <a href="#contact"><span data-i18n="experiences.linkContact">contattaci direttamente</span></a>
-    </p>
-  </div>
-</section>
-
-<!-- ══ BOOKING SECTION ══ -->
+<!-- ══ LIVE AVAILABILITY (Phase 12B-E2B) ── same PMS engine/functions/ids as
+     before; presentation only redesigned to a single quiet instrument
+     rather than a two-column marketing split. ══ -->
 <section id="booking">
-  <div class="section-inner">
-    <div class="booking-split">
-      <div class="booking-info reveal">
-        <div class="section-tag" data-i18n="booking.tag">Prenotazioni</div>
-        <h2 class="section-title"><span data-i18n="booking.titlePrefix">Prenota la tua</span> <em style="font-style:italic" data-i18n="booking.titleEmphasis">fuga</em></h2>
-        <p data-i18n="booking.intro">Prenota direttamente con noi per le migliori tariffe e un servizio personalizzato. Nessuna commissione di prenotazione, politiche flessibili.</p>
-        <div class="booking-perks">
-          <div class="booking-perk"><div class="bp-dot"></div><span data-i18n="booking.perk1">Miglior tariffa garantita, prenotando direttamente con noi</span></div>
-          <div class="booking-perk"><div class="bp-dot"></div><span data-i18n="booking.perk2">Conferma immediata via email</span></div>
-          <div class="booking-perk"><div class="bp-dot"></div><span data-i18n="booking.perk3">Accoglienza personalizzata e consigli locali</span></div>
-          <div class="booking-perk"><div class="bp-dot"></div><span data-i18n="booking.perk4">Attività e transfer organizzabili</span></div>
-          <div class="booking-perk"><div class="bp-dot"></div><span data-i18n="booking.perk5">TGST 17% e Green Tax incluse nelle tariffe</span></div>
+  <div class="section-inner" style="max-width:820px">
+    <div class="la-eyebrow" data-i18n="booking.reframeEyebrow">Prefer to arrange accommodation separately?</div>
+    <h2 class="section-title" data-i18n="booking.reframeHeadline">Check live availability at Vilu Residence.</h2>
+    <div class="la-widget">
+      <div class="la-row">
+        <div class="la-field"><label for="bwf-ci" data-i18n="booking.labelCheckin">Check-in</label><input type="text" class="bwf-input vilu-date-input" id="bwf-ci"></div>
+        <div class="la-field"><label for="bwf-co" data-i18n="booking.labelCheckout">Check-out</label><input type="text" class="bwf-input vilu-date-input" id="bwf-co"></div>
+        <div class="la-field la-field-sm"><label for="bwf-ad" data-i18n="booking.adults">Adulti</label>
+          <select class="bwf-select" id="bwf-ad"><option value="1" data-i18n="booking.adult1">1 Adulto</option><option value="2" selected="" data-i18n="booking.adult2">2 Adulti</option><option value="3" data-i18n="booking.adult3">3 Adulti</option></select>
         </div>
-        <button class="btn-primary" style="background:var(--gold);color:var(--navy)" onclick="openBookingPage()" data-i18n="booking.viewAllAvailability">Visualizza Tutta la Disponibilità</button>
-      </div>
-      <div class="booking-widget-frame reveal">
-        <div class="bwf-title" data-i18n="booking.quickReservation">Prenotazione Rapida</div>
-        <div class="bwf-sub" data-i18n="booking.checkInSeconds">Verifica la disponibilità in pochi secondi</div>
-        <div class="bwf-fields">
-          <div class="bwf-row">
-            <div class="bwf-field"><div class="bwf-label" data-i18n="bookingBar.checkin">Check-in</div><input type="text" class="bwf-input vilu-date-input" id="bwf-ci"></div>
-            <div class="bwf-field"><div class="bwf-label" data-i18n="bookingBar.checkout">Check-out</div><input type="text" class="bwf-input vilu-date-input" id="bwf-co"></div>
-          </div>
-          <div class="bwf-row">
-            <div class="bwf-field"><div class="bwf-label" data-i18n="booking.adults">Adulti</div>
-              <select class="bwf-select" id="bwf-ad"><option value="1" data-i18n="booking.adult1">1 Adulto</option><option value="2" selected="" data-i18n="booking.adult2">2 Adulti</option><option value="3" data-i18n="booking.adult3">3 Adulti</option></select>
-            </div>
-            <div class="bwf-field"><div class="bwf-label" data-i18n="booking.children">Bambini</div>
-              <select class="bwf-select" id="bwf-ch"><option value="0" selected="" data-i18n="booking.noChildren">Nessun bambino</option><option value="1" data-i18n="booking.child1">1 Bambino</option><option value="2" data-i18n="booking.child2">2 Bambini</option></select>
-            </div>
-          </div>
+        <div class="la-field la-field-sm"><label for="bwf-ch" data-i18n="booking.children">Bambini</label>
+          <select class="bwf-select" id="bwf-ch"><option value="0" selected="" data-i18n="booking.noChildren">Nessun bambino</option><option value="1" data-i18n="booking.child1">1 Bambino</option><option value="2" data-i18n="booking.child2">2 Bambini</option></select>
         </div>
-        <button class="bwf-btn" onclick="openBookingPageWithDates()" data-i18n="booking.checkAvailabilityArrow">Verifica Disponibilità →</button>
-        <div class="bwf-note"><span data-i18n="booking.or">O</span> <span style="color:var(--gold-light);cursor:pointer" onclick="openBookingPopup()" data-i18n="booking.orBrowseAllRooms">sfoglia tutte le camere</span> · <span data-i18n="booking.directBookingsOnly">Solo prenotazioni dirette</span></div>
+        <button class="bwf-btn la-btn" onclick="openBookingPageWithDates()" data-i18n="booking.checkAvailabilityArrow">Verifica Disponibilità →</button>
       </div>
+      <div class="bwf-note"><span data-i18n="booking.or">O</span> <span style="color:var(--gold-light);cursor:pointer" onclick="openBookingPopup()" data-i18n="booking.orBrowseAllRooms">sfoglia tutte le camere</span> · <span data-i18n="booking.directBookingsOnly">Solo prenotazioni dirette</span></div>
     </div>
+    <button class="la-viewall" onclick="openBookingPage()" data-i18n="booking.viewAllAvailability">Visualizza Tutta la Disponibilità</button>
   </div>
 </section>
 
-<!-- ══ GALLERY ══ -->
-<section id="gallery">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag" data-i18n="gallery.tag">Galleria</div>
-      <h2 class="section-title"><span data-i18n="gallery.titlePrefix">Momenti</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="gallery.titleEmphasis">in paradiso</em></h2>
-    </div>
-    <div class="gallery-grid reveal">
-      <div class="g-item g-item-1"><div class="g-bg lazy-bg" role="img" aria-labelledby="g-label-1" data-bg-url="https://viluresidence.net/images/vilu-residence-bikini-beach-maldives.jpg"></div><div class="g-overlay"><span class="g-label" id="g-label-1" data-i18n="gallery.ocean">Spiaggia Bikini</span></div></div>
-      <div class="g-item g-item-2"><div class="g-bg lazy-bg" role="img" aria-labelledby="g-label-2" data-bg-url="https://viluresidence.net/images/vilu-residence-guests-maamigili-sunset.jpg"></div><div class="g-overlay"><span class="g-label" id="g-label-2" data-i18n="gallery.guestMoments">Momenti degli ospiti</span></div></div>
-      <div class="g-item g-item-3"><div class="g-bg lazy-bg" role="img" aria-labelledby="g-label-3" data-bg-url="https://viluresidence.net/images/vilu-residence-guests-lagoon-maldives.jpg"></div><div class="g-overlay"><span class="g-label" id="g-label-3" data-i18n="gallery.maldivesLife">Vita alle Maldive</span></div></div>
-      <div class="g-item g-item-4"><div class="g-bg lazy-bg" role="img" aria-labelledby="g-label-4" data-bg-url="https://viluresidence.net/images/vilu-residence-couple-sunset-beach-maldives.jpg"></div><div class="g-overlay"><span class="g-label" id="g-label-4" data-i18n="gallery.sunsetViews">Viste al Tramonto</span></div></div>
-      <div class="g-item g-item-5"><div class="g-bg lazy-bg" role="img" aria-labelledby="g-label-5" data-bg-url="https://viluresidence.net/images/vilu-residence-maamigili-island-buggy-tour.jpg"></div><div class="g-overlay"><span class="g-label" id="g-label-5" data-i18n="gallery.activities">Attività</span></div></div>
-      <div class="g-item g-item-6"><div class="g-bg lazy-bg" role="img" aria-labelledby="g-label-6" data-bg-url="https://viluresidence.net/images/vilu-residence-sandbank-bbq-beach-dining.jpg"></div><div class="g-overlay"><span class="g-label" id="g-label-6" data-i18n="gallery.beachDining">Cena in spiaggia</span></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ REVIEWS ══ -->
-<section id="reviews">
-  <div class="section-inner" style="text-align:center">
-    <div class="reveal" style="max-width:560px;margin:0 auto">
-      <div class="section-tag" data-i18n="reviews.tag">Cosa Dicono gli Ospiti</div>
-      <h2 class="section-title"><span data-i18n="reviews.titlePrefix">Leggi le nostre</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="reviews.titleEmphasis">recensioni</em></h2>
-      <p class="gh-sub" style="margin:20px auto 36px;max-width:480px" data-i18n="reviews.subtitle">Ascolta direttamente gli ospiti che hanno soggiornato da noi a Vilu Residence.</p>
-      <a href="https://share.google/pvHqwMzmtKflnZyPo" target="_blank" rel="noopener noreferrer" class="btn-outline" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none">
-        <i class="ti ti-brand-google" aria-hidden="true"></i> <span data-i18n="reviews.readOnGoogle">Leggi le Nostre Recensioni su Google</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ══ ABOUT ══ -->
-<section id="about">
-  <div class="section-inner">
-    <div class="about-grid">
-      <div class="about-visual reveal">
-        <div class="about-img-frame lazy-bg" data-bg-url="https://viluresidence.net/images/vilu-residence-courtyard-terrace-maamigili.jpg" role="img" aria-label="Cortile ed edificio della guesthouse Vilu Residence a Maamigili" data-i18n-aria-label="alt.aboutPhoto">
-          <img src="/images/vilu-logo.jpg" alt="Vilu Residence" class="about-logo-big">
-        </div>
-        <div class="about-float-card">
-          <div class="about-float-num">6</div>
-          <div class="about-float-text" data-i18n="about.cosyRooms">Camere Accoglienti</div>
-        </div>
-      </div>
-      <div class="about-text reveal">
-        <div class="section-tag" data-i18n="about.tag">Chi Siamo</div>
-        <h2 class="section-title"><span data-i18n="about.titlePrefix">La tua casa</span> <em style="font-style:italic" data-i18n="about.titleEmphasis">in paradiso</em></h2>
-        <p class="about-desc" data-i18n="about.desc">Immerso nell'Atollo di Ari Sud, Vilu Residence Maamigili offre un'esperienza boutique intima circondata dalla bellezza naturale delle Maldive. Crediamo che ogni ospite meriti attenzione personalizzata, esperienze autentiche e un legame genuino con questo straordinario angolo di mondo.</p>
-        <div class="about-features">
-          <div class="about-feature"><div class="af-icon"><i class="ti ti-fish" aria-hidden="true"></i></div><div><div class="af-title" data-i18n="about.feat1Title">Snorkeling e Immersioni</div><div class="af-text" data-i18n="about.feat1Text">Barriera corallina di livello mondiale a pochi minuti</div></div></div>
-          <div class="about-feature"><div class="af-icon"><i class="ti ti-sailboat" aria-hidden="true"></i></div><div><div class="af-title" data-i18n="about.feat2Title">Escursioni tra le Isole</div><div class="af-text" data-i18n="about.feat2Text">Esplora gli atolli circostanti</div></div></div>
-          <div class="about-feature"><div class="af-icon"><i class="ti ti-tools-kitchen-2" aria-hidden="true"></i></div><div><div class="af-title" data-i18n="about.feat3Title">Cucina Locale</div><div class="af-text" data-i18n="about.feat3Text">Pesce fresco e piatti maldiviani</div></div></div>
-          <div class="about-feature"><div class="af-icon"><i class="ti ti-sunset-2" aria-hidden="true"></i></div><div><div class="af-title" data-i18n="about.feat4Title">Tramonti Mozzafiato</div><div class="af-text" data-i18n="about.feat4Text">Viste indimenticabili sull'Oceano Indiano</div></div></div>
-        </div>
-        <button class="btn-primary" style="background:var(--gold);color:var(--navy)" onclick="openBookingPage()" data-i18n="about.planYourStay">Pianifica il Tuo Soggiorno</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ TRAVEL INFO ══ -->
+<!-- ══ SOUTH ARI EXPERTISE ── merged Guides + Getting Here + Timing Checker
+     (Phase 12B-E2B). id="travel-info" is preserved on purpose: the global
+     nav's "Travel Information" link and the footer both already point here.
+     FAQ moved out to its own #faq section below -- this tab bar was
+     overloaded with 6 tabs otherwise. ══ -->
 <section id="travel-info">
   <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag" data-i18n="travelInfo.tag">Pianifica il viaggio</div>
-      <h2 class="section-title"><span data-i18n="travelInfo.titlePrefix">Informazioni</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="travelInfo.titleEmphasis">di viaggio</em></h2>
-      <p class="gh-sub" data-i18n="travelInfo.intro">Tutto per pianificare il viaggio: come raggiungerci, un controllo degli orari di coincidenza e risposte rapide alle domande più comuni.</p>
+    <div>
+      <div class="section-tag" data-i18n="guides.tag">Risorse di viaggio</div>
+      <h2 class="section-title"><span data-i18n="guides.titlePrefix">Guide e</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="guides.titleEmphasis">consigli di viaggio</em></h2>
+      <p class="gh-sub" data-i18n="guides.intro">Tutto ciò che sappiamo sull'atollo di Ari Sud, Maamigili e sulla pianificazione di un viaggio alle Maldive — ricercato per aiutarti a pianificare, non solo per riempire una pagina.</p>
     </div>
-    <div class="ti-tabs reveal">
-      <button class="ti-tab on" id="ti-tab-getting-here" onclick="tiSwitchTab('getting-here')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> <span data-i18n="travelInfo.tabGettingHere">Come arrivare</span></button>
-      <button class="ti-tab" id="ti-tab-timing" onclick="tiSwitchTab('timing')"><i class="ti ti-clock-check" aria-hidden="true"></i> <span data-i18n="travelInfo.tabTiming">Controllo orari</span></button>
-      <button class="ti-tab" id="ti-tab-faq" onclick="tiSwitchTab('faq')"><i class="ti ti-help-circle" aria-hidden="true"></i> <span data-i18n="travelInfo.tabFaq">FAQ</span></button>
+    <div class="ti-tabs">
+      <button class="ti-tab on" id="se-tab-destinations" onclick="seSwitchTab('destinations')"><i class="ti ti-map-2" aria-hidden="true"></i> <span data-i18n="guides.tabDestinations">Guide alle destinazioni</span></button>
+      <button class="ti-tab" id="se-tab-compare" onclick="seSwitchTab('compare')"><i class="ti ti-arrows-diff" aria-hidden="true"></i> <span data-i18n="guides.tabCompare">Confronti</span></button>
+      <button class="ti-tab" id="se-tab-blog" onclick="seSwitchTab('blog')"><i class="ti ti-notebook" aria-hidden="true"></i> <span data-i18n="guides.tabBlog">Blog di viaggio</span></button>
+      <button class="ti-tab" id="se-tab-getting-here" onclick="seSwitchTab('getting-here')"><i class="ti ti-plane-tilt" aria-hidden="true"></i> <span data-i18n="travelInfo.tabGettingHere">Come arrivare</span></button>
+      <button class="ti-tab" id="se-tab-timing" onclick="seSwitchTab('timing')"><i class="ti ti-clock-check" aria-hidden="true"></i> <span data-i18n="travelInfo.tabTiming">Controllo orari</span></button>
     </div>
 
-    <div class="ti-panel" id="ti-panel-getting-here">
+    <div class="ti-panel" id="se-panel-destinations">
+      <article class="guide-article reveal" id="guide-south-ari-atoll">
+        <h3 data-i18n="guideSaa.title">Guida di viaggio dell'atollo di Ari Sud</h3>
+        <p data-i18n="guideSaa.intro">L'atollo di Ari Sud (localmente atollo di Alifu Dhaalu) si trova nelle Maldive centrali, un anello di barriere coralline e banchi di sabbia costruito attorno a una serie di isole locali abitate e resort. È uno dei 26 atolli che compongono il paese, ed è noto soprattutto per una cosa: gli squali balena.</p>
+        <p class="exp-links"><a href="south-ari-atoll-guide.html" onclick="trackEvent('related_content_click',{destination_slug:'south-ari-atoll-guide'})"><span data-i18n="guides.linkSaaGuide">Leggi la nostra guida completa all'atollo di Ari Sud</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="guide-maamigili">
+        <h3 data-i18n="guideMaa.title">Guida di viaggio di Maamigili</h3>
+        <p data-i18n="guideMaa.intro">Maamigili è l'isola che Vilu Residence chiama casa — un'isola locale sul bordo meridionale dell'atollo di Ari Sud, e la più grande e popolosa dell'atollo, con 2.798 abitanti secondo il censimento del 2022. Localmente viene talvolta chiamata "l'isola degli squali balena", per ragioni che diventeranno ovvie tra qualche paragrafo.</p>
+        <p class="exp-links"><a href="maamigili-guide.html" onclick="trackEvent('related_content_click',{destination_slug:'maamigili-guide'})"><span data-i18n="guides.linkMaaGuide">Leggi la nostra guida completa su Maamigili</span></a></p>
+      </article>
+    </div>
+
+    <div class="ti-panel" id="se-panel-compare" style="display:none">
+      <article class="guide-article reveal" id="compare-snorkeling-islands">
+        <h3 data-i18n="cmpSnorkel.title">Le migliori isole locali delle Maldive per lo snorkeling</h3>
+        <p data-i18n="cmpSnorkel.intro">Non tutte le isole locali offrono la stessa esperienza in acqua, ed è utile sapere cosa cercare invece di scegliere solo in base alla notorietà del nome. In generale, le isole locali con il miglior snorkeling condividono alcune caratteristiche: un'area marina protetta o una riserva nelle vicinanze, una barriera corallina domestica o una laguna raggiungibile senza barca e — idealmente — vita marina residente, non solo stagionale.</p>
+        <p class="exp-links"><a href="best-local-islands-snorkeling.html" onclick="trackEvent('related_content_click',{destination_slug:'best-local-islands-snorkeling'})"><span data-i18n="guides.linkCmpSnorkel">Leggi la nostra guida completa per scegliere un'isola per lo snorkeling</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="compare-regions">
+        <h3 data-i18n="cmpRegions.title">Atollo di Ari Sud a confronto con altre regioni delle Maldive</h3>
+        <p data-i18n="cmpRegions.intro">I 26 atolli delle Maldive non sono intercambiabili — ogni regione ha un carattere diverso, ed è utile scegliere in base a ciò che si vuole davvero dal viaggio piuttosto che alla semplice vicinanza a Malé.</p>
+        <p class="exp-links"><a href="south-ari-vs-other-regions.html" onclick="trackEvent('related_content_click',{destination_slug:'south-ari-vs-other-regions'})"><span data-i18n="guides.linkCmpRegions">Leggi il nostro confronto completo tra Ari Sud e altre regioni</span></a></p>
+      </article>
+    </div>
+
+    <div class="ti-panel" id="se-panel-blog" style="display:none">
+      <article class="guide-article reveal" id="blog-best-time-visit">
+        <h3 data-i18n="blogBestTime.title">Periodo migliore per visitare le Maldive</h3>
+        <p data-i18n="blogBestTime.intro">La risposta breve: da novembre ad aprile è il consiglio classico, e per buoni motivi, ma non è l'unico buon periodo per partire — dipende da cosa stai privilegiando.</p>
+        <p class="exp-links"><a href="best-time-to-visit.html" onclick="trackEvent('related_content_click',{destination_slug:'best-time-to-visit'})"><span data-i18n="guides.linkBestTime">Leggi la nostra guida completa sul periodo migliore per visitare</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-whale-shark-season">
+        <h3 data-i18n="blogWhaleSeason.title">Periodo migliore per vedere gli squali balena nell'atollo di Ari Sud</h3>
+        <p data-i18n="blogWhaleSeason.intro">A differenza della maggior parte delle destinazioni per squali balena nel mondo, dove gli avvistamenti si concentrano attorno a una specifica finestra migratoria, l'aggregazione di squali balena dell'atollo di Ari Sud è documentata come presente tutto l'anno. I ricercatori del Maldives Whale Shark Research Programme foto-identificano squali individuali nell'Area Marina Protetta di Ari Sud (SAMPA) da molti anni, e la popolazione — prevalentemente maschi giovani — mostra una forte fedeltà al sito, rimanendo residente piuttosto che migrare secondo un ciclo stagionale.</p>
+        <p class="exp-links"><a href="whale-shark-snorkeling.html" onclick="trackEvent('related_content_click',{destination_slug:'whale-shark-snorkeling'})"><span data-i18n="saaPage.linkWhaleShark">Leggi la nostra guida completa allo snorkeling con squali balena →</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-guesthouse-vs-resort">
+        <h3 data-i18n="blogGvr.title">Guesthouse o resort alle Maldive: quale scegliere?</h3>
+        <p data-i18n="blogGvr.intro">Nessuno dei due è oggettivamente migliore — sono viaggi genuinamente diversi, e la scelta giusta dipende da cosa stai cercando alle Maldive.</p>
+        <p class="exp-links"><a href="guesthouse-vs-resort.html" onclick="trackEvent('related_content_click',{destination_slug:'guesthouse-vs-resort'})"><span data-i18n="guides.linkGvr">Leggi il nostro confronto completo tra guesthouse e resort</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-holiday-cost">
+        <h3 data-i18n="blogCost.title">Quanto costa una vacanza alle Maldive?</h3>
+        <p data-i18n="blogCost.intro">I costi alle Maldive variano più in base al tipo di alloggio che in quasi qualsiasi altro luogo al mondo — un resort e una guesthouse prenotati per la stessa settimana possono differire di un ordine di grandezza.</p>
+        <p class="exp-links"><a href="maldives-holiday-cost.html" onclick="trackEvent('related_content_click',{destination_slug:'maldives-holiday-cost'})"><span data-i18n="guides.linkCost">Leggi la nostra guida completa sui costi della vacanza</span></a></p>
+      </article>
+      <article class="guide-article reveal" id="blog-things-to-do-maamigili">
+        <h3 data-i18n="blogThings.title">Cosa fare a Maamigili, Atollo di Ari Sud</h3>
+        <p data-i18n="blogThings.intro">L'attrazione principale di Maamigili è ciò che si trova in acqua appena al largo, ma un soggiorno qui offre più delle sole escursioni.</p>
+        <p class="exp-links"><a href="things-to-do-maamigili.html" onclick="trackEvent('related_content_click',{destination_slug:'things-to-do-maamigili'})"><span data-i18n="guides.linkThings">Leggi la nostra guida completa sulle cose da fare a Maamigili</span></a></p>
+      </article>
+    </div>
+
+    <div class="ti-panel" id="se-panel-getting-here" style="display:none">
       <p class="gh-sub" data-i18n="gettingHere.intro">Vilu Residence si trova nell'Atollo di Ari Sud; per raggiungerci è necessaria una coincidenza dall'Aeroporto Internazionale di Velana. Scegli l'opzione più adatta alle tue date e al tuo budget.</p>
       <div class="gh-tabs reveal">
         <button class="gh-tab on" id="gh-tab-arrival" onclick="ghSwitchTab('arrival')" data-i18n="gettingHere.arrival">Arrivo</button>
@@ -1591,7 +1602,8 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <div class="gh-general reveal" id="gh-general"></div>
     </div>
 
-    <div class="ti-panel" id="ti-panel-timing" style="display:none">
+    <div class="ti-panel" id="se-panel-timing" style="display:none">
+      <p class="gh-sub" data-i18n="timing.intro">Non sei sicuro che le tue coincidenze funzionino? Inserisci qui sotto l'orario del tuo volo o speedboat per una verifica istantanea rispetto ai margini di sicurezza da noi consigliati.</p>
       <p class="gh-sub" data-i18n="timing.intro">Non sei sicuro che le tue coincidenze funzionino? Inserisci qui sotto l'orario del tuo volo o speedboat per una verifica istantanea rispetto ai margini di sicurezza da noi consigliati.</p>
       <div class="tc-tabs reveal">
         <button class="gh-tab on" id="tc-tab-arrival" onclick="tcSwitchTab('arrival')" data-i18n="gettingHere.arrival">Arrivo</button>
@@ -1632,32 +1644,112 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <div class="tc-disclaimer" data-i18n="timing.disclaimer">Questi sono orari indicativi basati su margini standard, non una garanzia — verifica sempre i dettagli esatti direttamente con noi, specialmente in prossimità della data del viaggio.</div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="ti-panel" id="ti-panel-faq" style="display:none">
-      <p class="gh-sub" data-i18n="faq.intro">Cerca o sfoglia per categoria — queste risposte provengono direttamente dalle nostre informazioni attuali su pacchetti e viaggi.</p>
-      <div class="faq-controls reveal">
-        <div class="faq-search">
-          <i class="ti ti-search" aria-hidden="true"></i>
-          <input type="text" id="faq-search-input" data-i18n-placeholder="faq.searchPlaceholder" placeholder="Cerca domande…">
-        </div>
-        <div class="faq-cats" id="faq-cats"></div>
-      </div>
-      <div class="faq-list reveal" id="faq-list"></div>
-      <div class="faq-empty" id="faq-empty" style="display:none" data-i18n="faq.noResults">Nessuna domanda corrispondente — prova una ricerca o una categoria diversa.</div>
+<!-- ══ TRUST ── real Google Reviews link + factual assurances already stated
+     elsewhere on the page (no invented ratings/counts/testimonials). ══ -->
+<section id="reviews">
+  <div class="section-inner" style="text-align:center;max-width:640px">
+    <div class="section-tag" data-i18n="reviews.tag">Cosa Dicono gli Ospiti</div>
+    <h2 class="section-title"><span data-i18n="reviews.titlePrefix">Leggi le nostre</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="reviews.titleEmphasis">recensioni</em></h2>
+    <p class="gh-sub" style="margin:16px auto 28px;max-width:480px" data-i18n="reviews.subtitle">Ascolta direttamente gli ospiti che hanno soggiornato da noi a Vilu Residence.</p>
+    <a href="https://share.google/pvHqwMzmtKflnZyPo" target="_blank" rel="noopener noreferrer" class="btn-outline" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none" onclick="trackEvent('review_link_click',{cta_location:'trust_section'})">
+      <i class="ti ti-brand-google" aria-hidden="true"></i> <span data-i18n="reviews.readOnGoogle">Leggi le Nostre Recensioni su Google</span>
+    </a>
+    <div class="tr-assurances">
+      <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Best rate guaranteed, book direct with us</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Free cancellation on every direct booking</span></div>
+      <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17% &amp; Green Tax included in every rate</span></div>
     </div>
   </div>
 </section>
 
-<!-- ══ CONTACT ══ -->
+<!-- ══ FAQ (Phase 12B-E2B) ── standalone editorial accordion, extracted from
+     the old Travel Info tab set. Uses <details>/<summary> so each item is
+     natively keyboard/screen-reader operable once rendered. A small static
+     fallback (facts that don't depend on live Firestore data) ships in the
+     base HTML so search engines and no-JS visitors see real content;
+     renderFAQ() replaces it with the full live-data-driven set when JS
+     runs -- see the fallback note in the script below. ══ -->
+<section id="faq">
+  <div class="section-inner" style="max-width:820px">
+    <div class="section-tag" data-i18n="faq.tag">FAQ per gli ospiti</div>
+    <h2 class="section-title"><span data-i18n="faq.titlePrefix">Risposte</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="faq.titleEmphasis">rapide</em></h2>
+    <p class="gh-sub" style="margin:16px 0 28px" data-i18n="faq.intro">Cerca o sfoglia per categoria — queste risposte provengono direttamente dalle nostre informazioni attuali su pacchetti e viaggi.</p>
+    <div class="faq-controls">
+      <div class="faq-search">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" id="faq-search-input" data-i18n-placeholder="faq.searchPlaceholder" placeholder="Cerca domande…">
+      </div>
+      <div class="faq-cats" id="faq-cats"></div>
+    </div>
+    <div class="faq-list" id="faq-list">
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qCancellationPolicy">Applicate una tariffa di cancellazione o per mancata presentazione?</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">Cancellazione gratuita per tutte le prenotazioni dirette effettuate con noi — tramite il nostro sito web, WhatsApp o telefono. Per queste prenotazioni non raccogliamo mai online un deposito, un pagamento anticipato o i dati della carta — il pagamento avviene di persona, solo in contanti (USD o EUR) — quindi cancellare o modificare la prenotazione non comporta mai alcun costo. Se hai prenotato tramite un'OTA (Booking.com, Airbnb o un'altra piattaforma di terze parti), si applica invece la politica di cancellazione di quella piattaforma, poiché non controlliamo né modifichiamo i termini delle OTA.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qWifi">Il Vilu Residence dispone di Wi-Fi?</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aWifi">Sì — il Wi-Fi gratuito è disponibile per tutti gli ospiti per l'intera durata del soggiorno.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qAircon">Le camere sono dotate di aria condizionata?</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aAircon">Sì — tutte le nostre camere dispongono di aria condizionata.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qDietary">Potete venire incontro a esigenze alimentari particolari?</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aDietary">In generale, sì — comunicateci eventuali esigenze alimentari (vegetariano, halal, allergie, ecc.) al momento della prenotazione, e faremo del nostro meglio per venirvi incontro.</div>
+      </details>
+    </div>
+    <div class="faq-empty" id="faq-empty" style="display:none" data-i18n="faq.noResults">Nessuna domanda corrispondente — prova una ricerca o una categoria diversa.</div>
+  </div>
+</section>
+
+<!-- ══ GALLERY (Phase 12B-E2B) ── same 6 real images, restrained horizontal
+     rail instead of a dense masonry wall. Rail scrolls internally; the page
+     itself does not (same proven mobile-overflow-safe pattern as the
+     package/experience rails). ══ -->
+<section id="gallery">
+  <div class="section-inner">
+    <div>
+      <div class="section-tag" data-i18n="gallery.tag">Galleria</div>
+      <h2 class="section-title"><span data-i18n="gallery.titlePrefix">Momenti</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="gallery.titleEmphasis">in paradiso</em></h2>
+    </div>
+    <div class="ga-rail">
+      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-bikini-beach-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.ocean">Spiaggia Bikini</span></div>
+      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-guests-maamigili-sunset.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.guestMoments">Momenti degli ospiti</span></div>
+      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-guests-lagoon-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.maldivesLife">Vita alle Maldive</span></div>
+      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-couple-sunset-beach-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.sunsetViews">Viste al Tramonto</span></div>
+      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-maamigili-island-buggy-tour.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.activities">Attività</span></div>
+      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-sandbank-bbq-beach-dining.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.beachDining">Cena in spiaggia</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CLOSING CONVERSION (Phase 12B-E2B) ── quiet, emotional, does not
+     repeat the hero composition. Max 2 CTAs. ══ -->
+<section id="closing">
+  <div class="section-inner" style="text-align:center;max-width:680px">
+    <h2 class="cc-headline" data-i18n="closing.headline">Your South Ari story starts here.</h2>
+    <div class="cc-ctas">
+      <a href="#holiday-packages" class="btn-primary" data-i18n="closing.cta" onclick="trackEvent('cta_click',{source_context:'closing'})">Explore Holiday Packages</a>
+      <button type="button" class="btn-outline" onclick="trackEvent('availability_click',{source_context:'closing'});openBookingPage()" data-i18n="closing.ctaSecondary">Check Availability</button>
+    </div>
+    <p class="cc-contact-hint"><span data-i18n="closing.contactHint">Or if you'd rather talk it through first,</span> <a href="#contact" onclick="trackEvent('contact_click',{contact_method:'section_link',cta_location:'closing'})" data-i18n="contact.contactUs">Contatta Vilu Residence</a></p>
+  </div>
+</section>
+
+<!-- ══ CONTACT (Phase 12B-E2B) ── same real form/functions, visually
+     quieted -- tertiary path near the page end, not a second Availability. ══ -->
 <section id="contact">
   <div class="section-inner">
-    <div class="reveal">
+    <div>
       <div class="section-tag" data-i18n="contact.tag">Contattaci</div>
-      <h2 class="section-title" style="color:var(--text)"><span data-i18n="contact.titlePrefix">Ci piacerebbe</span> <em style="font-style:italic;color:var(--teal)" data-i18n="contact.titleEmphasis">ascoltarti</em></h2>
+      <h2 class="section-title ct-title" style="color:var(--text)" data-i18n="contact.contactUs">Contatta Vilu Residence</h2>
     </div>
     <div class="contact-grid">
-      <div class="contact-info reveal">
-        <h3 data-i18n="contact.contactUs">Contatta Vilu Residence</h3>
+      <div class="contact-info">
         <div class="contact-details">
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.address">Indirizzo</div><div class="cd-value">Maamigili, South Ari Atoll, 00100<br>Republic of Maldives</div></div></div>
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-phone" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.phone">Telefono / WhatsApp</div><div class="cd-value"><a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'contact_details'})">+960 9903339</a></div></div></div>
@@ -1665,19 +1757,19 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
           <div class="cd-item"><div class="cd-icon"><i class="ti ti-clock" aria-hidden="true"></i></div><div><div class="cd-label" data-i18n="contact.responseTime">Tempo di Risposta</div><div class="cd-value" data-i18n="contact.within24h">Entro 24 ore</div></div></div>
         </div>
       </div>
-      <div class="contact-form reveal">
+      <div class="contact-form">
         <div class="cf-title" data-i18n="contact.sendMessage">Inviaci un messaggio</div>
         <div class="cf-fields">
           <div class="cf-row">
-            <div class="cf-field"><label data-i18n="contact.yourName">Il Tuo Nome</label><input type="text" id="cf-name" placeholder="Nome completo" data-i18n-placeholder="contact.namePlaceholder"></div>
-            <div class="cf-field"><label data-i18n="contact.emailLabel">Email</label><input type="email" id="cf-email" placeholder="tua@email.com" data-i18n-placeholder="contact.emailPlaceholder"></div>
+            <div class="cf-field"><label for="cf-name" data-i18n="contact.yourName">Il Tuo Nome</label><input type="text" id="cf-name" placeholder="Nome completo" data-i18n-placeholder="contact.namePlaceholder"></div>
+            <div class="cf-field"><label for="cf-email" data-i18n="contact.emailLabel">Email</label><input type="email" id="cf-email" placeholder="tua@email.com" data-i18n-placeholder="contact.emailPlaceholder"></div>
           </div>
-          <div class="cf-field"><label data-i18n="contact.subject">Oggetto</label>
+          <div class="cf-field"><label for="cf-subject" data-i18n="contact.subject">Oggetto</label>
             <select id="cf-subject"><option data-i18n="contact.subjectRoom">Richiesta Camera</option><option data-i18n="contact.subjectBooking">Domanda sulla Prenotazione</option><option data-i18n="contact.subjectActivities">Attività</option><option data-i18n="contact.subjectGroup">Prenotazione di Gruppo</option><option data-i18n="contact.subjectOther">Altro</option></select>
           </div>
-          <div class="cf-field" id="cf-package-wrap" style="display:none"><label data-i18n="contact.packageLabel">Pacchetto</label><input type="text" id="cf-package" placeholder="" readonly=""></div>
+          <div class="cf-field" id="cf-package-wrap" style="display:none"><label for="cf-package" data-i18n="contact.packageLabel">Pacchetto</label><input type="text" id="cf-package" placeholder="" readonly=""></div>
           <div class="cf-field" id="cf-rooms-wrap" style="display:none">
-            <label data-i18n="contact.roomsLabel">Number of Rooms Needed</label>
+            <label for="cf-rooms" data-i18n="contact.roomsLabel">Number of Rooms Needed</label>
             <input type="number" id="cf-rooms" min="1" max="10" placeholder="e.g. 2">
             <div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:6px" data-i18n="contact.roomsHint">Up to 3 guests per room</div>
           </div>
@@ -1687,86 +1779,17 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
               <span data-i18n="contact.flightLabel">Add Domestic Flight transfer — $110 per person (optional)</span>
             </label>
           </div>
-          <div class="cf-field"><label data-i18n="contact.message">Messaggio</label><textarea id="cf-message" placeholder="Raccontaci i tuoi piani di viaggio..." data-i18n-placeholder="contact.messagePlaceholder"></textarea></div>
+          <div class="cf-field"><label for="cf-message" data-i18n="contact.message">Messaggio</label><textarea id="cf-message" placeholder="Raccontaci i tuoi piani di viaggio..." data-i18n-placeholder="contact.messagePlaceholder"></textarea></div>
           <button class="cf-btn" onclick="sendContactForm()" data-i18n="contact.sendButton">Invia Messaggio →</button>
         </div>
       </div>
     </div>
-    <div class="map-embed reveal">
+    <div class="map-embed">
       <iframe src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d3982.4784863481955!2d72.83426557497258!3d3.4759281464984784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e6!4m3!3m2!1d3.473408!2d72.8375756!4m5!1s0x3b472f578e808eb1%3A0x77b12ee05368e158!2sVilu%20Residence%20-%20Best%20Guesthouse%20in%20Maamigili%20Island%2C%20Rahdhebai%20mahu%20A.dh%20maamigili%2C%2000100!3m2!1d3.4784482999999997!2d72.836158!5e0!3m2!1sen!2smv!4v1784201127651!5m2!1sen!2smv" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="" title="Vilu Residence location on Google Maps"></iframe>
     </div>
   </div>
 </section>
 
-<!-- ══ GUIDES & TRAVEL BLOG ══ -->
-<section id="guides">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag" data-i18n="guides.tag">Risorse di viaggio</div>
-      <h2 class="section-title"><span data-i18n="guides.titlePrefix">Guide e</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="guides.titleEmphasis">consigli di viaggio</em></h2>
-      <p class="gh-sub" data-i18n="guides.intro">Tutto ciò che sappiamo sull'atollo di Ari Sud, Maamigili e sulla pianificazione di un viaggio alle Maldive — ricercato per aiutarti a pianificare, non solo per riempire una pagina.</p>
-    </div>
-    <div class="guides-tabs reveal">
-      <button class="guides-tab on" id="guides-tab-destinations" onclick="guidesSwitchTab('destinations')"><i class="ti ti-map-2" aria-hidden="true"></i> <span data-i18n="guides.tabDestinations">Guide alle destinazioni</span></button>
-      <button class="guides-tab" id="guides-tab-compare" onclick="guidesSwitchTab('compare')"><i class="ti ti-arrows-diff" aria-hidden="true"></i> <span data-i18n="guides.tabCompare">Confronti</span></button>
-      <button class="guides-tab" id="guides-tab-blog" onclick="guidesSwitchTab('blog')"><i class="ti ti-notebook" aria-hidden="true"></i> <span data-i18n="guides.tabBlog">Blog di viaggio</span></button>
-    </div>
-
-    <div class="guides-panel" id="guides-panel-destinations">
-      <article class="guide-article reveal" id="guide-south-ari-atoll">
-        <h3 data-i18n="guideSaa.title">Guida di viaggio dell'atollo di Ari Sud</h3>
-        <p data-i18n="guideSaa.intro">L'atollo di Ari Sud (localmente atollo di Alifu Dhaalu) si trova nelle Maldive centrali, un anello di barriere coralline e banchi di sabbia costruito attorno a una serie di isole locali abitate e resort. È uno dei 26 atolli che compongono il paese, ed è noto soprattutto per una cosa: gli squali balena.</p>
-        <p class="exp-links"><a href="south-ari-atoll-guide.html"><span data-i18n="guides.linkSaaGuide">Leggi la nostra guida completa all'atollo di Ari Sud</span></a></p>
-      </article>
-      <article class="guide-article reveal" id="guide-maamigili">
-        <h3 data-i18n="guideMaa.title">Guida di viaggio di Maamigili</h3>
-        <p data-i18n="guideMaa.intro">Maamigili è l'isola che Vilu Residence chiama casa — un'isola locale sul bordo meridionale dell'atollo di Ari Sud, e la più grande e popolosa dell'atollo, con 2.798 abitanti secondo il censimento del 2022. Localmente viene talvolta chiamata "l'isola degli squali balena", per ragioni che diventeranno ovvie tra qualche paragrafo.</p>
-        <p class="exp-links"><a href="maamigili-guide.html"><span data-i18n="guides.linkMaaGuide">Leggi la nostra guida completa su Maamigili</span></a></p>
-      </article>
-    </div>
-
-    <div class="guides-panel" id="guides-panel-compare" style="display:none">
-      <article class="guide-article reveal" id="compare-snorkeling-islands">
-        <h3 data-i18n="cmpSnorkel.title">Le migliori isole locali delle Maldive per lo snorkeling</h3>
-        <p data-i18n="cmpSnorkel.intro">Non tutte le isole locali offrono la stessa esperienza in acqua, ed è utile sapere cosa cercare invece di scegliere solo in base alla notorietà del nome. In generale, le isole locali con il miglior snorkeling condividono alcune caratteristiche: un'area marina protetta o una riserva nelle vicinanze, una barriera corallina domestica o una laguna raggiungibile senza barca e — idealmente — vita marina residente, non solo stagionale.</p>
-        <p class="exp-links"><a href="best-local-islands-snorkeling.html"><span data-i18n="guides.linkCmpSnorkel">Leggi la nostra guida completa per scegliere un'isola per lo snorkeling</span></a></p>
-      </article>
-      <article class="guide-article reveal" id="compare-regions">
-        <h3 data-i18n="cmpRegions.title">Atollo di Ari Sud a confronto con altre regioni delle Maldive</h3>
-        <p data-i18n="cmpRegions.intro">I 26 atolli delle Maldive non sono intercambiabili — ogni regione ha un carattere diverso, ed è utile scegliere in base a ciò che si vuole davvero dal viaggio piuttosto che alla semplice vicinanza a Malé.</p>
-        <p class="exp-links"><a href="south-ari-vs-other-regions.html"><span data-i18n="guides.linkCmpRegions">Leggi il nostro confronto completo tra Ari Sud e altre regioni</span></a></p>
-      </article>
-    </div>
-
-    <div class="guides-panel" id="guides-panel-blog" style="display:none">
-      <article class="guide-article reveal" id="blog-best-time-visit">
-        <h3 data-i18n="blogBestTime.title">Periodo migliore per visitare le Maldive</h3>
-        <p data-i18n="blogBestTime.intro">La risposta breve: da novembre ad aprile è il consiglio classico, e per buoni motivi, ma non è l'unico buon periodo per partire — dipende da cosa stai privilegiando.</p>
-        <p class="exp-links"><a href="best-time-to-visit.html"><span data-i18n="guides.linkBestTime">Leggi la nostra guida completa sul periodo migliore per visitare</span></a></p>
-      </article>
-      <article class="guide-article reveal" id="blog-whale-shark-season">
-        <h3 data-i18n="blogWhaleSeason.title">Periodo migliore per vedere gli squali balena nell'atollo di Ari Sud</h3>
-        <p data-i18n="blogWhaleSeason.intro">A differenza della maggior parte delle destinazioni per squali balena nel mondo, dove gli avvistamenti si concentrano attorno a una specifica finestra migratoria, l'aggregazione di squali balena dell'atollo di Ari Sud è documentata come presente tutto l'anno. I ricercatori del Maldives Whale Shark Research Programme foto-identificano squali individuali nell'Area Marina Protetta di Ari Sud (SAMPA) da molti anni, e la popolazione — prevalentemente maschi giovani — mostra una forte fedeltà al sito, rimanendo residente piuttosto che migrare secondo un ciclo stagionale.</p>
-        <p class="exp-links"><a href="whale-shark-snorkeling.html"><span data-i18n="saaPage.linkWhaleShark">Leggi la nostra guida completa allo snorkeling con squali balena →</span></a></p>
-      </article>
-      <article class="guide-article reveal" id="blog-guesthouse-vs-resort">
-        <h3 data-i18n="blogGvr.title">Guesthouse o resort alle Maldive: quale scegliere?</h3>
-        <p data-i18n="blogGvr.intro">Nessuno dei due è oggettivamente migliore — sono viaggi genuinamente diversi, e la scelta giusta dipende da cosa stai cercando alle Maldive.</p>
-        <p class="exp-links"><a href="guesthouse-vs-resort.html"><span data-i18n="guides.linkGvr">Leggi il nostro confronto completo tra guesthouse e resort</span></a></p>
-      </article>
-      <article class="guide-article reveal" id="blog-holiday-cost">
-        <h3 data-i18n="blogCost.title">Quanto costa una vacanza alle Maldive?</h3>
-        <p data-i18n="blogCost.intro">I costi alle Maldive variano più in base al tipo di alloggio che in quasi qualsiasi altro luogo al mondo — un resort e una guesthouse prenotati per la stessa settimana possono differire di un ordine di grandezza.</p>
-        <p class="exp-links"><a href="maldives-holiday-cost.html"><span data-i18n="guides.linkCost">Leggi la nostra guida completa sui costi della vacanza</span></a></p>
-      </article>
-      <article class="guide-article reveal" id="blog-things-to-do-maamigili">
-        <h3 data-i18n="blogThings.title">Cosa fare a Maamigili, Atollo di Ari Sud</h3>
-        <p data-i18n="blogThings.intro">L'attrazione principale di Maamigili è ciò che si trova in acqua appena al largo, ma un soggiorno qui offre più delle sole escursioni.</p>
-        <p class="exp-links"><a href="things-to-do-maamigili.html"><span data-i18n="guides.linkThings">Leggi la nostra guida completa sulle cose da fare a Maamigili</span></a></p>
-      </article>
-    </div>
-  </div>
-</section>
 
 <!-- ══ FOOTER ══ -->
 <footer>
@@ -1795,7 +1818,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">Cosa Fare a Maamigili</a></li>
       </ul></div>
       <div class="footer-col"><h4 data-i18n="navShell.stay">Soggiorno</h4><ul>
-        <li><a href="#about">Vilu Residence</a></li>
+        <li><a href="#what-is-vilu">Vilu Residence</a></li>
         <li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">Camera Doppia</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li>
         <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">Camera Deluxe Family</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li>
         <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyOpenDeckName">Camera Deluxe Family con Terrazza</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room with Open Deck">$90</span></a></li>
@@ -2087,21 +2110,13 @@ en: {
     "deluxeFamilyName": "Deluxe Family Room",
     "deluxeFamilyOpenDeckName": "Deluxe Family Room with Open Deck"
   },
-  "about": {
-    "tag": "About Us",
-    "titlePrefix": "Your home",
-    "titleEmphasis": "in paradise",
-    "desc": "Nestled in the South Ari Atoll, Vilu Residence Maamigili offers an intimate boutique experience surrounded by the natural beauty of the Maldives. We believe every guest deserves personalised attention, authentic experiences, and a genuine connection with this remarkable corner of the world.",
-    "feat1Title": "Snorkeling & Diving",
-    "feat1Text": "World-class reef within minutes",
-    "feat2Title": "Island Hopping",
-    "feat2Text": "Explore surrounding atolls",
-    "feat3Title": "Local Cuisine",
-    "feat3Text": "Fresh seafood & Maldivian dishes",
-    "feat4Title": "Stunning Sunsets",
-    "feat4Text": "Unforgettable Indian Ocean views",
-    "planYourStay": "Plan Your Stay",
-    "cosyRooms": "Cosy Rooms"
+  "whatIsVilu": {
+    "eyebrow": "Who We Are",
+    "headline": "Vilu is your way into South Ari.",
+    "body": "Holiday planning, marine experiences and local knowledge — with our own six-room home in Maamigili when you need somewhere to stay.",
+    "point1": "Personalised attention, not a front desk — every guest is planned for individually.",
+    "point2": "Island hopping and local cuisine woven into your stay, not just snorkeling.",
+    "point3": "Boutique and intimate by design — six rooms, not sixty."
   },
   "gallery": {
     "tag": "Gallery",
@@ -2140,7 +2155,12 @@ en: {
     "unavailable": "Packages are temporarily unavailable — please",
     "contactUsLink": "contact us",
     "directly": "directly.",
-    "seeExperiences": "See what each excursion actually involves"
+    "seeExperiences": "See what each excursion actually involves",
+    "featuredTag": "Featured",
+    "more": "more",
+    "viewFullDetails": "View Full Details →",
+    "viewPackage": "View Package",
+    "moreLabel": "More Packages"
   },
   "experiences": {
     "tag": "Signature Excursions",
@@ -2196,7 +2216,13 @@ en: {
     "checkAvailabilityArrow": "Check Availability →",
     "orBrowseAllRooms": "browse all rooms",
     "directBookingsOnly": "Direct bookings only",
-    "or": "Or"
+    "or": "Or",
+    "reframeEyebrow": "Prefer to arrange accommodation separately?",
+    "reframeHeadline": "Check live availability at Vilu Residence.",
+    "labelCheckin": "Check-in",
+    "labelCheckout": "Check-out",
+    "labelGuests": "Guests",
+    "labelRooms": "Rooms"
   },
   "gettingHere": {
     "tag": "Travel logistics",
@@ -2275,7 +2301,10 @@ en: {
     "titlePrefix": "Read our",
     "titleEmphasis": "reviews",
     "subtitle": "Hear directly from guests who've stayed with us at Vilu Residence.",
-    "readOnGoogle": "Read Our Reviews on Google"
+    "readOnGoogle": "Read Our Reviews on Google",
+    "assurance1": "Best rate guaranteed, book direct with us",
+    "assurance2": "Free cancellation on every direct booking",
+    "assurance3": "TGST 17% & Green Tax included in every rate"
   },
   "contact": {
     "tag": "Get In Touch",
@@ -2302,6 +2331,12 @@ en: {
     "subjectGroup": "Group Booking",
     "subjectOther": "Other",
     "sendButton": "Send Message →"
+  },
+  "closing": {
+    "headline": "Your South Ari story starts here.",
+    "cta": "Explore Holiday Packages",
+    "ctaSecondary": "Check Availability",
+    "contactHint": "Or if you'd rather talk it through first,"
   },
   "footer": {
     "desc": "A welcoming guesthouse in the South Ari Atoll offering genuine service and authentic Maldivian experiences.",
@@ -3074,16 +3109,28 @@ async function fetchTransportContent() {
 // force .reveal children visible immediately, since IntersectionObserver
 // never fires for a display:none target and switching to display:'' can
 // otherwise leave the panel content invisible until the next scroll.
-function tiSwitchTab(tab) {
-  var tabs = {'getting-here':'ti-tab-getting-here','timing':'ti-tab-timing','faq':'ti-tab-faq'};
-  var panels = {'getting-here':'ti-panel-getting-here','timing':'ti-panel-timing','faq':'ti-panel-faq'};
-  Object.keys(tabs).forEach(function(k){
-    var tabEl = document.getElementById(tabs[k]);
+// Phase 12B-E2B: South Ari Expertise merges the old Guides tab set
+// (destinations/compare/blog) with Travel Info's Getting Here/Timing
+// Checker into one 5-tab bar (id="travel-info" preserved for the global
+// nav). Replaces the two separate tiSwitchTab()/guidesSwitchTab()
+// implementations this merges. FAQ is no longer one of these tabs -- it's
+// its own #faq section now.
+var SE_TABS = {
+  'destinations':'se-tab-destinations','compare':'se-tab-compare','blog':'se-tab-blog',
+  'getting-here':'se-tab-getting-here','timing':'se-tab-timing'
+};
+var SE_PANELS = {
+  'destinations':'se-panel-destinations','compare':'se-panel-compare','blog':'se-panel-blog',
+  'getting-here':'se-panel-getting-here','timing':'se-panel-timing'
+};
+function seSwitchTab(tab) {
+  Object.keys(SE_TABS).forEach(function(k){
+    var tabEl = document.getElementById(SE_TABS[k]);
     if (tabEl) tabEl.classList.toggle('on', k === tab);
-    var panelEl = document.getElementById(panels[k]);
+    var panelEl = document.getElementById(SE_PANELS[k]);
     if (panelEl) panelEl.style.display = (k === tab) ? '' : 'none';
   });
-  var shown = document.getElementById(panels[tab]);
+  var shown = document.getElementById(SE_PANELS[tab]);
   if (shown) shown.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
 }
 
@@ -3093,23 +3140,11 @@ var GUIDES_ARTICLE_TAB = {
   'blog-best-time-visit':'blog', 'blog-whale-shark-season':'blog',
   'blog-guesthouse-vs-resort':'blog', 'blog-holiday-cost':'blog', 'blog-things-to-do-maamigili':'blog'
 };
-function guidesSwitchTab(tab) {
-  var tabs = {'destinations':'guides-tab-destinations','compare':'guides-tab-compare','blog':'guides-tab-blog'};
-  var panels = {'destinations':'guides-panel-destinations','compare':'guides-panel-compare','blog':'guides-panel-blog'};
-  Object.keys(tabs).forEach(function(k){
-    var tabEl = document.getElementById(tabs[k]);
-    if (tabEl) tabEl.classList.toggle('on', k === tab);
-    var panelEl = document.getElementById(panels[k]);
-    if (panelEl) panelEl.style.display = (k === tab) ? '' : 'none';
-  });
-  var shown = document.getElementById(panels[tab]);
-  if (shown) shown.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
-}
 function handleGuidesDeepLink(){
   var hash = location.hash ? location.hash.slice(1) : '';
   var tab = GUIDES_ARTICLE_TAB[hash];
   if (!tab) return;
-  guidesSwitchTab(tab);
+  seSwitchTab(tab);
   setTimeout(function(){
     var el = document.getElementById(hash);
     if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
@@ -3863,28 +3898,29 @@ function renderFAQ() {
 
   var catLabels = {};
   FAQ_CATEGORIES.forEach(function(c){ catLabels[c.id] = t(c.key); });
+  // <details>/<summary> — natively keyboard/screen-reader operable with no
+  // JS required for the open/close mechanic itself (Phase 12B-E2B §18).
+  // JS only adds the faq_expand analytics hook on top, via the native
+  // 'toggle' event, guarded to real user opens only (see faqWireExpandTracking).
   listEl.innerHTML = filtered.map(function(it, i){
-    return '<div class="faq-item" data-idx="'+i+'">'
-      + '<button class="faq-question" onclick="faqToggle(this)">'
-      + '<span><span class="faq-cat-pill">'+catLabels[it.cat]+'</span>'+it.q+'</span>'
-      + '<i class="ti ti-chevron-down" aria-hidden="true"></i>'
-      + '</button>'
-      + '<div class="faq-answer"><div class="faq-answer-inner">'+it.a+'</div></div>'
-      + '</div>';
+    return '<details class="faq-item" data-idx="'+i+'" data-faq-q="'+it.q.replace(/"/g,'&quot;')+'">'
+      + '<summary class="faq-question"><span><span class="faq-cat-pill">'+catLabels[it.cat]+'</span>'+it.q+'</span></summary>'
+      + '<div class="faq-answer-inner">'+it.a+'</div>'
+      + '</details>';
   }).join('');
+  faqWireExpandTracking(listEl);
 }
 
-function faqToggle(btn) {
-  var item = btn.closest('.faq-item');
-  var answer = item.querySelector('.faq-answer');
-  var isOpen = item.classList.contains('open');
-  if (isOpen) {
-    answer.style.maxHeight = null;
-    item.classList.remove('open');
-  } else {
-    item.classList.add('open');
-    answer.style.maxHeight = answer.scrollHeight + 'px';
-  }
+// trackEvent('faq_expand', ...) fires only on a genuine user-initiated open
+// (native <details> 'toggle' event, filtered to el.open===true) -- never on
+// page init, programmatic re-render, closing, or language change, since
+// renderFAQ() never sets the `open` attribute itself.
+function faqWireExpandTracking(listEl){
+  listEl.querySelectorAll('.faq-item').forEach(function(el){
+    el.addEventListener('toggle', function(){
+      if (el.open) trackEvent('faq_expand', {faq_question: el.getAttribute('data-faq-q')});
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -4671,14 +4707,14 @@ function renderExperiences(pkgs, notesData){
       }
     });
 
-    return '<div class="exp-card" id="experience-'+slug+'">'
-      + '<div class="exp-icon"><i class="ti '+cfg.icon+'" aria-hidden="true"></i></div>'
-      + '<h3 class="exp-name">'+name+'</h3>'
-      + '<p class="exp-desc">'+desc+'</p>'
-      + '<div class="exp-price">'+priceLine+'</div>'
-      + '<div class="exp-actions">'
-        + '<a class="exp-cta" href="https://wa.me/9609903339?text='+waText+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'experience_enquire\',{contact_method:\'whatsapp\',experience_id:\''+cfg.key+'\'})">'+t('experiences.enquireOn')+'</a>'
-        + '<a class="exp-see-packages" href="#holiday-packages">'+t('experiences.seePackages')+'</a>'
+    return '<div class="exp-chip" id="experience-'+slug+'">'
+      + '<i class="ti '+cfg.icon+'" aria-hidden="true"></i>'
+      + '<div class="exp-chip-body">'
+        + '<h3 class="exp-chip-name">'+name+'</h3>'
+        + '<p class="exp-chip-desc">'+desc+'</p>'
+        + '<div class="exp-chip-row"><span class="exp-chip-price">'+priceLine+'</span>'
+          + '<a class="exp-chip-wa" href="https://wa.me/9609903339?text='+waText+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'experience_enquire\',{contact_method:\'whatsapp\',experience_id:\''+cfg.key+'\'})">'+t('experiences.enquireOn')+'</a>'
+        + '</div>'
       + '</div>'
     + '</div>';
   }).join('');
@@ -4700,53 +4736,88 @@ function hpNotesFor(p, notesData){
   return general.concat(matched);
 }
 
+// Phase 12B-E2B: editorial "one featured + rail" layout replaces the old
+// 9-equal-cards grid (anti-congestion contract, §1/§33). All per-package
+// computation (badge, savings %, upgrade-added activities, notes) is
+// UNCHANGED from the prior implementation -- only the rendered HTML differs.
+// Every package, featured or rail, still carries id="package-<slug>" +
+// data-pkg-id/name/nights so handleHolidayPackageDeepLink() and the
+// package_view IntersectionObserver keep working for all of them unchanged.
 function renderHolidayPackages(pkgs, notesData){
   var grid = document.getElementById('hp-grid');
   var baselineNights = pkgs[0].nights;
   var baselineRate = pkgs[0].pricePerRoom / pkgs[0].nights;
 
-  grid.innerHTML = pkgs.map(function(p, i){
+  // Featured = whichever package Firestore currently flags with a badge
+  // (today: "Maldives Dream Bliss" / Most Popular) -- never hardcoded here.
+  // Falls back to the middle-priced package only if nothing is badged.
+  var featured = pkgs.find(function(p){ return p.badge; }) || pkgs[Math.floor(pkgs.length/2)];
+  var rest = pkgs.filter(function(p){ return p !== featured; });
+
+  function computed(p, i){
     var isLadder = !p.excludeFromLadder;
     var rate = p.pricePerRoom / p.nights;
     var savingsPct = (isLadder && i>0) ? Math.round((1 - rate/baselineRate) * 100) : 0;
     var prev = (isLadder && i>0) ? pkgs[i-1] : null;
     var upgradeAdded = prev ? (p.activities||[]).filter(function(a){ return (prev.activities||[]).indexOf(a) === -1; }) : [];
+    return { isLadder:isLadder, rate:rate, savingsPct:savingsPct, upgradeAdded:upgradeAdded };
+  }
+
+  function featuredCardHtml(p){
+    var i = pkgs.indexOf(p);
+    var c = computed(p, i);
     var slug = hpSlug(p.name);
     var safeName = (p.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     var isRose = p.badgeStyle === 'rose';
-
-    var includesHtml = hpDetailLines(p.includes);
-    var activitiesHtml = hpDetailLines(p.activities);
-    var addOnsHtml = hpDetailLines(p.addOns, function(a){ return a.name+' — $'+a.price+a.unit; });
     var notesLines = hpNotesFor(p, notesData);
-    var notesHtml = notesLines.map(function(n){ return '<div class="hp-notes-line">'+td(n)+'</div>'; }).join('');
-
-    var isOrphan = (i === pkgs.length-1) && (pkgs.length % 3 === 1);
-    var rateRowExtra = !isLadder
+    var rateRowExtra = !c.isLadder
       ? '<span class="hp-specialty-tag">'+t('packages.honeymoonTag')+'</span>'
-      : (savingsPct>0 ? '<span class="hp-savings">'+tf('packages.saveVsRate',{pct:savingsPct,nights:baselineNights})+'</span>' : '');
-    var upgradeAddedNames = upgradeAdded.map(function(a){ return td(a); });
+      : (c.savingsPct>0 ? '<span class="hp-savings">'+tf('packages.saveVsRate',{pct:c.savingsPct,nights:baselineNights})+'</span>' : '');
+    var upgradeAddedNames = c.upgradeAdded.map(function(a){ return td(a); });
     var nightWord = p.nights>1 ? t('packages.nights') : t('packages.night');
-    return '<div class="hp-card'+(p.badge?' hp-featured':'')+(p.badge&&isRose?' hp-featured-rose':'')+(isOrphan?' hp-card-center':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'" data-pkg-nights="'+p.nights+'">'
-      + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'">'+td(p.badge)+'</div>' : '')
+    var includesLine = (p.includes||[]).map(function(x){ return td(x); }).join(' &middot; ');
+    var topActivities = (p.activities||[]).slice(0,4).map(function(x){ return td(x); });
+    var moreActivities = (p.activities||[]).length - topActivities.length;
+    var activitiesLine = topActivities.join(' &middot; ') + (moreActivities>0 ? ' &middot; +'+moreActivities+' '+t('packages.more') : '');
+    return '<div class="hp-card hp-featured-card'+(isRose?' hp-featured-rose':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'" data-pkg-nights="'+p.nights+'">'
+      + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'">'+td(p.badge)+'</div>' : '<div class="hp-badge hp-badge-featured">'+t('packages.featuredTag')+'</div>')
       + '<h3 class="hp-name">'+td(p.name)+'</h3>'
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">'+t('packages.pp')+' &middot; '+p.nights+' '+nightWord+'</span></div>'
-      + '<div class="hp-rate-row"><span>$'+rate.toFixed(0)+t('packages.perNightPerPerson')+'</span>'+rateRowExtra+'</div>'
+      + '<div class="hp-rate-row"><span>$'+c.rate.toFixed(0)+t('packages.perNightPerPerson')+'</span>'+rateRowExtra+'</div>'
       + '<p class="hp-hook">'+td(p.description||'')+'</p>'
-      + (upgradeAdded.length ? '<div class="hp-upgrade">'+t('packages.adds')+' '+upgradeAddedNames.join(' '+t('packages.and')+' ')+', '+t('packages.mostComplete')+'.</div>' : '')
-      + '<div class="hp-section"><div class="hp-section-label">'+t('packages.includes')+'</div><div class="hp-list">'+includesHtml+'</div></div>'
-      + '<div class="hp-section"><div class="hp-section-label">'+t('packages.activitiesLabel')+'</div><div class="hp-list hp-list-2col">'+activitiesHtml+'</div></div>'
-      + '<div class="hp-section"><div class="hp-section-label">'+t('packages.addOns')+'</div><div class="hp-list">'+addOnsHtml+'</div></div>'
-      + (notesLines.length ? '<details class="hp-notes">'
-          + '<summary>'+t('packages.goodToKnow')+'</summary>'
-          + '<div class="hp-notes-body">'+notesHtml+'</div>'
-        + '</details>' : '')
+      + (c.upgradeAdded.length ? '<div class="hp-upgrade">'+t('packages.adds')+' '+upgradeAddedNames.join(' '+t('packages.and')+' ')+', '+t('packages.mostComplete')+'.</div>' : '')
+      + (includesLine ? '<div class="hp-section"><div class="hp-section-label">'+t('packages.includes')+'</div><p class="hp-line">'+includesLine+'</p></div>' : '')
+      + (activitiesLine ? '<div class="hp-section"><div class="hp-section-label">'+t('packages.activitiesLabel')+'</div><p class="hp-line">'+activitiesLine+'</p></div>' : '')
+      + (notesLines.length ? '<details class="hp-notes"><summary>'+t('packages.goodToKnow')+'</summary><div class="hp-notes-body">'+notesLines.map(function(n){ return '<div class="hp-notes-line">'+td(n)+'</div>'; }).join('')+'</div></details>' : '')
       + '<div class="hp-actions">'
         + '<button class="hp-enquire-btn" onclick="hpEnquire(\''+p.id+'\',\''+safeName+'\')">'+t('packages.enquireButton')+'</button>'
         + '<a class="hp-whatsapp-link" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire\',{contact_method:\'whatsapp\',package_id:window.viluAnalytics.resolvePackageId(\''+safeName+'\',\''+p.id+'\')})">'+t('packages.askWhatsapp')+'</a>'
+        + '<a class="hp-view-full" href="holiday-packages.html#'+slug+'">'+t('packages.viewFullDetails')+'</a>'
       + '</div>'
-      + '</div>';
-  }).join('');
+    + '</div>';
+  }
+
+  function railItemHtml(p){
+    var i = pkgs.indexOf(p);
+    var c = computed(p, i);
+    var slug = hpSlug(p.name);
+    var safeName = (p.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    var nightWord = p.nights>1 ? t('packages.nights') : t('packages.night');
+    var badge = p.badge ? '<div class="hp-rail-badge">'+td(p.badge)+'</div>' : '';
+    return '<div class="hp-rail-item" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'" data-pkg-nights="'+p.nights+'">'
+      + badge
+      + '<h3 class="hp-rail-name">'+td(p.name)+'</h3>'
+      + '<div class="hp-rail-meta">$'+p.pricePerRoom+' '+t('packages.pp')+' &middot; '+p.nights+' '+nightWord+'</div>'
+      + '<p class="hp-rail-hook">'+td(p.description||'')+'</p>'
+      + '<div class="hp-rail-actions">'
+        + '<a class="hp-rail-view" href="holiday-packages.html#'+slug+'">'+t('packages.viewPackage')+' &rarr;</a>'
+        + '<a class="hp-rail-wa" aria-label="'+t('packages.askWhatsapp')+'" href="https://wa.me/9609903339?text='+encodeURIComponent("Hi! I'm interested in the "+p.name+" package.")+'" target="_blank" rel="noopener noreferrer" onclick="trackEvent(\'package_enquire\',{contact_method:\'whatsapp\',package_id:window.viluAnalytics.resolvePackageId(\''+safeName+'\',\''+p.id+'\')})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>'
+      + '</div>'
+    + '</div>';
+  }
+
+  grid.innerHTML = '<div class="hp-featured-wrap">'+featuredCardHtml(featured)+'</div>'
+    + '<div class="hp-rail-wrap"><div class="hp-rail-label">'+t('packages.moreLabel')+'</div><div class="hp-rail">'+rest.map(railItemHtml).join('')+'</div></div>';
 
   loadHpTerms();
 
@@ -4761,7 +4832,7 @@ function renderHolidayPackages(pkgs, notesData){
       }
     });
   }, {threshold:0.5});
-  document.querySelectorAll('#hp-grid .hp-card').forEach(function(card){ hpViewObserver.observe(card); });
+  document.querySelectorAll('#hp-grid [data-pkg-id]').forEach(function(card){ hpViewObserver.observe(card); });
 
   injectHolidayPackagesJsonLd(pkgs);
   handleHolidayPackageDeepLink();
