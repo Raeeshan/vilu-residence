@@ -1661,5 +1661,52 @@ section('Phase 12E-A — public booking presentation (engine/contract preservati
   });
 }
 
+section('Phase 12E-B — #booking availability_click analytics contract');
+{
+  const site = read('vilu-website.html');
+  const bookingSectionMatch = site.match(/<section id="booking">[\s\S]*?<\/section>/);
+  const bookingSection = bookingSectionMatch ? bookingSectionMatch[0] : '';
+
+  test('#booking section exists and was captured for this contract', () => {
+    assert.ok(bookingSection.length > 0, '<section id="booking"> not found');
+  });
+
+  test('all 3 #booking CTAs fire the canonical availability_click event, not a new event name', () => {
+    const ctaOnclicks = [...bookingSection.matchAll(/onclick="([^"]*)"/g)].map(m => m[1]);
+    const ctasWithOpenCall = ctaOnclicks.filter(oc => /openBookingPage|openBookingPopup/.test(oc));
+    assert.equal(ctasWithOpenCall.length, 3, `expected exactly 3 CTAs calling an open function inside #booking, found ${ctasWithOpenCall.length}`);
+    for (const oc of ctasWithOpenCall) {
+      assert.ok(/trackEvent\('availability_click',/.test(oc), `#booking CTA does not fire availability_click: ${oc}`);
+    }
+  });
+
+  test('#booking CTAs use distinct source_context values (no duplicate tracking blind spot) and never fire package_enquire', () => {
+    const contexts = [...bookingSection.matchAll(/trackEvent\('availability_click',\{source_context:'([^']+)'\}\)/g)].map(m => m[1]);
+    assert.equal(contexts.length, 3, `expected 3 source_context values, found ${contexts.length}`);
+    assert.equal(new Set(contexts).size, 3, 'source_context values must be distinct per CTA');
+    assert.ok(!/package_enquire/.test(bookingSection), '#booking must never fire package_enquire');
+  });
+
+  test('trackEvent is called exactly once per CTA onclick handler (single synchronous call, not wrapped in an async/duplicate-prone pattern)', () => {
+    const ctaOnclicks = [...bookingSection.matchAll(/onclick="([^"]*)"/g)].map(m => m[1]).filter(oc => /openBookingPage|openBookingPopup/.test(oc));
+    for (const oc of ctaOnclicks) {
+      const count = (oc.match(/trackEvent\(/g) || []).length;
+      assert.equal(count, 1, `expected exactly one trackEvent( call in this onclick, found ${count}: ${oc}`);
+    }
+  });
+
+  test('the "browse all rooms" control is a real, natively keyboard-operable <button>, not a mouse-only <span>', () => {
+    assert.ok(!/<span[^>]*onclick="[^"]*openBookingPopup[^"]*"/.test(bookingSection), '#booking must not have a <span onclick> control (mouse-only, not keyboard-operable)');
+    assert.ok(/<button type="button" class="la-inline-btn"[^>]*onclick="[^"]*openBookingPopup/.test(bookingSection), 'expected a real <button class="la-inline-btn"> wired to openBookingPopup');
+  });
+
+  test('this fix did not touch the pre-existing availability_click fire sites elsewhere on the page', () => {
+    const EXISTING_CONTEXTS = ["'hero_secondary'", "'homepage_booking_bar'", "'closing'"];
+    for (const ctx of EXISTING_CONTEXTS) {
+      assert.ok(site.includes(`trackEvent('availability_click',{source_context:${ctx}})`), `pre-existing availability_click fire site missing/changed: ${ctx}`);
+    }
+  });
+}
+
 // ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);

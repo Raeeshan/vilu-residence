@@ -691,6 +691,11 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .bwf-btn:hover{background-position:100% 0;box-shadow:0 10px 26px rgba(34,211,238,.4)}
 .la-btn{height:42px}
 .bwf-note{font-size:var(--font-size-xs);color:var(--muted);letter-spacing:.04em;margin-top:16px;text-align:center}
+/* Phase 12E-B: was a <span onclick>, mouse-only and never keyboard-operable.
+   A real <button>, reset to look identical (inline, no chrome), is natively
+   focusable/Enter-Space-activatable with zero markup complexity added. */
+.la-inline-btn{background:none;border:none;padding:0;margin:0;font:inherit;letter-spacing:inherit;color:var(--gold-light);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.la-inline-btn:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;border-radius:2px}
 .la-viewall{display:block;margin:24px auto 0;background:none;border:1px solid var(--border);color:var(--white);padding:12px 28px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s}
 .la-viewall:hover{border-color:var(--gold);color:var(--gold-light)}
 @media(max-width:900px){
@@ -1575,11 +1580,11 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <div class="la-field la-field-sm"><label for="bwf-ch" data-i18n="booking.children">어린이</label>
           <select class="bwf-select" id="bwf-ch"><option value="0" selected="" data-i18n="booking.noChildren">어린이 없음</option><option value="1" data-i18n="booking.child1">어린이 1명</option><option value="2" data-i18n="booking.child2">어린이 2명</option></select>
         </div>
-        <button class="bwf-btn la-btn" onclick="openBookingPageWithDates()" data-i18n="booking.checkAvailabilityArrow">예약 가능 여부 확인 →</button>
+        <button class="bwf-btn la-btn" onclick="trackEvent('availability_click',{source_context:'booking_widget'});openBookingPageWithDates()" data-i18n="booking.checkAvailabilityArrow">예약 가능 여부 확인 →</button>
       </div>
-      <div class="bwf-note"><span data-i18n="booking.or">또는</span> <span style="color:var(--gold-light);cursor:pointer" onclick="openBookingPopup()" data-i18n="booking.orBrowseAllRooms">전체 객실 둘러보기</span> · <span data-i18n="booking.directBookingsOnly">직접 예약만 가능</span></div>
+      <div class="bwf-note"><span data-i18n="booking.or">또는</span> <button type="button" class="la-inline-btn" onclick="trackEvent('availability_click',{source_context:'booking_widget_browse'});openBookingPopup()" data-i18n="booking.orBrowseAllRooms">전체 객실 둘러보기</button> · <span data-i18n="booking.directBookingsOnly">직접 예약만 가능</span></div>
     </div>
-    <button class="la-viewall" onclick="openBookingPage()" data-i18n="booking.viewAllAvailability">전체 예약 가능 현황 보기</button>
+    <button class="la-viewall" onclick="trackEvent('availability_click',{source_context:'booking_widget_viewall'});openBookingPage()" data-i18n="booking.viewAllAvailability">전체 예약 가능 현황 보기</button>
   </div>
 </section>
 
