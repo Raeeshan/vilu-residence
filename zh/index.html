@@ -349,8 +349,12 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-hero-media picture,.vc-hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 26%;display:block}
 .vc-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 26%;opacity:0;transition:opacity 1.1s cubic-bezier(.16,1,.3,1)}
 .vc-hero-video.vc-video-ready{opacity:1}
+/* Owner feedback: the hero read as darker than the source video. Top/bottom
+   (the only stops doing meaningful darkening -- the middle was already
+   .06-.22) eased from .62/.66 to .48/.50, keeping nav/CTA legibility while
+   letting the real footage read brighter through the rest of the frame. */
 .vc-hero-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:
-  linear-gradient(180deg,rgba(4,12,22,.62) 0%,rgba(4,12,22,.14) 26%,rgba(4,12,22,.06) 50%,rgba(4,12,22,.22) 78%,rgba(3,10,18,.66) 100%)}
+  linear-gradient(180deg,rgba(4,12,22,.48) 0%,rgba(4,12,22,.14) 26%,rgba(4,12,22,.06) 50%,rgba(4,12,22,.22) 78%,rgba(3,10,18,.50) 100%)}
 .vc-hero-content{position:relative;z-index:5;text-align:center;padding:0 5vw;max-width:820px;will-change:transform,opacity}
 .vc-eyebrow{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);background:rgba(4,12,22,.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border:1px solid rgba(34,211,238,.45);text-shadow:0 1px 4px rgba(0,0,0,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px}
 .vc-hero-title{margin-bottom:14px}
@@ -418,8 +422,12 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-above .vc-heading-lg span:last-child{color:var(--gold-light);font-style:italic}
 .vc-above .vc-story-sub{margin-left:auto;margin-right:auto}
 
-/* ── DESCENT ── pure-CSS gradient, native scroll only, no scroll-jacking */
-.vc-descent{height:140vh;display:flex;align-items:flex-start;justify-content:center;
+/* ── DESCENT ── pure-CSS gradient, native scroll only, no scroll-jacking.
+   Was 140vh -- on real desktop viewports that read as a very large, mostly
+   empty gap between Above South Ari and Below South Ari with only one small
+   caption in it. 90vh keeps enough room for the sticky caption below to
+   still travel/settle, while cutting the dead scroll distance by ~36%. */
+.vc-descent{height:90vh;display:flex;align-items:flex-start;justify-content:center;
   background:linear-gradient(180deg,#0e6f8e 0%,#0a4d68 18%,#0d2e4e 42%,#0a1c34 68%,#06101c 100%)}
 .vc-descent-caption{position:sticky;top:42vh;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.6vw,30px);color:rgba(255,255,255,.85);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear}
 
@@ -436,14 +444,20 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-below-links a{color:var(--teal-light);text-decoration:none;width:max-content}
 .vc-below-links a:hover{color:var(--gold-light)}
 
-/* Pre-reveal mask + gentle scale-in — same technique already proven on
-   Homecoming (see .vc-homecoming.vc-armed above): fully-visible/no-motion is
-   the reduced-motion/no-JS/no-IntersectionObserver default; .vc-armed is only
+/* Pre-reveal dim + gentle scale-in — same trigger already proven on
+   Homecoming (see .vc-homecoming.vc-armed above), but an opacity fade rather
+   than a full clip-path mask: a mask hides the photo completely until
+   .vc-active fires, so any delay between the reveal trigger and the image
+   actually finishing its (now non-lazy, but still real-world-variable) load
+   could show a fully "revealed" empty frame. Starting at 45% opacity instead
+   of 0 means the photo is always at least dimly present, never blank, no
+   matter how that race resolves. Fully-visible/no-motion remains the
+   reduced-motion/no-JS/no-IntersectionObserver default; .vc-armed is only
    ever applied inside the guarded branch in vcInitCinematicStory(), and
-   .vc-active removes the mask exactly once per intersection — see the
+   .vc-active completes the fade exactly once per intersection — see the
    contract note there. */
-.vc-below.vc-armed .vc-below-scene img{clip-path:inset(0 0 100% 0);transform:scale(1.08);transition:clip-path 1.3s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1)}
-.vc-below.vc-armed.vc-active .vc-below-scene img{clip-path:inset(0 0 0 0);transform:scale(1)}
+.vc-below.vc-armed .vc-below-scene img{opacity:.45;transform:scale(1.08);transition:opacity 1.3s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1)}
+.vc-below.vc-armed.vc-active .vc-below-scene img{opacity:1;transform:scale(1)}
 @media(max-width:600px){
   .vc-below-text{background:linear-gradient(180deg,rgba(4,11,20,.18) 0%,rgba(4,11,20,.88) 36%);padding:32px 24px;border-radius:0}
   .vc-below-scene img{object-position:center 32%}
@@ -468,10 +482,14 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-homecoming-fact span{font-weight:600;color:#8a5a1c}
 .vc-homecoming .vc-story-sub{color:rgba(36,26,15,.72)}
 .vc-homecoming .btn-primary{margin-top:28px}
-/* Pre-reveal mask: applied ONLY via .vc-armed (JS-gated, guarded branch);
-   .vc-active removes it. Never a bare default — see contract note above. */
-.vc-homecoming.vc-armed .vc-homecoming-media img{clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.16,1,.3,1)}
-.vc-homecoming.vc-armed.vc-active .vc-homecoming-media img{clip-path:inset(0 0 0 0)}
+/* Pre-reveal dim (not a full mask): applied ONLY via .vc-armed (JS-gated,
+   guarded branch); .vc-active completes it. Never a bare default — see
+   contract note above. Opacity, not clip-path -- a full mask can finish
+   "revealing" before a lazy-loaded image has actually downloaded, showing an
+   empty frame; starting at 45% opacity keeps the photo always at least
+   dimly present (see the identical fix + rationale on Below South Ari). */
+.vc-homecoming.vc-armed .vc-homecoming-media img{opacity:.45;transition:opacity 1.1s cubic-bezier(.16,1,.3,1)}
+.vc-homecoming.vc-armed.vc-active .vc-homecoming-media img{opacity:1}
 @media(max-width:900px){
   .vc-homecoming{grid-template-columns:1fr}
   .vc-homecoming-media{min-height:52vh}
@@ -561,7 +579,21 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
    wall -- same 6 real images. Rail scrolls internally; the page does not
    (same proven mobile-overflow-safe rail pattern used for packages). ── */
 #gallery{padding:90px 0;position:relative}
-.ga-rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:44px;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+/* Owner feedback: the native scroller had no visual cue that more photos
+   existed past the viewport edge, and the last visible card was simply cut
+   off -- read as an unfinished/awkward slider rather than a deliberate one.
+   A wrapping container lets an edge-fade mask and a pair of nav buttons sit
+   over the same native-scroll rail (behavior unchanged, presentation only). */
+.ga-rail-wrap{position:relative;margin-top:44px}
+.ga-rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;-webkit-overflow-scrolling:touch;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%)}
+.ga-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(6,16,28,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:2;transition:background .2s,border-color .2s}
+.ga-nav:hover{background:rgba(6,16,28,.85);border-color:var(--gold-light);color:var(--gold-light)}
+.ga-nav-prev{left:-8px}
+.ga-nav-next{right:-8px}
+.ga-nav{font-size:18px;line-height:1;font-family:'DM Sans',sans-serif}
+@media(max-width:820px){.ga-nav{display:none}}
 .ga-item{position:relative;flex:0 0 min(70vw,420px);aspect-ratio:4/5;border-radius:8px;overflow:hidden;scroll-snap-align:start}
 .ga-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .ga-item:hover .ga-img{transform:scale(1.06)}
@@ -580,7 +612,13 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 /* ── PHASE 12B-E2B: one featured package + a compact editorial rail for the
    rest, replacing the old 9-equal-cards grid (anti-congestion contract). ── */
 .hp-featured-wrap{margin-top:52px;display:flex;justify-content:center}
-.hp-rail-wrap{margin-top:44px}
+/* Owner feedback: "less congested" -- the one large featured card and the
+   horizontal rail below it now both carry real photography (see
+   HP_PKG_IMAGES above), which made the tight 44px gap between two visually
+   heavy components read as crowded rather than as one considered sequence.
+   A real section break (rule + more air) instead of a small caption's worth
+   of margin. */
+.hp-rail-wrap{margin-top:72px;padding-top:32px;border-top:1px solid rgba(255,255,255,.08)}
 .hp-rail-label{font-size:var(--font-size-xs);font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
 .hp-rail{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch}
 .hp-rail-item{flex:0 0 min(78vw,280px);scroll-snap-align:start;background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:22px;display:flex;flex-direction:column;transition:border-color .25s,transform .25s}
@@ -673,10 +711,24 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 /* ── LIVE AVAILABILITY (Phase 12B-E2B) ── one quiet instrument, not a
    two-column marketing split. Booking action only (anti-congestion §33). */
 #booking{padding:90px 0;position:relative}
+/* Fixed padding, not the sitewide 5vw: that rule grows with viewport while
+   this section-inner's max-width stays capped at 820px, so past ~900px the
+   available content width was actually SHRINKING as the page got wider
+   (5vw of an ever-growing viewport eating into a fixed-size box), which is
+   what let the row below overflow its own container on real desktop widths. */
+#booking .section-inner{padding:0 28px}
 .la-eyebrow{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
 #booking .section-title{color:var(--white);margin-bottom:32px;font-size:clamp(30px,3.6vw,42px)}
 .la-widget{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border:1px solid rgba(34,211,238,.22);border-radius:10px;padding:28px;box-shadow:0 20px 50px rgba(0,10,20,.35)}
-.la-row{display:grid;grid-template-columns:minmax(128px,1.2fr) minmax(128px,1.2fr) minmax(118px,1fr) minmax(130px,1fr) auto;gap:14px;align-items:end}
+/* flex-wrap, not a rigid 5-column grid: the grid's minmax minimums summed to
+   a fixed ~776px that could exceed the widget's actual available width, and
+   a CSS grid's tracks cannot shrink below their minmax floor -- the row just
+   overflowed the widget instead. Flex lets any field that doesn't fit wrap
+   to its own line instead, so this can never overflow again regardless of
+   viewport width or a translated label's length. */
+.la-row{display:flex;flex-wrap:wrap;gap:14px;align-items:end}
+.la-field{flex:1 1 140px;min-width:0}
+.la-field-sm{flex:1 1 110px}
 .la-field .bwf-input,.la-field .bwf-select{font-size:var(--font-size-sm);padding:10px 10px}
 .la-field{display:flex;flex-direction:column;gap:6px;text-align:left}
 .la-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
@@ -688,7 +740,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .bwf-select{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
 .bwf-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:12px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;white-space:nowrap}
 .bwf-btn:hover{background-position:100% 0;box-shadow:0 10px 26px rgba(34,211,238,.4)}
-.la-btn{height:42px}
+.la-btn{height:42px;flex:0 0 auto}
 .bwf-note{font-size:var(--font-size-xs);color:var(--muted);letter-spacing:.04em;margin-top:16px;text-align:center}
 /* Phase 12E-B: was a <span onclick>, mouse-only and never keyboard-operable.
    A real <button>, reset to look identical (inline, no chrome), is natively
@@ -698,8 +750,9 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .la-viewall{display:block;margin:24px auto 0;background:none;border:1px solid var(--border);color:var(--white);padding:12px 28px;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s}
 .la-viewall:hover{border-color:var(--gold);color:var(--gold-light)}
 @media(max-width:900px){
-  .la-row{grid-template-columns:1fr 1fr;gap:12px}
-  .la-btn{grid-column:1/-1;height:auto;padding:14px}
+  .la-row{gap:12px}
+  .la-field,.la-field-sm{flex-basis:calc(50% - 6px)}
+  .la-btn{flex-basis:100%;height:auto;padding:14px}
 }
 
 /* ── EXPERIENCES ── mirrors .hp-card's look/responsive behavior exactly (same
@@ -1409,7 +1462,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <div class="vc-below-scene" aria-hidden="true">
     <picture>
       <source type="image/webp" srcset="/images/whale_shark_2_gallery.webp">
-      <img src="/images/whale_shark_2_gallery.jpg" alt="" loading="lazy">
+      <!-- Not lazy: the mask-reveal below is gated on IntersectionObserver's
+           own .vc-active trigger, which can fire before a lazy-loaded image
+           has actually finished downloading -- the clip-path animation would
+           then finish playing over a still-blank image, reading as a broken/
+           empty section rather than a revealed photo. -->
+      <img src="/images/whale_shark_2_gallery.jpg" alt="">
     </picture>
   </div>
   <div class="vc-story-inner vc-below-text">
@@ -1430,7 +1488,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   <div class="vc-homecoming-media">
     <picture>
       <source type="image/webp" srcset="/images/vilu-residence-courtyard-terrace-maamigili.webp">
-      <img src="/images/vilu-residence-courtyard-terrace-maamigili.jpg" alt="位于马米吉利的维鲁公寓庭院及主体建筑" data-i18n-alt="alt.aboutPhoto" id="vc-homecoming-img" loading="lazy">
+      <img src="/images/vilu-residence-courtyard-terrace-maamigili.jpg" alt="位于马米吉利的维鲁公寓庭院及主体建筑" data-i18n-alt="alt.aboutPhoto" id="vc-homecoming-img">
     </picture>
   </div>
   <div class="vc-story-inner vc-homecoming-text">
@@ -1806,13 +1864,17 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <div class="section-tag" data-i18n="gallery.tag">图库</div>
       <h2 class="section-title"><span data-i18n="gallery.titlePrefix">天堂中的</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="gallery.titleEmphasis">美好瞬间</em></h2>
     </div>
-    <div class="ga-rail">
-      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-bikini-beach-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.ocean">比基尼海滩</span></div>
-      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-guests-maamigili-sunset.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.guestMoments">宾客时刻</span></div>
-      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-guests-lagoon-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.maldivesLife">马尔代夫生活</span></div>
-      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-couple-sunset-beach-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.sunsetViews">日落美景</span></div>
-      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-maamigili-island-buggy-tour.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.activities">活动体验</span></div>
-      <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-sandbank-bbq-beach-dining.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.beachDining">沙滩餐饮</span></div>
+    <div class="ga-rail-wrap">
+      <button type="button" class="ga-nav ga-nav-prev" aria-label="Previous photos" onclick="document.getElementById('ga-rail').scrollBy({left:-360,behavior:'smooth'})">←</button>
+      <div class="ga-rail" id="ga-rail">
+        <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-bikini-beach-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.ocean">比基尼海滩</span></div>
+        <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-guests-maamigili-sunset.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.guestMoments">宾客时刻</span></div>
+        <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-guests-lagoon-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.maldivesLife">马尔代夫生活</span></div>
+        <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-couple-sunset-beach-maldives.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.sunsetViews">日落美景</span></div>
+        <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-maamigili-island-buggy-tour.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.activities">活动体验</span></div>
+        <div class="ga-item"><img class="ga-img" src="https://viluresidence.net/images/vilu-residence-sandbank-bbq-beach-dining.jpg" alt="" loading="lazy"><span class="ga-label" data-i18n="gallery.beachDining">沙滩餐饮</span></div>
+      </div>
+      <button type="button" class="ga-nav ga-nav-next" aria-label="Next photos" onclick="document.getElementById('ga-rail').scrollBy({left:360,behavior:'smooth'})">→</button>
     </div>
   </div>
 </section>
@@ -3690,6 +3752,14 @@ function vcMountHeroVideo(){
   src.src = isMobile ? 'images/hero/hero-mobile.mp4' : 'images/hero/hero-desktop.mp4';
   video.appendChild(src);
   video.addEventListener('canplay', function(){ video.classList.add('vc-video-ready'); }, {once:true});
+  // Owner feedback: the ~5s source clip loops noticeably fast and felt like
+  // it had "no proper starting point". Two real, honest mitigations that
+  // don't require new footage: always start playback from true frame 0 (in
+  // case a bfcache restore or reload ever left a stale currentTime), and a
+  // gentle 0.88x rate to stretch the felt loop length (~5.7s) without the
+  // motion reading as unnaturally slow.
+  video.currentTime = 0;
+  video.playbackRate = 0.88;
   video.load();
   var playPromise = video.play();
   if(playPromise && playPromise.catch) playPromise.catch(function(){ /* autoplay blocked: poster remains, no error surfaced */ });
