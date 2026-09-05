@@ -2136,8 +2136,12 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
   });
 
   test('the hero poster preload hints exist, are gated on the same 820px breakpoint as the <picture><source>, and never target both variants unconditionally', () => {
-    assert.ok(site.includes('<link rel="preload" as="image" href="images/hero/hero-poster-mobile.webp" media="(max-width:820px)">'), 'missing mobile poster preload');
-    assert.ok(site.includes('<link rel="preload" as="image" href="images/hero/hero-poster-desktop.webp" media="(min-width:821px)">'), 'missing desktop poster preload');
+    // Posters are .jpg, not .webp, as of the Island-beach.mov hero replacement:
+    // the only locally available encoder (a stripped ffmpeg build bundled with
+    // BlueStacks) has no webp encoder, so JPEG -- equally valid, universally
+    // supported -- was used instead.
+    assert.ok(site.includes('<link rel="preload" as="image" href="images/hero/hero-poster-mobile.jpg" media="(max-width:820px)">'), 'missing mobile poster preload');
+    assert.ok(site.includes('<link rel="preload" as="image" href="images/hero/hero-poster-desktop.jpg" media="(min-width:821px)">'), 'missing desktop poster preload');
   });
 
   test('consent.js/analytics.js/theme.js all remain plain synchronous <script src> tags (no defer/async was added without full behavioral proof)', () => {
