@@ -1761,7 +1761,12 @@ section('Phase 12F — final site-wide deferred cleanup');
 
   test('D. the homepage now has the same .reveal no-JS fallback already present on guides/packages', () => {
     const site = read('vilu-website.html');
-    assert.ok(site.includes('<noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>'), 'homepage missing the .reveal no-JS fallback');
+    assert.ok(/<noscript><style>[^<]*\.reveal\{opacity:1!important;transform:none!important;filter:none!important\}[^<]*<\/style><\/noscript>/.test(site), 'homepage missing the .reveal no-JS fallback');
+  });
+
+  test('Phase 12G: the homepage no-JS fallback also forces the South Ari Expertise tab panels visible (they are display:none at page load and unreachable without JS)', () => {
+    const site = read('vilu-website.html');
+    assert.ok(/<noscript><style>[^<]*\.ti-panel\{display:block!important\}[^<]*<\/style><\/noscript>/.test(site), 'homepage missing the .ti-panel no-JS fallback');
   });
 
   test('D. the no-JS fallback does not alter normal-JS reveal behavior (still scoped inside <noscript>, not a live <style> rule)', () => {
@@ -1777,6 +1782,71 @@ section('Phase 12F — final site-wide deferred cleanup');
     const site = read('vilu-website.html');
     assert.ok(site.includes('id="consentBar"') && site.includes('id="consentPanel"') && site.includes('id="consentPanelOverlay"'), 'a core consent DOM id was removed');
     assert.ok(site.includes('role="dialog"') && site.includes('aria-labelledby="consentPanelTitle"'), 'consent panel dialog semantics were removed');
+  });
+}
+
+section('Phase 12G — homepage release-blocker hotfix');
+{
+  const site = read('vilu-website.html');
+
+  test('the homepage reveal observer is guarded against IntersectionObserver being unavailable', () => {
+    const idx = site.indexOf("if (!('IntersectionObserver' in window))");
+    assert.ok(idx > -1, 'missing the IntersectionObserver-unavailable guard on the homepage reveal observer');
+    const nearby = site.slice(idx, idx + 400);
+    assert.ok(/el\.classList\.add\('visible'\)/.test(nearby), 'the guard does not force .reveal elements visible when IntersectionObserver is unavailable');
+    assert.ok(/threshold:\.12/.test(site), 'the original .12 threshold for the ordinary (non-guarded) observer path must remain unchanged');
+  });
+
+  test('the homepage has exactly one <main> landmark, wrapping hero-through-contact only', () => {
+    const opens = (site.match(/^<main>$/gm) || []).length;
+    const closes = (site.match(/^<\/main>$/gm) || []).length;
+    assert.equal(opens, 1, 'expected exactly one <main> open tag');
+    assert.equal(closes, 1, 'expected exactly one </main> close tag');
+    const mainStart = site.indexOf('<main>');
+    const mainEnd = site.indexOf('</main>');
+    assert.ok(mainStart < site.indexOf('<section id="home"'), '<main> must open before the hero section');
+    assert.ok(mainEnd > site.indexOf('<section id="contact">'), '</main> must close after the contact section');
+    // Header/nav/mobile-drawer must precede <main>; footer/WhatsApp/consent must follow it.
+    assert.ok(site.indexOf('id="mobileMenu"') < mainStart, 'the mobile nav drawer must stay outside <main>');
+    assert.ok(site.indexOf('<footer>') > mainEnd, 'the footer must stay outside <main>');
+    assert.ok(site.indexOf('class="floating-whatsapp"') > mainEnd, 'the floating WhatsApp link must stay outside <main>');
+    assert.ok(site.indexOf('id="consentBar"') > mainEnd, 'the consent bar must stay outside <main>');
+  });
+
+  test('all 5 homepage booking-bar controls have a real, associated <label for=...>', () => {
+    const bookingBarSrc = site.slice(site.indexOf('class="booking-bar"'), site.indexOf('class="booking-bar"') + 2000);
+    for (const id of ['bb-ci', 'bb-co', 'bb-guests', 'bb-rooms', 'bb-room-count']) {
+      const re = new RegExp(`<label class="bb-label" for="${id}"[^>]*>[^<]+</label>\\s*<(?:input|select)[^>]*id="${id}"`);
+      assert.ok(re.test(bookingBarSrc), `${id}: missing an associated <label for="${id}">, or the label/control are no longer adjacent`);
+    }
+    assert.ok(!/<div class="bb-label"/.test(bookingBarSrc), 'a bb-label div was left un-converted to a <label>');
+  });
+
+  test('the 3 confirmed homepage contrast failures now use accessible tokens, and unrelated --teal consumers are untouched', () => {
+    assert.ok(site.includes('.vc-homecoming .vc-eyebrow{color:var(--accent-ink);border-color:rgba(138,90,28,.4)}'), '.vc-homecoming .vc-eyebrow no longer uses the accessible --accent-ink token');
+    assert.ok(site.includes('#contact .section-tag{color:var(--gold-light)}'), '#contact .section-tag no longer uses the accessible --gold-light token');
+    assert.ok(/\.cd-label\{[^}]*color:var\(--gold-light\)/.test(site), '.cd-label no longer uses the accessible --gold-light token');
+    assert.ok(/\.cf-field label\{[^}]*color:var\(--gold-light\)/.test(site), '.cf-field label no longer uses the accessible --gold-light token');
+    // Scope check: only the failing selectors were touched. Every other --teal
+    // consumer (buttons, icons, room-price-amount's own dark-theme override,
+    // the WhatsApp float) must still read --teal / --teal-light, unchanged.
+    assert.ok(site.includes('.room-book-btn{background:var(--teal)'), 'unrelated .room-book-btn --teal usage was changed');
+    assert.ok(site.includes('.floating-whatsapp{position:fixed') && /\.floating-whatsapp\{[^}]*background:var\(--teal\)/.test(site), 'unrelated .floating-whatsapp --teal usage was changed');
+    assert.ok(site.includes(':root[data-theme="dark"] .room-price-amount{color:var(--teal-light)}'), 'the pre-existing .room-price-amount dark-theme override was disturbed');
+  });
+
+  test('seSwitchTab still force-reveals .reveal descendants of the shown panel (the mechanism that makes the 12 tab-gated homepage articles visible under normal JS)', () => {
+    const idx = site.indexOf('function seSwitchTab(tab)');
+    assert.ok(idx > -1, 'seSwitchTab is missing');
+    const body = site.slice(idx, idx + 700);
+    assert.ok(/shown\.querySelectorAll\('\.reveal'\)\.forEach\(function\(el\)\{ el\.classList\.add\('visible'\); \}\)/.test(body), 'seSwitchTab no longer force-reveals .reveal descendants of the panel it shows');
+  });
+
+  test('no booking-engine/PMS boundary was touched by the homepage hotfix', () => {
+    for (const marker of ['writeReservation(', 'submitDirectBooking(', 'runTransaction(', '{ merge: true }', 'ROOM_CONFLICT', 'openBookingPopup(', 'openBookingPage(', 'bfpSearch(', 'confirmGuestBooking(', "BroadcastChannel('vilu_pms')"]) {
+      assert.ok(site.includes(marker), `booking-engine marker missing/changed: ${marker}`);
+    }
+    assert.ok(read('nav-shell.js').includes('function initBookingHashHandoff('), 'initBookingHashHandoff() in nav-shell.js is missing/changed');
   });
 }
 
