@@ -2169,5 +2169,82 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
   });
 }
 
+section('Phase 13B-2 — homepage Firebase/booking-adjacent performance optimization');
+{
+  const site = read('vilu-website.html');
+
+  test('the two Firebase SDK scripts are no longer loaded as synchronous, render-blocking <script src> tags', () => {
+    assert.ok(!site.includes('<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>'), 'firebase-app-compat.js is still a synchronous script tag');
+    assert.ok(!site.includes('<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>'), 'firebase-firestore-compat.js is still a synchronous script tag');
+  });
+
+  test('ensureFirebaseReady() exists, memoizes a single shared promise, times out, and allows retry after failure', () => {
+    const idx = site.indexOf('function ensureFirebaseReady()');
+    assert.ok(idx > -1, 'ensureFirebaseReady is missing');
+    const body = site.slice(idx, idx + 900);
+    assert.ok(/if \(_firebaseReadyPromise\) return _firebaseReadyPromise;/.test(body), 'ensureFirebaseReady does not reuse an in-flight/completed promise (would cause duplicate initialization)');
+    assert.ok(/_withTimeout\(/.test(body), 'ensureFirebaseReady does not have a timeout guard');
+    assert.ok(/_firebaseReadyPromise = null;/.test(body), 'ensureFirebaseReady does not reset its promise on failure (a real failure would permanently poison all future booking attempts)');
+    assert.ok(site.includes('function _withTimeout(promise, ms, label)'), '_withTimeout helper is missing');
+  });
+
+  test('Firebase is loaded via dynamic, non-blocking script injection, started immediately (not gated on DOMContentLoaded)', () => {
+    assert.ok(site.includes('function _loadScriptOnce(src)'), '_loadScriptOnce helper is missing');
+    assert.ok(/document\.createElement\('script'\)/.test(site.slice(site.indexOf('function _loadScriptOnce'), site.indexOf('function _loadScriptOnce') + 500)), '_loadScriptOnce does not create a script element dynamically');
+    // The proactive kick-off call must exist as a bare top-level statement,
+    // not wrapped in an event listener (that would delay the fetch start).
+    const kickoffIdx = site.indexOf('ensureFirebaseReady();');
+    assert.ok(kickoffIdx > -1, 'no proactive ensureFirebaseReady() kick-off call found');
+  });
+
+  test('every Firestore-touching function awaits ensureFirebaseReady() before its first fsDb.* use (no ReferenceError / undefined-fsDb race)', () => {
+    const fns = ['hasBlockConflict', 'writeReservation', 'supaGet', 'supaPost', 'fetchRoomDetailsFromFirestore', 'fetchTransportContent', 'fetchRoomPricesFromFirestore', 'loadBookedRangesFromSupabase', 'loadHolidayPackages', 'loadHpTerms'];
+    for (const fn of fns) {
+      const defIdx = site.search(new RegExp('async function ' + fn + '\\('));
+      assert.ok(defIdx > -1, `${fn}: function definition not found`);
+      const nextFnIdx = site.indexOf('\nasync function ', defIdx + 10);
+      const nextPlainFnIdx = site.indexOf('\nfunction ', defIdx + 10);
+      const bodyEnd = Math.min(...[nextFnIdx, nextPlainFnIdx].filter(i => i > -1).concat([defIdx + 3000]));
+      const body = site.slice(defIdx, bodyEnd);
+      const readyIdx = body.indexOf('ensureFirebaseReady()');
+      const firstFsDbIdx = body.search(/fsDb\./);
+      assert.ok(readyIdx > -1, `${fn}: does not call ensureFirebaseReady()`);
+      assert.ok(firstFsDbIdx === -1 || readyIdx < firstFsDbIdx, `${fn}: uses fsDb before awaiting ensureFirebaseReady()`);
+    }
+  });
+
+  test('writeReservation()/hasBlockConflict()/the reservation transaction remain structurally unchanged (only a leading await was added)', () => {
+    for (const marker of [
+      "throw new Error('ROOM_CONFLICT')",
+      'await fsDb.runTransaction(async function(transaction)',
+      "transaction.set(resRef, fields, { merge: true })",
+      "transaction.set(newAvailRef, { bookings: newBookings }, { merge: true })",
+    ]) {
+      assert.ok(site.includes(marker), `reservation write boundary marker missing/changed: ${marker}`);
+    }
+  });
+
+  test('opening the booking UI (popup/full page) has zero Firebase dependency -- both read only the already-loaded ROOMS array', () => {
+    const popupIdx = site.indexOf('function openBookingPopup(){');
+    const pageIdx = site.indexOf('function openBookingPage(){');
+    assert.ok(popupIdx > -1 && pageIdx > -1, 'openBookingPopup/openBookingPage not found');
+    const popupBody = site.slice(popupIdx, popupIdx + 200);
+    const pageBody = site.slice(pageIdx, pageIdx + 300);
+    assert.ok(!/fsDb\.|ensureFirebaseReady/.test(popupBody), 'openBookingPopup unexpectedly touches Firebase -- would delay the UI opening');
+    assert.ok(!/fsDb\.|ensureFirebaseReady/.test(pageBody), 'openBookingPage unexpectedly touches Firebase -- would delay the UI opening');
+  });
+
+  test('BroadcastChannel(\'vilu_pms\') still exists, is created exactly once, and is untouched by the Firebase lazy-load change', () => {
+    const matches = site.match(/new BroadcastChannel\('vilu_pms'\)/g) || [];
+    assert.equal(matches.length, 1, `expected exactly one BroadcastChannel('vilu_pms') instantiation, found ${matches.length}`);
+  });
+
+  test('the homepage no-JS fallback, main landmark, and booking-bar labels (Phase 12F/12G) are all still present after the Firebase boot change', () => {
+    assert.ok(site.includes(".reveal{opacity:1!important;transform:none!important;filter:none!important}"), 'no-JS reveal fallback missing');
+    assert.equal((site.match(/^<main>$/gm) || []).length, 1, 'expected exactly one <main> landmark');
+    assert.equal((site.match(/<label class="bb-label"/g) || []).length, 5, 'expected 5 booking-bar labels');
+  });
+}
+
 // ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);

@@ -2140,8 +2140,6 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // I18N — multi-language support. Static UI strings live in I18N[lang];
@@ -2899,8 +2897,32 @@ function initLazyBackgrounds(){
 document.addEventListener('DOMContentLoaded', initLazyBackgrounds);
 
 // ═══════════════════════════════════════════════════════════
-// FIREBASE FIRESTORE — Website live data connection
-// ═══════════════════════════════════════════════════════════
+// FIREBASE FIRESTORE — Website live data connection (Phase 13B-2)
+//
+// The two Firebase SDK <script> tags that used to sit right before this
+// block (firebase-app-compat.js + firebase-firestore-compat.js, ~101KB)
+// were loaded synchronously, blocking the parser -- and thus blocking the
+// main thread from painting the already-parsed hero/rooms/packages/footer
+// DOM -- confirmed as a leading LCP/TBT cause (Phase 13A audit). Every
+// single Firestore call site in this file lives inside an `async
+// function`, never at top-level/parse-time (verified directly, all ~16
+// fsDb.* call sites), so none of them need `fsDb` to exist the instant
+// this script runs -- only by the time they're actually CALLED. That
+// makes a lazy, on-demand load safe here without touching any of those
+// call sites' own logic.
+//
+// ensureFirebaseReady() loads both SDK scripts via non-blocking dynamically-
+// injected <script> tags, initializes Firebase exactly once, and memoizes
+// one shared Promise so any number of concurrent callers (the page-load
+// init below, a booking search, BroadcastChannel-triggered refreshes, an
+// actual reservation submit) await the SAME in-flight load rather than
+// re-fetching or re-initializing. A rejected promise (SDK failed to load,
+// or offline) propagates as a normal thrown error to whichever `await`ed
+// it -- every existing Firestore-touching function here already has its
+// own try/catch with a static-fallback or graceful-failure path (this was
+// already true before this phase, for ordinary Firestore errors), so a
+// failed/slow load degrades exactly the same way a failed Firestore read
+// always did: no new failure mode, no invented availability.
 var firebaseConfig = {
   apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
   authDomain: "vilu-residence.firebaseapp.com",
@@ -2909,8 +2931,62 @@ var firebaseConfig = {
   messagingSenderId: "751046104531",
   appId: "1:751046104531:web:c8af85f37c42a1c3c84b26"
 };
-firebase.initializeApp(firebaseConfig);
-var fsDb = firebase.firestore();
+var fsDb;
+var _firebaseReadyPromise = null;
+function _loadScriptOnce(src) {
+  return new Promise(function(resolve, reject) {
+    var existing = document.querySelector('script[src="' + src + '"]');
+    if (existing) { existing.addEventListener('load', resolve); existing.addEventListener('error', reject); return; }
+    var s = document.createElement('script');
+    s.src = src;
+    s.addEventListener('load', resolve);
+    s.addEventListener('error', function(){ reject(new Error('Failed to load ' + src)); });
+    document.head.appendChild(s);
+  });
+}
+// A blocked/dropped request (ad-blocker, firewall, some offline conditions)
+// does not reliably fire a <script>'s error event in every environment --
+// confirmed directly: with the two Firebase requests hard-blocked, the load
+// chain below hung indefinitely with neither resolve nor reject ever
+// firing, which would have left a booking search stuck "loading" forever
+// instead of failing gracefully. This timeout is the fix: after 12s (well
+// past any realistic real-world load, generous even for a slow connection)
+// the promise rejects on its own, letting every existing try/catch around
+// ensureFirebaseReady() fall back exactly as it already does for a normal
+// Firestore read error.
+function _withTimeout(promise, ms, label) {
+  return new Promise(function(resolve, reject) {
+    var timer = setTimeout(function(){ reject(new Error(label + ' timed out after ' + ms + 'ms')); }, ms);
+    promise.then(function(v){ clearTimeout(timer); resolve(v); }, function(e){ clearTimeout(timer); reject(e); });
+  });
+}
+function ensureFirebaseReady() {
+  if (_firebaseReadyPromise) return _firebaseReadyPromise;
+  _firebaseReadyPromise = _withTimeout(
+    _loadScriptOnce('https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js')
+      .then(function(){ return _loadScriptOnce('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js'); })
+      .then(function(){
+        if (!fsDb) { firebase.initializeApp(firebaseConfig); fsDb = firebase.firestore(); }
+        return fsDb;
+      }),
+    12000,
+    'Firebase SDK load'
+  ).catch(function(err){
+    console.error('Firebase failed to initialize', err);
+    _firebaseReadyPromise = null; // allow a later retry (e.g. next booking attempt) rather than permanently poisoning the promise
+    throw err;
+  });
+  return _firebaseReadyPromise;
+}
+// Start loading as soon as this script runs (right after the parser
+// reaches this point, in parallel with everything after it -- dynamic
+// script injection never blocks parsing) rather than waiting for
+// DOMContentLoaded, so real Firestore data has the best realistic chance
+// of already being ready by the time a visitor interacts with booking.
+// Fire-and-forget: the two page-load init blocks below and every on-demand
+// caller all separately `await ensureFirebaseReady()` and share this same
+// promise, so nothing here needs its result directly.
+ensureFirebaseReady();
 
 // ── SINGLE ATOMIC RESERVATION WRITE ──
 // writeReservation() is the ONLY function in this file allowed to write to
@@ -2920,6 +2996,7 @@ var fsDb = firebase.firestore();
 // design note on why this works as one Firestore transaction.
 async function hasBlockConflict(roomId, checkIn, checkOut) {
   try {
+    await ensureFirebaseReady();
     var snap = await fsDb.collection('blocks').where('room_id', '==', roomId).get();
     return snap.docs.some(function(doc) {
       var b = doc.data();
@@ -2929,6 +3006,7 @@ async function hasBlockConflict(roomId, checkIn, checkOut) {
 }
 
 async function writeReservation(docId, fields, opts) {
+  await ensureFirebaseReady();
   opts = opts || {};
   var roomId = fields.room_id;
   var oldRoomId = (opts.oldRoomId && opts.oldRoomId !== roomId) ? opts.oldRoomId : null;
@@ -2972,6 +3050,7 @@ async function writeReservation(docId, fields, opts) {
 // REST fetch.
 async function supaGet(table, query) {
   try {
+    await ensureFirebaseReady();
     if (table === 'website_content') {
       var docSnap = await fsDb.collection('website_content').doc('main').get();
       return docSnap.exists ? [{ value: docSnap.data().value }] : [];
@@ -2985,6 +3064,7 @@ async function supaGet(table, query) {
 
 async function supaPost(table, data, upsertOn) {
   try {
+    await ensureFirebaseReady();
     var id = String(data.id || (upsertOn && data[upsertOn]) || Date.now());
     await fsDb.collection(table).doc(id).set(data, { merge: true });
     return [data];
@@ -3142,6 +3222,7 @@ function photosOf(d){
 var _roomDetailsCache = {};
 async function fetchRoomDetailsFromFirestore() {
   try {
+    await ensureFirebaseReady();
     var roomIds = ['VR01','VR02','VR03','VR04','VR05','VR06'];
     var cache = {};
     var snaps = await Promise.all(roomIds.map(function(id){ return fsDb.collection('room_details').doc(id).get(); }));
@@ -3224,6 +3305,7 @@ var ghCurrentTab = 'arrival';
 
 async function fetchTransportContent() {
   try {
+    await ensureFirebaseReady();
     var ids = Object.keys(GH_META);
     var snaps = await Promise.all(ids.map(function(id){ return fsDb.collection('website_content').doc(id).get(); }));
     var cache = {};
@@ -3366,6 +3448,7 @@ function loadPMSRooms() {
 var _roomPricesCache = {};
 async function fetchRoomPricesFromFirestore() {
   try {
+    await ensureFirebaseReady();
     var roomIds = ['VR01','VR02','VR03','VR04','VR05','VR06'];
     var cache = {};
     var snaps = await Promise.all(roomIds.map(function(id){ return fsDb.collection('room_prices').doc(id).get(); }));
@@ -3452,6 +3535,7 @@ var availabilityLoadFailed = false;
 // everything needed for an availability check with nothing sensitive in it.
 async function loadBookedRangesFromSupabase() {
   try {
+    await ensureFirebaseReady();
     var roomIds = ['VR01','VR02','VR03','VR04','VR05','VR06'];
     var combined = [];
     for (var i=0;i<roomIds.length;i++) {
@@ -4833,8 +4917,14 @@ var _lastTerms = [];
 
 async function loadHolidayPackages(){
   var grid = document.getElementById('hp-grid');
-  if(!grid || typeof fsDb === 'undefined') return;
+  if(!grid) return;
   try {
+    // Phase 13B-2: previously bailed out permanently if fsDb wasn't defined
+    // yet (harmless when Firebase loaded synchronously before this ever ran,
+    // but would now silently skip the real-data refresh forever under lazy
+    // loading) -- waits for the shared init promise instead, same as every
+    // other Firestore-touching function in this file.
+    await ensureFirebaseReady();
     var results = await Promise.all([
       fsDb.collection('packages').where('active','==',true).get(),
       fsDb.collection('website_content').doc('packages_trip_notes').get().catch(function(){ return null; })
@@ -5073,6 +5163,7 @@ function renderHpTerms(){
 
 async function loadHpTerms(){
   try {
+    await ensureFirebaseReady();
     var snap = await fsDb.collection('website_content').doc('packages_terms').get();
     _lastTerms = (snap.exists && snap.data().terms) || [];
     if (typeof renderFAQ === 'function') renderFAQ();
