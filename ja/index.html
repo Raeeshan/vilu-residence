@@ -237,34 +237,6 @@ body{font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;posit
 ::-webkit-scrollbar-thumb{background:linear-gradient(var(--teal-light),var(--ocean));border-radius:10px}
 ::-webkit-scrollbar-thumb:hover{background:var(--gold)}
 
-/* ── AMBIENT UNDERWATER LAYERS ── */
-.ocean-bubbles{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:hidden}
-.bubble{position:absolute;bottom:-10vh;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.85) 0%,rgba(255,255,255,.25) 18%,rgba(190,240,255,.12) 40%,rgba(190,240,255,.04) 65%,rgba(190,240,255,0) 80%);box-shadow:0 0 4px rgba(180,235,255,.3),inset -2px -3px 4px rgba(4,20,35,.35),inset 2px 3px 3px rgba(255,255,255,.5);opacity:0;will-change:transform,opacity;animation-name:bubbleRise;animation-timing-function:linear;animation-iteration-count:infinite}
-.bubble.bubble--soft{filter:blur(.7px)}
-@keyframes bubbleRise{
-  0%{transform:translate(0,0) scale(.8,.85);opacity:0}
-  5%{opacity:.6}
-  14%{transform:translate(calc(var(--wobble) * .5),-13vh) scale(1,.94)}
-  27%{transform:translate(calc(var(--wobble) * -1),-29vh) scale(.96,1.05)}
-  38%{opacity:.55}
-  41%{transform:translate(calc(var(--wobble) * .7),-46vh) scale(1.04,.93)}
-  56%{transform:translate(calc(var(--wobble) * -.9),-63vh) scale(.94,1.06)}
-  70%{transform:translate(calc(var(--wobble) * .8),-80vh) scale(1.06,.92)}
-  84%{opacity:.42;transform:translate(calc(var(--wobble) * -.6),-97vh) scale(.96,1.08)}
-  100%{transform:translate(calc(var(--wobble) * .4),-113vh) scale(1.12,.9);opacity:0}
-}
-.light-rays{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none;mix-blend-mode:screen;opacity:.6}
-.light-rays::before,.light-rays::after{content:'';position:absolute;top:-25%;left:50%;width:160%;height:170%;transform:translateX(-50%) rotate(-6deg);background:conic-gradient(from 100deg at 50% 0%,transparent 0deg,rgba(190,245,255,.16) 5deg,transparent 13deg,transparent 42deg,rgba(190,245,255,.12) 48deg,transparent 56deg,transparent 92deg,rgba(190,245,255,.14) 98deg,transparent 106deg,transparent 180deg);animation:raySway 20s ease-in-out infinite}
-.light-rays::after{animation-duration:28s;animation-direction:reverse;opacity:.55;filter:blur(3px)}
-@keyframes raySway{
-  0%{transform:translateX(-50%) rotate(-8deg);opacity:.5}
-  22%{transform:translateX(-50%) rotate(-2deg);opacity:.66}
-  45%{transform:translateX(-50%) rotate(4deg) scale(1.03);opacity:.48}
-  68%{transform:translateX(-50%) rotate(9deg);opacity:.62}
-  86%{transform:translateX(-50%) rotate(3deg);opacity:.52}
-  100%{transform:translateX(-50%) rotate(-8deg);opacity:.5}
-}
-
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
@@ -451,69 +423,30 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
   background:linear-gradient(180deg,#0e6f8e 0%,#0a4d68 18%,#0d2e4e 42%,#0a1c34 68%,#06101c 100%)}
 .vc-descent-caption{position:sticky;top:42vh;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.6vw,30px);color:rgba(255,255,255,.85);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear}
 
-/* ── BELOW ── whale shark dominant, manta supporting, turtle tertiary,
-   reef frames only. Substantial open water/negative space preserved:
-   the scene never fills every corner. */
-.vc-below{justify-content:flex-start;background:radial-gradient(ellipse 120% 90% at 30% 20%,#0d3f5c 0%,#06101c 62%,#040b14 100%)}
-.vc-below-scene{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.vc-below-text{background:linear-gradient(90deg,rgba(4,11,20,.72) 0%,rgba(4,11,20,.5) 60%,transparent 100%);padding:48px 40px 48px 0;border-radius:0 4px 4px 0}
+/* ── BELOW ── real underwater photography, mask-reveal on scroll into view.
+   Replaces the former floating whale/manta/turtle cut-out system (removed —
+   read as artificial and cropped at viewport edges). Photography now carries
+   the section; wildlife sightings are never guaranteed — see below.sub. */
+.vc-below{justify-content:flex-start;background:#040b14}
+.vc-below-scene{position:absolute;inset:0;z-index:0;overflow:hidden}
+.vc-below-scene picture,.vc-below-scene img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 42%}
+.vc-below-text{background:linear-gradient(90deg,rgba(4,11,20,.82) 0%,rgba(4,11,20,.48) 55%,transparent 100%);padding:48px 40px 48px 0;border-radius:0 4px 4px 0}
 .vc-below .vc-eyebrow{border-color:rgba(255,255,255,.35)}
 .vc-below-links{display:flex;flex-direction:column;gap:10px;margin-top:26px;font-size:var(--font-size-sm)}
 .vc-below-links a{color:var(--teal-light);text-decoration:none;width:max-content}
 .vc-below-links a:hover{color:var(--gold-light)}
 
-.vc-reef{position:absolute;left:0;right:0;bottom:0;height:16vh;min-height:90px;max-height:190px;
-  background:linear-gradient(180deg,transparent 0%,rgba(4,20,18,.85) 55%,#031510 100%);
-  -webkit-mask-image:url('images/motion/reef-foreground.webp');-webkit-mask-size:cover;-webkit-mask-position:bottom;-webkit-mask-repeat:repeat-x;
-  mask-image:url('images/motion/reef-foreground.webp');mask-size:cover;mask-position:bottom;mask-repeat:repeat-x;
-  opacity:.9;z-index:2}
-.vc-lightrays.vc-lightrays{opacity:.35;z-index:1}
-.vc-particles{position:absolute;inset:0;z-index:1}
-.vc-particles span{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(200,240,255,.55);filter:blur(.4px)}
-.vc-particles span:nth-child(1){left:18%;top:22%;animation:vcParticleDrift 16s ease-in-out infinite}
-.vc-particles span:nth-child(2){left:42%;top:60%;animation:vcParticleDrift 19s ease-in-out infinite 2s}
-.vc-particles span:nth-child(3){left:65%;top:30%;animation:vcParticleDrift 22s ease-in-out infinite 5s}
-.vc-particles span:nth-child(4){left:78%;top:70%;animation:vcParticleDrift 17s ease-in-out infinite 8s}
-.vc-particles span:nth-child(5){left:30%;top:80%;animation:vcParticleDrift 20s ease-in-out infinite 3s}
-@keyframes vcParticleDrift{0%,100%{transform:translate(0,0);opacity:.15}50%{transform:translate(12px,-30px);opacity:.5}}
-
-.vc-turtle,.vc-manta,.vc-whale{position:absolute;will-change:transform}
-.vc-turtle img,.vc-manta img,.vc-whale img{display:block;width:100%;height:auto}
-.vc-turtle{width:clamp(64px,7vw,104px);left:8%;top:66%;z-index:3}
-.vc-manta{width:clamp(140px,17vw,260px);left:60%;top:24%;z-index:4;transform:translateX(0) rotate(-4deg)}
-.vc-whale{width:clamp(230px,30vw,460px);left:-34%;top:40%;z-index:5;transform:translateX(0) rotate(-2deg)}
-
-/* Default (no motion system armed): fully visible resting pose — this IS the
-   reduced-motion / no-JS / no-IntersectionObserver presentation, not a
-   fallback bolted on afterward. */
-.vc-turtle{animation:none}
-
-/* .vc-active plays exactly once per intersection (never infinite/alternate),
-   toggled by the observer in vcInitCinematicStory() — reset only happens
-   while the section is off-screen, so the whale/manta never visibly reverse
-   direction mid-crossing per the Phase 12B-E1A/E2A contract. */
-.vc-below.vc-active .vc-whale{animation:vcWhaleCross 18s cubic-bezier(.45,.05,.55,.95) 1 both}
-.vc-below.vc-active .vc-manta{animation:vcMantaCross 13s ease-in-out 1.4s 1 both}
-.vc-below.vc-active .vc-turtle{animation:vcTurtleDrift 9s ease-in-out infinite}
-@keyframes vcWhaleCross{
-  0%{transform:translateX(0) translateY(0) rotate(-2deg)}
-  50%{transform:translateX(70vw) translateY(-2.5vh) rotate(-1deg)}
-  100%{transform:translateX(150vw) translateY(-1vh) rotate(-2deg)}
-}
-@keyframes vcMantaCross{
-  0%{transform:translateX(0) translateY(0) rotate(-4deg)}
-  50%{transform:translateX(-38vw) translateY(3vh) rotate(-8deg)}
-  100%{transform:translateX(-92vw) translateY(1vh) rotate(-4deg)}
-}
-@keyframes vcTurtleDrift{
-  0%,100%{transform:translate(0,0) rotate(0deg)}
-  50%{transform:translate(10px,-8px) rotate(4deg)}
-}
+/* Pre-reveal mask + gentle scale-in — same technique already proven on
+   Homecoming (see .vc-homecoming.vc-armed above): fully-visible/no-motion is
+   the reduced-motion/no-JS/no-IntersectionObserver default; .vc-armed is only
+   ever applied inside the guarded branch in vcInitCinematicStory(), and
+   .vc-active removes the mask exactly once per intersection — see the
+   contract note there. */
+.vc-below.vc-armed .vc-below-scene img{clip-path:inset(0 0 100% 0);transform:scale(1.08);transition:clip-path 1.3s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1)}
+.vc-below.vc-armed.vc-active .vc-below-scene img{clip-path:inset(0 0 0 0);transform:scale(1)}
 @media(max-width:600px){
-  .vc-turtle{display:none}
-  .vc-below-text{background:linear-gradient(180deg,rgba(4,11,20,.2) 0%,rgba(4,11,20,.86) 30%);padding:32px 24px;border-radius:0}
-  .vc-whale{width:clamp(180px,58vw,300px);left:-50%;top:34%}
-  .vc-manta{width:clamp(100px,30vw,160px);left:66%;top:20%}
+  .vc-below-text{background:linear-gradient(180deg,rgba(4,11,20,.18) 0%,rgba(4,11,20,.88) 36%);padding:32px 24px;border-radius:0}
+  .vc-below-scene img{object-position:center 32%}
 }
 
 /* ── RETURN TO LIGHT ── motion quiets before Homecoming; no abrupt jump */
@@ -1210,16 +1143,6 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      that paints within the hero section's own box on top of this layer. -->
 <div class="page-scrim" aria-hidden="true"></div>
 
-<!-- ══ AMBIENT BUBBLE PARTICLES ══ -->
-<div class="ocean-bubbles" aria-hidden="true">
-  <span class="bubble bubble--soft" style="left:4%;width:8px;height:8px;animation-duration:16s;animation-delay:-2.3s;--wobble:19px"></span>
-  <span class="bubble bubble--soft" style="left:25%;width:6px;height:6px;animation-duration:14.5s;animation-delay:-12.8s;--wobble:14px"></span>
-  <span class="bubble" style="left:47%;width:14px;height:14px;animation-duration:23s;animation-delay:-14.4s;--wobble:31px"></span>
-  <span class="bubble" style="left:61%;width:10px;height:10px;animation-duration:18.5s;animation-delay:-10.6s;--wobble:24px"></span>
-  <span class="bubble" style="left:75%;width:13px;height:13px;animation-duration:21.5s;animation-delay:-16.2s;--wobble:29px"></span>
-  <span class="bubble bubble--soft" style="left:93%;width:4px;height:4px;animation-duration:10.8s;animation-delay:-8.6s;--wobble:8px"></span>
-</div>
-
 <!-- ══ NAVIGATION (Phase 10 global shell) ══ -->
 <nav id="nav" aria-label="メインナビゲーション" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
@@ -1449,14 +1372,10 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 
 <section id="vc-below" class="vc-story vc-below">
   <div class="vc-below-scene" aria-hidden="true">
-    <div class="vc-reef"></div>
-    <div class="light-rays vc-lightrays" aria-hidden="true"></div>
-    <div class="vc-particles">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <div class="vc-turtle"><img src="/images/motion/turtle.webp" alt="" loading="lazy"></div>
-    <div class="vc-manta"><img src="/images/motion/manta.webp" alt="" loading="lazy"></div>
-    <div class="vc-whale"><img src="/images/motion/whale-shark.webp" alt="" loading="lazy"></div>
+    <picture>
+      <source type="image/webp" srcset="/images/whale_shark_2_gallery.webp">
+      <img src="/images/whale_shark_2_gallery.jpg" alt="" loading="lazy">
+    </picture>
   </div>
   <div class="vc-story-inner vc-below-text">
     <div class="vc-eyebrow" data-i18n="below.eyebrow">南アリの水中へ</div>
