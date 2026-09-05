@@ -222,7 +222,7 @@ section{padding:80px 0;position:relative}
 .info-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px;transition:transform .3s ease,box-shadow .3s ease}
 .info-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,4,10,.3)}
 .info-card i{font-size:24px;color:var(--gold-light);margin-bottom:12px;display:block}
-.info-card h3,.info-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:8px}
+.info-card h2,.info-card h3,.info-card h4{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--white);margin-bottom:8px}
 .info-card p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6}
 
 /* ── TABLE OF CONTENTS (guide pages with many sections, e.g. maamigili-guide.html) ── */
@@ -243,16 +243,18 @@ section{padding:80px 0;position:relative}
 .toc-block a:hover{color:var(--gold-light);text-decoration:underline}
 
 /* ── TIP BOX (advisory content — same trusted-card language as .info-card, full-width banner) ── */
-.tip-box{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--card-border);border-left:3px solid var(--gold-light);border-radius:8px;padding:18px 20px;margin:20px 0}
+.tip-box{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--card-border);border-inline-start:3px solid var(--gold-light);border-radius:8px;padding:18px 20px;margin:20px 0}
 .tip-box i{font-size:20px;color:var(--gold-light);flex-shrink:0;margin-top:2px}
 .tip-box p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.7;margin:0;max-width:none}
+.tip-box p+p{margin-top:10px}
 .tip-box strong{color:var(--white)}
 
 /* ── WARNING BOX (legal/cultural compliance — alcohol, dress code, visa — deliberately
    more visually serious than a tip box, using the new --warn amber accent) ── */
-.warning-box{display:flex;gap:14px;align-items:flex-start;background:var(--warn-bg);border:1px solid var(--warn-border);border-left:3px solid var(--warn);border-radius:8px;padding:18px 20px;margin:20px 0}
+.warning-box{display:flex;gap:14px;align-items:flex-start;background:var(--warn-bg);border:1px solid var(--warn-border);border-inline-start:3px solid var(--warn);border-radius:8px;padding:18px 20px;margin:20px 0}
 .warning-box i{font-size:20px;color:var(--warn);flex-shrink:0;margin-top:2px}
 .warning-box p{font-size:var(--font-size-sm);color:var(--muted);line-height:1.7;margin:0;max-width:none}
+.warning-box p+p{margin-top:10px}
 .warning-box strong{color:var(--white)}
 
 /* ── IN-ARTICLE CONTENT IMAGES (guide pages embedding photos within prose) ── */
@@ -377,6 +379,11 @@ body[data-page-type="guide"] .guide-breakout-caption{font-size:var(--font-size-x
    labels facts already present in the guide's own copy, invents nothing. */
 .box-label{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);margin-bottom:6px}
 .warning-box .box-label{color:var(--warn)}
+
+/* Existing enumerable guide content (e.g. price tiers, checklists) that was
+   previously a bare, unstyled <ul> -- visual upgrade only, no text changed. */
+.guide-list{list-style:none;margin:20px 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.guide-list li{background:var(--card);border:1px solid var(--card-border);border-inline-start:3px solid var(--gold-light);border-radius:8px;padding:14px 18px;font-size:var(--font-size-sm);color:var(--muted);line-height:1.6}
 
 @media(max-width:900px){
   body[data-page-type="guide"] .guide-breakout{margin-inline:0}

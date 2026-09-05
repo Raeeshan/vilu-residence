@@ -1,5 +1,12 @@
 {
   "static": {
+    "guideUI": {
+      "tipGoodToKnow": "Dobré vědět",
+      "tipWildlifeNote": "Poznámka o divoké přírodě",
+      "tipPlanningNote": "Poznámka k plánování",
+      "tipLocalTip": "Místní tip",
+      "tipOurTake": "Náš pohled"
+    },
     "nav": {
       "home": "Domů",
       "rooms": "Pokoje",
@@ -1319,6 +1326,7 @@
       "description": "Objevte, co dělat v Maamigili a atolu Jižní Ari — žraloci velrybí, rejnoci manta, šnorchlování na útesu, rybolov, plavby a další, plus dovolenkové balíčky Vilu Residence."
     },
     "ttdPage": {
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20den%2C%20zaujal%20m%C4%9B%20v%C3%A1%C5%A1%20pr%C5%AFvodce%20Co%20d%C4%9Blat%20v%20Maamigili%20%E2%80%94%20mohli%20byste%20mi%20pomoct%20napl%C3%A1novat%20dovolenou%20na%20Malediv%C3%A1ch%20s%20Vilu%3F",
       "breadcrumb": "Co dělat v Maamigili",
       "title": "Co dělat v Maamigili",
       "subtitle": "Všechny druhy výletů dostupné během pobytu v Maamigili — a jak si je zařadit do dovolené.",

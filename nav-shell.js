@@ -231,11 +231,13 @@
       if (!heading || !list) return;
       var listId = list.id || ('guideTocList' + tocIndex);
       list.id = listId;
+      if (!heading.id) heading.id = 'guideTocHeading' + tocIndex;
       var toggle = document.createElement('button');
       toggle.type = 'button';
       toggle.className = 'toc-toggle';
       toggle.setAttribute('aria-expanded', 'true');
       toggle.setAttribute('aria-controls', listId);
+      toggle.setAttribute('aria-labelledby', heading.id);
       toggle.innerHTML = '<i class="ti ti-chevron-down" aria-hidden="true"></i>';
       heading.appendChild(toggle);
       toggle.addEventListener('click', function(){

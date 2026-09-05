@@ -1413,5 +1413,175 @@ section('Phase 12D-A — guide/destination editorial system (4 representative pa
   });
 }
 
+section('Phase 12D-B — complete guide family rollout (10 guide pages, full multilingual)');
+{
+  const ALL_GUIDE_PAGES = [
+    'maamigili-guide.html', 'south-ari-atoll-guide.html', 'whale-shark-snorkeling.html', 'manta-ray-snorkeling.html',
+    'things-to-do-maamigili.html', 'best-time-to-visit.html', 'guesthouse-vs-resort.html',
+    'maldives-holiday-cost.html', 'best-local-islands-snorkeling.html', 'south-ari-vs-other-regions.html'
+  ];
+  const SIX_NEW_PAGES = ALL_GUIDE_PAGES.slice(4);
+  const css = read('shared-page.css');
+  const navShellJs = read('nav-shell.js');
+  const buildScript = read('build-i18n-pages.js');
+
+  test('all 10 guide sources carry data-page-type="guide" and the reveal no-JS fallback', () => {
+    for (const page of ALL_GUIDE_PAGES) {
+      const src = read(page);
+      assert.ok(/data-page-type="guide"/.test(src), `${page}: missing data-page-type="guide"`);
+      assert.ok(src.includes('<noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>'), `${page}: missing the .reveal no-JS fallback`);
+    }
+  });
+
+  test('each of the 6 newly-migrated pages keeps its canonical URL identity: exactly one H1, canonical link, complete hreflang set', () => {
+    for (const page of SIX_NEW_PAGES) {
+      const src = read(page);
+      assert.equal((src.match(/<h1\b/g) || []).length, 1, `${page}: expected exactly one H1`);
+      assert.ok(/<link rel="canonical"/.test(src), `${page}: missing canonical link`);
+      const hreflangs = [...src.matchAll(/rel="alternate" hreflang="([^"]+)"/g)].map(m => m[1]);
+      assert.ok(hreflangs.includes('x-default'), `${page}: missing x-default hreflang`);
+      assert.equal(hreflangs.length, 12, `${page}: expected 12 hreflang entries (10 translated languages + English + x-default)`);
+    }
+  });
+
+  test('heading hierarchy on the 6 newly-migrated pages is sequential with no skip (excludes the known, deferred global footer H2->H4)', () => {
+    for (const page of SIX_NEW_PAGES) {
+      const src = read(page);
+      const bodyOnly = src.slice(src.indexOf('<body'), src.indexOf('<footer'));
+      const headings = [...bodyOnly.matchAll(/<(h[1-6])\b/g)].map(m => Number(m[1][1]));
+      for (let i = 1; i < headings.length; i++) {
+        assert.ok(headings[i] <= headings[i - 1] + 1, `${page}: heading jumps from h${headings[i - 1]} to h${headings[i]} at index ${i}`);
+      }
+    }
+  });
+
+  test('things-to-do-maamigili.html TOC is wrapped in the same two-zone guide-layout as the 4 originally-migrated pages, with real anchors preserved', () => {
+    const src = read('things-to-do-maamigili.html');
+    assert.ok(src.includes('<div class="guide-layout">'), 'missing guide-layout wrapper');
+    assert.ok(src.includes('<aside class="guide-toc-rail">'), 'missing guide-toc-rail aside');
+    const tocIdx = src.indexOf('class="toc-block"');
+    const asideIdx = src.indexOf('<aside class="guide-toc-rail">');
+    const articleIdx = src.indexOf('<article class="content-block reveal">');
+    assert.ok(asideIdx < tocIdx && tocIdx < articleIdx, 'toc-block must sit inside the aside, before the article');
+    const hrefs = src.match(/<nav aria-label="Table of contents" class="toc-block">[\s\S]*?<\/nav>/)[0];
+    const anchors = [...hrefs.matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
+    assert.ok(anchors.length >= 13, 'expected at least 13 real TOC anchors');
+    for (const id of anchors) assert.ok(src.includes(`id="${id}"`), `TOC anchor #${id} has no matching id= in the document`);
+  });
+
+  test('things-to-do-maamigili.html info-card/related-card headings were promoted h4->h3 (19+4), footer h4s left untouched (deferred, matches precedent)', () => {
+    const src = read('things-to-do-maamigili.html');
+    const bodyOnly = src.slice(src.indexOf('<body'), src.indexOf('<footer'));
+    assert.equal((bodyOnly.match(/<h4\b/g) || []).length, 0, 'no h4 should remain in the body content before the footer');
+    const footerOnly = src.slice(src.indexOf('<footer'));
+    assert.equal((footerOnly.match(/<h4\b/g) || []).length, 4, 'expected exactly the 4 known, deferred footer h4 instances');
+  });
+
+  test('things-to-do-maamigili.html WhatsApp CTA now uses data-i18n-href like every other guide page (previously hardcoded, no prefilled message)', () => {
+    const src = read('things-to-do-maamigili.html');
+    assert.ok(/data-i18n-href="ttdPage\.ctaWhatsappHref"/.test(src), 'missing data-i18n-href wiring on the WhatsApp CTA');
+    assert.ok(src.includes('ctaWhatsappHref:'), 'inline I18N.en.ttdPage block missing ctaWhatsappHref fallback');
+  });
+
+  test('build-i18n-pages.js things-to-do-maamigili.html metaNs matches its own client-side PAGE_META_NS (was a stale "blogThingsMeta" mismatch)', () => {
+    const ttdSrc = read('things-to-do-maamigili.html');
+    const clientNs = ttdSrc.match(/var PAGE_META_NS = '([^']+)';/)[1];
+    const entryMatch = buildScript.match(/source: 'things-to-do-maamigili\.html', outFile: 'things-to-do-maamigili\.html', metaNs: '([^']+)'/);
+    assert.ok(entryMatch, 'could not find the things-to-do-maamigili PAGES entry in build-i18n-pages.js');
+    assert.equal(entryMatch[1], clientNs, 'build-i18n-pages.js metaNs must match the page\'s own PAGE_META_NS');
+  });
+
+  test('shared guideUI i18n namespace (box-label vocabulary) exists with non-empty values in all 10 languages', () => {
+    const KEYS = ['tipGoodToKnow', 'tipWildlifeNote', 'tipPlanningNote', 'tipLocalTip', 'tipOurTake'];
+    for (const l of M.languages) {
+      const dict = JSON.parse(read(`i18n/${l}.json`));
+      assert.ok(dict.static.guideUI, `i18n/${l}.json missing static.guideUI namespace`);
+      for (const k of KEYS) assert.ok(typeof dict.static.guideUI[k] === 'string' && dict.static.guideUI[k].length > 0, `i18n/${l}.json guideUI.${k} missing or empty`);
+    }
+  });
+
+  test('every box-label span across all guide pages is data-i18n-driven (no hardcoded English UI leakage from the tip/warning box system)', () => {
+    for (const page of ALL_GUIDE_PAGES) {
+      const src = read(page);
+      const spans = [...src.matchAll(/<span class="box-label"[^>]*>/g)];
+      for (const [tag] of spans) assert.ok(/data-i18n="guideUI\./.test(tag), `${page}: box-label span not wired through guideUI.* — ${tag}`);
+    }
+  });
+
+  test('best-time-to-visit.html and south-ari-vs-other-regions.html card-grid restructuring preserved every original data-i18n key unchanged (wrap only, no rewrite)', () => {
+    const bt = read('best-time-to-visit.html');
+    for (const key of ['blogBestTime.h1', 'blogBestTime.p1', 'blogBestTime.h2', 'blogBestTime.p2', 'blogBestTime.h3', 'blogBestTime.p3']) {
+      assert.ok(bt.includes(`data-i18n="${key}"`), `best-time-to-visit.html missing preserved key ${key}`);
+    }
+    const car = read('south-ari-vs-other-regions.html');
+    for (const key of ['cmpRegions.h1', 'cmpRegions.p1', 'cmpRegions.h2', 'cmpRegions.p2', 'cmpRegions.h3', 'cmpRegions.p3', 'cmpRegions.h4', 'cmpRegions.p4']) {
+      assert.ok(car.includes(`data-i18n="${key}"`), `south-ari-vs-other-regions.html missing preserved key ${key}`);
+    }
+    const gvr = read('guesthouse-vs-resort.html');
+    for (const key of ['blogGvr.h4', 'blogGvr.p4', 'blogGvr.p5']) {
+      assert.ok(gvr.includes(`data-i18n="${key}"`), `guesthouse-vs-resort.html missing preserved key ${key}`);
+    }
+  });
+
+  test('.guide-list styling is a pure CSS visual upgrade — the two pages using it keep their original data-i18n list items unchanged', () => {
+    assert.ok(/\.guide-list\{/.test(css), 'missing .guide-list CSS rule');
+    const cost = read('maldives-holiday-cost.html');
+    for (let i = 1; i <= 4; i++) assert.ok(cost.includes(`data-i18n="blogCost.range${i}"`), `maldives-holiday-cost.html missing preserved range${i} key`);
+    const islands = read('best-local-islands-snorkeling.html');
+    for (let i = 1; i <= 3; i++) assert.ok(islands.includes(`data-i18n="cmpSnorkel.check${i}"`), `best-local-islands-snorkeling.html missing preserved check${i} key`);
+  });
+
+  test('tip-box and warning-box accent bars use logical (RTL-safe) properties, not hardcoded left/right', () => {
+    const tipRule = css.match(/\.tip-box\{[^}]+\}/)[0];
+    const warnRule = css.match(/\.warning-box\{[^}]+\}/)[0];
+    assert.ok(tipRule.includes('border-inline-start'), '.tip-box must use border-inline-start for RTL correctness');
+    assert.ok(!tipRule.includes('border-left'), '.tip-box must not use physical border-left');
+    assert.ok(warnRule.includes('border-inline-start'), '.warning-box must use border-inline-start for RTL correctness');
+    assert.ok(!warnRule.includes('border-left'), '.warning-box must not use physical border-left');
+  });
+
+  test('TOC toggle button has a real accessible name via aria-labelledby (was previously an icon-only button with no name)', () => {
+    assert.ok(/toggle\.setAttribute\('aria-labelledby', heading\.id\)/.test(navShellJs), 'initGuideToc() missing aria-labelledby wiring on the toc-toggle button');
+  });
+
+  test('no autoplay video, no new animation framework, no heavy slider was added to any of the 6 newly-migrated pages', () => {
+    for (const page of SIX_NEW_PAGES) {
+      const src = read(page);
+      assert.ok(!/<video\b/.test(src), `${page}: unexpected <video> element`);
+      assert.ok(!/swiper|slick-carousel|owl-carousel/i.test(src), `${page}: unexpected carousel library reference`);
+    }
+  });
+
+  test('none of the 5 short-form pages (excluding things-to-do-maamigili) gained an invented FAQPage schema without a matching visible FAQ section', () => {
+    for (const page of ['best-time-to-visit.html', 'guesthouse-vs-resort.html', 'maldives-holiday-cost.html', 'best-local-islands-snorkeling.html', 'south-ari-vs-other-regions.html']) {
+      const src = read(page);
+      assert.ok(!/"@type":\s*"FAQPage"/.test(src), `${page}: unexpected invented FAQPage schema with no corresponding FAQ section`);
+      assert.ok(!/<section id="faq"/.test(src), `${page}: unexpected invented FAQ section`);
+    }
+  });
+
+  test('internal guide-family cross-links are preserved (not flattened) for a sample of the ecosystem', () => {
+    assert.ok(read('things-to-do-maamigili.html').includes('href="whale-shark-snorkeling.html"'), 'things-to-do-maamigili -> whale-shark link missing');
+    assert.ok(read('guesthouse-vs-resort.html').includes('href="maldives-holiday-cost.html"'), 'guesthouse-vs-resort -> holiday-cost link missing');
+    assert.ok(read('best-local-islands-snorkeling.html').includes('href="south-ari-atoll-guide.html"'), 'best-local-islands -> south-ari-atoll-guide link missing');
+    assert.ok(read('south-ari-vs-other-regions.html').includes('href="holiday-packages.html"'), 'south-ari-vs-other-regions -> holiday-packages link missing');
+  });
+
+  test('homepage and Holiday Packages still carry none of this rollout\'s markers, including the newly-shared .guide-list class', () => {
+    for (const page of ['vilu-website.html', 'holiday-packages.html']) {
+      const src = read(page);
+      assert.ok(!src.includes('class="guide-list"'), `${page}: unexpectedly contains guide-list marker`);
+      assert.ok(!src.includes('guideUI.'), `${page}: unexpectedly references the guideUI i18n namespace`);
+    }
+  });
+
+  test('PMS and Agency Portal remain isolated from this rollout\'s new i18n namespace and CSS', () => {
+    for (const f of ['vilu-unified.html', 'vilu-agency-portal.html']) {
+      const src = read(f);
+      assert.ok(!src.includes('guideUI.') && !src.includes('class="guide-list"'), `${f} must stay isolated from the public guide-family system`);
+    }
+  });
+}
+
 // ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);

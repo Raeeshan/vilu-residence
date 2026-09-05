@@ -1,5 +1,12 @@
 {
   "static": {
+    "guideUI": {
+      "tipGoodToKnow": "Bon à savoir",
+      "tipWildlifeNote": "Remarque sur la faune",
+      "tipPlanningNote": "Conseil de planification",
+      "tipLocalTip": "Conseil local",
+      "tipOurTake": "Notre avis"
+    },
     "nav": {
       "home": "Accueil",
       "rooms": "Chambres",
@@ -1319,6 +1326,7 @@
       "description": "Découvrez les activités à Maamigili et dans l'atoll de Ari Sud — requins-baleines, raies manta, snorkeling sur récif, pêche, croisières et plus, ainsi que les forfaits vacances Vilu Residence."
     },
     "ttdPage": {
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20guide%20des%20activit%C3%A9s%20%C3%A0%20Maamigili%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu.",
       "breadcrumb": "Que faire à Maamigili",
       "title": "Que faire à Maamigili",
       "subtitle": "Toutes les excursions disponibles pendant un séjour à Maamigili — et comment les intégrer à vos vacances.",

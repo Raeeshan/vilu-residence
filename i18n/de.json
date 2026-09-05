@@ -1,5 +1,12 @@
 {
   "static": {
+    "guideUI": {
+      "tipGoodToKnow": "Gut zu wissen",
+      "tipWildlifeNote": "Hinweis zur Tierwelt",
+      "tipPlanningNote": "Planungshinweis",
+      "tipLocalTip": "Vor-Ort-Tipp",
+      "tipOurTake": "Unsere Einschätzung"
+    },
     "nav": {
       "home": "Startseite",
       "rooms": "Zimmer",
@@ -1319,6 +1326,7 @@
       "description": "Entdecken Sie Unternehmungen in Maamigili und im South Ari Atoll — Walhaie, Mantarochen, Riffschnorcheln, Angeln, Kreuzfahrten und mehr, sowie die Vilu Residence Urlaubspakete."
     },
     "ttdPage": {
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Aktivit%C3%A4ten-Guide%20f%C3%BCr%20Maamigili%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen.",
       "breadcrumb": "Unternehmungen in Maamigili",
       "title": "Unternehmungen in Maamigili",
       "subtitle": "Jede Art von Ausflug, die während eines Aufenthalts in Maamigili verfügbar ist — und wie Sie sie in Ihren Urlaub einbauen können.",

@@ -1,5 +1,12 @@
 {
   "static": {
+    "guideUI": {
+      "tipGoodToKnow": "Da sapere",
+      "tipWildlifeNote": "Nota sulla fauna",
+      "tipPlanningNote": "Nota di pianificazione",
+      "tipLocalTip": "Consiglio locale",
+      "tipOurTake": "Il nostro parere"
+    },
     "nav": {
       "home": "Home",
       "rooms": "Camere",
@@ -1319,6 +1326,7 @@
       "description": "Scopri cosa fare a Maamigili e nell'Atollo di Ari Sud — squali balena, mante, snorkeling sulla barriera corallina, pesca, crociere e altro, oltre ai pacchetti vacanza Vilu Residence."
     },
     "ttdPage": {
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Ciao!%20Ho%20letto%20la%20vostra%20guida%20alle%20attivit%C3%A0%20a%20Maamigili%20e%20vorrei%20un%20aiuto%20per%20pianificare%20la%20mia%20vacanza%20alle%20Maldive%20con%20Vilu.",
       "breadcrumb": "Cosa fare a Maamigili",
       "title": "Cosa fare a Maamigili",
       "subtitle": "Ogni tipo di escursione disponibile durante un soggiorno a Maamigili — e come inserirle nella tua vacanza.",

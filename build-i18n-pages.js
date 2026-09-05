@@ -26,7 +26,7 @@ const PAGES = [
   { source: 'maldives-holiday-cost.html', outFile: 'maldives-holiday-cost.html', metaNs: 'costMeta', i18nMode: 'standalone' },
   { source: 'best-local-islands-snorkeling.html', outFile: 'best-local-islands-snorkeling.html', metaNs: 'cmpSnorkelMeta', i18nMode: 'standalone' },
   { source: 'south-ari-vs-other-regions.html', outFile: 'south-ari-vs-other-regions.html', metaNs: 'cmpRegionsMeta', i18nMode: 'standalone' },
-  { source: 'things-to-do-maamigili.html', outFile: 'things-to-do-maamigili.html', metaNs: 'blogThingsMeta', i18nMode: 'standalone' },
+  { source: 'things-to-do-maamigili.html', outFile: 'things-to-do-maamigili.html', metaNs: 'ttdMeta', i18nMode: 'standalone' },
   // Legal pages (Phase 11B-P5): intentionally NOT added to SITEMAP_PAGE_SOURCE
   // below -- utility/trust pages stay out of the XML sitemap and noindexed,
   // per the P4/P4R/P5 decision, in every language.

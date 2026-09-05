@@ -1,5 +1,12 @@
 {
   "static": {
+    "guideUI": {
+      "tipGoodToKnow": "알아두면 좋은 점",
+      "tipWildlifeNote": "야생동물 안내",
+      "tipPlanningNote": "계획 참고사항",
+      "tipLocalTip": "현지 팁",
+      "tipOurTake": "저희의 생각"
+    },
     "nav": {
       "home": "홈",
       "rooms": "객실",
@@ -1319,6 +1326,7 @@
       "description": "마미길리와 사우스 아리 환초에서 즐길 수 있는 것들을 알아보세요 — 고래상어, 만타가오리, 리프 스노클링, 낚시, 크루즈 등, 그리고 빌루 레지던스 홀리데이 패키지."
     },
     "ttdPage": {
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EB%A7%88%EB%AF%B8%EA%B8%B8%EB%A6%AC%20%EC%95%A1%ED%8B%B0%EB%B9%84%ED%8B%B0%20%EA%B0%80%EC%9D%B4%EB%93%9C%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4.",
       "breadcrumb": "마미길리에서 즐길거리",
       "title": "마미길리에서 즐길거리",
       "subtitle": "마미길리 체류 중 이용할 수 있는 모든 종류의 투어 — 그리고 이를 휴가에 포함시키는 방법.",
