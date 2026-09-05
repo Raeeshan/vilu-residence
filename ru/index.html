@@ -546,6 +546,15 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .wiv-points{display:flex;flex-direction:column;gap:14px;margin-top:28px;max-width:56ch}
 .wiv-points li{font-size:var(--font-size-base);color:var(--muted);line-height:1.6;padding-left:22px;position:relative;list-style:none}
 .wiv-points li::before{content:'';position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+/* Real photographic anchor -- this section previously had text only,
+   followed by a large empty void before Holiday Packages began. */
+.wiv-layout{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.wiv-media{border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,4,10,.35)}
+.wiv-media img{display:block;width:100%;height:100%;object-fit:cover;aspect-ratio:4/5}
+@media(max-width:900px){
+  .wiv-layout{grid-template-columns:1fr;gap:28px}
+  .wiv-media img{aspect-ratio:16/10}
+}
 
 /* ── GALLERY ── */
 /* ── PHASE 12B-E2B: restrained horizontal moment rail, not a dense masonry
@@ -576,6 +585,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-rail{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch}
 .hp-rail-item{flex:0 0 min(78vw,280px);scroll-snap-align:start;background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:22px;display:flex;flex-direction:column;transition:border-color .25s,transform .25s}
 .hp-rail-item:hover{border-color:rgba(34,211,238,.35);transform:translateY(-3px)}
+.hp-rail-img{aspect-ratio:16/10;width:calc(100% + 44px);object-fit:cover;display:block;margin:-22px -22px 16px;border-radius:10px 10px 0 0}
 .hp-rail-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light);background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);padding:3px 10px;border-radius:20px;margin-bottom:10px;align-self:flex-start}
 .hp-rail-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-xl);font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.25}
 .hp-rail-meta{font-size:var(--font-size-sm);color:var(--teal-light);font-weight:600;margin-bottom:10px}
@@ -589,6 +599,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-view-full{display:block;text-align:center;font-size:var(--font-size-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding-top:4px}
 .hp-view-full:hover{color:var(--gold-light)}
 .hp-featured-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;box-shadow:0 24px 70px rgba(0,4,10,.4);padding:40px;display:flex;flex-direction:column;position:relative;max-width:620px;width:100%;transition:box-shadow .35s}
+.hp-featured-img{aspect-ratio:16/9;width:calc(100% + 80px);object-fit:cover;display:block;margin:-40px -40px 24px;border-radius:14px 14px 0 0}
 .hp-badge-featured{background:linear-gradient(135deg,var(--teal),var(--teal-light) 55%,var(--teal));color:var(--navy)}
 .hp-badge-featured::before{content:none}
 .hp-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:0 20px 60px rgba(0,4,10,.35);padding:32px;display:flex;flex-direction:column;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,border-color .35s}
@@ -655,6 +666,7 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .hp-card.hp-pulse{animation:hpPulse 1.4s ease}
 @media(max-width:900px){
   .hp-featured-card{padding:28px;max-width:none}
+  .hp-featured-img{width:calc(100% + 56px);margin:-28px -28px 20px}
   .hp-rail{margin:0 -5vw;padding:0 5vw 10px}
 }
 
@@ -703,6 +715,13 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .exp-chip:first-child{padding-top:0}
 .exp-chip:last-child{border-bottom:none}
 .exp-chip>i{font-size:22px;color:var(--gold-light);margin-top:4px;flex-shrink:0;width:24px;text-align:center}
+/* Real excursion photography where a genuine, specific photo exists (see
+   EXPERIENCES_CONFIG's photo field) -- kept deliberately compact (not a
+   second big card grid) so this stays the quick, scannable list it was
+   designed as; the icon fallback above is unchanged for the two excursions
+   with no distinct real photo, so nothing looks broken or invented. */
+.exp-chip-img{width:104px;height:78px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-top:2px}
+@media(max-width:560px){.exp-chip-img{width:76px;height:58px}}
 .exp-chip-body{flex:1;min-width:0}
 .exp-chip-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-lg);font-weight:600;color:var(--text);margin-bottom:4px}
 .exp-chip-desc{font-size:var(--font-size-sm);color:var(--muted);line-height:1.55;margin-bottom:8px}
@@ -751,7 +770,11 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .tr-assurances{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.08)}
 .tr-assurance{display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm);color:var(--muted)}
 .tr-assurance i{color:var(--gold-light);font-size:16px}
-#closing{padding:100px 0}
+#closing{padding:140px 0;position:relative;overflow:hidden}
+/* Real photographic anchor -- this was plain text on empty navy before. */
+.cc-media{position:absolute;inset:0;z-index:0}
+.cc-media img{display:block;width:100%;height:100%;object-fit:cover}
+.cc-media::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,11,20,.55) 0%,rgba(4,11,20,.72) 55%,rgba(4,11,20,.88) 100%)}
 .cc-headline{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:clamp(30px,4.2vw,48px);color:var(--gold-light);line-height:1.2;margin-bottom:32px}
 .cc-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
 .cc-contact-hint{margin-top:28px;font-size:var(--font-size-sm);color:var(--muted)}
@@ -813,7 +836,11 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
    closeBookingPopup() logic or any id= referenced by JS) ── */
 .booking-popup-overlay{position:fixed;inset:0;background:rgba(2,10,16,.88);backdrop-filter:blur(10px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
 .booking-popup-overlay.open{display:flex}
-.booking-popup{background:linear-gradient(165deg,var(--navy2),#0a2540);border:1px solid var(--card-border);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.16,1,.3,1);box-shadow:0 30px 80px rgba(0,5,10,.6);position:relative}
+/* Solid theme-aware surface -- the previous two-tone gradient hardcoded its
+   second stop to a dark navy hex, so in Light theme the popup rendered as a
+   light-to-dark diagonal wash instead of a clean card (var(--navy2) is the
+   only stop that ever changed with the theme). */
+.booking-popup{background:var(--navy2);border:1px solid var(--card-border);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.16,1,.3,1);box-shadow:0 30px 80px rgba(0,5,10,.6);position:relative}
 .booking-popup::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold-light),transparent);border-radius:12px 12px 0 0}
 .popup-header{padding:30px 32px 22px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .popup-eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-light);margin-bottom:6px}
@@ -1321,15 +1348,23 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      (personalised attention, island hopping, local cuisine) without
      repeating its photo/"six rooms" moment, which Homecoming now owns. ══ -->
 <section id="what-is-vilu">
-  <div class="section-inner" style="max-width:760px">
-    <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Кто мы</div>
-    <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu — ваш путь на Южный Ари.</h2>
-    <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Планирование отдыха, морские впечатления и знание местности — а также наш собственный дом на шесть номеров в Маамигили, если вам нужно, где остановиться.</p>
-    <ul class="wiv-points">
-      <li data-i18n="whatIsVilu.point1">Индивидуальное внимание, а не стойка регистрации — пребывание каждого гостя мы планируем отдельно.</li>
-      <li data-i18n="whatIsVilu.point2">Путешествия между островами и местная кухня — часть вашего отдыха, а не только снорклинг.</li>
-      <li data-i18n="whatIsVilu.point3">Камерность и стиль бутик-отеля по замыслу — шесть номеров, а не шестьдесят.</li>
-    </ul>
+  <div class="section-inner wiv-layout">
+    <div class="wiv-text">
+      <div class="section-tag" data-i18n="whatIsVilu.eyebrow">Кто мы</div>
+      <h2 class="section-title" style="color:var(--text)" data-i18n="whatIsVilu.headline">Vilu — ваш путь на Южный Ари.</h2>
+      <p class="gh-sub" style="margin-top:20px" data-i18n="whatIsVilu.body">Планирование отдыха, морские впечатления и знание местности — а также наш собственный дом на шесть номеров в Маамигили, если вам нужно, где остановиться.</p>
+      <ul class="wiv-points">
+        <li data-i18n="whatIsVilu.point1">Индивидуальное внимание, а не стойка регистрации — пребывание каждого гостя мы планируем отдельно.</li>
+        <li data-i18n="whatIsVilu.point2">Путешествия между островами и местная кухня — часть вашего отдыха, а не только снорклинг.</li>
+        <li data-i18n="whatIsVilu.point3">Камерность и стиль бутик-отеля по замыслу — шесть номеров, а не шестьдесят.</li>
+      </ul>
+    </div>
+    <div class="wiv-media">
+      <picture>
+        <source type="image/webp" srcset="/images/vilu-residence-maamigili-island-buggy-tour.webp">
+        <img src="/images/vilu-residence-maamigili-island-buggy-tour.jpg" alt="Guests exploring Maamigili island by buggy, South Ari Atoll" loading="lazy">
+      </picture>
+    </div>
   </div>
 </section>
 
@@ -1785,6 +1820,12 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 <!-- ══ CLOSING CONVERSION (Phase 12B-E2B) ── quiet, emotional, does not
      repeat the hero composition. Max 2 CTAs. ══ -->
 <section id="closing">
+  <div class="cc-media" aria-hidden="true">
+    <picture>
+      <source type="image/webp" srcset="/images/vilu-residence-guests-maamigili-sunset.webp">
+      <img src="/images/vilu-residence-guests-maamigili-sunset.jpg" alt="" loading="lazy">
+    </picture>
+  </div>
   <div class="section-inner" style="text-align:center;max-width:680px">
     <h2 class="cc-headline" data-i18n="closing.headline">Ваша история на Южном Ари начинается здесь.</h2>
     <div class="cc-ctas">
@@ -4886,11 +4927,11 @@ async function loadHolidayPackages(){
 // real minimum pricePerRoom among packages whose activities[] includes this
 // exact string - never a fabricated or estimated number.
 var EXPERIENCES_CONFIG = [
-  { key: 'Whale Shark Snorkeling', nameKey: 'whaleSharkName', descKey: 'whaleSharkDesc', icon: 'ti-fish' },
-  { key: 'Manta Snorkeling', nameKey: 'mantaName', descKey: 'mantaDesc', icon: 'ti-diamond' },
-  { key: 'Sandbank Trip', nameKey: 'sandbankName', descKey: 'sandbankDesc', icon: 'ti-map-pin' },
-  { key: 'Dolphin Cruise', nameKey: 'dolphinName', descKey: 'dolphinDesc', icon: 'ti-sunrise' },
-  { key: 'Sunset Cruise', nameKey: 'sunsetName', descKey: 'sunsetDesc', icon: 'ti-sunset-2' },
+  { key: 'Whale Shark Snorkeling', nameKey: 'whaleSharkName', descKey: 'whaleSharkDesc', icon: 'ti-fish', photo: ['images/whale_shark_hd.jpg', 'Whale shark swimming near the surface in South Ari Atoll, Maldives'] },
+  { key: 'Manta Snorkeling', nameKey: 'mantaName', descKey: 'mantaDesc', icon: 'ti-diamond', photo: ['images/manta_ray_hd.jpg', 'Manta ray gliding through the reef near Maamigili, Maldives'] },
+  { key: 'Sandbank Trip', nameKey: 'sandbankName', descKey: 'sandbankDesc', icon: 'ti-map-pin', photo: ['images/vilu-residence-sandbank-bbq-beach-dining.jpg', 'Private sandbank picnic dining on a South Ari Atoll sandbank'] },
+  { key: 'Dolphin Cruise', nameKey: 'dolphinName', descKey: 'dolphinDesc', icon: 'ti-sunrise', photo: ['images/dolphin_pod_gallery.jpg', 'Pod of dolphins swimming off the coast of South Ari Atoll'] },
+  { key: 'Sunset Cruise', nameKey: 'sunsetName', descKey: 'sunsetDesc', icon: 'ti-sunset-2', photo: ['images/vilu-residence-guests-maamigili-sunset.jpg', 'Guests enjoying sunset at Vilu Residence, Maamigili'] },
   { key: 'Private Island Picnic', nameKey: 'picnicName', descKey: 'picnicDesc', icon: 'ti-basket' },
   { key: 'Night Fishing', nameKey: 'nightFishingName', descKey: 'nightFishingDesc', icon: 'ti-fish-hook' }
 ];
@@ -4930,7 +4971,7 @@ function renderExperiences(pkgs, notesData){
     });
 
     return '<div class="exp-chip" id="experience-'+slug+'">'
-      + '<i class="ti '+cfg.icon+'" aria-hidden="true"></i>'
+      + (cfg.photo ? '<img class="exp-chip-img" src="'+cfg.photo[0]+'" alt="'+cfg.photo[1]+'" loading="lazy">' : '<i class="ti '+cfg.icon+'" aria-hidden="true"></i>')
       + '<div class="exp-chip-body">'
         + '<h3 class="exp-chip-name">'+name+'</h3>'
         + '<p class="exp-chip-desc">'+desc+'</p>'
@@ -4965,6 +5006,20 @@ function hpNotesFor(p, notesData){
 // Every package, featured or rail, still carries id="package-<slug>" +
 // data-pkg-id/name/nights so handleHolidayPackageDeepLink() and the
 // package_view IntersectionObserver keep working for all of them unchanged.
+// Real per-package photography, exact same mapping used on holiday-packages.html
+// (its own PKG_IMAGES const) so the homepage teaser and the full page agree.
+var HP_PKG_IMAGES = {
+  'island-explorer-getaway': ['images/whale_shark_hd.jpg', 'Whale shark swimming near the surface in South Ari Atoll, Maldives'],
+  'reef-sunset-adventure': ['images/thumb_turtle_snorkelers_gallery.jpg', 'Snorkellers swimming over the reef near Maamigili, Maldives'],
+  'island-serenity-escape': ['images/vilu-residence-sandbank-bbq-beach-dining.jpg', 'Private sandbank picnic dining on a South Ari Atoll sandbank'],
+  'maldives-dream-bliss': ['images/dolphin_pod_gallery.jpg', 'Pod of dolphins swimming off the coast of South Ari Atoll'],
+  'ultimate-island-relaxation': ['images/vilu-residence-guests-lagoon-maldives.jpg', 'Guests relaxing in the lagoon near Vilu Residence, Maldives'],
+  'grand-maldives-escape': ['images/manta_silhouette_gallery.jpg', 'Manta ray silhouette seen from below in turquoise Maldivian water'],
+  'ultimate-maldives-odyssey': ['images/whale_shark_2_gallery.jpg', 'Whale shark feeding near the surface off Maamigili, Maldives'],
+  'ultimate-resort-island-odyssey': ['images/vilu-residence-guests-maamigili-sunset.jpg', 'Guests enjoying sunset at Vilu Residence, Maamigili'],
+  'honeymoon-dream-escape': ['images/vilu-residence-couple-sunset-beach-maldives.jpg', 'Couple watching the sunset on the beach at Vilu Residence, Maldives']
+};
+
 function renderHolidayPackages(pkgs, notesData){
   var grid = document.getElementById('hp-grid');
   var baselineNights = pkgs[0].nights;
@@ -5001,7 +5056,9 @@ function renderHolidayPackages(pkgs, notesData){
     var topActivities = (p.activities||[]).slice(0,4).map(function(x){ return td(x); });
     var moreActivities = (p.activities||[]).length - topActivities.length;
     var activitiesLine = topActivities.join(' &middot; ') + (moreActivities>0 ? ' &middot; +'+moreActivities+' '+t('packages.more') : '');
+    var img = HP_PKG_IMAGES[slug];
     return '<div class="hp-card hp-featured-card'+(isRose?' hp-featured-rose':'')+'" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'" data-pkg-nights="'+p.nights+'">'
+      + (img ? '<img class="hp-featured-img" src="'+img[0]+'" alt="'+img[1]+'" loading="lazy">' : '')
       + (p.badge ? '<div class="hp-badge'+(isRose?' hp-badge-rose':'')+'">'+td(p.badge)+'</div>' : '<div class="hp-badge hp-badge-featured">'+t('packages.featuredTag')+'</div>')
       + '<h3 class="hp-name">'+td(p.name)+'</h3>'
       + '<div class="hp-price-row"><span class="hp-price">$'+p.pricePerRoom+'</span><span class="hp-price-sub">'+t('packages.pp')+' &middot; '+p.nights+' '+nightWord+'</span></div>'
@@ -5026,7 +5083,9 @@ function renderHolidayPackages(pkgs, notesData){
     var safeName = (p.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     var nightWord = p.nights>1 ? t('packages.nights') : t('packages.night');
     var badge = p.badge ? '<div class="hp-rail-badge">'+td(p.badge)+'</div>' : '';
+    var img = HP_PKG_IMAGES[slug];
     return '<div class="hp-rail-item" id="package-'+slug+'" data-pkg-id="'+p.id+'" data-pkg-name="'+safeName+'" data-pkg-nights="'+p.nights+'">'
+      + (img ? '<img class="hp-rail-img" src="'+img[0]+'" alt="'+img[1]+'" loading="lazy">' : '')
       + badge
       + '<h3 class="hp-rail-name">'+td(p.name)+'</h3>'
       + '<div class="hp-rail-meta">$'+p.pricePerRoom+' '+t('packages.pp')+' &middot; '+p.nights+' '+nightWord+'</div>'
