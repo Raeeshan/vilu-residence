@@ -9,15 +9,29 @@ const IMAGE_SITEMAP_NS = 'http://www.google.com/schemas/sitemap-image/1.1';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
 const RTL_LANGS = { ar: true };
 
-// ── Open Graph locale mapping (Phase 13B-1) ──
-// Facebook's og:locale accepts a small set of predefined values, generally
-// language_TERRITORY. Where Vilu's markets don't inherently imply one
-// country (Arabic, Chinese here is Simplified/mainland-oriented per the
-// site's own zh content), the most standards-appropriate widely-used value
-// is picked rather than inventing a geo claim the business hasn't made.
+// ── Open Graph locale mapping (Phase 13B-1, corrected 13B-1.1) ──
+// og:locale's value format is language_TERRITORY (RFC 5646 language subtag +
+// ISO 3166-1 alpha-2 region subtag) -- it has no concept of a region-less
+// language. For every language below except Arabic, Vilu's own market
+// framing already maps cleanly onto one real, non-invented territory
+// (Chinese content is Simplified/mainland-oriented, so zh_CN; the others are
+// each that language's single primary European/Asian market).
+//
+// Arabic is deliberately excluded. Vilu's Arabic content targets Arabic-
+// speaking travelers broadly, not one selected country, so no single
+// territory subtag is accurate -- and "AR" is itself the real ISO 3166-1
+// code for Argentina, not a generic "Arabic" placeholder, so publishing
+// "ar_AR" would be a genuine (if easily-overlooked) false geographic claim
+// to any consumer reading og:locale by its actual standard, not by
+// Facebook's own historical convention of reusing it for generic Arabic.
+// No literal country-less alternative exists in this property's format, so
+// the correct fix is omission, not substitution: Arabic pages carry no
+// og:locale (and no og:locale:alternate) at all. hreflang="ar" already
+// carries the real signal for this market and needs no territory subtag,
+// so it is completely unaffected by this decision.
 const OG_LOCALE_MAP = {
   ru: 'ru_RU', zh: 'zh_CN', de: 'de_DE', fr: 'fr_FR', it: 'it_IT',
-  ja: 'ja_JP', ko: 'ko_KR', ar: 'ar_AR', sk: 'sk_SK', cs: 'cs_CZ',
+  ja: 'ja_JP', ko: 'ko_KR', sk: 'sk_SK', cs: 'cs_CZ',
 };
 const OG_LOCALE_EN = 'en_US';
 
@@ -187,20 +201,27 @@ function localizeSocialMeta($, dict, metaNs, lang, outFile) {
 
   const locale = OG_LOCALE_MAP[lang];
   const ogLocaleEl = $('meta[property="og:locale"]');
-  if (ogLocaleEl.length && locale) ogLocaleEl.attr('content', locale);
-
-  // og:locale:alternate — one per OTHER language (English + the other 9
-  // translations), mirroring the existing complete hreflang cluster rather
-  // than inventing a separate list. Re-generated from scratch on every
-  // build (old tags stripped first) so re-running the build never
-  // accumulates duplicates.
+  // og:locale:alternate is always regenerated from scratch first (old tags
+  // stripped) so re-running the build never accumulates duplicates.
   $('meta[property="og:locale:alternate"]').remove();
-  if (ogLocaleEl.length && locale) {
+  if (locale) {
+    if (ogLocaleEl.length) ogLocaleEl.attr('content', locale);
+    // og:locale:alternate — one per OTHER language that itself has a real
+    // locale value (English + the other languages in OG_LOCALE_MAP).
+    // Arabic has none (see OG_LOCALE_MAP's own comment), so it is never
+    // listed as an alternate on any page, including this one when it is
+    // itself Arabic (the `if (locale)` guard above already excludes that
+    // case entirely).
     const alternates = [OG_LOCALE_EN].concat(
       LANGS.map((l) => OG_LOCALE_MAP[l]).filter((v) => v && v !== locale)
     );
     const tags = alternates.map((v) => `<meta property="og:locale:alternate" content="${v}">`).join('\n');
-    ogLocaleEl.after('\n' + tags);
+    if (ogLocaleEl.length) ogLocaleEl.after('\n' + tags);
+  } else {
+    // No standards-valid, non-invented territory exists for this language
+    // (Arabic) -- omit og:locale entirely rather than publish a stale or
+    // incorrect value. hreflang carries the real signal for this case.
+    ogLocaleEl.remove();
   }
 }
 
@@ -272,6 +293,30 @@ function applyStaticTranslations($, dict, metaNs, i18nMode) {
 // translated output -- so JSON-LD's English question/answer text can be
 // matched back to the exact static key that already has its translation.
 const _faqKeyMapCache = {};
+// Matches JSON-LD's plain-text question/answer against the visible page's
+// own data-i18n text with the SAME tolerance the instruction calls for
+// ("links do not need HTML markup inside JSON-LD, the textual meaning must
+// match") -- case and surrounding-whitespace differences are exactly the
+// kind of thing that must NOT block a match (confirmed root cause on
+// manta-ray-snorkeling.html/faqA11: JSON-LD's plain-English answer reads
+// "...current holiday packages." while the visible answer's stripped text
+// reads "...current Holiday Packages." purely because a real <a> link
+// wraps "Holiday Packages" there -- same sentence, same meaning, different
+// capitalization only). Never affects what text is actually inserted: the
+// map's VALUE is always the untouched data-i18n key, so the translated
+// text substituted later is exactly what the visible page already shows,
+// byte-for-byte, in its original case.
+function normalizeFaqText(s) { return stripFaqHtml(s).replace(/\s+/g, ' ').trim().toLowerCase(); }
+
+// A translated FAQ answer's data-i18n value is HTML (applyStaticTranslations
+// injects it via .html(), and some answers legitimately contain an in-line
+// <a> link, e.g. mrPage.faqA11's "...several current <a href=...>Holiday
+// Packages</a>."). JSON-LD's acceptedAnswer.text is expected to be plain
+// text per schema.org -- strip tags, keep only the semantic wording, exactly
+// per this phase's own instruction ("links do not need HTML markup inside
+// JSON-LD, the textual meaning must match").
+function stripFaqHtml(s) { return s.replace(/<[^>]+>/g, ''); }
+
 function faqKeyMap(pageDef) {
   if (_faqKeyMapCache[pageDef.source]) return _faqKeyMapCache[pageDef.source];
   const html = fs.readFileSync(pageDef.source, 'utf8');
@@ -281,7 +326,7 @@ function faqKeyMap(pageDef) {
     const key = $(this).attr('data-i18n');
     if (!/\.(faqQ|faqA)\d+$/.test(key)) return;
     const text = $(this).text().trim();
-    if (text) map[text] = key;
+    if (text) map[normalizeFaqText(text)] = key;
   });
   _faqKeyMapCache[pageDef.source] = map;
   return map;
@@ -332,18 +377,18 @@ function localizeFaqPageNode(node, dict, pageDef, warnings) {
   if (!Array.isArray(node.mainEntity)) return;
   const map = faqKeyMap(pageDef);
   for (const q of node.mainEntity) {
-    const qKey = map[q.name];
+    const qKey = map[normalizeFaqText(q.name)];
     if (qKey !== undefined) {
       const translated = getPath(dict.static, qKey);
-      if (translated !== undefined) q.name = translated;
+      if (translated !== undefined) q.name = stripFaqHtml(translated);
     } else {
       warnings.push(`FAQ question has no matching visible data-i18n text (left English): "${String(q.name).slice(0, 70)}"`);
     }
     if (q.acceptedAnswer && typeof q.acceptedAnswer.text === 'string') {
-      const aKey = map[q.acceptedAnswer.text];
+      const aKey = map[normalizeFaqText(q.acceptedAnswer.text)];
       if (aKey !== undefined) {
         const translated = getPath(dict.static, aKey);
-        if (translated !== undefined) q.acceptedAnswer.text = translated;
+        if (translated !== undefined) q.acceptedAnswer.text = stripFaqHtml(translated);
       } else {
         warnings.push(`FAQ answer has no matching visible data-i18n text (left English): "${String(q.acceptedAnswer.text).slice(0, 70)}"`);
       }

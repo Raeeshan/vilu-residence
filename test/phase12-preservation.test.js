@@ -1905,6 +1905,50 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
     }
   });
 
+  // Phase 13B-1.1: root-caused and fixed a remaining FAQ mismatch on
+  // manta-ray-snorkeling.html/faqA11 -- the JSON-LD's plain-English answer
+  // read "...current holiday packages." while the visible answer's own
+  // stripped text read "...current Holiday Packages." (a real <a> link
+  // wraps "Holiday Packages" there), so a case-sensitive exact-string match
+  // failed and the entry was silently left English. Fixed at the
+  // architecture level: text-matching is now case/whitespace-tolerant, and
+  // any HTML markup in a matched translation is stripped before insertion
+  // into JSON-LD (schema.org expects plain text; the *meaning* must match,
+  // not the markup). This recheck runs EVERY FAQ entry on EVERY FAQ-bearing
+  // page across all 10 languages -- not just the first entry -- for exact
+  // visible/schema parity, per the phase's explicit "0 mismatches required".
+  test('full FAQ parity recheck: every question/answer on every FAQ-bearing page, in all 10 languages, is localized, HTML-free, and count-matches the visible page (0 mismatches)', () => {
+    let checked = 0;
+    for (const p of CONTENT_PAGES.filter(p => p.faq_count > 0)) {
+      const enFaq = jsonLdBlocks(read(p.file)).find(b => b['@type'] === 'FAQPage');
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const faq = jsonLdBlocks(read(rel)).find(b => b['@type'] === 'FAQPage');
+        assert.equal(faq.mainEntity.length, p.faq_count, `${rel}: FAQ entry count doesn't match the visible page`);
+        faq.mainEntity.forEach((q, i) => {
+          checked++;
+          assert.ok(!/</.test(q.name), `${rel} entry ${i}: question still contains raw HTML markup`);
+          assert.ok(!/</.test(q.acceptedAnswer.text), `${rel} entry ${i}: answer still contains raw HTML markup`);
+          assert.notEqual(q.name, enFaq.mainEntity[i].name, `${rel} entry ${i}: question is still the English text`);
+          assert.notEqual(q.acceptedAnswer.text, enFaq.mainEntity[i].acceptedAnswer.text, `${rel} entry ${i}: answer is still the English text`);
+        });
+      }
+    }
+    assert.ok(checked > 900, `expected to have checked at least 900 FAQ entries total, only checked ${checked}`);
+  });
+
+  test('the manta-ray-snorkeling.html FAQ price answer (the confirmed 13B-1 mismatch) is specifically fixed and HTML-free, in every language', () => {
+    const enFaq = jsonLdBlocks(read('manta-ray-snorkeling.html')).find(b => b['@type'] === 'FAQPage');
+    const priceIdx = enFaq.mainEntity.findIndex(q => q.name.toLowerCase().includes('cost'));
+    assert.ok(priceIdx > -1, 'could not locate the price FAQ entry in the English source to compare against');
+    for (const l of M.languages) {
+      const faq = jsonLdBlocks(read(`${l}/manta-ray-snorkeling.html`)).find(b => b['@type'] === 'FAQPage');
+      const entry = faq.mainEntity[priceIdx];
+      assert.ok(!/</.test(entry.acceptedAnswer.text), `${l}/manta-ray-snorkeling.html: price answer still contains raw HTML markup`);
+      assert.notEqual(entry.acceptedAnswer.text, enFaq.mainEntity[priceIdx].acceptedAnswer.text, `${l}/manta-ray-snorkeling.html: price answer is still the English text`);
+    }
+  });
+
   test('BreadcrumbList/TouristDestination/Article/LodgingBusiness descriptive text is localized (not left English) where the page has one', () => {
     for (const p of CONTENT_PAGES) {
       const enHtml = read(p.file);
@@ -1986,28 +2030,58 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
     }
   });
 
-  test('og:locale matches the documented locale map, and exactly the other 10 locales appear as og:locale:alternate, for every language', () => {
-    const OG_LOCALE_MAP = { ru: 'ru_RU', zh: 'zh_CN', de: 'de_DE', fr: 'fr_FR', it: 'it_IT', ja: 'ja_JP', ko: 'ko_KR', ar: 'ar_AR', sk: 'sk_SK', cs: 'cs_CZ' };
+  // Phase 13B-1.1: "ar_AR" was reverted. og:locale's value format is
+  // language_TERRITORY -- there is no standards-valid, non-invented
+  // territory for Vilu's broad (not one-country) Arabic market, and "AR" is
+  // itself Argentina's real ISO 3166-1 code, not a generic-Arabic
+  // placeholder. Arabic pages now carry NO og:locale and NO
+  // og:locale:alternate tag at all; hreflang="ar" (no territory subtag
+  // required) is untouched and remains the real signal for this market.
+  const OG_LOCALE_MAP = { ru: 'ru_RU', zh: 'zh_CN', de: 'de_DE', fr: 'fr_FR', it: 'it_IT', ja: 'ja_JP', ko: 'ko_KR', sk: 'sk_SK', cs: 'cs_CZ' };
+
+  test('Arabic pages carry no og:locale and no og:locale:alternate at all (not ar_AR, not omitted-but-stale)', () => {
+    for (const p of CONTENT_PAGES) {
+      const rel = `ar/${p.generated_out_file || p.file}`;
+      const html = read(rel);
+      assert.equal(metaByProperty(html, 'og:locale'), null, `${rel}: expected no og:locale tag on the Arabic page`);
+      assert.equal(allMetaByProperty(html, 'og:locale:alternate').length, 0, `${rel}: expected no og:locale:alternate tags on the Arabic page`);
+    }
+  });
+
+  test('"ar_AR" (or any Argentina-implying Arabic locale) never appears anywhere in any generated page\'s Open Graph metadata', () => {
     for (const p of CONTENT_PAGES) {
       for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const html = read(rel);
+        assert.ok(!allMetaByProperty(html, 'og:locale:alternate').includes('ar_AR'), `${rel}: og:locale:alternate still lists ar_AR`);
+        assert.notEqual(metaByProperty(html, 'og:locale'), 'ar_AR', `${rel}: og:locale is still ar_AR`);
+      }
+    }
+  });
+
+  test('og:locale matches the documented locale map (Arabic excluded), and exactly the other 8 non-English locales + en_US appear as og:locale:alternate, for every non-Arabic language', () => {
+    for (const p of CONTENT_PAGES) {
+      for (const l of M.languages) {
+        if (l === 'ar') continue; // covered by the two Arabic-specific tests above
         const rel = `${l}/${p.generated_out_file || p.file}`;
         const html = read(rel);
         const locale = metaByProperty(html, 'og:locale');
         if (!locale) continue; // page has no og:locale tag at all (none in this project as of Phase 13B-1)
         assert.equal(locale, OG_LOCALE_MAP[l], `${rel}: og:locale doesn't match the documented map`);
         const alternates = allMetaByProperty(html, 'og:locale:alternate');
-        assert.equal(alternates.length, 10, `${rel}: expected 10 og:locale:alternate tags (all other languages), got ${alternates.length}`);
+        assert.equal(alternates.length, 9, `${rel}: expected 9 og:locale:alternate tags (en_US + the other 8 non-Arabic, non-own languages), got ${alternates.length}`);
         assert.ok(!alternates.includes(locale), `${rel}: og:locale:alternate incorrectly repeats the page's own locale`);
         assert.ok(alternates.includes('en_US'), `${rel}: og:locale:alternate is missing en_US`);
       }
     }
   });
 
-  test('every English source page that has an og:locale tag also has one on all 10 generated languages (no page silently skipped)', () => {
+  test('every English source page that has an og:locale tag also has one on all 9 non-Arabic generated languages (no page silently skipped)', () => {
     for (const p of CONTENT_PAGES) {
       const hasEnLocale = !!metaByProperty(read(p.file), 'og:locale');
       if (!hasEnLocale) continue;
       for (const l of M.languages) {
+        if (l === 'ar') continue;
         const rel = `${l}/${p.generated_out_file || p.file}`;
         assert.ok(metaByProperty(read(rel), 'og:locale'), `${rel}: missing og:locale despite the English source having one`);
       }
