@@ -632,6 +632,15 @@ function extractHomepagePackagesSource() {
   return sandbox.PACKAGES_DATA;
 }
 
+// Owner redesign (Phase 1): the live renderHolidayPackages() now builds
+// 1 flagship + 2 secondary photographic cards, not a rail of every package
+// -- but this static/no-JS fallback intentionally keeps rendering ALL 9
+// packages as flat .hp-rail-item entries, exactly as it always has. That's
+// a separate, protected contract (test/phase12-preservation.test.js:
+// "English #hp-grid should prerender all 9 packages") for no-JS visitors
+// and crawlers, not a visual mockup of the JS-enhanced showcase -- real
+// JS-enabled visitors never see this for longer than the pre-hydration
+// flash before renderHolidayPackages() unconditionally overwrites it.
 function renderHomepagePackageFallback(packages, dict, i18nEn, dynamicDict) {
   var t = makeT(dict, i18nEn);
   var td = makeTd(dynamicDict);

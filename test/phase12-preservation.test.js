@@ -1135,12 +1135,16 @@ section('Phase 12B-E2B — complete cinematic homepage contracts');
     for (const bad of ['★', '4.9', '5.0 stars', 'reviews)']) assert.ok(!h.includes(bad), `unexpected fabricated rating marker: ${bad}`);
   });
   test('gallery keeps all 6 real Vilu image assets as crawlable <img src> (not JS-only backgrounds)', () => {
+    // Owner redesign: the equal-width rail (class="ga-img") became one
+    // dominant image (class="ga-main-img", the first photo) + a thumbnail
+    // strip (class="ga-thumb-img", all 6, including the first again) --
+    // same 6 real files, still real <img src> markup, just renamed classes.
     const GALLERY_IMAGES = [
       'vilu-residence-bikini-beach-maldives.jpg', 'vilu-residence-guests-maamigili-sunset.jpg',
       'vilu-residence-guests-lagoon-maldives.jpg', 'vilu-residence-couple-sunset-beach-maldives.jpg',
       'vilu-residence-maamigili-island-buggy-tour.jpg', 'vilu-residence-sandbank-bbq-beach-dining.jpg'
     ];
-    for (const img of GALLERY_IMAGES) assert.ok(h.includes(`<img class="ga-img" src="https://viluresidence.net/images/${img}"`), img);
+    for (const img of GALLERY_IMAGES) assert.ok(h.includes(`<img class="ga-thumb-img" src="https://viluresidence.net/images/${img}"`), img);
   });
   test('closing conversion uses the approved line + exactly 2 CTAs to the approved destinations', () => {
     const closing = h.slice(h.indexOf('<section id="closing">'), h.indexOf('</section>', h.indexOf('<section id="closing">')));
