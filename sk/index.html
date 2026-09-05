@@ -502,9 +502,9 @@ section{position:relative}
 .booking-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:stretch;gap:0;height:72px}
 .bb-field{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 20px;border-right:1px solid var(--border)}
 .bb-field:first-child{padding-left:0}
-.bb-label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.bb-label{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-light);margin-bottom:4px}
 .bb-input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--white);width:100%;cursor:pointer}
-.bb-field:focus-within{box-shadow:inset 0 -2px 0 var(--teal-light)}
+.bb-field:focus-within{box-shadow:inset 0 -2px 0 var(--gold-light)}
 .bb-input::placeholder{color:rgba(255,255,255,.4)}
 .bb-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 /* Native <select> popups otherwise default to a plain white OS panel,
@@ -515,8 +515,8 @@ section{position:relative}
    native light popup regardless — an accepted limitation of <select>. */
 select.bb-input{color-scheme:dark}
 select.bb-input option{background-color:var(--navy2);color:var(--white)}
-.bb-btn{background:none;color:var(--white);border:1px solid var(--border);padding:0 32px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .3s,color .3s;white-space:nowrap}
-.bb-btn:hover{border-color:var(--gold);color:var(--gold-light)}
+.bb-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:0 32px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;white-space:nowrap}
+.bb-btn:hover{background-position:100% 0;box-shadow:0 10px 26px var(--glow)}
 
 /* ── ROOMS ── */
 #rooms{color:var(--text);padding:100px 0;position:relative}
@@ -681,11 +681,12 @@ select.bb-input option{background-color:var(--navy2);color:var(--white)}
 .la-field .bwf-input,.la-field .bwf-select{font-size:var(--font-size-sm);padding:10px 10px}
 .la-field{display:flex;flex-direction:column;gap:6px;text-align:left}
 .la-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)}
-.bwf-input{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
+.bwf-label{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-light);display:block;margin-bottom:6px}
+.bwf-input{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;transition:border .2s,box-shadow .2s;width:100%}
 .bwf-input:focus,.bwf-select:focus{border-color:var(--ocean);box-shadow:0 0 0 3px var(--glow)}
 .bwf-input::placeholder{color:var(--muted)}
 .bwf-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
-.bwf-select{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
+.bwf-select{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:var(--white);outline:none;width:100%;appearance:none;cursor:pointer}
 .bwf-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:12px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s;white-space:nowrap}
 .bwf-btn:hover{background-position:100% 0;box-shadow:0 10px 26px rgba(34,211,238,.4)}
 .la-btn{height:42px}
@@ -808,15 +809,23 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .footer-pms-badge{font-size:var(--font-size-xs);color:rgba(255,255,255,.25);display:flex;align-items:center;gap:6px}
 .footer-pms-badge span{color:var(--gold)}
 
-/* ── BOOKING POPUP ── */
+/* ── BOOKING POPUP (Phase 12E-A: premium public-booking presentation —
+   pure CSS/markup refinement, zero change to openBookingPopup()/
+   closeBookingPopup() logic or any id= referenced by JS) ── */
 .booking-popup-overlay{position:fixed;inset:0;background:rgba(2,10,16,.88);backdrop-filter:blur(10px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
 .booking-popup-overlay.open{display:flex}
-.booking-popup{background:linear-gradient(165deg,var(--navy2),#0a2540);border:1px solid rgba(34,211,238,.28);border-radius:10px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.16,1,.3,1);box-shadow:0 30px 80px rgba(0,5,10,.6)}
-.popup-header{padding:28px 32px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
-.popup-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:300;color:var(--white)}
-.popup-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:var(--font-size-3xl);cursor:pointer;line-height:1;transition:color .2s;padding:4px}
-.popup-close:hover{color:var(--white)}
+.booking-popup{background:linear-gradient(165deg,var(--navy2),#0a2540);border:1px solid var(--card-border);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.16,1,.3,1);box-shadow:0 30px 80px rgba(0,5,10,.6);position:relative}
+.booking-popup::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold-light),transparent);border-radius:12px 12px 0 0}
+.popup-header{padding:30px 32px 22px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.popup-eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-light);margin-bottom:6px}
+.popup-title{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);font-weight:300;color:var(--white);line-height:1.15}
+.popup-close{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:20px;width:36px;height:36px;border-radius:50%;cursor:pointer;line-height:1;transition:color .2s,background .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.popup-close:hover{color:var(--white);background:rgba(255,255,255,.14)}
+.popup-close:focus-visible,.bfp-close:focus-visible,.bwf-btn:focus-visible,.bwf-input:focus-visible,.bwf-select:focus-visible,.bfp-book-btn:focus-visible,.bfp-search-btn:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px}
 .popup-body{padding:28px 32px 32px}
+/* Traveler-facing error copy (invalid dates/fields, ROOM_CONFLICT, submit
+   failure) -- box only, JS still toggles display:none/block directly. */
+.bk-error{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.28);border-inline-start:3px solid #f87171;border-radius:6px;padding:12px 16px;margin-bottom:16px;color:#fca5a5;font-size:var(--font-size-sm);line-height:1.6}
 
 /* ── FULL BOOKING PAGE ── */
 #booking-full-page{display:none;position:fixed;inset:0;z-index:1500;background:var(--sand);overflow-y:auto}
@@ -831,11 +840,18 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .bfp-sub{font-size:var(--font-size-lg);color:var(--muted);margin-bottom:40px}
 .bfp-search{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:24px;box-shadow:0 10px 40px rgba(0,4,10,.3);margin-bottom:40px}
 .bfp-search-grid{display:grid;grid-template-columns:1fr 1fr 80px 80px 90px auto;gap:16px;align-items:end}
-.bfp-field label{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:6px}
-.bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none}
-.bfp-field input:focus,.bfp-field select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.2)}
-.bfp-search-btn{background:var(--teal);color:var(--white);border:none;padding:11px 24px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .3s}
-.bfp-search-btn:hover{background:var(--teal-light);box-shadow:0 8px 22px rgba(14,116,144,.35)}
+/* Phase 12E-A: .bfp-field label previously read var(--teal), which in Dark
+   is a legacy alias onto --surface-secondary (#14294a) -- nearly identical
+   to this panel's own --card background (--surface, #0f2140), so the label
+   text was effectively invisible (verified: ~1.1:1). Same root cause the
+   codebase already fixed once for .room-price-amount (see that selector's
+   comment above); --gold-light resolves to --accent-hover, clearing
+   contrast in both themes without a dark-only override. */
+.bfp-field label{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-light);display:block;margin-bottom:6px}
+.bfp-field input,.bfp-field select{width:100%;background:var(--sand);border:1px solid var(--sand2);border-radius:6px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-md);color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
+.bfp-field input:focus,.bfp-field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--glow)}
+.bfp-search-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:12px 24px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background-position .3s,box-shadow .3s}
+.bfp-search-btn:hover{background-position:100% 0;box-shadow:0 8px 22px var(--glow)}
 .bfp-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .bfp-room-card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,4,10,.3);transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1)}
 .bfp-room-card:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(14,116,144,.2)}
@@ -852,10 +868,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .bfp-room-name{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-2xl);font-weight:600;color:var(--text);margin-bottom:6px}
 .bfp-room-desc{font-size:var(--font-size-sm);color:var(--muted);line-height:1.6;margin-bottom:14px}
 .bfp-room-footer{display:flex;align-items:center;justify-content:space-between}
-.bfp-room-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);color:var(--teal);font-weight:600}
+/* Same invisible-text-on-similar-surface defect as .bfp-field label above,
+   and the same fix already applied once to .room-price-amount: --gold-light
+   (→ --accent-hover) reads clearly against --card in both themes. */
+.bfp-room-price{font-family:'Cormorant Garamond',serif;font-size:var(--font-size-3xl);color:var(--gold-light);font-weight:600}
 .bfp-room-price span{font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);color:var(--muted);font-weight:400}
-.bfp-book-btn{background:var(--teal);color:var(--white);border:none;padding:9px 18px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.bfp-book-btn:hover{background:var(--teal-light);box-shadow:0 6px 16px rgba(14,116,144,.35)}
+.bfp-book-btn{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);border:none;padding:10px 20px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-xs);font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background-position .3s,box-shadow .3s}
+.bfp-book-btn:hover{background-position:100% 0;box-shadow:0 6px 16px var(--glow)}
 .bfp-book-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .bfp-multi-bar{display:none;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:14px 20px;margin-bottom:20px;font-size:var(--font-size-base);color:var(--text);position:sticky;top:12px;z-index:5}
 
@@ -995,13 +1014,22 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
      until their date values visually truncated. Wrapping the button onto
      its own full-width row below the two remaining fields, instead of
      forcing it to share theirs, removes the squeeze for every language
-     rather than special-casing the ones long enough to trigger it today. */
+     rather than special-casing the ones long enough to trigger it today.
+
+     Phase 12E-A: the fields that fix hid (Guests/Rooms/Number of Rooms)
+     are real controls a mobile guest can still set today -- they were
+     simply invisible, not removed from the form, so the site was silently
+     always submitting their (correct but unreviewable) defaults. Every
+     field now stays visible, 2-per-row, wrapping onto its own additional
+     rows below Check-in/Check-out; the button keeps the full-width row
+     the original fix already established, so the translated-label squeeze
+     this comment describes cannot reoccur. Same treatment for
+     .bfp-search-grid below. */
   .booking-bar-inner{flex-wrap:wrap;height:auto}
-  .bb-field:nth-child(n+3){display:none}
   .bb-field{flex:1 1 50%;padding:14px 20px}
   .bb-btn{flex:1 1 100%;padding:16px 0}
   .bfp-search-grid{grid-template-columns:1fr 1fr;gap:12px}
-  .bfp-search-grid .bfp-field:nth-child(n+3){display:none}
+  .bfp-search-grid .bfp-search-btn{grid-column:1/-1}
 }
 @media(max-width:600px){
   .footer-top{grid-template-columns:1fr}
@@ -1960,10 +1988,10 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 
 <!-- ══ BOOKING POPUP ══ -->
 <div class="booking-popup-overlay" id="bookingPopupOverlay" onclick="if(event.target===this)closeBookingPopup()">
-  <div class="booking-popup">
+  <div class="booking-popup" role="dialog" aria-modal="true" aria-labelledby="bookingPopupTitle">
     <div class="popup-header">
-      <div class="popup-title" data-i18n="bookingPopup.title">Rezervujte si pobyt</div>
-      <button class="popup-close" onclick="closeBookingPopup()">×</button>
+      <div class="popup-title" id="bookingPopupTitle" data-i18n="bookingPopup.title">Rezervujte si pobyt</div>
+      <button class="popup-close" onclick="closeBookingPopup()" aria-label="Close">×</button>
     </div>
     <div class="popup-body">
       <div class="bwf-fields">
@@ -1983,7 +2011,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 </div>
 
 <!-- ══ FULL BOOKING PAGE ══ -->
-<div id="booking-full-page">
+<div id="booking-full-page" role="dialog" aria-modal="true" aria-labelledby="bfpTitleHeading">
   <div class="bfp-header">
     <div class="bfp-logo">
       <img src="/images/vilu-logo.jpg" alt="Vilu Residence">
@@ -1992,7 +2020,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <button class="bfp-close" onclick="closeBookingPage()"><i class="ti ti-x" aria-hidden="true"></i> <span data-i18n="bfp.close">Zavrieť</span></button>
   </div>
   <div class="bfp-content">
-    <h2 class="bfp-title" data-i18n="bfp.findRoom">Nájdite si dokonalú izbu</h2>
+    <h2 class="bfp-title" id="bfpTitleHeading" data-i18n="bfp.findRoom">Nájdite si dokonalú izbu</h2>
     <p class="bfp-sub" data-i18n="bfp.roomsAvailable">6 dostupných izieb v Južnom atole Ari, Maamigili · Priama rezervácia, garantované najlepšie ceny</p>
     <div class="bfp-search">
       <div class="bfp-search-grid">
@@ -2012,9 +2040,9 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
     <div style="margin-top:40px;padding:24px;background:rgba(26,107,90,.08);border:1px solid rgba(26,107,90,.2);border-radius:4px;text-align:center">
       <p style="font-size:var(--font-size-md);color:var(--muted);margin-bottom:12px" data-i18n="bfp.toComplete">Na dokončenie rezervácie nás prosím kontaktujte priamo:</p>
       <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
-        <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
-        <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
-        <a href="https://wa.me/9609903339" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--teal);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</a>
+        <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--gold-light);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-phone" aria-hidden="true"></i> +960 9903339</a>
+        <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--gold-light);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-mail" aria-hidden="true"></i> Viluresidence@gmail.com</a>
+        <a href="https://wa.me/9609903339" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'booking_flow_trust'})" style="display:flex;align-items:center;gap:8px;color:var(--gold-light);font-weight:500;text-decoration:none;font-size:var(--font-size-lg)"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</a>
       </div>
     </div>
   </div>
@@ -2022,10 +2050,10 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 
 <!-- ══ GUEST DETAILS (booking confirmation) ══ -->
 <div class="booking-popup-overlay" id="guestDetailsOverlay" onclick="if(event.target===this)closeGuestDetails()">
-  <div class="booking-popup">
+  <div class="booking-popup" role="dialog" aria-modal="true" aria-labelledby="guestDetailsTitle">
     <div class="popup-header">
-      <div class="popup-title" data-i18n="bfp.yourDetails">Vaše údaje</div>
-      <button class="popup-close" onclick="closeGuestDetails()">×</button>
+      <div class="popup-title" id="guestDetailsTitle" data-i18n="bfp.yourDetails">Vaše údaje</div>
+      <button class="popup-close" onclick="closeGuestDetails()" aria-label="Close">×</button>
     </div>
     <div class="popup-body">
       <div id="gd-summary" style="font-size:var(--font-size-base);color:var(--muted);margin-bottom:20px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:6px"></div>
@@ -2033,7 +2061,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label" data-i18n="bfp.email">E-mail</div><input type="email" class="bwf-input" id="gd-email"></div>
       <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label" data-i18n="bfp.phone">Telefón</div><input type="tel" class="bwf-input" id="gd-phone"></div>
       <div class="bwf-field" style="margin-bottom:20px"><div class="bwf-label" data-i18n="bfp.country">Krajina</div><input type="text" class="bwf-input" id="gd-country"></div>
-      <div id="gd-error" style="display:none;color:#f87171;font-size:var(--font-size-sm);margin-bottom:14px;line-height:1.5"></div>
+      <div id="gd-error" class="bk-error" style="display:none"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()" data-i18n="bfp.confirmBooking">Potvrdiť rezerváciu</button>
       <div class="bwf-note" data-i18n="bfp.emailNote">Potvrdenie vám pošleme e-mailom. Keďže ide o priamu rezerváciu, teraz sa nevyžaduje žiadna platba a rezerváciu môžete kedykoľvek bezplatne zrušiť — stačí zaplatiť v hotovosti pri príchode.</div>
     </div>
@@ -4210,13 +4238,50 @@ attachViluCalendar('bfp-ci', 'bfp-co', 'checkin');
 attachViluCalendar('bfp-co', 'bfp-ci', 'checkout');
 
 // ── BOOKING POPUP ──
+// ── Phase 12E-A: shared focus-trap/restore for the 3 booking overlays
+// (popup, full booking page, guest details) — presentation/accessibility
+// only, no change to any reservation/business logic. Mirrors nav-shell.js's
+// mobile-drawer pattern (openDrawer/closeDrawer/getFocusable), kept local
+// to this file since nav-shell.js deliberately excludes booking-specific
+// code (see its own header comment). ──
+var _bkLastFocused = null;
+function bkGetFocusable(container){
+  return Array.prototype.slice.call(container.querySelectorAll(
+    'a[href], button:not([disabled]), select, input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )).filter(function(el){ return el.offsetParent !== null; });
+}
+function bkOnOverlayOpen(container){
+  _bkLastFocused = document.activeElement;
+  var focusable = bkGetFocusable(container);
+  if (focusable.length) focusable[0].focus();
+}
+function bkOnOverlayClose(){
+  if (_bkLastFocused && typeof _bkLastFocused.focus === 'function') _bkLastFocused.focus();
+  _bkLastFocused = null;
+}
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Tab') return;
+  var bfp = document.getElementById('booking-full-page');
+  var openOverlay = document.querySelector('.booking-popup-overlay.open') ||
+    (bfp && bfp.style.display === 'block' ? bfp : null);
+  if (!openOverlay) return;
+  var focusable = bkGetFocusable(openOverlay);
+  if (!focusable.length) return;
+  var first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
 function openBookingPopup(){
   document.getElementById('bookingPopupOverlay').classList.add('open');
   document.body.style.overflow='hidden';
+  bkOnOverlayOpen(document.getElementById('bookingPopupOverlay'));
 }
 function closeBookingPopup(){
+  var wasOpen = document.getElementById('bookingPopupOverlay').classList.contains('open');
   document.getElementById('bookingPopupOverlay').classList.remove('open');
   document.body.style.overflow='';
+  if (wasOpen) bkOnOverlayClose();
 }
 
 // ── FULL BOOKING PAGE ──
@@ -4231,10 +4296,13 @@ function openBookingPage(){
   document.getElementById('booking-full-page').style.display='block';
   document.body.style.overflow='hidden';
   bfpRenderRooms(ROOMS);
+  bkOnOverlayOpen(document.getElementById('booking-full-page'));
 }
 function closeBookingPage(){
+  var wasOpen = document.getElementById('booking-full-page').style.display === 'block';
   document.getElementById('booking-full-page').style.display='none';
   document.body.style.overflow='';
+  if (wasOpen) bkOnOverlayClose();
 }
 function openBookingPageWithDates(){
   openBookingPage();
@@ -4486,10 +4554,13 @@ function bfpOpenGuestDetails(rooms, ci, co){
   document.getElementById('gd-phone').value = '';
   document.getElementById('gd-country').value = '';
   document.getElementById('guestDetailsOverlay').classList.add('open');
+  bkOnOverlayOpen(document.getElementById('guestDetailsOverlay'));
 }
 
 function closeGuestDetails(){
+  var wasOpen = document.getElementById('guestDetailsOverlay').classList.contains('open');
   document.getElementById('guestDetailsOverlay').classList.remove('open');
+  if (wasOpen) bkOnOverlayClose();
 }
 
 function showGuestError(html){

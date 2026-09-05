@@ -1583,5 +1583,83 @@ section('Phase 12D-B — complete guide family rollout (10 guide pages, full mul
   });
 }
 
+section('Phase 12E-A — public booking presentation (engine/contract preservation)');
+{
+  const site = read('vilu-website.html');
+
+  test('the writeReservation()/submitDirectBooking() reservation-write boundary is untouched', () => {
+    assert.ok(/async function writeReservation\(docId, fields, opts\)/.test(site), 'writeReservation signature changed');
+    assert.ok(/fsDb\.runTransaction\(async function\(transaction\)/.test(site), 'runTransaction call missing/changed');
+    assert.ok(/transaction\.set\(resRef, fields, \{ ?merge: ?true ?\}\)/.test(site), 'the {merge:true} reservation write is missing/changed');
+    assert.ok(/throw new Error\('ROOM_CONFLICT'\)/.test(site), 'ROOM_CONFLICT literal missing');
+    assert.ok((site.match(/ROOM_CONFLICT/g) || []).length >= 2, 'expected both the pre-check and in-transaction ROOM_CONFLICT throws');
+    assert.ok(/async function submitDirectBooking\(booking\)/.test(site), 'submitDirectBooking signature changed');
+    assert.ok(/status: ?'Pending'/.test(site), 'public bookings must still be written with status Pending');
+    assert.ok(/source: ?'Website'/.test(site), 'public bookings must still be written with source Website');
+    assert.ok(/\/\^VR0\[1-6\]\$\/\.test\(booking\.roomId\)/.test(site), 'the VR01-VR06 room-id guard on submitDirectBooking is missing/changed');
+  });
+
+  test('the public entry points into the booking experience are all still wired', () => {
+    assert.ok(/function openBookingPopup\(\)/.test(site), 'openBookingPopup missing');
+    assert.ok(/function openBookingPage\(\)/.test(site), 'openBookingPage missing');
+    assert.ok(/function bfpSearch\(/.test(site), 'bfpSearch missing');
+    assert.ok(/function confirmGuestBooking\(/.test(site), 'confirmGuestBooking missing');
+    assert.ok(site.includes('id="booking"'), '#booking anchor missing');
+    assert.ok(site.includes('js-check-availability'), '.js-check-availability marker missing');
+    assert.ok(site.includes('js-live-availability'), '.js-live-availability marker missing');
+  });
+
+  test('initBookingHashHandoff() still exists in nav-shell.js and still only acts on the homepage', () => {
+    const navShellJs = read('nav-shell.js');
+    assert.ok(/function initBookingHashHandoff\(\)/.test(navShellJs), 'initBookingHashHandoff missing');
+    assert.ok(/if \(typeof window\.openBookingPopup !== 'function'\) return;/.test(navShellJs), 'the homepage-only guard is missing/changed');
+    assert.ok(/location\.hash === '#booking'/.test(navShellJs), 'the #booking hash check is missing/changed');
+  });
+
+  test('the BroadcastChannel(\'vilu_pms\') cross-tab sync with the PMS is untouched', () => {
+    assert.ok(/new BroadcastChannel\('vilu_pms'\)/.test(site), 'BroadcastChannel(\'vilu_pms\') missing');
+    assert.ok(/'SETTINGS_UPDATE'/.test(site) && /'NEW_BOOKING'/.test(site), 'expected PMS broadcast message types missing');
+  });
+
+  test('public room names and current rates are unchanged (DEFAULT_ROOMS fallback)', () => {
+    const ROOM_LINES = [
+      "{id:'VR01',name:'Deluxe Family Room',type:'Deluxe Family Room',rate:80",
+      "{id:'VR02',name:'Deluxe Family Room',type:'Deluxe Family Room',rate:80",
+      "{id:'VR03',name:'Double Room',type:'Double Room',rate:85",
+      "{id:'VR04',name:'Double Room',type:'Double Room',rate:85",
+      "{id:'VR05',name:'Double Room',type:'Double Room',rate:90",
+      "{id:'VR06',name:'Deluxe Family Room with Open Deck',type:'Deluxe Family Room with Open Deck',rate:90"
+    ];
+    for (const line of ROOM_LINES) assert.ok(site.includes(line), `DEFAULT_ROOMS entry changed or missing: ${line}`);
+  });
+
+  test('Holiday Package enquiry and accommodation booking remain two distinct commercial paths', () => {
+    const fnStart = site.indexOf('async function submitDirectBooking');
+    const bookingFnBody = site.slice(fnStart, fnStart + 800);
+    assert.ok(!/package/i.test(bookingFnBody), 'submitDirectBooking body must stay accommodation-only, no package-enquiry mixing');
+  });
+
+  test('the 3 public booking overlays gained real dialog semantics without changing any id= that JS depends on', () => {
+    for (const id of ['bookingPopupOverlay', 'booking-full-page', 'guestDetailsOverlay', 'bfp-rooms-grid', 'gd-name', 'gd-email', 'gd-error']) {
+      assert.ok(site.includes(`id="${id}"`), `expected id="${id}" to still exist`);
+    }
+    assert.ok(/role="dialog" aria-modal="true" aria-labelledby="bookingPopupTitle"/.test(site), 'booking popup missing dialog semantics');
+    assert.ok(/role="dialog" aria-modal="true" aria-labelledby="bfpTitleHeading"/.test(site), 'full booking page missing dialog semantics');
+    assert.ok(/role="dialog" aria-modal="true" aria-labelledby="guestDetailsTitle"/.test(site), 'guest details overlay missing dialog semantics');
+  });
+
+  test('no new animation framework or autoplay video was introduced into the booking overlays', () => {
+    // Scoped to the 3 booking overlays specifically -- the homepage's own
+    // pre-existing hero <video> (vc-hero-video, Phase 12B) is unrelated and
+    // untouched; this only guards against a NEW video/carousel inside the
+    // booking flow itself.
+    const popupIdx = site.indexOf('id="bookingPopupOverlay"');
+    const gdEndIdx = site.indexOf('</div>\n\n<script') !== -1 ? site.indexOf('id="guestDetailsOverlay"') + 3000 : site.length;
+    const bookingFlowSlice = site.slice(popupIdx, gdEndIdx);
+    assert.ok(!/<video\b/.test(bookingFlowSlice), 'unexpected <video> element inside the booking overlays');
+    assert.ok(!/framer-motion|gsap\.min\.js|swiper-bundle/i.test(site), 'unexpected animation/carousel library reference');
+  });
+}
+
 // ---------------------------------------------------------------------------
 console.log(`\n${passed}/${passed + failed} preservation assertions passed${failed ? ` — ${failed} FAILED` : ''}`);
