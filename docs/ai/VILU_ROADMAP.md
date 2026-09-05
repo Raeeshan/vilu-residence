@@ -2,6 +2,8 @@
 
 Every phase below is real and permanent. **Do not start any phase beyond the current active one without explicit owner approval for that specific phase** — this file records the full intended sequence so future sessions don't lose it, not a license to execute it autonomously. See `VILU_CURRENT_STATE.md` for which phase is active right now, and re-verify that file (and this one) against actual repository state before relying on either.
 
+**See [`VILU_COMPLETION_MATRIX.md`](VILU_COMPLETION_MATRIX.md) for the full 0–55 phase-by-phase status table** (a separate, later owner-provided numbering that covers the same project — this file's 1–36 numbering is not being renumbered to match, since both describe the same real state and renumbering risks losing history for no benefit; the matrix cross-references both where they overlap).
+
 Status labels (use exactly one per phase): `NOT STARTED` · `PLANNED` · `AUDIT IN PROGRESS` · `IMPLEMENTATION IN PROGRESS` · `PREVIEW READY` · `OWNER REVIEW` · `BLOCKED` · `APPROVED` · `DEPLOYED` · `COMPLETE`. Never mark `APPROVED` without explicit owner approval. Never mark `COMPLETE` without actual evidence (tests, screenshots, or a verified live check).
 
 ---

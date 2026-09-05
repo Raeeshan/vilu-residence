@@ -1,6 +1,6 @@
 # VILU — Master Context
 
-**Read this file, and the other six `docs/ai/VILU_*.md` files, before any substantial Vilu work.** See `VILU_CURRENT_STATE.md` for the session-startup checklist.
+**Read this file, and the other `docs/ai/VILU_*.md` files, before any substantial Vilu work.** See `VILU_CURRENT_STATE.md` for the session-startup checklist, and [`VILU_COMPLETION_MATRIX.md`](VILU_COMPLETION_MATRIX.md) for the full phase-by-phase status of the entire project (which phases are complete, partially complete, current, or pending — read it before assuming anything needs to be built from zero).
 
 ---
 
