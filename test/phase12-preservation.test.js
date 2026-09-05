@@ -61,6 +61,22 @@ function metaByName(html, name) {
 }
 function linkRel(html, rel) { return (headOf(html).match(/<link\b[^>]*>/g) || []).filter(t => attr(t, 'rel') === rel); }
 function titleOf(html) { const m = headOf(html).match(/<title>([^<]*)<\/title>/); return m ? m[1] : null; }
+function metaByProperty(html, prop) {
+  for (const t of headOf(html).match(/<meta\b[^>]*>/g) || []) if (attr(t, 'property') === prop) return attr(t, 'content');
+  return null;
+}
+function allMetaByProperty(html, prop) {
+  const out = [];
+  for (const t of headOf(html).match(/<meta\b[^>]*>/g) || []) if (attr(t, 'property') === prop) out.push(attr(t, 'content'));
+  return out;
+}
+function jsonLdBlocks(html) {
+  const out = [];
+  const re = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
+  let m;
+  while ((m = re.exec(html))) { try { out.push(JSON.parse(m[1])); } catch (e) { out.push({ __parseError: e.message, __raw: m[1] }); } }
+  return out;
+}
 function h1s(html) { return [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)].map(m => stripTags(m[1])); }
 function bodyTag(html) { const m = html.match(/<body\b[^>]*>/); return m ? m[0] : ''; }
 function jsonLd(html) {
@@ -1847,6 +1863,235 @@ section('Phase 12G — homepage release-blocker hotfix');
       assert.ok(site.includes(marker), `booking-engine marker missing/changed: ${marker}`);
     }
     assert.ok(read('nav-shell.js').includes('function initBookingHashHandoff('), 'initBookingHashHandoff() in nav-shell.js is missing/changed');
+  });
+}
+
+section('Phase 13B-1 — global SEO localization + safe performance quick wins');
+{
+  const site = read('vilu-website.html');
+
+  test('every JSON-LD block on every one of the 140 generated pages is valid, parseable JSON', () => {
+    for (const l of M.languages) for (const p of CONTENT_PAGES) {
+      const rel = `${l}/${p.generated_out_file || p.file}`;
+      const html = read(rel);
+      for (const block of jsonLdBlocks(html)) {
+        assert.ok(!block.__parseError, `${rel}: malformed JSON-LD (${block.__parseError})`);
+      }
+    }
+  });
+
+  test('FAQPage schema question/answer count matches the page\'s own recorded faq_count, in every language (exact visible/schema parity)', () => {
+    for (const p of CONTENT_PAGES.filter(p => p.faq_count > 0)) {
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const html = read(rel);
+        const faqBlocks = jsonLdBlocks(html).filter(b => b['@type'] === 'FAQPage');
+        assert.equal(faqBlocks.length, 1, `${rel}: expected exactly one FAQPage block`);
+        assert.equal(faqBlocks[0].mainEntity.length, p.faq_count, `${rel}: FAQPage entry count doesn't match visible FAQ count (${p.faq_count})`);
+      }
+    }
+  });
+
+  test('FAQPage question/answer text is actually localized (not left English) for at least the first entry, on every translated FAQ page', () => {
+    for (const p of CONTENT_PAGES.filter(p => p.faq_count > 0)) {
+      const enHtml = read(p.file);
+      const enFaq = jsonLdBlocks(enHtml).find(b => b['@type'] === 'FAQPage');
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const faq = jsonLdBlocks(read(rel)).find(b => b['@type'] === 'FAQPage');
+        assert.notEqual(faq.mainEntity[0].name, enFaq.mainEntity[0].name, `${rel}: first FAQ question is still the English text`);
+        assert.notEqual(faq.mainEntity[0].acceptedAnswer.text, enFaq.mainEntity[0].acceptedAnswer.text, `${rel}: first FAQ answer is still the English text`);
+      }
+    }
+  });
+
+  test('BreadcrumbList/TouristDestination/Article/LodgingBusiness descriptive text is localized (not left English) where the page has one', () => {
+    for (const p of CONTENT_PAGES) {
+      const enHtml = read(p.file);
+      const enBlocks = jsonLdBlocks(enHtml);
+      const enLodging = enBlocks.find(b => b['@type'] === 'LodgingBusiness');
+      const enDest = enBlocks.find(b => b['@type'] === 'TouristDestination');
+      const enArticle = enBlocks.find(b => b['@type'] === 'Article');
+      if (!enLodging && !enDest && !enArticle) continue;
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const blocks = jsonLdBlocks(read(rel));
+        if (enLodging) {
+          const node = blocks.find(b => b['@type'] === 'LodgingBusiness');
+          assert.notEqual(node.description, enLodging.description, `${rel}: LodgingBusiness.description still English`);
+        }
+        if (enDest) {
+          const node = blocks.find(b => b['@type'] === 'TouristDestination');
+          assert.notEqual(node.name, enDest.name, `${rel}: TouristDestination.name still English`);
+          assert.notEqual(node.description, enDest.description, `${rel}: TouristDestination.description still English`);
+        }
+        if (enArticle) {
+          const node = blocks.find(b => b['@type'] === 'Article');
+          assert.notEqual(node.headline, enArticle.headline, `${rel}: Article.headline still English`);
+          assert.notEqual(node.description, enArticle.description, `${rel}: Article.description still English`);
+        }
+      }
+    }
+  });
+
+  test('BreadcrumbList item URLs point at the translated page, not the English root, in every language', () => {
+    for (const p of CONTENT_PAGES) {
+      const enBlocks = jsonLdBlocks(read(p.file));
+      if (!enBlocks.find(b => b['@type'] === 'BreadcrumbList')) continue;
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const bc = jsonLdBlocks(read(rel)).find(b => b['@type'] === 'BreadcrumbList');
+        for (const item of bc.itemListElement) {
+          assert.ok(item.item.includes(`/${l}/`), `${rel}: breadcrumb item "${item.name}" still points at an English URL (${item.item})`);
+        }
+      }
+    }
+  });
+
+  test('proper nouns (Vilu Residence, Maamigili) are never mistranslated inside JSON-LD, in every language', () => {
+    for (const l of M.languages) {
+      const rel = `${l}/maamigili-guide.html`;
+      const blocks = jsonLdBlocks(read(rel));
+      const org = blocks.flatMap(b => [b.author, b.publisher]).find(Boolean);
+      assert.equal(org && org.name, 'Vilu Residence', `${rel}: Article author/publisher name is not the untranslated brand name`);
+    }
+  });
+
+  test('og:title/og:description/twitter:title/twitter:description are localized (not English) in every language, for the homepage and 3 representative guide pages', () => {
+    const pages = ['vilu-website.html', 'holiday-packages.html', 'maamigili-guide.html', 'whale-shark-snorkeling.html'];
+    for (const file of pages) {
+      const p = CONTENT_PAGES.find(p => p.file === file);
+      const enHtml = read(file);
+      const enOgTitle = metaByProperty(enHtml, 'og:title');
+      const enOgDesc = metaByProperty(enHtml, 'og:description');
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const html = read(rel);
+        assert.notEqual(metaByProperty(html, 'og:title'), enOgTitle, `${rel}: og:title still English`);
+        assert.notEqual(metaByProperty(html, 'og:description'), enOgDesc, `${rel}: og:description still English`);
+        assert.equal(metaByName(html, 'twitter:title'), metaByProperty(html, 'og:title'), `${rel}: twitter:title doesn't match localized og:title`);
+        assert.equal(metaByName(html, 'twitter:description'), metaByProperty(html, 'og:description'), `${rel}: twitter:description doesn't match localized og:description`);
+      }
+    }
+  });
+
+  test('og:url is rewritten to the translated page URL (not the English root) in every language', () => {
+    for (const p of CONTENT_PAGES) {
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const url = metaByProperty(read(rel), 'og:url');
+        if (!url) continue;
+        assert.ok(url.includes(`/${l}/`), `${rel}: og:url still points at an English URL (${url})`);
+      }
+    }
+  });
+
+  test('og:locale matches the documented locale map, and exactly the other 10 locales appear as og:locale:alternate, for every language', () => {
+    const OG_LOCALE_MAP = { ru: 'ru_RU', zh: 'zh_CN', de: 'de_DE', fr: 'fr_FR', it: 'it_IT', ja: 'ja_JP', ko: 'ko_KR', ar: 'ar_AR', sk: 'sk_SK', cs: 'cs_CZ' };
+    for (const p of CONTENT_PAGES) {
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        const html = read(rel);
+        const locale = metaByProperty(html, 'og:locale');
+        if (!locale) continue; // page has no og:locale tag at all (none in this project as of Phase 13B-1)
+        assert.equal(locale, OG_LOCALE_MAP[l], `${rel}: og:locale doesn't match the documented map`);
+        const alternates = allMetaByProperty(html, 'og:locale:alternate');
+        assert.equal(alternates.length, 10, `${rel}: expected 10 og:locale:alternate tags (all other languages), got ${alternates.length}`);
+        assert.ok(!alternates.includes(locale), `${rel}: og:locale:alternate incorrectly repeats the page's own locale`);
+        assert.ok(alternates.includes('en_US'), `${rel}: og:locale:alternate is missing en_US`);
+      }
+    }
+  });
+
+  test('every English source page that has an og:locale tag also has one on all 10 generated languages (no page silently skipped)', () => {
+    for (const p of CONTENT_PAGES) {
+      const hasEnLocale = !!metaByProperty(read(p.file), 'og:locale');
+      if (!hasEnLocale) continue;
+      for (const l of M.languages) {
+        const rel = `${l}/${p.generated_out_file || p.file}`;
+        assert.ok(metaByProperty(read(rel), 'og:locale'), `${rel}: missing og:locale despite the English source having one`);
+      }
+    }
+  });
+
+  test('hreflang/canonical clusters remain complete after the JSON-LD/OG localization pass (untouched by it)', () => {
+    for (const p of SITEMAP_PAGES) {
+      const html = read(p.file);
+      const tags = (headOf(html).match(/<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g) || []);
+      assert.equal(tags.length, M.languages.length + 2, `${p.file}: expected ${M.languages.length + 2} hreflang tags (10 languages + en + x-default)`);
+    }
+  });
+
+  test('the two previously-orphaned comparison guides now receive real editorial internal links from sibling pages', () => {
+    const inbound = {
+      'best-local-islands-snorkeling.html': ['south-ari-atoll-guide.html', 'maamigili-guide.html', 'best-time-to-visit.html'],
+      'south-ari-vs-other-regions.html': ['south-ari-atoll-guide.html', 'things-to-do-maamigili.html'],
+    };
+    for (const [target, sources] of Object.entries(inbound)) {
+      for (const source of sources) {
+        assert.ok(read(source).includes(`related-card" href="${target}"`), `${source}: expected a related-card link to ${target}`);
+      }
+    }
+  });
+
+  test('the planning cluster (best-time-to-visit / maldives-holiday-cost / guesthouse-vs-resort) is now a fully-connected triangle of related-reading links', () => {
+    const triangle = ['best-time-to-visit.html', 'maldives-holiday-cost.html', 'guesthouse-vs-resort.html'];
+    for (const a of triangle) {
+      for (const b of triangle) {
+        if (a === b) continue;
+        assert.ok(read(a).includes(`href="${b}"`), `${a}: expected a related-reading link to ${b}`);
+      }
+    }
+  });
+
+  test('the confirmed maaPage.faqA13 content-loss bug (dropped fingerprint-analogy clause) is fixed in all 10 languages', () => {
+    const fixedFragment = {
+      ar: 'بصمة الإصبع', cs: 'otisk prstu', de: 'Fingerabdruck', fr: 'empreinte digitale', it: "impronta digitale",
+      ja: '指紋', ko: '지문', ru: 'отпечаток пальца', sk: 'odtlačok prsta', zh: '指纹',
+    };
+    for (const l of M.languages) {
+      const dict = JSON.parse(read(`i18n/${l}.json`));
+      const text = dict.static.maaPage.faqA13;
+      assert.ok(text.includes(fixedFragment[l]), `i18n/${l}.json: maaPage.faqA13 is missing the restored fingerprint-analogy clause`);
+    }
+  });
+
+  test('the icon font now declares font-display:swap, matching every other @font-face on the site', () => {
+    const css = read('fonts/tabler-icons-subset.css');
+    assert.ok(/@font-face\{font-family:"tabler-icons";font-style:normal;font-weight:400;font-display:swap;/.test(css), 'tabler-icons @font-face is missing font-display:swap');
+  });
+
+  test('the hero poster preload hints exist, are gated on the same 820px breakpoint as the <picture><source>, and never target both variants unconditionally', () => {
+    assert.ok(site.includes('<link rel="preload" as="image" href="images/hero/hero-poster-mobile.webp" media="(max-width:820px)">'), 'missing mobile poster preload');
+    assert.ok(site.includes('<link rel="preload" as="image" href="images/hero/hero-poster-desktop.webp" media="(min-width:821px)">'), 'missing desktop poster preload');
+  });
+
+  test('consent.js/analytics.js/theme.js all remain plain synchronous <script src> tags (no defer/async was added without full behavioral proof)', () => {
+    for (const file of ['consent.js', 'analytics.js', 'theme.js']) {
+      assert.ok(site.includes(`<script src="${file}"></script>`), `${file} is no longer a plain synchronous script tag on the homepage`);
+    }
+  });
+
+  // Phase 13B-1 investigated a `/{lang}` -> `/{lang}/` 301 redirect (item 22)
+  // to establish one canonical HTTP form. A `redirects` block was added and
+  // deployed to a preview channel for live testing -- which found that
+  // Firebase Hosting's redirect-source matching treats "/ru" and "/ru/" as
+  // equivalent, so the SAME rule that correctly redirected "/ru" also fired
+  // on "/ru/" itself, producing a genuine, confirmed (curl -I, live 301
+  // Location: /ru/ on a request for /ru/) infinite redirect loop that would
+  // have broken every non-English homepage. Reverted before commit;
+  // firebase.json is byte-identical to origin/main. This is deliberately
+  // NOT re-attempted in this phase -- see the final report for the
+  // recommended follow-up (a Firebase Hosting support/docs investigation
+  // into the exact redirect-matching semantics, done in isolation, before
+  // ever trying this again).
+  test('firebase.json is untouched by the (reverted) language-root redirect experiment -- byte-identical to what a fresh build produces from origin', () => {
+    const config = JSON.parse(read('firebase.json'));
+    assert.equal(config.hosting.redirects, undefined, 'no "redirects" block should exist -- the /{lang} -> /{lang}/ experiment was reverted after it was found to create a live redirect loop');
+    for (const l of M.languages) {
+      assert.ok(config.hosting.rewrites.find(rw => rw.source === `/${l}`), `expected the original /${l} rewrite to still exist`);
+      assert.ok(config.hosting.rewrites.find(rw => rw.source === `/${l}/`), `expected the original /${l}/ rewrite to still exist`);
+    }
   });
 }
 

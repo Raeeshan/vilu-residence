@@ -9,6 +9,18 @@ const IMAGE_SITEMAP_NS = 'http://www.google.com/schemas/sitemap-image/1.1';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
 const RTL_LANGS = { ar: true };
 
+// ── Open Graph locale mapping (Phase 13B-1) ──
+// Facebook's og:locale accepts a small set of predefined values, generally
+// language_TERRITORY. Where Vilu's markets don't inherently imply one
+// country (Arabic, Chinese here is Simplified/mainland-oriented per the
+// site's own zh content), the most standards-appropriate widely-used value
+// is picked rather than inventing a geo claim the business hasn't made.
+const OG_LOCALE_MAP = {
+  ru: 'ru_RU', zh: 'zh_CN', de: 'de_DE', fr: 'fr_FR', it: 'it_IT',
+  ja: 'ja_JP', ko: 'ko_KR', ar: 'ar_AR', sk: 'sk_SK', cs: 'cs_CZ',
+};
+const OG_LOCALE_EN = 'en_US';
+
 // Footer copyright year — derived from the Maldives timezone rather than the
 // build machine's local clock, so it's correct regardless of where/when the
 // predeploy build runs. Standard-library Intl only, no dependency.
@@ -146,6 +158,52 @@ function rewriteHreflangAndCanonical($, lang, outFile) {
   }
 }
 
+// ── Open Graph / Twitter localization (Phase 13B-1) ──
+//
+// Before this, every generated /{lang}/ page carried the ENGLISH og:title/
+// og:description/twitter:* text (confirmed by direct diff against the
+// English source) plus an og:url pointing at the English root URL and a
+// hardcoded og:locale="en_US" -- so any social share of a translated page
+// showed English preview text and declared the wrong locale. Fixes this by
+// reusing the SAME already-translated seoTitle/seoDesc values
+// applyStaticTranslations() already computed for <title>/meta description
+// (verified genuinely localized, not fabricated here), and by rewriting
+// og:url to the same language-prefixed URL rewriteHreflangAndCanonical()
+// already computes for the canonical tag.
+function localizeSocialMeta($, dict, metaNs, lang, outFile) {
+  const seoTitle = getPath(dict.static, metaNs + '.title');
+  const seoDesc = getPath(dict.static, metaNs + '.description');
+  if (seoTitle !== undefined) {
+    $('meta[property="og:title"]').attr('content', seoTitle);
+    $('meta[name="twitter:title"]').attr('content', seoTitle);
+  }
+  if (seoDesc !== undefined) {
+    $('meta[property="og:description"]').attr('content', seoDesc);
+    $('meta[name="twitter:description"]').attr('content', seoDesc);
+  }
+  const suffix = outFile === 'index.html' ? '' : outFile;
+  const ogUrl = $('meta[property="og:url"]');
+  if (ogUrl.length) ogUrl.attr('content', SITE_ROOT + '/' + lang + '/' + suffix);
+
+  const locale = OG_LOCALE_MAP[lang];
+  const ogLocaleEl = $('meta[property="og:locale"]');
+  if (ogLocaleEl.length && locale) ogLocaleEl.attr('content', locale);
+
+  // og:locale:alternate — one per OTHER language (English + the other 9
+  // translations), mirroring the existing complete hreflang cluster rather
+  // than inventing a separate list. Re-generated from scratch on every
+  // build (old tags stripped first) so re-running the build never
+  // accumulates duplicates.
+  $('meta[property="og:locale:alternate"]').remove();
+  if (ogLocaleEl.length && locale) {
+    const alternates = [OG_LOCALE_EN].concat(
+      LANGS.map((l) => OG_LOCALE_MAP[l]).filter((v) => v && v !== locale)
+    );
+    const tags = alternates.map((v) => `<meta property="og:locale:alternate" content="${v}">`).join('\n');
+    ogLocaleEl.after('\n' + tags);
+  }
+}
+
 function applyStaticTranslations($, dict, metaNs, i18nMode) {
   $('[data-i18n]').each(function () {
     const val = getPath(dict.static, $(this).attr('data-i18n'));
@@ -184,6 +242,193 @@ function applyStaticTranslations($, dict, metaNs, i18nMode) {
   if (seoTitle !== undefined) $('title').text(seoTitle);
   const seoDesc = getPath(dict.static, metaNs + '.description');
   if (seoDesc !== undefined) $('meta[name="description"]').attr('content', seoDesc);
+}
+
+// ── Structured-data (JSON-LD) localization (Phase 13B-1) ──
+//
+// Before this, every static JSON-LD block (LodgingBusiness, Organization,
+// BreadcrumbList, TouristDestination, Article, FAQPage, per-package
+// Product/Offer) was byte-identical English on every one of the 10
+// translated pages, even though the visible text around it was correctly
+// translated -- confirmed by direct diff in the Phase 13A audit. Nothing
+// here invents new translation content: every substitution reuses a value
+// already translated and reviewed for a DIFFERENT, semantically equivalent
+// purpose on the same page (the SEO title/description, an existing nav
+// label, an existing per-page breadcrumb label, or -- for FAQ and package
+// entries -- the exact same translated string already shown to the visitor
+// for that exact question/answer/package). Proper nouns (Vilu Residence,
+// Maamigili, place names) are never touched, because none of the reused
+// keys touch them -- they're the same keys already confirmed to keep those
+// proper nouns as-is (Phase 13A quoted evidence).
+//
+// A handful of narrow, rare-content fields (TouristAttraction sub-entities'
+// name/description on 2 guide pages) have no existing translated
+// equivalent anywhere on the page and are deliberately left in English
+// rather than fabricated -- reported, not silently patched.
+
+// Builds a { englishText: 'namespace.faqQ7' } map from the page's OWN
+// visible FAQ markup (data-i18n keys ending in faqQ<n>/faqA<n>), read once
+// per page from the untouched English source -- never from already-
+// translated output -- so JSON-LD's English question/answer text can be
+// matched back to the exact static key that already has its translation.
+const _faqKeyMapCache = {};
+function faqKeyMap(pageDef) {
+  if (_faqKeyMapCache[pageDef.source]) return _faqKeyMapCache[pageDef.source];
+  const html = fs.readFileSync(pageDef.source, 'utf8');
+  const $ = cheerio.load(html, { decodeEntities: false });
+  const map = {};
+  $('[data-i18n]').each(function () {
+    const key = $(this).attr('data-i18n');
+    if (!/\.(faqQ|faqA)\d+$/.test(key)) return;
+    const text = $(this).text().trim();
+    if (text) map[text] = key;
+  });
+  _faqKeyMapCache[pageDef.source] = map;
+  return map;
+}
+
+// Derives a standalone page's own breadcrumb/content namespace (e.g.
+// 'maaMeta' -> 'maaPage') mechanically from metaNs, the same naming
+// convention already used consistently for every page in i18n/*.json --
+// avoids a second hand-typed table that could drift out of sync with it.
+function pageNamespaceFor(metaNs) {
+  return metaNs.replace(/Meta$/, 'Page');
+}
+
+// Maps a BreadcrumbList item's (untouched, English, constant) `item` URL to
+// the translated label it should carry, and rewrites that URL to point at
+// the actual translated page rather than forcing the visitor's breadcrumb
+// trail back to an English page mid-language-context.
+function localizeBreadcrumbItem(item, dict, lang) {
+  if (item.item === SITE_ROOT + '/') {
+    const home = getPath(dict.static, 'nav.home');
+    if (home !== undefined) item.name = home;
+    item.item = SITE_ROOT + '/' + lang + '/';
+    return;
+  }
+  if (item.item === SITE_ROOT + '/#holiday-packages') {
+    const v = getPath(dict.static, 'pageNav.hpGuide');
+    if (v !== undefined) item.name = v;
+    item.item = SITE_ROOT + '/' + lang + '/#holiday-packages';
+    return;
+  }
+  if (item.item === SITE_ROOT + '/#experiences') {
+    const v = getPath(dict.static, 'navShell.experiences');
+    if (v !== undefined) item.name = v;
+    item.item = SITE_ROOT + '/' + lang + '/#experiences';
+    return;
+  }
+  for (const p of PAGES) {
+    if (p.outFile === 'index.html') continue;
+    if (item.item !== SITE_ROOT + '/' + p.source) continue;
+    const label = getPath(dict.static, pageNamespaceFor(p.metaNs) + '.breadcrumb');
+    if (label !== undefined) item.name = label;
+    item.item = SITE_ROOT + '/' + lang + '/' + p.outFile;
+    return;
+  }
+}
+
+function localizeFaqPageNode(node, dict, pageDef, warnings) {
+  if (!Array.isArray(node.mainEntity)) return;
+  const map = faqKeyMap(pageDef);
+  for (const q of node.mainEntity) {
+    const qKey = map[q.name];
+    if (qKey !== undefined) {
+      const translated = getPath(dict.static, qKey);
+      if (translated !== undefined) q.name = translated;
+    } else {
+      warnings.push(`FAQ question has no matching visible data-i18n text (left English): "${String(q.name).slice(0, 70)}"`);
+    }
+    if (q.acceptedAnswer && typeof q.acceptedAnswer.text === 'string') {
+      const aKey = map[q.acceptedAnswer.text];
+      if (aKey !== undefined) {
+        const translated = getPath(dict.static, aKey);
+        if (translated !== undefined) q.acceptedAnswer.text = translated;
+      } else {
+        warnings.push(`FAQ answer has no matching visible data-i18n text (left English): "${String(q.acceptedAnswer.text).slice(0, 70)}"`);
+      }
+    }
+  }
+}
+
+// One JSON-LD node (a single @type object — arrays are unwrapped by the
+// caller before this runs).
+function localizeJsonLdNode(node, dict, metaNs, pageDef, warnings) {
+  if (!node || typeof node !== 'object') return;
+  switch (node['@type']) {
+    case 'LodgingBusiness': {
+      // Reuses the homepage's own already-translated SEO description rather
+      // than maintaining a second, never-translated variant of the same
+      // fact (see this function's header comment).
+      const desc = getPath(dict.static, metaNs + '.description');
+      if (desc !== undefined) node.description = desc;
+      break;
+    }
+    case 'TouristDestination':
+    case 'Article': {
+      const title = getPath(dict.static, metaNs + '.title');
+      const desc = getPath(dict.static, metaNs + '.description');
+      if (node['@type'] === 'TouristDestination' && title !== undefined) node.name = title;
+      if (node['@type'] === 'Article' && title !== undefined) node.headline = title;
+      if (desc !== undefined) node.description = desc;
+      // includesAttraction[].name/.description (Villa Airport, Bikini Beach)
+      // have no existing translated equivalent anywhere on the page —
+      // deliberately left English rather than fabricated; reported only.
+      if (Array.isArray(node.includesAttraction) && node.includesAttraction.length) {
+        warnings.push(`TouristDestination.includesAttraction (${node.includesAttraction.length} item(s)) left English — no existing translated equivalent to reuse`);
+      }
+      break;
+    }
+    case 'Product': {
+      // Two distinct shapes on this site: the per-package array on
+      // holiday-packages.html (name/description exist verbatim as dict.dynamic
+      // keys, exactly like every td() call on that page), and a single
+      // per-experience Product on whale-shark-/manta-ray-snorkeling.html
+      // (no dynamic-dict entry — reuses the page's own SEO title/description,
+      // same rule as TouristDestination/Article above).
+      if (pageDef.hasPackageGrid && dict.dynamic) {
+        if (typeof node.name === 'string' && dict.dynamic[node.name] !== undefined) node.name = dict.dynamic[node.name];
+        if (typeof node.description === 'string' && dict.dynamic[node.description] !== undefined) node.description = dict.dynamic[node.description];
+      } else {
+        const title = getPath(dict.static, metaNs + '.title');
+        const desc = getPath(dict.static, metaNs + '.description');
+        if (title !== undefined) node.name = title;
+        if (desc !== undefined) node.description = desc;
+      }
+      break;
+    }
+    case 'FAQPage':
+      localizeFaqPageNode(node, dict, pageDef, warnings);
+      break;
+    case 'BreadcrumbList':
+      if (Array.isArray(node.itemListElement)) {
+        for (const item of node.itemListElement) localizeBreadcrumbItem(item, dict, pageDef.__lang);
+      }
+      break;
+    // Organization/Brand/PostalAddress/GeoCoordinates/ImageObject/WebPage/
+    // ListItem/Answer/Question/Offer carry no page-level descriptive text of
+    // their own (name fields are the "Vilu Residence" proper noun, or pure
+    // data) — deliberately untouched.
+    default:
+      break;
+  }
+}
+
+function localizeJsonLd($, dict, metaNs, pageDef, lang, warnings) {
+  pageDef.__lang = lang; // read by localizeBreadcrumbItem via the shared pageDef reference
+  $('script[type="application/ld+json"]').each(function () {
+    const raw = $(this).text();
+    let json;
+    try { json = JSON.parse(raw); } catch (e) { return; } // malformed/non-JSON script, skip untouched
+    const nodes = Array.isArray(json) ? json : [json];
+    for (const node of nodes) localizeJsonLdNode(node, dict, metaNs, pageDef, warnings);
+    // decodeEntities:false (this file's cheerio.load option throughout) means
+    // .text(...) writes the string as raw bytes, not HTML-entity-escaped —
+    // verified necessary here: a JSON-LD <script> must never contain
+    // HTML-escaped '&amp;'/'&lt;' in place of literal '&'/'<', or the
+    // browser's JSON parser breaks on it.
+    $(this).text(JSON.stringify(json, null, 2));
+  });
 }
 
 // ── Package-grid pre-rendering (holiday-packages.html only) ──
@@ -742,6 +987,7 @@ function updateSitemapImages(imagesBySource) {
 function main() {
   let totalGenerated = 0;
   const imagesBySource = {};
+  const jsonLdWarnings = [];
   for (const pageDef of PAGES) {
     if (!fs.existsSync(pageDef.source)) { console.warn(`SKIPPED ${pageDef.source}: not found`); continue; }
     const srcHtml = fs.readFileSync(pageDef.source, 'utf8');
@@ -769,6 +1015,12 @@ function main() {
       const $ = cheerio.load(srcHtml, { decodeEntities: false });
       applyStaticTranslations($, dict, pageDef.metaNs, pageDef.i18nMode);
       rewriteHreflangAndCanonical($, lang, pageDef.outFile);
+      localizeSocialMeta($, dict, pageDef.metaNs, lang, pageDef.outFile);
+      {
+        const pageWarnings = [];
+        localizeJsonLd($, dict, pageDef.metaNs, pageDef, lang, pageWarnings);
+        for (const w of pageWarnings) jsonLdWarnings.push(`${pageDef.source}/${lang}: ${w}`);
+      }
       rewriteResourcePaths($);
       if (pageDef.i18nMode === 'standalone') rewriteHomepageBackLinks($, lang);
       rewriteLegalLinks($, lang);
@@ -913,6 +1165,22 @@ function main() {
     }
   }
   console.log(`\nDone: ${totalGenerated}/${PAGES.length * LANGS.length} files generated.`);
+  if (jsonLdWarnings.length) {
+    // Dedupe by source+message (strip the per-language prefix) — the same
+    // gap (e.g. an un-matchable FAQ entry, or an untranslated attraction
+    // sub-entity) is expected to repeat identically across all 10
+    // languages, and 10x-repeating the same line would bury real findings.
+    const seen = new Set();
+    const unique = [];
+    for (const w of jsonLdWarnings) {
+      const key = w.replace(/\/[a-z]{2}:/, ':');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      unique.push(w);
+    }
+    console.log(`\nJSON-LD localization notes (${unique.length} unique, ${jsonLdWarnings.length} total across ${LANGS.length} languages):`);
+    for (const w of unique) console.log(`  - ${w}`);
+  }
   updateSitemapImages(imagesBySource);
   updateSitemapLastmod();
 }
@@ -936,4 +1204,12 @@ module.exports = {
   computeSitemapLastmod,
   getPath,
   applyStaticTranslations,
+  localizeSocialMeta,
+  localizeJsonLd,
+  localizeJsonLdNode,
+  localizeBreadcrumbItem,
+  faqKeyMap,
+  pageNamespaceFor,
+  OG_LOCALE_MAP,
+  SITE_ROOT,
 };
