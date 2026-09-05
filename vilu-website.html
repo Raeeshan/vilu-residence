@@ -3736,15 +3736,14 @@ function vcMountHeroVideo(){
   src.src = isMobile ? 'images/hero/hero-mobile.mp4' : 'images/hero/hero-desktop.mp4';
   video.appendChild(src);
   video.addEventListener('canplay', function(){ video.classList.add('vc-video-ready'); }, {once:true});
-  // Owner feedback: the ~5s source clip loops noticeably fast and felt like
-  // it had "no proper starting point". Two real, honest mitigations that
-  // don't require new footage: always start playback from true frame 0 (in
-  // case a bfcache restore or reload ever left a stale currentTime), and a
-  // gentle 0.88x rate to stretch the felt loop length (~5.7s) without the
-  // motion reading as unnaturally slow.
-  video.currentTime = 0;
-  video.playbackRate = 0.88;
+  // Owner feedback: the ~5s source clip loops noticeably fast. A real,
+  // honest mitigation that doesn't require new footage: a gentle 0.88x rate
+  // stretches the felt loop length to ~5.7s without the motion reading as
+  // unnaturally slow. Set AFTER load() -- load() resets playbackRate to 1
+  // (and currentTime to 0) as part of its own media-element reset, so
+  // setting it any earlier gets silently overwritten.
   video.load();
+  video.playbackRate = 0.88;
   var playPromise = video.play();
   if(playPromise && playPromise.catch) playPromise.catch(function(){ /* autoplay blocked: poster remains, no error surfaced */ });
 }
