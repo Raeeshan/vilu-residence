@@ -1305,10 +1305,10 @@ section('Phase 12D-A — guide/destination editorial system (4 representative pa
     }
   });
 
-  test('package-page-content heading hierarchy is sequential with no skip (excludes the known, deferred global footer H2->H4)', () => {
+  test('package-page-content heading hierarchy is sequential with no skip, footer included (Phase 12F fixed the footer H2->H4 skip)', () => {
     for (const page of GUIDE_PAGES) {
       const src = read(page);
-      const bodyOnly = src.slice(src.indexOf('<body'), src.indexOf('<footer'));
+      const bodyOnly = src.slice(src.indexOf('<body'), src.lastIndexOf('</body>'));
       const headings = [...bodyOnly.matchAll(/<(h[1-6])\b/g)].map(m => Number(m[1][1]));
       for (let i = 1; i < headings.length; i++) {
         assert.ok(headings[i] <= headings[i - 1] + 1, `${page}: heading jumps from h${headings[i - 1]} to h${headings[i]} at index ${i}`);
@@ -1444,10 +1444,10 @@ section('Phase 12D-B — complete guide family rollout (10 guide pages, full mul
     }
   });
 
-  test('heading hierarchy on the 6 newly-migrated pages is sequential with no skip (excludes the known, deferred global footer H2->H4)', () => {
+  test('heading hierarchy on the 6 newly-migrated pages is sequential with no skip, footer included (Phase 12F fixed the footer H2->H4 skip)', () => {
     for (const page of SIX_NEW_PAGES) {
       const src = read(page);
-      const bodyOnly = src.slice(src.indexOf('<body'), src.indexOf('<footer'));
+      const bodyOnly = src.slice(src.indexOf('<body'), src.lastIndexOf('</body>'));
       const headings = [...bodyOnly.matchAll(/<(h[1-6])\b/g)].map(m => Number(m[1][1]));
       for (let i = 1; i < headings.length; i++) {
         assert.ok(headings[i] <= headings[i - 1] + 1, `${page}: heading jumps from h${headings[i - 1]} to h${headings[i]} at index ${i}`);
@@ -1469,12 +1469,13 @@ section('Phase 12D-B — complete guide family rollout (10 guide pages, full mul
     for (const id of anchors) assert.ok(src.includes(`id="${id}"`), `TOC anchor #${id} has no matching id= in the document`);
   });
 
-  test('things-to-do-maamigili.html info-card/related-card headings were promoted h4->h3 (19+4), footer h4s left untouched (deferred, matches precedent)', () => {
+  test('things-to-do-maamigili.html info-card/related-card headings were promoted h4->h3 (19+4); footer headings also now h3 (Phase 12F fix, no longer deferred)', () => {
     const src = read('things-to-do-maamigili.html');
     const bodyOnly = src.slice(src.indexOf('<body'), src.indexOf('<footer'));
     assert.equal((bodyOnly.match(/<h4\b/g) || []).length, 0, 'no h4 should remain in the body content before the footer');
     const footerOnly = src.slice(src.indexOf('<footer'));
-    assert.equal((footerOnly.match(/<h4\b/g) || []).length, 4, 'expected exactly the 4 known, deferred footer h4 instances');
+    assert.equal((footerOnly.match(/<h4\b/g) || []).length, 0, 'Phase 12F: footer headings were promoted to h3, no h4 should remain');
+    assert.equal((footerOnly.match(/<h3\b/g) || []).length, 4, 'expected exactly the 4 footer column headings as h3');
   });
 
   test('things-to-do-maamigili.html WhatsApp CTA now uses data-i18n-href like every other guide page (previously hardcoded, no prefilled message)', () => {
@@ -1705,6 +1706,77 @@ section('Phase 12E-B — #booking availability_click analytics contract');
     for (const ctx of EXISTING_CONTEXTS) {
       assert.ok(site.includes(`trackEvent('availability_click',{source_context:${ctx}})`), `pre-existing availability_click fire site missing/changed: ${ctx}`);
     }
+  });
+}
+
+section('Phase 12F — final site-wide deferred cleanup');
+{
+  const ALL_FOOTER_PAGES = [
+    'vilu-website.html', 'holiday-packages.html', 'privacy-policy.html', 'cookies.html',
+    'maamigili-guide.html', 'south-ari-atoll-guide.html', 'whale-shark-snorkeling.html', 'manta-ray-snorkeling.html',
+    'things-to-do-maamigili.html', 'best-time-to-visit.html', 'guesthouse-vs-resort.html',
+    'maldives-holiday-cost.html', 'best-local-islands-snorkeling.html', 'south-ari-vs-other-regions.html'
+  ];
+
+  test('A. the 4 global footer column headings are h3 (promoted from h4) on every page that carries the shared footer', () => {
+    for (const page of ALL_FOOTER_PAGES) {
+      const src = read(page);
+      const footerOnly = src.slice(src.indexOf('<footer'));
+      for (const key of ['footer.explore', 'navShell.stay', 'footer.southAriGuides', 'footer.plan']) {
+        assert.ok(footerOnly.includes(`<h3 data-i18n="${key}">`), `${page}: footer heading ${key} is not h3`);
+        assert.ok(!footerOnly.includes(`<h4 data-i18n="${key}">`), `${page}: footer heading ${key} is still h4`);
+      }
+    }
+  });
+
+  test('A. .footer-col h3,.footer-col h4 CSS rule is additive (not a replacement) in both stylesheets', () => {
+    assert.ok(/\.footer-col h3,\.footer-col h4\{/.test(read('vilu-website.html')), 'vilu-website.html footer-col CSS not made additive for h3');
+    assert.ok(/\.footer-col h3,\.footer-col h4\{/.test(read('shared-page.css')), 'shared-page.css footer-col CSS not made additive for h3');
+  });
+
+  test('B. the real, applied mobile consent-bar compaction lives in theme.css (the file that actually wins the cascade), not a dead-code duplicate elsewhere', () => {
+    const themeCss = read('theme.css');
+    assert.ok(/Phase 12F/.test(themeCss.slice(themeCss.indexOf('.consent-bar{'), themeCss.indexOf('/* ── Privacy Choices'))), 'theme.css consent-bar block missing the Phase 12F fix');
+    assert.ok(/min-height:44px/.test(themeCss), 'mobile consent buttons must keep a WCAG-compliant 44px touch target');
+  });
+
+  test('B. consent behavior/categories/copy are unchanged -- this was a presentation-only fix', () => {
+    const site = read('vilu-website.html');
+    assert.ok(site.includes('data-i18n="consent.message"'), 'consent disclosure copy binding removed/changed');
+    assert.ok(site.includes('id="consentReject"') && site.includes('id="consentAccept"') && site.includes('id="consentCustomizeOpen"'), 'a consent control id was removed/renamed');
+  });
+
+  test('C. the confirmed-orphaned hpPage.enquireBtn / hpPage.ctaBook / blogThingsPage.ctaBook keys are gone from every language, and no active ctaBook key was touched', () => {
+    for (const l of M.languages) {
+      const dict = JSON.parse(read(`i18n/${l}.json`));
+      assert.equal(dict.static.hpPage.enquireBtn, undefined, `i18n/${l}.json: hpPage.enquireBtn should have been removed`);
+      assert.equal(dict.static.hpPage.ctaBook, undefined, `i18n/${l}.json: hpPage.ctaBook should have been removed`);
+      assert.equal(dict.static.blogThingsPage.ctaBook, undefined, `i18n/${l}.json: blogThingsPage.ctaBook should have been removed`);
+      // Every genuinely-active per-guide ctaBook key must still exist, untouched.
+      for (const ns of ['wsPage', 'mrPage', 'maaPage', 'saaPage', 'btPage', 'gvrPage', 'costPage', 'cmpSnorkelPage', 'cmpRegionsPage', 'ttdPage']) {
+        assert.ok(typeof dict.static[ns].ctaBook === 'string' && dict.static[ns].ctaBook.length > 0, `i18n/${l}.json: active key ${ns}.ctaBook was removed/emptied`);
+      }
+    }
+  });
+
+  test('D. the homepage now has the same .reveal no-JS fallback already present on guides/packages', () => {
+    const site = read('vilu-website.html');
+    assert.ok(site.includes('<noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>'), 'homepage missing the .reveal no-JS fallback');
+  });
+
+  test('D. the no-JS fallback does not alter normal-JS reveal behavior (still scoped inside <noscript>, not a live <style> rule)', () => {
+    const site = read('vilu-website.html');
+    const idx = site.indexOf('<noscript><style>.reveal');
+    assert.ok(idx > -1, 'fallback not found');
+    // Confirm it is not accidentally duplicated as a live (non-noscript) rule anywhere else.
+    const liveDup = site.match(/(?<!noscript><style>)\.reveal\{opacity:1!important/g) || [];
+    assert.equal(liveDup.length, 0, 'the no-JS override must not also exist as a live (non-noscript) CSS rule');
+  });
+
+  test('critical consent DOM contracts remain intact after the mobile presentation fix', () => {
+    const site = read('vilu-website.html');
+    assert.ok(site.includes('id="consentBar"') && site.includes('id="consentPanel"') && site.includes('id="consentPanelOverlay"'), 'a core consent DOM id was removed');
+    assert.ok(site.includes('role="dialog"') && site.includes('aria-labelledby="consentPanelTitle"'), 'consent panel dialog semantics were removed');
   });
 }
 

@@ -468,9 +468,20 @@ footer{padding:calc(var(--space-7) - 8px) 0 var(--space-4);background:var(--bg-s
 .consent-btn-customize{grid-column:1 / -1;grid-row:2;border:none;background:transparent;color:var(--accent-text);text-decoration:underline;text-underline-offset:4px;min-height:40px}
 .consent-btn-customize:hover{border:none;color:var(--text)}
 @media (max-width:700px){
-  .consent-bar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-width:none;padding:20px 18px 16px}
+  /* Phase 12F: measured at 34-43% of the viewport height on real phone
+     sizes (320-430px) before this fix, obscuring page content beneath it.
+     Disclosure copy is untouched -- no text shortened or hidden -- only
+     spacing/type-scale tightened; button min-height stays at 44px (WCAG
+     2.5.5 touch-target minimum), and Reject/Accept keep identical size
+     and grid position -- no new bias toward either choice. */
+  .consent-bar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-width:none;padding:16px 16px 14px}
   [dir="rtl"] .consent-bar{left:12px;right:12px}
-  .consent-bar-actions{grid-template-columns:1fr 1fr}
+  .consent-bar-inner{gap:10px}
+  .consent-bar-text strong{font-size:18px;margin-bottom:3px}
+  .consent-bar-text p{font-size:13px;line-height:1.45}
+  .consent-bar-actions{grid-template-columns:1fr 1fr;gap:8px}
+  .consent-btn{min-height:44px;font-size:12px;padding:0 10px}
+  .consent-btn-customize{min-height:32px}
 }
 @media (max-width:360px){
   .consent-bar-actions{grid-template-columns:1fr}

@@ -327,15 +327,15 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 
 /* ── HERO ── */
 #home{position:relative;height:100vh;height:100dvh;min-height:600px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--abyss)}
-.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(var(--font-size-display),9.5vw,124px);font-weight:300;line-height:1;letter-spacing:-.01em;margin-bottom:20px;text-shadow:0 0 40px rgba(34,211,238,.35);animation:fadeUp .8s .1s ease both}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(var(--font-size-display),9.5vw,124px);font-weight:300;line-height:1;letter-spacing:-.01em;margin-bottom:20px;text-shadow:0 0 40px rgba(34,211,238,.35)}
 .hero-title em{font-style:italic;color:var(--gold-light)}
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-light) 55%,var(--gold));background-size:220% 100%;color:var(--navy);padding:16px 36px;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .35s;text-decoration:none;display:inline-block}
 .btn-primary:hover{background-position:100% 0;transform:translateY(-2px);box-shadow:0 10px 30px rgba(34,211,238,.4)}
 .btn-outline{background:rgba(255,255,255,.03);backdrop-filter:blur(6px);color:var(--white);padding:16px 36px;border:1px solid rgba(255,255,255,.4);border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .btn-outline:hover{border-color:var(--ocean);color:var(--ocean);box-shadow:0 0 24px var(--glow)}
-.hero-scroll{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;animation:fadeUpCenter .8s .5s ease both}
+.hero-scroll{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5}
 .hero-scroll span{font-size:var(--font-size-xs);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5)}
-.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(34,211,238,.9),transparent);animation:scrollAnim 2s infinite}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(34,211,238,.9),transparent)}
 
 /* ── VILU CINEMATIC HERO (Phase 12B-E2A) ── real footage, poster-first.
    Motion timing follows the Vilu Cinematic Motion System locked in 12B-E1A:
@@ -348,13 +348,30 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-hero-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   linear-gradient(180deg,rgba(4,12,22,.62) 0%,rgba(4,12,22,.14) 26%,rgba(4,12,22,.06) 50%,rgba(4,12,22,.22) 78%,rgba(3,10,18,.66) 100%)}
 .vc-hero-content{position:relative;z-index:5;text-align:center;padding:0 5vw;max-width:820px;will-change:transform,opacity}
-.vc-eyebrow{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);background:rgba(4,12,22,.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border:1px solid rgba(34,211,238,.45);text-shadow:0 1px 4px rgba(0,0,0,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px;animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
+.vc-eyebrow{display:inline-block;font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);background:rgba(4,12,22,.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border:1px solid rgba(34,211,238,.45);text-shadow:0 1px 4px rgba(0,0,0,.45);padding:6px 20px;border-radius:20px;margin-bottom:28px}
 .vc-hero-title{margin-bottom:14px}
-.vc-display{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;color:var(--gold-light);font-size:clamp(30px,4.6vw,52px);line-height:1.05;letter-spacing:.01em;margin-bottom:22px;animation:fadeUp .8s .15s ease both}
-.vc-hero-sub{font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:rgba(255,255,255,.68);max-width:44ch;margin:0 auto 34px;line-height:1.6;animation:fadeUp .8s .22s ease both}
-.vc-hero-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;animation:fadeUp .8s .3s ease both}
+.vc-display{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;color:var(--gold-light);font-size:clamp(30px,4.6vw,52px);line-height:1.05;letter-spacing:.01em;margin-bottom:22px}
+.vc-hero-sub{font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);color:rgba(255,255,255,.68);max-width:44ch;margin:0 auto 34px;line-height:1.6}
+.vc-hero-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
 .vc-cta-secondary{background:rgba(255,255,255,.04);backdrop-filter:blur(6px);color:var(--white);padding:16px 32px;border:1px solid rgba(255,255,255,.4);border-radius:2px;font-family:'DM Sans',sans-serif;font-size:var(--font-size-base);font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color .3s,color .3s,box-shadow .3s}
 .vc-cta-secondary:hover{border-color:var(--ocean);color:var(--ocean);box-shadow:0 0 24px var(--glow)}
+/* Phase 12F: these hero entrance animations were previously unconditional.
+   The site-wide `*{animation-duration:.01ms!important}` reduced-motion rule
+   (see the top of this stylesheet) already compresses them to imperceptible,
+   but every other page (guides/packages) instead removes the animation
+   outright under reduced motion, a cleaner and more explicit guarantee than
+   relying solely on the blunt universal override. This brings the homepage
+   hero in line with that same pattern -- default (no-preference) experience
+   is completely unchanged. */
+@media(prefers-reduced-motion:no-preference){
+  .hero-title{animation:fadeUp .8s .1s ease both}
+  .hero-scroll{animation:fadeUpCenter .8s .5s ease both}
+  .scroll-line{animation:scrollAnim 2s infinite}
+  .vc-eyebrow{animation:fadeUp .8s ease both,badgeGlow 3.5s ease-in-out infinite}
+  .vc-display{animation:fadeUp .8s .15s ease both}
+  .vc-hero-sub{animation:fadeUp .8s .22s ease both}
+  .vc-hero-ctas{animation:fadeUp .8s .3s ease both}
+}
 /* Short-viewport-height desktop/tablet handling (1366x768, 1024x768 range):
    the prototype validation found copy crowding the nav at these heights —
    tighten vertical rhythm rather than merely scaling type down. */
@@ -805,7 +822,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
 .footer-social{display:flex;gap:12px;margin-top:18px}
 .footer-social a{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.14);border-radius:50%;color:rgba(255,255,255,.6);font-size:17px;transition:all .25s;text-decoration:none}
 .footer-social a:hover{color:var(--navy);background:var(--gold);border-color:var(--gold)}
-.footer-col h4{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.footer-col h3,.footer-col h4{font-size:var(--font-size-xs);font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
 .footer-col ul a{font-size:var(--font-size-base);color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
 .footer-col ul a:hover{color:var(--ocean)}
@@ -1135,6 +1152,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
   .consent-btn{flex:1}
 }
 </style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 <link rel="stylesheet" href="/theme.css">
 </head>
 <body data-page-type="home" data-page-slug="home">
@@ -1881,13 +1899,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
       </div>
     </div>
     <div class="footer-top">
-      <div class="footer-col"><h4 data-i18n="footer.explore">探索</h4><ul>
+      <div class="footer-col"><h3 data-i18n="footer.explore">探索</h3><ul>
         <li><a href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="pageNav.hpGuide">度假套餐</a></li>
         <li><a href="whale-shark-snorkeling.html" data-i18n="pageNav.wsGuide">鲸鲨浮潜</a></li>
         <li><a href="manta-ray-snorkeling.html" data-i18n="pageNav.mrGuide">蝠鲼浮潜</a></li>
         <li><a href="things-to-do-maamigili.html" data-i18n="pageNav.thingsGuide">马米吉利有哪些可做的事</a></li>
       </ul></div>
-      <div class="footer-col"><h4 data-i18n="navShell.stay">住宿</h4><ul>
+      <div class="footer-col"><h3 data-i18n="navShell.stay">住宿</h3><ul>
         <li><a href="#what-is-vilu">Vilu Residence</a></li>
         <li><a href="#rooms"><span data-i18n="rooms.doubleRoomName">双人房</span> — <span class="footer-room-price" data-room-type="Double Room">$85</span></a></li>
         <li><a href="#rooms"><span data-i18n="rooms.deluxeFamilyName">豪华家庭房</span> — <span class="footer-room-price" data-room-type="Deluxe Family Room">$80</span></a></li>
@@ -1895,13 +1913,13 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}.footer-inner{max
         <li><a href="#booking" class="js-live-availability" data-i18n="navShell.liveAvailability">实时房态</a></li>
         <li><a href="#gallery" data-i18n="nav.gallery">图库</a></li>
       </ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.southAriGuides">南阿里指南</h4><ul>
+      <div class="footer-col"><h3 data-i18n="footer.southAriGuides">南阿里指南</h3><ul>
         <li><a href="maamigili-guide.html" data-i18n="pageNav.maaGuide">马米吉利指南</a></li>
         <li><a href="south-ari-atoll-guide.html" data-i18n="pageNav.saaGuide">南阿里环礁指南</a></li>
         <li><a href="best-local-islands-snorkeling.html" data-i18n="pageNav.cmpSnorkelGuide">最佳浮潜岛屿</a></li>
         <li><a href="south-ari-vs-other-regions.html" data-i18n="pageNav.cmpRegionsGuide">南阿里对比其他地区</a></li>
       </ul></div>
-      <div class="footer-col"><h4 data-i18n="footer.plan">规划</h4><ul>
+      <div class="footer-col"><h3 data-i18n="footer.plan">规划</h3><ul>
         <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">最佳旅行时间</a></li>
         <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">度假费用指南</a></li>
         <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">民宿对比度假村</a></li>

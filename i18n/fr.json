@@ -987,7 +987,6 @@
       "includesLabel": "Inclus",
       "activitiesLabel": "Activités",
       "addonsLabel": "Options supplémentaires",
-      "enquireBtn": "Demander sur WhatsApp",
       "badgeMostPopular": "Le plus populaire",
       "badgeBestValue": "Meilleur rapport qualité-prix",
       "badgeMostComplete": "Le plus complet",
@@ -999,7 +998,6 @@
       "relTag3": "Guide d'expérience",
       "ctaTitle": "Vous ne savez pas quel forfait choisir ?",
       "ctaText": "Indiquez-nous vos dates et ce qui compte le plus pour vous, et nous vous orienterons vers le bon forfait.",
-      "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
       "enquireWhatsapp": "Demander sur WhatsApp",
       "enquireEmail": "Demander par e-mail",
@@ -1318,7 +1316,6 @@
       "relTitle3": "Forfaits vacances",
       "ctaTitle": "Séjournez là où tout se passe",
       "ctaText": "Vilu Residence est une guesthouse installée à Maamigili même — à quelques pas du port et de tout ce qui est mentionné sur cette page. Vérifiez les disponibilités ou contactez-nous directement.",
-      "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp"
     },
     "ttdMeta": {

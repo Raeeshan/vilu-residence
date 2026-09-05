@@ -987,7 +987,6 @@
       "includesLabel": "Zahrnuje",
       "activitiesLabel": "Aktivity",
       "addonsLabel": "Volitelné doplňky",
-      "enquireBtn": "Zeptat se na WhatsApp",
       "badgeMostPopular": "Nejoblíbenější",
       "badgeBestValue": "Nejlepší hodnota",
       "badgeMostComplete": "Nejkompletnější",
@@ -999,7 +998,6 @@
       "relTag3": "Průvodce zážitkem",
       "ctaTitle": "Nejste si jisti, který balíček vám sedí?",
       "ctaText": "Řekněte nám svá data a co je pro vás nejdůležitější, a doporučíme vám ten pravý balíček.",
-      "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp",
       "enquireWhatsapp": "Zeptat se na WhatsApp",
       "enquireEmail": "Zeptat se e-mailem",
@@ -1318,7 +1316,6 @@
       "relTitle3": "Dovolenkové balíčky",
       "ctaTitle": "Ubytujte se přímo tam, kde se to všechno děje",
       "ctaText": "Vilu Residence je penzion přímo na Maamigili — pár kroků od přístavu a všeho, co je na této stránce. Zkontrolujte dostupnost nebo se nás zeptejte přímo.",
-      "ctaBook": "Zkontrolovat dostupnost",
       "ctaWhatsapp": "Zeptat se na WhatsApp"
     },
     "ttdMeta": {
