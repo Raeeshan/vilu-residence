@@ -416,20 +416,16 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-above .vc-story-sub{margin-left:auto;margin-right:auto}
 
 /* ── DESCENT ── native scroll only, no scroll-jacking.
-   Was 140vh, then 90vh, then 56vh -- owner feedback (round 3): still read
-   as "a large block with one small sentence floating in the middle," and
-   asked for a photographic continuation rather than a flat color gradient.
-   42vh (shorter still) now carries a real, heavily-darkened photograph
-   (the same whale-shark image Below South Ari uses) under the gradient --
-   the same underwater scene, first as a dim suggestion, then in full a
-   moment later, rather than an abstract color wash unrelated to the
-   photography around it. Still no scroll-jacking, no discrete floating
-   shapes (see VILU_DECISIONS.md). */
-.vc-descent{height:42vh;min-height:260px;display:flex;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;
-  background-image:linear-gradient(180deg,rgba(14,111,142,.55) 0%,rgba(10,77,104,.72) 30%,rgba(13,46,78,.88) 62%,rgba(6,16,28,.96) 100%),url(images/whale_shark_2_gallery.jpg);
-  background-size:cover,cover;background-position:center,center 30%}
-.vc-descent::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 45% at 50% 8%,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 70%);pointer-events:none}
-.vc-descent-caption{position:sticky;top:22vh;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.6vw,30px);color:rgba(255,255,255,.85);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear;z-index:1}
+   Was 140vh, then 90vh, then 56vh, then a darkened whale-shark photo at
+   42vh -- owner feedback (round 4): the photo treatment still didn't read
+   well as its own block. Removed the background photo entirely: this
+   section now uses the site's own normal background (var(--bg), the same
+   flat token every plain section already sits on -- no gradient, no
+   image), so it genuinely blends into the page instead of presenting as a
+   separate designed block. Just the caption, smooth and minimal. Still no
+   scroll-jacking, no discrete floating shapes (see VILU_DECISIONS.md). */
+.vc-descent{height:42vh;min-height:260px;display:flex;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
+.vc-descent-caption{position:sticky;top:22vh;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.6vw,30px);color:var(--text-muted);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear;z-index:1}
 
 /* ── BELOW ── real underwater photography, mask-reveal on scroll into view.
    Replaces the former floating whale/manta/turtle cut-out system (removed —
@@ -451,7 +447,14 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
    (less "pasted," more atmospheric) without touching the reveal opacity
    logic above. */
 .vc-below-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,11,20,.4) 0%,rgba(4,11,20,0) 20%,rgba(4,11,20,0) 68%,rgba(4,11,20,.6) 100%);pointer-events:none}
-.vc-below-text{background:linear-gradient(90deg,rgba(4,11,20,.82) 0%,rgba(4,11,20,.48) 55%,transparent 100%);padding:48px 40px 48px 0;border-radius:0 4px 4px 0}
+/* Owner feedback: the previous gradient (0%->.82, 55%->.48, 100%->transparent)
+   dropped from dark to clear quickly enough to read as a visible rectangular
+   edge against the bright photo -- "sharp/boxy," not cinematic. Spread over
+   more stops for a long, gradual dissolve with no perceptible seam, a
+   generous border-radius on the open corners (a soft card, not a cutout),
+   and a light blur so the panel reads as a quiet glass surface rather than
+   a flat color block laid over the photo. */
+.vc-below-text{background:linear-gradient(90deg,rgba(4,11,20,.78) 0%,rgba(4,11,20,.66) 30%,rgba(4,11,20,.42) 55%,rgba(4,11,20,.16) 80%,transparent 100%);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);padding:48px 56px 48px 0;border-radius:0 32px 32px 0}
 .vc-below .vc-eyebrow{border-color:rgba(255,255,255,.35)}
 .vc-below-links{display:flex;flex-direction:column;gap:10px;margin-top:26px;font-size:var(--font-size-sm)}
 .vc-below-links a{color:var(--teal-light);text-decoration:none;width:max-content}
@@ -479,7 +482,7 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-below.vc-armed .vc-below-scene img{opacity:.82;transform:scale(1.08);transition:opacity 1.3s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1)}
 .vc-below.vc-armed.vc-active .vc-below-scene img{opacity:1;transform:scale(1)}
 @media(max-width:600px){
-  .vc-below-text{background:linear-gradient(180deg,rgba(4,11,20,.18) 0%,rgba(4,11,20,.88) 36%);padding:32px 24px;border-radius:0}
+  .vc-below-text{background:linear-gradient(180deg,rgba(4,11,20,.08) 0%,rgba(4,11,20,.55) 18%,rgba(4,11,20,.84) 36%);padding:32px 24px;border-radius:28px 28px 0 0}
   .vc-below-scene img{object-position:center 32%}
 }
 
