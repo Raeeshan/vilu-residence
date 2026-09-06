@@ -4,45 +4,39 @@ Living record of the site's real, verified Google Search Console / production-se
 
 ---
 
-## Verification status (as of 2026-09-06)
+## Verification status (updated 2026-09-06, second pass)
 
-**NOT CONFIGURED.** Confirmed via three independent, real checks — not assumed:
+**A real, already-verified property exists: `https://viluresidence.net/` (URL-prefix property), verified since at least early August 2026, with continuous real data.** This was NOT detectable via static site/DNS checks (no `google-site-verification` meta tag, no verification file, no DNS TXT record) because it appears to have been verified via an already-connected Google Analytics/Tag association on the same Google account (`viluresidence@gmail.com`) rather than a site-side artifact — a verification method that leaves no trace in the site's own HTML or DNS. **The first-pass conclusion of "NOT CONFIGURED" was correct about the absence of any Domain-property/DNS-based verification, but incomplete — it missed this existing, working URL-prefix property**, discovered this pass by using the connected, authenticated browser to open Search Console directly.
 
-1. No `google-site-verification` meta tag exists anywhere in `vilu-website.html`'s `<head>` (checked directly against the production-served HTML).
-2. No verification HTML file exists at any plausible path — checked directly, all returned HTTP 404.
-3. A live public DNS TXT lookup for `viluresidence.net` (via Google's own `dns.google` DNS-over-HTTPS resolver, an authoritative-enough public source) returned exactly one TXT record: `hosting-site=viluresidence` — a Firebase Hosting custom-domain artifact, not a Google Search Console verification record. No `google-site-verification=` TXT record exists.
+Confirmed real state of that property:
+- Ownership verification: **verified owner** (confirmed in Settings → General settings).
+- Sitemap already submitted (Aug 3, 2026) and processing successfully (see Sitemap section below).
+- Real Performance/Indexing data exists back to 2026-08-02.
 
-No prior Google Search Console work was found anywhere in this repository or in any `docs/ai/*` continuity file, beyond a single PENDING placeholder row in the roadmap.
+**Additionally, this pass created a new Domain property for `viluresidence.net`** (the architecture Google and this project's own instructions prefer, since it covers HTTPS/all paths/all language subdirectories under one property). It is **not yet verified** — DNS verification was deliberately not completed by Claude (see "Owner action required" below). Recommendation: keep both — the existing URL-prefix property preserves its history; the Domain property becomes primary once verified, without losing anything.
 
-## Preferred property architecture
+## Owner action required (hard gate — DNS only)
 
-- **Property type:** Domain property for `viluresidence.net` (not URL-prefix) — covers HTTPS, all paths, and all language subdirectories under one property.
-- **Preferred verification method:** DNS TXT record at the domain's registrar/DNS provider. Do not add a redundant HTML verification file if DNS verification succeeds.
-- **Canonical SEO domain:** `viluresidence.net`. `viluresidence.com` remains a future strategic option only — do not treat it as canonical.
+Claude has no DNS credentials and must not add DNS records itself, regardless of authorization given, per a standing rule against modifying system/security-level infrastructure directly. Everything else in Search Console that didn't require touching DNS (creating the property, reading all available data, associating GA4) was completed this pass using the owner's own already-authenticated Google session in the connected browser.
 
-## Owner action required (hard gate)
+The owner must, using their own DNS registrar/provider access:
 
-Claude has no DNS or Google-account credentials and must not attempt any part of this step. The owner must, using their own accounts/access:
+1. Add this exact DNS TXT record at the root of `viluresidence.net`:
+   ```
+   google-site-verification=Zs-AXgzmNp27ERoQjlnHDYpvvuHOUo9eWqZo9k8uJGY
+   ```
+   (Retrieved directly from Google Search Console's own verification dialog for the pending Domain property — this is the authoritative, exact value, not reconstructed from memory.)
+2. Note: Google Search Console detected the DNS provider as **Cloudflare** and offered an OAuth-based "authorize Google to manage your Cloudflare DNS" one-click flow — **this was deliberately declined**, since it grants Google broader, ongoing DNS-management access than adding one TXT record. The manual "Any DNS provider" path was used instead to retrieve the value above; the owner can add it manually in the Cloudflare dashboard, or use Google's one-click Cloudflare flow themselves if they prefer that trade-off — that choice belongs to the owner, not Claude.
+3. Return to Search Console (`https://search.google.com/search-console` → property switcher → `viluresidence.net` under "Not verified") and click Verify once the record is live.
+4. Existing Firebase-related DNS records (`hosting-site=viluresidence`) were not touched and must remain intact — confirmed present and undisturbed as of this pass.
 
-1. Log into [Google Search Console](https://search.google.com/search-console) with their own Google account.
-2. Add `viluresidence.net` as a **Domain property**.
-3. Add the DNS TXT verification record Google's own UI provides, at whichever registrar/DNS provider manages `viluresidence.net`'s DNS.
-4. Wait for Google to confirm verification (can take from minutes to ~24-48 hours depending on DNS propagation).
-5. Report back once verified, so sitemap submission and real baseline capture can proceed.
+## Sitemap status (confirmed via the real, verified property)
 
-## Sitemap audit (2026-09-06)
+- `/sitemap.xml` already submitted **2026-08-03**, last read **2026-09-04**, status **Success**.
+- **132 discovered pages** (matches this session's own independent static audit exactly), 0 discovered videos.
+- Not resubmitted this pass — an existing successful submission should not be resubmitted without reason.
 
-- URL: `https://viluresidence.net/sitemap.xml` — HTTP 200.
-- Well-formed XML (one apparent url-count discrepancy during analysis was traced to the sitemap's own explanatory XML comment literally containing the string `<url>` in its prose — not a real malformed entry, confirmed by parsing rather than assumed).
-- **132 real `<url>` entries**: 12 distinct pages × 11 language variants (en + zh/ru/de/it/fr/ar/ja/ko/sk/cs), uniformly 12 per language.
-- **451 `<image:image>` entries.**
-- Only 2 distinct `<lastmod>` values across the whole file (2026-09-05, 2026-09-06) — genuinely recent, not stale/fabricated dates.
-- Zero preview (`*.web.app`), PMS (`vilu-unified.html`), or Agency Portal (`vilu-agency-portal.html`) URLs present.
-- Every `<url>` block carries the full 11-language hreflang alternate-link set (including itself and `x-default`), matching the `<head>`'s own hreflang tags — no mismatch found.
-
-**Not yet submitted to Search Console** — submission requires a verified property, which doesn't exist yet.
-
-## Robots.txt audit (2026-09-06)
+## Robots.txt audit (2026-09-06, static check, still valid)
 
 ```
 User-agent: *
@@ -53,54 +47,118 @@ Disallow: /vilu-agency-portal.html
 Sitemap: https://viluresidence.net/sitemap.xml
 ```
 
-- Site-wide `Allow: /` — the public site is fully crawlable.
-- Only the two internal PMS/Agency-Portal HTML files are blocked — correct, these were never meant to be public or indexed.
-- Sitemap correctly referenced.
-- No accidental site-wide `Disallow`, no leftover Firebase-preview-channel artifacts in the production robots.txt.
+Site-wide `Allow: /`, only the two internal PMS/Agency-Portal HTML files blocked, correct sitemap reference, no accidental blocking, no Firebase-preview artifacts.
 
-## Indexability sample audit (2026-09-06)
+## Indexing baseline (real data, from Search Console's Pages report, last update 2026-08-28)
 
-Sampled directly against production (`https://viluresidence.net/`), all HTTP 200:
+- **131 not indexed, 1 indexed**, out of 132 known pages.
+- **The only indexed page is the homepage** (`https://viluresidence.net/`, last crawled Aug 29, 2026).
+- Not-indexed breakdown:
+  - **130 pages** — "Discovered - currently not indexed" (Google systems reason). **Classification: EXPECTED for a ~1-month-old property**, not a technical defect — Google has the URLs (via the sitemap) but hasn't prioritized crawling/indexing them yet. Worth monitoring, not urgent.
+  - **1 page** — "Alternate page with proper canonical tag" (Website reason). **Classification: EXPECTED/benign** — a URL correctly deferring to a canonical elsewhere.
+- No blocked/soft-404/server-error/redirect-issue reasons present at all — the *type* of exclusion is healthy; the *volume* (130 undiscovered-for-indexing pages) is the real, actionable signal for future content/internal-linking work (Phase 23+), not a bug to fix in Phase 22.
 
-| Page | Canonical | hreflang | Notes |
+## URL Inspection samples (real, this pass)
+
+| URL | Status | Last crawl | Canonical | Notes |
+|---|---|---|---|---|
+| `https://viluresidence.net/` | Indexed | Aug 29, 2026 | self, matches Google-selected | Crawled as Googlebot smartphone; referring page includes a **Google Travel/Hotels entity URL** — the property is already surfaced in Google's Hotels/Travel database |
+| `https://viluresidence.net/holiday-packages.html` | Not indexed — Discovered, currently not indexed | Never crawled (N/A) | — | Referring page: none detected |
+| `https://viluresidence.net/ru/` | Not indexed — Discovered, currently not indexed | Never crawled (N/A) | — | Same pattern as above; representative of the other sampled pages (south-ari-atoll-guide, whale-shark-snorkeling, manta-ray-snorkeling, zh/, ar/ were not individually re-inspected this pass since the pattern was already confirmed consistent) |
+
+**Request Indexing was deliberately NOT clicked for any page this pass** — Phase 22 is scoped as measurement/baseline, not remediation; requesting indexing is a reasonable future action but wasn't part of this audit's authorized scope.
+
+## Search performance baseline — REAL DATA (3-month view, 2026-08-02 to 2026-09-04)
+
+- **Total clicks: 36. Total impressions: 1,720 (1.72K). Average CTR: 2.1%. Average position: 5.9.**
+
+### Top queries (sample, 158 total queries in the window)
+| Query | Clicks | Impressions |
+|---|---|---|
+| vilu residence | 6 | 90 |
+| vilu residence maamigili | 6 | 62 |
+| ceny *(Czech: "prices")* | 1 | 1 |
+| ubytování *(Czech: "accommodation")* | 1 | 1 |
+| maldive hotel | 0 | 58 |
+| maldivler otel fiyatları *(Turkish)* | 0 | 47 |
+| maldivler otelleri *(Turkish)* | 0 | 40 |
+| maldivler otel *(Turkish)* | 0 | 25 |
+| malediwy hotele *(Polish)* | 0 | 22 |
+| cazare maldive *(Romanian)* | 0 | 21 |
+
+Notable: genuine international query demand already exists in Turkish, Polish, Romanian, and Czech even without any dedicated content for those markets beyond the existing 10 locale mirrors — real signal for Phase 23's market-research input, not yet acted on.
+
+### Top pages
+**100% of clicks (36/36) and ~99.7% of impressions (1,715/1,720) come from the homepage alone.** No other page — no guide, no package page, no locale mirror — has any measurable search visibility yet. Directly consistent with the indexing baseline above (only the homepage is indexed).
+
+### Top countries (of 63 total with impressions)
+| Country | Clicks | Impressions | Classification |
 |---|---|---|---|
-| `/` (homepage) | self-referencing | full 11-language cluster + x-default | Rich structured data: LodgingBusiness, Organization, BreadcrumbList, GeoCoordinates, PostalAddress, Product, Offer |
-| `/holiday-packages.html` | (not individually re-checked beyond HTTP 200 this pass) | — | — |
-| `/maamigili-guide.html` | self-referencing | — | Title/meta description present and specific |
-| `/south-ari-atoll-guide.html` | (HTTP 200 confirmed) | — | — |
-| `/whale-shark-snorkeling.html` | (HTTP 200 confirmed) | — | — |
-| `/manta-ray-snorkeling.html` | (HTTP 200 confirmed) | — | — |
-| `/ru/` | self-referencing | localized title (`гостевой дом`) | `lang="ru"` |
-| `/zh/` | (HTTP 200 confirmed) | — | — |
-| `/ar/` | self-referencing | localized title | `<html lang="ar" dir="rtl">` confirmed |
+| Czechia | 14 | 138 | Traction |
+| Italy | 8 | 256 | Traction |
+| Maldives | 4 | 142 | Traction (expected — local market) |
+| Singapore | 2 | 13 | Early traction |
+| **Germany** | 1 | **247** | **Quick-win candidate — high impressions, very low CTR** |
+| Spain | 1 | 40 | Early traction |
+| United States | 1 | 23 | Early traction |
+| United Kingdom | 1 | 22 | Early traction |
+| Austria | 1 | 21 | Early traction |
+| India | 1 | 12 | Early traction |
+| **Turkey** | 0 | **226** | **Quick-win candidate — high impressions, zero clicks yet** |
+| France | 0 | 141 | No clicks yet |
+| Greece | 0 | 94 | No clicks yet |
+| Poland | 0 | 50 | No clicks yet |
+| Slovakia | 0 | 28 | No clicks yet |
+| Russia | 0 | 8 | Present, very early |
+| Japan | 0 | 6 | Present, very early |
+| Tajikistan | 0 | 1 | Present, minimal |
+| Uzbekistan | 0 | 1 | Present, minimal |
 
-No blocking `<meta name="robots">` tag found on any sampled page (default index,follow, consistent with robots.txt).
+**Explicitly named markets with zero measured impressions this window: China, Kazakhstan, South Korea.** Per instruction, this is NOT overinterpreted as "no demand" — it's a ~1-month sample from a single, mostly-homepage-only-indexed property; absence here just means no measured signal yet, not confirmed absence of demand.
 
-**Noted, not a defect, not fixed this pass**: there is no dedicated rooms/accommodation URL (rooms content lives only as a homepage anchor section, `#rooms`) and no dedicated transport/planning guide page (confirmed via direct 404 checks on several plausible paths) — this matches the already-documented Phase 24 topical-authority gap, not a new finding.
+### Device split
+| Device | Clicks | Impressions |
+|---|---|---|
+| Mobile | 24 | 1,388 |
+| Desktop | 12 | 318 |
+| Tablet | 0 | 9 |
 
-## Search performance baseline
+Mobile dominates both clicks (~67%) and impressions (~81%) — consistent with travel-intent search behavior.
 
-**Not yet available** — no verified Search Console property exists, so no real query/page/country/device/CTR/position data could be captured. Do not fill this section with an estimate. Update once the owner completes verification (see "Owner action required" above) and enough data has accumulated (GSC typically needs several days to weeks to populate a meaningful baseline after verification).
+### Search appearance / Web vs Image vs Video
+- **Web: real data as above.**
+- **Image search: 0 clicks, 0 impressions** — despite 451 image sitemap entries, none have surfaced in Google Images yet.
+- **Video search: 0 clicks, 0 impressions** — expected, no video content/sitemap exists.
+- **Search Appearance (rich results): no data** — no rich-result surface (FAQ, review stars, etc.) is currently active, despite the LodgingBusiness/Organization/BreadcrumbList structured data present on the homepage. Not necessarily a defect — rich-result eligibility and display are at Google's discretion and take time to appear even with correct markup.
 
-## GA4 linkage status
+### Links report
+- External links: 0 reported. Internal links: 0 reported. **This likely reflects Search Console's own link-graph data lagging behind real crawl activity (consistent with the shallow indexing depth found above) rather than a confirmed absence of backlinks — recorded as "no data yet," not "zero backlinks confirmed."**
 
-GA4 is live and unaffected by this audit: Measurement ID `G-1EPZ71Q331`, Property ID `420109910` (see `VILU_PROTECTED_CONTRACTS.md` §Analytics for the full canonical event/dimension list — none of it was touched this pass). Linking Search Console to GA4 is done inside Google's own admin consoles for both products and requires the owner's own account access to each — not attempted this pass, and not something Claude can do on the owner's behalf.
+## GA4 association — COMPLETED this pass
 
-## Monitoring process (designed, not yet running — no property to monitor yet)
+Search Console property `https://viluresidence.net/` is now formally associated with GA4 property **"Vilu Residence — viluresidence.net" (420109910)**, data stream `https://viluresidence.net/` — completed via Search Console's standard, same-account Associations workflow (Settings → Associations → Associate → select property → select data stream → confirm). No GA4 event names, consent settings, audiences, retention, or any other GA4 configuration were touched — only the standard cross-product association handshake. Confirmed showing in Settings → Associations → Associated services after completion.
 
-Once verified, the intended recurring review cadence is:
+## Manual actions / security issues
 
-1. **Weekly** (or another cadence the owner prefers): review clicks, impressions, CTR, and average-position trends; note new queries and new countries showing traffic; check the Coverage/Indexing report for new errors.
-2. **Diagnose** any material change (a page dropping out of the index, a sudden CTR drop, a new 404 pattern) before assuming a fix is needed.
-3. **Prioritize** findings — indexation errors and outright broken pages first, opportunity items (high impressions + low CTR, positions 4-20) second.
+None found. Notification center showed only routine milestone/onboarding messages ("Congrats on reaching 20 clicks in 28 days!", a general "Monitor the Google Search traffic" tip, the original "Get started" welcome message, and this pass's new GA4-association confirmation) — no manual action penalties, no security issues flagged.
+
+## Monitoring process
+
+Once the Domain property is verified (or using the existing verified URL-prefix property in the meantime), the intended recurring review cadence is:
+
+1. **Weekly** (or another cadence the owner prefers): review clicks, impressions, CTR, and average-position trends; note new queries and new countries showing traffic; check the Pages/Indexing report for new errors.
+2. **Diagnose** any material change (a page dropping out of the index, a sudden CTR drop, a new error pattern) before assuming a fix is needed.
+3. **Prioritize** findings — indexation errors and outright broken pages first, opportunity items (the Germany/Turkey high-impression-low-CTR pattern above) second.
 4. **Recommend** specific, scoped changes — never a blanket "improve SEO" action.
-5. **Owner approval** for any material change (title/meta/URL/schema edits, new pages).
+5. **Owner approval** for any material change (title/meta/URL/schema edits, new pages, Request Indexing campaigns).
 6. **Implement** only the approved change.
 7. **Measure again** to confirm the change had the intended effect before moving on.
 
 This mirrors the project's standing measure → diagnose → prioritize → recommend → approve → implement → re-measure discipline already used for performance work (Phase 21) and should not be replaced with automatic, unreviewed SEO edits.
 
-## Data limitations (as of 2026-09-06)
+## Data limitations (updated 2026-09-06)
 
-- No Search Console API access exists in this session — even after the owner verifies the property, retrieving GSC data requires either manual export by the owner or a future, separately-authorized API/OAuth integration. This baseline file will need a real update mechanism decided once verification is complete.
-- Everything in this document above the "Owner action required" section was independently verified via direct HTTP/DNS requests against production, not sourced from any Google account or dashboard.
+- All data in this document was read directly from the real Google Search Console UI (via the owner's own authenticated browser session, with the owner's explicit authorization for this specific session) — not fabricated, not estimated.
+- No Search Console API/OAuth integration exists for ongoing automated data pulls — future updates to this file will require either the owner manually exporting data, or a separately-authorized API integration decided later.
+- The 3-month performance window only contains meaningful data from 2026-08-02 onward (when the existing property's data collection began) — earlier dates in that window show zero activity because the property didn't yet exist/wasn't yet collecting data, not because the site had no traffic.
+- Query, page, and country tables above are samples (top ~10 each), not exhaustive — 158 total queries and 63 total countries exist in the real data; the full lists were paged through for country data specifically to check the owner's named markets, but not exported/transcribed in full here to keep this document readable. Use Search Console's own Export feature for a complete pull when needed.
