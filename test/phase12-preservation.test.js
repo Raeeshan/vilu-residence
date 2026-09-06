@@ -1843,7 +1843,16 @@ section('Phase 12G — homepage release-blocker hotfix');
   });
 
   test('the 3 confirmed homepage contrast failures now use accessible tokens, and unrelated --teal consumers are untouched', () => {
-    assert.ok(site.includes('.vc-homecoming .vc-eyebrow{color:var(--accent-ink);border-color:rgba(138,90,28,.4)}'), '.vc-homecoming .vc-eyebrow no longer uses the accessible --accent-ink token');
+    // Owner redesign (Phase 15, homepage smoothness pass): .vc-homecoming no
+    // longer sits on its own hardcoded light-amber photo-crop background --
+    // it now uses the same var(--bg-secondary) surface every other section
+    // uses (see .vc-homecoming's own rule), so its eyebrow no longer needs
+    // --accent-ink (dark ink for a light fill); it now uses the accent-soft
+    // chip pattern (var(--accent-soft) background + var(--accent-text)
+    // foreground) already proven contrast-safe elsewhere (e.g. .table-wrap
+    // th), which is the accessible pairing for THIS background, not a
+    // regression of the original fix.
+    assert.ok(site.includes('.vc-homecoming .vc-eyebrow{color:var(--accent-text);background:var(--accent-soft);border-color:var(--border);backdrop-filter:none;-webkit-backdrop-filter:none;text-shadow:none}'), '.vc-homecoming .vc-eyebrow no longer uses an accessible accent-on-surface token pairing');
     assert.ok(site.includes('#contact .section-tag{color:var(--gold-light)}'), '#contact .section-tag no longer uses the accessible --gold-light token');
     assert.ok(/\.cd-label\{[^}]*color:var\(--gold-light\)/.test(site), '.cd-label no longer uses the accessible --gold-light token');
     assert.ok(/\.cf-field label\{[^}]*color:var\(--gold-light\)/.test(site), '.cf-field label no longer uses the accessible --gold-light token');

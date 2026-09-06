@@ -431,18 +431,19 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-above .vc-heading-lg span:last-child{color:var(--gold-light);font-style:italic}
 .vc-above .vc-story-sub{margin-left:auto;margin-right:auto}
 
-/* ── DESCENT ── pure-CSS gradient, native scroll only, no scroll-jacking.
-   Was 140vh, then 90vh -- owner feedback (round 2): even at 90vh this read
-   as a large, mostly-empty blue hold rather than a deliberate transition.
-   56vh keeps just enough room for the sticky caption to still travel/settle
-   (see the scroll-progress handler below, which is proportional to section
-   height and needs no change), while the section itself now reads as a
-   brief passage, not a destination. A single static radial glow (no
-   animation, no discrete floating shapes -- that pattern was already tried
-   once and rejected, see VILU_DECISIONS.md) gives it a little depth instead
-   of a flat gradient wall. */
-.vc-descent{height:56vh;min-height:320px;display:flex;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;
-  background:linear-gradient(180deg,#0e6f8e 0%,#0a4d68 22%,#0d2e4e 50%,#0a1c34 78%,#06101c 100%)}
+/* ── DESCENT ── native scroll only, no scroll-jacking.
+   Was 140vh, then 90vh, then 56vh -- owner feedback (round 3): still read
+   as "a large block with one small sentence floating in the middle," and
+   asked for a photographic continuation rather than a flat color gradient.
+   42vh (shorter still) now carries a real, heavily-darkened photograph
+   (the same whale-shark image Below South Ari uses) under the gradient --
+   the same underwater scene, first as a dim suggestion, then in full a
+   moment later, rather than an abstract color wash unrelated to the
+   photography around it. Still no scroll-jacking, no discrete floating
+   shapes (see VILU_DECISIONS.md). */
+.vc-descent{height:42vh;min-height:260px;display:flex;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;
+  background-image:linear-gradient(180deg,rgba(14,111,142,.55) 0%,rgba(10,77,104,.72) 30%,rgba(13,46,78,.88) 62%,rgba(6,16,28,.96) 100%),url(images/whale_shark_2_gallery.jpg);
+  background-size:cover,cover;background-position:center,center 30%}
 .vc-descent::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 45% at 50% 8%,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 70%);pointer-events:none}
 .vc-descent-caption{position:sticky;top:22vh;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.6vw,30px);color:rgba(255,255,255,.85);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear;z-index:1}
 
@@ -450,9 +451,22 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
    Replaces the former floating whale/manta/turtle cut-out system (removed —
    read as artificial and cropped at viewport edges). Photography now carries
    the section; wildlife sightings are never guaranteed — see below.sub. */
-.vc-below{justify-content:flex-start;background:#040b14}
+/* Owner feedback: the shared .vc-story min-height:100vh forced this
+   section to whatever height the visitor's own viewport happened to be --
+   on a short wide window the shark's full body fills edge-to-edge (read
+   as "too dominant/aggressive"); on a tall narrow one, object-fit:cover
+   has no crop headroom left once height is the binding scale factor, so
+   the section shows much more of the photo's own plain, dark lower-water
+   region than makes for good composition. A tighter, viewport-independent
+   range gives the crop a consistent, deliberate frame either way. */
+.vc-below{justify-content:flex-start;background:#040b14;min-height:clamp(560px,82vh,820px)}
 .vc-below-scene{position:absolute;inset:0;z-index:0;overflow:hidden}
 .vc-below-scene picture,.vc-below-scene img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 42%}
+/* Soft top/bottom vignette -- eases the photo's edges into the sections
+   above/below instead of a stark cutout, and quiets the crop generally
+   (less "pasted," more atmospheric) without touching the reveal opacity
+   logic above. */
+.vc-below-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,11,20,.4) 0%,rgba(4,11,20,0) 20%,rgba(4,11,20,0) 68%,rgba(4,11,20,.6) 100%);pointer-events:none}
 .vc-below-text{background:linear-gradient(90deg,rgba(4,11,20,.82) 0%,rgba(4,11,20,.48) 55%,transparent 100%);padding:48px 40px 48px 0;border-radius:0 4px 4px 0}
 .vc-below .vc-eyebrow{border-color:rgba(255,255,255,.35)}
 .vc-below-links{display:flex;flex-direction:column;gap:10px;margin-top:26px;font-size:var(--font-size-sm)}
@@ -485,24 +499,39 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
   .vc-below-scene img{object-position:center 32%}
 }
 
-/* ── RETURN TO LIGHT ── motion quiets before Homecoming; no abrupt jump */
-.vc-return{height:60vh;background:linear-gradient(180deg,#06101c 0%,#0b2c3e 35%,#3a5a52 62%,#8a8461 82%,#efe6cf 100%)}
+/* ── RETURN TO LIGHT (renamed in intent, not just name: was a fixed
+   dark-to-cream gradient regardless of theme -- owner feedback: this made
+   Homecoming "look like a different website starts there," since the
+   cream (#efe6cf) matched neither theme's real palette (Dark's real --bg
+   is navy, Light's real --bg is #f6f1e8, a different warm ivory). Now
+   ends in the actual current theme's own surface token, so Homecoming
+   flows into whichever theme is active instead of forcing a third,
+   unrelated color. ── */
+.vc-return{height:60vh;background:linear-gradient(180deg,#06101c 0%,#0b2c3e 40%,var(--bg-secondary) 100%)}
 
-/* ── HOMECOMING ── real photo only, mask-reveal, visible by default */
-.vc-homecoming{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:0;padding:0;background:#efe6cf;color:#241a0f}
+/* ── HOMECOMING ── real photo only, mask-reveal, visible by default.
+   Owner feedback: the hardcoded #efe6cf cream background (and matching
+   hardcoded dark-ink text) ignored the theme system entirely -- it was
+   the same color in Dark and Light alike, reading as a jarring, out-of-
+   place block rather than a continuation of the page. Now uses the same
+   --bg-secondary/--text tokens every other section uses, so it's a normal
+   dark surface in Dark theme and the normal warm ivory in Light theme --
+   still a quiet visual "exhale" moment (a plain surface after a lot of
+   photography), just no longer a third, unrelated color. */
+.vc-homecoming{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:0;padding:0;background:var(--bg-secondary);color:var(--text)}
 .vc-homecoming-media{position:relative;height:100%;min-height:70vh;overflow:hidden}
 .vc-homecoming-media picture,.vc-homecoming-media img{display:block;width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 0 0)}
 .vc-homecoming-text{padding:60px 6vw}
-/* Phase 12G: this badge sits over a light photo crop (measured effective
-   background ~#8d8a80), where the previous #8a5a1c only cleared 1.7:1 --
-   var(--accent-ink) is the existing "dark ink on a light amber-toned
-   surface" token (see theme.css), which clears 5.4:1+ against this same
-   backdrop in both themes without inventing a new color. */
-.vc-homecoming .vc-eyebrow{color:var(--accent-ink);border-color:rgba(138,90,28,.4)}
-.vc-homecoming .vc-heading-sm{color:#241a0f;margin-bottom:18px}
-.vc-homecoming-fact{color:rgba(36,26,15,.72) !important}
-.vc-homecoming-fact span{font-weight:600;color:#8a5a1c}
-.vc-homecoming .vc-story-sub{color:rgba(36,26,15,.72)}
+/* The base .vc-eyebrow is styled for sitting over full-bleed photography
+   (a dark scrim pill, needed regardless of theme) -- Homecoming's eyebrow
+   sits on the section's own plain surface instead, so it uses the same
+   accent-soft chip treatment already proven elsewhere (table headers) for
+   text-on-surface accents, which is contrast-checked per theme. */
+.vc-homecoming .vc-eyebrow{color:var(--accent-text);background:var(--accent-soft);border-color:var(--border);backdrop-filter:none;-webkit-backdrop-filter:none;text-shadow:none}
+.vc-homecoming .vc-heading-sm{color:var(--text);margin-bottom:18px}
+.vc-homecoming-fact{color:var(--text-muted) !important}
+.vc-homecoming-fact span{font-weight:600;color:var(--accent-text)}
+.vc-homecoming .vc-story-sub{color:var(--text-muted)}
 .vc-homecoming .btn-primary{margin-top:28px}
 /* Pre-reveal dim (not a full mask): applied ONLY via .vc-armed (JS-gated,
    guarded branch); .vc-active completes it. Never a bare default — see
