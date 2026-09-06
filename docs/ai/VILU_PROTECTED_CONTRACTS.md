@@ -55,9 +55,9 @@ Full architecture map, 7 classified findings (V1-V7), and the implementation rep
 - Never store a real credential value in a report, log, commit message, or documentation file — report "credential present," never the value.
 - Never run a full Firebase Auth export (`firebase auth:export` or equivalent) — that pulls real password hashes into a local file, a bigger and riskier action than this work warrants. A yes/no "does this account exist" question belongs to the owner/an authorized admin checking the Firebase Console directly.
 
-## Performance findings (Phase 21, added 2026-09-06, updated after continuation pass)
+## Performance findings (Phase 21, added 2026-09-06, updated after continuation pass; `2aa4d04`+`4605344` deployed to production 2026-09-06)
 
-The Descent scroll-progress module in `vilu-website.html` (formerly an unnamed IIFE, now `vcInitDescentScrollProgress()`) is deferred to the `load` event, matching `vcInitCinematicStory()`'s existing pattern — this was found via real Lighthouse traces to be the single largest forced-reflow source on the page. Do not revert this to an immediate/unconditional call without re-measuring first.
+The Descent scroll-progress module in `vilu-website.html` (formerly an unnamed IIFE, now `vcInitDescentScrollProgress()`) is deferred to the `load` event, matching `vcInitCinematicStory()`'s existing pattern — this was found via real Lighthouse traces to be the single largest forced-reflow source on the page. **Live in production since 2026-09-06 (commit `2aa4d04`).** Do not revert this to an immediate/unconditional call without re-measuring first.
 
 The Experiences chip's dolphin photo (`EXPERIENCES_CONFIG`'s `dolphinName` entry) points to `dolphin_pod_gallery-thumb.jpg` (360x203, ~10KB) instead of the full `dolphin_pod_gallery.jpg` (1600x900, ~109KB) — confirmed reliable via live-browser testing (plain `src`, no `srcset`). `HP_PKG_IMAGES['maldives-dream-bliss']` still correctly points at the full-resolution original — that's the large featured-package-card usage of the same source photo, never touch it to "match" the chip.
 
