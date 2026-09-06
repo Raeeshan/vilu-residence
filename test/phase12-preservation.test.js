@@ -926,6 +926,7 @@ for (const [code, cfg] of Object.entries(M.partial_languages || {})) {
   for (const file of cfg.pages) {
     const pageDef = M.pages.find((p) => p.file === file);
     const rel = `${code}/${(pageDef && pageDef.generated_out_file) || file}`;
+    const canonicalSuffix = pageDef.url_path === '/' ? '/' : pageDef.url_path;
     test(`${rel}: exists, lang="${code}", self-canonical, ${cfg.hreflang_codes.length}-code hreflang parity`, () => {
       assert.ok(exists(rel), rel);
       const html = read(rel);
@@ -933,7 +934,7 @@ for (const [code, cfg] of Object.entries(M.partial_languages || {})) {
       assert.equal(attr(tag, 'lang'), code, rel);
       const c = linkRel(html, 'canonical');
       assert.equal(c.length, 1, rel);
-      assert.equal(attr(c[0], 'href'), `${M.site_origin}/${code}/${file}`, rel);
+      assert.equal(attr(c[0], 'href'), `${M.site_origin}/${code}${canonicalSuffix}`, rel);
       sameSet(linkRel(html, 'alternate').map((t) => attr(t, 'hreflang')).filter(Boolean), cfg.hreflang_codes, rel);
     });
   }
@@ -953,6 +954,33 @@ for (const [code, cfg] of Object.entries(M.partial_languages || {})) {
       if (cfg.pages.includes(p.file)) continue;
       const rel = `${code}/${p.generated_out_file || p.file}`;
       assert.ok(!exists(rel), `${rel} should not exist -- ${code} is only declared for ${cfg.pages.join(', ')}`);
+    }
+  });
+  test(`${code}'s generated page(s) never link to a page not covered by ${code} via a same-directory relative href (would 404 under /${code}/)`, () => {
+    // A sibling page genuinely covered by this partial locale (in cfg.pages) is
+    // correctly left as a same-directory relative link -- it resolves inside
+    // /{code}/. Every OTHER page in the site's PAGES catalogue, plus the one
+    // permanently-uncovered English-only page (getting-to-maamigili.html, not
+    // in PAGES at all -- see build-i18n-pages.js's own comment on it), must
+    // instead be root-absolute so it resolves to the real English page.
+    const uncoveredOutFiles = new Set(
+      M.pages.filter((p) => !cfg.pages.includes(p.file)).map((p) => p.generated_out_file || p.file)
+    );
+    uncoveredOutFiles.add('getting-to-maamigili.html');
+    for (const file of cfg.pages) {
+      const pageDef = M.pages.find((p) => p.file === file);
+      const rel = `${code}/${(pageDef && pageDef.generated_out_file) || file}`;
+      const html = read(rel);
+      for (const m of html.matchAll(/href="([a-z0-9-]+\.html)(#[^"]*)?"/gi)) {
+        const [, hrefFile] = m;
+        if (uncoveredOutFiles.has(hrefFile)) {
+          assert.fail(`${rel}: bare relative href="${hrefFile}" would 404 under /${code}/ -- must be root-absolute`);
+        }
+      }
+      for (const uncovered of uncoveredOutFiles) {
+        if (!html.includes(uncovered)) continue;
+        assert.ok(html.includes(`href="/${uncovered}`), `${rel}: expected a root-absolute link to /${uncovered}`);
+      }
     }
   });
 }

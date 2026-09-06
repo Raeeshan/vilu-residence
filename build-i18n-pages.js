@@ -148,12 +148,57 @@ function rewriteHomepageBackLinks($, lang) {
 // rewrites the link to the matching localized copy. Runs for every page in
 // every language, both homepage and standalone -- both templates' footers
 // link to the legal pages the same way.
-function rewriteLegalLinks($, lang) {
+function rewriteLegalLinks($, lang, dict) {
+  // Phase 30: privacy-policy.html/cookies.html are themselves partial-locale-
+  // aware pages (each carries its own metaNs, privacyMeta/cookiesMeta). For a
+  // partial locale that doesn't cover one of them, blindly rewriting to
+  // /{lang}/{file} would point at a page that was never generated -- a 404.
+  // Left as the original root-absolute /{file} (the real English page)
+  // instead, same convention as rewriteUncoveredSiblingLinks.
+  const legalMetaNs = { '/privacy-policy.html': 'privacyMeta', '/cookies.html': 'cookiesMeta' };
   $('a[href]').each(function () {
     const el = $(this);
     const href = el.attr('href');
-    if (href === '/privacy-policy.html' || href === '/cookies.html') {
+    const metaNs = legalMetaNs[href];
+    if (metaNs && dict.static && dict.static[metaNs] !== undefined) {
       el.attr('href', '/' + lang + href);
+    }
+  });
+}
+
+// Phase 30: a partial locale (e.g. Spanish, covering only some pages) breaks
+// the assumption rewriteLegalLinks' own comment documents -- "every other
+// cross-page link stays a bare relative filename because a same-name file
+// genuinely exists in the same output directory". For every OTHER page this
+// dict doesn't cover (checked the same way the generation skip above does:
+// its metaNs namespace absent from dict.static), a same-directory relative
+// link to it would resolve to a non-existent /{lang}/{file} 404. Rewritten
+// to a root-absolute link to the real English page instead -- never a fake
+// /{lang}/ route. A no-op for every fully-covered language (nothing to
+// rewrite, since every sibling page exists for them).
+function rewriteUncoveredSiblingLinks($, dict) {
+  const uncoveredOutFiles = new Set(
+    PAGES.filter((p) => p.metaNs && (!dict.static || dict.static[p.metaNs] === undefined)).map((p) => p.outFile)
+  );
+  if (!uncoveredOutFiles.size) return;
+  // getting-to-maamigili.html is deliberately never in PAGES at all (English-
+  // only, Phase 24/25 -- see the SITEMAP_PAGE_SOURCE comment) so it has zero
+  // /{lang}/ mirror in ANY language, including the 10 established ones. That
+  // pre-existing cross-language link issue is out of Phase 30's scope to fix
+  // globally, but this dict-driven check only ever reaches this line for a
+  // genuinely partial locale (uncoveredOutFiles is only non-empty then), so
+  // adding it here fixes it for the new partial locale without changing a
+  // single byte of output for the 10 full-coverage languages.
+  uncoveredOutFiles.add('getting-to-maamigili.html');
+  $('a[href]').each(function () {
+    const el = $(this);
+    const href = el.attr('href');
+    // Only bare relative filenames (optionally with a #fragment) are in
+    // scope -- root-absolute, protocol-relative, and anchor-only hrefs are
+    // already handled elsewhere or don't need rewriting.
+    const fileMatch = href.match(/^([a-z0-9-]+\.html)(#.*)?$/i);
+    if (fileMatch && uncoveredOutFiles.has(fileMatch[1])) {
+      el.attr('href', '/' + fileMatch[1] + (fileMatch[2] || ''));
     }
   });
 }
@@ -1104,8 +1149,9 @@ function main() {
         for (const w of pageWarnings) jsonLdWarnings.push(`${pageDef.source}/${lang}: ${w}`);
       }
       rewriteResourcePaths($);
+      rewriteUncoveredSiblingLinks($, dict);
       if (pageDef.i18nMode === 'standalone') rewriteHomepageBackLinks($, lang);
-      rewriteLegalLinks($, lang);
+      rewriteLegalLinks($, lang, dict);
       if (pkgScript) prerenderPackageGrid($, pkgScript.src, dict.static, pkgScript.i18nEn, dict.dynamic);
       if (pageDef.source === 'vilu-website.html' && homepagePackages && homepageI18nEn) {
         const hpGrid = $('#hp-grid');

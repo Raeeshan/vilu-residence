@@ -6,7 +6,7 @@
    Each page defines its own `var I18N = {en: {...}}` BEFORE this
    script runs, then calls initPage() on DOMContentLoaded.
    ══════════════════════════════════════════════════════════════ */
-var LANG_NAMES = {en:"English",zh:"中文",ru:"Русский",de:"Deutsch",it:"Italiano",fr:"Français",ar:"العربية",ja:"日本語",ko:"한국어",sk:"Slovenčina",cs:"Čeština"};
+var LANG_NAMES = {en:"English",zh:"中文",ru:"Русский",de:"Deutsch",it:"Italiano",fr:"Français",ar:"العربية",ja:"日本語",ko:"한국어",sk:"Slovenčina",cs:"Čeština",es:"Español"};
 var RTL_LANGS = {ar:true};
 var currentLang = 'en';
 
