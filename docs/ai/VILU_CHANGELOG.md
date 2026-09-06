@@ -4,6 +4,22 @@ Dated record of significant completed work. Newest entries at the top. This is a
 
 ---
 
+## 2026-09-06 — Phase 27 China Market Expansion CLOSED: COMPLETE — mainland-China conversion path deployed
+
+Final Phase 27 implementation item: the mainland-China conversion-path fix, deployed together with the previously-approved Chinese copy changes.
+
+**The gap**: WhatsApp is blocked in mainland China without a VPN, yet the shared English markup styles WhatsApp as `.btn-primary` (visually dominant, gold-filled) with email as `.btn-outline` (secondary) in every package card and the closing CTA band on `holiday-packages.html` — the site's primary commercial page.
+
+**The fix**: added a single, tightly-scoped block to `shared-page.css` — `html[lang="zh"] .pkg-cta a.btn-primary[href^="https://wa.me"]` and its `.cta-buttons` equivalent — that swaps WhatsApp and Email's visual role (Email becomes primary/gold-filled, WhatsApp becomes secondary/outlined) and reading order (`order:1`/`order:2`) for `zh` pages only, using the site's own `--accent`/`--accent-ink`/`--accent-hover`/`--accent-soft` design tokens so Dark and Light theming keep working automatically with zero new hardcoded colors. Zero markup, `href`, or `onclick` tracking changes — every `package_enquire`/`contact_click` analytics event fires exactly as before, just from a re-styled, reordered button. Confirmed via `git diff` and a live production check that English and Russian (and, by the same unscoped-selector proof, every other locale) are byte-for-byte unaffected. Added `test/china-cta-priority.test.js` (6/6) to guard the override's existence, scope, and non-leakage.
+
+**Verification note**: an initial live check via `getComputedStyle` in one browser tab appeared to show the fix not applying — investigated and traced to a stale/anomalous JS-introspection read in that specific tab (even an injected `!important` test rule failed to register in the same tab), not a real defect. A screenshot-based check on a genuinely fresh tab, and a separate fresh production fetch of `shared-page.css`, both confirmed the fix renders correctly; this is recorded as a testing-methodology note, not a product finding.
+
+Combined with the previously-committed Chinese copy fixes (`4265557`) and this pass's own commit (`ec1816c`), deployed hosting-only — Firebase confirmed exactly 5 files uploaded (`i18n/zh.json`, `shared-page.css`, and the 3 regenerated `zh/*.html` mirrors it produced). Pre-deploy: independently re-verified the true live baseline via byte-diff against `viluresidence.net/zh/` (found to be `96536fe`, not assumed), and confirmed the hosting diff was restricted to exactly those 5 files with zero backend/PMS drift. Post-deploy live verification: all 6 checked `/zh/` pages return 200 with correct `lang="zh"`/canonical/12-tag-hreflang; the CTA hierarchy renders correctly (Email primary/first, WhatsApp secondary/second) on a fresh production tab in both Dark and Light; zero console errors; zero overflow at 320px; English holiday-packages.html confirmed still WhatsApp-primary, completely unaffected.
+
+Full regression suite green throughout: `phase12-preservation` 558/558, `sitemap-lastmod` 13/13, `attribution-core` 82/82, `attribution-events` 21/21, `weather-live` 26/26, `locale-asset-paths` 5/5, plus the new `china-cta-priority` 6/6; `vilu-weather-cache` repo's own suite 12/12; `build-i18n-pages.js` 140/140; `git diff --check` clean. `origin/main` untouched throughout (still `1130e1e3`).
+
+**Phase 27 status: COMPLETE.** Per the owner's own explicit completion principle, deploying the mainland-China conversion-path fix closes out every remaining Vilu-controlled implementation item; Baidu (owner-gated, requires a China-based phone/partner Vilu doesn't have), Xiaohongshu (owner time investment), Trip.com/Ctrip listing optimization (owner/business-development action), and a future WeChat personal-ID decision are correctly treated as ongoing external/channel operations, not phase-completion blockers — the same precedent Phase 26 established for Yandex. Roadmap: 28 COMPLETE / 11 PARTIAL / 17 PENDING = 56 total. Branch: `feat/vilu-reference-design-system`. Rollback point: `96536fe`. Owner approval: received and exercised for this exact deployment scope.
+
 ## 2026-09-06 — Phase 27 China Market Expansion: evidence-driven audit + targeted copy fixes (pre-production)
 
 Per the owner's Phase 27 authorization, ran a full audit of the current `/zh/` production site before any implementation, mirroring the Phase 26 Russia methodology.
