@@ -682,6 +682,7 @@ const SITEMAP_PAGE_SOURCE = {
   'best-local-islands-snorkeling.html': 'best-local-islands-snorkeling.html',
   'south-ari-vs-other-regions.html': 'south-ari-vs-other-regions.html',
   'things-to-do-maamigili.html': 'things-to-do-maamigili.html',
+  'getting-to-maamigili.html': 'getting-to-maamigili.html', // English-only page (Phase 24/25) -- not in PAGES, so no /{lang}/ mirrors or hero-image sitemap entry; lastmod only
 };
 
 const _lastmodCache = {};

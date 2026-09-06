@@ -12,8 +12,8 @@
   "generated_pages_total": 140,
   "sitemap": {
     "file": "sitemap.xml",
-    "expected_url_count": 132,
-    "content_pages_in_sitemap": 12,
+    "expected_url_count": 133,
+    "content_pages_in_sitemap": 13,
     "excluded_pages": ["privacy-policy.html", "cookies.html", "404.html"]
   },
 
@@ -203,6 +203,22 @@
       "faq_count": 0
     },
     {
+      "file": "getting-to-maamigili.html",
+      "url_path": "/getting-to-maamigili.html",
+      "in_sitemap": true,
+      "translated": false,
+      "page_type": "guide",
+      "page_slug": "getting-to-maamigili",
+      "title": "Getting to Maamigili — Flights, Speedboat &amp; Arrival Guide",
+      "description": "How to get from Velana International Airport to Maamigili, South Ari Atoll: domestic flight vs. direct speedboat, real durations and sources, arrival/departure timing, and trip-preparation essentials.",
+      "canonical": "https://viluresidence.net/getting-to-maamigili.html",
+      "robots": null,
+      "hreflang": false,
+      "h1": "Getting to Maamigili",
+      "jsonld_types": ["Article", "BreadcrumbList", "FAQPage"],
+      "faq_count": 8
+    },
+    {
       "file": "privacy-policy.html",
       "url_path": "/privacy-policy.html",
       "in_sitemap": false,
@@ -336,7 +352,7 @@
       "max_age_days": 30,
       "commercial_events": ["package_enquire", "experience_enquire", "availability_click"],
       "augmented_params": ["first_touch_source", "first_touch_medium", "first_touch_campaign", "landing_page_slug", "landing_language"],
-      "landing_slugs": ["home", "holiday-packages", "best-local-islands-snorkeling", "best-time-to-visit", "guesthouse-vs-resort", "maamigili-guide", "maldives-holiday-cost", "manta-ray-snorkeling", "south-ari-atoll-guide", "south-ari-vs-other-regions", "things-to-do-maamigili", "whale-shark-snorkeling"],
+      "landing_slugs": ["home", "holiday-packages", "best-local-islands-snorkeling", "best-time-to-visit", "getting-to-maamigili", "guesthouse-vs-resort", "maamigili-guide", "maldives-holiday-cost", "manta-ray-snorkeling", "south-ari-atoll-guide", "south-ari-vs-other-regions", "things-to-do-maamigili", "whale-shark-snorkeling"],
       "own_hostnames": ["viluresidence.net", "viluresidence.web.app", "viluresidence.firebaseapp.com", "vilu-residence.web.app", "vilu-residence.firebaseapp.com"],
       "site_lang_codes": ["ar", "cs", "de", "fr", "it", "ja", "ko", "ru", "sk", "zh"]
     },
@@ -371,7 +387,7 @@
   "file_fingerprints": {
     "$comment": "Baseline fingerprints (sha256) — NOT a permanent hash lock. An approved change to either file is acceptable if the owner approves, the semantic tests stay green, and consent/analytics behaviour is re-verified; update these values in the same commit.",
     "consent.js": "a3b69fa5c9de7fdb3dfb237fa7aa991d33c35854adc99a6a3db5154ebbaea2f2",
-    "analytics.js": "a1394100231b7746523b03c3df31d48927dd5d80a9d85d4818e22cababe7eff1"
+    "analytics.js": "dfa7c13332a77feaa5d54fcae80b01bfb4459bce003aeb64360c391f3847ebca"
   },
 
   "storage_keys": {

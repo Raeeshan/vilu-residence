@@ -175,11 +175,13 @@ section('URLs / SEO — sitemap');
   const sm = read(M.sitemap.file);
   const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   test(`sitemap has exactly ${M.sitemap.expected_url_count} URLs`, () => assert.equal(locs.length, M.sitemap.expected_url_count));
-  test('sitemap URL set is exactly the canonical set (12 pages x (en + 10 languages))', () => {
+  test('sitemap URL set is exactly the canonical set (12 fully-localized pages x (en + 10 languages), plus any English-only sitemap pages once each)', () => {
     const expected = [];
     for (const p of SITEMAP_PAGES) {
       expected.push(M.site_origin + p.url_path);
-      for (const l of M.languages) expected.push(M.site_origin + '/' + l + (p.url_path === '/' ? '/' : p.url_path));
+      if (p.translated !== false) {
+        for (const l of M.languages) expected.push(M.site_origin + '/' + l + (p.url_path === '/' ? '/' : p.url_path));
+      }
     }
     sameSet(locs, expected);
   });
@@ -613,9 +615,9 @@ section('Analytics — canonical events, dimensions, attribution');
     assert.deepEqual(map, M.analytics.package_name_to_id);
     for (const it of M.packages.items) assert.equal(map[it.name], it.id, it.name);
   });
-  test('ELIGIBLE_LANDING_SLUGS is exactly the 12 approved landing slugs', () => {
+  test('ELIGIBLE_LANDING_SLUGS is exactly the 13 approved landing slugs', () => {
     const slugs = evalBlock(an, /var ELIGIBLE_LANDING_SLUGS = \[/, '];', 'ELIGIBLE_LANDING_SLUGS');
-    assert.equal(slugs.length, 12);
+    assert.equal(slugs.length, 13);
     sameSet(slugs, M.analytics.attribution.landing_slugs);
   });
   test('every landing slug is the data-page-slug of a sitemap page', () => {
@@ -2116,6 +2118,7 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
 
   test('hreflang/canonical clusters remain complete after the JSON-LD/OG localization pass (untouched by it)', () => {
     for (const p of SITEMAP_PAGES) {
+      if (p.translated === false) continue; // English-only sitemap page: no hreflang cluster expected (see p.hreflang check)
       const html = read(p.file);
       const tags = (headOf(html).match(/<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g) || []);
       assert.equal(tags.length, M.languages.length + 2, `${p.file}: expected ${M.languages.length + 2} hreflang tags (10 languages + en + x-default)`);

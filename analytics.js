@@ -149,6 +149,7 @@
     'holiday-packages',                // holiday-packages.html (data-page-type="package")
     'best-local-islands-snorkeling',   // guide
     'best-time-to-visit',              // guide
+    'getting-to-maamigili',            // guide
     'guesthouse-vs-resort',            // guide
     'maamigili-guide',                 // guide
     'maldives-holiday-cost',           // guide
