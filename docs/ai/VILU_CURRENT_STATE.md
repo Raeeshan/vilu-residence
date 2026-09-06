@@ -11,19 +11,19 @@
 ## Current phase
 
 **PHASE 15 — CURRENT VISUAL CORRECTION** (site-wide reference-design pass; see `VILU_COMPLETION_MATRIX.md` for how this maps to the original `VILU_ROADMAP.md` Phase 1 numbering)
-Status: **IMPLEMENTATION IN PROGRESS** — all 4 previously-pending visual defects are now fixed and verified; final exhaustive cross-page/cross-language QA remains open
-Owner approval: **NO**
-Production impact: **NONE YET — blocked until owner approves the preview**
+Status: **VISUAL REDESIGN DEPLOYED TO PRODUCTION** — owner explicitly authorized a production hosting deploy of this branch (2026-09-06); all previously-pending visual defects (property white-fade, availability, packages, gallery, hero video/brightness, Below South Ari curved panel) are fixed, verified on preview, and now live on `viluresidence.net`. This closes out the *visual correction* phase's shipping step only — it does **not** mean the wider Vilu project (Phase 2 weather/time, SEO/international expansion, Phase 26 CRM, or any other roadmap phase) is complete. See `VILU_COMPLETION_MATRIX.md` for what remains.
+Owner approval: **YES — explicit production deployment authorization, 2026-09-06**
+Production impact: **YES — hosting-only deploy completed 2026-09-06, commit `dcfe40b`**
 
 ## Branch / commit state
 
 - Feature branch: `feat/vilu-reference-design-system`
-- Latest pushed commit as of this snapshot: `8e4d0a1` (history: `1130e1e` prod baseline → `5103850` remove floating wildlife/bubbles → `4402f73` site-wide design completion pass → `ae65663` owner-feedback visual fixes round 1 → `ed9b1ea` playbackRate ordering fix → `f6d4dba` Island Beach hero replacement → `5a7f5a4` permanent AI memory/roadmap docs → `16dcfaf` hero color-range hardening + hero→section fade + Descent shrink → `8e4d0a1` property white-fade fix + availability/packages/gallery redesign)
-- Production baseline (`origin/main` at the last confirmed check): `1130e1e328ac8ac0df88f26b5523ff34201c80c0`
+- Latest pushed commit as of this snapshot: `dcfe40b` (history: `1130e1e` prod baseline → `5103850` remove floating wildlife/bubbles → `4402f73` site-wide design completion pass → `ae65663` owner-feedback visual fixes round 1 → `ed9b1ea` playbackRate ordering fix → `f6d4dba` Island Beach hero replacement → `5a7f5a4` permanent AI memory/roadmap docs → `16dcfaf` hero color-range hardening + hero→section fade + Descent shrink → `8e4d0a1` property white-fade fix + availability/packages/gallery redesign → … → `dcfe40b` full-duration hero video + real brightness/color + localized text scrim, curved Below South Ari panel)
+- **Deployed to production: `dcfe40b69a96a96659746c58a92b7310a1cbac54`, 2026-09-06, hosting-only (`firebase deploy --only hosting`), site `viluresidence`.** Pre-deploy production baseline was `1130e1e328ac8ac0df88f26b5523ff34201c80c0`; that commit remains `origin/main`'s HEAD — this was a hosting content release, not a git merge to `main`.
 - **Always re-verify both SHAs with `git fetch && git rev-parse origin/main` and `git log` on the feature branch before relying on them — do not trust this file's numbers if the repository shows otherwise.**
 - Primary worktree (`C:\Users\hp\vilu-residence`) is intentionally dirty (~199 pre-existing uncommitted legal/privacy files) and must never be used as a build/deploy source or touched/reset. All design work happens in the dedicated worktree `C:\Users\hp\vilu-residence-reference-design`.
-- Live preview channel: `https://viluresidence--vilu-reference-design-system-bgmh161r.web.app/` (Firebase Hosting preview channel on the `viluresidence` site, re-deployed after each round of fixes).
-- Live production domain: `https://viluresidence.net/` — unchanged throughout this entire phase.
+- Live preview channel: `https://viluresidence--vilu-reference-design-system-bgmh161r.web.app/` (Firebase Hosting preview channel on the `viluresidence` site, re-deployed after each round of fixes) — remains available for any future round of changes on this branch.
+- Live production domain: `https://viluresidence.net/` — **now serving the cinematic redesign as of 2026-09-06** (previously unchanged throughout this phase; see the production-deployment changelog entry).
 
 ## What's done in this phase so far
 
@@ -51,9 +51,10 @@ Production impact: **NONE YET — blocked until owner approves the preview**
 
 ## Immediate next action
 
-Owner review of the current preview. If further corrections come back, address them one stage at a time per the standing verbatim-relay workflow (see `VILU_DECISIONS.md` §"Standing workflow"). Do not start Phase 2 (weather/time) or any SEO/international/security phase until this phase is owner-approved and released.
+Monitor the live production site for any owner feedback now that the redesign is public. If further corrections come back, address them one stage at a time per the standing verbatim-relay workflow (see `VILU_DECISIONS.md` §"Standing workflow"). Do not start Phase 2 (weather/time) or any SEO/international/security/CRM phase until explicitly authorized — the production deploy just completed covers only this visual-correction phase's scope, nothing further.
 
 ## Hard blockers
 
-- No merge to `main` and no production deploy until the owner explicitly says the visual design is approved.
-- No live weather/time API connection until the visual phase is approved and a provider is chosen per `VILU_ROADMAP.md` Phase 2/6's own gating steps.
+- No further production deploy without a fresh, explicit owner authorization for that specific deploy — the 2026-09-06 authorization covered this one hosting release only, not standing permission for future ones.
+- No live weather/time API connection until a provider is chosen per `VILU_ROADMAP.md` Phase 2/6's own gating steps, and the phase is separately authorized.
+- No merge of this feature branch into `main` has occurred or is authorized — production was updated via `firebase deploy --only hosting` (a content release), not a git merge; `origin/main` is still at the pre-existing baseline `1130e1e3`.
