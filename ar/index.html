@@ -1208,7 +1208,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
 .dn-fc-temp{font-family:'DM Sans',sans-serif;font-size:var(--font-size-sm);font-weight:600;color:var(--white);font-variant-numeric:tabular-nums}
 .dn-fc-temp-low{color:var(--muted);font-weight:500}
 .dn-note{position:relative;margin:28px 0 0;font-size:var(--font-size-xs);color:var(--muted);letter-spacing:.02em}
-.dn-note i{margin-right:6px}
+.dn-note a{color:var(--gold-light)}
 @media(max-width:820px){
   .dn-panel{padding:32px 24px}
   .dn-grid{grid-template-columns:1fr 1fr;row-gap:28px}
@@ -1220,7 +1220,6 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
 }
 [dir="rtl"] .dn-stat{align-items:flex-end;text-align:right}
 [dir="rtl"] .dn-value-unit{margin-left:0;margin-right:8px}
-[dir="rtl"] .dn-note i{margin-right:0;margin-left:6px}
 @media(prefers-reduced-motion:no-preference){
   .dn-stat{transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1)}
   .dn-panel.reveal .dn-stat{opacity:0;transform:translateY(14px)}
@@ -2023,29 +2022,27 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
         <span class="dn-place-main">Maamigili</span>
         <span class="dn-place-sub" data-i18n="destNow.region">South Ari Atoll</span>
       </div>
-      <!-- Static fallback (no-JS-safe): identical to SAMPLE_DESTINATION_DATA below.
-           renderDestinationNow() re-renders this same content on load as a
-           progressive enhancement (and is the hook a future Phase 20 would
-           call with real data) -- this markup is never an empty JS-only shell. -->
+      <!-- Static fallback (no-JS-safe, and the initial paint before the live
+           fetch below resolves): an honest "unavailable" placeholder, never
+           a fake number -- matches renderDestinationFailure()'s own output.
+           A no-JS visitor has no way to receive live data at all (no fetch
+           without JS), so this is the correct, honest state for them;
+           fetchDestinationWeather() replaces it with real data (or the same
+           honest fallback) as soon as it resolves. Local Time only ever
+           updates via JS -- a no-JS visitor sees "--:--" here, honestly. -->
       <div class="dn-grid" id="dn-grid" role="list" aria-label="Maamigili conditions">
-        <div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9a4 4 0 1 1 4 4"></path><path d="M6 18h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8 9.2"></path></svg></i>
-          <div class="dn-value">29°C<span class="dn-value-unit">Partly Cloudy</span></div>
+        <div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18h11a3.5 3.5 0 0 0 .5-6.96A5.5 5.5 0 0 0 7.1 9.8 4 4 0 0 0 6.5 18"></path></svg></i>
+          <div class="dn-value" style="font-size:var(--font-size-lg)" data-i18n="destNow.unavailable">Live conditions temporarily unavailable</div>
           <div class="dn-label" data-i18n="destNow.labelConditions">Current Conditions</div></div>
         <div class="dn-stat" role="listitem"><i class="ti ti-clock dn-icon" aria-hidden="true"></i>
           <div class="dn-value" id="dn-local-time">--:--</div>
           <div class="dn-label" data-i18n="destNow.labelTime">Local Time · Maldives</div></div>
         <div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5M6 12a6 6 0 0 1 12 0"></path><path d="M3 12h1M20 12h1M5 15l-1 1M19 15l1 1"></path><path d="M2 18h20"></path></svg></i>
-          <div class="dn-value">06:02<span class="dn-sep">/</span>18:14</div>
+          <div class="dn-value">—:—<span class="dn-sep">/</span>—:—</div>
           <div class="dn-label" data-i18n="destNow.labelSun">Sunrise / Sunset</div></div>
       </div>
-      <div class="dn-forecast" id="dn-forecast" role="list" aria-label="Short forecast (sample data)">
-        <div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label">Mon</span><i class="dn-fc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.8 4.8l1.4 1.4M17.8 17.8l1.4 1.4M2 12h2M20 12h2M4.8 19.2l1.4-1.4M17.8 6.2l1.4-1.4"></path></svg></i><span class="dn-fc-temp">30°<span class="dn-fc-temp-low">/26°</span></span></div>
-        <div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label">Tue</span><i class="dn-fc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9a4 4 0 1 1 4 4"></path><path d="M6 18h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8 9.2"></path></svg></i><span class="dn-fc-temp">29°<span class="dn-fc-temp-low">/26°</span></span></div>
-        <div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label">Wed</span><i class="dn-fc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18h11a3.5 3.5 0 0 0 .5-6.96A5.5 5.5 0 0 0 7.1 9.8 4 4 0 0 0 6.5 18"></path></svg></i><span class="dn-fc-temp">28°<span class="dn-fc-temp-low">/25°</span></span></div>
-        <div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label">Thu</span><i class="dn-fc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 15h11a3.5 3.5 0 0 0 .5-6.96A5.5 5.5 0 0 0 7.1 6.8 4 4 0 0 0 6.5 15"></path><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"></path></svg></i><span class="dn-fc-temp">27°<span class="dn-fc-temp-low">/25°</span></span></div>
-        <div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label">Fri</span><i class="dn-fc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.8 4.8l1.4 1.4M17.8 17.8l1.4 1.4M2 12h2M20 12h2M4.8 19.2l1.4-1.4M17.8 6.2l1.4-1.4"></path></svg></i><span class="dn-fc-temp">30°<span class="dn-fc-temp-low">/26°</span></span></div>
-      </div>
-      <p class="dn-note"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span data-i18n="destNow.sampleNote">Sample data for this design preview — live conditions arrive in a future phase.</span></p>
+      <div class="dn-forecast" id="dn-forecast" role="list" aria-label="3-day forecast"></div>
+      <p class="dn-note"><span data-i18n="destNow.attribution">Weather data by <a href="https://www.weatherapi.com/" target="_blank" rel="noopener">WeatherAPI.com</a></span></p>
     </div>
   </div>
 </section>
@@ -3181,21 +3178,29 @@ function initLazyBackgrounds(){
 document.addEventListener('DOMContentLoaded', initLazyBackgrounds);
 
 // ═══════════════════════════════════════════════════════════
-// DESTINATION NOW — Phase 17 visual prototype (no live API, no backend)
+// DESTINATION NOW — Phase 20 zero-cost live implementation (Phase 17 design, unchanged)
 //
-// Local time is the one real value: computed client-side from the
-// visitor's own clock via Intl.DateTimeFormat against the Indian/Maldives
-// IANA zone (UTC+05:00, no DST) -- zero network call, zero API key, zero
-// geolocation. Everything else (condition, temperature, sunrise/sunset,
-// forecast) is explicit SAMPLE data for this design prototype only, per
-// this phase's own rule against presenting fake weather as real -- see
-// the visible .dn-note disclaimer in the markup above.
+// Local time is computed client-side from the visitor's own clock via
+// Intl.DateTimeFormat against the Indian/Maldives IANA zone (UTC+05:00,
+// no DST) -- zero network call, zero API key, zero geolocation -- and
+// keeps working even if the weather fetch below fails entirely.
 //
-// renderDestinationNow(data) is written to the exact shape a future
-// Phase 20 live fetch would return, so that phase can replace
-// SAMPLE_DESTINATION_DATA with an async call and pass the result to this
-// same function unchanged -- no markup/CSS change needed then. Nothing
-// here is wired to any provider; there is no fetch, no key, no proxy.
+// Condition/temperature/sunrise/sunset/forecast come from
+// weather-cache.json, refreshed every ~20 minutes by a scheduled GitHub
+// Action (scripts/fetch-weather.js) calling WeatherAPI.com's free tier
+// (100,000 calls/month, $0) and publishing the result to the
+// `weather-cache-data` branch of this same repository -- fetched here
+// directly from GitHub's own raw-content CDN (public, free,
+// CORS-enabled), never from a paid server, Firestore, or Cloud Function.
+// The WeatherAPI key itself lives only as a GitHub Actions repository
+// secret; it is never present in this file, any other shipped file, or
+// weather-cache.json.
+//
+// If the fetch fails, times out, or the cached data is stale (the
+// Action hasn't run successfully in over 90 minutes), a restrained
+// "Live conditions temporarily unavailable" message replaces the
+// weather/sunrise stats -- never a fake value, never 0°C/NaN/undefined.
+// Local Time is never affected by this failure path.
 // ═══════════════════════════════════════════════════════════
 var DN_ICONS = {
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.8 4.8l1.4 1.4M17.8 17.8l1.4 1.4M2 12h2M20 12h2M4.8 19.2l1.4-1.4M17.8 6.2l1.4-1.4"/></svg>',
@@ -3205,23 +3210,32 @@ var DN_ICONS = {
   sunrise: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5M6 12a6 6 0 0 1 12 0"/><path d="M3 12h1M20 12h1M5 15l-1 1M19 15l1 1"/><path d="M2 18h20"/></svg>',
   sunset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V3M6 12a6 6 0 0 1 12 0"/><path d="M3 12h1M20 12h1M5 9l-1-1M19 9l1-1"/><path d="M2 18h20"/></svg>'
 };
-// Sample only -- see module comment above. Shape mirrors a plausible future
-// Phase 20 API response so the render function never needs to change.
-var SAMPLE_DESTINATION_DATA = {
-  conditionIcon: 'partlyCloudy',
-  conditionLabel: 'Partly Cloudy',
-  tempC: 29,
-  sunrise: '06:02',
-  sunset: '18:14',
-  forecast: [
-    { day: 'Mon', icon: 'sun', high: 30, low: 26 },
-    { day: 'Tue', icon: 'partlyCloudy', high: 29, low: 26 },
-    { day: 'Wed', icon: 'cloud', high: 28, low: 25 },
-    { day: 'Thu', icon: 'rain', high: 27, low: 25 },
-    { day: 'Fri', icon: 'sun', high: 30, low: 26 }
-  ]
+function dnIcon(key){ return DN_ICONS[key] || DN_ICONS.cloud; } // unknown/unmapped condition -> restrained default, never missing
+
+// WeatherAPI.com condition codes -> this component's 4 restrained icon
+// buckets. Full code table sourced from weatherapi.com/docs -- this is a
+// deliberate simplification (matches Phase 17's "do not redesign the
+// approved component" instruction, so no new icon buckets were added for
+// this pass); day/night is not distinguished, since the approved design
+// has no separate night icon. See VILU_DECISIONS.md for the full table
+// and this decision's rationale.
+var DN_CONDITION_MAP = {
+  1000: 'sun',
+  1003: 'partlyCloudy',
+  1006: 'cloud', 1009: 'cloud', 1012: 'cloud', 1030: 'cloud', 1135: 'cloud', 1147: 'cloud'
+  // every other documented code (drizzle/rain/sleet/snow/thunder/ice families,
+  // plus dust/smoke/haze codes not realistic for Maldives) falls through to
+  // the 'rain' bucket via mapConditionCodeToIcon()'s default below, since
+  // dnIcon()'s own fallback is 'cloud' only for a genuinely unknown code.
 };
-function dnIcon(key){ return DN_ICONS[key] || DN_ICONS.sun; }
+function mapConditionCodeToIcon(code){
+  if (typeof code !== 'number') return 'cloud';
+  if (Object.prototype.hasOwnProperty.call(DN_CONDITION_MAP, code)) return DN_CONDITION_MAP[code];
+  if (code >= 1000 && code <= 1030) return 'cloud'; // haze/dust/smoke family, not otherwise mapped
+  if (code >= 1063 && code <= 1282) return 'rain'; // every drizzle/rain/sleet/snow/thunder code
+  return 'cloud';
+}
+
 function renderDestinationNow(data){
   var grid = document.getElementById('dn-grid');
   var strip = document.getElementById('dn-forecast');
@@ -3241,7 +3255,88 @@ function renderDestinationNow(data){
       '<i class="dn-fc-icon" aria-hidden="true">' + dnIcon(d.icon) + '</i>' +
       '<span class="dn-fc-temp">' + d.high + '°<span class="dn-fc-temp-low">/' + d.low + '°</span></span></div>';
   }).join('');
+  dnTickClock(); // the grid above just replaced #dn-local-time with a fresh node -- repaint it immediately, don't wait for the next 30s tick
 }
+
+// Never a fake value: hides the condition/sunrise/forecast stats behind a
+// restrained message. Local Time (rendered separately below) is
+// untouched by this path and keeps working.
+function renderDestinationFailure(){
+  var grid = document.getElementById('dn-grid');
+  var strip = document.getElementById('dn-forecast');
+  if (grid) grid.innerHTML =
+    '<div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true">' + DN_ICONS.cloud + '</i>' +
+    '<div class="dn-value" style="font-size:var(--font-size-lg)" data-i18n="destNow.unavailable">Live conditions temporarily unavailable</div>' +
+    '<div class="dn-label" data-i18n="destNow.labelConditions">Current Conditions</div></div>' +
+    '<div class="dn-stat" role="listitem"><i class="ti ti-clock dn-icon" aria-hidden="true"></i>' +
+    '<div class="dn-value" id="dn-local-time">--:--</div>' +
+    '<div class="dn-label" data-i18n="destNow.labelTime">Local Time · Maldives</div></div>' +
+    '<div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true">' + DN_ICONS.sunrise + '</i>' +
+    '<div class="dn-value">—:—<span class="dn-sep">/</span>—:—</div>' +
+    '<div class="dn-label" data-i18n="destNow.labelSun">Sunrise / Sunset</div></div>';
+  if (strip) strip.innerHTML = '';
+  dnTickClock();
+}
+
+// Extracted as pure, unit-testable functions (see test/weather-live.test.js)
+// rather than inlined in the fetch handler.
+function dnIsFresh(fetchedAtIso, maxAgeMs){
+  var t = Date.parse(fetchedAtIso);
+  if (isNaN(t)) return false;
+  return (Date.now() - t) <= maxAgeMs;
+}
+function dnValidateCache(json){
+  if (!json || typeof json !== 'object') return false;
+  if (!json.current || typeof json.current.tempC !== 'number' || typeof json.current.conditionCode !== 'number') return false;
+  if (!json.astro || typeof json.astro.sunrise !== 'string' || typeof json.astro.sunset !== 'string') return false;
+  if (!Array.isArray(json.forecast) || json.forecast.length === 0) return false;
+  for (var i = 0; i < json.forecast.length; i++) {
+    var d = json.forecast[i];
+    if (!d || typeof d.maxTempC !== 'number' || typeof d.minTempC !== 'number' || typeof d.conditionCode !== 'number' || typeof d.date !== 'string') return false;
+  }
+  return true;
+}
+var _dnDayFmt = (function(){
+  try { return new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' }); }
+  catch (e) { return null; }
+})();
+function dnCacheToRenderData(json){
+  return {
+    conditionIcon: mapConditionCodeToIcon(json.current.conditionCode),
+    conditionLabel: json.current.conditionText || '—',
+    tempC: Math.round(json.current.tempC),
+    sunrise: json.astro.sunrise,
+    sunset: json.astro.sunset,
+    forecast: json.forecast.map(function(d){
+      var label = d.date;
+      if (_dnDayFmt) { try { label = _dnDayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
+      return { day: label, icon: mapConditionCodeToIcon(d.conditionCode), high: Math.round(d.maxTempC), low: Math.round(d.minTempC) };
+    })
+  };
+}
+
+var DN_WEATHER_CACHE_URL = 'https://raw.githubusercontent.com/Raeeshan/vilu-residence/weather-cache-data/weather-cache.json';
+var DN_STALE_MS = 90 * 60 * 1000; // 90 min -- generous buffer over the ~20-min refresh cadence before treating data as unavailable
+
+async function fetchDestinationWeather(){
+  var controller = ('AbortController' in window) ? new AbortController() : null;
+  var timeoutId = controller ? setTimeout(function(){ controller.abort(); }, 8000) : null;
+  try {
+    var res = await fetch(DN_WEATHER_CACHE_URL + '?_=' + Date.now(), { // cache-bust: GitHub's raw CDN caches ~5 min, we want this fetch's own freshness check to be authoritative
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined
+    });
+    if (!res.ok) { renderDestinationFailure(); return; }
+    var json = await res.json();
+    if (!dnIsFresh(json.fetchedAt, DN_STALE_MS) || !dnValidateCache(json)) { renderDestinationFailure(); return; }
+    renderDestinationNow(dnCacheToRenderData(json));
+  } catch (e) {
+    renderDestinationFailure();
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
+
 var _dnClockFmt = (function(){
   try { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Indian/Maldives', hour: '2-digit', minute: '2-digit', hour12: false }); }
   catch (e) { return null; } // unsupported timeZone (very old browser) -- leave the placeholder, no crash
@@ -3253,9 +3348,10 @@ function dnTickClock(){
 }
 function initDestinationNow(){
   if (!document.getElementById('destination-now')) return;
-  renderDestinationNow(SAMPLE_DESTINATION_DATA);
   dnTickClock();
   setInterval(dnTickClock, 30000); // real, live value -- not decorative motion, so not gated on prefers-reduced-motion
+  fetchDestinationWeather();
+  setInterval(fetchDestinationWeather, 20 * 60 * 1000); // stay in sync with the ~20-min Action refresh cadence, no faster
 }
 document.addEventListener('DOMContentLoaded', initDestinationNow);
 
