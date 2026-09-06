@@ -38,7 +38,7 @@ Supplier costs, margins, net rates, private excursion cost structure, agency com
 
 Never change the business semantics of: `writeReservation()`, `submitDirectBooking()`, `runTransaction`, the `{merge:true}` write pattern, `ROOM_CONFLICT` handling, `openBookingPopup()`, `openBookingPage()`, `bfpSearch()`, `confirmGuestBooking()`, `initBookingHashHandoff()`, `BroadcastChannel('vilu_pms')`. Reservation status on write: `Pending`. Reservation source: `Website`. **Never create a real reservation during QA/testing** — read-only checks (opening the popup, searching availability, viewing room results) only, never the final confirmation step. A real server-side backstop exists independent of the client: `functions/index.js`'s `blockDoubleBooking` Cloud Function auto-cancels a newly created reservation if it overlaps another active one for the same room — do not remove or bypass it when touching booking code.
 
-## Authentication / security protected contracts (added 2026-09-06, Phase 47 audit; updated 2026-09-06 after minimal implementation, commit `080874b`)
+## Authentication / security protected contracts (added 2026-09-06, Phase 47 audit; last updated 2026-09-06 after production deployment, commits `080874b` + `6e64c68`, live on `viluresidence.net`)
 
 Full architecture map, 7 classified findings (V1-V7), and the implementation report live in `VILU_COMPLETION_MATRIX.md` Phase 47 and that day's Phase 47 audit/implementation reports — read them before touching any authentication code in `vilu-unified.html` or `vilu-agency-portal.html`.
 
