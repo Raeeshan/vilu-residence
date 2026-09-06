@@ -86,8 +86,10 @@ Initially leverage the Russian-language funnel where suitable; research actual d
 Same data-driven, Russian-funnel-first approach as Phase 14. Do not overbuild before evidence.
 
 ### Phase 16 — Spain
-**Status:** NOT STARTED · **Owner approval required:** YES · **Production impact:** YES (new `/es/` locale)
+**Status:** PARTIALLY COMPLETE (evidence-driven audit + Holiday Packages implementation done 2026-09-06/07, pre-production — see `VILU_COMPLETION_MATRIX.md` Phase 30, the same real workstream under this project's other numbering) · **Owner approval required:** received for this scope · **Production impact:** YES (new `/es/` locale, currently one page)
 Genuine Spanish localization planned: keyword research, translation, localization, titles/descriptions, schema, hreflang, commercial package localization, destination guides, Spanish travel publications, backlinks, Google acquisition, Spanish CRO, international QA.
+
+**2026-09-06/07 update:** no Spanish locale existed before this pass. Evidence (real but modest next to Russia/China, plus a confirmed budget-positioning risk in an existing Spanish independent-travel-blogger niche) justified Option B — Holiday Packages only, not a full 12-page mirror. Added genuine build-pipeline support for a partial locale, which exposed and fixed a real `og:locale:alternate` bug. `i18n/es.json` (194 strings, native European Spanish) disambiguates Maamigili from a same-named island in Raa Atoll. Not deployed — pre-production report only. Full detail: `VILU_COMPLETION_MATRIX.md` Phase 30, `VILU_CHANGELOG.md`, `VILU_DECISIONS.md`.
 
 ### Phase 17 — Tajikistan (market test)
 **Status:** NOT STARTED · **Owner approval required:** YES · **Production impact:** minimal (experimental)
