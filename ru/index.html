@@ -3977,7 +3977,20 @@ else window.addEventListener('load', vcInitCinematicStory);
 // property. Never calls preventDefault, never resizes/locks the page — this
 // is explicitly NOT scroll-jacking. Default --descent-msg-op is 1 (see CSS),
 // so the caption is already visible before this ever runs.
-(function(){
+//
+// Phase 21 performance audit (2026-09-06): real Lighthouse traces against
+// production found this block's own initial (immediate, unconditional)
+// getBoundingClientRect() call as the single largest forced-reflow source on
+// the page (365-1822ms across runs) -- not because the read itself is slow,
+// but because it fires synchronously during initial script execution and
+// forces the browser to flush all layout/style work queued up by everything
+// else that has run before it. Since the caption is already visibly correct
+// via the CSS default (see comment above) with no scroll-progress applied
+// yet, deferring this whole block's setup to `load` (matching
+// vcInitCinematicStory()'s existing pattern just above) removes that forced
+// reflow from the critical rendering path with zero visual change -- nothing
+// downstream can scroll meaningfully before the page has finished loading.
+function vcInitDescentScrollProgress(){
   var descent = document.getElementById('vc-descent');
   var caption = document.getElementById('vc-descent-caption');
   if(!descent || !caption) return;
@@ -4003,7 +4016,9 @@ else window.addEventListener('load', vcInitCinematicStory);
     if(!ticking){ requestAnimationFrame(update); ticking = true; }
   }, {passive:true});
   update();
-})();
+}
+if(document.readyState === 'complete') vcInitDescentScrollProgress();
+else window.addEventListener('load', vcInitDescentScrollProgress);
 
 // ── GALLERY PARALLAX ── same cheap transform-only/rAF-throttled/reduced-
 // motion-aware approach as the hero, scoped to one section: each tile's
