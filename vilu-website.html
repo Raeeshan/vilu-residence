@@ -3180,14 +3180,14 @@ document.addEventListener('DOMContentLoaded', initLazyBackgrounds);
 //
 // Condition/temperature/sunrise/sunset/forecast come from
 // weather-cache.json, refreshed every ~20 minutes by a scheduled GitHub
-// Action (scripts/fetch-weather.js) calling WeatherAPI.com's free tier
-// (100,000 calls/month, $0) and publishing the result to the
-// `weather-cache-data` branch of this same repository -- fetched here
+// Action in the DEDICATED, SEPARATE github.com/Raeeshan/vilu-weather-cache
+// repository (never this repository's own origin/main) calling
+// WeatherAPI.com's free tier (100,000 calls/month, $0) -- fetched here
 // directly from GitHub's own raw-content CDN (public, free,
 // CORS-enabled), never from a paid server, Firestore, or Cloud Function.
 // The WeatherAPI key itself lives only as a GitHub Actions repository
-// secret; it is never present in this file, any other shipped file, or
-// weather-cache.json.
+// secret on that separate repository; it is never present in this file,
+// any other shipped file, or weather-cache.json.
 //
 // If the fetch fails, times out, or the cached data is stale (the
 // Action hasn't run successfully in over 90 minutes), a restrained
@@ -3278,14 +3278,18 @@ function dnIsFresh(fetchedAtIso, maxAgeMs){
   if (isNaN(t)) return false;
   return (Date.now() - t) <= maxAgeMs;
 }
+// Cache schema (vilu-weather-cache's own contract -- see that repo's
+// README): { updated_at, location, temperature_c, condition:{code,text},
+// is_day, sunrise, sunset, forecast:[{date,max_c,min_c,condition:{code,text}}] }
 function dnValidateCache(json){
   if (!json || typeof json !== 'object') return false;
-  if (!json.current || typeof json.current.tempC !== 'number' || typeof json.current.conditionCode !== 'number') return false;
-  if (!json.astro || typeof json.astro.sunrise !== 'string' || typeof json.astro.sunset !== 'string') return false;
+  if (typeof json.temperature_c !== 'number') return false;
+  if (!json.condition || typeof json.condition.code !== 'number') return false;
+  if (typeof json.sunrise !== 'string' || typeof json.sunset !== 'string') return false;
   if (!Array.isArray(json.forecast) || json.forecast.length === 0) return false;
   for (var i = 0; i < json.forecast.length; i++) {
     var d = json.forecast[i];
-    if (!d || typeof d.maxTempC !== 'number' || typeof d.minTempC !== 'number' || typeof d.conditionCode !== 'number' || typeof d.date !== 'string') return false;
+    if (!d || typeof d.max_c !== 'number' || typeof d.min_c !== 'number' || !d.condition || typeof d.condition.code !== 'number' || typeof d.date !== 'string') return false;
   }
   return true;
 }
@@ -3295,20 +3299,22 @@ var _dnDayFmt = (function(){
 })();
 function dnCacheToRenderData(json){
   return {
-    conditionIcon: mapConditionCodeToIcon(json.current.conditionCode),
-    conditionLabel: json.current.conditionText || '—',
-    tempC: Math.round(json.current.tempC),
-    sunrise: json.astro.sunrise,
-    sunset: json.astro.sunset,
+    conditionIcon: mapConditionCodeToIcon(json.condition.code),
+    conditionLabel: json.condition.text || '—',
+    tempC: Math.round(json.temperature_c),
+    sunrise: json.sunrise,
+    sunset: json.sunset,
     forecast: json.forecast.map(function(d){
       var label = d.date;
       if (_dnDayFmt) { try { label = _dnDayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
-      return { day: label, icon: mapConditionCodeToIcon(d.conditionCode), high: Math.round(d.maxTempC), low: Math.round(d.minTempC) };
+      return { day: label, icon: mapConditionCodeToIcon(d.condition.code), high: Math.round(d.max_c), low: Math.round(d.min_c) };
     })
   };
 }
 
-var DN_WEATHER_CACHE_URL = 'https://raw.githubusercontent.com/Raeeshan/vilu-residence/weather-cache-data/weather-cache.json';
+// Dedicated, separate repository (vilu-weather-cache) -- never
+// vilu-residence's own origin/main, which this automation never touches.
+var DN_WEATHER_CACHE_URL = 'https://raw.githubusercontent.com/Raeeshan/vilu-weather-cache/main/weather-cache.json';
 var DN_STALE_MS = 90 * 60 * 1000; // 90 min -- generous buffer over the ~20-min refresh cadence before treating data as unavailable
 
 async function fetchDestinationWeather(){
@@ -3321,7 +3327,7 @@ async function fetchDestinationWeather(){
     });
     if (!res.ok) { renderDestinationFailure(); return; }
     var json = await res.json();
-    if (!dnIsFresh(json.fetchedAt, DN_STALE_MS) || !dnValidateCache(json)) { renderDestinationFailure(); return; }
+    if (!dnIsFresh(json.updated_at, DN_STALE_MS) || !dnValidateCache(json)) { renderDestinationFailure(); return; }
     renderDestinationNow(dnCacheToRenderData(json));
   } catch (e) {
     renderDestinationFailure();

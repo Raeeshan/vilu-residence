@@ -101,16 +101,22 @@ test('dnIcon() never returns undefined for any DN_ICONS key, and falls back safe
 // ---------------------------------------------------------------------------
 section('Cache validation and freshness (cache hit / expiration / malformed response)');
 
+// Matches vilu-weather-cache's own cache contract exactly (see that
+// repo's README.md and scripts/fetch-weather.js) -- this repo's client
+// code is tested against the SAME field names that repo publishes.
 function fixtureCache(overrides) {
   return Object.assign({
-    fetchedAt: new Date().toISOString(),
-    location: { name: 'Maamigili', region: 'Alif Dhaal Atoll', country: 'Maldives', tzId: 'Indian/Maldives' },
-    current: { tempC: 29, conditionCode: 1003, conditionText: 'Partly cloudy', isDay: 1 },
-    astro: { sunrise: '06:02', sunset: '18:14' },
+    updated_at: new Date().toISOString(),
+    location: 'Maamigili, Alif Dhaal Atoll, Maldives',
+    temperature_c: 29,
+    condition: { code: 1003, text: 'Partly cloudy' },
+    is_day: 1,
+    sunrise: '06:02',
+    sunset: '18:14',
     forecast: [
-      { date: '2026-09-06', maxTempC: 30, minTempC: 26, conditionCode: 1000, conditionText: 'Sunny' },
-      { date: '2026-09-07', maxTempC: 29, minTempC: 26, conditionCode: 1003, conditionText: 'Partly cloudy' },
-      { date: '2026-09-08', maxTempC: 28, minTempC: 25, conditionCode: 1063, conditionText: 'Patchy rain possible' }
+      { date: '2026-09-06', max_c: 30, min_c: 26, condition: { code: 1000, text: 'Sunny' } },
+      { date: '2026-09-07', max_c: 29, min_c: 26, condition: { code: 1003, text: 'Partly cloudy' } },
+      { date: '2026-09-08', max_c: 28, min_c: 25, condition: { code: 1063, text: 'Patchy rain possible' } }
     ]
   }, overrides);
 }
@@ -118,12 +124,12 @@ function fixtureCache(overrides) {
 test('a well-formed, fresh cache (cache hit) validates and is fresh', () => {
   const c = fixtureCache({});
   assert.equal(M.dnValidateCache(c), true);
-  assert.equal(M.dnIsFresh(c.fetchedAt, 90 * 60 * 1000), true);
+  assert.equal(M.dnIsFresh(c.updated_at, 90 * 60 * 1000), true);
 });
 test('successful weather response shape: current temp/condition present and correctly typed', () => {
   const c = fixtureCache({});
-  assert.equal(typeof c.current.tempC, 'number');
-  assert.equal(typeof c.current.conditionCode, 'number');
+  assert.equal(typeof c.temperature_c, 'number');
+  assert.equal(typeof c.condition.code, 'number');
   assert.equal(M.dnValidateCache(c), true);
 });
 test('3-day forecast: exactly the free-plan-supported count is accepted, each entry validated', () => {
@@ -132,11 +138,11 @@ test('3-day forecast: exactly the free-plan-supported count is accepted, each en
   assert.equal(M.dnValidateCache(c), true);
 });
 test('sunrise/sunset: present as 24-hour strings, required for validation to pass', () => {
-  assert.equal(M.dnValidateCache(fixtureCache({ astro: { sunrise: '06:02', sunset: '18:14' } })), true);
-  assert.equal(M.dnValidateCache(fixtureCache({ astro: null })), false, 'missing astro must fail validation');
-  assert.equal(M.dnValidateCache(fixtureCache({ astro: { sunrise: '06:02' } })), false, 'missing sunset must fail validation');
+  assert.equal(M.dnValidateCache(fixtureCache({ sunrise: '06:02', sunset: '18:14' })), true);
+  assert.equal(M.dnValidateCache(fixtureCache({ sunrise: undefined })), false, 'missing sunrise must fail validation');
+  assert.equal(M.dnValidateCache(fixtureCache({ sunset: undefined })), false, 'missing sunset must fail validation');
 });
-test('cache expiration: a fetchedAt older than the staleness window is correctly detected as stale', () => {
+test('cache expiration: an updated_at older than the staleness window is correctly detected as stale', () => {
   const staleTs = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(); // 2h old > 90min threshold
   assert.equal(M.dnIsFresh(staleTs, 90 * 60 * 1000), false);
 });
@@ -146,14 +152,14 @@ test('cache expiration boundary: just inside the window is fresh, just outside i
   assert.equal(M.dnIsFresh(insideTs, 90 * 60 * 1000), true);
   assert.equal(M.dnIsFresh(outsideTs, 90 * 60 * 1000), false);
 });
-test('dnIsFresh() never throws on a malformed/missing fetchedAt -- treated as not fresh', () => {
+test('dnIsFresh() never throws on a malformed/missing updated_at -- treated as not fresh', () => {
   assert.equal(M.dnIsFresh(undefined, 90 * 60 * 1000), false);
   assert.equal(M.dnIsFresh(null, 90 * 60 * 1000), false);
   assert.equal(M.dnIsFresh('not-a-date', 90 * 60 * 1000), false);
   assert.equal(M.dnIsFresh('', 90 * 60 * 1000), false);
 });
-test('malformed response: missing current.tempC fails validation without throwing', () => {
-  assert.equal(M.dnValidateCache(fixtureCache({ current: { conditionCode: 1000 } })), false);
+test('malformed response: missing temperature_c fails validation without throwing', () => {
+  assert.equal(M.dnValidateCache(fixtureCache({ temperature_c: undefined })), false);
 });
 test('malformed response: missing forecast array, or a forecast entry missing required fields, fails validation', () => {
   assert.equal(M.dnValidateCache(fixtureCache({ forecast: [] })), false, 'empty forecast array must fail');
@@ -161,6 +167,12 @@ test('malformed response: missing forecast array, or a forecast entry missing re
   assert.equal(M.dnValidateCache(null), false, 'null input must not throw');
   assert.equal(M.dnValidateCache(undefined), false, 'undefined input must not throw');
   assert.equal(M.dnValidateCache('not even an object'), false, 'wrong-type input must not throw');
+});
+test('unknown weather condition code inside a cache still validates and renders (falls back to a safe icon)', () => {
+  const c = fixtureCache({ condition: { code: 9999, text: 'Something unusual' } });
+  assert.equal(M.dnValidateCache(c), true);
+  const data = M.dnCacheToRenderData(c);
+  assert.ok(data.conditionIcon in M.DN_ICONS);
 });
 test('dnCacheToRenderData() maps a valid cache into renderDestinationNow()\'s exact expected shape', () => {
   const data = M.dnCacheToRenderData(fixtureCache({}));
@@ -229,26 +241,17 @@ test('the string "WEATHERAPI_KEY" (the secret env var name) never appears in any
 test('no WeatherAPI key query parameter (key=...) appears anywhere in vilu-website.html', () => {
   assert.ok(!/[?&]key=[A-Za-z0-9]/.test(read('vilu-website.html')), 'a literal key= query string must never appear client-side');
 });
-test('the client never calls api.weatherapi.com directly -- only the keyless GitHub raw-content URL', () => {
+test('the client never calls api.weatherapi.com directly -- only the keyless cache URL on the dedicated, separate repository', () => {
   const html = read('vilu-website.html');
   assert.ok(!html.includes('api.weatherapi.com'), 'the client must never call the WeatherAPI endpoint directly (that would require a client-exposed key)');
-  assert.ok(html.includes('raw.githubusercontent.com'), 'the client must fetch the pre-fetched, keyless cache file instead');
+  assert.ok(html.includes('raw.githubusercontent.com/Raeeshan/vilu-weather-cache/main/weather-cache.json'), 'the client must fetch the pre-fetched, keyless cache file from the dedicated weather-cache repository');
+  assert.ok(!html.includes('raw.githubusercontent.com/Raeeshan/vilu-residence/'), 'the client must not point at this repository -- the automation lives entirely in the separate vilu-weather-cache repository');
 });
-test('scripts/fetch-weather.js reads the key only from process.env, never hardcodes a literal key, and never writes it to its own output', () => {
-  const script = read('scripts/fetch-weather.js');
-  assert.ok(script.includes('process.env.WEATHERAPI_KEY'), 'must read the key from the environment');
-  assert.ok(!/key\s*[:=]\s*['"][A-Za-z0-9]{10,}['"]/.test(script), 'must not contain a hardcoded literal key');
-  // The only place `key` is written is into the outbound request URL; confirm the persisted JSON object never includes a "key" field itself.
-  const outObjectMatch = script.match(/const out = \{[\s\S]*?\n\s*\};/);
-  assert.ok(outObjectMatch, 'could not find the persisted output object literal');
-  assert.ok(!/\bkey\b\s*:/.test(outObjectMatch[0]), 'the persisted weather-cache.json object must never include the API key');
+test('scripts/fetch-weather.js (the fetch/publish automation) does not live in this repository -- it belongs to the separate vilu-weather-cache repository, never touching this one\'s origin/main', () => {
+  assert.equal(fs.existsSync(path.join(ROOT, 'scripts', 'fetch-weather.js')), false, 'fetch-weather.js must not be duplicated into vilu-residence -- its authoritative copy and its own tests live in vilu-weather-cache');
 });
-test('weather-cache.json (the committed placeholder / any future refresh) contains no key-shaped field', () => {
-  if (fs.existsSync(path.join(ROOT, 'weather-cache.json'))) {
-    const cache = JSON.parse(read('weather-cache.json'));
-    assert.equal(Object.prototype.hasOwnProperty.call(cache, 'key'), false);
-    assert.equal(Object.prototype.hasOwnProperty.call(cache, 'apiKey'), false);
-  }
+test('no weather-cache.json is ever committed inside this repository -- it is only ever fetched live from the dedicated repository', () => {
+  assert.equal(fs.existsSync(path.join(ROOT, 'weather-cache.json')), false);
 });
 
 // ---------------------------------------------------------------------------
