@@ -8,11 +8,12 @@
 
 ---
 
-## Master project audit (2026-09-06)
+## Master project audit (2026-09-06) + Phase 47 security architecture audit (2026-09-06, same day)
 
-A full 56-phase repository/production/roadmap audit was completed the same day as the production deploy below, per the owner's "MASTER PROJECT AUDIT + DEFINITIVE ROADMAP + 56/56 COMPLETION PROGRAM" directive. **Result: 18 COMPLETE / 15 PARTIAL / 23 PENDING / 0 CURRENT / 0 BLOCKED — see `VILU_COMPLETION_MATRIX.md` for the full table and evidence.** Two things from that audit matter most for any future session:
+A full 56-phase repository/production/roadmap audit was completed the same day as the production deploy below, per the owner's "MASTER PROJECT AUDIT + DEFINITIVE ROADMAP + 56/56 COMPLETION PROGRAM" directive, followed the same day by a deep-dive Phase 47 (Security) architecture/risk audit per a second owner directive. **Current counts: 18 COMPLETE / 15 PARTIAL / 22 PENDING / 1 CURRENT (Phase 47) / 0 BLOCKED — see `VILU_COMPLETION_MATRIX.md` for the full table and evidence.** What matters most for any future session:
 1. **Phase 14 (Accessibility) was corrected from COMPLETE to PARTIAL** — the prior status wasn't evidence-backed; real gaps exist (no skip-link, incomplete form labeling, zero Lighthouse/axe ever run). Don't re-mark it COMPLETE without an actual audit run.
-2. **Phase 47 (Security Hardening) has concrete, current, file-cited findings** — hardcoded/base64 default credentials still live in `vilu-unified.html`, plus a dead unauthenticated session-restore path in `vilu-agency-portal.html`. Recommended for earlier-than-sequence attention. Full detail in `VILU_COMPLETION_MATRIX.md` Phase 47.
+2. **Phase 47 (Security Hardening) is now CURRENT, not PENDING** — a full architecture map + 7 classified findings (V1-V7) exist, with a proposed migration plan, target architecture, and test plan, **none of it implemented**. Key nuance re-verified first-hand (don't re-derive from scratch): the hardcoded default credentials are a self-healing legacy fallback whose real exploitability depends on whether those 2 specific accounts have already migrated in Firebase Auth — unknown from the repo, deliberately not resolved by exporting Auth data (that's an owner/admin Console check, not a repo audit step). The login-lockout system is **fully dead code** (never called), not just weak. Two separate legacy agency-routing paths inside `vilu-unified.html` were traced and confirmed **dead**, not merely deprecated. Full detail in `VILU_COMPLETION_MATRIX.md` Phase 47 and the audit report itself.
+3. **No authentication code has been changed.** Do not begin implementing the Phase 47 migration plan without a fresh, explicit owner authorization for that specific implementation — the audit authorization does not extend to it.
 
 ## Current phase
 
@@ -57,7 +58,7 @@ Production impact: **YES — hosting-only deploy completed 2026-09-06, commit `d
 
 ## Immediate next action
 
-Monitor the live production site for any owner feedback now that the redesign is public. Per the 2026-09-06 master audit's recommended execution order: Phase 47 (Security Hardening) is flagged for earlier-than-sequence attention given concrete, current findings on the live PMS/Agency Portal; Phase 21 (Performance) should start with an actual Lighthouse/CWV baseline (none has ever been run); Phase 17 (weather visual prototype) is next in the roadmap's own numeric sequence and fully unblocked. **None of these are authorized to start by the audit itself** — each still needs its own explicit owner go-ahead per the standing workflow (see `VILU_DECISIONS.md` §"Standing workflow"). Do not start Phase 2/17 (weather/time), Phase 40 (CRM), or Phase 47 (security) implementation until explicitly authorized for that specific phase.
+Phase 47 (Security Hardening) is now CURRENT with a complete architecture/risk audit and proposed migration plan on record (see `VILU_COMPLETION_MATRIX.md` Phase 47) — **awaiting explicit owner authorization to begin implementation**, plus one owner/admin-side action first: confirm via Firebase Console (not a data export) whether the two default admin/agency accounts have already migrated to real Firebase Auth credentials, which determines how urgently the legacy-fallback code needs to go. Do not begin implementing any part of the Phase 47 migration plan without that specific authorization. Separately, Phase 21 (Performance) should start with an actual Lighthouse/CWV baseline (none has ever been run) and Phase 17 (weather visual prototype) is next in the roadmap's own numeric sequence and fully unblocked — neither is authorized to start by either audit alone; each needs its own explicit owner go-ahead per the standing workflow (see `VILU_DECISIONS.md` §"Standing workflow").
 
 ## Hard blockers
 

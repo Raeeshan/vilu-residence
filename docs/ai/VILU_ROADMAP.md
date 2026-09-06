@@ -150,8 +150,8 @@ Agency lead acquisition, partner onboarding, quotation workflow, group enquiries
 Activities/excursions/South-Ari-experience brand — potential integration with experiences, holiday packages, agency distribution, guest excursion enquiries, destination content. Do not force into the current visual phase.
 
 ### Phase 32 — Security Hardening
-**Status:** PENDING SEPARATE PHASE · **Owner approval required:** YES · **Production impact:** YES
-Historical concerns on record: hardcoded default accounts, base64 password patterns, legacy plaintext storage, localStorage credential behavior, legacy agency login, old BroadcastChannel paths, internal-page exposure, role separation. Full audit: Auth, Firestore, rules, Storage, PMS, Agency Portal, password handling, staff accounts, sessions, internal pages, permissions. No destructive security rewrites during design work.
+**Status:** CURRENT — architecture/risk audit (47A/B in `VILU_COMPLETION_MATRIX.md` numbering) complete 2026-09-06, implementation NOT authorized yet · **Owner approval required:** YES for implementation · **Production impact:** NONE YET (audit only)
+Full architecture map + 7 classified findings (V1-V7) now on record in `VILU_COMPLETION_MATRIX.md` Phase 47 and the 2026-09-06 Phase 47 audit report: self-healing legacy credential fallbacks (exploitability depends on unconfirmed Firebase Auth migration status), a fully dead/never-called login-lockout system, a dead unauthenticated session-restore vestige (confirmed data-access-safe since Firestore rules still gate real reads/writes), a narrower-than-assumed login-form enumeration signal, and two confirmed-dead legacy agency-routing code paths. A migration plan, threat classification, target architecture, and test plan are proposed but **not implemented** — see the audit report for full detail. No destructive security rewrites have occurred.
 
 ### Phase 33 — PMS Reliability / Hardening
 **Status:** PENDING SEPARATE PHASE · **Owner approval required:** YES · **Production impact:** YES
