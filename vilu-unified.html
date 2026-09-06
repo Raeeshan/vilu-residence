@@ -8614,88 +8614,18 @@ function loadLogo(){
   });
 }
 
-// Agency accounts stored in localStorage by PMS User Management
-// Agency credentials can be embedded here by the PMS
-// Format: {email, password, name, role:'agency'}
-var EMBEDDED_AGENCY_USERS = [];
-
-function loadAgencyUsers(){
-  // 1. Try all localStorage keys
-  var found = [];
-  try{
-    var keys = ['vilu_users_sync','vilu_users','vilu_agency_users'];
-    for(var k=0;k<keys.length;k++){
-      var saved = localStorage.getItem(keys[k]);
-      if(saved){
-        var all = JSON.parse(saved);
-        var agencies = all.filter(function(u){return u.role==='agency';});
-        if(agencies.length){ found = agencies; break; }
-      }
-    }
-  }catch(e){}
-  // 2. Merge with embedded users
-  var embedded = EMBEDDED_AGENCY_USERS||[];
-  embedded.forEach(function(eu){
-    if(!found.find(function(f){return f.email.toLowerCase()===eu.email.toLowerCase();})){
-      found.push(eu);
-    }
-  });
-  return found;
-}
-
-function doAgencyLogin(){
-  var email = (document.getElementById('ag-email').value||'').trim().toLowerCase();
-  var pass = (document.getElementById('ag-pass').value||'').trim();
-  var err = document.getElementById('login-err');
-  err.style.display='none';
-  if(!email||!pass){err.textContent='Enter your email and password.';err.style.display='block';return;}
-  var users = loadAgencyUsers();
-  if(!users.length){
-    err.innerHTML='<strong>Cannot find your account.</strong><br><small>Make sure both the PMS and this page are open in the same browser. If the problem persists, contact Vilu Residence at <a href="mailto:Viluresidence@gmail.com" style="color:#b91c1c">Viluresidence@gmail.com</a></small>';
-    err.style.display='block';return;
-  }
-  var user = users.find(function(u){return u.email.toLowerCase()===email && u.password===pass;});
-  if(!user){
-    // Try case-insensitive password too
-    user = users.find(function(u){return u.email.toLowerCase()===email;});
-    if(user){err.textContent='Wrong password. Contact Vilu Residence if you forgot your password.';err.style.display='block';return;}
-    err.textContent='Email not found. Make sure you are using the email Vilu Residence registered for you.';err.style.display='block';return;
-  }
-  currentAgency = user;
-  // Load this agency's bookings
-  try{var mb=localStorage.getItem('vilu_agency_bk_'+user.email);myBookings=mb?JSON.parse(mb):[];}catch(e){myBookings=[];}
-  try{var bl=localStorage.getItem('vilu_agency_blk_'+user.email);myBlocks=bl?JSON.parse(bl):[];}catch(e){myBlocks=[];}
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('agency-app').className='app on';
-  document.getElementById('hdr-agent').textContent=user.name||user.email;
-  document.getElementById('hdr-agency-name').textContent=user.name||'Agency';
-  loadLogo();
-  drawPackages();
-}
-
-function agDoSignout(){
-  currentAgency=null; selectedPkg=null;
-  document.getElementById('login-screen').style.display='';
-  document.getElementById('agency-app').className='app';
-  document.getElementById('ag-pass').value='';
-}
-
-function agShowTab(name, el){
-  ['packages','availability','mybookings','blockroom'].forEach(function(t){
-    document.getElementById('tab-'+t).className = t===name?'':'hidden';
-  });
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
-  if(el) el.classList.add('on');
-  if(name==='packages') drawPackages();
-  if(name==='mybookings') drawMyBookings();
-  if(name==='blockroom') drawMyBlocks();
-  if(name==='availability'){
-    var today=new Date(); var tom=new Date(today); tom.setDate(tom.getDate()+1);
-    document.getElementById('av-ci').value=today.toISOString().slice(0,10);
-    document.getElementById('av-co').value=tom.toISOString().slice(0,10);
-    checkAvailability();
-  }
-}
+// Phase 47 security audit (2026-09-06): this used to be a second, fully
+// separate agency login (EMBEDDED_AGENCY_USERS/loadAgencyUsers/doAgencyLogin/
+// agDoSignout/agShowTab), plaintext-password-comparison, targeting #ag-email/
+// #ag-pass/#agency-app. Confirmed dead and removed: those input elements
+// never existed anywhere in this file's markup (calling this code would have
+// thrown a TypeError reading .value of null before doing anything), and
+// doLogin() above already redirects every real agency profile to the
+// dedicated vilu-agency-portal.html instead, which has its own real,
+// Firebase-Auth-based doAgencyLogin(). The #agency-app markup itself is left
+// in place untouched (inert, never shown by any remaining code path) rather
+// than risk editing unrelated layout/CSS in this file for a purely cosmetic
+// gain.
 
 // ── AVAILABILITY ──
 function getAvailability(){
@@ -10599,88 +10529,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // ═══════════════════════════════════════════════════════════
 // SECURITY SYSTEM — Vilu Residence PMS
 // ═══════════════════════════════════════════════════════════
-
-// ── SHA-256 HASHING ──
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// ── LOGIN ATTEMPT TRACKING ──
-var LOGIN_ATTEMPTS = (function(){
-  try { return JSON.parse(localStorage.getItem('vilu_login_attempts')||'{}'); }
-  catch(e) { return {}; }
-})();
-
-function saveLoginAttempts() {
-  localStorage.setItem('vilu_login_attempts', JSON.stringify(LOGIN_ATTEMPTS));
-}
-
-function isAccountLocked(email) {
-  var attempts = LOGIN_ATTEMPTS[email];
-  if(!attempts) return false;
-  if(attempts.count >= 5) {
-    var now = Date.now();
-    if(now - attempts.lockTime < 30 * 60 * 1000) {
-      return Math.ceil((30 * 60 * 1000 - (now - attempts.lockTime)) / 60000);
-    } else {
-      delete LOGIN_ATTEMPTS[email];
-      saveLoginAttempts();
-      return false;
-    }
-  }
-  return false;
-}
-
-function recordFailedAttempt(email) {
-  if(!LOGIN_ATTEMPTS[email]) LOGIN_ATTEMPTS[email] = {count:0};
-  LOGIN_ATTEMPTS[email].count++;
-  if(LOGIN_ATTEMPTS[email].count >= 5) LOGIN_ATTEMPTS[email].lockTime = Date.now();
-  saveLoginAttempts();
-  return Math.max(0, 5 - LOGIN_ATTEMPTS[email].count);
-}
-
-function recordSuccessfulLogin(email) {
-  delete LOGIN_ATTEMPTS[email];
-  saveLoginAttempts();
-  logLoginActivity(email, 'success');
-}
-
-// ── LOGIN ACTIVITY LOG ──
-function logLoginActivity(email, status) {
-  try {
-    var log = JSON.parse(localStorage.getItem('vilu_login_log')||'[]');
-    log.unshift({email:email, status:status, time:new Date().toISOString()});
-    if(log.length > 100) log = log.slice(0,100);
-    localStorage.setItem('vilu_login_log', JSON.stringify(log));
-  } catch(e) {}
-}
-
-// ── SESSION TIMEOUT (2 hours) ──
-var _sessionTimer = null;
-function resetSessionTimer() {
-  if(_sessionTimer) clearTimeout(_sessionTimer);
-  _sessionTimer = setTimeout(function() {
-    if(currentUser) {
-      toast('Session expired — please login again');
-      setTimeout(doLogout, 2000);
-    }
-  }, 2 * 60 * 60 * 1000);
-}
-
-function startSession() {
-  resetSessionTimer();
-  ['click','keydown','touchstart'].forEach(function(evt) {
-    document.addEventListener(evt, resetSessionTimer, {passive:true});
-  });
-}
-
-
-window._doLoginSafe = doLogin;
-
-
+// Phase 47 security audit (2026-09-06): the login-lockout/attempt-tracking
+// system (isAccountLocked/recordFailedAttempt/recordSuccessfulLogin),
+// SHA-256 helper, and 2-hour session-timeout (startSession/resetSessionTimer)
+// that used to live here were verified to have ZERO callers anywhere in this
+// file -- never wired into doLogin()/authenticateUser(), so they provided no
+// actual protection. Removed as confirmed-dead code; Firebase Auth's own
+// server-side protections remain the real, active safeguard. The Security
+// Log viewer below is UNCHANGED and still live (wired into the User
+// Management panel) -- it always showed "No login activity yet" before this
+// removal too, since logLoginActivity() (which populated it) had the same
+// zero-caller problem; removing it changes nothing about what an admin sees.
 
 // ── SECURITY LOG VIEWER ──
 function showLoginLog() {

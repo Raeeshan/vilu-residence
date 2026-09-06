@@ -651,16 +651,22 @@ async function doAgencyLogin(){
     if (authErr.code === 'auth/user-not-found') {
       var migrated = await migrateLegacyAgency(email, pass);
       if (!migrated) {
-        err.textContent='Email not found. Make sure you are using the email Vilu Residence registered for you.';
+        // Phase 47 security audit (2026-09-06): this used to say "Email not
+        // found" (vs. "Wrong password" below) -- a login-form enumeration
+        // signal letting a visitor tell whether a given email is registered.
+        // Normalized to the same generic message as every other failure
+        // case here, matching the PMS's own doLogin() (which was already
+        // uniform) and the "Forgot password" flow below (already correct).
+        err.textContent='Incorrect email or password. Please try again.';
         err.style.display='block';
         return;
       }
     } else if (authErr.code === 'auth/wrong-password') {
-      err.textContent='Wrong password. Contact Vilu Residence if you forgot your password.';
+      err.textContent='Incorrect email or password. Please try again.';
       err.style.display='block';
       return;
     } else {
-      err.textContent='Incorrect email or password.';
+      err.textContent='Incorrect email or password. Please try again.';
       err.style.display='block';
       return;
     }
@@ -1976,9 +1982,16 @@ window.submitBlock=async function(){
 window.checkAvailability=function(){var ci=document.getElementById('av-ci').value;var co=document.getElementById('av-co').value;var el=document.getElementById('av-results');if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Select valid dates.</p>';return;}var nights=Math.round((new Date(co)-new Date(ci))/864e5);var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});var total=ROOMS_LIST.length;el.innerHTML='<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:12px">'+fd(ci)+' \u2192 '+fd(co)+' \u00b7 '+nights+' night'+(nights>1?'s':'')+'</div><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:16px"><div style="font-size:var(--font-size-3xl);font-weight:800;color:#15803d">'+availRooms.length+'<span style="font-size:var(--font-size-md);font-weight:600;margin-left:6px">of '+total+' rooms available</span></div><div style="font-size:var(--font-size-sm);color:#6b7280;margin-top:4px">'+fd(ci)+' \u2192 '+fd(co)+'</div></div>'+(availRooms.length>0?'<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px 20px"><label style="font-size:var(--font-size-sm);font-weight:700;color:#374151;display:block;margin-bottom:10px">HOW MANY ROOMS DO YOU WANT?</label><div style="display:flex;align-items:center;gap:12px"><input type="number" id="av-room-count" min="1" max="'+availRooms.length+'" value="1" style="width:80px;padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:var(--font-size-xl);font-weight:700;text-align:center;font-family:inherit"><span style="font-size:var(--font-size-base);color:#6b7280">rooms (max '+availRooms.length+')</span></div><div style="display:flex;gap:8px;margin-top:14px"><button type="button" onclick="goBlockRooms(\''+ci+'\',\''+co+'\')" style="background:#f59e0b;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Lock Block rooms</button><button type="button" onclick="goBookPackage(\''+ci+'\',\''+co+'\')" style="background:#0096c7;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Book a package</button></div></div>':'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;color:#b91c1c;font-size:var(--font-size-base);font-weight:600">No rooms available for these dates.</div>');};
 window.goBlockRooms=function(ci,co){var count=parseInt(document.getElementById('av-room-count').value)||1;showTab('blockroom',document.querySelector('.tab'));setTimeout(function(){var a=document.getElementById('blk-ci'),b=document.getElementById('blk-co'),c=document.getElementById('blk-rm');if(a)a.value=ci;if(b)b.value=co;if(c)c.value=count;},300);};
 window.goBookPackage=function(ci,co){var count=parseInt(document.getElementById('av-room-count').value)||1;window._selectedRoomCount=count;showTab('packages',document.querySelector('.tab'));setTimeout(function(){var ex=document.getElementById('pkg-notice');if(ex)ex.remove();var n=document.createElement('div');n.id='pkg-notice';n.style.cssText='background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:var(--font-size-sm);color:#1d4ed8;font-weight:600';n.innerHTML='Booking '+count+' room'+(count>1?'s':'')+' \u00b7 '+fd(ci)+' \u2192 '+fd(co);var p=document.getElementById('pkg-cards');if(p&&p.parentElement)p.parentElement.insertBefore(n,p);},300);};
-window.doSignout=function(){currentAgency=null;try{firebase.auth().signOut();}catch(e){}try{localStorage.removeItem('vilu_agency_session');}catch(e){}var ls=document.getElementById('login-screen'),aa=document.getElementById('agency-app'),em=document.getElementById('ag-email'),ps=document.getElementById('ag-pass'),err=document.getElementById('login-err');if(aa){aa.style.display='none';aa.className='app';}if(ls)ls.style.display='';if(em)em.value='';if(ps)ps.value='';if(err){err.textContent='';err.style.display='none';}};
+window.doSignout=function(){currentAgency=null;try{firebase.auth().signOut();}catch(e){}var ls=document.getElementById('login-screen'),aa=document.getElementById('agency-app'),em=document.getElementById('ag-email'),ps=document.getElementById('ag-pass'),err=document.getElementById('login-err');if(aa){aa.style.display='none';aa.className='app';}if(ls)ls.style.display='';if(em)em.value='';if(ps)ps.value='';if(err){err.textContent='';err.style.display='none';}};
 var _origSubmitAgBk=typeof submitAgencyBooking!=='undefined'?submitAgencyBooking:null;window.submitAgencyBooking=function(){if(_origSubmitAgBk)_origSubmitAgBk();setTimeout(function(){if(!myBookings||!myBookings.length)return;var bk=myBookings[0];try{var q=JSON.parse(localStorage.getItem('vilu_agency_new_bk')||'[]');if(!q.find(function(r){return r.id===bk.id;})){q.push(bk);localStorage.setItem('vilu_agency_new_bk',JSON.stringify(q));}}catch(e){}try{var bc=new BroadcastChannel('vilu_pms');bc.postMessage({type:'NEW_BOOKING',reservation:bk});bc.close();}catch(e){}},500);};
-(function(){try{var s=localStorage.getItem('vilu_agency_session');if(s){var u=JSON.parse(s);window.currentAgency=u;var ls=document.getElementById('login-screen'),aa=document.getElementById('agency-app');if(ls)ls.style.display='none';if(aa){aa.style.display='flex';aa.className='app on';}var nameEl=document.getElementById('agency-name');if(nameEl)nameEl.textContent=u.name||u.email;}}catch(e){}})();
+// Phase 47 security audit (2026-09-06): removed a dead session-restore IIFE
+// that read 'vilu_agency_session' from localStorage and set window.currentAgency
+// from it directly, with no Firebase Auth check. Repo-wide grep confirmed this
+// key is never written by any current code path -- the real, active session
+// restore is firebase.auth().onAuthStateChanged() above, which correctly
+// re-verifies against Firebase Auth on every page load. The matching
+// localStorage.removeItem('vilu_agency_session') in doSignout() above was
+// also removed since there is nothing left to clean up.
 </script>
 </body>
 </html>
