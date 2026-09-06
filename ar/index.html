@@ -460,30 +460,38 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
    (less "pasted," more atmospheric) without touching the reveal opacity
    logic above. */
 .vc-below-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,11,20,.4) 0%,rgba(4,11,20,0) 20%,rgba(4,11,20,0) 68%,rgba(4,11,20,.6) 100%);pointer-events:none}
-/* Owner feedback: the previous gradient (0%->.82, 55%->.48, 100%->transparent)
-   dropped from dark to clear quickly enough to read as a visible rectangular
-   edge against the bright photo -- "sharp/boxy," not cinematic. Spread over
-   more stops for a long, gradual dissolve with no perceptible seam, a
-   generous border-radius on the open corners (a soft card, not a cutout),
-   and a light blur so the panel reads as a quiet glass surface rather than
-   a flat color block laid over the photo. */
-/* Owner feedback (round 5): the linear left-to-right band still read as a
-   dark rectangle laid over the photo, even softened -- because a
-   backdrop-filter blur (added in the previous pass) always blurs its own
-   full rectangular box regardless of how transparent the color gradient
-   inside it gets, which re-introduced a hard-edged shape of its own.
-   Dropped the blur entirely and replaced the linear gradient with a radial
-   glow that fades to fully transparent well before this box's own edges
-   (the color stops finish at 78% of the ellipse's own radius, which is
-   itself smaller than the box) -- there is no longer a straight edge or a
-   blurred rectangle anywhere for the eye to read as a "panel," just a soft
-   concentration of darkness behind the text that dissolves in every
-   direction. No border-radius needed: there is no hard shape left to
-   round. */
-.vc-below-text{background:radial-gradient(ellipse 75% 80% at 38% 42%,rgba(4,11,20,.74) 0%,rgba(4,11,20,.56) 32%,rgba(4,11,20,.28) 58%,rgba(4,11,20,.08) 78%,transparent 92%);padding:64px 72px}
-.vc-below .vc-eyebrow{border-color:rgba(255,255,255,.35)}
-.vc-below-links{display:flex;flex-direction:column;gap:10px;margin-top:26px;font-size:var(--font-size-sm)}
-.vc-below-links a{color:var(--teal-light);text-decoration:none;width:max-content}
+/* Owner feedback (round 6): matching an owner-supplied reference image --
+   a sculpted, obviously-curved dark-glass panel with a real (if elegant)
+   shape, not the previous round's soft edgeless glow. Two rounds tried to
+   solve "sharp rectangle" by removing the panel's shape entirely; the
+   reference shows the actual answer was a genuinely large, organic curve,
+   not the absence of an edge. The right side uses an elliptical
+   border-radius whose vertical radius is much larger than the box's own
+   height, which merges the top-right/bottom-right corner curves into one
+   continuous lens-like bulge -- CSS-native, responsive, no clip-path/SVG
+   needed. The left side keeps a large-but-conventional radius so the
+   panel still reads as "one sculpted piece," not two different corner
+   languages. */
+.vc-below-text{position:relative;max-width:600px;background:linear-gradient(160deg,rgba(11,24,42,.92) 0%,rgba(6,16,29,.88) 55%,rgba(4,11,20,.86) 100%);border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 90px rgba(0,4,10,.5),inset 0 1px 0 rgba(255,255,255,.07);border-radius:56px 240px 240px 56px/56px 420px 420px 56px;padding:64px 84px 64px 56px;overflow:hidden}
+/* The panel mirrors to the right in RTL languages (via the shared flex
+   layout), but a physical border-radius/padding does not flip on its own
+   -- without this, the large curve would end up facing away from the
+   shark instead of wrapping around it. Mirror both explicitly. */
+[dir="rtl"] .vc-below-text{border-radius:240px 56px 56px 240px/420px 56px 56px 420px;padding:64px 56px 64px 84px}
+[dir="rtl"] .vc-below-text::before{right:auto;left:-15%}
+/* A soft diagonal highlight in the upper area -- the glass "catches the
+   light" the way real glass/acrylic does, reinforcing the premium
+   material feel instead of a flat color fill. */
+.vc-below-text::before{content:'';position:absolute;top:-45%;right:-15%;width:75%;height:95%;background:radial-gradient(ellipse at center,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 72%);pointer-events:none}
+.vc-below .vc-eyebrow{border-color:rgba(255,255,255,.35);position:relative;z-index:1}
+.vc-below .vc-eyebrow::before{content:'— ';opacity:.85}
+/* Thin divider between the heading and the body copy, matching the
+   reference's quiet rule -- easier and more robust as a top border on the
+   paragraph than a separate empty div. */
+.vc-below .vc-story-sub{position:relative;z-index:1;padding-top:22px;border-top:1px solid rgba(255,255,255,.16);margin-top:24px}
+.vc-below-links{position:relative;z-index:1;display:flex;flex-direction:column;margin-top:28px;font-size:var(--font-size-sm)}
+.vc-below-links a{display:block;color:var(--teal-light);text-decoration:none;padding:14px 0;border-top:1px solid rgba(255,255,255,.12)}
+.vc-below-links a:first-child{border-top:none;padding-top:0}
 .vc-below-links a:hover{color:var(--gold-light)}
 
 /* Pre-reveal dim + gentle scale-in — same trigger already proven on
@@ -508,7 +516,13 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-below.vc-armed .vc-below-scene img{opacity:.82;transform:scale(1.08);transition:opacity 1.3s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1)}
 .vc-below.vc-armed.vc-active .vc-below-scene img{opacity:1;transform:scale(1)}
 @media(max-width:600px){
-  .vc-below-text{background:linear-gradient(180deg,transparent 0%,rgba(4,11,20,.12) 12%,rgba(4,11,20,.35) 24%,rgba(4,11,20,.62) 38%,rgba(4,11,20,.85) 52%);padding:32px 24px}
+  /* Mobile is a genuine adaptation, not a shrunk desktop panel: at full
+     width there is no "left vs right" asymmetry left to preserve, so the
+     card becomes symmetric -- a single large radius on all four corners,
+     matching the reference's curved-card language rather than its
+     specific left-anchored bulge shape (which only makes sense at
+     landscape-ish widths). */
+  .vc-below-text{max-width:none;background:linear-gradient(165deg,rgba(11,24,42,.94) 0%,rgba(4,11,20,.92) 100%);border-radius:32px;padding:36px 28px;margin-top:auto}
   .vc-below-scene img{object-position:center 32%}
 }
 
