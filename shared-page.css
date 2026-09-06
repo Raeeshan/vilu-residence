@@ -755,3 +755,28 @@ body.pkg-sticky-clearance{padding-bottom:calc(74px + env(safe-area-inset-bottom)
   .consent-bar-actions{width:100%}
   .consent-btn{flex:1}
 }
+
+/* ══════════════ CHINA CONVERSION PATH (Phase 27) ══════════════ */
+/* WhatsApp is blocked in mainland China without a VPN. Scoped entirely to
+   html[lang="zh"] so every other locale is byte-for-byte unaffected: the
+   package-enquiry and closing-band CTA pairs (WhatsApp = .btn-primary,
+   Email = .btn-outline in the shared English markup) swap visual roles for
+   zh only -- Email becomes the filled/primary action, WhatsApp becomes the
+   outlined/secondary one, and moves after Email in reading order. Markup,
+   hrefs, onclick tracking, and every other locale are untouched. */
+html[lang="zh"] .pkg-cta a.btn-primary[href^="https://wa.me"],
+html[lang="zh"] .cta-buttons a.btn-primary[href^="https://wa.me"]{
+  order:2;background:transparent;background-image:none;color:var(--text);border:1px solid var(--border-strong)
+}
+html[lang="zh"] .pkg-cta a.btn-primary[href^="https://wa.me"]:hover,
+html[lang="zh"] .cta-buttons a.btn-primary[href^="https://wa.me"]:hover{
+  border-color:var(--accent);color:var(--accent-text);box-shadow:none
+}
+html[lang="zh"] .pkg-cta a.btn-outline[href^="mailto:"],
+html[lang="zh"] .cta-buttons a.btn-outline[href^="mailto:"]{
+  order:1;background:var(--accent);background-image:none;color:var(--accent-ink);border:none
+}
+html[lang="zh"] .pkg-cta a.btn-outline[href^="mailto:"]:hover,
+html[lang="zh"] .cta-buttons a.btn-outline[href^="mailto:"]:hover{
+  background:var(--accent-hover);color:var(--accent-ink);box-shadow:0 8px 24px var(--accent-soft)
+}
