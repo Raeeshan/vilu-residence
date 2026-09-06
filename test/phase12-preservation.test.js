@@ -1139,6 +1139,19 @@ section('Phase 12B-E2B — complete cinematic homepage contracts');
     // dominant image (class="ga-main-img", the first photo) + a thumbnail
     // strip (class="ga-thumb-img", all 6, including the first again) --
     // same 6 real files, still real <img src> markup, just renamed classes.
+    //
+    // Phase 21 performance continuation (2026-09-06): a dedicated-thumbnail
+    // architecture for 2 of these 6 (couple-sunset-beach, buggy-tour) was
+    // attempted twice -- once via srcset+sizes, once via a plain src swap
+    // to a separate derivative file -- and both were reverted after live-
+    // browser testing found the specific derivative files reproducibly
+    // failed to decode in this session's actual page context (confirmed
+    // correct bytes via curl+md5sum, confirmed not a caching artifact via
+    // fresh tab + hard reload + forced re-fetch, root cause not isolated).
+    // Back to the original, simpler, fully-reliable architecture: all 6
+    // thumbnails load the real full-resolution file directly. See
+    // VILU_PROTECTED_CONTRACTS.md §Performance findings before attempting
+    // this again.
     const GALLERY_IMAGES = [
       'vilu-residence-bikini-beach-maldives.jpg', 'vilu-residence-guests-maamigili-sunset.jpg',
       'vilu-residence-guests-lagoon-maldives.jpg', 'vilu-residence-couple-sunset-beach-maldives.jpg',
