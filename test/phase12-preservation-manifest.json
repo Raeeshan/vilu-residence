@@ -10,9 +10,17 @@
   "hreflang_codes": ["en", "zh", "ru", "de", "it", "fr", "ar", "ja", "ko", "sk", "cs", "x-default"],
   "generated_pages_per_language": 14,
   "generated_pages_total": 140,
+  "partial_languages": {
+    "$comment": "Phase 30: Spanish launched deliberately covering only Holiday Packages (evidence-driven scope, not a full 12-page mirror -- see VILU_DECISIONS.md). Kept fully separate from the 'languages'/full-parity fields above so the original 10-language, 140-file invariant stays exact and untouched. A page listed here gets its own hreflang_codes/og_locale_alternate_count (13 and 10 respectively: the base 12/9 plus Spanish) on top of every one of its existing generated mirrors too, since hreflang/OG alternates must list ALL real alternates including the new one.",
+    "es": {
+      "pages": ["holiday-packages.html"],
+      "hreflang_codes": ["en", "zh", "ru", "de", "it", "fr", "ar", "ja", "ko", "sk", "cs", "es", "x-default"],
+      "og_locale_alternate_count": 10
+    }
+  },
   "sitemap": {
     "file": "sitemap.xml",
-    "expected_url_count": 133,
+    "expected_url_count": 134,
     "content_pages_in_sitemap": 13,
     "excluded_pages": ["privacy-policy.html", "cookies.html", "404.html"]
   },

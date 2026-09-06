@@ -6,7 +6,7 @@ const { execSync } = require('child_process');
 
 const SITE_ROOT = 'https://viluresidence.net';
 const IMAGE_SITEMAP_NS = 'http://www.google.com/schemas/sitemap-image/1.1';
-const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs'];
+const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs', 'es'];
 const RTL_LANGS = { ar: true };
 
 // ── Open Graph locale mapping (Phase 13B-1, corrected 13B-1.1) ──
@@ -31,7 +31,7 @@ const RTL_LANGS = { ar: true };
 // so it is completely unaffected by this decision.
 const OG_LOCALE_MAP = {
   ru: 'ru_RU', zh: 'zh_CN', de: 'de_DE', fr: 'fr_FR', it: 'it_IT',
-  ja: 'ja_JP', ko: 'ko_KR', sk: 'sk_SK', cs: 'cs_CZ',
+  ja: 'ja_JP', ko: 'ko_KR', sk: 'sk_SK', cs: 'cs_CZ', es: 'es_ES',
 };
 const OG_LOCALE_EN = 'en_US';
 
@@ -207,13 +207,23 @@ function localizeSocialMeta($, dict, metaNs, lang, outFile) {
   if (locale) {
     if (ogLocaleEl.length) ogLocaleEl.attr('content', locale);
     // og:locale:alternate — one per OTHER language that itself has a real
-    // locale value (English + the other languages in OG_LOCALE_MAP).
+    // locale value (English + the other languages in OG_LOCALE_MAP) AND is
+    // actually generated for THIS page. Phase 30: a partial locale (e.g.
+    // Spanish, initially covering only holiday-packages.html) must not be
+    // advertised as an alternate on pages it doesn't actually have a mirror
+    // for -- so "available for this page" is read from the hreflang
+    // <link> tags already present in the page's own source HTML (kept
+    // accurate per-page, see rewriteHreflangAndCanonical's inputs) rather
+    // than the global LANGS constant every page used to assume uniformly.
     // Arabic has none (see OG_LOCALE_MAP's own comment), so it is never
     // listed as an alternate on any page, including this one when it is
     // itself Arabic (the `if (locale)` guard above already excludes that
     // case entirely).
+    const pageLangs = $('link[rel="alternate"][hreflang]')
+      .map((_, el) => $(el).attr('hreflang')).get()
+      .filter((code) => code && code !== 'en' && code !== 'x-default');
     const alternates = [OG_LOCALE_EN].concat(
-      LANGS.map((l) => OG_LOCALE_MAP[l]).filter((v) => v && v !== locale)
+      pageLangs.map((l) => OG_LOCALE_MAP[l]).filter((v) => v && v !== locale)
     );
     const tags = alternates.map((v) => `<meta property="og:locale:alternate" content="${v}">`).join('\n');
     if (ogLocaleEl.length) ogLocaleEl.after('\n' + tags);
@@ -1066,6 +1076,23 @@ function main() {
     for (const lang of LANGS) {
       const dictPath = `i18n/${lang}.json`;
       if (!fs.existsSync(dictPath)) { console.warn(`SKIPPED ${pageDef.source}/${lang}: no ${dictPath}`); continue; }
+      // Phase 30: partial-locale support. A language may exist (i18n/{lang}.json
+      // present) while only covering SOME pages -- e.g. Spanish launching with
+      // just Holiday Packages rather than a full 12-page mirror. Rather than
+      // emit a "thin mirror" (nav/footer translated, body content silently
+      // falling back to English because applyStaticTranslations() skips
+      // undefined keys), skip generating this page/lang pair entirely when the
+      // page's own metaNs namespace isn't present in the dict -- every existing
+      // fully-translated language already has 100% namespace coverage, so this
+      // never fires for them; it only ever fires for a deliberately partial
+      // locale's not-yet-translated pages.
+      {
+        const dictPreCheck = JSON.parse(fs.readFileSync(dictPath, 'utf8'));
+        if (pageDef.metaNs && (!dictPreCheck.static || dictPreCheck.static[pageDef.metaNs] === undefined)) {
+          console.log(`SKIPPED ${pageDef.source}/${lang}: partial locale, ${pageDef.metaNs} not yet translated`);
+          continue;
+        }
+      }
       const dict = JSON.parse(fs.readFileSync(dictPath, 'utf8'));
       const $ = cheerio.load(srcHtml, { decodeEntities: false });
       applyStaticTranslations($, dict, pageDef.metaNs, pageDef.i18nMode);

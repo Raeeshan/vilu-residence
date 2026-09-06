@@ -31,6 +31,27 @@ function test(name, fn) {
 }
 function section(t) { console.log(`\n# ${t}`); }
 
+// Phase 30: a page covered by a partial locale (currently just Spanish on
+// holiday-packages.html) legitimately carries more hreflang/og:locale:alternate
+// entries than the rest of the site -- these two helpers are the single place
+// that knows which pages that applies to, so every assertion below stays
+// correct without duplicating the exception in four different places.
+function partialLangsForPage(file) {
+  return Object.entries(M.partial_languages || {}).filter(([code, cfg]) => code !== '$comment' && cfg.pages.includes(file)).map(([code]) => code);
+}
+function expectedHreflangCodes(file) {
+  const extra = partialLangsForPage(file);
+  if (!extra.length) return M.hreflang_codes;
+  // All configured partial locales for this page agree on the same full set
+  // by construction (each one's own manifest entry already lists every other
+  // partial locale sharing that page) -- take the first's.
+  return M.partial_languages[extra[0]].hreflang_codes;
+}
+function expectedOgAlternateCount(file) {
+  const extra = partialLangsForPage(file);
+  return extra.length ? M.partial_languages[extra[0]].og_locale_alternate_count : 9;
+}
+
 const cache = new Map();
 // Line endings are normalized to LF here so every assertion below tests the
 // SAME source logic regardless of the checkout's line-ending representation.
@@ -145,9 +166,9 @@ for (const p of M.pages) {
     else { assert.equal(c.length, 1); assert.equal(attr(c[0], 'href'), p.canonical); }
   });
   test(`${p.file}: robots = ${p.robots === null ? '(absent)' : p.robots}`, () => assert.equal(metaByName(html, 'robots'), p.robots));
-  test(`${p.file}: hreflang ${p.hreflang ? 'parity (' + M.hreflang_codes.length + ' codes)' : 'absent'}`, () => {
+  test(`${p.file}: hreflang ${p.hreflang ? 'parity (' + expectedHreflangCodes(p.file).length + ' codes)' : 'absent'}`, () => {
     const codes = linkRel(html, 'alternate').map(t => attr(t, 'hreflang')).filter(Boolean);
-    if (p.hreflang) sameSet(codes, M.hreflang_codes); else assert.equal(codes.length, 0);
+    if (p.hreflang) sameSet(codes, expectedHreflangCodes(p.file)); else assert.equal(codes.length, 0);
   });
   test(`${p.file}: exactly one <h1> = "${p.h1}"`, () => { const h = h1s(html); assert.equal(h.length, 1); assert.equal(h[0], p.h1); });
   test(`${p.file}: JSON-LD types ${JSON.stringify(p.jsonld_types)}`, () => sameSet(jsonLdTypes(html), p.jsonld_types));
@@ -175,13 +196,14 @@ section('URLs / SEO — sitemap');
   const sm = read(M.sitemap.file);
   const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
   test(`sitemap has exactly ${M.sitemap.expected_url_count} URLs`, () => assert.equal(locs.length, M.sitemap.expected_url_count));
-  test('sitemap URL set is exactly the canonical set (12 fully-localized pages x (en + 10 languages), plus any English-only sitemap pages once each)', () => {
+  test('sitemap URL set is exactly the canonical set (12 fully-localized pages x (en + 10 languages), plus any English-only sitemap pages once each, plus any Phase 30 partial-locale pages)', () => {
     const expected = [];
     for (const p of SITEMAP_PAGES) {
       expected.push(M.site_origin + p.url_path);
       if (p.translated !== false) {
         for (const l of M.languages) expected.push(M.site_origin + '/' + l + (p.url_path === '/' ? '/' : p.url_path));
       }
+      for (const code of partialLangsForPage(p.file)) expected.push(M.site_origin + '/' + code + p.url_path);
     }
     sameSet(locs, expected);
   });
@@ -874,7 +896,7 @@ section('Multilingual — generated pages');
       assert.equal(c.length, 1, f.rel);
       const expected = M.site_origin + '/' + f.l + (f.p.url_path === '/' ? '/' : f.p.url_path);
       assert.equal(attr(c[0], 'href'), expected, f.rel);
-      sameSet(linkRel(html, 'alternate').map(t => attr(t, 'hreflang')).filter(Boolean), M.hreflang_codes, f.rel);
+      sameSet(linkRel(html, 'alternate').map(t => attr(t, 'hreflang')).filter(Boolean), expectedHreflangCodes(f.p.file), f.rel);
     }
   });
   test('generated pages keep data-page-type / data-page-slug and the consent DOM', () => {
@@ -894,6 +916,45 @@ section('Multilingual — generated pages');
     assert.ok(read(M.navigation.language_select_source).includes(`aria-label="${M.navigation.language_select_aria_label}"`));
   });
   test('i18n JSON files exist for all 10 languages', () => { for (const l of M.languages) assert.ok(exists(`i18n/${l}.json`), l); });
+}
+
+// ---------------------------------------------------------------------------
+section('Multilingual — Phase 30 partial locale (Spanish)');
+for (const [code, cfg] of Object.entries(M.partial_languages || {})) {
+  if (code === '$comment') continue;
+  test(`i18n/${code}.json exists`, () => assert.ok(exists(`i18n/${code}.json`)));
+  for (const file of cfg.pages) {
+    const pageDef = M.pages.find((p) => p.file === file);
+    const rel = `${code}/${(pageDef && pageDef.generated_out_file) || file}`;
+    test(`${rel}: exists, lang="${code}", self-canonical, ${cfg.hreflang_codes.length}-code hreflang parity`, () => {
+      assert.ok(exists(rel), rel);
+      const html = read(rel);
+      const tag = html.match(/<html\b[^>]*>/)[0];
+      assert.equal(attr(tag, 'lang'), code, rel);
+      const c = linkRel(html, 'canonical');
+      assert.equal(c.length, 1, rel);
+      assert.equal(attr(c[0], 'href'), `${M.site_origin}/${code}/${file}`, rel);
+      sameSet(linkRel(html, 'alternate').map((t) => attr(t, 'hreflang')).filter(Boolean), cfg.hreflang_codes, rel);
+    });
+  }
+  test(`every full-coverage-language mirror of ${cfg.pages.join(', ')} advertises ${code} as an hreflang/OG alternate too`, () => {
+    for (const file of cfg.pages) {
+      const pageDef = M.pages.find((p) => p.file === file);
+      const outFile = (pageDef && pageDef.generated_out_file) || file;
+      for (const l of M.languages) {
+        const rel = `${l}/${outFile}`;
+        const codes = linkRel(read(rel), 'alternate').map((t) => attr(t, 'hreflang')).filter(Boolean);
+        assert.ok(codes.includes(code), `${rel}: missing hreflang="${code}" alternate`);
+      }
+    }
+  });
+  test(`partial locale ${code} generates ONLY its declared page(s), not a thin mirror of every page`, () => {
+    for (const p of CONTENT_PAGES) {
+      if (cfg.pages.includes(p.file)) continue;
+      const rel = `${code}/${p.generated_out_file || p.file}`;
+      assert.ok(!exists(rel), `${rel} should not exist -- ${code} is only declared for ${cfg.pages.join(', ')}`);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2097,7 +2158,8 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
         if (!locale) continue; // page has no og:locale tag at all (none in this project as of Phase 13B-1)
         assert.equal(locale, OG_LOCALE_MAP[l], `${rel}: og:locale doesn't match the documented map`);
         const alternates = allMetaByProperty(html, 'og:locale:alternate');
-        assert.equal(alternates.length, 9, `${rel}: expected 9 og:locale:alternate tags (en_US + the other 8 non-Arabic, non-own languages), got ${alternates.length}`);
+        const expectedCount = expectedOgAlternateCount(p.file);
+        assert.equal(alternates.length, expectedCount, `${rel}: expected ${expectedCount} og:locale:alternate tags, got ${alternates.length}`);
         assert.ok(!alternates.includes(locale), `${rel}: og:locale:alternate incorrectly repeats the page's own locale`);
         assert.ok(alternates.includes('en_US'), `${rel}: og:locale:alternate is missing en_US`);
       }
@@ -2121,7 +2183,8 @@ section('Phase 13B-1 — global SEO localization + safe performance quick wins')
       if (p.translated === false) continue; // English-only sitemap page: no hreflang cluster expected (see p.hreflang check)
       const html = read(p.file);
       const tags = (headOf(html).match(/<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g) || []);
-      assert.equal(tags.length, M.languages.length + 2, `${p.file}: expected ${M.languages.length + 2} hreflang tags (10 languages + en + x-default)`);
+      const expectedCount = expectedHreflangCodes(p.file).length;
+      assert.equal(tags.length, expectedCount, `${p.file}: expected ${expectedCount} hreflang tags`);
     }
   });
 
