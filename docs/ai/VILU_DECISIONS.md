@@ -47,6 +47,12 @@ Owner-approved design/business/technical decisions. These are settled — don't 
 - **Incident on record:** a prior scratch Firebase config / wrong public-root deploy caused a production 404. Never create a scratch `firebase.json`, never change the Hosting public path, never deploy from anywhere but the legitimate repository configuration at the exact approved commit. (Recorded permanently — see `feedback_deploy_public_dir_resolution` in the assistant's own cross-session memory, and now here for repository-level permanence.)
 - The primary/dirty worktree (`C:\Users\hp\vilu-residence`, ~199 pre-existing uncommitted files) must never be used as a build or deploy source, and must never be reset or cleaned.
 
+## Master audit discipline (added 2026-09-06)
+
+- Phase status labels must be evidence-backed, not optimistic — this was tested for real when the 2026-09-06 master audit found Phase 14 (Accessibility) had been marked COMPLETE without a skip-link, without full form labeling, and without ever running an actual accessibility test. It was corrected to PARTIAL. Future sessions should treat "foundation exists" and "phase complete" as genuinely different claims (see `VILU_COMPLETION_MATRIX.md`'s own completion definition) and re-verify a COMPLETE label against the repository before trusting it, especially for anything measurement-based (accessibility, performance) rather than feature-presence-based.
+- A hosting-only production deploy from a feature branch does **not** imply `origin/main` should be fast-forwarded to match — that remains a separate decision requiring its own explicit owner authorization, even though it creates a real (low-risk) traceability gap where `git log origin/main` doesn't reflect what's actually live.
+- Security findings surfaced during an unrelated audit (hardcoded/base64 default credentials, dead unauthenticated code paths — see `VILU_COMPLETION_MATRIX.md` Phase 47) are reported, never silently fixed in passing and never left undocumented — but also not fixed without their own dedicated, owner-authorized security-hardening phase, per the standing rule against casual security rewrites during unrelated work.
+
 ## Guest Account / CRM (Phase 26, added 2026-09-06)
 
 - Marketing consent is a separate decision from account creation — creating a Vilu account never auto-subscribes a guest to marketing. Clear, explicit opt-in required, with working subscribe/unsubscribe/change-preferences at all times.

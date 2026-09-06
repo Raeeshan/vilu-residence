@@ -9,24 +9,23 @@ Status labels (use exactly one per phase): `NOT STARTED` · `PLANNED` · `AUDIT 
 ---
 
 ### Phase 1 — Current Visual Correction
-**Status:** IMPLEMENTATION IN PROGRESS · **Owner approval required:** YES (to merge/deploy) · **Production impact:** NONE YET
-New Island Beach hero, hero brightness, hero loop, hero→section fade transition, Descent redesign, property-photo defect investigation, availability visual refinement, package arrangement redesign, gallery redesign, Dark/Light QA. Full detail in `VILU_CURRENT_STATE.md`.
+**Status:** COMPLETE — DEPLOYED · **Owner approval required:** received 2026-09-06 · **Production impact:** REALIZED
+New Island Beach hero (full 31.2s duration, brightness/color corrected), hero loop, hero→section fade transition, Descent redesign, property-photo defect fixed, availability visual refinement, package arrangement redesign, gallery redesign, Below South Ari curved-panel rebuild, Dark/Light QA — all implemented, tested (546/82/21/13/140 all green), and live on `https://viluresidence.net/`. Full detail in `VILU_CURRENT_STATE.md` and `VILU_COMPLETION_MATRIX.md` Phase 15.
 
 ### Phase 2 — Live Destination Experience: visual prototype
-**Status:** PLANNED · **Owner approval required:** YES · **Production impact:** NONE
-Design-only first: Maamigili local time, current weather, forecast, sunrise/sunset, a transparent glass-like hero treatment. Must not delay or block Phase 1. No live API connection at this stage — see Phase 6.
+**Status:** PLANNED — unblocked, not started · **Owner approval required:** YES · **Production impact:** NONE
+Design-only first: Maamigili local time, current weather, forecast, sunrise/sunset, a transparent glass-like hero treatment. No live API connection at this stage — see Phase 6. Confirmed via 2026-09-06 repository audit: zero weather-related code exists anywhere yet.
 
 ### Phase 3 — Owner Visual Approval
-**Status:** NOT STARTED (blocked on Phase 1) · **Owner approval required:** this phase IS the approval gate · **Production impact:** NONE
-Owner personally reviews desktop/mobile, Dark/Light, hero, packages, gallery, weather prototype, availability, property section, rooms, guides, booking — across everything touched in Phases 1–2.
+**Status:** COMPLETE · **Owner approval required:** this phase WAS the approval gate — satisfied by the explicit 2026-09-06 production-deployment authorization · **Production impact:** NONE (this phase is the gate, not the release)
 
 ### Phase 4 — Production Design Release
-**Status:** BLOCKED BY OWNER APPROVAL · **Owner approval required:** YES · **Production impact:** YES (Hosting-only)
-Controlled Hosting-only release of the approved design, following the exact integration/deploy discipline in `VILU_PROTECTED_CONTRACTS.md` §"Deployment safety rules."
+**Status:** COMPLETE — DEPLOYED 2026-09-06 · **Owner approval required:** received · **Production impact:** YES (Hosting-only, realized)
+Deployed commit `dcfe40b` via `firebase deploy --only hosting --project vilu-residence` (site `viluresidence`), following the exact integration/deploy discipline in `VILU_PROTECTED_CONTRACTS.md` §"Deployment safety rules." **Note:** `origin/main` remains at the pre-redesign `1130e1e3` — this was a Hosting content release, not a git merge; fast-forwarding `main` is a separate, not-yet-authorized decision.
 
 ### Phase 5 — Live Production Verification
-**Status:** NOT STARTED · **Owner approval required:** NO (verification only) · **Production impact:** READ-ONLY CHECKS
-Visual, booking/PMS boundary, analytics, consent, SEO, international, accessibility, performance — all re-verified on the live domain after Phase 4.
+**Status:** COMPLETE · **Owner approval required:** NO (verification only) · **Production impact:** READ-ONLY CHECKS, completed
+Full sweep completed 2026-09-06 on `https://viluresidence.net/`: HTTP 200, hero autoplay/loop/brightness, Dark/Light, mobile 320-430 zero overflow, RU/ZH/AR + Arabic RTL curve-mirroring, booking/PMS smoke test (no reservation submitted), consent/analytics intact, zero real console errors.
 
 ### Phase 6 — Live Maamigili Weather/Time Implementation
 **Status:** NOT STARTED · **Owner approval required:** YES (provider/license/data choice) · **Production impact:** YES (new external dependency)
@@ -178,5 +177,6 @@ Ensure a future AI, years later, can reconstruct the entire project from `docs/a
 - **Phase 12** — cinematic redesign foundation (hero video, dark/light theme system, homepage restructure).
 - **Phase 13A** — global SEO/performance/international-market audit (audit only, no implementation).
 - **Phase 13B-1 / 13B-1.1** — international metadata/schema/internal-linking corrections (JSON-LD localization, OG/Twitter localization, FAQ parity fixes, Arabic locale correction).
-- **Phase 13B-2** — safe Firebase performance architecture (`ensureFirebaseReady()` lazy-init), integrated to `main` and deployed to production (Hosting-only) — this is the current production baseline, `1130e1e328ac8ac0df88f26b5523ff34201c80c0`.
-- **Current: Phase 1 above** — visual correction / Island Beach hero, in progress on `feat/vilu-reference-design-system`, not yet merged or deployed.
+- **Phase 13B-2** — safe Firebase performance architecture (`ensureFirebaseReady()` lazy-init), integrated to `main` and deployed to production (Hosting-only) — this is the production baseline commit in `main`, `1130e1e328ac8ac0df88f26b5523ff34201c80c0`.
+- **Phases 1–5 above** — visual correction / Island Beach hero / Below South Ari rebuild / owner approval / production release / live verification — **all COMPLETE as of 2026-09-06**, deployed to `https://viluresidence.net/` at commit `dcfe40b` (Hosting-only; `origin/main` not yet fast-forwarded to include it — see Phase 4 note above and `VILU_COMPLETION_MATRIX.md` Phase 18).
+- **Next unblocked phase per this roadmap's own sequence:** Phase 2 (Live Destination Experience visual prototype) — not started, needs explicit owner approval to begin, per the 2026-09-06 master-audit reconciliation. See `VILU_COMPLETION_MATRIX.md` for the full 0–55 status table and that audit's recommended execution order, which flags Phase 32 (Security Hardening in this file's numbering) for earlier-than-sequence attention given concrete findings.

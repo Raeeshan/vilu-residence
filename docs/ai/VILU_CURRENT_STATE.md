@@ -4,16 +4,22 @@
 
 **For the full phase-by-phase status of the entire 56-phase project (not just the current one), see [`VILU_COMPLETION_MATRIX.md`](VILU_COMPLETION_MATRIX.md).** This file covers only the currently-active phase in detail.
 
-**Snapshot date: 2026-09-06.**
+**Snapshot date: 2026-09-06 (updated same day after the full master-project audit — see below).**
 
 ---
 
+## Master project audit (2026-09-06)
+
+A full 56-phase repository/production/roadmap audit was completed the same day as the production deploy below, per the owner's "MASTER PROJECT AUDIT + DEFINITIVE ROADMAP + 56/56 COMPLETION PROGRAM" directive. **Result: 18 COMPLETE / 15 PARTIAL / 23 PENDING / 0 CURRENT / 0 BLOCKED — see `VILU_COMPLETION_MATRIX.md` for the full table and evidence.** Two things from that audit matter most for any future session:
+1. **Phase 14 (Accessibility) was corrected from COMPLETE to PARTIAL** — the prior status wasn't evidence-backed; real gaps exist (no skip-link, incomplete form labeling, zero Lighthouse/axe ever run). Don't re-mark it COMPLETE without an actual audit run.
+2. **Phase 47 (Security Hardening) has concrete, current, file-cited findings** — hardcoded/base64 default credentials still live in `vilu-unified.html`, plus a dead unauthenticated session-restore path in `vilu-agency-portal.html`. Recommended for earlier-than-sequence attention. Full detail in `VILU_COMPLETION_MATRIX.md` Phase 47.
+
 ## Current phase
 
-**PHASE 15 — CURRENT VISUAL CORRECTION** (site-wide reference-design pass; see `VILU_COMPLETION_MATRIX.md` for how this maps to the original `VILU_ROADMAP.md` Phase 1 numbering)
-Status: **VISUAL REDESIGN DEPLOYED TO PRODUCTION** — owner explicitly authorized a production hosting deploy of this branch (2026-09-06); all previously-pending visual defects (property white-fade, availability, packages, gallery, hero video/brightness, Below South Ari curved panel) are fixed, verified on preview, and now live on `viluresidence.net`. This closes out the *visual correction* phase's shipping step only — it does **not** mean the wider Vilu project (Phase 2 weather/time, SEO/international expansion, Phase 26 CRM, or any other roadmap phase) is complete. See `VILU_COMPLETION_MATRIX.md` for what remains.
+**PHASE 15 — CURRENT VISUAL CORRECTION — now COMPLETE** (site-wide reference-design pass; see `VILU_COMPLETION_MATRIX.md` for how this maps to the original `VILU_ROADMAP.md` Phase 1 numbering)
+Status: **COMPLETE — DEPLOYED AND VERIFIED ON PRODUCTION.** Owner explicitly authorized a production hosting deploy of this branch (2026-09-06); all previously-pending visual defects (property white-fade, availability, packages, gallery, hero video/brightness, Below South Ari curved panel) are fixed, deployed, and verified live on `viluresidence.net` (full post-deploy sweep completed the same day). This closes out the *visual correction* phase entirely — it does **not** mean the wider Vilu project (Phase 2 weather/time, SEO/international expansion, Phase 40 CRM, Phase 47 security hardening, or any other roadmap phase) is complete. See `VILU_COMPLETION_MATRIX.md` for the full remaining picture.
 Owner approval: **YES — explicit production deployment authorization, 2026-09-06**
-Production impact: **YES — hosting-only deploy completed 2026-09-06, commit `dcfe40b`**
+Production impact: **YES — hosting-only deploy completed 2026-09-06, commit `dcfe40b`, verified live the same day**
 
 ## Branch / commit state
 
@@ -42,7 +48,7 @@ Production impact: **YES — hosting-only deploy completed 2026-09-06, commit `d
 
 ## Not yet done in this phase
 
-- **Final exhaustive Dark/Light/mobile/desktop/multilingual QA** — a solid verification pass was done this session (overflow-checked at all 9 required widths, spot-checked ar/ru/zh/de/ja + Arabic RTL at 390/1440, screenshotted the 4 fixed sections in both themes), but a full page-by-page sweep of every guide page, the full Packages page, and Rooms has not been repeated this session.
+- **Final exhaustive Dark/Light/mobile/desktop/multilingual QA** — a solid verification pass was done this session (overflow-checked at all 9 required widths, spot-checked ar/ru/zh/de/ja + Arabic RTL at 390/1440, screenshotted the 4 fixed sections in both themes, plus a full live-production sweep after deploy), but a full page-by-page sweep of every guide page, the full Packages page, and Rooms has not been repeated this session — folded into `VILU_COMPLETION_MATRIX.md` Phase 51 (Final Technical QA) rather than kept open indefinitely against this phase.
 - Weather/time visual prototype — not started (see below), correctly not blocking this phase.
 
 ## Live Destination Experience (weather/time) — status
@@ -51,7 +57,7 @@ Production impact: **YES — hosting-only deploy completed 2026-09-06, commit `d
 
 ## Immediate next action
 
-Monitor the live production site for any owner feedback now that the redesign is public. If further corrections come back, address them one stage at a time per the standing verbatim-relay workflow (see `VILU_DECISIONS.md` §"Standing workflow"). Do not start Phase 2 (weather/time) or any SEO/international/security/CRM phase until explicitly authorized — the production deploy just completed covers only this visual-correction phase's scope, nothing further.
+Monitor the live production site for any owner feedback now that the redesign is public. Per the 2026-09-06 master audit's recommended execution order: Phase 47 (Security Hardening) is flagged for earlier-than-sequence attention given concrete, current findings on the live PMS/Agency Portal; Phase 21 (Performance) should start with an actual Lighthouse/CWV baseline (none has ever been run); Phase 17 (weather visual prototype) is next in the roadmap's own numeric sequence and fully unblocked. **None of these are authorized to start by the audit itself** — each still needs its own explicit owner go-ahead per the standing workflow (see `VILU_DECISIONS.md` §"Standing workflow"). Do not start Phase 2/17 (weather/time), Phase 40 (CRM), or Phase 47 (security) implementation until explicitly authorized for that specific phase.
 
 ## Hard blockers
 
