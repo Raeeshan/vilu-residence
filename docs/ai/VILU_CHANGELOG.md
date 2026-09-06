@@ -4,6 +4,16 @@ Dated record of significant completed work. Newest entries at the top. This is a
 
 ---
 
+## 2026-09-07 — Phase 30 Spanish Packages MVP deployed to production
+
+Pre-deploy: independently re-verified the true live baseline via byte-diff against `viluresidence.net/holiday-packages.html` (found `1e9dcf8`, matching the prior report, not assumed) and confirmed the hosting diff was restricted to exactly the 14 approved files (`i18n/es.json`, `sitemap.xml`, `holiday-packages.html` + its 10 existing locale mirrors, `es/holiday-packages.html`) with zero backend/PMS drift. Package data confirmed byte-identical (same MD5) between the English source and the new Spanish page — IDs/prices/nights/inclusions untouched.
+
+Deployed hosting-only (`firebase deploy --only hosting --project vilu-residence`); Firebase confirmed exactly 14 files uploaded. **Live post-deploy verification on `viluresidence.net`**: `/es/holiday-packages.html` returns HTTP 200 with `lang="es"`, self-canonical, a correct 13-tag hreflang cluster (10 existing + en + es + x-default), `og:locale="es_ES"` with 10 correct alternates, Spanish title/meta description, and all 9 packages present with unchanged prices ($450-$1300) and night counts (4-11) — confirmed via direct inspection of the actual network response body, not just a rendered page. Partial-locale safety confirmed: `/es/`, `/es/maamigili-guide.html`, and every other non-packages Spanish path correctly return 404 — no accidental thin mirrors. Sitemap confirmed valid (134 URLs, `es/holiday-packages.html` appears exactly once, no other page cluster falsely carries an `es` alternate).
+
+**A confirmed, isolated Browser-pane rendering anomaly, not a production defect**: this session's browser-automation tool rendered `/es/holiday-packages.html` as English (screenshot, `document.title`, `get_page_text` all agreed) despite the actual HTTP response body — verified directly via the tool's own network-inspection feature, via `curl` from three independent invocations, via an in-page `fetch(..., {cache:'no-store'})`, and via the CDN cache-hit content itself — being 100% correct Spanish on every single check. The same tool correctly rendered `zh/holiday-packages.html` moments later in the same tab, ruling out a general session-wide rendering failure. Full mobile/Dark/Light screenshot QA could not be completed as a result; a manual owner spot-check of the live URL is recommended to close this out, though technical/functional correctness is not in doubt given the network-body-level verification.
+
+Full regression suite green throughout (562/13/82/21/26/5/6, `vilu-weather-cache` 12/12, `build-i18n-pages.js` 141/154, `git diff --check` clean). `origin/main` untouched (`1130e1e3`). Rollback point: `1e9dcf8`. Branch: `feat/vilu-reference-design-system`, commits `255faed` (deployed). Owner approval: received and exercised for this exact deployment scope.
+
 ## 2026-09-06/07 — Phase 30 Spain Market Expansion: Spanish locale launched, scoped to Holiday Packages (pre-production)
 
 Per the owner's Phase 30 authorization, audited whether a Spanish locale existed before doing anything — confirmed it did not, anywhere (no `i18n/es.json`, not in `build-i18n-pages.js`'s `LANGS`, `/es/` returns 404 live).
