@@ -621,6 +621,24 @@ async function migrateLegacyAgency(email, pass){
       email: legacy.email, name: legacy.name, role: 'agency',
       company: legacy.company||'', commission: legacy.commission||0
     }, { merge: true });
+    // Phase 47 security cleanup (2026-09-06): scrub the now-redundant
+    // plaintext password from every localStorage key it might appear in on
+    // this device, mirroring migrateLegacyUser()'s equivalent cleanup in
+    // vilu-unified.html -- this was previously missing here, so a completed
+    // agency migration still left a plaintext copy behind on the agency's
+    // own browser even though Firebase Auth now owns the real credential.
+    keys.forEach(function(k){
+      try{
+        var saved = localStorage.getItem(k);
+        if(!saved) return;
+        var all = JSON.parse(saved);
+        var changed = false;
+        all.forEach(function(u){
+          if(u.email && u.email.toLowerCase()===email && u.password){ delete u.password; changed = true; }
+        });
+        if(changed) localStorage.setItem(k, JSON.stringify(all));
+      }catch(e){}
+    });
     return true;
   } catch(e) { return false; }
 }

@@ -8282,12 +8282,26 @@ function hasValidEmail(u){
   return !!(u && typeof u.email === 'string' && u.email);
 }
 
-// Users database — change passwords here
+// Users database — profile placeholders only, no credential material.
 // Load users from localStorage or use default admin only
+//
+// Phase 47 security cleanup (2026-09-06): both accounts below are now
+// confirmed to have real Firebase Auth credentials (verified via Firebase
+// Console, not exported/inspected here), so the hardcoded/base64 bootstrap
+// passwords that used to live in this array are permanently unreachable --
+// authenticateUser() always succeeds via the real signInWithEmailAndPassword
+// call first, and migrateLegacyUser()'s fallback can only ever fire on
+// auth/user-not-found, which can no longer happen for either email. Removed
+// the shipped default credential material itself; kept the two entries
+// (email/role/name/company only) since "always ensure this identity exists
+// in the in-memory USERS list" is still their real purpose -- unrelated to
+// carrying a password. migrateLegacyUser() itself is intentionally NOT
+// removed -- it may still be needed for some other legitimate account this
+// session has no way to inventory (see VILU_COMPLETION_MATRIX.md Phase 47).
 function loadUsers(){
   var DEFAULTS = [
-    {email:'Viluresidence@gmail.com',password:atob('UmFpc2hhbmhhc3NhbjEr'),role:'admin',name:'Raishan Hassan'},
-    {email:'agency@viluresidence.com',password:atob('YWdlbmN5MTIz'),role:'agency',name:'Agency User',company:'Agency'}
+    {email:'Viluresidence@gmail.com',role:'admin',name:'Raishan Hassan'},
+    {email:'agency@viluresidence.com',role:'agency',name:'Agency User',company:'Agency'}
   ];
   try{
     const saved = localStorage.getItem('vilu_users');
@@ -8298,12 +8312,24 @@ function loadUsers(){
       // indefinitely and crash every future load that touched it.
       const arr = JSON.parse(saved).filter(hasValidEmail);
       if(arr && arr.length){
+        // Phase 47 (2026-09-06): scrub any stale plaintext password left over
+        // from before this cleanup shipped, but ONLY for the two accounts
+        // confirmed migrated above -- never touches any other account's
+        // password field, since this session has no way to confirm whether
+        // any other real account still depends on it (see
+        // VILU_COMPLETION_MATRIX.md Phase 47).
+        var MIGRATED_EMAILS = DEFAULTS.map(function(d){return d.email.toLowerCase();});
+        var scrubbed = false;
+        arr.forEach(function(u){
+          if(MIGRATED_EMAILS.indexOf(u.email.toLowerCase())!==-1 && u.password){ delete u.password; scrubbed = true; }
+        });
         // Always ensure agency user exists
         DEFAULTS.forEach(function(def){
           if(!arr.find(function(u){return u.email.toLowerCase()===def.email.toLowerCase();})){
             arr.push(def);
           }
         });
+        if(scrubbed) localStorage.setItem('vilu_users', JSON.stringify(arr));
         return arr;
       }
     }
