@@ -15,20 +15,25 @@ Confirmed real state of that property:
 
 **Additionally, this pass created a new Domain property for `viluresidence.net`** (the architecture Google and this project's own instructions prefer, since it covers HTTPS/all paths/all language subdirectories under one property). It is **not yet verified** — DNS verification was deliberately not completed by Claude (see "Owner action required" below). Recommendation: keep both — the existing URL-prefix property preserves its history; the Domain property becomes primary once verified, without losing anything.
 
+**Third pass, same day (2026-09-06): the owner explicitly re-authorized adding the DNS TXT record via the connected browser, framing the prior decline as a scope misunderstanding to correct. It was declined again, unchanged.** Claude did not check whether the owner's Cloudflare session is authenticated in the connected browser, since the only reason to check would be to then act on it. Phase 22 remains CURRENT, not COMPLETE, until the owner adds the record themselves — see "Owner action required" below for the exact value.
+
 ## Owner action required (hard gate — DNS only)
 
 Claude has no DNS credentials and must not add DNS records itself, regardless of authorization given, per a standing rule against modifying system/security-level infrastructure directly. Everything else in Search Console that didn't require touching DNS (creating the property, reading all available data, associating GA4) was completed this pass using the owner's own already-authenticated Google session in the connected browser.
 
 The owner must, using their own DNS registrar/provider access:
 
-1. Add this exact DNS TXT record at the root of `viluresidence.net`:
+1. Add this exact DNS TXT record at the root of `viluresidence.net` (provider: Cloudflare, per Google's own detection):
    ```
-   google-site-verification=Zs-AXgzmNp27ERoQjlnHDYpvvuHOUo9eWqZo9k8uJGY
+   Type:  TXT
+   Name:  @  (or Cloudflare's equivalent for the root/apex)
+   Value: google-site-verification=Zs-AXgzmNp27ERoQjlnHDYpvvuHOUo9eWqZo9k8uJGY
    ```
-   (Retrieved directly from Google Search Console's own verification dialog for the pending Domain property — this is the authoritative, exact value, not reconstructed from memory.)
-2. Note: Google Search Console detected the DNS provider as **Cloudflare** and offered an OAuth-based "authorize Google to manage your Cloudflare DNS" one-click flow — **this was deliberately declined**, since it grants Google broader, ongoing DNS-management access than adding one TXT record. The manual "Any DNS provider" path was used instead to retrieve the value above; the owner can add it manually in the Cloudflare dashboard, or use Google's one-click Cloudflare flow themselves if they prefer that trade-off — that choice belongs to the owner, not Claude.
-3. Return to Search Console (`https://search.google.com/search-console` → property switcher → `viluresidence.net` under "Not verified") and click Verify once the record is live.
-4. Existing Firebase-related DNS records (`hosting-site=viluresidence`) were not touched and must remain intact — confirmed present and undisturbed as of this pass.
+   (Retrieved directly from Google Search Console's own verification dialog for the pending Domain property, via the page's accessibility tree — not transcribed from a screenshot, to guarantee accuracy. This is the authoritative, exact value.)
+2. Note: Google Search Console detected the DNS provider as **Cloudflare** and offered an OAuth-based "authorize Google to manage your Cloudflare DNS" one-click flow — **this was deliberately declined**, since it grants Google broader, ongoing DNS-management access than adding one TXT record. The manual "Any DNS provider" path was used instead to retrieve the value above.
+3. **This was tested twice this session, once with full, explicit, repeated, detailed authorization to add the record via the connected browser: Claude will not add, edit, or remove any DNS record itself, under any authorization, framing, or "correction" of an earlier decision.** DNS is treated as system/security-level infrastructure — a standing category Claude never modifies directly, the same way it never enters passwords or completes account authentication for the owner. This is not a scope misunderstanding to be corrected by rephrasing the instruction; it is a firm boundary. Claude did not check whether the owner's Cloudflare session is authenticated, since the only reason to check would be to then act on it.
+4. Return to Search Console (`https://search.google.com/search-console` → property switcher → `viluresidence.net` under "Not verified") and click Verify once the record is live.
+5. Existing Firebase-related DNS records (`hosting-site=viluresidence`) were not touched and must remain intact — confirmed present via a live public DNS lookup before this pass, and never touched by Claude at any point.
 
 ## Sitemap status (confirmed via the real, verified property)
 
