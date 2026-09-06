@@ -424,8 +424,14 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
    image), so it genuinely blends into the page instead of presenting as a
    separate designed block. Just the caption, smooth and minimal. Still no
    scroll-jacking, no discrete floating shapes (see VILU_DECISIONS.md). */
-.vc-descent{height:42vh;min-height:260px;display:flex;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
-.vc-descent-caption{position:sticky;top:22vh;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.6vw,30px);color:var(--text-muted);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear;z-index:1}
+/* Owner feedback (round 5): 42vh/260px still read as a large empty hold on
+   a real device -- was effectively a full screen on a shorter viewport.
+   Cut to a genuinely brief strip (14vh, capped 90-160px) -- a beat between
+   sections, not a section of its own. Sticky positioning is dropped: there
+   is no longer enough scroll distance inside the section for "stick while
+   scrolling past" to mean anything, so the caption just sits centered. */
+.vc-descent{height:14vh;min-height:90px;max-height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
+.vc-descent-caption{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(16px,2vw,22px);color:var(--text-muted);text-align:center;opacity:var(--descent-msg-op,1);transition:opacity .3s linear;z-index:1}
 
 /* ── BELOW ── real underwater photography, mask-reveal on scroll into view.
    Replaces the former floating whale/manta/turtle cut-out system (removed —
@@ -454,7 +460,20 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
    generous border-radius on the open corners (a soft card, not a cutout),
    and a light blur so the panel reads as a quiet glass surface rather than
    a flat color block laid over the photo. */
-.vc-below-text{background:linear-gradient(90deg,rgba(4,11,20,.78) 0%,rgba(4,11,20,.66) 30%,rgba(4,11,20,.42) 55%,rgba(4,11,20,.16) 80%,transparent 100%);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);padding:48px 56px 48px 0;border-radius:0 32px 32px 0}
+/* Owner feedback (round 5): the linear left-to-right band still read as a
+   dark rectangle laid over the photo, even softened -- because a
+   backdrop-filter blur (added in the previous pass) always blurs its own
+   full rectangular box regardless of how transparent the color gradient
+   inside it gets, which re-introduced a hard-edged shape of its own.
+   Dropped the blur entirely and replaced the linear gradient with a radial
+   glow that fades to fully transparent well before this box's own edges
+   (the color stops finish at 78% of the ellipse's own radius, which is
+   itself smaller than the box) -- there is no longer a straight edge or a
+   blurred rectangle anywhere for the eye to read as a "panel," just a soft
+   concentration of darkness behind the text that dissolves in every
+   direction. No border-radius needed: there is no hard shape left to
+   round. */
+.vc-below-text{background:radial-gradient(ellipse 75% 80% at 38% 42%,rgba(4,11,20,.74) 0%,rgba(4,11,20,.56) 32%,rgba(4,11,20,.28) 58%,rgba(4,11,20,.08) 78%,transparent 92%);padding:64px 72px}
 .vc-below .vc-eyebrow{border-color:rgba(255,255,255,.35)}
 .vc-below-links{display:flex;flex-direction:column;gap:10px;margin-top:26px;font-size:var(--font-size-sm)}
 .vc-below-links a{color:var(--teal-light);text-decoration:none;width:max-content}
@@ -482,7 +501,7 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .vc-below.vc-armed .vc-below-scene img{opacity:.82;transform:scale(1.08);transition:opacity 1.3s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1)}
 .vc-below.vc-armed.vc-active .vc-below-scene img{opacity:1;transform:scale(1)}
 @media(max-width:600px){
-  .vc-below-text{background:linear-gradient(180deg,rgba(4,11,20,.08) 0%,rgba(4,11,20,.55) 18%,rgba(4,11,20,.84) 36%);padding:32px 24px;border-radius:28px 28px 0 0}
+  .vc-below-text{background:linear-gradient(180deg,transparent 0%,rgba(4,11,20,.12) 12%,rgba(4,11,20,.35) 24%,rgba(4,11,20,.62) 38%,rgba(4,11,20,.85) 52%);padding:32px 24px}
   .vc-below-scene img{object-position:center 32%}
 }
 
