@@ -60,11 +60,11 @@ No third-party keyword-volume tool (Ahrefs/SEMrush/Keyword Planner) was availabl
 
 | Cluster | Intent | Business value | Evidence | Current Vilu page | Recommended target |
 |---|---|---|---|---|---|
-| Whale shark / South Ari | Informational → Commercial investigation | VERY HIGH | Trends: high, year-round (§5); zero GSC clicks yet | Homepage Experiences section (no dedicated page) | Dedicated whale-shark landing page combining the existing guide content with clear package/booking paths |
+| Whale shark / South Ari | Informational → Commercial investigation | VERY HIGH | Trends: high, year-round (§5); zero GSC clicks yet | **`whale-shark-snorkeling.html` already exists (confirmed this pass — substantial, well-structured), linked from homepage** | Not a new page — get the existing page indexed (see `INDEXING_ANALYSIS.md`); consider strengthening internal links/backlinks pointing to it |
 | Maldives local island | Commercial investigation | HIGH | Trends: real volume, routes mostly to "Maafushi" (§5, `COMPETITOR_GAPS.md`) | Homepage "What Is Vilu" section | A page/section explicitly targeting "local island guesthouse" language, since that's the real search term class, not just "Maamigili" |
 | Holiday packages | Commercial investigation → Transactional | VERY HIGH (direct package-sales priority per this phase's own instructions) | Existing full Packages page; Trends shows flatter but real volume | Full Packages page (already exists) | No new page needed — a content/CTR pass, not a build |
 | Accommodation/hotel (Maamigili/South Ari) | Commercial investigation → Transactional | HIGH | GSC: 194 impressions/1 click across this cluster (§2) | Homepage Rooms section | CTR investigation (title/snippet), not a new page |
-| Transport (Male–Maamigili, speedboat, flight) | Informational → Local | HIGH planning/conversion value | No GSC/Trends evidence gathered this pass (would need dedicated Trends query); already a known content gap from Phase 24 audit | None exists | Dedicated transport/planning page — already recommended pre-Phase-23, now reinforced |
+| Transport (Male–Maamigili, speedboat, flight) | Informational → Local | HIGH planning/conversion value | Real SERP evidence this pass: the legacy `.com` site's dedicated transport page ranks organically for "Maamigili speedboat transportation" (`COMPETITOR_GAPS.md` §3b) — direct proof this content class has real search value | **Only a non-indexable FAQ-accordion line on `.net`** (confirmed this pass — plain text, no link, no dedicated URL); a full dedicated page exists on the legacy `.com` site | Build a dedicated transport/planning page on `.net` — now the single sharpest, most directly evidenced content gap in this research (P0, see §15) |
 | Honeymoon / family | Commercial investigation | MEDIUM | No dedicated Trends/GSC evidence this pass | Package inclusions only | Not yet evidenced enough to prioritize a dedicated page |
 | Cost/itinerary/trip-prep | Informational | MEDIUM (assists conversion, low direct value) | No volume evidence gathered this pass | None exists | Known content gap (Phase 24), unchanged by this pass |
 | Diving (vs. snorkeling) | Informational → Commercial | LOW-MEDIUM, no volume evidence this pass | Not researched this pass | — | Needs its own Trends check before prioritizing |
@@ -90,9 +90,11 @@ See the three companion documents for full detail:
 - `INDEXING_ANALYSIS.md` — the 130-not-indexed investigation and priority tiers.
 - `MARKET_INTELLIGENCE.md` — Russia, China, Kazakhstan, Uzbekistan, Spain, Tajikistan findings (from dedicated research this pass).
 
-## 9. Content gap map
+## 9. Content gap map — **corrected this pass after a fresh live check of `viluresidence.net`**
 
-**FACT (carried forward from the Phase 24 audit, still valid, re-confirmed by this pass's query/Trends evidence):** no dedicated transport/getting-there, trip-preparation/packing, itinerary-planning, or cost-breakdown pages exist — content lives only as subsections inside other guides. **This pass adds:** no dedicated whale-shark/manta/snorkeling landing page exists either (that content lives inside the homepage Experiences section and the existing guide pages, not as an independently indexable, internally-linked hub) — and the real query/Trends evidence in §2 and §5 suggests this is now the higher-priority gap of the two, given whale-shark content is Vilu's actual core differentiator and currently has zero measured GSC visibility.
+**CORRECTION:** an earlier version of this section stated "no dedicated whale-shark/manta/snorkeling landing page exists." This was checked directly against the live current site this pass and found **imprecise** — a real, substantial, well-structured dedicated page exists at `whale-shark-snorkeling.html` (confirmed via a real `href` link from the homepage in multiple places, and by loading the page directly: it has a full table of contents — Quick Facts, What the Excursion Involves, group size, who can join, safety, seasonality, pricing, FAQ — genuinely deep content, not a thin stub). **The real gap is not content existence — it's that this page is not yet indexed by Google** (it is one of the 130 "discovered, currently not indexed" pages — see `INDEXING_ANALYSIS.md`) and has zero measured GSC query/click data as a result. This is a meaningfully different, and more encouraging, finding than "the content doesn't exist": the work has already been done; what's missing is Google actually crawling and indexing it, which is a `INDEXING_ANALYSIS.md`-scoped problem, not a new-content-creation problem.
+
+**FACT (carried forward from the Phase 24 audit, still valid, re-confirmed live this pass):** no dedicated transport/getting-there, trip-preparation/packing, itinerary-planning, or cost-breakdown pages exist on `.net` — the homepage contains only a single non-indexable FAQ-accordion line referencing "Getting Here" (confirmed via direct inspection: it is plain text, not a link, with no dedicated URL). **This pass sharpens this finding considerably**: the legacy `viluresidence.com` site has a real, dedicated `/transportation.php` page that **currently ranks organically** for "Maamigili speedboat transportation" (`COMPETITOR_GAPS.md` §3b) — meaning this specific content gap is not hypothetical, it is actively being filled by the old site instead of the new one. **This is now the single most concrete, evidence-backed content gap in this entire research pass** — more so than the whale-shark page, which already exists and only needs indexing, not creation.
 
 ## 10. Package search opportunity (commercial priority #1, per this phase's own instruction)
 
@@ -115,6 +117,27 @@ See the three companion documents for full detail:
 
 **OBSERVATION, not confirmed FACT:** neither SERP check in §7 showed a clearly-rendered AI Overview in the text extraction used, but this method is not a reliable way to confirm absence (AI Overview rendering can vary by account/session/geography, and a text-only extraction can miss it even when present). **RECOMMENDATION:** re-check with a visual screenshot method in a future pass before drawing conclusions about AI Overview presence; do not treat this pass's "not observed" as "confirmed absent."
 
+## 14b. Current-site reconciliation (this pass) — every prior Phase 23 finding, reclassified
+
+Per explicit owner instruction, `viluresidence.com` is the OLD/LEGACY site and `viluresidence.net` is the CURRENT production site. None of this document's substantive findings were ever derived from `.com`'s design, architecture, or content quality — but a fresh live check of `.net` was still performed to verify (not assume) that every finding above holds against the actual current site. Classification key: **STILL VALID** (directly re-confirmed live this pass or sourced from GSC/Trends data independent of either site), **PARTIALLY VALID** (mostly correct, one detail updated), **OLD-SITE ARTIFACT** (a finding that turned out to describe `.com`, not `.net`), **NEEDS FRESH CRAWL DATA** (correct as stated, but resolution depends on Google re-crawling, not on anything checkable today).
+
+| Finding | Classification | Note |
+|---|---|---|
+| §1 Branded/non-branded 33%/67% split | **STILL VALID** | Real GSC data, independent of either site's content |
+| §2 Whale-shark/manta/snorkeling absent from Vilu's own GSC query data | **STILL VALID** | This is a Search Console *data* finding (what people search and click), not a page-existence claim — remains true regardless of the §9 correction below |
+| §3 Germany/Turkey high-impression/low-CTR | **STILL VALID** | Real GSC data |
+| §5 Google Trends (seasonality, Maamigili vs. Maafushi/Dhigurah/Thulusdhoo volume, "dhigurah" rising query) | **STILL VALID** | Sourced entirely from Google Trends, unrelated to either website |
+| §7 "Maamigili hotel" SERP — Vilu named on Tripadvisor/HotelsOne, `.net` itself absent from organic results | **STILL VALID** | Directly re-confirmed live this pass — `.net` still does not appear in this SERP's organic results |
+| §7 "Whale shark Maldives where to see" SERP — Dhigurah dominance | **STILL VALID** | Real SERP data, unrelated to either Vilu website's own content |
+| §9 "No dedicated whale-shark/manta/snorkeling landing page exists" | **PARTIALLY VALID → CORRECTED** | The page exists on `.net` (`whale-shark-snorkeling.html`), is substantial, and is properly linked — the real gap is indexing, not content creation. See correction above. |
+| §9 "No dedicated transport/getting-there page exists" | **STILL VALID, STRENGTHENED** | Confirmed `.net` has no such page (only a non-linked FAQ line); newly confirmed `.com`'s equivalent page actively ranks for a real query — sharpens this into the top content-gap finding |
+| §12 Real Instagram (22.5K+ followers) and Google Business Profile | **STILL VALID** | These are the *business's* real assets (shared across whatever site represents it), not specific to either domain's content |
+| `COMPETITOR_GAPS.md` §3 `viluresidence.com` duplicate-site finding | **STILL VALID, SUBSTANTIALLY EXPANDED** | This pass added a full legacy-only audit (sitemap inventory, indexation count, the transportation-page ranking evidence, a 301-mapping inventory) — see `COMPETITOR_GAPS.md` §3a-3e |
+| `INDEXING_ANALYSIS.md` 130-not-indexed diagnosis | **STILL VALID, STRENGTHENED** | Confirming `whale-shark-snorkeling.html` is genuinely deep, non-thin content that is still unindexed rules out "the content itself is poor quality" as a cause for at least this page, reinforcing the new-site/crawl-priority explanation over a content-quality explanation |
+| Any conclusion about `.net`'s design, architecture, template quality, or internal-linking depth | **N/A — none was ever based on `.com`** | No correction needed; this concern from the owner's instruction did not apply to any finding actually made |
+
+**NEEDS FRESH CRAWL DATA:** whether the indexing-priority-tier recommendations in `INDEXING_ANALYSIS.md` actually improve indexation can only be confirmed once Google re-crawls the site — nothing checkable today resolves this.
+
 ## 15. Priority scoring — P0/P1/P2/P3
 
 Scored on: search demand (real evidence only), commercial value, current position/visibility, competition, Vilu's authority fit, content gap size, market priority, conversion potential, indexability, implementation effort.
@@ -122,12 +145,12 @@ Scored on: search demand (real evidence only), commercial value, current positio
 ### P0 (highest value, evidence-backed, low-to-medium effort)
 1. **Close the "Maamigili hotel" / accommodation direct-ranking gap** — third parties already vouch for Vilu; the site itself doesn't yet appear (§7, §11).
 2. **Investigate the Germany (247 impr/1 click) and Turkey (226 impr/0 clicks) CTR gap** at the specific-query level before any title/snippet change (§3).
-3. **Resolve the `viluresidence.com` duplicate-site situation** — a real, live, separately-ranking older site for the same business exists (`COMPETITOR_GAPS.md`). This is flagged as the closest thing to a "critical defect" this research found; per this phase's own scope, it is reported here, not acted on.
+3. **Resolve the `viluresidence.com` legacy-domain situation** — confirmed this pass to have ≥6 real indexed pages (more than `.net`'s 1) and at least one page actively ranking for a real, valuable non-branded query (`/transportation.php`) that `.net` has no equivalent for. This is the closest thing to a critical, actionable finding this research produced; a full inventory and candidate 301-mapping table is ready in `COMPETITOR_GAPS.md` §3e for if/when the owner authorizes a controlled migration — **no redirect, DNS, or domain action was taken or proposed as executed this pass.**
+4. **Build the missing transport/getting-there page on `.net`** — now the sharpest evidence-backed content gap: the legacy site's equivalent page currently ranks for a real query that the current site cannot capture at all. Independent of any `.com` migration decision, this content should exist on the canonical `.net` site regardless.
 
 ### P1 (strong evidence, larger effort)
-4. Build a dedicated whale-shark/South-Ari landing page/hub — the clearest content gap given real, year-round, evidenced search interest and zero current GSC visibility for the term (§2, §5, §7).
-5. Investigate why 130/132 pages remain "discovered, not indexed" and execute the evidence-based indexing-priority tiers (`INDEXING_ANALYSIS.md`).
-6. Build the previously-identified transport/trip-prep/cost content (Phase 24 gap, reinforced this pass).
+5. **Get the already-built `whale-shark-snorkeling.html` page indexed** — the content already exists and is substantial (confirmed this pass); the gap is Google's crawl/index priority, not content creation. This is now lower-effort than previously stated, since no new page needs to be written.
+6. Investigate why 130/132 pages remain "discovered, not indexed" and execute the evidence-based indexing-priority tiers (`INDEXING_ANALYSIS.md`).
 
 ### P2 (real signal, needs more evidence before committing)
 7. Russia-specific content/localization work (Yandex visibility, "гестхаус" positioning) — see `MARKET_INTELLIGENCE.md`.
