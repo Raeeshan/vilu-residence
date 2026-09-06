@@ -53,6 +53,15 @@ Owner-approved design/business/technical decisions. These are settled — don't 
 - A hosting-only production deploy from a feature branch does **not** imply `origin/main` should be fast-forwarded to match — that remains a separate decision requiring its own explicit owner authorization, even though it creates a real (low-risk) traceability gap where `git log origin/main` doesn't reflect what's actually live.
 - Security findings surfaced during an unrelated audit (hardcoded/base64 default credentials, dead unauthenticated code paths — see `VILU_COMPLETION_MATRIX.md` Phase 47) are reported, never silently fixed in passing and never left undocumented — but also not fixed without their own dedicated, owner-authorized security-hardening phase, per the standing rule against casual security rewrites during unrelated work.
 
+## Search measurement / Google Search Console (Phase 22, added 2026-09-06)
+
+- Domain property (`viluresidence.net`) is the preferred Search Console property type — never a URL-prefix property — since it covers HTTPS, all paths, and all language subdirectories under one property. DNS TXT record is the preferred verification method; don't add a redundant HTML verification file if DNS verification is available.
+- The canonical SEO domain remains `viluresidence.net`. `viluresidence.com` remains a future strategic option only — never treat it as the current canonical domain in any Phase 22+ work.
+- Claude must never add or change a DNS record, and must never attempt Google Search Console verification on the owner's behalf — both require the owner's own registrar/DNS-provider access and Google-account login. This is a hard owner-action gate, not a task Claude can complete or work around.
+- No real GSC query/impression/click/CTR/position data may ever be fabricated or estimated if a Search Console property doesn't yet exist or hasn't returned it — report "not yet available," never invent a plausible-looking number.
+- Phase 22 is measurement/setup infrastructure only. Do not rewrite titles, meta descriptions, URLs, hreflang, or schema architecture during Phase 22 unless a critical indexability defect is found (none was, this pass) — that kind of content work belongs to later, separately-scoped SEO phases.
+- Connecting Search Console does not itself mean "SEO is working" — Phase 22 completion means measurement infrastructure and a baseline exist, not that growth has started. Growth is evaluated in later phases against real data this phase makes possible.
+
 ## Guest Account / CRM (Phase 26, added 2026-09-06)
 
 - Marketing consent is a separate decision from account creation — creating a Vilu account never auto-subscribes a guest to marketing. Clear, explicit opt-in required, with working subscribe/unsubscribe/change-preferences at all times.
