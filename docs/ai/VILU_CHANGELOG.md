@@ -4,6 +4,16 @@ Dated record of significant completed work. Newest entries at the top. This is a
 
 ---
 
+## 2026-09-06 — Phase 26 Russia Market Expansion CLOSED: COMPLETE
+
+Final audit against the phase's own 20-item completion checklist, following the owner's confirmation that Yandex Webmaster ownership is verified (HTML-file method) and `sitemap.xml` has been submitted. All items confirmed satisfied: Russian on-site content quality/positioning/metadata (fixed and deployed earlier this same day, `b67a3e5`), technical indexability (canonical/hreflang/sitemap all correct, confirmed live), mobile/Dark/Light QA (all clean), internal linking and package conversion path (already adequate, no changes needed), no fake wildlife guarantees or resort misrepresentation (both reconfirmed), Yandex ownership + sitemap submission (owner-completed and owner-confirmed), `robots.txt` compatibility (no obsolete Yandex directives needed), Yandex.Metrica correctly not added.
+
+**Honest Yandex baseline recorded, nothing invented**: ownership verified, sitemap submitted and in Yandex's own processing queue; no indexed-page count, query, impression, click, or position data exists yet, since Yandex's own documentation states initial processing can take roughly 1-2 weeks. A Russia measurement plan (Yandex Webmaster indexing/query reports, Google Search Console filtered to Country=Russia/`​/ru/`, GA4 segmented by language=ru using already-existing events — no new tracking or taxonomy) and a prioritized, legitimate-channels-only Russia off-page/distribution operating plan (Level.Travel category listing, existing OTA-listing polish, Russian travel-blog/editorial outreach, the real "русские на Мальдивах" Telegram community, VK/Yandex Business flagged as needing more evidence first) are both recorded in full in `VILU_DECISIONS.md`.
+
+**Standing completion principle established by this closure**: a phase's implementation can be COMPLETE while external growth outcomes it doesn't control (crawler timing, rankings, third-party listing approvals) remain open-ended, ongoing-monitoring items rather than completion blockers — this is now the precedent for any future phase with a similar external dependency.
+
+No production changes this pass — this was a documentation/reconciliation close-out only, as instructed; a final live spot-check (ru homepage, the Yandex verification file, sitemap, robots.txt) found zero defects, so none were needed. **Phase 26 moves PARTIALLY COMPLETE → COMPLETE.** Updated roadmap: 27 COMPLETE / 12 PARTIAL / 17 PENDING = 56 total. Branch: `feat/vilu-reference-design-system`. Owner approval: received (Yandex verification + sitemap submission performed by the owner; phase-closure decision authorized this pass). Production impact: NONE (no new deploy — the underlying Russian copy fixes and verification file were already live from the two prior passes).
+
 ## 2026-09-06 — Phase 26 Russian copy improvements deployed to production; Yandex verification prepared
 
 Per explicit authorization, deployed ONLY the 5 approved Phase 26 Russian copy fixes to production, then prepared (research only, no implementation) the Yandex Webmaster verification path.
