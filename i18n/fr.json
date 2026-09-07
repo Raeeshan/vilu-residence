@@ -21,7 +21,7 @@
       "guides": "Guides et blog"
     },
     "hero": {
-      "badge": "Atoll d'Ari Sud · Maldives",
+      "badge": "Atoll de Sud Ari · Maldives",
       "titlePrefix": "Vilu",
       "titleEmphasis": "Residence",
       "subtitle": "Une pension chaleureuse et accueillante au cœur des Maldives",
@@ -71,7 +71,7 @@
       "tag": "À propos de nous",
       "titlePrefix": "Votre chez-vous",
       "titleEmphasis": "au paradis",
-      "desc": "Niché dans l'atoll d'Ari Sud, Vilu Residence Maamigili propose une expérience intimiste de charme, entourée par la beauté naturelle des Maldives. Nous croyons que chaque hôte mérite une attention personnalisée, des expériences authentiques et un lien sincère avec ce coin du monde remarquable.",
+      "desc": "Niché dans l'atoll de Sud Ari, Vilu Residence Maamigili propose une expérience intimiste de charme, entourée par la beauté naturelle des Maldives. Nous croyons que chaque hôte mérite une attention personnalisée, des expériences authentiques et un lien sincère avec ce coin du monde remarquable.",
       "feat1Title": "Snorkeling et plongée",
       "feat1Text": "Un récif d'exception à quelques minutes",
       "feat2Title": "Excursions entre îles",
@@ -163,7 +163,7 @@
       "tag": "Logistique de voyage",
       "titlePrefix": "Comment",
       "titleEmphasis": "venir",
-      "intro": "Vilu Residence se trouve dans l'atoll d'Ari Sud ; pour venir jusqu'à nous, il faut une correspondance depuis l'aéroport international de Velana. Choisissez l'option qui convient à vos dates et à votre budget.",
+      "intro": "Vilu Residence se trouve dans l'atoll de Sud Ari ; pour venir jusqu'à nous, il faut une correspondance depuis l'aéroport international de Velana. Choisissez l'option qui convient à vos dates et à votre budget.",
       "arrival": "Arrivée",
       "departure": "Départ",
       "duration": "Durée",
@@ -213,7 +213,7 @@
       "sendButton": "Envoyer le message →"
     },
     "footer": {
-      "desc": "Une pension accueillante dans l'atoll d'Ari Sud, offrant un service authentique et de véritables expériences maldiviennes.",
+      "desc": "Une pension accueillante dans l'atoll de Sud Ari, offrant un service authentique et de véritables expériences maldiviennes.",
       "navigate": "Navigation",
       "roomsHeading": "Chambres",
       "info": "Infos",
@@ -226,7 +226,8 @@
       "southAriGuides": "Guides de Sud Ari",
       "plan": "Planifier",
       "brandLine": "Vivez Sud Ari.",
-      "positioning": "Organisation premium de vacances aux Maldives depuis Maamigili, atoll d'Ari Sud – requins-baleines, raies mantas et vie insulaire locale, avec notre propre maison d'hôtes de six chambres, Vilu Residence, comme point de départ."
+      "positioning": "Organisation premium de vacances aux Maldives depuis Maamigili, atoll de Sud Ari – requins-baleines, raies mantas et vie insulaire locale, avec notre propre maison d'hôtes de six chambres, Vilu Residence, comme point de départ.",
+      "findUsOnMaps": "Retrouvez-nous sur Google Maps"
     },
     "bookingPopup": {
       "title": "Réservez votre séjour",
@@ -237,7 +238,7 @@
       "bookYourStay": "Vilu Residence — Réservez votre séjour",
       "close": "Fermer",
       "findRoom": "Trouvez la chambre idéale",
-      "roomsAvailable": "6 chambres disponibles dans l'atoll d'Ari Sud, Maamigili · Réservation directe, meilleurs tarifs garantis",
+      "roomsAvailable": "6 chambres disponibles dans l'atoll de Sud Ari, Maamigili · Réservation directe, meilleurs tarifs garantis",
       "checkin": "Arrivée",
       "checkout": "Départ",
       "adults": "Adultes",
@@ -384,16 +385,16 @@
       "tabFaq": "FAQ"
     },
     "seo": {
-      "title": "Vilu Residence — Maison d'hôtes à Maamigili, Atoll de Ari Sud",
-      "description": "Maison d'hôtes de charme à Maamigili, atoll d'Ari Sud : snorkeling avec requins-baleines et raies manta, plage facilement accessible, hospitalité locale chaleureuse."
+      "title": "Vilu Residence — Maison d'hôtes à Maamigili, Atoll de Sud Ari",
+      "description": "Maison d'hôtes de charme à Maamigili, atoll de Sud Ari : snorkeling avec requins-baleines et raies manta, plage facilement accessible, hospitalité locale chaleureuse."
     },
     "alt": {
-      "heroWhaleShark": "Requin-baleine nageant près de la surface dans l'atoll d'Ari Sud, Maldives",
+      "heroWhaleShark": "Requin-baleine nageant près de la surface dans l'atoll de Sud Ari, Maldives",
       "heroMantaRay": "Raie manta glissant dans une eau claire près de Maamigili, Maldives",
       "heroTurtle": "Plongeurs en apnée nageant aux côtés d'une tortue de mer aux Maldives",
       "heroMantaSilhouette": "Silhouette d'une raie manta vue d'en dessous dans une eau turquoise des Maldives",
       "heroWhaleShark2": "Requin-baleine se nourrissant près de la surface au large de Maamigili, Maldives",
-      "heroDolphins": "Groupe de dauphins nageant au large de l'atoll d'Ari Sud",
+      "heroDolphins": "Groupe de dauphins nageant au large de l'atoll de Sud Ari",
       "aboutPhoto": "Cour intérieure et bâtiment de la maison d'hôtes Vilu Residence à Maamigili"
     },
     "experiences": {
@@ -575,7 +576,8 @@
       "concP1": "Maamigili n'essaie pas d'être une île-resort, et c'est justement le propos. C'est une île maldivienne active qui se trouve avoir à ses côtés l'une des zones de requins-baleines les plus fiables de la planète, avec son propre aéroport, un véritable village, et des tarifs de guesthouse plutôt que de resort. Pour les voyageurs qui veulent un accès direct à cette vie marine — des requins-baleines tous les mois de l'année, des mantas en saison, des tortues et une vie récifale entre les deux — sans le coût ni la bulle autonome d'un resort privé, c'est une option réellement solide, pas seulement un compromis économique.",
       "concP2": "Les compromis sont réels, et à connaître avant d'atterrir : pas d'alcool sur l'île, une tenue modeste en dehors de Bikini Beach, et une destination plus petite et plus tranquille que l'image de carte postale des Maldives version resort. Pour le bon voyageur, ce ne sont pas des inconvénients — c'est ce qui donne au séjour l'impression d'être les Maldives au-delà de la brochure.",
       "htrGtmLink": "Pour la vision complète — horaires d'arrivée et de départ, correspondances internationales, perturbations météo et ce qu'il faut prévoir avant de voler — consultez notre <a href=\"getting-to-maamigili.html\">guide dédié pour se rendre à Maamigili</a>.",
-      "sunsetCaption": "Coucher de soleil sur Maamigili — la petite île locale au cœur de chaque séjour Vilu."
+      "sunsetCaption": "Coucher de soleil sur Maamigili — la petite île locale au cœur de chaque séjour Vilu.",
+      "introP4": "Ce guide est rédigé par l'équipe de <a href=\"/#what-is-vilu\">Vilu Residence</a>, une maison d'hôtes familiale de six chambres basée directement à Maamigili — les détails ici proviennent donc de personnes qui vivent et travaillent sur l'île, et non d'un résumé générique de site de voyage."
     },
     "cmpSnorkel": {
       "title": "Les meilleures îles locales des Maldives pour le snorkeling",
@@ -646,7 +648,7 @@
       "p3": "Les vols internationaux vers Malé, la correspondance en vol intérieur ou en bateau rapide, et toute activité supplémentaire au-delà de ce qui est inclus dans un forfait méritent d'être budgétisés séparément."
     },
     "blogThings": {
-      "title": "Que faire à Maamigili, Atoll de Ari Sud",
+      "title": "Que faire à Maamigili, Atoll de Sud Ari",
       "intro": "L'attrait principal de Maamigili se trouve dans l'eau juste au large, mais un séjour ici offre plus que les seules excursions.",
       "h1": "Dans l'eau",
       "p1": "Le snorkeling avec les requins-baleines dans l'aire marine protégée de Sud Ari, les sites de raies manta, le snorkeling sur récif et avec les tortues, les excursions sur banc de sable, les croisières au coucher du soleil et les sorties dauphins sont tous organisés en excursions à la journée depuis l'île — tous inclus selon nos différents forfaits vacances en fonction de la durée du séjour.",
@@ -786,18 +788,18 @@
       "breakoutCaption": "Exploration d'une île locale dans l'atoll de Sud Ari — la vie insulaire quotidienne se déroule aux côtés du récif, non à l'écart de lui."
     },
     "wsMeta": {
-      "title": "Snorkeling avec les requins-baleines à Maamigili, atoll de Ari Sud — À quoi s'attendre",
-      "description": "Ce à quoi vous attendre réellement lors d'une excursion de snorkeling avec les requins-baleines depuis Maamigili, atoll de Ari Sud : durée, ce qui se passe si aucun n'est trouvé, qui peut participer, et des chances honnêtes toute l'année — par Vilu Residence."
+      "title": "Snorkeling avec les requins-baleines à Maamigili, atoll de Sud Ari — À quoi s'attendre",
+      "description": "Ce à quoi vous attendre réellement lors d'une excursion de snorkeling avec les requins-baleines depuis Maamigili, atoll de Sud Ari : durée, ce qui se passe si aucun n'est trouvé, qui peut participer, et des chances honnêtes toute l'année — par Vilu Residence."
     },
     "wsPage": {
       "breadcrumb": "Snorkeling avec les requins-baleines",
-      "h1": "Snorkeling avec les requins-baleines à <em>Maamigili, atoll de Ari Sud</em>",
+      "h1": "Snorkeling avec les requins-baleines à <em>Maamigili, atoll de Sud Ari</em>",
       "subtitle": "Une excursion partagée d'environ deux heures et demie au départ de Maamigili pour nager aux côtés de requins-baleines — l'un des rares endroits au monde où l'on peut les rencontrer toute l'année. Voici exactement à quoi vous attendre, y compris ce qui se passe si nous n'en trouvons pas.",
       "tocHeading": "Sur cette page",
       "intro": "Le snorkeling avec les requins-baleines chez Vilu Residence est une excursion partagée au départ de Maamigili, durant généralement environ deux heures et demie. Les requins-baleines sont des animaux sauvages, une rencontre n'est donc jamais garantie — mais si la recherche ne donne rien, les hôtes sont emmenés à la place sur un récif proche pour environ 30 minutes de snorkeling, et Vilu peut proposer une seconde tentative à prix réduit. L'excursion est incluse dans chacun des forfaits vacances actuels de Vilu, ou peut être réservée seule — actuellement à 85 USD par personne, bien qu'il soit préférable de confirmer le tarif actuel directement auprès de nous, car il s'agit d'un tarif opérationnel susceptible de changer.",
       "hQuickFacts": "En bref",
       "qfDurationLabel": "Excursion d'environ 2h30",
-      "qfDurationNote": "Départ de Maamigili, généralement vers 9h00 après le petit-déjeuner.",
+      "qfDurationNote": "Départ de <a href=\"maamigili-guide.html\">Maamigili</a>, généralement vers 9h00 après le petit-déjeuner.",
       "qfGroupLabel": "Partagée, min. 2 personnes",
       "qfGroupNote": "Excursions privées possibles sur demande, moyennant un supplément.",
       "qfSwimLabel": "Nageurs peu expérimentés et enfants bienvenus",
@@ -805,27 +807,27 @@
       "qfPriceLabel": "85 USD / personne",
       "qfPriceNote": "Tarif seul — merci de confirmer le tarif actuel auprès de nous.",
       "hExcursion": "Ce que comprend l'excursion",
-      "excursionP1": "Les excursions partent généralement de Maamigili vers 9h00, juste après le petit-déjeuner. Le bateau se dirige vers la zone de l'aire marine protégée de Ari Sud où les requins-baleines ont été actifs récemment, et l'équipage et le guide commencent leurs recherches à partir de là — c'est souvent la partie la plus longue de l'excursion, car trouver un requin un matin donné n'est ni instantané ni garanti.",
+      "excursionP1": "Les excursions partent généralement de Maamigili vers 9h00, juste après le petit-déjeuner. Le bateau se dirige vers la zone de l'aire marine protégée de Sud Ari où les requins-baleines ont été actifs récemment, et l'équipage et le guide commencent leurs recherches à partir de là — c'est souvent la partie la plus longue de l'excursion, car trouver un requin un matin donné n'est ni instantané ni garanti.",
       "excursionP2": "Une fois un requin localisé, le guide explique comment entrer dans l'eau et quoi faire, et les hôtes nagent à ses côtés aussi longtemps que la rencontre le permet naturellement — les requins-baleines se déplacent continuellement, donc le temps passé dans l'eau avec un même animal se compte généralement en quelques minutes à la fois, parfois avec plusieurs approches si le requin reste dans la zone. L'excursion complète, de porte à porte depuis Maamigili, dure environ 2 heures 30 minutes.",
       "hNoSighting": "Si nous ne trouvons pas de requin-baleine",
-      "noSightingP1": "Les requins-baleines sont des animaux sauvages, et une rencontre n'est jamais garantie sur une seule excursion — c'est vrai partout dans le monde, et l'atoll de Ari Sud ne fait pas exception. Ce qui fait vraiment la différence, c'est ce qui se passe ensuite, et la plupart des opérateurs n'en disent pas grand-chose.",
+      "noSightingP1": "Les requins-baleines sont des animaux sauvages, et une rencontre n'est jamais garantie sur une seule excursion — c'est vrai partout dans le monde, et l'atoll de Sud Ari ne fait pas exception. Ce qui fait vraiment la différence, c'est ce qui se passe ensuite, et la plupart des opérateurs n'en disent pas grand-chose.",
       "noSightingTip": "Si la recherche ne donne pas de requin-baleine, les hôtes sont emmenés à la place sur un récif proche pour environ 30 minutes de snorkeling, afin que l'excursion ne soit pas une matinée perdue dans tous les cas. Vilu Residence peut également proposer une seconde tentative à prix réduit un autre jour — nous ne publions pas de montant de réduction fixe, car cela dépend de la situation, mais cela vaut la peine de nous demander directement si cela vous arrive.",
       "hGroupSize": "Excursions partagées, taille du groupe et excursions privées",
       "groupSizeP1": "L'excursion standard aux requins-baleines est une sortie partagée, non privée, et nécessite un minimum de 2 participants pour partir au tarif standard. Si vous réservez le même jour que d'autres hôtes, vous pourriez être regroupés sur le même bateau.",
       "groupSizeP2": "Si vous voyagez seul et que personne d'autre n'est réservé ce jour-là, des frais supplémentaires peuvent s'appliquer. Une excursion entièrement privée peut également être organisée sur demande — nous ne publions pas de tarif fixe pour une excursion privée ici car cela dépend des détails, alors demandez-nous directement si c'est ce que vous recherchez.",
       "groupSizeP3": "Le nombre de membres d'équipage et de guides à bord est ajusté au nombre d'hôtes participants — nous n'appliquons pas de ratio fixe, mais l'augmentons lorsque plus d'hôtes se joignent.",
       "hWhoCanJoin": "Qui peut participer — nageurs, nageurs peu expérimentés et enfants",
-      "whoP1": "Les nageurs peu expérimentés sont les bienvenus, mais doivent informer le personnel de l'hôtel ou le guide avant le départ de leur niveau de natation et s'ils auront besoin d'assistance dans l'eau. Chaque bateau d'excursion transporte des gilets de sauvetage, disponibles gratuitement en cas de besoin — mais un gilet de sauvetage ne signifie pas automatiquement que tout le monde est apte à entrer dans l'eau ce jour-là. Les consignes de sécurité du guide et les conditions réelles de la mer ce jour-là s'appliquent toujours, et priment.",
-      "whoP2": "Les enfants peuvent participer avec l'accord des parents. Les parents doivent informer le personnel de l'hôtel ou le guide du niveau de natation de l'enfant avant l'excursion. Vilu Residence ne recommande pas le snorkeling dans l'eau avec les requins-baleines pour les enfants qui ne nagent pas bien — un enfant jugé inapte à entrer dans l'eau est le bienvenu pour rester sur le bateau et observer depuis là, bien que les frais habituels de l'excursion puissent quand même s'appliquer même si l'enfant reste à bord. Il n'existe pas d'âge minimum fixe unique ; l'aptitude dépend du niveau de natation et du jugement du guide le jour même, discuté avec vous au préalable.",
+      "whoP1": "Les nageurs peu expérimentés sont les bienvenus, mais doivent informer notre équipe ou le guide avant le départ de leur niveau de natation et s'ils auront besoin d'assistance dans l'eau. Chaque bateau d'excursion transporte des gilets de sauvetage, disponibles gratuitement en cas de besoin — mais un gilet de sauvetage ne signifie pas automatiquement que tout le monde est apte à entrer dans l'eau ce jour-là. Les consignes de sécurité du guide et les conditions réelles de la mer ce jour-là s'appliquent toujours, et priment.",
+      "whoP2": "Les enfants peuvent participer avec l'accord des parents. Les parents doivent informer notre équipe ou le guide du niveau de natation de l'enfant avant l'excursion. Vilu Residence ne recommande pas le snorkeling dans l'eau avec les requins-baleines pour les enfants qui ne nagent pas bien — un enfant jugé inapte à entrer dans l'eau est le bienvenu pour rester sur le bateau et observer depuis là, bien que les frais habituels de l'excursion puissent quand même s'appliquer même si l'enfant reste à bord. Il n'existe pas d'âge minimum fixe unique ; l'aptitude dépend du niveau de natation et du jugement du guide le jour même, discuté avec vous au préalable.",
       "hResponsible": "Briefing sécurité et rencontres responsables avec les requins-baleines",
       "responsibleP1": "Avant que quiconque n'entre dans l'eau, le guide donne un briefing sur la sécurité et le comportement à adopter près du requin. Ce n'est pas seulement une question de savoir-vivre en excursion — les Maldives disposent d'une réglementation légale protégeant les requins-baleines (<a href=\"https://corporate.visitmaldives.com/news/press-release/the-maldives-takes-significant-new-step-to-enhance-conservation-of-whale-sharks-with-national-regulation/\" target=\"_blank\" rel=\"noopener\">réglementation n° 2024/R-96</a>), et la respecter est à la fois la loi et la raison pour laquelle les rencontres ici restent bénéfiques pour les requins et pour les futurs visiteurs.",
       "responsibleRules": "<strong>Ce qu'exige la réglementation :</strong> rester à au moins 3 mètres du corps du requin-baleine et 4 mètres de sa queue ; ne jamais le toucher ni s'y accrocher ; s'approcher et nager calmement sur le côté, jamais de face ni par derrière ; ne jamais le poursuivre ni gêner sa trajectoire ; et pas de flash photographique. Les guides informent chaque groupe de cela avant l'entrée dans l'eau, et le font respecter dans l'eau.",
-      "responsibleLink": "Pour la vision complète de l'atoll de Ari Sud — raies manta, îles locales et comment s'y rendre : <a href=\"south-ari-atoll-guide.html\">Guide de l'atoll de Ari Sud →</a>",
+      "responsibleLink": "Pour la vision complète de l'atoll de Sud Ari — raies manta, îles locales et comment s'y rendre : <a href=\"south-ari-atoll-guide.html\">Guide de l'atoll de Sud Ari →</a>",
       "hWeather": "Météo et modifications d'excursion",
       "weatherP1": "Vilu vérifie la météo et les conditions maritimes avant chaque excursion. Si les conditions ne sont pas appropriées, les hôtes en sont informés avant le départ, et l'excursion peut être reportée à un autre jour ou annulée — une réservation à l'avance ne garantit pas à elle seule que l'excursion se déroulera exactement comme prévu.",
       "weatherLink": "Ceci est distinct de l'annulation de votre réservation d'hébergement — pour cela, consultez notre <a href=\"/#travel-info\" onclick=\"if(typeof tiSwitchTab==='function')tiSwitchTab('faq')\">politique générale de réservation et d'annulation →</a>",
       "hBestSeason": "Existe-t-il une meilleure saison ?",
-      "bestSeasonP1": "L'atoll de Ari Sud est l'un des rares endroits au monde où l'on peut rencontrer des requins-baleines toute l'année. Les recherches du <a href=\"https://maldiveswhalesharkresearch.org/research/\" target=\"_blank\" rel=\"noopener\">Maldives Whale Shark Research Programme</a> n'ont trouvé aucun schéma saisonnier marqué dans les observations individuelles au sein de l'aire marine protégée de Ari Sud — contrairement aux destinations où les requins-baleines transitent lors d'une fenêtre de migration étroite, les requins ici semblent utiliser la zone toute l'année, majoritairement de jeunes mâles immatures, dans ce que les chercheurs pensent être une sorte de nurserie.",
+      "bestSeasonP1": "L'atoll de Sud Ari est l'un des rares endroits au monde où l'on peut rencontrer des requins-baleines toute l'année. Les recherches du <a href=\"https://maldiveswhalesharkresearch.org/research/\" target=\"_blank\" rel=\"noopener\">Maldives Whale Shark Research Programme</a> n'ont trouvé aucun schéma saisonnier marqué dans les observations individuelles au sein de l'aire marine protégée de Sud Ari — contrairement aux destinations où les requins-baleines transitent lors d'une fenêtre de migration étroite, les requins ici semblent utiliser la zone toute l'année, majoritairement de jeunes mâles immatures, dans ce que les chercheurs pensent être une sorte de nurserie.",
       "bestSeasonP2": "C'est une affirmation sur la présence, pas une promesse pour une excursion donnée. Une présence toute l'année signifie qu'il n'y a pas de « mauvais » mois pour tenter sa chance — cela ne signifie pas une observation garantie le jour de votre sortie. Un beau temps et une mer calme peuvent offrir une meilleure visibilité sous l'eau et un snorkeling plus confortable, mais nous n'avons pas de preuve que de meilleures conditions augmentent réellement les chances de trouver un requin un matin donné, nous ne l'affirmons donc pas.",
       "bestSeasonLink": "Pour les tendances météo et quand visiter en général : <a href=\"best-time-to-visit.html\">Guide de la meilleure période pour visiter →</a>",
       "hBring": "Que devriez-vous emporter ?",
@@ -850,9 +852,9 @@
       "faqQ4": "S'agit-il d'une excursion privée ?",
       "faqA4": "Non, l'excursion standard est une sortie partagée avec un minimum de 2 participants, et les hôtes réservant pour le même jour peuvent être regroupés sur le même bateau. Une excursion privée peut être organisée sur demande, moyennant un supplément.",
       "faqQ5": "Les nageurs peu expérimentés peuvent-ils participer ?",
-      "faqA5": "Oui, mais les nageurs peu expérimentés doivent informer le personnel de l'hôtel ou le guide avant le départ de leur niveau de natation et s'ils ont besoin d'assistance. Des gilets de sauvetage gratuits sont disponibles sur chaque bateau en cas de besoin, bien que la participation réelle dans l'eau dépende toujours des conditions maritimes et des consignes de sécurité du guide ce jour-là.",
+      "faqA5": "Oui, mais les nageurs peu expérimentés doivent informer notre équipe ou le guide avant le départ de leur niveau de natation et s'ils ont besoin d'assistance. Des gilets de sauvetage gratuits sont disponibles sur chaque bateau en cas de besoin, bien que la participation réelle dans l'eau dépende toujours des conditions maritimes et des consignes de sécurité du guide ce jour-là.",
       "faqQ6": "Les enfants peuvent-ils participer ?",
-      "faqA6": "Les enfants peuvent participer avec l'accord des parents. Les parents doivent informer le personnel de l'hôtel ou le guide du niveau de natation de l'enfant avant l'excursion. Vilu Residence ne recommande pas le snorkeling dans l'eau avec les requins-baleines pour les enfants qui ne nagent pas bien — un enfant jugé inapte à l'eau peut rester sur le bateau à la place, bien que les frais habituels de l'excursion puissent quand même s'appliquer.",
+      "faqA6": "Les enfants peuvent participer avec l'accord des parents. Les parents doivent informer notre équipe ou le guide du niveau de natation de l'enfant avant l'excursion. Vilu Residence ne recommande pas le snorkeling dans l'eau avec les requins-baleines pour les enfants qui ne nagent pas bien — un enfant jugé inapte à l'eau peut rester sur le bateau à la place, bien que les frais habituels de l'excursion puissent quand même s'appliquer.",
       "faqQ7": "Qu'est-ce qui est inclus dans l'excursion ?",
       "faqA7": "L'équipement de snorkeling, les serviettes, les fruits frais et l'eau sont inclus.",
       "faqQ8": "Que dois-je emporter ?",
@@ -864,9 +866,9 @@
       "faqQ11": "Que se passe-t-il en cas de mauvais temps ?",
       "faqA11": "Vilu vérifie la météo et les conditions maritimes avant chaque excursion. Si les conditions ne sont pas appropriées, les hôtes en sont informés avant le départ et l'excursion peut être reportée à un autre jour ou annulée — une réservation à l'avance ne garantit pas que l'excursion se déroulera exactement comme prévu.",
       "faqQ12": "Y a-t-il une meilleure période de l'année pour voir des requins-baleines ?",
-      "faqA12": "L'atoll de Ari Sud est l'un des rares endroits au monde où l'on peut rencontrer des requins-baleines toute l'année, sans schéma saisonnier marqué documenté pour les observations individuelles. Un beau temps peut offrir une meilleure visibilité et un snorkeling plus confortable, mais ne signifie pas une meilleure chance d'observation un jour donné.",
+      "faqA12": "L'atoll de Sud Ari est l'un des rares endroits au monde où l'on peut rencontrer des requins-baleines toute l'année, sans schéma saisonnier marqué documenté pour les observations individuelles. Un beau temps peut offrir une meilleure visibilité et un snorkeling plus confortable, mais ne signifie pas une meilleure chance d'observation un jour donné.",
       "relatedTag": "Voir aussi",
-      "relatedTitle": "Plus de l'<em>atoll de Ari Sud</em>",
+      "relatedTitle": "Plus de l'<em>atoll de Sud Ari</em>",
       "relTag1": "Guide de l'expérience",
       "relTag2": "Guide de destination",
       "relTag3": "Planifiez votre séjour",
@@ -891,7 +893,7 @@
       "intro": "Le snorkeling avec les raies manta depuis Maamigili est une sortie partagée d'environ 2 heures 30. Plutôt que de se rendre systématiquement à un site fixe, nos guides vérifient les observations récentes et les conditions de mer, puis choisissent une zone de recherche à partir de là. Vous pourriez voir des mantas en train de se faire nettoyer, en train de se nourrir, ou simplement de passer — les observations ne sont jamais garanties, mais si nous n'en trouvons pas, nous irons faire du snorkeling sur un récif voisin à la place. Réservable seul à partir de 85 USD par personne, sous réserve de confirmation.",
       "hQuickFacts": "En bref",
       "qfDurationLabel": "Excursion d'env. 2h30",
-      "qfDurationNote": "Départ de Maamigili, généralement vers 9h après le petit-déjeuner.",
+      "qfDurationNote": "Départ de <a href=\"maamigili-guide.html\">Maamigili</a>, généralement vers 9h après le petit-déjeuner.",
       "qfGroupLabel": "Partagée, min. 2 personnes",
       "qfGroupNote": "Sorties privées possibles sur demande, avec supplément.",
       "qfSwimLabel": "Nageurs peu à l'aise et enfants possibles",
@@ -940,7 +942,7 @@
       "hIncluded": "Ce qui est inclus",
       "includedP1": "Le matériel de snorkeling, les serviettes, les fruits frais et l'eau sont inclus dans chaque excursion manta.",
       "hPrice": "Tarif et réservation",
-      "priceP1": "Le snorkeling avec les raies manta est réservable seul à partir de 85 USD par personne, bien que nous recommandions de confirmer le tarif actuel auprès de l'hôtel avant de réserver, car il peut évoluer. Une sortie partagée normale nécessite un minimum de 2 participants ; si vous êtes le seul intéressé, ou si vous préférez y aller en privé, un supplément peut s'appliquer.",
+      "priceP1": "Le snorkeling avec les raies manta est réservable seul à partir de 85 USD par personne, bien que nous recommandions de confirmer le tarif actuel auprès de notre équipe avant de réserver, car il peut évoluer. Une sortie partagée normale nécessite un minimum de 2 participants ; si vous êtes le seul intéressé, ou si vous préférez y aller en privé, un supplément peut s'appliquer.",
       "priceP2": "Le snorkeling avec les raies manta est aussi inclus dans plusieurs des forfaits vacances actuels de Vilu, aux côtés de l'hébergement, du transfert aller-retour et du petit-déjeuner, selon leur propre tarification de forfait.",
       "priceLink": "<a href=\"holiday-packages.html\">Voir nos forfaits vacances actuels →</a>",
       "hFaq": "Questions fréquentes",
@@ -1064,15 +1066,15 @@
     },
     "maaMeta": {
       "title": "Guide de Voyage de Maamigili — L'Île de Vilu Residence",
-      "description": "Guide de voyage de Maamigili, Atoll de Ari Sud : aéroport Villa International, requins-baleines toute l'année au large, et pourquoi séjourner ici plutôt qu'en resort."
+      "description": "Guide de voyage de Maamigili, Atoll de Sud Ari : aéroport Villa International, requins-baleines toute l'année au large, et pourquoi séjourner ici plutôt qu'en resort."
     },
     "maaPage": {
       "breadcrumb": "Guide de Maamigili",
       "subtitle": "Tout ce qu'un voyageur a réellement besoin de savoir sur l'île locale derrière les requins-baleines présents toute l'année dans l'atoll de Sud Ari — comment s'y rendre, quand y aller, et à quoi ressemble vraiment le séjour une fois sur place.",
       "relatedTag": "Continuer la lecture",
-      "relatedTitle": "Explorer davantage <em>l'Atoll de Ari Sud</em>",
+      "relatedTitle": "Explorer davantage <em>l'Atoll de Sud Ari</em>",
       "relTag1": "Guide de Destination",
-      "relTitle1": "Guide de l'Atoll de Ari Sud",
+      "relTitle1": "Guide de l'Atoll de Sud Ari",
       "relTag2": "Guide d'Expérience",
       "relTitle2": "Plongée avec les Requins-Baleines",
       "relTag3": "Planifier le Séjour",
@@ -1205,9 +1207,9 @@
       "relTag2": "Planifier le Séjour",
       "relTitle2": "Forfaits Vacances",
       "relTag3": "Guide de Destination",
-      "relTitle3": "Guide de l'Atoll de Ari Sud",
+      "relTitle3": "Guide de l'Atoll de Sud Ari",
       "ctaTitle": "Les requins-baleines sont ici en toute saison",
-      "ctaText": "Quel que soit le mois qui convient à votre budget et votre emploi du temps, la vie marine de Ari Sud sera là — découvrez comment nos forfaits vacances rassemblent tout cela, ou vérifiez directement les disponibilités.",
+      "ctaText": "Quel que soit le mois qui convient à votre budget et votre emploi du temps, la vie marine de Sud Ari sera là — découvrez comment nos forfaits vacances rassemblent tout cela, ou vérifiez directement les disponibilités.",
       "ctaBook": "Vérifier les disponibilités",
       "ctaWhatsapp": "Demander sur WhatsApp",
       "linkWhaleShark": "En savoir plus sur la saison des requins-baleines dans notre guide de plongée avec les requins-baleines →",
@@ -1309,8 +1311,8 @@
       "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20Sud%20Ari%20vs%20Autres%20R%C3%A9gions%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu."
     },
     "blogThingsMeta": {
-      "title": "Que faire à Maamigili, Atoll de Ari Sud",
-      "description": "Ce qu'il y a à faire à Maamigili, Atoll de Ari Sud, au-delà du snorkeling avec les requins-baleines — excursions en mer, vie insulaire, et conseils pratiques pour votre séjour."
+      "title": "Que faire à Maamigili, Atoll de Sud Ari",
+      "description": "Ce qu'il y a à faire à Maamigili, Atoll de Sud Ari, au-delà du snorkeling avec les requins-baleines — excursions en mer, vie insulaire, et conseils pratiques pour votre séjour."
     },
     "blogThingsPage": {
       "breadcrumb": "Que Faire à Maamigili",
@@ -1331,7 +1333,7 @@
     },
     "ttdMeta": {
       "title": "Que faire à Maamigili — Guide des excursions et activités",
-      "description": "Découvrez les activités à Maamigili et dans l'atoll de Ari Sud — requins-baleines, raies manta, snorkeling sur récif, pêche, croisières et plus, ainsi que les forfaits vacances Vilu Residence."
+      "description": "Découvrez les activités à Maamigili et dans l'atoll de Sud Ari — requins-baleines, raies manta, snorkeling sur récif, pêche, croisières et plus, ainsi que les forfaits vacances Vilu Residence."
     },
     "ttdPage": {
       "ctaWhatsappHref": "https://wa.me/9609903339?text=Bonjour%20!%20J'ai%20lu%20votre%20guide%20des%20activit%C3%A9s%20%C3%A0%20Maamigili%20et%20j'aimerais%20de%20l'aide%20pour%20planifier%20mes%20vacances%20aux%20Maldives%20avec%20Vilu.",
@@ -1342,7 +1344,7 @@
       "tocHeading": "Sur cette page",
       "tocList": "<li><a href=\"#quick-overview\">Aperçu rapide — Ce qui est disponible à Maamigili</a></li><li><a href=\"#whale-shark\">Snorkeling avec les requins-baleines</a></li><li><a href=\"#manta-ray\">Snorkeling avec les raies manta</a></li><li><a href=\"#reef-turtle-nurse\">Snorkeling récif, tortues & requins-nourrices</a></li><li><a href=\"#sandbank-picnic\">Excursion banc de sable & île pique-nique</a></li><li><a href=\"#cruises\">Croisières dauphins & coucher de soleil</a></li><li><a href=\"#fishing\">Expériences de pêche</a></li><li><a href=\"#diving\">Plongée</a></li><li><a href=\"#quieter-touches\">Expériences plus calmes — Photographie, dîner romantique & cinéma sur la plage</a></li><li><a href=\"#island-life\">La vie à Maamigili entre les excursions</a></li><li><a href=\"#holiday-packages-section\">Intégrer vos activités à un forfait vacances</a></li><li><a href=\"#weather\">Météo & changements d'excursion</a></li><li><a href=\"#faq\">Questions fréquentes</a></li>",
       "hOverview": "Aperçu rapide — Ce qui est disponible à Maamigili",
-      "overviewIntro": "Il existe de nombreuses façons de découvrir Maamigili et l'atoll de Ari Sud environnant pendant un séjour à Vilu Residence, du snorkeling avec la vie marine et des excursions sur récif aux croisières, à la pêche et à des expériences de plage plus calmes.",
+      "overviewIntro": "Il existe de nombreuses façons de découvrir Maamigili et l'atoll de Sud Ari environnant pendant un séjour à Vilu Residence, du snorkeling avec la vie marine et des excursions sur récif aux croisières, à la pêche et à des expériences de plage plus calmes.",
       "overviewCat1": "Eau & Snorkeling",
       "overviewCat1List": "Snorkeling avec les requins-baleines, Snorkeling avec les raies manta, Snorkeling avec les tortues, Snorkeling avec les requins-nourrices, Snorkeling sur récif (Fenfushi, Dhiddhoo & Ariyadhoo)",
       "overviewCat2": "Excursions en bateau & sur île",
@@ -1356,10 +1358,10 @@
       "overviewClosing": "Nos forfaits vacances combinent l'hébergement avec des expériences sélectionnées et sont le meilleur point de départ pour planifier lesquelles inclure dans votre séjour.",
       "linkPackagesOverview": "Voir nos forfaits vacances →",
       "hWhaleShark": "Snorkeling avec les requins-baleines",
-      "whaleSharkP1": "L'atoll de Ari Sud est connu pour ses rencontres avec les requins-baleines toute l'année, et Maamigili offre une base pratique pour atteindre les zones de recherche proches. L'excursion est généralement accessible aux amateurs de snorkeling sans nécessiter de certification de plongée, et les observations ne sont jamais garanties. Pour le détail complet — ce que comprend l'excursion, la taille des groupes, ce qui est inclus, et ce qui se passe si aucun requin n'est trouvé ce jour-là — consultez notre guide dédié au snorkeling avec les requins-baleines.",
+      "whaleSharkP1": "L'atoll de Sud Ari est connu pour ses rencontres avec les requins-baleines toute l'année, et Maamigili offre une base pratique pour atteindre les zones de recherche proches. L'excursion est généralement accessible aux amateurs de snorkeling sans nécessiter de certification de plongée, et les observations ne sont jamais garanties. Pour le détail complet — ce que comprend l'excursion, la taille des groupes, ce qui est inclus, et ce qui se passe si aucun requin n'est trouvé ce jour-là — consultez notre guide dédié au snorkeling avec les requins-baleines.",
       "linkWhaleShark": "Lire notre guide complet du snorkeling avec les requins-baleines →",
       "hMantaRay": "Snorkeling avec les raies manta",
-      "mantaRayP1": "Les raies manta de l'atoll de Ari Sud résident toute l'année dans les eaux des Maldives, mais plutôt qu'un site fixe, nos guides vérifient les observations récentes et les conditions marines et choisissent où chercher en fonction. Comme l'excursion requins-baleines, elle est généralement accessible aux amateurs de snorkeling, et les observations ne sont jamais garanties. Pour le détail complet, consultez notre guide dédié au snorkeling avec les raies manta.",
+      "mantaRayP1": "Les raies manta de l'atoll de Sud Ari résident toute l'année dans les eaux des Maldives, mais plutôt qu'un site fixe, nos guides vérifient les observations récentes et les conditions marines et choisissent où chercher en fonction. Comme l'excursion requins-baleines, elle est généralement accessible aux amateurs de snorkeling, et les observations ne sont jamais garanties. Pour le détail complet, consultez notre guide dédié au snorkeling avec les raies manta.",
       "linkMantaRay": "Lire notre guide complet du snorkeling avec les raies manta →",
       "hReefTurtleNurse": "Snorkeling récif, tortues & requins-nourrices",
       "reefIntro": "Quelques excursions sur récif sont également disponibles au-delà des deux excursions phares.",
@@ -1376,7 +1378,7 @@
       "picnicIslandP": "Une excursion sur île distincte, différente de l'excursion banc de sable.",
       "hCruises": "Croisières dauphins & coucher de soleil",
       "hDolphin": "Croisière dauphins",
-      "dolphinP": "Une croisière en bateau dans les eaux autour de l'atoll de Ari Sud à la recherche de dauphins.",
+      "dolphinP": "Une croisière en bateau dans les eaux autour de l'atoll de Sud Ari à la recherche de dauphins.",
       "hSunset": "Croisière coucher de soleil",
       "sunsetP": "Une croisière en bateau programmée pour le coucher du soleil, pour observer le ciel changer de couleur au-dessus de l'eau à la fin de la journée.",
       "hFishing": "Expériences de pêche",
@@ -1390,8 +1392,8 @@
       "hLobster": "Chasse à la langouste",
       "lobsterP": "Une excursion guidée de chasse à la langouste le long du récif.",
       "hDiving": "Plongée",
-      "divingP": "Maamigili et les récifs environnants sont également une base pour la plongée, bien que Vilu Residence n'exploite pas elle-même de sorties de plongée — la plongée ici est organisée par un centre de plongée dûment certifié, et non dans le cadre d'une excursion Vilu. Pour une vision régionale plus complète de la plongée dans l'atoll de Ari Sud, consultez notre guide de voyage de l'atoll de Ari Sud.",
-      "linkDiving": "Lire notre guide complet de l'atoll de Ari Sud →",
+      "divingP": "Maamigili et les récifs environnants sont également une base pour la plongée, bien que Vilu Residence n'exploite pas elle-même de sorties de plongée — la plongée ici est organisée par un centre de plongée dûment certifié, et non dans le cadre d'une excursion Vilu. Pour une vision régionale plus complète de la plongée dans l'atoll de Sud Ari, consultez notre guide de voyage de l'atoll de Sud Ari.",
+      "linkDiving": "Lire notre guide complet de l'atoll de Sud Ari →",
       "hQuieterTouches": "Expériences plus calmes — Photographie, dîner romantique & cinéma sur la plage",
       "quieterIntro": "Tous les aspects d'un séjour à Maamigili ne se passent pas en bateau. Quelques expériences plus calmes sont également disponibles :",
       "hPhotography": "Photographie professionnelle",
@@ -1410,11 +1412,11 @@
       "weatherP": "La météo et les conditions marines peuvent affecter ces excursions, et les sorties peuvent être modifiées, reportées ou annulées lorsque les conditions ne sont pas adaptées. La disponibilité peut aussi dépendre de la planification et de l'activité elle-même. Vilu vérifie les conditions avant chaque excursion et vous informera de tout changement dès que possible.",
       "hFaq": "Questions fréquentes",
       "faqQ1": "Quelle est la différence entre l'excursion requins-baleines et l'excursion raies manta ?",
-      "faqA1": "Les deux sont des excursions de snorkeling dans les eaux autour de l'atoll de Ari Sud, mais elles concernent des animaux différents au comportement différent. Consultez nos guides dédiés à chacun pour le détail complet.",
+      "faqA1": "Les deux sont des excursions de snorkeling dans les eaux autour de l'atoll de Sud Ari, mais elles concernent des animaux différents au comportement différent. Consultez nos guides dédiés à chacun pour le détail complet.",
       "faqQ2": "Ces activités sont-elles incluses dans un forfait vacances, ou réservées séparément ?",
       "faqA2": "Nos forfaits vacances combinent l'hébergement avec des expériences sélectionnées. Les activités incluses dépendent du forfait et de la durée du séjour — consultez notre page <a href=\"holiday-packages.html\">Forfaits vacances</a> ou contactez-nous directement pour connaître les options actuelles.",
       "faqQ3": "Dois-je être plongeur certifié pour l'une de ces activités ?",
-      "faqA3": "Non — chaque excursion listée sur cette page repose sur le snorkeling, le bateau ou la pêche, et ne nécessite pas de certification de plongée. La plongée elle-même est disponible séparément dans l'atoll de Ari Sud via un centre de plongée dûment certifié, et non comme excursion Vilu.",
+      "faqA3": "Non — chaque excursion listée sur cette page repose sur le snorkeling, le bateau ou la pêche, et ne nécessite pas de certification de plongée. La plongée elle-même est disponible séparément dans l'atoll de Sud Ari via un centre de plongée dûment certifié, et non comme excursion Vilu.",
       "faqQ4": "Que se passe-t-il si la météo n'est pas favorable à une excursion ?",
       "faqA4": "La météo et les conditions marines peuvent affecter n'importe laquelle de ces sorties. Vilu vérifie les conditions avant chaque excursion, et une sortie peut être reportée, modifiée ou annulée si les conditions ne sont pas adaptées — nous vous informerons dès que possible.",
       "faqQ5": "Le snorkeling avec les tortues est-il la même excursion que celle des requins-baleines ou des raies manta ?",
@@ -1422,11 +1424,11 @@
       "faqQ6": "Puis-je combiner plusieurs de ces activités pendant un seul séjour ?",
       "faqA6": "Oui — les hôtes peuvent combiner plusieurs expériences pendant leur séjour, et nos forfaits vacances sont conçus pour faciliter la planification conjointe de l'hébergement et des activités sélectionnées.",
       "faqQ7": "Vilu Residence exploite-t-elle elle-même des excursions de plongée ?",
-      "faqA7": "Non. Vilu n'exploite pas la plongée directement — elle est organisée par un centre de plongée dûment certifié dans l'atoll de Ari Sud.",
+      "faqA7": "Non. Vilu n'exploite pas la plongée directement — elle est organisée par un centre de plongée dûment certifié dans l'atoll de Sud Ari.",
       "faqQ8": "Où puis-je trouver les options d'activités et d'excursions ?",
       "faqA8": "Nos <a href=\"holiday-packages.html\">Forfaits vacances</a> combinent l'hébergement avec des expériences sélectionnées et constituent le meilleur point de départ pour planifier votre séjour. Consultez nos forfaits vacances actuels ou contactez Vilu Residence, et nous vous aiderons à choisir l'option adaptée à votre voyage.",
       "relatedTag": "Poursuivre la lecture",
-      "relatedTitle": "Découvrir davantage l'<em>atoll de Ari Sud</em>",
+      "relatedTitle": "Découvrir davantage l'<em>atoll de Sud Ari</em>",
       "relTag1": "Guide d'expérience",
       "relTitle1": "Snorkeling avec les requins-baleines",
       "relTag2": "Guide d'expérience",
@@ -1516,7 +1518,7 @@
       "toc12": "Modifications de cette politique",
       "toc13": "Nous contacter",
       "whoTitle": "Qui nous sommes",
-      "whoP1": "Vilu Residence est une maison d'hôtes située à Maamigili, Alifu Dhaalu Atoll, Republic of Maldives, exploitée par Mexiczone. Cette politique explique quelles informations nous collectons via viluresidence.net, pourquoi nous les collectons, et les choix qui s'offrent à vous.",
+      "whoP1": "Vilu Residence est une maison d'hôtes située à Maamigili, atoll de Sud Ari, Republic of Maldives, exploitée par Mexiczone. Cette politique explique quelles informations nous collectons via viluresidence.net, pourquoi nous les collectons, et les choix qui s'offrent à vous.",
       "whoP2": "Si vous avez une question concernant cette politique ou vos informations, contactez-nous à l'adresse <a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>.",
       "infoTitle": "Informations que nous collectons",
       "directTitle": "Réservation directe sur le site web",
@@ -1560,7 +1562,7 @@
       "changesTitle": "Modifications de cette politique",
       "changesP": "Nous pouvons mettre à jour cette politique de temps à autre à mesure que notre site web ou nos pratiques évoluent. La date « Dernière mise à jour » en haut de cette page reflète la révision la plus récente.",
       "contactTitle": "Nous contacter",
-      "contactP": "Vilu Residence<br>Maamigili, Alifu Dhaalu Atoll<br>Republic of Maldives<br><a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>"
+      "contactP": "Vilu Residence<br>Maamigili, atoll de Sud Ari<br>Republic of Maldives<br><a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>"
     },
     "cookiesMeta": {
       "title": "Cookies & Technologie — Vilu Residence",
@@ -1599,7 +1601,7 @@
       "eyebrow": "Au-dessus de Sud Ari",
       "displayLine1": "Une île.",
       "displayLine2": "Tout un océan à découvrir.",
-      "sub": "L'atoll d'Ari Sud : un rivage tranquille et baigné de soleil au cœur des Maldives — la base de Vilu pour explorer tout ce qui l'entoure."
+      "sub": "L'atoll de Sud Ari : un rivage tranquille et baigné de soleil au cœur des Maldives — la base de Vilu pour explorer tout ce qui l'entoure."
     },
     "below": {
       "eyebrow": "Sous Sud Ari",

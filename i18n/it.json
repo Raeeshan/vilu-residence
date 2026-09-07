@@ -226,7 +226,8 @@
       "southAriGuides": "Guide di Ari Sud",
       "plan": "Pianifica",
       "brandLine": "Vivi Ari Sud.",
-      "positioning": "Pianificazione premium di vacanze alle Maldive da Maamigili, atollo di Ari Sud – squali balena, mante e vita dell'isola locale, con la nostra guesthouse di sei camere, Vilu Residence, come base."
+      "positioning": "Pianificazione premium di vacanze alle Maldive da Maamigili, atollo di Ari Sud – squali balena, mante e vita dell'isola locale, con la nostra guesthouse di sei camere, Vilu Residence, come base.",
+      "findUsOnMaps": "Trovaci su Google Maps"
     },
     "bookingPopup": {
       "title": "Prenota il Tuo Soggiorno",
@@ -575,7 +576,8 @@
       "concP1": "Maamigili non cerca di essere un'isola-resort, ed è proprio questo il punto. È un'isola maldiviana attiva che si trova ad avere accanto una delle zone di squali balena più affidabili del pianeta, con un proprio aeroporto, un villaggio vero, e tariffe da guesthouse invece che da resort. Per i viaggiatori che vogliono accesso diretto a quella vita marina — squali balena ogni mese dell'anno, manta in stagione, tartarughe e vita di reef nel mezzo — senza il costo o la bolla autonoma di un resort privato, è un'opzione davvero valida, non solo un compromesso economico.",
       "concP2": "I compromessi sono reali, e vale la pena conoscerli prima di atterrare: niente alcol sull'isola, abbigliamento modesto fuori da Bikini Beach, e una destinazione più piccola e tranquilla rispetto all'immagine da cartolina delle Maldive versione resort. Per il viaggiatore giusto, questi non sono svantaggi — sono ciò che fa sentire il soggiorno come le Maldive oltre la brochure.",
       "htrGtmLink": "Per il quadro completo — orari di arrivo e partenza, coincidenze internazionali, imprevisti meteo e cosa preparare prima di volare — consulta la nostra <a href=\"getting-to-maamigili.html\">guida dedicata per arrivare a Maamigili</a>.",
-      "sunsetCaption": "Tramonto su Maamigili — la piccola isola locale al centro di ogni vacanza Vilu."
+      "sunsetCaption": "Tramonto su Maamigili — la piccola isola locale al centro di ogni vacanza Vilu.",
+      "introP4": "Questa guida è scritta dal team di <a href=\"/#what-is-vilu\">Vilu Residence</a>, una guesthouse a conduzione familiare con sei camere situata proprio a Maamigili — i dettagli qui riportati provengono quindi da persone che vivono e lavorano sull'isola, non da un riassunto generico di un sito di viaggi."
     },
     "cmpSnorkel": {
       "title": "Le migliori isole locali delle Maldive per lo snorkeling",
@@ -797,7 +799,7 @@
       "intro": "Lo snorkeling con gli squali balena con Vilu Residence è un'escursione condivisa in partenza da Maamigili, che dura in genere circa due ore e mezza. Gli squali balena sono animali selvatici, quindi un avvistamento non è mai garantito — ma se la ricerca non dà esito, gli ospiti vengono invece portati su una barriera corallina vicina per circa 30 minuti di snorkeling, e Vilu può offrire un secondo tentativo scontato. L'escursione è inclusa in ogni pacchetto vacanza attuale di Vilu, oppure può essere prenotata a parte — attualmente a 85 USD a persona, anche se conviene confermare il prezzo attuale direttamente con noi, poiché si tratta di una tariffa operativa che può cambiare.",
       "hQuickFacts": "In breve",
       "qfDurationLabel": "Escursione di ~2h30",
-      "qfDurationNote": "Partenza da Maamigili, in genere verso le 09:00 dopo la colazione.",
+      "qfDurationNote": "Partenza da <a href=\"maamigili-guide.html\">Maamigili</a>, in genere verso le 09:00 dopo la colazione.",
       "qfGroupLabel": "Condivisa, min. 2 ospiti",
       "qfGroupNote": "Escursioni private disponibili su richiesta, con supplemento.",
       "qfSwimLabel": "Nuotatori inesperti e bambini benvenuti",
@@ -815,8 +817,8 @@
       "groupSizeP2": "Se viaggi da solo e nessun altro è prenotato quel giorno, potrebbero applicarsi costi aggiuntivi. È possibile organizzare anche un'escursione interamente privata su richiesta — qui non pubblichiamo un prezzo fisso per l'escursione privata poiché dipende dai dettagli, quindi chiedici direttamente se è questo che cerchi.",
       "groupSizeP3": "Il numero di membri dell'equipaggio e guide a bordo viene adeguato al numero di ospiti partecipanti — non applichiamo un rapporto fisso, ma lo aumentiamo quando si aggiungono più ospiti.",
       "hWhoCanJoin": "Chi può partecipare — nuotatori, nuotatori inesperti e bambini",
-      "whoP1": "I nuotatori inesperti sono benvenuti a partecipare, ma dovrebbero comunicare al personale dell'hotel o alla guida prima della partenza il proprio livello di nuoto e se avranno bisogno di assistenza in acqua. Ogni barca dell'escursione porta a bordo giubbotti di salvataggio, disponibili gratuitamente ogni volta che servono — ma un giubbotto di salvataggio non significa automaticamente che tutti siano idonei a entrare in acqua quel giorno. Le istruzioni di sicurezza della guida e le condizioni effettive del mare in quel giorno restano valide, e hanno la priorità.",
-      "whoP2": "I bambini possono partecipare con l'approvazione dei genitori. I genitori dovrebbero comunicare al personale dell'hotel o alla guida il livello di nuoto del bambino prima dell'escursione. Vilu Residence non consiglia lo snorkeling in acqua con gli squali balena per i bambini che non sanno nuotare bene — un bambino valutato non idoneo all'acqua è benvenuto a restare sulla barca e osservare da lì, anche se le normali tariffe dell'escursione potrebbero comunque applicarsi anche se il bambino resta a bordo. Non esiste un'unica età minima fissa; l'idoneità dipende dal livello di nuoto e dal giudizio della guida in quel giorno, discusso con te in anticipo.",
+      "whoP1": "I nuotatori inesperti sono benvenuti a partecipare, ma dovrebbero comunicare al nostro staff o alla guida prima della partenza il proprio livello di nuoto e se avranno bisogno di assistenza in acqua. Ogni barca dell'escursione porta a bordo giubbotti di salvataggio, disponibili gratuitamente ogni volta che servono — ma un giubbotto di salvataggio non significa automaticamente che tutti siano idonei a entrare in acqua quel giorno. Le istruzioni di sicurezza della guida e le condizioni effettive del mare in quel giorno restano valide, e hanno la priorità.",
+      "whoP2": "I bambini possono partecipare con l'approvazione dei genitori. I genitori dovrebbero comunicare al nostro staff o alla guida il livello di nuoto del bambino prima dell'escursione. Vilu Residence non consiglia lo snorkeling in acqua con gli squali balena per i bambini che non sanno nuotare bene — un bambino valutato non idoneo all'acqua è benvenuto a restare sulla barca e osservare da lì, anche se le normali tariffe dell'escursione potrebbero comunque applicarsi anche se il bambino resta a bordo. Non esiste un'unica età minima fissa; l'idoneità dipende dal livello di nuoto e dal giudizio della guida in quel giorno, discusso con te in anticipo.",
       "hResponsible": "Briefing di sicurezza e incontri responsabili con gli squali balena",
       "responsibleP1": "Prima che chiunque entri in acqua, la guida fornisce un briefing su sicurezza e comportamento su come comportarsi vicino allo squalo. Non si tratta solo di galateo dell'escursione — le Maldive hanno un regolamento legale a tutela degli squali balena (<a href=\"https://corporate.visitmaldives.com/news/press-release/the-maldives-takes-significant-new-step-to-enhance-conservation-of-whale-sharks-with-national-regulation/\" target=\"_blank\" rel=\"noopener\">Regolamento n. 2024/R-96</a>), e rispettarlo è sia legge sia il motivo per cui gli incontri qui restano positivi per gli squali e per i futuri visitatori.",
       "responsibleRules": "<strong>Cosa richiede il regolamento:</strong> mantenere almeno 3 metri di distanza dal corpo dello squalo balena e 4 metri dalla coda; non toccarlo né aggrapparsi mai ad esso; avvicinarsi e nuotare con calma di lato, mai frontalmente né alle spalle; non inseguirlo né ostacolarne mai il percorso; e nessun flash fotografico. Le guide informano ogni gruppo su questo prima dell'ingresso, e lo fanno rispettare in acqua.",
@@ -850,9 +852,9 @@
       "faqQ4": "È un'escursione privata?",
       "faqA4": "No, l'escursione standard è condivisa con un minimo di 2 partecipanti, e gli ospiti che prenotano per lo stesso giorno possono essere abbinati sulla stessa barca. Un'escursione privata può essere organizzata su richiesta, con supplemento.",
       "faqQ5": "I nuotatori inesperti possono partecipare?",
-      "faqA5": "Sì, ma i nuotatori inesperti dovrebbero comunicare al personale dell'hotel o alla guida prima della partenza il proprio livello di nuoto e se hanno bisogno di assistenza. Giubbotti di salvataggio gratuiti sono disponibili su ogni barca quando servono, anche se la partecipazione effettiva in acqua dipende sempre dalle condizioni del mare e dalle istruzioni di sicurezza della guida in quel giorno.",
+      "faqA5": "Sì, ma i nuotatori inesperti dovrebbero comunicare al nostro staff o alla guida prima della partenza il proprio livello di nuoto e se hanno bisogno di assistenza. Giubbotti di salvataggio gratuiti sono disponibili su ogni barca quando servono, anche se la partecipazione effettiva in acqua dipende sempre dalle condizioni del mare e dalle istruzioni di sicurezza della guida in quel giorno.",
       "faqQ6": "I bambini possono partecipare?",
-      "faqA6": "I bambini possono partecipare con l'approvazione dei genitori. I genitori dovrebbero comunicare al personale dell'hotel o alla guida il livello di nuoto del bambino prima dell'escursione. Vilu Residence non consiglia lo snorkeling in acqua con gli squali balena per i bambini che non sanno nuotare bene — un bambino valutato non idoneo all'acqua può restare sulla barca invece, anche se le normali tariffe dell'escursione potrebbero comunque applicarsi.",
+      "faqA6": "I bambini possono partecipare con l'approvazione dei genitori. I genitori dovrebbero comunicare al nostro staff o alla guida il livello di nuoto del bambino prima dell'escursione. Vilu Residence non consiglia lo snorkeling in acqua con gli squali balena per i bambini che non sanno nuotare bene — un bambino valutato non idoneo all'acqua può restare sulla barca invece, anche se le normali tariffe dell'escursione potrebbero comunque applicarsi.",
       "faqQ7": "Cosa è incluso nell'escursione?",
       "faqA7": "Sono inclusi attrezzatura da snorkeling, asciugamani, frutta fresca e acqua.",
       "faqQ8": "Cosa dovrei portare?",
@@ -891,7 +893,7 @@
       "intro": "Lo snorkeling con le mante da Maamigili è un'escursione condivisa di circa 2 ore e 30 minuti. Invece di andare sempre in un punto fisso, le nostre guide controllano gli avvistamenti recenti e le condizioni del mare e da lì scelgono una zona di ricerca. Potreste vedere mante che si fanno pulire in una stazione di pulizia, che si nutrono, o semplicemente di passaggio — gli avvistamenti non sono mai garantiti, ma se non ne troviamo una faremo snorkeling su una barriera vicina. Prenotabile da sola a partire da 85 USD a persona, salvo conferma.",
       "hQuickFacts": "In Breve",
       "qfDurationLabel": "Escursione di ~2h30",
-      "qfDurationNote": "Partenza da Maamigili, in genere verso le 9:00 dopo colazione.",
+      "qfDurationNote": "Partenza da <a href=\"maamigili-guide.html\">Maamigili</a>, in genere verso le 9:00 dopo colazione.",
       "qfGroupLabel": "Condivisa, min. 2 persone",
       "qfGroupNote": "Uscite private disponibili su richiesta, con supplemento.",
       "qfSwimLabel": "Nuotatori inesperti e bambini possono partecipare",
@@ -940,7 +942,7 @@
       "hIncluded": "Cosa È Incluso",
       "includedP1": "Attrezzatura da snorkeling, asciugamani, frutta fresca e acqua sono inclusi in ogni escursione con le mante.",
       "hPrice": "Prezzo e Prenotazione",
-      "priceP1": "Lo snorkeling con le mante è prenotabile da solo a partire da 85 USD a persona, anche se raccomandiamo di confermare il prezzo attuale con l'hotel prima di prenotare, poiché può cambiare. Un'uscita condivisa normale richiede un minimo di 2 partecipanti; se siete gli unici interessati, o preferite andare privatamente, potrebbe applicarsi un supplemento.",
+      "priceP1": "Lo snorkeling con le mante è prenotabile da solo a partire da 85 USD a persona, anche se raccomandiamo di confermare il prezzo attuale con noi prima di prenotare, poiché può cambiare. Un'uscita condivisa normale richiede un minimo di 2 partecipanti; se siete gli unici interessati, o preferite andare privatamente, potrebbe applicarsi un supplemento.",
       "priceP2": "Lo snorkeling con le mante è incluso anche in diversi pacchetti vacanza attuali di Vilu, insieme ad alloggio, transfer andata e ritorno e colazione alla loro rispettiva tariffa di pacchetto.",
       "priceLink": "<a href=\"holiday-packages.html\">Guarda i nostri pacchetti vacanza attuali →</a>",
       "hFaq": "Domande Frequenti",
@@ -1053,7 +1055,7 @@
       "viewJourney": "Vedi il viaggio",
       "viewDetails": "Vedi i dettagli",
       "heroEyebrow": "Collezione vacanze Vilu",
-      "heroDisplay": "Scegli il tuo viaggio nel Sud Ari.",
+      "heroDisplay": "Scegli il tuo viaggio nell'Ari Sud.",
       "verifiedLine": "Ogni viaggio include il trasferimento andata e ritorno, il tuo soggiorno al Vilu Residence, la colazione quotidiana e lo snorkeling con squali balena, mante e tartarughe.",
       "featuredTag": "Viaggi in evidenza",
       "featuredTitle": "Tre modi per iniziare",
@@ -1516,7 +1518,7 @@
       "toc12": "Modifiche alla presente informativa",
       "toc13": "Contattaci",
       "whoTitle": "Chi siamo",
-      "whoP1": "Vilu Residence è una guesthouse a Maamigili, Alifu Dhaalu Atoll, Repubblica delle Maldive, gestita da Mexiczone. La presente informativa spiega quali informazioni raccogliamo tramite viluresidence.net, perché le raccogliamo e quali scelte hai a disposizione.",
+      "whoP1": "Vilu Residence è una guesthouse a Maamigili, Atollo di Ari Sud, Repubblica delle Maldive, gestita da Mexiczone. La presente informativa spiega quali informazioni raccogliamo tramite viluresidence.net, perché le raccogliamo e quali scelte hai a disposizione.",
       "whoP2": "Per qualsiasi domanda su questa informativa o sulle tue informazioni, contattaci all'indirizzo <a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>.",
       "infoTitle": "Informazioni che raccogliamo",
       "directTitle": "Prenotazione diretta sul sito web",
@@ -1560,7 +1562,7 @@
       "changesTitle": "Modifiche alla presente informativa",
       "changesP": "Potremmo aggiornare questa informativa di tanto in tanto, in base ai cambiamenti del nostro sito web o delle nostre prassi. La data \"Ultimo aggiornamento\" in cima a questa pagina riflette la revisione più recente.",
       "contactTitle": "Contattaci",
-      "contactP": "Vilu Residence<br>Maamigili, Alifu Dhaalu Atoll<br>Repubblica delle Maldive<br><a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>"
+      "contactP": "Vilu Residence<br>Maamigili, Atollo di Ari Sud<br>Repubblica delle Maldive<br><a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>"
     },
     "cookiesMeta": {
       "title": "Cookie & Technology — Vilu Residence",

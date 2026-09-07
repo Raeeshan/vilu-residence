@@ -383,7 +383,7 @@
     <section id="quick-facts">
       <h2 class="section-title" data-i18n="mrPage.hQuickFacts">En bref</h2>
       <div class="card-grid" style="margin-top:24px">
-        <div class="info-card"><i class="ti ti-clock" aria-hidden="true"></i><h3 data-i18n="mrPage.qfDurationLabel">Excursion d'env. 2h30</h3><p data-i18n="mrPage.qfDurationNote">Départ de Maamigili, généralement vers 9h après le petit-déjeuner.</p></div>
+        <div class="info-card"><i class="ti ti-clock" aria-hidden="true"></i><h3 data-i18n="mrPage.qfDurationLabel">Excursion d'env. 2h30</h3><p data-i18n="mrPage.qfDurationNote">Départ de <a href="maamigili-guide.html">Maamigili</a>, généralement vers 9h après le petit-déjeuner.</p></div>
         <div class="info-card"><i class="ti ti-users" aria-hidden="true"></i><h3 data-i18n="mrPage.qfGroupLabel">Partagée, min. 2 personnes</h3><p data-i18n="mrPage.qfGroupNote">Sorties privées possibles sur demande, avec supplément.</p></div>
         <div class="info-card"><i class="ti ti-swimming" aria-hidden="true"></i><h3 data-i18n="mrPage.qfSwimLabel">Nageurs peu à l'aise et enfants possibles</h3><p data-i18n="mrPage.qfSwimNote">Sous conditions — voir qui peut participer, ci-dessous.</p></div>
         <div class="info-card"><i class="ti ti-currency-dollar" aria-hidden="true"></i><h3 data-i18n="mrPage.qfPriceLabel">85 USD par personne</h3><p data-i18n="mrPage.qfPriceNote">Prix de la sortie seule — merci de confirmer le tarif actuel auprès de nous.</p></div>
@@ -476,7 +476,7 @@
 
     <section id="price">
       <h2 class="section-title" style="margin-top:44px" data-i18n="mrPage.hPrice">Tarif et réservation</h2>
-      <p data-i18n="mrPage.priceP1">Le snorkeling avec les raies manta est réservable seul à partir de 85 USD par personne, bien que nous recommandions de confirmer le tarif actuel auprès de l'hôtel avant de réserver, car il peut évoluer. Une sortie partagée normale nécessite un minimum de 2 participants ; si vous êtes le seul intéressé, ou si vous préférez y aller en privé, un supplément peut s'appliquer.</p>
+      <p data-i18n="mrPage.priceP1">Le snorkeling avec les raies manta est réservable seul à partir de 85 USD par personne, bien que nous recommandions de confirmer le tarif actuel auprès de notre équipe avant de réserver, car il peut évoluer. Une sortie partagée normale nécessite un minimum de 2 participants ; si vous êtes le seul intéressé, ou si vous préférez y aller en privé, un supplément peut s'appliquer.</p>
       <p data-i18n="mrPage.priceP2">Le snorkeling avec les raies manta est aussi inclus dans plusieurs des forfaits vacances actuels de Vilu, aux côtés de l'hébergement, du transfert aller-retour et du petit-déjeuner, selon leur propre tarification de forfait.</p>
       <p class="exp-links" data-i18n="mrPage.priceLink"><a href="holiday-packages.html">Voir nos forfaits vacances actuels →</a></p>
     </section>
@@ -548,7 +548,7 @@
         <p class="footer-brandline" data-i18n="footer.brandLine">Vivez Sud Ari.</p>
       </div>
       <div class="footer-hero-text">
-        <p class="footer-desc" data-i18n="footer.positioning">Organisation premium de vacances aux Maldives depuis Maamigili, atoll d'Ari Sud – requins-baleines, raies mantas et vie insulaire locale, avec notre propre maison d'hôtes de six chambres, Vilu Residence, comme point de départ.</p>
+        <p class="footer-desc" data-i18n="footer.positioning">Organisation premium de vacances aux Maldives depuis Maamigili, atoll de Sud Ari – requins-baleines, raies mantas et vie insulaire locale, avec notre propre maison d'hôtes de six chambres, Vilu Residence, comme point de départ.</p>
         <div class="footer-ctas">
           <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Planifiez vos vacances</a>
           <a class="footer-availability js-check-availability" href="/fr/#booking" data-i18n="navShell.checkAvailability">Vérifier la disponibilité</a>
@@ -590,7 +590,7 @@
         <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'footer'})">+960 9903339</a>
         <a href="mailto:Viluresidence@gmail.com" onclick="trackEvent('contact_click',{contact_method:'email',cta_location:'footer'})">Viluresidence@gmail.com</a>
         <a href="https://wa.me/9609903339" target="_blank" rel="noopener noreferrer" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'footer'})">WhatsApp</a>
-        <span class="footer-address">Maamigili, South Ari Atoll, Maldives</span>
+        <a class="footer-address" href="https://maps.google.com/?cid=8624726302398144856" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="footer.findUsOnMaps" aria-label="Retrouvez-nous sur Google Maps" onclick="trackEvent('contact_click',{contact_method:'maps',cta_location:'footer'})">Maamigili, South Ari Atoll, Maldives</a>
       </div>
       <div class="footer-social">
         <a href="https://www.instagram.com/vilu_residence/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></a>
@@ -737,7 +737,7 @@ var I18N = { en: {
     hIncluded: "What's Included",
     includedP1: "Snorkeling equipment, towels, fresh fruit, and water are included on every manta ray excursion.",
     hPrice: "Price & Booking",
-    priceP1: "Manta ray snorkeling is bookable on its own from USD 85 per person, though we'd recommend confirming the current price with the hotel before booking, since it can change. A normal shared trip requires a minimum of 2 participants; if you're the only guest interested, or you'd prefer to go privately, additional charges may apply.",
+    priceP1: "Manta ray snorkeling is bookable on its own from USD 85 per person, though we'd recommend confirming the current price with our team before booking, since it can change. A normal shared trip requires a minimum of 2 participants; if you're the only guest interested, or you'd prefer to go privately, additional charges may apply.",
     priceP2: "Manta ray snorkeling is also included in several of Vilu's current holiday packages, alongside accommodation, round-trip transfer, and breakfast at their own package pricing.",
     priceLink: "<a href=\"holiday-packages.html\">See our current holiday packages →</a>",
     hFaq: "Frequently Asked Questions",

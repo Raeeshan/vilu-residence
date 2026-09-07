@@ -226,7 +226,8 @@
       "southAriGuides": "Sprievodcovia Južný Ari",
       "plan": "Plánovanie",
       "brandLine": "Zažite Južné Ari.",
-      "positioning": "Prémiové plánovanie dovolenky na Maldivách z Maamigili na atole Južné Ari – veľrybie žraloky, manty a život na miestnom ostrove, s naším vlastným penziónom so šiestimi izbami, Vilu Residence, ako základňou."
+      "positioning": "Prémiové plánovanie dovolenky na Maldivách z Maamigili na atole Južné Ari – veľrybie žraloky, manty a život na miestnom ostrove, s naším vlastným penziónom so šiestimi izbami, Vilu Residence, ako základňou.",
+      "findUsOnMaps": "Nájdite nás na Google Maps"
     },
     "bookingPopup": {
       "title": "Rezervujte si pobyt",
@@ -575,7 +576,8 @@
       "concP1": "Maamigili sa nesnaží byť ostrovom-rezortom, a to je práve zmysel. Je to fungujúci maldivský ostrov, ktorý má náhodou vedľa seba jednu z najspoľahlivejších oblastí žralokov veľrybích na planéte, s vlastným letiskom, skutočnou dedinou a cenami za penzión namiesto cien za rezort. Pre cestovateľov, ktorí chcú priamy prístup k tomuto morskému životu — žraloky veľrybie každý mesiac v roku, mantové raje v sezóne, korytnačky a útesový život medzitým — bez nákladov alebo uzavretej bubliny súkromného rezortu, je to skutočne silná voľba, nielen rozpočtový kompromis.",
       "concP2": "Kompromisy sú reálne a stojí za to ich poznať pred pristátím: žiadny alkohol na ostrove, skromné oblečenie mimo Bikini Beach, a menšia, pokojnejšia destinácia než pohľadnicová podoba Maldiv verzie rezort. Pre správneho cestovateľa to nie sú nevýhody — sú to presne tie veci, vďaka ktorým pobyt pôsobí ako Maldivy nad rámec brožúry.",
       "htrGtmLink": "Kompletný prehľad — časovanie príletu a odletu, medzinárodné nadväzujúce lety, možné narušenie počasím a čo si pripraviť pred cestou — nájdete v našom podrobnom <a href=\"getting-to-maamigili.html\">sprievodcovi cestou do Maamigili</a>.",
-      "sunsetCaption": "Západ slnka nad Maamigili — malým miestnym ostrovom v srdci každej dovolenky s Vilu."
+      "sunsetCaption": "Západ slnka nad Maamigili — malým miestnym ostrovom v srdci každej dovolenky s Vilu.",
+      "introP4": "Tohto sprievodcu napísal tím <a href=\"/#what-is-vilu\">Vilu Residence</a>, rodinného penziónu so šiestimi izbami priamo na Maamigili — informácie tu teda pochádzajú od ľudí, ktorí na ostrove skutočne žijú a pracujú, nie z všeobecného zhrnutia cestovateľského webu."
     },
     "cmpSnorkel": {
       "title": "Najlepšie miestne ostrovy na Maldivách na šnorchlovanie",
@@ -797,7 +799,7 @@
       "intro": "Šnorchlovanie so žralokmi veľrybími s Vilu Residence je zdieľaný výlet vyplávajúci z Maamigili, ktorý zvyčajne trvá okolo dvoch a pol hodiny. Žraloky veľrybie sú divé zvieratá, takže stretnutie nie je nikdy zaručené — ak však hľadanie nič neprinesie, hostia sú namiesto toho odvezení na blízky útes na približne 30 minút šnorchlovania a Vilu môže ponúknuť zvýhodnený druhý pokus. Výlet je súčasťou každého aktuálneho balíka Vilu, alebo si ho možno rezervovať samostatne — momentálne za 85 USD na osobu, hoci sa oplatí overiť si aktuálnu cenu priamo u nás, keďže ide o prevádzkovú sadzbu, ktorá sa môže meniť.",
       "hQuickFacts": "Rýchle fakty",
       "qfDurationLabel": "~2 h 30 min výlet",
-      "qfDurationNote": "Vyplávanie z Maamigili, zvyčajne okolo 9:00 po raňajkách.",
+      "qfDurationNote": "Vyplávanie z <a href=\"maamigili-guide.html\">Maamigili</a>, zvyčajne okolo 9:00 po raňajkách.",
       "qfGroupLabel": "Zdieľaný, min. 2 hostia",
       "qfGroupNote": "Súkromné výlety na požiadanie, s príplatkom.",
       "qfSwimLabel": "Slabší plavci a deti vítaní",
@@ -815,8 +817,8 @@
       "groupSizeP2": "Ak cestujete sami a v ten deň nemá rezerváciu nikto iný, môže sa účtovať príplatok. Na požiadanie možno zariadiť aj úplne súkromný výlet — pevnú cenu za súkromný výlet tu nezverejňujeme, keďže závisí od konkrétnych podrobností, takže ak o to máte záujem, opýtajte sa nás priamo.",
       "groupSizeP3": "Počet posádky a sprievodcov na palube sa prispôsobuje počtu zúčastnených hostí — nemáme pevný pomer, ale zvyšujeme ho, keď sa pridá viac hostí.",
       "hWhoCanJoin": "Kto sa môže zúčastniť — plavci, slabší plavci a deti",
-      "whoP1": "Slabší plavci sa môžu zúčastniť, mali by však pred odchodom informovať personál hotela alebo sprievodcu o svojej plaveckej úrovni a o tom, či budú potrebovať pomoc vo vode. Každá výletná loď má na palube záchranné vesty, dostupné zdarma kedykoľvek je to potrebné — záchranná vesta však automaticky neznamená, že je daný deň vhodný pre vstup do vody pre každého. Bezpečnostné pokyny sprievodcu a skutočné podmienky mora v daný deň naďalej platia a majú prednosť.",
-      "whoP2": "Deti sa môžu zúčastniť so súhlasom rodičov. Rodičia by mali pred výletom informovať personál hotela alebo sprievodcu o plaveckej úrovni dieťaťa. Vilu Residence neodporúča šnorchlovanie vo vode so žralokmi veľrybími deťom, ktoré dobre neplávajú — dieťa posúdené ako nevhodné pre vodu môže namiesto toho zostať na lodi a sledovať dianie odtiaľ, hoci bežný poplatok za výlet sa môže vzťahovať aj v prípade, že dieťa zostane na palube. Neexistuje jeden pevný minimálny vek; vhodnosť závisí od plaveckej úrovne a úsudku sprievodcu v daný deň, ktorý sa s vami vopred prediskutuje.",
+      "whoP1": "Slabší plavci sa môžu zúčastniť, mali by však pred odchodom informovať náš personál alebo sprievodcu o svojej plaveckej úrovni a o tom, či budú potrebovať pomoc vo vode. Každá výletná loď má na palube záchranné vesty, dostupné zdarma kedykoľvek je to potrebné — záchranná vesta však automaticky neznamená, že je daný deň vhodný pre vstup do vody pre každého. Bezpečnostné pokyny sprievodcu a skutočné podmienky mora v daný deň naďalej platia a majú prednosť.",
+      "whoP2": "Deti sa môžu zúčastniť so súhlasom rodičov. Rodičia by mali pred výletom informovať náš personál alebo sprievodcu o plaveckej úrovni dieťaťa. Vilu Residence neodporúča šnorchlovanie vo vode so žralokmi veľrybími deťom, ktoré dobre neplávajú — dieťa posúdené ako nevhodné pre vodu môže namiesto toho zostať na lodi a sledovať dianie odtiaľ, hoci bežný poplatok za výlet sa môže vzťahovať aj v prípade, že dieťa zostane na palube. Neexistuje jeden pevný minimálny vek; vhodnosť závisí od plaveckej úrovne a úsudku sprievodcu v daný deň, ktorý sa s vami vopred prediskutuje.",
       "hResponsible": "Bezpečnostná inštruktáž a zodpovedné stretnutia so žralokmi veľrybími",
       "responsibleP1": "Skôr než ktokoľvek vstúpi do vody, sprievodca poskytne bezpečnostnú a interakčnú inštruktáž o tom, ako sa správať pri žralokovi. Nejde len o etiketu výletu — Maldivy majú zákonnú vyhlášku chrániacu žraloky veľrybie (<a href=\"https://corporate.visitmaldives.com/news/press-release/the-maldives-takes-significant-new-step-to-enhance-conservation-of-whale-sharks-with-national-regulation/\" target=\"_blank\" rel=\"noopener\">nariadenie č. 2024/R-96</a>), a jej dodržiavanie je zároveň zákonom aj dôvodom, prečo stretnutia tu zostávajú dobré pre žraloky aj pre budúcich návštevníkov.",
       "responsibleRules": "<strong>Čo nariadenie vyžaduje:</strong> zostať minimálne 3 metre od tela žraloka veľrybieho a 4 metre od jeho chvosta; nikdy sa ho nedotýkať ani ho nedržať; približovať sa a plávať pokojne zo strany, nikdy spredu ani zozadu; nikdy ho nehoniť ani mu nebrániť v ceste; a žiadny blesk pri fotografovaní. Sprievodcovia na to upozorňujú každú skupinu pred vstupom a dohliadajú na to aj vo vode.",
@@ -850,9 +852,9 @@
       "faqQ4": "Je to súkromný výlet?",
       "faqA4": "Nie, štandardný výlet je zdieľaný, s minimálne 2 účastníkmi, a hostia rezervujúci na rovnaký deň môžu byť spojení na rovnakej lodi. Súkromný výlet možno zariadiť na požiadanie, s príplatkom.",
       "faqQ5": "Môžu sa zúčastniť slabší plavci?",
-      "faqA5": "Áno, ale slabší plavci by mali pred odchodom informovať personál hotela alebo sprievodcu o svojej plaveckej úrovni a o tom, či potrebujú pomoc. Na každej lodi sú k dispozícii bezplatné záchranné vesty, kedykoľvek je to potrebné, hoci skutočná účasť vo vode stále závisí od podmienok mora a bezpečnostných pokynov sprievodcu v daný deň.",
+      "faqA5": "Áno, ale slabší plavci by mali pred odchodom informovať náš personál alebo sprievodcu o svojej plaveckej úrovni a o tom, či potrebujú pomoc. Na každej lodi sú k dispozícii bezplatné záchranné vesty, kedykoľvek je to potrebné, hoci skutočná účasť vo vode stále závisí od podmienok mora a bezpečnostných pokynov sprievodcu v daný deň.",
       "faqQ6": "Môžu sa zúčastniť deti?",
-      "faqA6": "Deti sa môžu zúčastniť so súhlasom rodičov. Rodičia by mali pred výletom informovať personál hotela alebo sprievodcu o plaveckej úrovni dieťaťa. Vilu Residence neodporúča šnorchlovanie vo vode so žralokmi veľrybími deťom, ktoré dobre neplávajú — dieťa posúdené ako nevhodné pre vodu môže namiesto toho zostať na lodi, hoci bežný poplatok za výlet sa môže vzťahovať aj tak.",
+      "faqA6": "Deti sa môžu zúčastniť so súhlasom rodičov. Rodičia by mali pred výletom informovať náš personál alebo sprievodcu o plaveckej úrovni dieťaťa. Vilu Residence neodporúča šnorchlovanie vo vode so žralokmi veľrybími deťom, ktoré dobre neplávajú — dieťa posúdené ako nevhodné pre vodu môže namiesto toho zostať na lodi, hoci bežný poplatok za výlet sa môže vzťahovať aj tak.",
       "faqQ7": "Čo je zahrnuté vo výlete?",
       "faqA7": "Zahrnuté sú šnorchlovacie vybavenie, uteráky, čerstvé ovocie a voda.",
       "faqQ8": "Čo si mám vziať so sebou?",
@@ -891,7 +893,7 @@
       "intro": "Šnorchlovanie s mantami z Maamigili je spoločný výlet trvajúci približne 2 hodiny 30 minút. Naši sprievodcovia nechodia vždy na jedno pevné miesto, ale najskôr skontrolujú nedávne pozorovania a stav mora a podľa toho zvolia oblasť hľadania. Môžete stretnúť mantu vznášajúcu sa pri čistiacej stanici, žerúcu, alebo len tak preplávajúcu okolo — pozorovanie nikdy nie je zaručené, no ak žiadnu nenájdeme, namiesto toho pôjdeme šnorchlovať k neďalekému útesu. Dá sa rezervovať samostatne od 85 USD za osobu, cena podlieha potvrdeniu.",
       "hQuickFacts": "Rýchly prehľad",
       "qfDurationLabel": "Výlet cca 2h30m",
-      "qfDurationNote": "Odchod z Maamigili, zvyčajne okolo 09:00 po raňajkách.",
+      "qfDurationNote": "Odchod z <a href=\"maamigili-guide.html\">Maamigili</a>, zvyčajne okolo 09:00 po raňajkách.",
       "qfGroupLabel": "Spoločný výlet, min. 2 hostia",
       "qfGroupNote": "Súkromné výlety na požiadanie za príplatok.",
       "qfSwimLabel": "Slabší plavci a deti sa možno môžu zúčastniť",
@@ -940,7 +942,7 @@
       "hIncluded": "Čo je zahrnuté",
       "includedP1": "Šnorchlovacie vybavenie, uteráky, čerstvé ovocie a voda sú zahrnuté v každom výlete za mantami.",
       "hPrice": "Cena a rezervácia",
-      "priceP1": "Šnorchlovanie s mantami je možné rezervovať samostatne od 85 USD za osobu, no odporúčame pred rezerváciou overiť aktuálnu cenu u hotela, keďže sa môže meniť. Bežný spoločný výlet vyžaduje minimálne 2 účastníkov; ak ste jediným záujemcom alebo uprednostňujete súkromný výlet, môže byť účtovaný príplatok.",
+      "priceP1": "Šnorchlovanie s mantami je možné rezervovať samostatne od 85 USD za osobu, no odporúčame pred rezerváciou overiť aktuálnu cenu u nás, keďže sa môže meniť. Bežný spoločný výlet vyžaduje minimálne 2 účastníkov; ak ste jediným záujemcom alebo uprednostňujete súkromný výlet, môže byť účtovaný príplatok.",
       "priceP2": "Šnorchlovanie s mantami je tiež súčasťou viacerých aktuálnych dovolenkových balíkov Vilu, spolu s ubytovaním, transferom tam a späť a raňajkami za ich vlastnú balíkovú cenu.",
       "priceLink": "<a href=\"holiday-packages.html\">Pozrite si naše aktuálne dovolenkové balíky →</a>",
       "hFaq": "Časté otázky",
@@ -1516,7 +1518,7 @@
       "toc12": "Zmeny týchto zásad",
       "toc13": "Kontaktujte nás",
       "whoTitle": "Kto sme",
-      "whoP1": "Vilu Residence je penzión v Maamigili, Alifu Dhaalu Atoll, Maldivská republika, prevádzkovaný spoločnosťou Mexiczone. Tieto zásady vysvetľujú, aké informácie zhromažďujeme prostredníctvom viluresidence.net, prečo ich zhromažďujeme a aké možnosti máte.",
+      "whoP1": "Vilu Residence je penzión v Maamigili, Južný Ari Atol, Maldivská republika, prevádzkovaný spoločnosťou Mexiczone. Tieto zásady vysvetľujú, aké informácie zhromažďujeme prostredníctvom viluresidence.net, prečo ich zhromažďujeme a aké možnosti máte.",
       "whoP2": "Ak máte akúkoľvek otázku týkajúcu sa týchto zásad alebo vašich informácií, kontaktujte nás na adrese <a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>.",
       "infoTitle": "Informácie, ktoré zhromažďujeme",
       "directTitle": "Priama rezervácia cez webovú stránku",
@@ -1560,7 +1562,7 @@
       "changesTitle": "Zmeny týchto zásad",
       "changesP": "Tieto zásady môžeme z času na čas aktualizovať v súlade so zmenami našej webovej stránky alebo našich postupov. Dátum „Posledná aktualizácia“ v hornej časti tejto stránky odráža najnovšiu revíziu.",
       "contactTitle": "Kontaktujte nás",
-      "contactP": "Vilu Residence<br>Maamigili, Alifu Dhaalu Atoll<br>Maldivská republika<br><a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>"
+      "contactP": "Vilu Residence<br>Maamigili, Južný Ari Atol<br>Maldivská republika<br><a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>"
     },
     "cookiesMeta": {
       "title": "Cookies & technológie — Vilu Residence",
