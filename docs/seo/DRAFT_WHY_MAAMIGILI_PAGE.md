@@ -8,28 +8,30 @@
 
 | # | Claim | Verdict | Source |
 |---|---|---|---|
-| 1 | South Ari Atoll holds a **resident, year-round** whale shark aggregation (not seasonal migration) | **FACT** | Harvey-Carroll et al., *Scientific Reports* 2021 (nature.com/articles/s41598-020-79101-8); PADI (blog.padi.com/diving-maldives-south-ari-marine-protected-area) — both already cited in `maamigili-guide.html` |
+| 1 | South Ari Atoll (specifically SAMPA) is one of few places globally where individual whale sharks show **year-long residency** | **FACT — precise wording matters.** Harvey-Carroll et al., *Scientific Reports* 2021 (nature.com/articles/s41598-020-79101-8) states exactly this: "one of few locations globally where year-long residency of individuals occurs." Do not broaden this to "non-migratory population" or "permanently resident population" — the paper's claim is about individual residency patterns, not an absolute species-level statement. |
 | 2 | Maamigili directly borders the South Ari Atoll Marine Protected Area (SAMPA) | **FACT** | Maldives Ministry of Environment SAMPA designation (protectedareas.environment.gov.mv); already cited in `maamigili-guide.html` |
-| 3 | Maamigili Beyru is a real, named reef along Maamigili's own outer edge, inside SAMPA | **FACT** | Already documented and cited in `maamigili-guide.html` (Divernet; Ministry of Environment) |
-| 4 | Maamigili Beyru can accurately be called a whale-shark site | **DO NOT USE as written.** Existing site content treats "the whale shark grounds" (a ~14km reef shelf, described as "offshore") and "Maamigili Beyru" as two distinct locations — Beyru is documented specifically as a **manta ray, reef shark, and reef-fish** site, not the whale-shark grounds. Accurate framing: Beyru is a *second, complementary* reason to base yourself in Maamigili, alongside (not the same as) the whale-shark grounds. |
+| 3 | Maamigili Beyru is a real, named reef along Maamigili's own outer edge, inside SAMPA, and can accurately be described as a whale-shark site | **FACT — corrected this pass.** PADI's own official dive-site page for Maamigili Beyru (padi.com/dive-site/maldives/maamigili-beyru/) names it directly: "Maamigili Beyru (Whale Shark Marine Protected Area)... part of the South Ari Marine Protected Zone, established to preserve the habitat of whale sharks," with whale sharks "spotted year-round, especially on sunny days with calm seas." Manta rays, reef sharks, and reef fish are listed on the same page as frequently-seen secondary species. **Correction note**: an earlier draft pass of this page under-relied on Vilu's own internal copy (`maamigili-guide.html`, which separates "the whale shark grounds" from a manta-focused "Maamigili Beyru") instead of this stronger external primary source. This draft now follows PADI's own naming. Worth a future look at reconciling `maamigili-guide.html`'s own wording, though that's a separate, not-yet-authorized edit. |
+| 4 | Maamigili has a stronger/more reliable whale-shark record than Dhigurah | **DO NOT USE.** No source supports a comparative ranking — Visit Maldives lists Dhigurah/Maamigili/Dhidhdhoo/Dhangethi without ranking any of them, and both sit inside the same SAMPA zone. |
 | 5 | Maamigili has its own domestic airport, the only one in South Ari Atoll | **FACT** | Villa International Airport (VAM) — Wikipedia, CAPA airport profile; already cited in `maamigili-guide.html` and independently confirmed this pass via a third-party listicle |
 | 6 | Most Dhigurah-bound air travelers land in Maamigili first | **FACT** | Dhigurah's own guesthouse-published transport guides (holiday.com.mv, dhigurah.mv), independently verified this pass and in the prior competitor-capture research pass |
-| 7 | Maamigili has a stronger/more reliable whale-shark record than Dhigurah | **DO NOT USE.** No source supports a comparative ranking — Visit Maldives lists Dhigurah/Maamigili/Dhidhdhoo/Dhangethi without ranking any of them, and both sit inside the same SAMPA zone. |
+| 7 | A specific sighting-probability percentage (e.g. "80% on any given day") | **DO NOT USE.** This figure appeared only in a search-engine AI summary drawing on a non-PADI dive-operator source, not on PADI's own official page, which states no percentage at all. Unverified against a primary source — do not publish it. |
 | 8 | Sightings are guaranteed | **DO NOT USE, ever.** "Essentially every week of every month" (the real, cited, already-approved claim) is the strongest defensible framing — never "guaranteed," "always," or "100%." |
 
 ## 2. Strongest factual Maamigili advantages (use these)
 
-- Resident (not migratory) whale-shark population with genuine, rare-globally site fidelity — a scientifically distinctive fact, not marketing language.
+- Maamigili Beyru is itself named by PADI as a whale-shark site inside the South Ari Marine Protected Area, with sightings reported year-round — not a separate or secondary location.
+- South Ari (SAMPA) is one of only a few places globally where individual whale sharks show year-long residency, per peer-reviewed research — a scientifically distinctive fact, precisely worded, not marketing language.
 - Sightings reported essentially every week of every month, year-round — the real cited frequency claim.
 - The only airport in South Ari Atoll (Villa International Airport, VAM) — a true, structural access advantage over 9 of the 11 competitor-search islands.
-- A second, distinct on-site draw: Maamigili Beyru, a named reef for manta rays, reef sharks, and reef fish, also inside SAMPA.
+- Manta rays, reef sharks, and reef fish are also frequently seen at Maamigili Beyru (manta season roughly February–April) — a genuine secondary draw, not the primary one.
 - The island already carries an informal "Whale Shark Island" nickname in its own already-published guide content — real, existing recognition independent of Dhigurah.
 - A real, populated local island (2,798 residents, 2022 census, the largest in Alif Dhaal Atoll) with a working village, not a private resort bubble.
 - Vilu's package model bundles the stay, breakfast, round-trip speedboat, and a defined activity set — most competitor-island guesthouses found in research are single-purpose room bookings only.
 
 ## 3. Claims that should NOT be used
 
-- "Maamigili Beyru is a whale-shark site" (it's the manta/reef site — see §1.4).
+- "South Ari's whale sharks are non-migratory" or "South Ari has a permanently resident population" — the paper's precise claim is "year-long residency of individuals," a narrower, more careful statement. Use that exact framing (see §1.1).
+- A specific sighting-probability percentage (e.g. "80%") — not stated on PADI's own official page; do not use an unverified number from a secondary summary (see §1.7).
 - Any "better than Dhigurah" or "more whale sharks than Dhigurah" claim.
 - "Dhigurah is the whale-shark island" / "the main whale-shark destination" (contradicts the Maamigili-first rule).
 - "Maamigili is an alternative to Dhigurah."
@@ -61,7 +63,7 @@
 
 ## 9. Opening hook (page-sub, immediately under H1)
 
-**Come to South Ari for whale sharks, and you don't need to look past the island where they're actually found. Maamigili sits right on the reef shelf that holds one of the only resident, year-round whale shark populations on Earth — with its own airport, its own reef at Maamigili Beyru, and a real village behind the beach.**
+**Come to South Ari for whale sharks, and you don't need to look past the island where they're actually found. Maamigili sits beside Maamigili Beyru, a whale shark site inside the South Ari Marine Protected Area where sightings are reported year-round — with its own airport and a real village behind the beach.**
 
 *(Verified, non-generic, leads with the resident/year-round fact rather than "Maamigili is a beautiful island" filler; establishes Maamigili as the subject, not a comparison.)*
 
@@ -69,7 +71,7 @@
 
 1. Hero: H1 + opening hook
 2. A — Why Maamigili matters in South Ari
-3. B — The whale shark grounds
+3. B — South Ari's whale sharks
 4. C — Maamigili Beyru
 5. D — Getting here
 6. E — A real local-island stay
@@ -86,23 +88,23 @@
 
 ### Why Maamigili
 
-*Come to South Ari for whale sharks, and you don't need to look past the island where they're actually found. Maamigili sits right on the reef shelf that holds one of the only resident, year-round whale shark populations on Earth — with its own airport, its own reef at Maamigili Beyru, and a real village behind the beach.*
+*Come to South Ari for whale sharks, and you don't need to look past the island where they're actually found. Maamigili sits beside Maamigili Beyru, a whale shark site inside the South Ari Marine Protected Area where sightings are reported year-round — with its own airport and a real village behind the beach.*
 
 **Why Maamigili matters in South Ari**
 
-Most of what people search for when they think about whale sharks in the Maldives — a local island, a guesthouse budget, snorkeling instead of a liveaboard, somewhere real rather than a fenced-off resort — already points to South Ari Atoll. Maamigili is inside it. Not near it, not adjacent to it: the reef shelf that holds South Ari's resident whale shark population runs directly along Maamigili's own coast, inside the South Ari Marine Protected Area. Some guides already call Maamigili "Whale Shark Island," an informal name that's stuck for the same reason: this is where the sightings actually happen, not where you catch a boat to somewhere else.
+Most of what people search for when they think about whale sharks in the Maldives — a local island, a guesthouse budget, snorkeling instead of a liveaboard, somewhere real rather than a fenced-off resort — already points to South Ari Atoll. Maamigili is inside it. Not near it, not adjacent to it: Maamigili Beyru, the reef running along the island's own outer edge, is itself part of the South Ari Marine Protected Area and is recognized by PADI as a whale shark site, with sightings reported year-round. Some guides already call Maamigili "Whale Shark Island," an informal name that's stuck for the same reason: this is where the sightings actually happen, not where you catch a boat to somewhere else.
 
 Searching Dhigurah for whale sharks? Look at Maamigili before you decide. Both islands sit inside the same protected reef system, and Maldives' own tourism authority lists them — alongside Dhidhdhoo and Dhangethi — as equally valid local-island bases for exactly this trip. The difference worth knowing before you book is practical, not biological: Maamigili has South Ari Atoll's only airport. Most travelers flying to Dhigurah already land here first, then take a further speedboat on. Staying where you land removes that extra leg entirely.
 
-**The whale shark grounds**
+**South Ari's whale sharks**
 
-The population itself is the real reason South Ari draws divers and snorkelers from everywhere. Research published in *Scientific Reports* (Harvey-Carroll et al., 2021) found that, unlike almost every other whale shark population on the planet, South Ari's doesn't migrate through — it stays, along a roughly 14-kilometre stretch of reef, month after month, made up mostly of juvenile males with genuine, rare site fidelity. PADI's own diving guide to the area describes the same thing. In practice, that means sightings are reported essentially every week of every month, year-round, rather than clustering into a short season the way whale shark encounters do almost everywhere else in the world. Their position along the reef shifts a little with the season — west-leaning December to April, east-leaning May to November — but the population itself doesn't leave.
+The whale sharks themselves are the real reason South Ari draws divers and snorkelers from everywhere. Research published in *Scientific Reports* (Harvey-Carroll et al., 2021) found that South Ari Atoll's Marine Protected Area is one of only a few places globally where individual whale sharks show year-long residency — a population made up almost exclusively of immature males, tracked over years by the Maldives Whale Shark Research Programme rather than assumed. PADI's own dive-site listing for Maamigili Beyru describes sightings as occurring year-round, especially on calm, sunny days. In practice, that means sightings are reported essentially every week of every month, rather than clustering into a short season the way whale shark encounters do almost everywhere else in the world. Their position along the reef shifts a little with the season — west-leaning December to April, east-leaning May to November.
 
-None of this is a guarantee. Whale sharks are wild animals, and no honest operator promises a sighting on any single trip. What South Ari offers instead is a real, evidenced, exceptionally high likelihood, backed by research rather than a marketing line.
+None of this is a guarantee. Whale sharks are wild animals, and no honest operator promises a sighting on any single trip. What South Ari offers instead is a real, evidenced, exceptionally high likelihood, backed by published research and PADI's own site documentation, not a marketing line.
 
 **Maamigili Beyru**
 
-The whale shark grounds aren't the island's only reef. Maamigili Beyru, the reef running along the island's own outer edge, sits inside the same protected area and is a known site for manta rays, reef sharks, and a wide range of ordinary reef fish — a second, closer reason to base yourself here rather than commute to it. Manta sightings at Beyru peak roughly February through April, when regional currents push manta populations toward South Ari specifically. Like the whale shark grounds, fishing and anchoring are restricted here to protect the habitat.
+Maamigili Beyru — the reef running along the island's own outer edge — is the site itself: PADI's own listing names it directly as part of the South Ari Marine Protected Area, established to protect whale shark habitat, with sightings reported year-round. It's not a separate location you travel to from Maamigili; it's the reef Maamigili sits beside. Manta rays, reef sharks, and a wide range of ordinary reef fish are also frequently seen here, with manta sightings peaking roughly February through April, when regional currents push manta populations toward South Ari specifically. Fishing and anchoring are restricted at Beyru to protect the habitat.
 
 **Getting here**
 
@@ -116,7 +118,7 @@ Maamigili is a real, inhabited Maldivian island — 2,798 residents at the last 
 
 **What a South Ari holiday actually includes**
 
-Between the whale shark grounds and Maamigili Beyru, a stay here naturally covers whale shark snorkeling, manta ray snorkeling in season, turtles and reef life in between, and — depending on the package — a sunset cruise, a sandbank picnic, or a dolphin cruise at dusk. These are real, currently-offered Vilu experiences, not a generic activity list.
+Anchored around Maamigili Beyru, a stay here naturally covers whale shark snorkeling, manta ray snorkeling in season, turtles and reef life in between, and — depending on the package — a sunset cruise, a sandbank picnic, or a dolphin cruise at dusk. These are real, currently-offered Vilu experiences, not a generic activity list.
 
 **How Vilu's packages work**
 
@@ -130,7 +132,7 @@ Wildlife-focused travelers who want the real reef, not a resort-house-reef subst
 
 **The honest reality**
 
-Whale sharks, manta rays, and every other encounter described here are wild, natural events. South Ari's resident population makes sightings likely, most weeks of most months, based on real published research — but no responsible operator, on this island or any other, can promise what a wild animal will do on a given day. Any trip is planned around real odds, not a guarantee.
+Whale sharks, manta rays, and every other encounter described here are wild, natural events. South Ari's year-long individual residency, documented in published research, makes sightings likely most weeks of most months — but no responsible operator, on this island or any other, can promise what a wild animal will do on a given day. Any trip is planned around real, evidenced odds, not a guarantee.
 
 **Why stay with Vilu Residence**
 
@@ -152,7 +154,7 @@ Vilu Residence is a real six-room guesthouse on Maamigili itself, run as a genui
 
 ## 13. Maamigili Beyru section
 
-Drafted as its own short section (see draft above), correctly scoped as a manta/reef-shark/reef-fish site distinct from the whale-shark grounds, sourced to the same citations already live in `maamigili-guide.html` (Divernet, Ministry of Environment). Framed as a second, complementary reason to stay, never conflated with the whale-shark claim.
+Revised this pass: drafted as the site itself — PADI's own official listing names Maamigili Beyru directly as a whale-shark site inside the South Ari Marine Protected Area, with year-round sightings, and manta rays/reef sharks/reef fish as genuine, frequently-seen secondary species (manta season roughly February–April, per the existing Divernet citation already live in `maamigili-guide.html`). Sourced primarily to PADI's own dive-site page this pass, cross-checked against the existing Divernet/Ministry of Environment citations for the manta-season detail.
 
 ## 14. Airport/access section
 
@@ -191,8 +193,9 @@ No individual-experience-enquiry CTA on this page — matches the standing packa
 
 ## 20. Authoritative sources used
 
-- Harvey-Carroll et al., *Scientific Reports* 2021 — https://www.nature.com/articles/s41598-020-79101-8 (already cited in `maamigili-guide.html`)
-- PADI — https://blog.padi.com/diving-maldives-south-ari-marine-protected-area/ (already cited in `maamigili-guide.html`)
+- Harvey-Carroll et al., *Scientific Reports* 2021 — https://www.nature.com/articles/s41598-020-79101-8 (already cited in `maamigili-guide.html`; exact abstract wording verified this pass — "one of few locations globally where year-long residency of individuals occurs")
+- PADI (dive-site listing, verified directly this pass) — https://www.padi.com/dive-site/maldives/maamigili-beyru/ — the primary source for Maamigili Beyru's own whale-shark identity ("Maamigili Beyru (Whale Shark Marine Protected Area)... whale sharks... spotted year-round")
+- PADI (destination overview, already cited in `maamigili-guide.html`) — https://blog.padi.com/diving-maldives-south-ari-marine-protected-area/
 - Maldives Ministry of Environment, SAMPA designation — https://protectedareas.environment.gov.mv/en/protected-areas/south-ari-marine-park-sampa (already cited in `maamigili-guide.html`)
 - Divernet — https://divernet.com/world-dives/south-ari-atoll-a-hotspot-for-whalesharks-and-manta-rays/ (already cited in `maamigili-guide.html`, Maamigili Beyru manta season)
 - Visit Maldives — https://visitmaldives.com/en/experience/swim-with-whale-sharks-during-your-local-island-stay-in-the-maldives (equal-listing fact, verified in prior competitor research)
