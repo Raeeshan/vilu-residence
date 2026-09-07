@@ -225,3 +225,35 @@ The owner has defined a permanent two-stage operating model for Vilu that surviv
 `SEARCH / DISCOVERY → VILU AUTHORITY CONTENT → REAL VILU SERVICE / PACKAGE → ENQUIRY → BOOKING → UPSELL → REPEAT / REVIEW / REFERRAL.`
 
 **Why this is recorded here rather than left in a single session's context**: this instruction is explicitly meant to survive across every future session regardless of which phase is active, so it must live in a permanent continuity doc (this file), not just be inferred from a single directive message that will eventually scroll out of any one conversation's context.
+
+---
+
+## PERMANENT: E-E-A-T / editorial trust policy (added 2026-09-07, Phase 35)
+
+This is the standing editorial standard for all Vilu-published content, not a one-time Phase 35 checklist — it governs every future page, translation, and content edit.
+
+**Core rule — never fabricate:** No invented years-in-operation, qualifications, certifications, awards, partnerships, staff biographies, guest/review counts, media mentions, journalist endorsements, scientific/wildlife authority, or statistics. Every trust claim must be (A) already supported by Vilu-controlled evidence, (B) publicly/independently verifiable, (C) supplied directly by the owner, or (D) framed plainly as ordinary first-hand/local experience rather than specialist credential.
+
+**Wildlife claims:** Sightings (whale shark, manta, turtle) are never guaranteed, in any language, on any page — this was already standing policy (see Identity and positioning, above) and Phase 35 extended it to cover translated marketing copy (the homepage's whale-shark/manta experience cards) and the commercial booking page (`holiday-packages.html` FAQ), not just the dedicated excursion pages.
+
+**Sourcing standard:** Wildlife/factual claims on authority pages should cite Maldives government sources, Visit Maldives, MWSRP (`maldiveswhalesharkresearch.org`), the Maldives government Protected Areas portal (`protectedareas.environment.gov.mv`), Manta Trust/established marine-research bodies, or recognized dive-trade media (e.g. Divernet, Oceanographic Magazine) — never low-quality commercial SEO-aggregator sites. Phase 35 removed two such sources (`resortlife.travel`, `airial.travel`) from `maamigili-guide.html` and replaced them with MWSRP's own site and the official Maldives Ministry of Environment SAMPA page, reusing already-verified facts rather than researching new ones from scratch.
+
+**Freshness dates:** `datePublished` is derived from the file's real git history, never invented. `dateModified` reflects genuine edits made that day — an honest "updated today" is fine when the content actually changed that day; a cosmetic date bump with no real edit is not.
+
+**Authorship:** Content is attributed to Vilu Residence as an organization (`"author": {"@type": "Organization", "name": "Vilu Residence", ...}` in `Article` JSON-LD nodes), never to an invented individual expert. A named individual author is only ever used with explicit owner approval.
+
+**Schema appropriateness:** `author`/`publisher`/`datePublished`/`dateModified` are `CreativeWork`/`Article` properties, not `LodgingBusiness`/`Product`/`TouristDestination` properties — pages needing authorship signals get a separate `Article` JSON-LD node alongside the primary entity node (the pattern `maamigili-guide.html` already established), rather than bolting non-standard fields onto the primary node.
+
+**Local/first-hand voice vs. cited fact:** It's acceptable for local-guide content to speak from first-hand island experience for practical/logistics matters while citing external sources for objective/historical facts in the same piece — this is normal for genuine local guide content, not treated as a contradiction requiring removal of either voice.
+
+**Commercial copy is out of scope for E-E-A-T rewrites:** Package names, IDs, prices, nights, inclusions and their marketing "hooks" are locked and were not altered under this policy, even where a first-hand-voice audit found them generic — trust-content work does not extend to unauthorized rewrites of approved commercial copy.
+
+**Reviewed and confirmed adequate as-is (no change made, Phase 35):**
+- Homepage "Who We Are" section — factual, no invented founder story or corporate fluff.
+- `sameAs` entity links — Instagram, Facebook, Tripadvisor were already real/Vilu-owned; Phase 35 added the verified Google Maps CID link (`maps.google.com/?cid=8624726302398144856`, the same confirmed listing already used in the footer) as a fourth, equally verified entry. No unverified directories or competitor/platform-search URLs were added.
+- No sitewide compact "trust badge" section was built — existing scattered signals (Google Maps embed, footer Maps link, real Google Reviews link, Tripadvisor links, explicit no-fabricated-testimonials dev comment already in the code, cancellation/payment-trust FAQ language) were judged adequate and restrained; adding a generic trust-badge block risked exactly the unsupportable "100% Trusted"/"#1"-style claims this policy exists to avoid.
+- Multilingual trust: spot-checked German and Spanish locale dictionaries for any translation inflating "guesthouse" into "resort"/"luxury" framing — every `Resort`/`Luxus`/`lujo`-type occurrence found was legitimate guesthouse-vs-resort comparison content (the dedicated comparison page and FAQ), never a claim about Vilu itself. No exaggeration found.
+
+**Unresolved, not blocking (owner action, carried forward again):** the legal operator name "Mexiczone" in `privacy-policy.html` predates this and every prior session (present in the original Phase 12 baseline snapshot) and has no corroborating or contradicting source anywhere in this repository. Not guessed at or altered. Continue treating this as an owner-confirmation item, not a blocker for any phase.
+
+**Authority backlog — deliberately not executed in Phase 35:** deeper authority-building work is intentionally sequenced into later phases and must not be pulled forward: Phase 36 (backlinks/digital PR), Phase 37 (AI/AEO/entity authority), Phase 38 (image/video authority), Phase 39 (CRO/trust conversion), Phase 42 (original authority/data report), Phase 54 (search moat), and Post-56 Growth Operations (per the Growth Operating Model above) once Stage 2 is authorized.
