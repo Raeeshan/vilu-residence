@@ -64,7 +64,9 @@
       { "source": "/sk", "destination": "/sk/index.html" },
       { "source": "/sk/", "destination": "/sk/index.html" },
       { "source": "/cs", "destination": "/cs/index.html" },
-      { "source": "/cs/", "destination": "/cs/index.html" }
+      { "source": "/cs/", "destination": "/cs/index.html" },
+      { "source": "/es", "destination": "/es/index.html" },
+      { "source": "/es/", "destination": "/es/index.html" }
     ],
     "headers": [
       {
@@ -74,7 +76,7 @@
         ]
       },
       {
-        "source": "/{zh,ru,de,it,fr,ar,ja,ko,sk,cs}/index.html",
+        "source": "/{zh,ru,de,it,fr,ar,ja,ko,sk,cs,es}/index.html",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" }
         ]
