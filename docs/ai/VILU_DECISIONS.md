@@ -219,6 +219,8 @@ The owner has defined a permanent two-stage operating model for Vilu that surviv
 
 **Standing rule, effective immediately even though Stage 2 hasn't started**: the current roadmap's target markets (Russia, China, the established 11 locales, etc.) are **not permanent**. Once Stage 1 completes, Vilu must monitor demand from ALL countries globally — actual traffic, search demand, enquiries, bookings, conversion rate, and revenue are what determine which countries receive future investment, not the original phase list. Don't treat the Phase 26-31-era market-expansion decisions as a closed, final list once Stage 2 begins.
 
+**How Phase 33 (Local SEO) feeds this loop once Stage 2 begins**: local SEO is not a one-time fix, it becomes a recurring sub-loop within the same MEASURE → ... → REPEAT cycle above — `monitor local queries (Maamigili/South Ari intent) → monitor Google Maps/Business-Profile visibility and review growth → monitor competitor listings on the same island (Koimala, White Sand Inn, Dravida, etc., per COMPETITOR_GAPS.md) → identify unmet local demand (e.g. the still-unclosed Dhigurah whale-shark search-association gap) → improve content/service connection → increase direct enquiries/bookings → repeat`. This recurring operation does not start now — same Stage-1-first rule as everything else in this section — but the loop shape is recorded here so it isn't reinvented from scratch once Stage 2 is authorized.
+
 **The long-term commercial funnel this all serves:**
 `SEARCH / DISCOVERY → VILU AUTHORITY CONTENT → REAL VILU SERVICE / PACKAGE → ENQUIRY → BOOKING → UPSELL → REPEAT / REVIEW / REFERRAL.`
 
