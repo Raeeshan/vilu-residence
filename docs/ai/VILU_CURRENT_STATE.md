@@ -4,9 +4,13 @@
 
 **For the full phase-by-phase status of the entire 56-phase project (not just the current one), see [`VILU_COMPLETION_MATRIX.md`](VILU_COMPLETION_MATRIX.md).** This file covers only the currently-active phase in detail.
 
-**Snapshot date: 2026-09-06 (updated same day after the full master-project audit — see below).**
+**Snapshot date: 2026-09-07 (updated same day after Phase 14 Accessibility Completion — see below).**
 
 ---
+
+## Phase 14 Accessibility Completion — COMPLETE, deployed to production (2026-09-07)
+
+The PARTIAL status noted below (item 1, 2026-09-06) is now resolved. A full public-site accessibility pass fixed every material gap the 2026-09-06 audit found: a real, working skip-link (with `tabindex="-1"` on `#main-content` so the fragment jump actually moves focus, not just scroll position — verified live, since a naive skip-link without this is a common but real failure mode); the page-hero `<header>` changed to a labeled ARIA region, resolving a duplicate-banner landmark conflict against the real site `<header id="site-header">`; every booking-bar/booking-popup/guest-details field (13 inputs) given a real `<label for>`; gallery main image and transport-calculator date/time inputs given proper alt text/`aria-labelledby`; language switcher/floating WhatsApp/sticky CTA given valid ARIA roles and labels; a blank comparison-table header cell given an accessible name; and a real, sitewide Light-theme contrast defect fixed (`--gold`/`--gold-light` used as small-label text measured 3.27:1/4.04:1 against Light's near-white surfaces, below WCAG AA's 4.5:1 — switched to the existing, previously-unused `--accent-text` token, now 5.33:1/4.82:1). The first-ever automated accessibility test suite was added (`test/accessibility.test.js`, real axe-core + jsdom, 16/16 passing across English/Arabic/Russian/Chinese/Spanish × homepage/holiday-packages/one guide page), closing the "zero automated a11y tests, zero Lighthouse/axe ever run" gap. Full regression suite re-verified throughout (564/564 preservation, 30/30 weather-live). Deployed hosting-only to production (commit `9bb4af1`); post-deploy QA performed live on `viluresidence.net` across English/Arabic, Dark theme, keyboard-only navigation, and zero new console/network errors. One honest residual limitation: `.box-label` (shared-page.css tip/info boxes) still has the same Light-theme contrast defect, deferred because it shares a selector with an existing `.warning-box .box-label{color:var(--warn)}` override that needs its own careful, non-cascade-breaking fix — not silently dropped, tracked in `VILU_COMPLETION_MATRIX.md` Phase 14's Remaining column. Full detail: `VILU_COMPLETION_MATRIX.md` Phase 14.
 
 ## Master project audit + Phase 47 security hardening — both complete and deployed (2026-09-06)
 
