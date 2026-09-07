@@ -566,7 +566,11 @@ section('Phase 12C-D — multilingual, accessibility, analytics completion');
   });
 
   test('heading hierarchy for package-page-owned content is sequential with no skip (h1 -> h2 -> h3), independent of the shared site-wide footer', () => {
-    const bodyOnly = hp.slice(hp.indexOf('<header class="page-header"'), hp.indexOf('<footer'));
+    // Phase 14: the page's own hero block moved from <header class="page-header">
+    // to <div class="page-header"> (still the same marker for "where
+    // package-content begins") -- fixing a real axe-core landmark-no-duplicate-
+    // banner violation against the site's real <header id="site-header"> nav.
+    const bodyOnly = hp.slice(hp.indexOf('<div class="page-header"'), hp.indexOf('<footer'));
     const headings = [...bodyOnly.matchAll(/<(h[1-6])\b/g)].map(m => Number(m[1][1]));
     assert.equal(headings.filter(h => h === 1).length, 1, 'exactly one H1');
     for (let i = 1; i < headings.length; i++) {
@@ -1922,11 +1926,15 @@ section('Phase 12G — homepage release-blocker hotfix');
   });
 
   test('the homepage has exactly one <main> landmark, wrapping hero-through-contact only', () => {
-    const opens = (site.match(/^<main>$/gm) || []).length;
+    // Phase 14: <main> gained id="main-content" (the skip-link's jump target)
+    // and tabindex="-1" (so that jump actually moves focus there, not just
+    // scroll position -- otherwise the very next Tab press re-enters the nav
+    // the skip link exists to bypass). Still exactly one <main>, same position.
+    const opens = (site.match(/^<main id="main-content" tabindex="-1">$/gm) || []).length;
     const closes = (site.match(/^<\/main>$/gm) || []).length;
     assert.equal(opens, 1, 'expected exactly one <main> open tag');
     assert.equal(closes, 1, 'expected exactly one </main> close tag');
-    const mainStart = site.indexOf('<main>');
+    const mainStart = site.indexOf('<main id="main-content" tabindex="-1">');
     const mainEnd = site.indexOf('</main>');
     assert.ok(mainStart < site.indexOf('<section id="home"'), '<main> must open before the hero section');
     assert.ok(mainEnd > site.indexOf('<section id="contact">'), '</main> must close after the contact section');
@@ -2365,7 +2373,7 @@ section('Phase 13B-2 — homepage Firebase/booking-adjacent performance optimiza
 
   test('the homepage no-JS fallback, main landmark, and booking-bar labels (Phase 12F/12G) are all still present after the Firebase boot change', () => {
     assert.ok(site.includes(".reveal{opacity:1!important;transform:none!important;filter:none!important}"), 'no-JS reveal fallback missing');
-    assert.equal((site.match(/^<main>$/gm) || []).length, 1, 'expected exactly one <main> landmark');
+    assert.equal((site.match(/^<main id="main-content" tabindex="-1">$/gm) || []).length, 1, 'expected exactly one <main> landmark');
     assert.equal((site.match(/<label class="bb-label"/g) || []).length, 5, 'expected 5 booking-bar labels');
   });
 }

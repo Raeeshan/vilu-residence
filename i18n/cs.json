@@ -332,7 +332,9 @@
       "msgFlight": "Počítejte s odbavením na vnitrostátním terminálu v Malé do {time} (45 minut před odletem).",
       "msgBoat": "Počítejte s příchodem na místo odjezdu rychlého člunu do {time} (30 minut před odjezdem).",
       "msgDep": "Počítejte s tím, že budete připraveni k odjezdu do {time}, abyste na letiště Maamigili dorazili včas na odbavení dle vaší letenky.",
-      "disclaimer": "Jedná se o orientační časy vycházející ze standardních časových rezerv, nikoli o záruku — přesné podrobnosti si vždy ověřte přímo u nás, zejména blíží-li se datum vaší cesty."
+      "disclaimer": "Jedná se o orientační časy vycházející ze standardních časových rezerv, nikoli o záruku — přesné podrobnosti si vždy ověřte přímo u nás, zejména blíží-li se datum vaší cesty.",
+      "dateSuffix": "Datum",
+      "timeSuffix": "Čas"
     },
     "faq": {
       "tag": "Časté dotazy hostů",
@@ -421,7 +423,9 @@
       "linkContact": "kontaktujte nás přímo"
     },
     "floatingWhatsapp": {
-      "ariaLabel": "Napište nám na WhatsApp"
+      "ariaLabel": "Napište nám na WhatsApp",
+      "regionLabel": "Rychlý kontakt",
+      "stickyRegionLabel": "Pomoc s balíčky"
     },
     "guides": {
       "tag": "Cestovní zdroje",
@@ -555,7 +559,7 @@
       "hWhereToStay": "Kde se ubytovat",
       "stayP1": "Ubytování na Maamigili je založeno na penzionech, nikoli na resortech — v rámci samotného Maamigili neexistuje žádný soukromý ostrov-resort, jelikož jde o obydlený místní ostrov, nikoli o neobydlenou koncesi resortu. Mezi jmenované penziony na ostrově patří La Cabana Maldives, Koimala Inn, Shamar Guesthouse &amp; Dive (specializovaná potápěčská základna ostrova), White Sand Inn a Vilu Residence. (<a href=\"https://maldives-magazine.com/budget/maamigili.htm\" target=\"_blank\" rel=\"noopener\">Maldives Magazine</a>; <a href=\"https://www.maldivesnomad.com/islands/local/maamigili/\" target=\"_blank\" rel=\"noopener\">Maldivesnomad</a>)",
       "stayP2": "Širší volba — penzion na místním ostrově, nebo soukromý ostrov-resort — je otázkou struktury, nikoli kvality. Obojí jsou legitimní způsoby, jak zažít Maledivy; co se hodí, závisí na tom, co vlastně upřednostňujete:",
-      "stayTable": "<table><thead><tr><th></th><th>Penzion na místním ostrově (např. Maamigili)</th><th>Soukromý ostrov-resort</th></tr></thead><tbody><tr><td>Typická cena</td><td>Nižší — často zlomek cen za noc v resortu</td><td>Vyšší, někdy výrazně</td></tr><tr><td>Přístup k mořskému životu</td><td>Přímý, pokud ostrov leží u útesu/chráněné oblasti</td><td>Také přímý, ale omezený na domácí útes a dosah výletů daného resortu</td></tr><tr><td>Alkohol</td><td>Nedostupný — zákon místních ostrovů</td><td>Dostupný pod licencí resortu</td></tr><tr><td>Oblékání</td><td>Skromné oblečení očekáváno mimo Bikini Beach</td><td>Žádná omezení v areálu resortu</td></tr><tr><td>Kontakt s komunitou</td><td>Reálný, každodenní život místního ostrova</td><td>Minimální — uzavřené prostředí resortu</td></tr><tr><td>Transfer</td><td>Liší se podle ostrova; Maamigili má vlastní letiště</td><td>Často let plus samostatný úsek rychlolodí/hydroplánem</td></tr></tbody></table>",
+      "stayTable": "<table><thead><tr><th scope=\"col\"><span class=\"sr-only\">Kritéria</span></th><th scope=\"col\">Penzion na místním ostrově (např. Maamigili)</th><th scope=\"col\">Soukromý ostrov-resort</th></tr></thead><tbody><tr><td>Typická cena</td><td>Nižší — často zlomek cen za noc v resortu</td><td>Vyšší, někdy výrazně</td></tr><tr><td>Přístup k mořskému životu</td><td>Přímý, pokud ostrov leží u útesu/chráněné oblasti</td><td>Také přímý, ale omezený na domácí útes a dosah výletů daného resortu</td></tr><tr><td>Alkohol</td><td>Nedostupný — zákon místních ostrovů</td><td>Dostupný pod licencí resortu</td></tr><tr><td>Oblékání</td><td>Skromné oblečení očekáváno mimo Bikini Beach</td><td>Žádná omezení v areálu resortu</td></tr><tr><td>Kontakt s komunitou</td><td>Reálný, každodenní život místního ostrova</td><td>Minimální — uzavřené prostředí resortu</td></tr><tr><td>Transfer</td><td>Liší se podle ostrova; Maamigili má vlastní letiště</td><td>Často let plus samostatný úsek rychlolodí/hydroplánem</td></tr></tbody></table>",
       "stayP3": "Upřímné shrnutí: resort je správnou volbou, pokud je prioritou all-inclusive, uzavřený pobyt s alkoholem na místě. Ostrov s penziony jako Maamigili je správnou volbou, pokud jsou důležitější poměr cena/výkon, přímý přístup ke stejné divoké přírodě a útesům za zlomek ceny a autentický kontakt s maledivským ostrovním životem — výměnou za dodržování místních norem po celou dobu pobytu.",
       "stayLink": "<a href=\"guesthouse-vs-resort.html\">Penzion, nebo resort, podrobně →</a> · <a href=\"maldives-holiday-cost.html\">Kompletní rozpis nákladů →</a>",
       "hVilu": "Proč se ubytovat ve Vilu Residence",
@@ -1448,7 +1452,8 @@
       "themeDark": "Cinematic Dark",
       "themeLight": "Island Luxury Light",
       "switchToDark": "Přepnout na Cinematic Dark",
-      "switchToLight": "Přepnout na Island Luxury Light"
+      "switchToLight": "Přepnout na Island Luxury Light",
+      "skipToMain": "Přeskočit na hlavní obsah"
     },
     "consent": {
       "title": "Vaše soukromí, vaše volba",
@@ -1635,6 +1640,9 @@
       "labelSun": "Východ / západ slunce",
       "attribution": "Údaje o počasí poskytuje <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
       "disclaimer": "Informace o počasí slouží pouze jako obecné vodítko. Podmínky a předpovědi jsou pravděpodobnostní a nemusí být přesné. Nepoužívejte je jako jediný podklad pro rozhodnutí týkající se osobní bezpečnosti, letectví, námořní plavby, plánování v nouzových situacích či jiných bezpečnostně kritických činností — v případech, kdy je přesnost klíčová, se vždy obraťte na oficiální meteorologické služby a příslušné úřady."
+    },
+    "pageHeader": {
+      "ariaLabel": "Úvod stránky"
     }
   },
   "dynamic": {

@@ -40,6 +40,8 @@
 </head>
 <body data-page-type="legal" data-page-slug="cookies">
 
+<header id="site-header">
+<a href="#main-content" class="skip-link" data-i18n="navShell.skipToMain">跳至主要内容</a>
 <nav id="nav" aria-label="主导航" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
     <a href="/zh/" class="nav-logo">
@@ -94,7 +96,7 @@
       </li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
+      <div class="lang-switcher" role="group" aria-label="Language selector"></div>
       <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">规划假期</a>
       <a class="nav-check-availability js-check-availability" href="/zh/#booking" data-i18n="navShell.checkAvailability">查看空房</a>
     </div>
@@ -105,6 +107,7 @@
     </div>
   </div>
 </nav>
+</header>
 
 <!-- Mobile drawer (Phase 10 global shell) -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="网站菜单" data-i18n-aria-label="navShell.menuLabel">
@@ -161,7 +164,7 @@
       <a class="mm-check-availability js-check-availability" href="/zh/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">查看空房</a>
     </div>
     <div class="mm-lang">
-      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+      <div class="lang-switcher lang-switcher-mobile" role="group" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
       <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
@@ -175,15 +178,15 @@
   </div>
 </div>
 
-<header class="page-header">
+<div class="page-header" role="region" aria-label="页面简介" data-i18n-aria-label="pageHeader.ariaLabel">
   <div class="page-header-inner">
     <div class="breadcrumbs"><a href="/zh/">Home</a> / <span data-i18n="cookiesPage.breadcrumb">Cookie 与技术</span></div>
     <h1 class="page-h1"><span data-i18n="cookiesPage.h1Pre">Cookie 与</span><em data-i18n="cookiesPage.h1Em">技术</em></h1>
     <p class="page-sub" data-i18n="cookiesPage.sub">我们用于运行本网站的技术，以及您对其中可选部分所拥有的选择。</p>
   </div>
-</header>
+</div>
 
-<main class="section-inner" style="padding-top:56px;padding-bottom:80px">
+<main id="main-content" tabindex="-1" class="section-inner" style="padding-top:56px;padding-bottom:80px">
   <article class="content-block reveal" style="max-width:760px;margin:0 auto">
 
     <p style="font-size:var(--font-size-sm);color:var(--muted)" data-i18n="cookiesPage.lastUpdated">最后更新：2026年9月3日</p>
@@ -299,7 +302,9 @@
   </div>
 </footer>
 
+<div role="region" aria-label="快速联系" data-i18n-aria-label="floatingWhatsapp.regionLabel">
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+</div>
 
 <!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
 <div class="consent-bar" id="consentBar" role="region" aria-label="Cookie 与隐私同意" data-i18n-aria-label="consent.barLabel" hidden="">

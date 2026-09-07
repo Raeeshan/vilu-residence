@@ -332,7 +332,9 @@
       "msgFlight": "请计划在{time}前于马累国内航站楼办理值机手续(起飞前45分钟)。",
       "msgBoat": "请计划在{time}前抵达快艇出发点(出发前30分钟)。",
       "msgDep": "请计划在{time}前准备就绪出发,以便您能及时抵达马米吉利机场办理机票值机手续。",
-      "disclaimer": "以上时间仅为基于标准缓冲时间的一般参考,并非保证——请务必直接与我们确认具体细节,尤其是在临近出行日期时。"
+      "disclaimer": "以上时间仅为基于标准缓冲时间的一般参考,并非保证——请务必直接与我们确认具体细节,尤其是在临近出行日期时。",
+      "dateSuffix": "日期",
+      "timeSuffix": "时间"
     },
     "faq": {
       "tag": "住客常见问题",
@@ -421,7 +423,9 @@
       "linkContact": "直接联系我们"
     },
     "floatingWhatsapp": {
-      "ariaLabel": "通过WhatsApp与我们聊天"
+      "ariaLabel": "通过WhatsApp与我们聊天",
+      "regionLabel": "快速联系",
+      "stickyRegionLabel": "套餐咨询"
     },
     "guides": {
       "tag": "旅行资讯",
@@ -555,7 +559,7 @@
       "hWhereToStay": "住宿地点",
       "stayP1": "马米吉利的住宿以民宿为主，而非度假村——马米吉利岛上并没有私人度假村，因为这是一座有人居住的本地岛屿，而非无人居住的度假村特许经营地。岛上有名可查的民宿包括La Cabana Maldives、Koimala Inn、Shamar Guesthouse &amp; Dive（岛上专门的潜水基地）、White Sand Inn以及Vilu Residence。（<a href=\"https://maldives-magazine.com/budget/maamigili.htm\" target=\"_blank\" rel=\"noopener\">Maldives Magazine</a>；<a href=\"https://www.maldivesnomad.com/islands/local/maamigili/\" target=\"_blank\" rel=\"noopener\">Maldivesnomad</a>）",
       "stayP2": "本地岛屿民宿与私人度假村岛屿之间更宏观的选择，是一个结构性问题，而非品质高低之分。二者都是体验马尔代夫的合理方式；哪一种更适合你，取决于你真正看重的是什么：",
-      "stayTable": "<table><thead><tr><th></th><th>本地岛屿民宿（如马米吉利）</th><th>私人度假村岛屿</th></tr></thead><tbody><tr><td>典型费用</td><td>更低——通常只是度假村每晚价格的一小部分</td><td>更高，有时高出许多</td></tr><tr><td>海洋生物可达性</td><td>如果岛屿靠近珊瑚礁/保护区，则可直接前往</td><td>同样可直接前往，但仅限于该度假村自有礁石及行程范围</td></tr><tr><td>酒精</td><td>无法获得——受本地岛屿法律限制</td><td>可在度假村许可下获得</td></tr><tr><td>着装规范</td><td>比基尼海滩以外需着装得体</td><td>度假村范围内无限制</td></tr><tr><td>与社区的接触</td><td>真实的、日常的本地岛屿生活</td><td>极少——自成一体的度假村环境</td></tr><tr><td>交通</td><td>视岛屿而定；马米吉利拥有自己的机场</td><td>通常需要飞机加上单独的快艇/水上飞机接驳</td></tr></tbody></table>",
+      "stayTable": "<table><thead><tr><th scope=\"col\"><span class=\"sr-only\">比较项</span></th><th scope=\"col\">本地岛屿民宿（如马米吉利）</th><th scope=\"col\">私人度假村岛屿</th></tr></thead><tbody><tr><td>典型费用</td><td>更低——通常只是度假村每晚价格的一小部分</td><td>更高，有时高出许多</td></tr><tr><td>海洋生物可达性</td><td>如果岛屿靠近珊瑚礁/保护区，则可直接前往</td><td>同样可直接前往，但仅限于该度假村自有礁石及行程范围</td></tr><tr><td>酒精</td><td>无法获得——受本地岛屿法律限制</td><td>可在度假村许可下获得</td></tr><tr><td>着装规范</td><td>比基尼海滩以外需着装得体</td><td>度假村范围内无限制</td></tr><tr><td>与社区的接触</td><td>真实的、日常的本地岛屿生活</td><td>极少——自成一体的度假村环境</td></tr><tr><td>交通</td><td>视岛屿而定；马米吉利拥有自己的机场</td><td>通常需要飞机加上单独的快艇/水上飞机接驳</td></tr></tbody></table>",
       "stayP3": "坦率地说：如果优先考虑的是全包式、自成一体且可在住处享用酒精的度假体验，度假村是正确选择。如果更看重性价比、能以极低成本直接接触相同的野生生物和珊瑚礁，以及与马尔代夫真实岛屿生活的接触，马米吉利这样的民宿岛屿则是正确选择——代价是整个住宿期间都需遵循本地岛屿的规范。",
       "stayLink": "<a href=\"guesthouse-vs-resort.html\">民宿还是度假村，详细对比 →</a>·<a href=\"maldives-holiday-cost.html\">完整费用明细 →</a>",
       "hVilu": "为什么选择入住Vilu Residence",
@@ -1448,7 +1452,8 @@
       "themeDark": "Cinematic Dark",
       "themeLight": "Island Luxury Light",
       "switchToDark": "切换到 Cinematic Dark",
-      "switchToLight": "切换到 Island Luxury Light"
+      "switchToLight": "切换到 Island Luxury Light",
+      "skipToMain": "跳至主要内容"
     },
     "consent": {
       "title": "您的隐私，由您选择",
@@ -1635,6 +1640,9 @@
       "labelSun": "日出 / 日落",
       "attribution": "天气数据由 <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a> 提供",
       "disclaimer": "天气信息仅供参考。天气状况和预报基于概率，可能并不准确。请勿将其作为涉及人身安全、航空、海上航行、应急规划或其他安全关键活动决策的唯一依据——在准确性至关重要时，请务必咨询官方气象部门及相关主管机构。"
+    },
+    "pageHeader": {
+      "ariaLabel": "页面简介"
     }
   },
   "dynamic": {

@@ -110,6 +110,8 @@
 </head>
 <body data-page-type="guide" data-page-slug="maldives-holiday-cost">
 
+<header id="site-header">
+<a href="#main-content" class="skip-link" data-i18n="navShell.skipToMain">Zum Hauptinhalt springen</a>
 <nav id="nav" aria-label="Hauptnavigation" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
     <a href="/de/" class="nav-logo">
@@ -165,7 +167,7 @@
       </li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
+      <div class="lang-switcher" role="group" aria-label="Language selector"></div>
       <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Urlaub planen</a>
       <a class="nav-check-availability js-check-availability" href="/de/#booking" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
     </div>
@@ -176,6 +178,7 @@
     </div>
   </div>
 </nav>
+</header>
 
 <!-- Mobile drawer (Phase 10 global shell) -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Seitenmenü" data-i18n-aria-label="navShell.menuLabel">
@@ -233,7 +236,7 @@
       <a class="mm-check-availability js-check-availability" href="/de/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Verfügbarkeit prüfen</a>
     </div>
     <div class="mm-lang">
-      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+      <div class="lang-switcher lang-switcher-mobile" role="group" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
       <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
@@ -247,15 +250,15 @@
   </div>
 </div>
 
-<header class="page-header" style="background-image:url('/images/turtle_snorkelers_gallery.jpg');background-image:image-set(url('/images/turtle_snorkelers_gallery.webp') type('image/webp'), url('/images/turtle_snorkelers_gallery.jpg') type('image/jpeg'))">
+<div class="page-header" role="region" aria-label="Seiteneinführung" data-i18n-aria-label="pageHeader.ariaLabel" style="background-image:url('/images/turtle_snorkelers_gallery.jpg');background-image:image-set(url('/images/turtle_snorkelers_gallery.webp') type('image/webp'), url('/images/turtle_snorkelers_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
     <div class="breadcrumbs"><a href="/de/" data-i18n="pageNav.home">Startseite</a> / <span data-i18n="costPage.breadcrumb">Urlaubskosten-Guide</span></div>
     <h1 class="page-h1" data-i18n="blogCost.title">Wie viel kostet ein Malediven-Urlaub?</h1>
     <p class="page-sub" data-i18n="costPage.subtitle">Gästehaus oder Resort — die Malediven können 10-mal mehr kosten, je nachdem, wo Sie übernachten. Hier ist, was Sie tatsächlich erwarten können.</p>
   </div>
-</header>
+</div>
 
-<main class="section-inner" style="padding-top:56px">
+<main id="main-content" tabindex="-1" class="section-inner" style="padding-top:56px">
   <article class="content-block reveal">
     <p data-i18n="blogCost.intro">Die Kosten auf den Malediven variieren stärker nach Unterkunftsart als fast überall sonst auf der Welt — ein Resort und ein Guesthouse für dieselbe Woche gebucht können sich um eine Größenordnung unterscheiden.</p>
 
@@ -381,7 +384,9 @@
   </div>
 </footer>
 
+<div role="region" aria-label="Schnellkontakt" data-i18n-aria-label="floatingWhatsapp.regionLabel">
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+</div>
 
 <!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
 <div class="consent-bar" id="consentBar" role="region" aria-label="Cookie- und Datenschutzeinwilligung" data-i18n-aria-label="consent.barLabel" hidden="">

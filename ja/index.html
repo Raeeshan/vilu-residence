@@ -283,6 +283,13 @@ nav.scrolled{background:rgba(4,20,30,.85);backdrop-filter:blur(14px);border-bott
 .nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:10px;background:none;border:none;flex-shrink:0}
 .nav-hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:all .3s}
 .nav-logo:focus-visible,.nav-links>li>a:focus-visible,.nav-drop-trigger:focus-visible,.nav-drop-panel a:focus-visible,.lang-switcher select:focus-visible,.btn-plan-holiday:focus-visible,.nav-check-availability:focus-visible,.nav-hamburger:focus-visible{outline:2px solid var(--teal-light);outline-offset:3px;border-radius:2px}
+/* Phase 14: keyboard-only "skip to main content" link -- off-screen until
+   focused, matching the site's existing focus-visible convention rather
+   than inventing a new visual treatment. */
+.skip-link{position:absolute;top:-999px;inset-inline-start:8px;z-index:10000;background:var(--navy);color:var(--white);padding:10px 18px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;text-decoration:none}
+.skip-link:focus{top:8px;outline:2px solid var(--teal-light);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#main-content:focus{outline:none}
 [dir="rtl"] .nav-drop-panel a{text-align:right}
 [dir="rtl"] .lang-switcher select{padding-right:0;padding-left:14px}
 [dir="rtl"] .lang-switcher::after{right:auto;left:9px}
@@ -1250,6 +1257,45 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
 }
 :root[data-theme="light"] .dn-fc-day{background:rgba(29,36,48,.03)}
 
+/* Phase 14: small uppercase labels/eyebrows across the page use --gold /
+   --gold-light as their text color. Those aliases resolve to --accent
+   (#ad701f, 4.04:1) and --accent-hover (#c07f2b, 3.27:1) in Light theme --
+   both measured below WCAG AA's 4.5:1 for normal-size text against this
+   theme's near-white surfaces. theme.css already defines --accent-text
+   (#925f1c, 5.33:1/4.82:1) specifically "for readable links/labels" (see
+   its own comment) but these components were never switched to it. Fixing
+   text color only, on exactly the small-label selectors affected -- never
+   touching --gold/--gold-light themselves, which stay correct where they're
+   used as button/badge BACKGROUND colors (paired with --navy ink text, a
+   separate, already-passing contrast pair) or as large display text (which
+   clears WCAG's 3:1 large-text threshold already). */
+:root[data-theme="light"] .nav-logo-sub,
+:root[data-theme="light"] .section-tag,
+:root[data-theme="light"] .bb-label,
+:root[data-theme="light"] .ga-counter,
+:root[data-theme="light"] .hp-rail-badge,
+:root[data-theme="light"] .hp-rail-view,
+:root[data-theme="light"] .la-eyebrow,
+:root[data-theme="light"] .la-field label,
+:root[data-theme="light"] .bwf-label,
+:root[data-theme="light"] .footer-brand-sub,
+:root[data-theme="light"] .footer-col h3,
+:root[data-theme="light"] .footer-col h4,
+:root[data-theme="light"] .footer-pms-badge span,
+:root[data-theme="light"] .popup-eyebrow,
+:root[data-theme="light"] .bfp-field label,
+:root[data-theme="light"] .cd-label,
+:root[data-theme="light"] .cf-field label,
+:root[data-theme="light"] .tc-label,
+:root[data-theme="light"] .faq-cat-pill,
+:root[data-theme="light"] .consent-locked,
+:root[data-theme="light"] .exp-chip-wa,
+:root[data-theme="light"] .dn-place-sub{color:var(--accent-text)}
+/* .consent-locked also dims itself to opacity:.8 (a Dark-theme-only design
+   choice); layered on top of the color fix above that still lands at
+   3.58:1, so Light restores full opacity here specifically. */
+:root[data-theme="light"] .consent-locked{opacity:1}
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUpCenter{from{opacity:0;transform:translate(-50%,24px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -1430,6 +1476,8 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
 <div class="page-scrim" aria-hidden="true"></div>
 
 <!-- ══ NAVIGATION (Phase 10 global shell) ══ -->
+<header id="site-header">
+<a href="#main-content" class="skip-link" data-i18n="navShell.skipToMain">メインコンテンツへスキップ</a>
 <nav id="nav" aria-label="メインナビゲーション" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
     <a href="#home" class="nav-logo">
@@ -1485,7 +1533,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       </li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
+      <div class="lang-switcher" role="group" aria-label="Language selector"></div>
       <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">休暇を計画する</a>
       <a class="nav-check-availability js-check-availability" href="#booking" data-i18n="navShell.checkAvailability">空室状況を確認</a>
     </div>
@@ -1496,6 +1544,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </div>
   </div>
 </nav>
+</header>
 
 <!-- Mobile drawer (Phase 10 global shell) -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="サイトメニュー" data-i18n-aria-label="navShell.menuLabel">
@@ -1553,7 +1602,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       <a class="mm-check-availability js-check-availability" href="#booking" data-mm-close="" data-i18n="navShell.checkAvailability">空室状況を確認</a>
     </div>
     <div class="mm-lang">
-      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+      <div class="lang-switcher lang-switcher-mobile" role="group" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
       <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
@@ -1567,10 +1616,10 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
   </div>
 </div>
 
-<!-- Phase 12G: single <main> landmark wrapping primary homepage content only
+<!-- Phase 12G: single <main id="main-content"> landmark wrapping primary homepage content only
      (hero through contact). Header/nav/mobile-drawer precede it; footer,
      the floating WhatsApp link, and consent UI follow it, all outside. -->
-<main>
+<main id="main-content" tabindex="-1">
 <!-- ══ HERO ══ -->
 <section id="home" class="vc-hero">
   <!-- Poster-first: the poster <img> is the real LCP element (fetchpriority=high,
@@ -1971,19 +2020,19 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       <div class="tc-card reveal">
         <div id="tc-arrival-fields">
           <div class="tc-field">
-            <div class="tc-label" data-i18n="timing.domesticLabel">国内線の出発時刻(マレ→マーミギリ)</div>
+            <div class="tc-label" id="tc-label-flight" data-i18n="timing.domesticLabel">国内線の出発時刻(マレ→マーミギリ)</div>
             <div class="tc-inputs">
-              <input type="date" class="tc-input" id="tc-flight-date">
-              <input type="time" class="tc-input" id="tc-flight-time">
+              <input type="date" class="tc-input" id="tc-flight-date" aria-labelledby="tc-label-flight tc-flight-date-suffix"><span class="sr-only" id="tc-flight-date-suffix" data-i18n="timing.dateSuffix">日付</span>
+              <input type="time" class="tc-input" id="tc-flight-time" aria-labelledby="tc-label-flight tc-flight-time-suffix"><span class="sr-only" id="tc-flight-time-suffix" data-i18n="timing.timeSuffix">時刻</span>
               <button class="tc-check-btn" onclick="tcCheck('flight')" data-i18n="timing.checkBtn">確認する</button>
             </div>
             <div class="tc-result" id="tc-result-flight"></div>
           </div>
           <div class="tc-field">
-            <div class="tc-label" data-i18n="timing.boatLabel">スピードボートの出発時刻(マレから直行便)</div>
+            <div class="tc-label" id="tc-label-boat" data-i18n="timing.boatLabel">スピードボートの出発時刻(マレから直行便)</div>
             <div class="tc-inputs">
-              <input type="date" class="tc-input" id="tc-boat-date">
-              <input type="time" class="tc-input" id="tc-boat-time">
+              <input type="date" class="tc-input" id="tc-boat-date" aria-labelledby="tc-label-boat tc-boat-date-suffix"><span class="sr-only" id="tc-boat-date-suffix" data-i18n="timing.dateSuffix">日付</span>
+              <input type="time" class="tc-input" id="tc-boat-time" aria-labelledby="tc-label-boat tc-boat-time-suffix"><span class="sr-only" id="tc-boat-time-suffix" data-i18n="timing.timeSuffix">時刻</span>
               <button class="tc-check-btn" onclick="tcCheck('boat')" data-i18n="timing.checkBtn">確認する</button>
             </div>
             <div class="tc-result" id="tc-result-boat"></div>
@@ -1991,10 +2040,10 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
         </div>
         <div id="tc-departure-fields" style="display:none">
           <div class="tc-field">
-            <div class="tc-label" data-i18n="timing.depLabel">帰国便のチェックイン時刻(航空券記載、マーミギリ空港)</div>
+            <div class="tc-label" id="tc-label-dep" data-i18n="timing.depLabel">帰国便のチェックイン時刻(航空券記載、マーミギリ空港)</div>
             <div class="tc-inputs">
-              <input type="date" class="tc-input" id="tc-dep-date">
-              <input type="time" class="tc-input" id="tc-dep-time">
+              <input type="date" class="tc-input" id="tc-dep-date" aria-labelledby="tc-label-dep tc-dep-date-suffix"><span class="sr-only" id="tc-dep-date-suffix" data-i18n="timing.dateSuffix">日付</span>
+              <input type="time" class="tc-input" id="tc-dep-time" aria-labelledby="tc-label-dep tc-dep-time-suffix"><span class="sr-only" id="tc-dep-time-suffix" data-i18n="timing.timeSuffix">時刻</span>
               <button class="tc-check-btn" onclick="tcCheck('dep')" data-i18n="timing.checkBtn">確認する</button>
             </div>
             <div class="tc-result" id="tc-result-dep"></div>
@@ -2131,7 +2180,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </div>
     <div class="ga-showcase" id="ga-showcase">
       <div class="ga-main">
-        <img class="ga-main-img" id="ga-main-img" src="https://viluresidence.net/images/vilu-residence-bikini-beach-maldives.jpg" alt="" loading="lazy">
+        <img class="ga-main-img" id="ga-main-img" src="https://viluresidence.net/images/vilu-residence-bikini-beach-maldives.jpg" alt="ビキニビーチ" data-i18n-alt="gallery.ocean" loading="lazy">
         <div class="ga-main-scrim" aria-hidden="true"></div>
         <div class="ga-main-caption"><span class="ga-counter" id="ga-counter">1 / 6</span><span class="ga-caption-text" id="ga-caption-text" data-i18n="gallery.ocean">ビキニビーチ</span></div>
         <button type="button" class="ga-nav ga-nav-prev" aria-label="Previous photo" onclick="gaShow(gaIndex-1)">←</button>
@@ -2291,7 +2340,9 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
   </div>
 </footer>
 
+<div role="region" aria-label="クイックコンタクト" data-i18n-aria-label="floatingWhatsapp.regionLabel">
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="floatingWhatsapp.ariaLabel" aria-label="WhatsAppでチャットする" onclick="trackEvent('contact_click',{contact_method:'whatsapp',cta_location:'floating_button'})"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+</div>
 
 <!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
 <div class="consent-bar" id="consentBar" role="region" aria-label="Cookieとプライバシーの同意" data-i18n-aria-label="consent.barLabel" hidden="">
@@ -2361,12 +2412,12 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     <div class="popup-body">
       <div class="bwf-fields">
         <div class="bwf-row">
-          <div class="bwf-field"><div class="bwf-label" data-i18n="bookingBar.checkin">チェックイン</div><input type="text" class="bwf-input vilu-date-input" id="popup-ci"></div>
-          <div class="bwf-field"><div class="bwf-label" data-i18n="bookingBar.checkout">チェックアウト</div><input type="text" class="bwf-input vilu-date-input" id="popup-co"></div>
+          <div class="bwf-field"><label class="bwf-label" for="popup-ci" data-i18n="bookingBar.checkin">チェックイン</label><input type="text" class="bwf-input vilu-date-input" id="popup-ci"></div>
+          <div class="bwf-field"><label class="bwf-label" for="popup-co" data-i18n="bookingBar.checkout">チェックアウト</label><input type="text" class="bwf-input vilu-date-input" id="popup-co"></div>
         </div>
         <div class="bwf-row">
-          <div class="bwf-field"><div class="bwf-label" data-i18n="booking.adults">大人</div><select class="bwf-select" id="popup-ad"><option>1</option><option selected="">2</option><option>3</option></select></div>
-          <div class="bwf-field"><div class="bwf-label" data-i18n="booking.children">子供</div><select class="bwf-select" id="popup-ch"><option selected="">0</option><option>1</option><option>2</option></select></div>
+          <div class="bwf-field"><label class="bwf-label" for="popup-ad" data-i18n="booking.adults">大人</label><select class="bwf-select" id="popup-ad"><option>1</option><option selected="">2</option><option>3</option></select></div>
+          <div class="bwf-field"><label class="bwf-label" for="popup-ch" data-i18n="booking.children">子供</label><select class="bwf-select" id="popup-ch"><option selected="">0</option><option>1</option><option>2</option></select></div>
         </div>
       </div>
       <button class="bwf-btn" style="margin-top:8px" onclick="openBookingPageWithDates();closeBookingPopup()" data-i18n="bookingPopup.searchAvailability">空室を検索 →</button>
@@ -2389,11 +2440,11 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     <p class="bfp-sub" data-i18n="bfp.roomsAvailable">南アリ環礁マーミギリに客室6室・直接予約で最安値保証</p>
     <div class="bfp-search">
       <div class="bfp-search-grid">
-        <div class="bfp-field"><label data-i18n="bookingBar.checkin">チェックイン</label><input type="text" class="vilu-date-input" id="bfp-ci"></div>
-        <div class="bfp-field"><label data-i18n="bookingBar.checkout">チェックアウト</label><input type="text" class="vilu-date-input" id="bfp-co"></div>
-        <div class="bfp-field"><label data-i18n="booking.adults">大人</label><select id="bfp-ad"><option>1</option><option selected="">2</option><option>3</option></select></div>
-        <div class="bfp-field"><label data-i18n="booking.children">子供</label><select id="bfp-ch"><option selected="">0</option><option>1</option><option>2</option></select></div>
-        <div class="bfp-field"><label data-i18n="bookingBar.rooms">客室</label><select id="bfp-rooms"><option selected="">1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div class="bfp-field"><label for="bfp-ci" data-i18n="bookingBar.checkin">チェックイン</label><input type="text" class="vilu-date-input" id="bfp-ci"></div>
+        <div class="bfp-field"><label for="bfp-co" data-i18n="bookingBar.checkout">チェックアウト</label><input type="text" class="vilu-date-input" id="bfp-co"></div>
+        <div class="bfp-field"><label for="bfp-ad" data-i18n="booking.adults">大人</label><select id="bfp-ad"><option>1</option><option selected="">2</option><option>3</option></select></div>
+        <div class="bfp-field"><label for="bfp-ch" data-i18n="booking.children">子供</label><select id="bfp-ch"><option selected="">0</option><option>1</option><option>2</option></select></div>
+        <div class="bfp-field"><label for="bfp-rooms" data-i18n="bookingBar.rooms">客室</label><select id="bfp-rooms"><option selected="">1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
         <button class="bfp-search-btn" onclick="bfpSearch()" data-i18n="bfp.search">検索</button>
       </div>
     </div>
@@ -2422,10 +2473,10 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </div>
     <div class="popup-body">
       <div id="gd-summary" style="font-size:var(--font-size-base);color:var(--muted);margin-bottom:20px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:6px"></div>
-      <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label" data-i18n="bfp.fullName">フルネーム</div><input type="text" class="bwf-input" id="gd-name"></div>
-      <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label" data-i18n="bfp.email">メールアドレス</div><input type="email" class="bwf-input" id="gd-email"></div>
-      <div class="bwf-field" style="margin-bottom:14px"><div class="bwf-label" data-i18n="bfp.phone">電話番号</div><input type="tel" class="bwf-input" id="gd-phone"></div>
-      <div class="bwf-field" style="margin-bottom:20px"><div class="bwf-label" data-i18n="bfp.country">国</div><input type="text" class="bwf-input" id="gd-country"></div>
+      <div class="bwf-field" style="margin-bottom:14px"><label class="bwf-label" for="gd-name" data-i18n="bfp.fullName">フルネーム</label><input type="text" class="bwf-input" id="gd-name"></div>
+      <div class="bwf-field" style="margin-bottom:14px"><label class="bwf-label" for="gd-email" data-i18n="bfp.email">メールアドレス</label><input type="email" class="bwf-input" id="gd-email"></div>
+      <div class="bwf-field" style="margin-bottom:14px"><label class="bwf-label" for="gd-phone" data-i18n="bfp.phone">電話番号</label><input type="tel" class="bwf-input" id="gd-phone"></div>
+      <div class="bwf-field" style="margin-bottom:20px"><label class="bwf-label" for="gd-country" data-i18n="bfp.country">国</label><input type="text" class="bwf-input" id="gd-country"></div>
       <div id="gd-error" class="bk-error" style="display:none"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()" data-i18n="bfp.confirmBooking">予約を確定する</button>
       <div class="bwf-note" data-i18n="bfp.emailNote">確認メールをお送りいたします。直接のご予約のため、現在お支払いの必要はなく、いつでも無料でキャンセルいただけます——現地到着時に現金でお支払いください。</div>
@@ -4411,7 +4462,7 @@ function gaShow(i){
   var item = GA_ITEMS[gaIndex];
   var mainImg = document.getElementById('ga-main-img');
   var counter = document.getElementById('ga-counter');
-  if(mainImg) mainImg.src = item.src;
+  if(mainImg) { mainImg.src = item.src; mainImg.alt = t(item.key); }
   if(counter) counter.textContent = (gaIndex+1)+' / '+n;
   gaRefreshCaption();
   document.querySelectorAll('#ga-thumbs .ga-thumb').forEach(function(el, idx){

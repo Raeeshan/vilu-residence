@@ -332,7 +332,9 @@
       "msgFlight": "Prévoyez de vous enregistrer au terminal domestique de Malé avant {time} (45 minutes avant le départ).",
       "msgBoat": "Prévoyez d'être au point de départ du hors-bord avant {time} (30 minutes avant le départ).",
       "msgDep": "Prévoyez d'être prêt à partir avant {time} afin d'arriver à l'aéroport de Maamigili à temps pour l'enregistrement indiqué sur votre billet.",
-      "disclaimer": "Ces horaires sont donnés à titre indicatif, sur la base de marges standard, et ne constituent pas une garantie — confirmez toujours les détails exacts directement avec nous, surtout à l'approche de votre date de voyage."
+      "disclaimer": "Ces horaires sont donnés à titre indicatif, sur la base de marges standard, et ne constituent pas une garantie — confirmez toujours les détails exacts directement avec nous, surtout à l'approche de votre date de voyage.",
+      "dateSuffix": "Date",
+      "timeSuffix": "Heure"
     },
     "faq": {
       "tag": "FAQ Clients",
@@ -421,7 +423,9 @@
       "linkContact": "contactez-nous directement"
     },
     "floatingWhatsapp": {
-      "ariaLabel": "Discutez avec nous sur WhatsApp"
+      "ariaLabel": "Discutez avec nous sur WhatsApp",
+      "regionLabel": "Contact rapide",
+      "stickyRegionLabel": "Aide sur les forfaits"
     },
     "guides": {
       "tag": "Ressources de voyage",
@@ -555,7 +559,7 @@
       "hWhereToStay": "Où loger",
       "stayP1": "L'hébergement à Maamigili repose sur les guesthouses, pas sur les resorts — il n'existe pas d'île-resort privée au sein de Maamigili elle-même, puisqu'il s'agit d'une île locale habitée et non d'une concession de resort inhabitée. Parmi les guesthouses nommées sur l'île : La Cabana Maldives, Koimala Inn, Shamar Guesthouse &amp; Dive (la base de plongée dédiée de l'île), White Sand Inn, et Vilu Residence. (<a href=\"https://maldives-magazine.com/budget/maamigili.htm\" target=\"_blank\" rel=\"noopener\">Maldives Magazine</a> ; <a href=\"https://www.maldivesnomad.com/islands/local/maamigili/\" target=\"_blank\" rel=\"noopener\">Maldivesnomad</a>)",
       "stayP2": "Le choix plus large — une guesthouse d'île locale contre une île-resort privée — est une question de structure, pas de qualité. Les deux sont des façons légitimes de découvrir les Maldives ; ce qui vous convient dépend de ce que vous privilégiez réellement :",
-      "stayTable": "<table><thead><tr><th></th><th>Guesthouse d'île locale (ex. Maamigili)</th><th>Île-resort privée</th></tr></thead><tbody><tr><td>Coût typique</td><td>Plus bas — souvent une fraction des tarifs par nuit d'un resort</td><td>Plus élevé, parfois nettement</td></tr><tr><td>Accès à la vie marine</td><td>Direct, lorsque l'île se trouve près du récif/de l'aire marine protégée</td><td>Direct également, mais limité au récif du resort et à sa portée d'excursion</td></tr><tr><td>Alcool</td><td>Non disponible — législation des îles locales</td><td>Disponible sous licence de resort</td></tr><tr><td>Code vestimentaire</td><td>Tenue modeste attendue en dehors de Bikini Beach</td><td>Aucune restriction sur le domaine du resort</td></tr><tr><td>Contact avec la communauté</td><td>Réel, vie quotidienne d'une île locale</td><td>Minimal — environnement de resort autonome</td></tr><tr><td>Transfert</td><td>Variable selon l'île ; Maamigili a son propre aéroport</td><td>Souvent vol + trajet séparé en hors-bord/hydravion</td></tr></tbody></table>",
+      "stayTable": "<table><thead><tr><th scope=\"col\"><span class=\"sr-only\">Critères</span></th><th scope=\"col\">Guesthouse d'île locale (ex. Maamigili)</th><th scope=\"col\">Île-resort privée</th></tr></thead><tbody><tr><td>Coût typique</td><td>Plus bas — souvent une fraction des tarifs par nuit d'un resort</td><td>Plus élevé, parfois nettement</td></tr><tr><td>Accès à la vie marine</td><td>Direct, lorsque l'île se trouve près du récif/de l'aire marine protégée</td><td>Direct également, mais limité au récif du resort et à sa portée d'excursion</td></tr><tr><td>Alcool</td><td>Non disponible — législation des îles locales</td><td>Disponible sous licence de resort</td></tr><tr><td>Code vestimentaire</td><td>Tenue modeste attendue en dehors de Bikini Beach</td><td>Aucune restriction sur le domaine du resort</td></tr><tr><td>Contact avec la communauté</td><td>Réel, vie quotidienne d'une île locale</td><td>Minimal — environnement de resort autonome</td></tr><tr><td>Transfert</td><td>Variable selon l'île ; Maamigili a son propre aéroport</td><td>Souvent vol + trajet séparé en hors-bord/hydravion</td></tr></tbody></table>",
       "stayP3": "Le cadrage honnête : un resort est le bon choix si un séjour tout compris et autonome avec alcool sur place est la priorité. Une île de guesthouses comme Maamigili est le bon choix si la valeur, l'accès direct aux mêmes richesses naturelles et aux mêmes récifs pour une fraction du coût, et un contact authentique avec la vie insulaire maldivienne comptent davantage — avec pour contrepartie le respect des normes locales pendant toute la durée du séjour.",
       "stayLink": "<a href=\"guesthouse-vs-resort.html\">Guesthouse ou resort, en détail →</a> · <a href=\"maldives-holiday-cost.html\">Répartition complète du budget →</a>",
       "hVilu": "Pourquoi séjourner à Vilu Residence",
@@ -1448,7 +1452,8 @@
       "themeDark": "Cinematic Dark",
       "themeLight": "Island Luxury Light",
       "switchToDark": "Passer en Cinematic Dark",
-      "switchToLight": "Passer en Island Luxury Light"
+      "switchToLight": "Passer en Island Luxury Light",
+      "skipToMain": "Passer au contenu principal"
     },
     "consent": {
       "title": "Votre vie privée, votre choix",
@@ -1635,6 +1640,9 @@
       "labelSun": "Lever / coucher du soleil",
       "attribution": "Données météo fournies par <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
       "disclaimer": "Les informations météorologiques sont fournies à titre indicatif uniquement. Les conditions et prévisions sont probabilistes et peuvent être inexactes. Ne les utilisez pas comme seule base de décision pour la sécurité personnelle, l'aviation, la navigation maritime, la planification d'urgence ou toute autre activité critique pour la sécurité — consultez toujours les services météorologiques officiels et les autorités compétentes lorsque la précision est essentielle."
+    },
+    "pageHeader": {
+      "ariaLabel": "Introduction de la page"
     }
   },
   "dynamic": {

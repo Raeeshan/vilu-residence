@@ -110,6 +110,8 @@
 </head>
 <body data-page-type="guide" data-page-slug="best-time-to-visit">
 
+<header id="site-header">
+<a href="#main-content" class="skip-link" data-i18n="navShell.skipToMain">Preskočiť na hlavný obsah</a>
 <nav id="nav" aria-label="Hlavná navigácia" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
     <a href="/sk/" class="nav-logo">
@@ -165,7 +167,7 @@
       </li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
+      <div class="lang-switcher" role="group" aria-label="Language selector"></div>
       <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">Naplánujte dovolenku</a>
       <a class="nav-check-availability js-check-availability" href="/sk/#booking" data-i18n="navShell.checkAvailability">Skontrolovať dostupnosť</a>
     </div>
@@ -176,6 +178,7 @@
     </div>
   </div>
 </nav>
+</header>
 
 <!-- Mobile drawer (Phase 10 global shell) -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menu stránky" data-i18n-aria-label="navShell.menuLabel">
@@ -233,7 +236,7 @@
       <a class="mm-check-availability js-check-availability" href="/sk/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">Skontrolovať dostupnosť</a>
     </div>
     <div class="mm-lang">
-      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+      <div class="lang-switcher lang-switcher-mobile" role="group" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
       <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
@@ -247,15 +250,15 @@
   </div>
 </div>
 
-<header class="page-header" style="background-image:url('/images/whale_shark_2_gallery.jpg');background-image:image-set(url('/images/whale_shark_2_gallery.webp') type('image/webp'), url('/images/whale_shark_2_gallery.jpg') type('image/jpeg'))">
+<div class="page-header" role="region" aria-label="Úvod stránky" data-i18n-aria-label="pageHeader.ariaLabel" style="background-image:url('/images/whale_shark_2_gallery.jpg');background-image:image-set(url('/images/whale_shark_2_gallery.webp') type('image/webp'), url('/images/whale_shark_2_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
     <div class="breadcrumbs"><a href="/sk/" data-i18n="pageNav.home">Domov</a> / <span data-i18n="btPage.breadcrumb">Najlepší Čas na Návštevu</span></div>
     <h1 class="page-h1" data-i18n="blogBestTime.title">Najlepšie obdobie na návštevu Maldiv</h1>
     <p class="page-sub" data-i18n="btPage.subtitle">Klasická rada je november–apríl — tu je, čo to skutočne znamená pre počasie, cenu a morský život.</p>
   </div>
-</header>
+</div>
 
-<main class="section-inner" style="padding-top:56px">
+<main id="main-content" tabindex="-1" class="section-inner" style="padding-top:56px">
   <article class="content-block reveal">
     <p data-i18n="blogBestTime.intro">Krátka odpoveď: november až apríl je klasické odporúčanie, a to z dobrého dôvodu, ale nie je to jediné dobré obdobie na cestu — závisí od toho, čo uprednostňujete.</p>
 
@@ -384,7 +387,9 @@
   </div>
 </footer>
 
+<div role="region" aria-label="Rýchly kontakt" data-i18n-aria-label="floatingWhatsapp.regionLabel">
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+</div>
 
 <!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
 <div class="consent-bar" id="consentBar" role="region" aria-label="Súhlas s cookies a súkromím" data-i18n-aria-label="consent.barLabel" hidden="">

@@ -28,7 +28,8 @@
       "themeLight": "Island Luxury Light",
       "switchToDark": "Cambiar a Cinematic Dark",
       "switchToLight": "Cambiar a Island Luxury Light",
-      "planTrip": "Planificar Viaje"
+      "planTrip": "Planificar Viaje",
+      "skipToMain": "Saltar al contenido principal"
     },
     "pageNav": {
       "home": "Inicio",
@@ -317,7 +318,9 @@
       "tight": "Este horario es muy justo — contáctanos directamente",
       "msgFlight": "Ten previsto facturar en la terminal doméstica de Malé antes de las {time} (45 minutos antes de la salida).",
       "msgBoat": "Ten previsto estar en el punto de salida de la lancha rápida antes de las {time} (30 minutos antes de la salida).",
-      "msgDep": "Ten previsto estar listo para salir antes de las {time} para llegar a tiempo al Aeropuerto de Maamigili para la facturación de tu vuelo."
+      "msgDep": "Ten previsto estar listo para salir antes de las {time} para llegar a tiempo al Aeropuerto de Maamigili para la facturación de tu vuelo.",
+      "dateSuffix": "Fecha",
+      "timeSuffix": "Hora"
     },
     "destNow": {
       "tag": "La Isla, Ahora Mismo",
@@ -475,7 +478,9 @@
       "aboutPhoto": "Patio y edificio de Vilu Residence en Maamigili"
     },
     "floatingWhatsapp": {
-      "ariaLabel": "Chatea con nosotros por WhatsApp"
+      "ariaLabel": "Chatea con nosotros por WhatsApp",
+      "regionLabel": "Contacto rápido",
+      "stickyRegionLabel": "Ayuda con paquetes"
     },
     "hpMeta": {
       "title": "Paquetes de Vacaciones a Maldivas — Tiburón Ballena y Mantarrayas",
@@ -591,6 +596,9 @@
       ],
       "hintCheckin": "Selecciona la fecha de entrada",
       "hintCheckout": "Selecciona la fecha de salida"
+    },
+    "pageHeader": {
+      "ariaLabel": "Introducción de la página"
     }
   },
   "dynamic": {

@@ -332,7 +332,9 @@
       "msgFlight": "말레 국내선 터미널에는 {time}까지 체크인하시기 바랍니다 (출발 45분 전).",
       "msgBoat": "스피드보트 출발 지점에는 {time}까지 도착하시기 바랍니다 (출발 30분 전).",
       "msgDep": "항공권 체크인 시간에 맞춰 마미길리 공항에 도착하실 수 있도록 {time}까지 출발 준비를 마치시기 바랍니다.",
-      "disclaimer": "이는 표준 여유 시간을 기준으로 한 일반적인 안내 시간이며 보장된 것은 아닙니다 — 특히 여행일이 가까워지면 반드시 저희에게 직접 정확한 세부 사항을 확인해 주세요."
+      "disclaimer": "이는 표준 여유 시간을 기준으로 한 일반적인 안내 시간이며 보장된 것은 아닙니다 — 특히 여행일이 가까워지면 반드시 저희에게 직접 정확한 세부 사항을 확인해 주세요.",
+      "dateSuffix": "날짜",
+      "timeSuffix": "시간"
     },
     "faq": {
       "tag": "자주 묻는 질문",
@@ -421,7 +423,9 @@
       "linkContact": "직접 문의하기"
     },
     "floatingWhatsapp": {
-      "ariaLabel": "WhatsApp으로 채팅하기"
+      "ariaLabel": "WhatsApp으로 채팅하기",
+      "regionLabel": "빠른 연락",
+      "stickyRegionLabel": "패키지 문의"
     },
     "guides": {
       "tag": "여행 정보",
@@ -555,7 +559,7 @@
       "hWhereToStay": "숙박할 곳",
       "stayP1": "마미길리의 숙박은 리조트가 아닌 게스트하우스를 중심으로 이루어집니다 — 마미길리 자체 내에는 프라이빗 리조트 아일랜드가 없는데, 이는 무인 리조트 특허지가 아닌 유인 로컬 아일랜드이기 때문입니다. 섬 내 이름 있는 게스트하우스로는 La Cabana Maldives, Koimala Inn, Shamar Guesthouse &amp; Dive(섬 전용 다이빙 기지), White Sand Inn, Vilu Residence 등이 있습니다. (<a href=\"https://maldives-magazine.com/budget/maamigili.htm\" target=\"_blank\" rel=\"noopener\">Maldives Magazine</a>; <a href=\"https://www.maldivesnomad.com/islands/local/maamigili/\" target=\"_blank\" rel=\"noopener\">Maldivesnomad</a>)",
       "stayP2": "로컬 아일랜드의 게스트하우스인지, 프라이빗 리조트 아일랜드인지라는 더 큰 선택은 품질의 문제가 아니라 구조의 문제입니다. 둘 다 몰디브를 경험하는 정당한 방법이며, 무엇이 맞는지는 실제로 무엇을 우선시하는지에 달려 있습니다.",
-      "stayTable": "<table><thead><tr><th></th><th>로컬 아일랜드 게스트하우스(예: 마미길리)</th><th>프라이빗 리조트 아일랜드</th></tr></thead><tbody><tr><td>일반적인 비용</td><td>더 낮음 — 흔히 리조트 1박 요금의 일부 수준</td><td>더 높음, 때로는 상당히</td></tr><tr><td>해양 생물 접근성</td><td>섬이 리프/보호구역 근처에 있을 경우 직접적</td><td>역시 직접적이나 해당 리조트의 하우스 리프와 투어 범위로 제한됨</td></tr><tr><td>술</td><td>이용 불가 — 로컬 아일랜드 법률에 따름</td><td>리조트 라이선스 하에 이용 가능</td></tr><tr><td>복장 규정</td><td>비키니 비치 밖에서는 단정한 옷차림 요구</td><td>리조트 구내에서는 제한 없음</td></tr><tr><td>지역사회와의 교류</td><td>실제적이고 일상적인 로컬 아일랜드 생활</td><td>최소한 — 자기완결적인 리조트 환경</td></tr><tr><td>이동</td><td>섬마다 다름; 마미길리는 자체 공항 보유</td><td>흔히 항공편에 더해 별도의 스피드보트/수상비행기 구간</td></tr></tbody></table>",
+      "stayTable": "<table><thead><tr><th scope=\"col\"><span class=\"sr-only\">기준</span></th><th scope=\"col\">로컬 아일랜드 게스트하우스(예: 마미길리)</th><th scope=\"col\">프라이빗 리조트 아일랜드</th></tr></thead><tbody><tr><td>일반적인 비용</td><td>더 낮음 — 흔히 리조트 1박 요금의 일부 수준</td><td>더 높음, 때로는 상당히</td></tr><tr><td>해양 생물 접근성</td><td>섬이 리프/보호구역 근처에 있을 경우 직접적</td><td>역시 직접적이나 해당 리조트의 하우스 리프와 투어 범위로 제한됨</td></tr><tr><td>술</td><td>이용 불가 — 로컬 아일랜드 법률에 따름</td><td>리조트 라이선스 하에 이용 가능</td></tr><tr><td>복장 규정</td><td>비키니 비치 밖에서는 단정한 옷차림 요구</td><td>리조트 구내에서는 제한 없음</td></tr><tr><td>지역사회와의 교류</td><td>실제적이고 일상적인 로컬 아일랜드 생활</td><td>최소한 — 자기완결적인 리조트 환경</td></tr><tr><td>이동</td><td>섬마다 다름; 마미길리는 자체 공항 보유</td><td>흔히 항공편에 더해 별도의 스피드보트/수상비행기 구간</td></tr></tbody></table>",
       "stayP3": "솔직히 말하면, 현지에서 술을 즐길 수 있는 올인클루시브의 자기완결적인 숙박이 우선순위라면 리조트가 맞는 선택입니다. 가성비, 같은 야생동물과 리프에 훨씬 저렴한 비용으로 직접 접근하는 것, 그리고 진짜 몰디브 섬 생활과의 교류가 더 중요하다면 마미길리 같은 게스트하우스 섬이 맞는 선택입니다 — 그 대가로 숙박 기간 내내 로컬 아일랜드의 규범을 따라야 합니다.",
       "stayLink": "<a href=\"guesthouse-vs-resort.html\">게스트하우스냐 리조트냐, 자세히 보기 →</a> · <a href=\"maldives-holiday-cost.html\">전체 비용 상세 내역 →</a>",
       "hVilu": "Vilu Residence에 묵어야 하는 이유",
@@ -1448,7 +1452,8 @@
       "themeDark": "Cinematic Dark",
       "themeLight": "Island Luxury Light",
       "switchToDark": "Cinematic Dark로 전환",
-      "switchToLight": "Island Luxury Light로 전환"
+      "switchToLight": "Island Luxury Light로 전환",
+      "skipToMain": "본문으로 건너뛰기"
     },
     "consent": {
       "title": "고객님의 개인정보, 고객님의 선택",
@@ -1635,6 +1640,9 @@
       "labelSun": "일출 / 일몰",
       "attribution": "날씨 데이터 제공: <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
       "disclaimer": "기상 정보는 일반적인 참고용으로만 제공됩니다. 기상 상태와 예보는 확률에 기반한 것으로 정확하지 않을 수 있습니다. 개인 안전, 항공, 해상 운항, 비상 계획 또는 기타 안전이 중요한 활동에 관한 결정을 이 정보에만 의존해서는 안 됩니다 — 정확성이 중요한 경우 항상 공식 기상 기관 및 관계 당국에 문의하시기 바랍니다."
+    },
+    "pageHeader": {
+      "ariaLabel": "페이지 소개"
     }
   },
   "dynamic": {

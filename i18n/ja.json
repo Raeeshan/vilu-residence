@@ -332,7 +332,9 @@
       "msgFlight": "出発の45分前までに、マレの国内線ターミナルで{time}にチェックインできるよう計画してください。",
       "msgBoat": "出発の30分前までに、{time}にはスピードボート乗り場に到着できるよう計画してください。",
       "msgDep": "航空券のチェックイン時刻に間に合うよう、{time}までにマーミギリ空港へ向けて出発できるよう計画してください。",
-      "disclaimer": "これらは標準的な余裕時間に基づく一般的な目安であり、保証するものではありません。特にご旅行日が近づいている場合は、必ず私たちに直接詳細をご確認ください。"
+      "disclaimer": "これらは標準的な余裕時間に基づく一般的な目安であり、保証するものではありません。特にご旅行日が近づいている場合は、必ず私たちに直接詳細をご確認ください。",
+      "dateSuffix": "日付",
+      "timeSuffix": "時刻"
     },
     "faq": {
       "tag": "ゲストからのよくある質問",
@@ -421,7 +423,9 @@
       "linkContact": "直接お問い合わせください"
     },
     "floatingWhatsapp": {
-      "ariaLabel": "WhatsAppでチャットする"
+      "ariaLabel": "WhatsAppでチャットする",
+      "regionLabel": "クイックコンタクト",
+      "stickyRegionLabel": "パッケージのご相談"
     },
     "guides": {
       "tag": "旅の情報",
@@ -555,7 +559,7 @@
       "hWhereToStay": "宿泊先",
       "stayP1": "マーミジリでの宿泊はリゾートではなくゲストハウスが中心です——マーミジリ自体には民間のリゾートアイランドはありません。無人のリゾート特許地ではなく、有人のローカルアイランドだからです。島内で名前の知られているゲストハウスには、La Cabana Maldives、Koimala Inn、Shamar Guesthouse &amp; Dive（島専用のダイブ拠点）、White Sand Inn、Vilu Residenceなどがあります。（<a href=\"https://maldives-magazine.com/budget/maamigili.htm\" target=\"_blank\" rel=\"noopener\">Maldives Magazine</a>；<a href=\"https://www.maldivesnomad.com/islands/local/maamigili/\" target=\"_blank\" rel=\"noopener\">Maldivesnomad</a>）",
       "stayP2": "ローカルアイランドのゲストハウスか、プライベートリゾートアイランドかという大きな選択は、品質の問題ではなく構造上の問題です。どちらもモルディブを体験する正当な方法であり、どちらが合っているかは、あなたが本当に何を重視するかによります。",
-      "stayTable": "<table><thead><tr><th></th><th>ローカルアイランドのゲストハウス（例：マーミジリ）</th><th>プライベートリゾートアイランド</th></tr></thead><tbody><tr><td>一般的な費用</td><td>より低い——リゾートの1泊料金の一部程度のことが多い</td><td>より高い、場合によってはかなり高い</td></tr><tr><td>海洋生物へのアクセス</td><td>島がリーフ／海洋保護区の近くにあれば直接的</td><td>こちらも直接的だが、そのリゾート自体のハウスリーフとツアー範囲に限られる</td></tr><tr><td>アルコール</td><td>入手不可——ローカルアイランドの法律による</td><td>リゾートのライセンスの下で入手可能</td></tr><tr><td>服装規定</td><td>ビキニビーチ以外では控えめな服装が求められる</td><td>リゾート敷地内では制限なし</td></tr><tr><td>地域との交流</td><td>本物の、ローカルアイランドの日常生活</td><td>最小限——自己完結型のリゾート環境</td></tr><tr><td>移動</td><td>島によって異なる；マーミジリには独自の空港がある</td><td>フライトに加え、別途スピードボートや水上飛行機の移動が必要なことが多い</td></tr></tbody></table>",
+      "stayTable": "<table><thead><tr><th scope=\"col\"><span class=\"sr-only\">比較項目</span></th><th scope=\"col\">ローカルアイランドのゲストハウス（例：マーミジリ）</th><th scope=\"col\">プライベートリゾートアイランド</th></tr></thead><tbody><tr><td>一般的な費用</td><td>より低い——リゾートの1泊料金の一部程度のことが多い</td><td>より高い、場合によってはかなり高い</td></tr><tr><td>海洋生物へのアクセス</td><td>島がリーフ／海洋保護区の近くにあれば直接的</td><td>こちらも直接的だが、そのリゾート自体のハウスリーフとツアー範囲に限られる</td></tr><tr><td>アルコール</td><td>入手不可——ローカルアイランドの法律による</td><td>リゾートのライセンスの下で入手可能</td></tr><tr><td>服装規定</td><td>ビキニビーチ以外では控えめな服装が求められる</td><td>リゾート敷地内では制限なし</td></tr><tr><td>地域との交流</td><td>本物の、ローカルアイランドの日常生活</td><td>最小限——自己完結型のリゾート環境</td></tr><tr><td>移動</td><td>島によって異なる；マーミジリには独自の空港がある</td><td>フライトに加え、別途スピードボートや水上飛行機の移動が必要なことが多い</td></tr></tbody></table>",
       "stayP3": "率直に言えば、現地でアルコールが楽しめるオールインクルーシブで自己完結型の滞在を優先するなら、リゾートが正しい選択です。コストパフォーマンス、同じ野生動物やリーフへのわずかな費用での直接アクセス、そして本物のモルディブの島の暮らしとの触れ合いをより重視するなら、マーミジリのようなゲストハウスの島が正しい選択です——引き換えに、滞在期間中はローカルアイランドの規範に従う必要があります。",
       "stayLink": "<a href=\"guesthouse-vs-resort.html\">ゲストハウスかリゾートか、詳しくはこちら →</a>・<a href=\"maldives-holiday-cost.html\">費用の完全な内訳 →</a>",
       "hVilu": "Vilu Residenceに滞在する理由",
@@ -1448,7 +1452,8 @@
       "themeDark": "Cinematic Dark",
       "themeLight": "Island Luxury Light",
       "switchToDark": "Cinematic Dark に切り替える",
-      "switchToLight": "Island Luxury Light に切り替える"
+      "switchToLight": "Island Luxury Light に切り替える",
+      "skipToMain": "メインコンテンツへスキップ"
     },
     "consent": {
       "title": "お客様のプライバシー、お客様の選択",
@@ -1635,6 +1640,9 @@
       "labelSun": "日の出 / 日の入り",
       "attribution": "気象データ提供：<a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
       "disclaimer": "気象情報は一般的な目安としてのみご利用ください。天候や予報は確率に基づくものであり、正確でない場合があります。個人の安全、航空、海上航行、緊急時の計画、その他安全に関わる活動の判断材料として、これのみに依存しないでください——正確性が重要な場合は、必ず公式の気象機関および関係当局にご確認ください。"
+    },
+    "pageHeader": {
+      "ariaLabel": "ページ概要"
     }
   },
   "dynamic": {

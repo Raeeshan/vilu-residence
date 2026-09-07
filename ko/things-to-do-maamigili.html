@@ -180,6 +180,8 @@
 </head>
 <body data-page-type="guide" data-page-slug="things-to-do-maamigili">
 
+<header id="site-header">
+<a href="#main-content" class="skip-link" data-i18n="navShell.skipToMain">본문으로 건너뛰기</a>
 <nav id="nav" aria-label="주요 내비게이션" data-i18n-aria-label="navShell.mainNav">
   <div class="nav-row-top">
     <a href="/ko/" class="nav-logo">
@@ -235,7 +237,7 @@
       </li>
     </ul>
     <div class="nav-right">
-      <div class="lang-switcher" aria-label="Language selector"></div>
+      <div class="lang-switcher" role="group" aria-label="Language selector"></div>
       <a class="btn-plan-holiday" href="holiday-packages.html" onclick="if(document.body.getAttribute('data-page-type')==='guide'&amp;&amp;window.viluAnalytics)window.viluAnalytics.setGuideHandoff(document.body.getAttribute('data-page-slug'))" data-i18n="navShell.planHoliday">휴가 계획하기</a>
       <a class="nav-check-availability js-check-availability" href="/ko/#booking" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
     </div>
@@ -246,6 +248,7 @@
     </div>
   </div>
 </nav>
+</header>
 
 <!-- Mobile drawer (Phase 10 global shell) -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="사이트 메뉴" data-i18n-aria-label="navShell.menuLabel">
@@ -303,7 +306,7 @@
       <a class="mm-check-availability js-check-availability" href="/ko/#booking" data-mm-close="" data-i18n="navShell.checkAvailability">예약 가능 여부 확인</a>
     </div>
     <div class="mm-lang">
-      <div class="lang-switcher lang-switcher-mobile" aria-label="Language selector"></div>
+      <div class="lang-switcher lang-switcher-mobile" role="group" aria-label="Language selector"></div>
     </div>
     <div class="mm-contact">
       <a href="tel:+9609903339" onclick="trackEvent('contact_click',{contact_method:'phone',cta_location:'mobile_menu'})">+960 9903339</a>
@@ -317,15 +320,15 @@
   </div>
 </div>
 
-<header class="page-header" style="background-image:url('/images/turtle_snorkelers_gallery.jpg');background-image:image-set(url('/images/turtle_snorkelers_gallery.webp') type('image/webp'), url('/images/turtle_snorkelers_gallery.jpg') type('image/jpeg'))">
+<div class="page-header" role="region" aria-label="페이지 소개" data-i18n-aria-label="pageHeader.ariaLabel" style="background-image:url('/images/turtle_snorkelers_gallery.jpg');background-image:image-set(url('/images/turtle_snorkelers_gallery.webp') type('image/webp'), url('/images/turtle_snorkelers_gallery.jpg') type('image/jpeg'))">
   <div class="page-header-inner">
     <div class="breadcrumbs"><a href="/ko/" data-i18n="pageNav.home">홈</a> / <span data-i18n="ttdPage.breadcrumb">마미길리에서 즐길거리</span></div>
     <h1 class="page-h1" data-i18n="ttdPage.title">마미길리에서 즐길거리</h1>
     <p class="page-sub" data-i18n="ttdPage.subtitle">마미길리 체류 중 이용할 수 있는 모든 종류의 투어 — 그리고 이를 휴가에 포함시키는 방법.</p>
   </div>
-</header>
+</div>
 
-<main class="section-inner" style="padding-top:56px">
+<main id="main-content" tabindex="-1" class="section-inner" style="padding-top:56px">
   <div class="guide-layout">
     <aside class="guide-toc-rail">
           <nav aria-label="Table of contents" class="toc-block">
@@ -560,7 +563,9 @@
   </div>
 </footer>
 
+<div role="region" aria-label="빠른 연락" data-i18n-aria-label="floatingWhatsapp.regionLabel">
 <a href="https://wa.me/9609903339" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
+</div>
 
 <!-- ══ CONSENT MANAGER (Phase 11B) ══ -->
 <div class="consent-bar" id="consentBar" role="region" aria-label="쿠키 및 개인정보 동의" data-i18n-aria-label="consent.barLabel" hidden="">
