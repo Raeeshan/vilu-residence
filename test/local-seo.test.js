@@ -106,6 +106,32 @@ section('Case E — getting-to-maamigili.html title includes the disambiguating 
   });
 }
 
+section('Case G — whale-shark-snorkeling.html / manta-ray-snorkeling.html link to maamigili-guide.html in-body (English source, static HTML AND embedded I18N.en fallback stay in sync)');
+{
+  // Real bug class this guards: every data-i18n string on a standalone page
+  // exists in two places -- the static HTML default text, and the embedded
+  // `var I18N = { en: {...} }` JS object used by applyTranslations() at
+  // runtime (which runs -- and overwrites the DOM -- even on the plain
+  // English page). Editing only the HTML half leaves the JS half stale, and
+  // the stale JS value silently reverts the fix the moment the page loads.
+  // Caught live in Phase 33 (a fresh no-cache fetch showed the fix; the
+  // rendered DOM after JS ran did not) -- both copies must be checked here.
+  for (const [file, ns] of [['whale-shark-snorkeling.html', 'wsPage'], ['manta-ray-snorkeling.html', 'mrPage']]) {
+    test(`${file}: the quick-facts "Departs from Maamigili" note links to maamigili-guide.html in BOTH the static HTML and the embedded I18N.en JS fallback`, () => {
+      const html = read(file);
+      const htmlKeyIdx = html.indexOf(`data-i18n="${ns}.qfDurationNote"`);
+      assert.ok(htmlKeyIdx >= 0, `${file}: could not find the qfDurationNote <p> element`);
+      const htmlSnippet = html.slice(htmlKeyIdx, html.indexOf('</p>', htmlKeyIdx));
+      assert.ok(htmlSnippet.includes('<a href="maamigili-guide.html">'), `${file}: static HTML qfDurationNote has no link to maamigili-guide.html`);
+
+      const jsKeyIdx = html.indexOf('qfDurationNote: "');
+      assert.ok(jsKeyIdx >= 0, `${file}: could not find the embedded I18N.en qfDurationNote entry`);
+      const jsSnippet = html.slice(jsKeyIdx, jsKeyIdx + 200);
+      assert.ok(jsSnippet.includes('<a href=\\"maamigili-guide.html\\">'), `${file}: embedded I18N.en qfDurationNote is STALE -- still has no link, will silently overwrite the HTML fix at runtime`);
+    });
+  }
+}
+
 section('Case F — Maamigili entity clarity: maamigili-guide.html names Vilu Residence in its introduction section');
 {
   test('maamigili-guide.html introduces Vilu Residence within the #introduction section, not only far down the page', () => {
