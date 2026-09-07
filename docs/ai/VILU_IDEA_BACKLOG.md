@@ -4,7 +4,9 @@ Future owner ideas that are **not approved for immediate implementation**. Recor
 
 ---
 
-## Live Destination Experience — weather / time (design detail, promoted to `VILU_ROADMAP.md` Phase 2 & 6 for sequencing, kept here for full design notes)
+## Live Destination Experience — weather / time — STATUS: LIVE (kept here for the original full design notes only, not as open work)
+
+**This entire section describes work that is now COMPLETE and live in production** (`VILU_COMPLETION_MATRIX.md` Phase 20/`VILU_ROADMAP.md` Phase 6) — real WeatherAPI.com data, live on `viluresidence.net`'s homepage. Kept below only as historical design-rationale notes; do not read the numbered implementation-order list as a remaining to-do.
 
 **Concept:** show real Maamigili/South Ari destination conditions elegantly over or near the cinematic hero, to reinforce "Vilu = South Ari travel platform" rather than "Vilu = guesthouse website."
 
@@ -39,10 +41,10 @@ Once weather/time exists, a broader family of "useful right now" destination uti
 
 The core Guest Account / CRM / Direct-Marketing System is now `VILU_ROADMAP.md` Phase 26 (added 2026-09-06). Its loyalty component specifically remains here as unresolved backlog within that phase: repeat-guest benefits, package-upgrade offers, exclusive rates, early access, member offers, referral rewards. Explicitly `FUTURE / NOT DEFINED` — no discount, rate, or rule exists yet, and none should be invented without a dedicated owner decision when this sub-phase is actually reached.
 
-## Package/experience presentation ideas not yet actioned
+## Package/experience presentation ideas — both shipped (2026-09-07 correction)
 
-- A hybrid Holiday Packages homepage layout (e.g. 2 strong photographic cards, or 1 featured + an elegant 2/3-card secondary grid) was requested by the owner as a real redesign target, distinct from just adding photography/spacing. Not yet attempted as of 2026-09-06 — see `VILU_CURRENT_STATE.md` for exact status.
-- A more editorial/asymmetric Gallery composition (one strong main image + secondary peeks, rather than a horizontal scroll rail with controls) was requested but not yet attempted as of 2026-09-06.
+- ~~A hybrid Holiday Packages homepage layout...~~ **Built and live**: the homepage package section now uses 1 flagship + 2 secondary photographic cards (commit `8e4d0a1`, Phase 15). See `VILU_CHANGELOG.md`.
+- ~~A more editorial/asymmetric Gallery composition...~~ **Built and live**: one dominant image + a slim click-to-swap thumbnail strip (commit `8e4d0a1`, Phase 15). See `VILU_CHANGELOG.md`.
 
 ## Technical SEO cleanup candidates (noted, not yet actioned)
 
