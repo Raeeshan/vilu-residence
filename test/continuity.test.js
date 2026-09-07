@@ -88,6 +88,28 @@ section('Case B — locked package catalog (VILU_PROTECTED_CONTRACTS.md)');
       assert.ok(row.includes('| ' + nights + ' |'), `package ${id} nights changed from ${nights}: "${row}"`);
     }
   });
+  test('the round-trip-speedboat-only transport-wording rule is documented (owner correction, 2026-09-07)', () => {
+    assert.ok(/round-trip speedboat/.test(CONTRACTS), 'round-trip speedboat inclusion fact missing from VILU_PROTECTED_CONTRACTS.md');
+    assert.ok(/not\*{0,2} include domestic-flight/i.test(CONTRACTS), 'the domestic-flights-not-included rule is missing from VILU_PROTECTED_CONTRACTS.md');
+  });
+  test('no public page implies Vilu packages include domestic flights/airfare', () => {
+    const FORBIDDEN = [
+      /domestic airport included/i, /domestic flights? included/i,
+      /fly directly with your (vilu )?package/i, /package includes.{0,40}(flight|airfare)/i,
+      /(flight|airfare).{0,40}included in (the |your |each )?package/i,
+    ];
+    const files = fs.readdirSync('.', { withFileTypes: true })
+      .filter(e => e.isFile() && e.name.endsWith('.html'))
+      .map(e => e.name);
+    const hits = [];
+    for (const f of files) {
+      const html = read(f);
+      for (const re of FORBIDDEN) {
+        if (re.test(html)) hits.push(`${f}: matched ${re}`);
+      }
+    }
+    assert.equal(hits.length, 0, 'forbidden package/airfare wording found:\n' + hits.join('\n'));
+  });
 }
 
 section('Case C — protected function/pattern names still named exactly as documented');

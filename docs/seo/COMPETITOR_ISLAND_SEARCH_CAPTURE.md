@@ -38,6 +38,8 @@ Research conducted by three parallel passes: a Dhigurah-focused deep dive (SERPs
 
 **The honest hook, stated as fact, not marketing copy**: *"If you're flying to Dhigurah, you're already landing in Maamigili — the only airport in South Ari Atoll, inside the same protected whale-shark zone. Staying where you land skips the extra boat leg."* This is a genuine practical-access claim, not a claim about better whale-shark odds — the research found no credible basis for a "more/better sightings" claim and this document does not recommend making one.
 
+**Mandatory transport-wording guardrail for any future page built from this research (owner correction, 2026-09-07)**: the airport hook is a *destination/access* fact only — a traveler may choose to fly into Maamigili as an alternative way to reach it, entirely separate from any package purchase. **Vilu holiday packages include the round-trip speedboat transfer, never domestic airfare.** Never write this hook in a way that could be read as "book a package and your flight is covered," "domestic flights included," or "fly directly with your Vilu package." Any future page must state the airport-access fact and the package's speedboat-only transport inclusion as two clearly separate statements, never merged into one sentence. See `VILU_PROTECTED_CONTRACTS.md` §"Transport-inclusion wording" for the permanent rule.
+
 ## 4. Where Maamigili is genuinely stronger (evidence-based only)
 
 - **Only airport in South Ari Atoll** — zero additional inter-island boat transfer after landing; true against 9 of the 11 competitor islands (all except Dharavandhoo, which has its own airport in Baa Atoll). Weakest against islands already very close to Malé (Dhiffushi/Guraidhoo/Huraa, 30-45 min boat from Malé itself) since their existing transfer is already short.
@@ -67,6 +69,8 @@ Research conducted by three parallel passes: a Dhigurah-focused deep dive (SERPs
 - **Ukulhas/Thoddoo**: *"[Island]'s own guides send you south to South Ari for whale sharks — here's what that region actually is."* — educational, geography-first.
 - **Maafushi**: *"The whale-shark boat from Maafushi is a ~3-hour crossing each way into South Ari — here's the region it's taking you to."* — factual trip-logistics framing, sourced from operators' own published trip times.
 - **Dharavandhoo**: a small mention within a broader "Maldives marine-life seasons" educational piece (manta season ends, whale sharks are year-round), never a head-to-head page.
+
+**Every hook above is an access/geography claim only — none of them describe or imply what a Vilu package includes.** Package transport inclusion (round-trip speedboat only, never domestic airfare) must be stated separately if a page mentions both — see the guardrail in §3 above.
 
 ## 8. Target competitor-intent queries (researched, real)
 
