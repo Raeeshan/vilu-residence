@@ -462,6 +462,7 @@ footer{padding:60px 5vw 32px;position:relative;overflow:hidden}
 .pkg-list{list-style:none;font-size:var(--font-size-sm);color:var(--muted);line-height:1.7}
 .pkg-cta{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .pkg-cta a{flex:1;text-align:center;font-size:var(--font-size-xs);padding:12px 14px}
+.pkg-cta-trust{margin:10px 0 0;text-align:center;font-size:var(--font-size-xs);color:var(--muted)}
 .pkg-cta-alt{display:block;text-align:center;margin-top:10px;font-size:var(--font-size-xs);color:var(--muted);text-decoration:none;transition:color var(--pc-micro,220ms) ease,letter-spacing var(--pc-micro,220ms) ease}
 .pkg-cta-alt:hover{color:var(--gold-light);text-decoration:underline;letter-spacing:.008em}
 
@@ -694,6 +695,14 @@ body[data-page-type="package"] .page-header::after{
    12px breathing room + safe-area, on mobile widths only. */
 body.pkg-sticky-clearance{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
 @media(min-width:701px){body.pkg-sticky-clearance{padding-bottom:0}}
+/* Phase 39: the floating WhatsApp button (bottom-right, z-index:900) sits
+   directly over the right edge of this sticky bar (z-index:800) on mobile --
+   both are WhatsApp CTAs, so showing both at once is a redundant, visually
+   overlapping duplicate rather than two useful options. Hide the floating
+   button only while the sticky bar is actually showing; it reappears the
+   instant the bar is dismissed or scrolled past, so WhatsApp access is never
+   actually lost, just never doubled up in the same footprint. */
+body.pkg-sticky-clearance .floating-whatsapp{display:none}
 
 /* ── RTL ── */
 [dir="rtl"] .content-list{padding-left:0;padding-right:20px}
