@@ -193,3 +193,33 @@ Owner-approved design/business/technical decisions. These are settled — don't 
 - **Deployment note (2026-09-07): the mutable feature-branch worktree had an unrelated, in-progress uncommitted change at deploy time** — a background task the owner started independently, mid-fix for the separately-flagged weather-label bug — and the deployment authorization explicitly excluded that fix from this release's scope. Rather than stash or disturb someone else's in-flight work, deployment was done from a separate, clean worktree checked out at the exact approved commit (the same "isolated exact-commit worktree" pattern already established for Phase 13B-2's production deploy), leaving the mutable worktree and the other task's progress completely untouched. **Standing lesson: when the approved commit's worktree has any uncommitted diff at deploy time, don't assume it's safe to include or safe to discard — check what it is first, and if it's out of this deployment's authorized scope (regardless of who made it or why), deploy from an isolated checkout instead of touching the mutable tree.**
 - **A second real gap found only during pre-deploy verification, not during implementation**: `firebase.json`'s `hosting.rewrites` and no-cache `headers` had explicit `/xx` + `/xx/` entries for every one of the 10 established languages but none for `es` — without it, `/es/` might not have reliably resolved to `es/index.html` the way every other locale does. Fixed before deploying (commit `a4cd87a`). **Standing lesson: a new locale needs a hosting-config check, not just an i18n/build-pipeline check** — `build-i18n-pages.js` generating the right files is necessary but not sufficient; the CDN routing config that exposes those files needs its own explicit per-locale entry, and it's easy to forget since it's a different file from everything else touched when adding a language.
 - **Roadmap-count reconciliation (2026-09-07): the owner's own typed roadmap arithmetic (assuming 11 PARTIAL / 17 PENDING prior to this phase) did not match a precise count of `VILU_COMPLETION_MATRIX.md`'s actual rows** — the real prior state was 28 COMPLETE / **12** PARTIAL / **16** PENDING = 56. The owner's own message flagged this exact risk ("DO NOT blindly trust this typed count... reconcile against the authoritative completion matrix") and was right to. After moving Phase 30 from PARTIAL to COMPLETE: **29 COMPLETE / 11 PARTIAL / 16 PENDING = 56**, with the 11 remaining PARTIAL phases being 14, 32, 33, 35, 37, 38, 39, 44, 48, 49, 55. **Standing lesson: roadmap phase counts drift over many sessions and should always be recomputed from the matrix table directly (grep every row's status column) rather than carried forward as a remembered number, even when the carried-forward number comes from the owner themselves.**
+
+## PERMANENT: post-56-phase Growth Operating Model (added 2026-09-07, Phase 32)
+
+The owner has defined a permanent two-stage operating model for Vilu that survives across every future session, independent of which phase is currently active. This is standing strategic direction, not tied to any one phase's scope — read it before assuming the 56-phase roadmap is the end state.
+
+**STAGE 1 (current, in progress):** Complete the full 56-phase Vilu website/platform roadmap tracked in `VILU_COMPLETION_MATRIX.md`. Do not begin Stage 2 operations before Stage 1 is complete — the owner was explicit: *"Do NOT begin post-roadmap growth operations now. First finish the 56-phase build."*
+
+**STAGE 2 (future, not yet authorized to start):** Once all 56 phases are COMPLETE, ChatGPT + Claude transition from primarily *building* the website into Vilu's continuous, standing:
+- global marketing intelligence team
+- SEO growth team
+- visibility team
+- conversion team
+- upselling team
+- competitor intelligence team
+- authority/backlink team
+- review/trust team
+- distribution team
+- agency/B2B growth team
+- CRM/customer-lifecycle team
+- commercial intelligence team
+
+**The Stage 2 operating loop, once active:**
+`MEASURE → detect worldwide demand → analyze competitor visibility → identify what travelers are searching for → match search demand to REAL Vilu services → identify content/service/conversion gaps → prioritize by likely bookings/revenue → owner approves material changes → Claude implements → QA → measure conversion/revenue → repeat.`
+
+**Standing rule, effective immediately even though Stage 2 hasn't started**: the current roadmap's target markets (Russia, China, the established 11 locales, etc.) are **not permanent**. Once Stage 1 completes, Vilu must monitor demand from ALL countries globally — actual traffic, search demand, enquiries, bookings, conversion rate, and revenue are what determine which countries receive future investment, not the original phase list. Don't treat the Phase 26-31-era market-expansion decisions as a closed, final list once Stage 2 begins.
+
+**The long-term commercial funnel this all serves:**
+`SEARCH / DISCOVERY → VILU AUTHORITY CONTENT → REAL VILU SERVICE / PACKAGE → ENQUIRY → BOOKING → UPSELL → REPEAT / REVIEW / REFERRAL.`
+
+**Why this is recorded here rather than left in a single session's context**: this instruction is explicitly meant to survive across every future session regardless of which phase is active, so it must live in a permanent continuity doc (this file), not just be inferred from a single directive message that will eventually scroll out of any one conversation's context.
