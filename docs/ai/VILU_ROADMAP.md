@@ -171,9 +171,9 @@ Own visibility across Google Search, Google Maps, Google Images, YouTube, Yandex
 **Status:** COMPLETE (2026-09-07, tracked as Phase 44 in `VILU_COMPLETION_MATRIX.md` — see that file for the authoritative record) · **Owner approval required:** received · **Production impact:** YES, realized
 This roadmap entry's numbering predates the matrix; the actual work is done — governance/strategy layer built (agency segmentation, risk criteria, commission governance, direct-vs-agency guardrails), a restrained public footer enquiry link shipped, zero real external agency relationships found and stated honestly rather than invented. Full record: `VILU_COMPLETION_MATRIX.md` Phase 44.
 
-### Phase 31 — Vilu Voyager Future Integration
+### Phase 31 — Vilu Voyager Guest Guide (tracked as Phase 45 in `VILU_COMPLETION_MATRIX.md`)
 **Status:** PLANNED / FUTURE (concept only) · **Owner approval required:** YES · **Production impact:** YES if/when launched
-Activities/excursions/South-Ari-experience brand — potential integration with experiences, holiday packages, agency distribution, guest excursion enquiries, destination content. Do not force into the current visual phase.
+**Corrected understanding (2026-09-08, owner clarification)**: Vilu Voyager is a post-arrival Guest Guide PDF given to guests — practical stay information, island information, activities/excursion details and prices, rules, transport, meals, safety, and contact information. It is **not** a separate excursion company or a public excursion marketplace. Do not force into the current visual phase.
 
 ### Phase 32 — Security Hardening
 **Status:** COMPLETE WITH DOCUMENTED RESIDUAL LEGACY COMPATIBILITY — deployed to production 2026-09-06 (combined `080874b` + `6e64c68`), verified live · **Owner approval required:** received, for both the implementation and the production deployment · **Production impact:** YES, realized

@@ -62,7 +62,7 @@ The owner-supplied Dark/Light reference screenshots are **visual/art-direction r
 
 ## 7. Related future brand concepts (not yet launched)
 
-Vilu Voyager (activities/excursions/South-Ari-experience brand — potential integration with experiences, holiday packages, agency distribution, guest excursion enquiries, destination content), Vilu Ari Dive, Vilu Spice, Vilu Griffin. All **PLANNED / FUTURE** only — see `VILU_IDEA_BACKLOG.md`. Do not publicly launch any of these simply because they exist in documentation; they become real only when the owner explicitly authorizes them.
+Vilu Voyager (a post-arrival Guest Guide PDF for guests — practical stay information, island information, activities/excursion details and prices, rules, transport, meals, safety, and contact information; **not** a separate excursion company or public excursion marketplace), Vilu Ari Dive, Vilu Spice, Vilu Griffin. All **PLANNED / FUTURE** only — see `VILU_IDEA_BACKLOG.md`. Do not publicly launch any of these simply because they exist in documentation; they become real only when the owner explicitly authorizes them.
 
 ## 8. Homepage semantic architecture (current, preserve unless owner explicitly changes it)
 

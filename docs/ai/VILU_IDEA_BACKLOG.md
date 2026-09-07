@@ -34,7 +34,7 @@ Once weather/time exists, a broader family of "useful right now" destination uti
 
 ## Future Vilu-family brands (concept only, not launched)
 
-- **Vilu Voyager** — activities/excursions/South-Ari-experience brand; potential integration with experiences, holiday packages, agency distribution, guest excursion enquiries, destination content. Roadmap position: `VILU_ROADMAP.md` Phase 31.
+- **Vilu Voyager** — **corrected understanding (2026-09-08, owner clarification, supersedes the earlier "excursion/activity brand" framing below)**: a post-arrival Guest Guide PDF given to guests with practical stay information — island information, activities/excursion details and prices, rules, transport, meals, safety, and contact information. **Not** a separate excursion company, a public-facing brand, or a public excursion marketplace. Roadmap position: `VILU_ROADMAP.md` Phase 31 / `VILU_COMPLETION_MATRIX.md` Phase 45.
 - **Vilu Ari Dive**, **Vilu Spice**, **Vilu Griffin** — known related owner concepts, status unconfirmed beyond "exists in documentation." Treat each as real/future only according to current owner status at the time a future session picks this up — do not assume any of these are ready to build, and do not publicly reference them on the live site until the owner says so.
 
 ## Guest Account / CRM — loyalty sub-feature specifically
