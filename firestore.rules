@@ -44,7 +44,7 @@ service cloud.firestore {
                     && (
                       isAdmin() || isStaff() ||
                       (isAgency() && request.resource.data.agencyId == request.auth.uid && request.resource.data.source == 'Agency') ||
-                      (request.auth == null && request.resource.data.source == 'Website' && !('agencyId' in request.resource.data))
+                      (request.auth == null && request.resource.data.source == 'Website' && !('agencyId' in request.resource.data) && request.resource.data.status == 'Pending')
                     );
       allow update: if request.resource.data.room_id is string
                     && request.resource.data.check_in is string

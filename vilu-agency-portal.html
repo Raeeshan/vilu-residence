@@ -806,6 +806,10 @@ function calGridShift(dir){
 
 function ymdStr(d){ return d.toISOString().slice(0,10); }
 
+// HTML-escape guest-controlled strings before they are interpolated into any
+// markup string that is later handed to .innerHTML / document.write.
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
 async function renderAgencyCalendarGrid(){
   await fetchLiveAvailability();
   var body = document.getElementById('cal-grid-body');
@@ -843,7 +847,7 @@ async function renderAgencyCalendarGrid(){
         var mine = myIds[occ.id];
         if (mine) {
           cellStyle = 'background:#dbeafe;border:1px solid #93c5fd';
-          title = mine.guest_name+' · '+mine.check_in+' → '+mine.check_out;
+          title = esc(mine.guest_name)+' · '+mine.check_in+' → '+mine.check_out;
         } else {
           cellStyle = 'background:#fee2e2;border:1px solid #fca5a5';
           title = 'Booked';
@@ -1005,7 +1009,7 @@ function drawMyBookings(){
     var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
     h+='<tr>';
     h+='<td style="font-weight:700;color:var(--green)">'+bk.id+'</td>';
-    h+='<td>'+bk.fn+' '+bk.ln+'</td>';
+    h+='<td>'+esc(bk.fn)+' '+esc(bk.ln)+'</td>';
     h+='<td style="font-size:var(--font-size-sm)">'+bk.packageName+'</td>';
     h+='<td style="font-size:var(--font-size-sm)">'+bk.rn+'</td>';
     h+='<td style="font-size:var(--font-size-sm)">'+fd(bk.ci)+' → '+fd(bk.co)+'<br><span style="color:var(--muted)">'+nights+' nights</span></td>';
@@ -1077,7 +1081,7 @@ async function generateBookingConfirmation(bkId){
     : 'Transfer: arrival by '+arr.toLowerCase()+', departure by '+dep.toLowerCase();
   var inclusionsSentence = 'Accommodation with '+mealPlan+(activities.length?' & Trips — '+activities.join(', '):'')+', '+transferSentence+'.';
 
-  var greetName = (bk.title?bk.title+' ':'')+bk.fn+' '+bk.ln;
+  var greetName = (bk.title?esc(bk.title)+' ':'')+esc(bk.fn)+' '+esc(bk.ln);
   var roomLine = bk.roomCount+' × '+(bk.roomType||'Room')+(bk.roomCount>1?'s':'');
 
   function row(label, value){
@@ -1172,7 +1176,7 @@ function generateAgencyInvoice(bkId){
     : '<tr><th>Room</th><td>'+bk.rn+'</td></tr>';
   var html='<h1>Invoice</h1><div style="color:#6b7280;font-size:var(--font-size-base);margin-bottom:16px">Vilu Residence Maamigili, South Ari Atoll, Maldives</div>'
     +'<table><tr><th>Reference</th><td>'+bk.id+'</td></tr>'
-    +'<tr><th>Guest</th><td>'+bk.fn+' '+bk.ln+'</td></tr>'
+    +'<tr><th>Guest</th><td>'+esc(bk.fn)+' '+esc(bk.ln)+'</td></tr>'
     +invRoomsRow
     +'<tr><th>Dates</th><td>'+fd(bk.ci)+' → '+fd(bk.co)+' ('+nights+' nights)</td></tr>'
     +'<tr><th>Package</th><td>'+(bk.packageName||'—')+'</td></tr>'
