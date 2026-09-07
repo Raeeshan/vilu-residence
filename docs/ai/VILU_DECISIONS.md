@@ -331,3 +331,15 @@ This is the standing editorial standard for all Vilu-published content, not a on
 **No automatic outreach.** Do not send emails, WhatsApp messages, or agency-application submissions; do not create partner accounts, sign agreements, offer commissions, or change rates — without current, explicit owner authorization for that specific action. Phase 44 produced research and reusable message *frameworks* only (`docs/business/VILU_AGENCY_PARTNER_STRATEGY.md` §10) — nothing was sent.
 
 **Partner risk/rejection criteria** (full detail in the strategy doc §6): reject or decline any prospective partner who demands unsustainable rates, misrepresents Vilu as a resort, promises guests a guaranteed wildlife sighting, asks Vilu to hide real local-island rules, shows unreliable payment/high chargeback risk, demands harmful exclusivity, or requests private operational data beyond their own booking scope.
+
+## PERMANENT: PMS hardening / reservation-write integrity rules (added 2026-09-07, Phase 48)
+
+**`writeReservation()`/`hasBlockConflict()` in `vilu-website.html`, `vilu-unified.html`, and `vilu-agency-portal.html` must stay byte-identical.** This was verified directly (not assumed) in Phase 48 — the "single shared write path" claim in the code's own comments is literally true. Any future change to one copy must be mirrored to the other two in the same commit, or the three write paths silently drift out of sync with `room_availability` and with each other's conflict guarantees.
+
+**Guest-controlled reservation fields (name, email, phone, nationality, passport/ID, notes, transport free-text) must always pass through `esc()` before reaching `.innerHTML`, `document.write`, or an HTML attribute (`value="..."`, `title="..."`) in `vilu-unified.html` or `vilu-agency-portal.html`.** Phase 48 found and fixed ~90 sites where this wasn't true — a real stored-XSS path from an anonymous public booking into an authenticated staff/admin session. Any new render site for these fields must wrap them in `esc()` from the start; do not add a new unescaped guest-data sink and rely on a future audit to catch it.
+
+**Public/unauthenticated reservation creation is permanently restricted, at the `firestore.rules` level, to `source=='Website'`, no `agencyId` field, and `status=='Pending'`.** Do not weaken this to accept another status or relax the source/agencyId checks without a specific, separate owner decision — this is what keeps a raw API write from bypassing the staff review queue or impersonating an agency booking.
+
+**Reservations are never hard-deleted (`allow delete: if false` in `firestore.rules`) and never will be without a separate, explicit owner decision.** Any client-side "delete" is a soft-delete (the Bin) — do not add a real Firestore delete path for reservations.
+
+**Do not weaken `firestore.rules` to make a broken or inconvenient client code path work.** If a client path and the rules disagree, the default assumption is the client is wrong, not the rules — fix the client, or escalate the specific rule for a separate decision, per the same evidence standard as everything else in this file.

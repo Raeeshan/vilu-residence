@@ -6,7 +6,21 @@
 
 **PERMANENT, standing across every future session — read `VILU_DECISIONS.md` §"PERMANENT: post-56-phase Growth Operating Model"**: once all 56 roadmap phases are COMPLETE, Claude's role shifts from building the site to a continuous MEASURE → detect global demand → match to real Vilu services → owner-approved implementation → QA → measure loop, monitoring ALL countries (not just the current phase list) for future investment. Do not start this Stage 2 operating mode before Stage 1 (the 56-phase roadmap) is fully complete.
 
-**Snapshot date: 2026-09-07 (updated same day after Phase 44 Agency/Partner Growth — see below).**
+**Snapshot date: 2026-09-07 (updated same day after Phase 48 PMS Hardening — see below).**
+
+---
+
+## Phase 48 PMS Hardening — COMPLETE, deployed to production (2026-09-07)
+
+A hardening phase, not a redesign — the PMS's working booking behavior was deliberately left unchanged except for proven defects. Full architecture audit (read in full, not assumed): confirmed `writeReservation()`/`hasBlockConflict()` are byte-identical across `vilu-website.html`, `vilu-unified.html`, `vilu-agency-portal.html` — the code's own "single shared write path" comment holds. Verified `blockDoubleBooking` (`functions/index.js`) is a genuine, race-safe server-side backstop for reservations created outside that transaction (uses Firestore `createTime`, not execution order, to resolve which of two conflicting docs to auto-cancel). Read `firestore.rules` in full: public reservation creates cannot read/update/delete reservations, cannot touch `blocks`/`room_availability` directly, and agency access stays isolated by `agencyId==auth.uid`.
+
+**Found and fixed a real stored-XSS vulnerability**: guest-submitted name/email/phone/nationality/passport-ID/notes were rendered unescaped into `.innerHTML`/`document.write`/`value="..."` at roughly 90 sites across `vilu-unified.html` and `vilu-agency-portal.html` — a genuine path from an anonymous public booking into script execution inside an authenticated staff/admin session (the reservation-detail edit form's `value="..."` attribute-breakout sites were the highest-severity subset). Added an `esc()` helper to both files and wrapped every confirmed guest-controlled sink; left trusted data (room names, prices, dates, status labels, anything already using `.textContent`) untouched.
+
+**Closed a narrow `firestore.rules` gap**: the public/unauthenticated reservation-create branch now also requires `status=='Pending'`, matching what the website's own booking code has always sent — previously a raw Firestore SDK write bypassing the site's UI could self-label a fake reservation `'Confirmed'`, skipping the Pending review queue. Verified non-breaking against every create branch (public/staff/admin/agency) with direct evidence before deploying, per a dedicated 6-point pre-deploy check.
+
+**Fixed one incidentally-discovered defect**: the calendar's drag-to-move-reservation flow called an undefined `showMv()`, which would throw instead of confirming the move — now routes through the existing, already-safe `showConfirm()` modal.
+
+Added `test/pms-hardening.test.js` (16/16, static/source-level only — no live Firestore, no real reservation ever created) and `docs/ai/VILU_PMS_RUNBOOK.md` (recovery steps for 6 named PMS failure scenarios). Full regression suite green across all 17 test files (564/564 preservation, 16/16 accessibility, 68/68 international-SEO, 24/24 local-SEO, 12/12 E-E-A-T, 30/30 structured-data, 25/25 entity-graph, 27/27 media-SEO, 14/14 CRO, 6/6 agency-growth, plus the rest). Deployed in two scoped steps — hosting (`viluresidence`) then, after the pre-deploy re-verification, `firestore.rules` — both on commit `796e505`. Post-deploy QA performed live and non-destructively on production for both: hosting QA confirmed `esc()` neutralizes an XSS payload while preserving normal special characters (apostrophes, ampersands, quotes, accented letters) on both the PMS and Agency Portal, confirmed `showMv` is gone and `showConfirm` exists, exercised the live booking-availability search successfully, confirmed the Agency Portal loads clean, and found zero new console errors; rules QA confirmed live via a direct negative test — an unauthenticated attempt to self-create a `status:'Confirmed'` reservation was denied (nothing written, no cleanup needed) and public read of `reservations` remains denied. No real reservation was ever created at any point in this phase. Full detail: `VILU_COMPLETION_MATRIX.md` Phase 48, `docs/ai/VILU_PMS_RUNBOOK.md`.
 
 ---
 
