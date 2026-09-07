@@ -5267,8 +5267,8 @@ async function drawBlockRequests(){
   if (!reqs.length) { el.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">No pending requests.</p>'; return; }
   el.innerHTML = reqs.map(function(r){
     return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap">'
-      + '<div><div style="font-size:var(--font-size-sm);font-weight:700">'+(r.agencyName||r.agencyEmail)+'</div>'
-      + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+(r.rooms||[]).map(function(rn){return rNm(rn);}).join(', ')+' · '+fd(r.ci)+'–'+fd(r.co)+(r.note?' · '+r.note:'')+'</div></div>'
+      + '<div><div style="font-size:var(--font-size-sm);font-weight:700">'+esc(r.agencyName||r.agencyEmail)+'</div>'
+      + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+(r.rooms||[]).map(function(rn){return rNm(rn);}).join(', ')+' · '+fd(r.ci)+'–'+fd(r.co)+(r.note?' · '+esc(r.note):'')+'</div></div>'
       + '<div style="display:flex;gap:6px">'
       + '<button class="ab" title="Approve" style="color:#059669" onclick="approveBlockRequest(\''+r.id+'\')"><i class="ti ti-check"></i></button>'
       + '<button class="ab" title="Reject" style="color:#dc2626" onclick="rejectBlockRequest(\''+r.id+'\')"><i class="ti ti-x"></i></button>'
