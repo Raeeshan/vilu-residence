@@ -170,9 +170,9 @@
       "enquireOn": "Preguntar por WhatsApp",
       "startingFrom": "Desde ${price} pp, incluido en {count} paquete{plural}",
       "whaleSharkName": "Snorkel con Tiburón Ballena",
-      "whaleSharkDesc": "Nada junto a tiburones ballena en el arrecife del Atolón Ari Sur, justo frente a la costa. El equipo de snorkel está incluido, y las excursiones suelen salir a las 09:00 después del desayuno. Los avistamientos no pueden garantizarse al 100% — son animales salvajes — pero la mayoría de las salidas sí logran verlos.",
+      "whaleSharkDesc": "Nada junto a tiburones ballena en el arrecife del Atolón Ari Sur, justo frente a la costa. El equipo de snorkel está incluido, y las excursiones suelen salir a las 09:00 después del desayuno. Los avistamientos no pueden garantizarse al 100% — son animales salvajes.",
       "mantaName": "Snorkel con Mantarrayas",
-      "mantaDesc": "Haz snorkel con mantarrayas deslizándose por el arrecife cerca de Maamigili. El equipo está incluido y las excursiones suelen salir a las 09:00 después del desayuno, igual que nuestras salidas de tiburón ballena.",
+      "mantaDesc": "Haz snorkel con mantarrayas deslizándose por el arrecife cerca de Maamigili. El equipo está incluido y las excursiones suelen salir a las 09:00 después del desayuno, igual que nuestras salidas de tiburón ballena. Los avistamientos no pueden garantizarse al 100% — son animales salvajes.",
       "sandbankName": "Excursión al Banco de Arena",
       "sandbankDesc": "Una salida en barco hasta un banco de arena privado, con el almuerzo incluido durante la excursión.",
       "dolphinName": "Crucero de Delfines",
@@ -212,7 +212,8 @@
       "deluxeFamilyDesc": "Habitaciones amplias con dos camas de matrimonio y vistas al jardín, ideales para familias o grupos pequeños, con comodidades superiores para una estancia más relajante.",
       "deluxeFamilyOpenDeckName": "Habitación Familiar Deluxe con Terraza Privada",
       "deluxeFamilyOpenDeckDesc": "Nuestra mejor habitación, con dos camas de matrimonio y tu propia terraza privada — la gran protagonista de la habitación, perfecta para familias que buscan más espacio al aire libre.",
-      "featureOpenDeck": "Terraza privada"
+      "featureOpenDeck": "Terraza privada",
+      "featureBreakfast": "Desayuno incluido"
     },
     "booking": {
       "reframeEyebrow": "¿Prefieres reservar el alojamiento aparte?",
@@ -561,7 +562,9 @@
       "ctaWhatsapp": "Consultar por WhatsApp",
       "ctaEmail": "Escribir un Email",
       "ctaAccom": "¿Prefieres reservar el alojamiento aparte? Consulta la disponibilidad en tiempo real &rarr;",
-      "stickyText": "¿Necesitas ayuda para elegir? Pregunta a Vilu"
+      "stickyText": "¿Necesitas ayuda para elegir? Pregunta a Vilu",
+      "faqQ8": "¿Se garantiza el avistamiento de tiburones ballena o mantarrayas en las excursiones del paquete?",
+      "faqA8": "No. Los tiburones ballena y las mantarrayas son animales salvajes, y el avistamiento nunca puede garantizarse en ninguna excursión individual. Si no se encuentra un tiburón ballena durante la búsqueda, los huéspedes son llevados a un arrecife cercano para hacer snorkel en su lugar, y Vilu Residence puede ofrecer un segundo intento con descuento otro día."
     },
     "alerts": {
       "enterNameEmail": "Introduce tu nombre y correo electrónico.",

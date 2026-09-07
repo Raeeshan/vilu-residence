@@ -57,7 +57,7 @@
       "hreflang": true,
       "h1": "Maldives Holiday Packages",
       "jsonld_types": ["BreadcrumbList", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "FAQPage"],
-      "faq_count": 7,
+      "faq_count": 8,
       "required_ids": ["pkg-grid", "hamburger", "mobileMenu"]
     },
     {
@@ -87,7 +87,7 @@
       "robots": null,
       "hreflang": true,
       "h1": "South Ari Atoll Travel Guide",
-      "jsonld_types": ["TouristDestination", "BreadcrumbList", "FAQPage"],
+      "jsonld_types": ["TouristDestination", "BreadcrumbList", "Article", "FAQPage"],
       "faq_count": 11
     },
     {
@@ -102,7 +102,7 @@
       "robots": null,
       "hreflang": true,
       "h1": "Whale Shark Snorkeling in Maamigili, South Ari Atoll",
-      "jsonld_types": ["Product", "BreadcrumbList", "FAQPage"],
+      "jsonld_types": ["Product", "BreadcrumbList", "Article", "FAQPage"],
       "faq_count": 12
     },
     {
@@ -117,7 +117,7 @@
       "robots": null,
       "hreflang": true,
       "h1": "Manta Ray Snorkeling in Maamigili, South Ari Atoll",
-      "jsonld_types": ["Product", "BreadcrumbList", "FAQPage"],
+      "jsonld_types": ["Product", "BreadcrumbList", "Article", "FAQPage"],
       "faq_count": 12
     },
     {
