@@ -154,6 +154,20 @@ Now that the Domain property is verified (2026-09-06), the intended recurring re
 
 This mirrors the project's standing measure → diagnose → prioritize → recommend → approve → implement → re-measure discipline already used for performance work (Phase 21) and should not be replaced with automatic, unreviewed SEO edits.
 
+## 2026-09-07 update — "Alternate page with proper canonical tag" email investigated
+
+A new GSC email ("New reason preventing your pages from being indexed") triggered a full investigation. Read directly from the URL-prefix property (`https://viluresidence.net/`) — the Domain property (`sc-domain:viluresidence.net`) still shows "Processing data, please check again in a day or so" for Page indexing and was not usable this pass.
+
+**Page indexing totals**: Indexed 1 / Not indexed 131 (2 reasons) — unchanged in shape from the original baseline (only 1 indexed, ~130 discovered-not-indexed is expected for a site this age; see Data limitations below).
+- **"Alternate page with proper canonical tag"**: 1 URL, first detected **9/5/26** (two days before Phase 30's homepage deployment — not caused by it). The single affected URL is `https://viluresidence.net/ar/`. URL Inspection shows: user-declared canonical `https://viluresidence.net/` (English root), Google-selected canonical "same as user-declared," last crawl **Aug 24, 2026**. **Live re-check same day found this already fixed on the actual site**: `curl`-verified, `/ar/` currently serves a correct self-canonical (`href="https://viluresidence.net/ar/"`), correct `lang="ar"`/`dir="rtl"`, confirmed again via a real browser load with JS settled. This GSC entry reflects a stale Aug 24 crawl, not a live defect — Google simply hasn't recrawled `/ar/` since. No code or config change was made (none was needed). Recommend the owner click "Validate Fix" on this GSC report item to prompt a recrawl sooner; not done automatically.
+- **"Discovered - currently not indexed"**: 130 URLs, source "Google systems," unchanged pattern from the original baseline — expected for a young, low-authority site with a large single-batch multilingual sitemap, not a technical defect.
+
+**Spanish pages** (`/es/`, `/es/holiday-packages.html`): both return "URL is unknown to Google" in URL Inspection — not yet crawled at all (expected; `/es/` was deployed today, `/es/holiday-packages.html` a few days prior). No referring sitemap/page detected yet by Google's own crawl, despite both being present in the live sitemap — normal discovery lag, not an error.
+
+**Technical duplicate check**: `viluresidence.web.app` (200, self-canonical to `.net`), `www.viluresidence.net` (200, self-canonical to non-www `.net`), and `http://` (301 → `https://`) are all correctly guided to consolidate to the real canonical domain — harmless by design, no action needed.
+
+**Severity: MINOR.** No live canonical/indexing defect exists on the current site; the single affected URL is a stale crawl artifact of an already-correct page, and the 130-URL "discovered" bucket is the same known, expected, previously-documented pattern. No production change made or required.
+
 ## Data limitations (updated 2026-09-06)
 
 - All data in this document was read directly from the real Google Search Console UI (via the owner's own authenticated browser session, with the owner's explicit authorization for this specific session) — not fabricated, not estimated.
