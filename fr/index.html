@@ -3067,6 +3067,21 @@ function applyTranslations(){
   document.documentElement.setAttribute('lang', currentLang);
   document.documentElement.setAttribute('dir', RTL_LANGS[currentLang] ? 'rtl' : 'ltr');
   document.querySelectorAll('.lang-switcher select').forEach(function(sel){ sel.value = currentLang; });
+  // Forecast day-of-week labels (Destination Now) are computed once, at
+  // whatever instant the weather cache fetch happens to resolve -- a real
+  // race against language detection, since both can complete in either
+  // order. Re-derived here from each label's own stored ISO date (set by
+  // renderDestinationNow()) so ANY call to applyTranslations() -- whichever
+  // fires last, the weather render or the language switch -- leaves them
+  // correctly localized, not just whichever happened to run first.
+  if (typeof dnDayFmt === 'function') {
+    var _dnFmt = dnDayFmt();
+    if (_dnFmt) {
+      document.querySelectorAll('.dn-fc-day-label[data-fc-date]').forEach(function(el){
+        try { el.textContent = _dnFmt.format(new Date(el.getAttribute('data-fc-date') + 'T12:00:00Z')); } catch (e) {}
+      });
+    }
+  }
 }
 
 var _loadedLangs = {en: true};
@@ -3264,7 +3279,7 @@ function renderDestinationNow(data){
     '<div class="dn-value">' + data.sunrise + '<span class="dn-sep">/</span>' + data.sunset + '</div>' +
     '<div class="dn-label" data-i18n="destNow.labelSun">Sunrise / Sunset</div></div>';
   strip.innerHTML = data.forecast.map(function(d){
-    return '<div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label">' + d.day + '</span>' +
+    return '<div class="dn-fc-day" role="listitem"><span class="dn-fc-day-label" data-fc-date="' + d.date + '">' + d.day + '</span>' +
       '<i class="dn-fc-icon" aria-hidden="true">' + dnIcon(d.icon) + '</i>' +
       '<span class="dn-fc-temp">' + d.high + '°<span class="dn-fc-temp-low">/' + d.low + '°</span></span></div>';
   }).join('');
@@ -3339,7 +3354,7 @@ function dnCacheToRenderData(json){
     forecast: json.forecast.map(function(d){
       var label = d.date;
       if (dayFmt) { try { label = dayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
-      return { day: label, icon: mapConditionCodeToIcon(d.condition.code), high: Math.round(d.max_c), low: Math.round(d.min_c) };
+      return { day: label, date: d.date, icon: mapConditionCodeToIcon(d.condition.code), high: Math.round(d.max_c), low: Math.round(d.min_c) };
     })
   };
 }
