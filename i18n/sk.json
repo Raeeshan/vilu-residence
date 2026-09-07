@@ -1622,6 +1622,19 @@
       "point1": "Osobný prístup, nie recepcia — pobyt každého hosťa plánujeme individuálne.",
       "point2": "Spoznávanie ostrovov a miestna kuchyňa sú súčasťou pobytu, nielen šnorchlovanie.",
       "point3": "Butikové a komorné z princípu — šesť izieb, nie šesťdesiat."
+    },
+    "destNow": {
+      "tag": "Ostrov práve teraz",
+      "titlePrefix": "Južný Ari,",
+      "titleEmphasis": "tento okamih",
+      "intro": "Živý ostrov, päť hodín pred väčšinou sveta.",
+      "region": "Atol Južný Ari",
+      "unavailable": "Aktuálne podmienky sú dočasne nedostupné",
+      "labelConditions": "Aktuálne podmienky",
+      "labelTime": "Miestny čas · Maldivy",
+      "labelSun": "Východ / západ slnka",
+      "attribution": "Údaje o počasí poskytuje <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
+      "disclaimer": "Informácie o počasí slúžia len na všeobecnú orientáciu. Podmienky a predpovede sú pravdepodobnostné a nemusia byť presné. Nepoužívajte ich ako jediný podklad pre rozhodnutia týkajúce sa osobnej bezpečnosti, letectva, námornej plavby, plánovania núdzových situácií alebo iných bezpečnostne kritických činností — ak je presnosť kľúčová, vždy sa obráťte na oficiálne meteorologické služby a príslušné orgány."
     }
   },
   "dynamic": {

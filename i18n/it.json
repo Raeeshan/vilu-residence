@@ -1622,6 +1622,19 @@
       "point1": "Attenzione personalizzata, non una reception — ogni ospite viene seguito individualmente.",
       "point2": "Island hopping e cucina locale fanno parte del soggiorno, non solo lo snorkeling.",
       "point3": "Boutique e intimo per scelta — sei camere, non sessanta."
+    },
+    "destNow": {
+      "tag": "L'isola, in questo momento",
+      "titlePrefix": "Ari Sud,",
+      "titleEmphasis": "questo istante",
+      "intro": "Un'isola viva, cinque ore avanti rispetto a gran parte del mondo.",
+      "region": "Atollo di Ari Sud",
+      "unavailable": "Condizioni attuali temporaneamente non disponibili",
+      "labelConditions": "Condizioni attuali",
+      "labelTime": "Ora locale · Maldive",
+      "labelSun": "Alba / tramonto",
+      "attribution": "Dati meteo forniti da <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
+      "disclaimer": "Le informazioni meteo hanno solo scopo indicativo. Le condizioni e le previsioni sono probabilistiche e potrebbero non essere accurate. Non utilizzarle come unica base per decisioni relative alla sicurezza personale, all'aviazione, alla navigazione marittima, alla pianificazione di emergenze o ad altre attività critiche per la sicurezza — consultare sempre i servizi meteorologici ufficiali e le autorità competenti quando la precisione è fondamentale."
     }
   },
   "dynamic": {

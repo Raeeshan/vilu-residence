@@ -1622,6 +1622,19 @@
       "point1": "Une attention personnalisée, pas un simple accueil — chaque séjour est pensé individuellement.",
       "point2": "L'exploration des îles et la cuisine locale font partie du séjour, pas seulement le snorkeling.",
       "point3": "Un esprit boutique et intimiste par conception — six chambres, pas soixante."
+    },
+    "destNow": {
+      "tag": "L'île, en ce moment",
+      "titlePrefix": "Sud Ari,",
+      "titleEmphasis": "cet instant",
+      "intro": "Une île bien vivante, cinq heures d'avance sur la majeure partie du monde.",
+      "region": "Atoll de Sud Ari",
+      "unavailable": "Conditions actuelles temporairement indisponibles",
+      "labelConditions": "Conditions actuelles",
+      "labelTime": "Heure locale · Maldives",
+      "labelSun": "Lever / coucher du soleil",
+      "attribution": "Données météo fournies par <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
+      "disclaimer": "Les informations météorologiques sont fournies à titre indicatif uniquement. Les conditions et prévisions sont probabilistes et peuvent être inexactes. Ne les utilisez pas comme seule base de décision pour la sécurité personnelle, l'aviation, la navigation maritime, la planification d'urgence ou toute autre activité critique pour la sécurité — consultez toujours les services météorologiques officiels et les autorités compétentes lorsque la précision est essentielle."
     }
   },
   "dynamic": {

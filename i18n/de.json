@@ -1622,6 +1622,19 @@
       "point1": "Persönliche Betreuung statt Rezeption — jeder Gast wird individuell geplant.",
       "point2": "Inselhopping und lokale Küche sind Teil Ihres Aufenthalts, nicht nur Schnorcheln.",
       "point3": "Boutique und intim by design — sechs Zimmer, nicht sechzig."
+    },
+    "destNow": {
+      "tag": "Die Insel, jetzt gerade",
+      "titlePrefix": "Süd-Ari,",
+      "titleEmphasis": "dieser Moment",
+      "intro": "Eine lebendige Insel, fünf Stunden voraus vor dem Großteil der Welt.",
+      "region": "Süd-Ari-Atoll",
+      "unavailable": "Aktuelle Bedingungen vorübergehend nicht verfügbar",
+      "labelConditions": "Aktuelle Bedingungen",
+      "labelTime": "Ortszeit · Malediven",
+      "labelSun": "Sonnenauf-/-untergang",
+      "attribution": "Wetterdaten von <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a>",
+      "disclaimer": "Die Wetterinformationen dienen nur zur allgemeinen Orientierung. Bedingungen und Vorhersagen sind wahrscheinlichkeitsbasiert und können ungenau sein. Verlassen Sie sich hierauf nicht als alleinige Grundlage für Entscheidungen zur persönlichen Sicherheit, Luftfahrt, Seefahrt, Notfallplanung oder andere sicherheitskritische Aktivitäten — wenden Sie sich bei entscheidender Genauigkeit stets an die offiziellen Wetterdienste und zuständigen Behörden."
     }
   },
   "dynamic": {

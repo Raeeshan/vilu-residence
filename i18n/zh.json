@@ -1622,6 +1622,19 @@
       "point1": "个性化的关怀，而非前台式的接待——每一位客人的行程都为其量身规划。",
       "point2": "跳岛游和本地美食都融入您的旅程，而不只是浮潜。",
       "point3": "精品而私密，是我们的设计初衷——六间客房，而非六十间。"
+    },
+    "destNow": {
+      "tag": "此刻的岛屿",
+      "titlePrefix": "南阿里，",
+      "titleEmphasis": "此刻",
+      "intro": "一座鲜活的岛屿，比世界上大多数地方快五个小时。",
+      "region": "南阿里环礁",
+      "unavailable": "实时天气信息暂时无法获取",
+      "labelConditions": "当前天气",
+      "labelTime": "当地时间 · 马尔代夫",
+      "labelSun": "日出 / 日落",
+      "attribution": "天气数据由 <a href=\"https://www.weatherapi.com/\" target=\"_blank\" rel=\"noopener\">WeatherAPI.com</a> 提供",
+      "disclaimer": "天气信息仅供参考。天气状况和预报基于概率，可能并不准确。请勿将其作为涉及人身安全、航空、海上航行、应急规划或其他安全关键活动决策的唯一依据——在准确性至关重要时，请务必咨询官方气象部门及相关主管机构。"
     }
   },
   "dynamic": {

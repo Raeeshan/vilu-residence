@@ -2024,15 +2024,15 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
 <section id="destination-now">
   <div class="section-inner">
     <div class="dn-head reveal">
-      <div class="section-tag" data-i18n="destNow.tag">The Island, Right Now</div>
-      <h2 class="section-title"><span data-i18n="destNow.titlePrefix">South Ari,</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="destNow.titleEmphasis">this moment</em></h2>
-      <p class="gh-sub" data-i18n="destNow.intro">A living island, five hours ahead of most of the world.</p>
+      <div class="section-tag" data-i18n="destNow.tag">지금, 이 섬은</div>
+      <h2 class="section-title"><span data-i18n="destNow.titlePrefix">사우스 아리,</span> <em style="font-style:italic;color:var(--gold-light)" data-i18n="destNow.titleEmphasis">지금 이 순간</em></h2>
+      <p class="gh-sub" data-i18n="destNow.intro">살아 숨쉬는 섬, 세계 대부분의 지역보다 5시간 앞서 있습니다.</p>
     </div>
     <div class="dn-panel reveal">
       <div class="dn-glow" aria-hidden="true"></div>
       <div class="dn-place">
         <span class="dn-place-main">Maamigili</span>
-        <span class="dn-place-sub" data-i18n="destNow.region">South Ari Atoll</span>
+        <span class="dn-place-sub" data-i18n="destNow.region">사우스 아리 환초</span>
       </div>
       <!-- Static fallback (no-JS-safe, and the initial paint before the live
            fetch below resolves): an honest "unavailable" placeholder, never
@@ -2044,18 +2044,18 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
            updates via JS -- a no-JS visitor sees "--:--" here, honestly. -->
       <div class="dn-grid" id="dn-grid" role="list" aria-label="Maamigili conditions">
         <div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18h11a3.5 3.5 0 0 0 .5-6.96A5.5 5.5 0 0 0 7.1 9.8 4 4 0 0 0 6.5 18"></path></svg></i>
-          <div class="dn-value" style="font-size:var(--font-size-lg)" data-i18n="destNow.unavailable">Live conditions temporarily unavailable</div>
-          <div class="dn-label" data-i18n="destNow.labelConditions">Current Conditions</div></div>
+          <div class="dn-value" style="font-size:var(--font-size-lg)" data-i18n="destNow.unavailable">실시간 기상 정보를 일시적으로 이용할 수 없습니다</div>
+          <div class="dn-label" data-i18n="destNow.labelConditions">현재 기상 상태</div></div>
         <div class="dn-stat" role="listitem"><i class="ti ti-clock dn-icon" aria-hidden="true"></i>
           <div class="dn-value" id="dn-local-time">--:--</div>
-          <div class="dn-label" data-i18n="destNow.labelTime">Local Time · Maldives</div></div>
+          <div class="dn-label" data-i18n="destNow.labelTime">현지 시각 · 몰디브</div></div>
         <div class="dn-stat" role="listitem"><i class="dn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5M6 12a6 6 0 0 1 12 0"></path><path d="M3 12h1M20 12h1M5 15l-1 1M19 15l1 1"></path><path d="M2 18h20"></path></svg></i>
           <div class="dn-value">—:—<span class="dn-sep">/</span>—:—</div>
-          <div class="dn-label" data-i18n="destNow.labelSun">Sunrise / Sunset</div></div>
+          <div class="dn-label" data-i18n="destNow.labelSun">일출 / 일몰</div></div>
       </div>
       <div class="dn-forecast" id="dn-forecast" role="list" aria-label="3-day forecast"></div>
-      <p class="dn-note"><span data-i18n-html="destNow.attribution">Weather data by <a href="https://www.weatherapi.com/" target="_blank" rel="noopener">WeatherAPI.com</a></span></p>
-      <p class="dn-note dn-disclaimer" data-i18n="destNow.disclaimer">Weather information is for general guidance only. Conditions and forecasts are probabilistic and may not be accurate. Do not use this as the sole basis for decisions involving personal safety, aviation, marine navigation, emergency planning, or other safety-critical activities — always consult official meteorological services and relevant authorities where accuracy is critical.</p>
+      <p class="dn-note"><span data-i18n-html="destNow.attribution">날씨 데이터 제공: <a href="https://www.weatherapi.com/" target="_blank" rel="noopener">WeatherAPI.com</a></span></p>
+      <p class="dn-note dn-disclaimer" data-i18n="destNow.disclaimer">기상 정보는 일반적인 참고용으로만 제공됩니다. 기상 상태와 예보는 확률에 기반한 것으로 정확하지 않을 수 있습니다. 개인 안전, 항공, 해상 운항, 비상 계획 또는 기타 안전이 중요한 활동에 관한 결정을 이 정보에만 의존해서는 안 됩니다 — 정확성이 중요한 경우 항상 공식 기상 기관 및 관계 당국에 문의하시기 바랍니다.</p>
     </div>
   </div>
 </section>
@@ -3268,6 +3268,7 @@ function renderDestinationNow(data){
       '<i class="dn-fc-icon" aria-hidden="true">' + dnIcon(d.icon) + '</i>' +
       '<span class="dn-fc-temp">' + d.high + '°<span class="dn-fc-temp-low">/' + d.low + '°</span></span></div>';
   }).join('');
+  applyTranslations(); // this innerHTML rewrite happens after the initial page-load applyTranslations() pass (async fetch resolves later), so the fresh data-i18n labels above need their own translation pass or they stay stuck in English
   dnTickClock(); // the grid above just replaced #dn-local-time with a fresh node -- repaint it immediately, don't wait for the next 30s tick
 }
 
@@ -3288,6 +3289,7 @@ function renderDestinationFailure(){
     '<div class="dn-value">—:—<span class="dn-sep">/</span>—:—</div>' +
     '<div class="dn-label" data-i18n="destNow.labelSun">Sunrise / Sunset</div></div>';
   if (strip) strip.innerHTML = '';
+  applyTranslations(); // same async-timing gap as renderDestinationNow() above -- the failure-path markup carries its own fresh data-i18n labels
   dnTickClock();
 }
 
@@ -3313,11 +3315,21 @@ function dnValidateCache(json){
   }
   return true;
 }
-var _dnDayFmt = (function(){
-  try { return new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' }); }
-  catch (e) { return null; }
-})();
+// Built fresh per call (not cached at parse time) because currentLang is
+// still 'en' when this script first runs -- language detection resolves
+// asynchronously afterward, and the forecast strip's day-of-week labels
+// need to reflect whatever language has been selected by the time real
+// weather data actually arrives. Falls back to 'en-US' for a locale code
+// Intl doesn't recognize (never letting a bad currentLang break the strip).
+function dnDayFmt(){
+  try { return new Intl.DateTimeFormat(currentLang, { weekday: 'short', timeZone: 'UTC' }); }
+  catch (e) {
+    try { return new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' }); }
+    catch (e2) { return null; }
+  }
+}
 function dnCacheToRenderData(json){
+  var dayFmt = dnDayFmt();
   return {
     conditionIcon: mapConditionCodeToIcon(json.condition.code),
     conditionLabel: json.condition.text || '—',
@@ -3326,7 +3338,7 @@ function dnCacheToRenderData(json){
     sunset: json.sunset,
     forecast: json.forecast.map(function(d){
       var label = d.date;
-      if (_dnDayFmt) { try { label = _dnDayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
+      if (dayFmt) { try { label = dayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
       return { day: label, icon: mapConditionCodeToIcon(d.condition.code), high: Math.round(d.max_c), low: Math.round(d.min_c) };
     })
   };

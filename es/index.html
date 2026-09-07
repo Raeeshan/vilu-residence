@@ -3268,6 +3268,7 @@ function renderDestinationNow(data){
       '<i class="dn-fc-icon" aria-hidden="true">' + dnIcon(d.icon) + '</i>' +
       '<span class="dn-fc-temp">' + d.high + '°<span class="dn-fc-temp-low">/' + d.low + '°</span></span></div>';
   }).join('');
+  applyTranslations(); // this innerHTML rewrite happens after the initial page-load applyTranslations() pass (async fetch resolves later), so the fresh data-i18n labels above need their own translation pass or they stay stuck in English
   dnTickClock(); // the grid above just replaced #dn-local-time with a fresh node -- repaint it immediately, don't wait for the next 30s tick
 }
 
@@ -3288,6 +3289,7 @@ function renderDestinationFailure(){
     '<div class="dn-value">—:—<span class="dn-sep">/</span>—:—</div>' +
     '<div class="dn-label" data-i18n="destNow.labelSun">Sunrise / Sunset</div></div>';
   if (strip) strip.innerHTML = '';
+  applyTranslations(); // same async-timing gap as renderDestinationNow() above -- the failure-path markup carries its own fresh data-i18n labels
   dnTickClock();
 }
 
@@ -3313,11 +3315,21 @@ function dnValidateCache(json){
   }
   return true;
 }
-var _dnDayFmt = (function(){
-  try { return new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' }); }
-  catch (e) { return null; }
-})();
+// Built fresh per call (not cached at parse time) because currentLang is
+// still 'en' when this script first runs -- language detection resolves
+// asynchronously afterward, and the forecast strip's day-of-week labels
+// need to reflect whatever language has been selected by the time real
+// weather data actually arrives. Falls back to 'en-US' for a locale code
+// Intl doesn't recognize (never letting a bad currentLang break the strip).
+function dnDayFmt(){
+  try { return new Intl.DateTimeFormat(currentLang, { weekday: 'short', timeZone: 'UTC' }); }
+  catch (e) {
+    try { return new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' }); }
+    catch (e2) { return null; }
+  }
+}
 function dnCacheToRenderData(json){
+  var dayFmt = dnDayFmt();
   return {
     conditionIcon: mapConditionCodeToIcon(json.condition.code),
     conditionLabel: json.condition.text || '—',
@@ -3326,7 +3338,7 @@ function dnCacheToRenderData(json){
     sunset: json.sunset,
     forecast: json.forecast.map(function(d){
       var label = d.date;
-      if (_dnDayFmt) { try { label = _dnDayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
+      if (dayFmt) { try { label = dayFmt.format(new Date(d.date + 'T12:00:00Z')); } catch (e) {} }
       return { day: label, icon: mapConditionCodeToIcon(d.condition.code), high: Math.round(d.max_c), low: Math.round(d.min_c) };
     })
   };

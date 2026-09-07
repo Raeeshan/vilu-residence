@@ -31,7 +31,7 @@ function section(t) { console.log(`\n# ${t}`); }
 // ---------------------------------------------------------------------------
 section('Extraction — pull the real Destination Now module out of vilu-website.html');
 
-function loadDestinationNowModule() {
+function loadDestinationNowModule(lang) {
   const src = read('vilu-website.html');
   const startMarker = '// DESTINATION NOW — Phase 20 zero-cost live implementation';
   const endMarker = "document.addEventListener('DOMContentLoaded', initDestinationNow);";
@@ -44,6 +44,15 @@ function loadDestinationNowModule() {
   // Minimal DOM/browser stubs -- just enough for the module's top-level
   // evaluation (Intl IIFEs, function declarations) to run without a real
   // browser. initDestinationNow() itself is never invoked by this harness.
+  // currentLang/applyTranslations are real globals declared elsewhere in
+  // vilu-website.html (outside this module's own boundary) that
+  // renderDestinationNow()/renderDestinationFailure()/dnDayFmt() reach out
+  // to -- stubbed here to match what the real page actually provides,
+  // matching this module's own comment that it tests shipped code, not a
+  // reimplementation. `lang` defaults to 'en' (the page's real initial
+  // value before async language detection resolves); applyTranslations is
+  // a no-op since translating the DOM isn't this suite's concern.
+  const appliedTranslationsCalls = [];
   const sandbox = {
     document: { getElementById: () => null, addEventListener: () => {} },
     window: {},
@@ -51,6 +60,8 @@ function loadDestinationNowModule() {
     Date,
     Math,
     console,
+    currentLang: lang || 'en',
+    applyTranslations: () => { appliedTranslationsCalls.push(1); },
     setInterval: () => 0,
     clearTimeout: () => {},
     setTimeout: (fn) => { return 0; }, // never auto-fires in this sandbox -- no test here calls the real fetch path
@@ -64,7 +75,7 @@ function loadDestinationNowModule() {
       renderDestinationNow, renderDestinationFailure, DN_ICONS, DN_WEATHER_CACHE_URL, DN_STALE_MS
     };
   `, ctx);
-  return { mod: ctx.__out, sandbox };
+  return { mod: ctx.__out, sandbox, appliedTranslationsCalls };
 }
 
 let M;
@@ -191,6 +202,50 @@ test('dnCacheToRenderData() maps a valid cache into renderDestinationNow()\'s ex
 });
 
 // ---------------------------------------------------------------------------
+section('Multilingual weather-widget labels (post-Phase-30 micro-fix)');
+
+test('forecast day-of-week labels follow currentLang, not a hardcoded en-US locale', () => {
+  const enData = loadDestinationNowModule('en').mod.dnCacheToRenderData(fixtureCache({}));
+  const esData = loadDestinationNowModule('es').mod.dnCacheToRenderData(fixtureCache({}));
+  const ruData = loadDestinationNowModule('ru').mod.dnCacheToRenderData(fixtureCache({}));
+  // Real Intl output differs by locale for the same UTC date -- if these
+  // three ever came out identical, dnDayFmt() silently fell back to en-US
+  // for es/ru instead of actually using currentLang.
+  assert.notEqual(enData.forecast[0].day, esData.forecast[0].day, 'Spanish day label must differ from the English one');
+  assert.notEqual(enData.forecast[0].day, ruData.forecast[0].day, 'Russian day label must differ from the English one');
+});
+test('an unrecognized currentLang value falls back to en-US day labels rather than throwing', () => {
+  const data = loadDestinationNowModule('not-a-real-locale-code').mod.dnCacheToRenderData(fixtureCache({}));
+  assert.equal(typeof data.forecast[0].day, 'string');
+  assert.ok(data.forecast[0].day.length > 0);
+});
+test('renderDestinationNow() re-applies translations after its innerHTML rewrite (async weather data must not leave labels stuck in English)', () => {
+  const dom = { grid: { innerHTML: '' }, strip: { innerHTML: '' } };
+  const fakeDoc = { getElementById: (id) => (id === 'dn-grid' ? dom.grid : id === 'dn-forecast' ? dom.strip : id === 'dn-local-time' ? { textContent: '' } : null) };
+  const src = read('vilu-website.html');
+  const start = src.indexOf('// DESTINATION NOW — Phase 20 zero-cost live implementation');
+  const end = src.indexOf("document.addEventListener('DOMContentLoaded', initDestinationNow);", start);
+  const code = src.slice(start, end);
+  const calls = [];
+  const ctx = vm.createContext({ document: fakeDoc, window: {}, Intl, Date, Math, console, currentLang: 'es', applyTranslations: () => { calls.push(1); }, setInterval: () => 0, clearTimeout: () => {}, setTimeout: () => 0 });
+  vm.runInContext(code + ';__render = renderDestinationNow; __toData = dnCacheToRenderData;', ctx);
+  ctx.__render(ctx.__toData(fixtureCache({})));
+  assert.equal(calls.length, 1, 'renderDestinationNow() must call applyTranslations() exactly once after rebuilding #dn-grid/#dn-forecast');
+});
+test('renderDestinationFailure() also re-applies translations after its innerHTML rewrite', () => {
+  const fakeDoc = { getElementById: (id) => (id === 'dn-grid' ? { innerHTML: '' } : id === 'dn-forecast' ? { innerHTML: '' } : null) };
+  const src = read('vilu-website.html');
+  const start = src.indexOf('// DESTINATION NOW — Phase 20 zero-cost live implementation');
+  const end = src.indexOf("document.addEventListener('DOMContentLoaded', initDestinationNow);", start);
+  const code = src.slice(start, end);
+  const calls = [];
+  const ctx = vm.createContext({ document: fakeDoc, window: {}, Intl, Date, Math, console, currentLang: 'ar', applyTranslations: () => { calls.push(1); }, setInterval: () => 0, clearTimeout: () => {}, setTimeout: () => 0 });
+  vm.runInContext(code + ';__fail = renderDestinationFailure;', ctx);
+  ctx.__fail();
+  assert.equal(calls.length, 1, 'renderDestinationFailure() must call applyTranslations() exactly once after rebuilding #dn-grid');
+});
+
+// ---------------------------------------------------------------------------
 section('Frontend failure state (provider timeout / provider error / network failure)');
 
 // fetchDestinationWeather() itself always resolves to either
@@ -213,7 +268,7 @@ test('renderDestinationFailure() never writes a fake temperature, sunrise, sunse
   const start = src.indexOf('// DESTINATION NOW — Phase 20 zero-cost live implementation');
   const end = src.indexOf("document.addEventListener('DOMContentLoaded', initDestinationNow);", start);
   const code = src.slice(start, end);
-  const ctx = vm.createContext({ document: fakeDoc, window: {}, Intl, Date, Math, console, setInterval: () => 0, clearTimeout: () => {}, setTimeout: () => 0 });
+  const ctx = vm.createContext({ document: fakeDoc, window: {}, Intl, Date, Math, console, currentLang: 'en', applyTranslations: () => {}, setInterval: () => 0, clearTimeout: () => {}, setTimeout: () => 0 });
   vm.runInContext(code + ';__fail = renderDestinationFailure; __tick = dnTickClock;', ctx);
   ctx.__fail();
   assert.ok(!dom.grid.innerHTML.includes('NaN'), 'must never render NaN');
