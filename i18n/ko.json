@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "페이지 소개"
+    },
+    "media": {
+      "altWhaleSharkSurface": "몰디브 사우스 아리 환초에서 수면 근처를 헤엄치는 고래상어",
+      "altWhaleSharkMpa": "마미길리 인근 남아리 해양보호구역에서 수면 근처에 있는 고래상어",
+      "altMantaRayBeyru": "남아리 환초 마미길리 베이루의 리프 위를 미끄러지듯 헤엄치는 만타가오리",
+      "altSnorkellersReef": "몰디브 마미길리 인근 리프 위를 헤엄치는 스노클러들",
+      "altSandbankBbq": "남아리 환초 마미길리 인근 샌드뱅크에서 즐기는 해변 바비큐 저녁 식사가 포함된 선셋 투어",
+      "altGuestsLagoon": "몰디브 Vilu Residence 인근 라군에서 휴식을 취하는 투숙객들",
+      "altCourtyardTerrace": "마미길리에 있는 Vilu Residence의 안뜰과 게스트하우스 건물"
     }
   },
   "dynamic": {

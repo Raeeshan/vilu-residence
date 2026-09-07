@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "Úvod stránky"
+    },
+    "media": {
+      "altWhaleSharkSurface": "Žralok veľrybí plávajúci blízko hladiny v atole Južný Ari, Maldivy",
+      "altWhaleSharkMpa": "Žralok veľrybí pri hladine v chránenej morskej oblasti Južný Ari, neďaleko Maamigili",
+      "altMantaRayBeyru": "Manta ray kĺžuca nad útesom pri Maamigili Beyru, atol Južný Ari",
+      "altSnorkellersReef": "Šnorchlisti plávajú nad útesom neďaleko Maamigili, Maldivy",
+      "altSandbankBbq": "Výlet na pieskovú lavicu pri západe slnka s grilovaním na pláži neďaleko Maamigili, atol Južný Ari",
+      "altGuestsLagoon": "Hostia relaxujúci v lagúne neďaleko Vilu Residence, Maldivy",
+      "altCourtyardTerrace": "Nádvorie a budova penziónu Vilu Residence v Maamigili"
     }
   },
   "dynamic": {

@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "Seiteneinführung"
+    },
+    "media": {
+      "altWhaleSharkSurface": "Walhai, der nahe der Oberfläche im Süd-Ari-Atoll, Malediven, schwimmt",
+      "altWhaleSharkMpa": "Walhai nahe der Oberfläche im Meeresschutzgebiet Süd-Ari, in der Nähe von Maamigili",
+      "altMantaRayBeyru": "Mantarochen gleitet über das Riff bei Maamigili Beyru, Süd-Ari-Atoll",
+      "altSnorkellersReef": "Schnorchler schwimmen über dem Riff nahe Maamigili, Malediven",
+      "altSandbankBbq": "Sandbank-Sonnenuntergangsausflug mit Beach-Barbecue-Dinner in der Nähe von Maamigili, Süd-Ari-Atoll",
+      "altGuestsLagoon": "Gäste entspannen sich in der Lagune in der Nähe von Vilu Residence, Malediven",
+      "altCourtyardTerrace": "Innenhof und Gästehausgebäude von Vilu Residence in Maamigili"
     }
   },
   "dynamic": {

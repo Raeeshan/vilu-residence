@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "Introduction de la page"
+    },
+    "media": {
+      "altWhaleSharkSurface": "Requin-baleine nageant près de la surface dans l'atoll de Sud Ari, Maldives",
+      "altWhaleSharkMpa": "Requin-baleine près de la surface dans l'aire marine protégée de Sud Ari, à proximité de Maamigili",
+      "altMantaRayBeyru": "Raie manta glissant au-dessus du récif à Maamigili Beyru, atoll de Sud Ari",
+      "altSnorkellersReef": "Personnes faisant du snorkeling au-dessus du récif près de Maamigili, Maldives",
+      "altSandbankBbq": "Excursion au coucher du soleil sur un banc de sable avec barbecue sur la plage près de Maamigili, atoll de Sud Ari",
+      "altGuestsLagoon": "Clients se détendant dans le lagon près de Vilu Residence, Maldives",
+      "altCourtyardTerrace": "Cour intérieure et bâtiment de la guesthouse Vilu Residence à Maamigili"
     }
   },
   "dynamic": {

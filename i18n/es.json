@@ -603,6 +603,15 @@
     },
     "pageHeader": {
       "ariaLabel": "Introducción de la página"
+    },
+    "media": {
+      "altWhaleSharkSurface": "Tiburón ballena nadando cerca de la superficie en el Atolón Ari Sur, Maldivas",
+      "altWhaleSharkMpa": "Tiburón ballena cerca de la superficie en el Área Marina Protegida de Ari Sur, cerca de Maamigili",
+      "altMantaRayBeyru": "Mantarraya deslizándose sobre el arrecife en Maamigili Beyru, Atolón Ari Sur",
+      "altSnorkellersReef": "Snorkelistas nadando sobre el arrecife cerca de Maamigili, Maldivas",
+      "altSandbankBbq": "Excursión al atardecer en el banco de arena con cena barbacoa en la playa cerca de Maamigili, Atolón Ari Sur",
+      "altGuestsLagoon": "Huéspedes relajándose en la laguna cerca de Vilu Residence, Maldivas",
+      "altCourtyardTerrace": "Patio y edificio del alojamiento Vilu Residence en Maamigili"
     }
   },
   "dynamic": {

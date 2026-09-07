@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "页面简介"
+    },
+    "media": {
+      "altWhaleSharkSurface": "在马尔代夫南阿里环礁近水面处游动的鲸鲨",
+      "altWhaleSharkMpa": "在马米吉利附近的南阿里海洋保护区水面附近的鲸鲨",
+      "altMantaRayBeyru": "在南阿里环礁马米吉利贝鲁礁石上方滑行的蝠鲼",
+      "altSnorkellersReef": "在马尔代夫马米吉利附近礁石上方浮潜的游客",
+      "altSandbankBbq": "在南阿里环礁马米吉利附近沙洲享用海滩烧烤晚餐的日落之旅",
+      "altGuestsLagoon": "在Vilu Residence附近的潟湖中休憩的客人",
+      "altCourtyardTerrace": "位于马米吉利的Vilu Residence庭院及民宿建筑"
     }
   },
   "dynamic": {

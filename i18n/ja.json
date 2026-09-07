@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "ページ概要"
+    },
+    "media": {
+      "altWhaleSharkSurface": "モルディブ、南アリ環礁の水面近くを泳ぐジンベエザメ",
+      "altWhaleSharkMpa": "マーミジリ近くの南アリ海洋保護区で水面近くにいるジンベエザメ",
+      "altMantaRayBeyru": "南アリ環礁マーミジリ・ベイルの礁の上を滑るように泳ぐマンタ",
+      "altSnorkellersReef": "モルディブ、マーミジリ近くの礁の上を泳ぐシュノーケラーたち",
+      "altSandbankBbq": "南アリ環礁マーミジリ近くのサンドバンクでのビーチバーベキューディナー付き夕日エクスカーション",
+      "altGuestsLagoon": "モルディブのVilu Residence近くのラグーンでくつろぐゲストたち",
+      "altCourtyardTerrace": "マーミジリにあるVilu Residenceの中庭とゲストハウスの建物"
     }
   },
   "dynamic": {

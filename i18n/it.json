@@ -1655,6 +1655,15 @@
     },
     "pageHeader": {
       "ariaLabel": "Introduzione alla pagina"
+    },
+    "media": {
+      "altWhaleSharkSurface": "Squalo balena che nuota vicino alla superficie nell'atollo di Ari Sud, Maldive",
+      "altWhaleSharkMpa": "Squalo balena vicino alla superficie nell'area marina protetta di Ari Sud, vicino a Maamigili",
+      "altMantaRayBeyru": "Manta che scivola sopra la barriera corallina a Maamigili Beyru, atollo di Ari Sud",
+      "altSnorkellersReef": "Snorkelisti che nuotano sopra la barriera corallina vicino a Maamigili, Maldive",
+      "altSandbankBbq": "Escursione al tramonto su un banco di sabbia con barbecue in spiaggia vicino a Maamigili, atollo di Ari Sud",
+      "altGuestsLagoon": "Ospiti che si rilassano nella laguna vicino a Vilu Residence, Maldive",
+      "altCourtyardTerrace": "Cortile ed edificio della guesthouse Vilu Residence a Maamigili"
     }
   },
   "dynamic": {
