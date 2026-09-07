@@ -343,3 +343,13 @@ This is the standing editorial standard for all Vilu-published content, not a on
 **Reservations are never hard-deleted (`allow delete: if false` in `firestore.rules`) and never will be without a separate, explicit owner decision.** Any client-side "delete" is a soft-delete (the Bin) — do not add a real Firestore delete path for reservations.
 
 **Do not weaken `firestore.rules` to make a broken or inconvenient client code path work.** If a client path and the rules disagree, the default assumption is the client is wrong, not the rules — fix the client, or escalate the specific rule for a separate decision, per the same evidence standard as everything else in this file.
+
+## PERMANENT: Agency Portal isolation rules (added 2026-09-07, Phase 49)
+
+**Agency-controlled free text (block-request `note`, and any future agency-authored field) must pass through `esc()` before reaching `.innerHTML` in `vilu-unified.html` or `vilu-agency-portal.html`, exactly like guest-controlled fields.** Phase 49 found and fixed the block-request panel's `note`/`agencyName` rendering unescaped in the PMS's staff-facing approval view — an agency account (a lower-trust, external actor, same as a public guest) could otherwise inject a payload that executes in an admin's authenticated session. Treat every agency-authored text field the same way Phase 48 already treats guest-authored ones.
+
+**Per-agency packages/pricing (`agency_packages/{email}`) and reservations (`agencyId`) must stay isolated per-agency at the `firestore.rules` level, not just filtered client-side.** Verified in Phase 49 with live negative tests against production: an authenticated agency session cannot read another agency's `agency_packages` doc or another agency's reservations, and cannot submit a block request or reservation attributed to a different `agencyId`. Any new agency-facing collection or query must carry the same `request.auth.uid`/`agencyId` match in its rule — never rely on the client only querying its own data.
+
+**No self-registration for agency accounts.** `createUserWithEmailAndPassword` must only ever be reachable through the legacy-migration path (which requires a pre-existing matching legacy credential already on that device), never a public sign-up form. Accounts are created by Vilu staff/admin only; the login screen must keep saying so.
+
+**Group/block requests from the Agency Portal must never create a real block directly.** They create a `pending` `block_requests` document that only staff/admin can approve — an agency can request a hold, never grant itself one.

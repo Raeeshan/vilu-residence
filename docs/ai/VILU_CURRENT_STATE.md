@@ -6,7 +6,23 @@
 
 **PERMANENT, standing across every future session — read `VILU_DECISIONS.md` §"PERMANENT: post-56-phase Growth Operating Model"**: once all 56 roadmap phases are COMPLETE, Claude's role shifts from building the site to a continuous MEASURE → detect global demand → match to real Vilu services → owner-approved implementation → QA → measure loop, monitoring ALL countries (not just the current phase list) for future investment. Do not start this Stage 2 operating mode before Stage 1 (the 56-phase roadmap) is fully complete.
 
-**Snapshot date: 2026-09-07 (updated same day after Phase 48 PMS Hardening — see below).**
+**Snapshot date: 2026-09-07 (updated same day after Phase 49 Agency Portal Hardening — see below).**
+
+---
+
+## Phase 49 Agency Portal Hardening — COMPLETE, deployed to production (2026-09-07)
+
+Hardening, not redesign. Full architecture audit: login/auth/session, agency identity, rate/commission visibility, reservation-write path, group/block requests, account lifecycle, approval boundary. Confirmed server-enforced agency isolation for both reservations (`agencyId==auth.uid`) and per-agency packages/pricing (`agency_packages/{own email}` — one agency's pricing can never leak to another), verified live against production with negative tests (cross-agency read and a spoofed foreign-agencyId write both denied, nothing written). Confirmed no self-registration path exists and an authenticated non-agency account is rejected both client- and server-side. Confirmed account revocation already works correctly: deleting the `users/{email}` profile doc revokes Firestore access immediately (server-side `isAgency()` re-checks live on every request), not just at next login.
+
+**Found and fixed a real stored-XSS gap Phase 48 didn't cover**: agency-authored block-request `note`/`agencyName` rendered unescaped into the PMS's staff-facing approval panel and the agency's own view — an agency account could inject a payload executing in an admin's session the moment they reviewed a pending request. Fixed with the existing `esc()` helpers. Verified the shared `writeReservation()`/`ROOM_CONFLICT` contract is unforked, group/block requests never create a real block directly (staff-approval-only), and reservations remain undeletable by anyone.
+
+**Public AI-tool exposure audit: clean.** No Claude/ChatGPT/Anthropic/OpenAI disclosure found anywhere in public HTML/JS/CSS; internal docs/test files confirmed excluded from hosting.
+
+**Editorial audit**: the site was found to already read naturally overall — no markdown remnants, no formulaic AI-writing patterns, and the "too mathematically structured" design criticism was investigated and found not well-founded against the real CSS/section structure (documented, left alone). Fixed the concrete findings: 466 ASCII-punctuation instances in `i18n/zh.json` corrected to full-width Chinese punctuation; wired two already-translated but never-consumed footer legal-link i18n keys (was showing untranslated English on every locale), which also surfaced and fixed a pre-existing double-HTML-escaped `&amp;amp;`; removed a duplicated paragraph; lightly varied a few repeated phrasings.
+
+Added `test/agency-portal-hardening.test.js` (20/20) and `test/public-ai-exposure.test.js` (5/5). Full regression green across 19 test files. Deployed hosting-only (no rules/functions changes), commit `1667a0a`; post-deploy QA verified live and non-destructively across the PMS, Agency Portal, and representative public pages/locales (EN/DE/RU/AR/ZH), including direct negative-isolation tests against production Firestore.
+
+**One real, known limitation surfaced by this phase's own QA**: the room-description text edits are correct in the static source but not currently visible to visitors, because `refreshRoomCards()` overwrites them at runtime from Firestore's `room_details` collection (live PMS content) — not fixed this phase, since editing live business content data is outside a hardening/editorial phase's authorization. Full detail: `VILU_COMPLETION_MATRIX.md` Phase 49.
 
 ---
 
