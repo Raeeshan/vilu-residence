@@ -3188,7 +3188,17 @@ function initLangSwitcher(){
 document.addEventListener('DOMContentLoaded', async function(){
   var initial = detectInitialLang();
   initLangSwitcher();
-  currentLang = 'en';
+  // Phase 32: seed currentLang with the URL-detected locale (not a hardcoded
+  // 'en') before the very first applyTranslations() call, so lang/dir/
+  // canonical are correct on first paint -- previously this always wrote
+  // English/ltr first and silently self-corrected a moment later once
+  // loadLanguageData() resolved, a real (if narrow) window where a
+  // JS-rendering crawler or a slow/failed fetch could see the wrong
+  // lang/dir/canonical on a non-English URL. Visible text still legitimately
+  // shows the English fallback until the dictionary loads (t() already
+  // falls back to I18N.en when I18N[currentLang] isn't populated yet) --
+  // unchanged, and not what this fixes.
+  currentLang = initial;
   applyTranslations();
   if (initial !== 'en') {
     try { await loadLanguageData(initial); currentLang = initial; } catch(e) { currentLang = 'en'; }

@@ -1514,7 +1514,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
             <a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Periodo Migliore</a>
             <a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Guida ai Costi</a>
             <a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Guesthouse vs Resort</a>
-            <a href="getting-to-maamigili.html" data-i18n="pageNav.gtmGuide">Getting to Maamigili</a>
+            <a href="/getting-to-maamigili.html" data-i18n="pageNav.gtmGuide">Come arrivare a Maamigili</a>
             <a href="#travel-info" data-i18n="nav.travelInfo">Info di viaggio</a>
           </div>
         </div>
@@ -1583,7 +1583,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
         <a href="best-time-to-visit.html" data-mm-close="" data-i18n="pageNav.btGuide">Periodo Migliore</a>
         <a href="maldives-holiday-cost.html" data-mm-close="" data-i18n="pageNav.costGuide">Guida ai Costi</a>
         <a href="guesthouse-vs-resort.html" data-mm-close="" data-i18n="pageNav.gvrGuide">Guesthouse vs Resort</a>
-        <a href="getting-to-maamigili.html" data-mm-close="" data-i18n="pageNav.gtmGuide">Getting to Maamigili</a>
+        <a href="/getting-to-maamigili.html" data-mm-close="" data-i18n="pageNav.gtmGuide">Come arrivare a Maamigili</a>
         <a href="#travel-info" data-mm-close="" data-i18n="nav.travelInfo">Info di viaggio</a>
       </div>
     </div>
@@ -2007,7 +2007,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       </div>
       <div class="gh-grid reveal" id="gh-grid"></div>
       <div class="gh-general reveal" id="gh-general"></div>
-      <p class="exp-links" data-i18n-html="gettingHere.gtmLink">Want the full arrival and departure picture — international connections, weather disruption, and what to prepare before you fly? See our <a href="getting-to-maamigili.html">Getting to Maamigili guide</a>.</p>
+      <p class="exp-links" data-i18n-html="gettingHere.gtmLink">Vuoi il quadro completo di arrivo e partenza — coincidenze internazionali, imprevisti meteo e cosa preparare prima di volare? Consulta la nostra <a href="/getting-to-maamigili.html">guida per arrivare a Maamigili</a>.</p>
     </div>
 
     <div class="ti-panel" id="se-panel-timing" style="display:none">
@@ -2278,7 +2278,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
           <img src="/images/vilu-logo.jpg" alt="Vilu Residence" width="48" height="48">
           <div><div class="footer-brand-name">Vilu Residence</div><div class="footer-brand-sub">Maamigili · Maldives</div></div>
         </div>
-        <p class="footer-brandline" data-i18n="footer.brandLine">Vivi South Ari.</p>
+        <p class="footer-brandline" data-i18n="footer.brandLine">Vivi Ari Sud.</p>
       </div>
       <div class="footer-hero-text">
         <p class="footer-desc" data-i18n="footer.positioning">Pianificazione premium di vacanze alle Maldive da Maamigili, atollo di Ari Sud – squali balena, mante e vita dell'isola locale, con la nostra guesthouse di sei camere, Vilu Residence, come base.</p>
@@ -2313,7 +2313,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
         <li><a href="best-time-to-visit.html" data-i18n="pageNav.btGuide">Periodo Migliore</a></li>
         <li><a href="maldives-holiday-cost.html" data-i18n="pageNav.costGuide">Guida ai Costi</a></li>
         <li><a href="guesthouse-vs-resort.html" data-i18n="pageNav.gvrGuide">Guesthouse vs Resort</a></li>
-        <li><a href="getting-to-maamigili.html" data-i18n="pageNav.gtmGuide">Getting to Maamigili</a></li>
+        <li><a href="/getting-to-maamigili.html" data-i18n="pageNav.gtmGuide">Come arrivare a Maamigili</a></li>
         <li><a href="#travel-info" data-i18n="nav.travelInfo">Info di viaggio</a></li>
         <li><a href="#contact" data-i18n="nav.contact">Contatti</a></li>
         <li><a href="/it/privacy-policy.html">Privacy Policy</a></li>
@@ -3205,7 +3205,17 @@ function initLangSwitcher(){
 document.addEventListener('DOMContentLoaded', async function(){
   var initial = detectInitialLang();
   initLangSwitcher();
-  currentLang = 'en';
+  // Phase 32: seed currentLang with the URL-detected locale (not a hardcoded
+  // 'en') before the very first applyTranslations() call, so lang/dir/
+  // canonical are correct on first paint -- previously this always wrote
+  // English/ltr first and silently self-corrected a moment later once
+  // loadLanguageData() resolved, a real (if narrow) window where a
+  // JS-rendering crawler or a slow/failed fetch could see the wrong
+  // lang/dir/canonical on a non-English URL. Visible text still legitimately
+  // shows the English fallback until the dictionary loads (t() already
+  // falls back to I18N.en when I18N[currentLang] isn't populated yet) --
+  // unchanged, and not what this fixes.
+  currentLang = initial;
   applyTranslations();
   if (initial !== 'en') {
     try { await loadLanguageData(initial); currentLang = initial; } catch(e) { currentLang = 'en'; }

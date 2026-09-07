@@ -483,7 +483,7 @@
       "stickyRegionLabel": "Ayuda con paquetes"
     },
     "hpMeta": {
-      "title": "Paquetes de Vacaciones a Maldivas — Tiburón Ballena y Mantarrayas",
+      "title": "Paquetes de Vacaciones a Maldivas — Tiburón Ballena y Mantarrayas | Vilu Residence",
       "description": "9 paquetes de vacaciones en Maamigili, Atolón Ari Sur, Maldivas, desde 450 $ por persona — traslados, alojamiento en Vilu Residence, desayuno y snorkel con tiburón ballena y mantarrayas incluidos."
     },
     "hpPage": {
@@ -716,6 +716,10 @@
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Pago solo en efectivo (USD o EUR), a la llegada — sin depósito, prepago ni datos de tarjeta solicitados online",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Cancelación gratuita para reservas directas — como nunca se cobra por adelantado, cancelar nunca supone ningún cargo",
     "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Las reservas a través de plataformas (Booking.com, Airbnb, etc.) siguen la política de cancelación de esa plataforma, no la nuestra",
-    "Garden view": "Vista al jardín"
+    "Garden view": "Vista al jardín",
+    "Half-Board — $25/day": "Media Pensión — $25/día",
+    "Full-Board — $40/day": "Pensión Completa — $40/día",
+    "Photography — $25/hr": "Fotografía — $25/hora",
+    "Private Island Picnic — $51/person": "Picnic Privado en la Isla — $51/persona"
   }
 }

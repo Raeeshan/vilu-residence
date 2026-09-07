@@ -180,15 +180,19 @@ function rewriteUncoveredSiblingLinks($, dict) {
   const uncoveredOutFiles = new Set(
     PAGES.filter((p) => p.metaNs && (!dict.static || dict.static[p.metaNs] === undefined)).map((p) => p.outFile)
   );
-  if (!uncoveredOutFiles.size) return;
   // getting-to-maamigili.html is deliberately never in PAGES at all (English-
   // only, Phase 24/25 -- see the SITEMAP_PAGE_SOURCE comment) so it has zero
-  // /{lang}/ mirror in ANY language, including the 10 established ones. That
-  // pre-existing cross-language link issue is out of Phase 30's scope to fix
-  // globally, but this dict-driven check only ever reaches this line for a
-  // genuinely partial locale (uncoveredOutFiles is only non-empty then), so
-  // adding it here fixes it for the new partial locale without changing a
-  // single byte of output for the 10 full-coverage languages.
+  // /{lang}/ mirror in ANY language, full-coverage or partial. Added
+  // unconditionally (not gated behind the `if (!uncoveredOutFiles.size)
+  // return` this function used to have before this line): that early return
+  // meant this fix only ever applied to a genuinely partial locale (Spanish),
+  // since a full locale's uncoveredOutFiles set started empty and returned
+  // before this line ever ran -- so a bare relative
+  // href="getting-to-maamigili.html" link on any of the 10 full-coverage
+  // locales' pages was silently rewritten to nothing and resolved to a real
+  // 404 (e.g. /ru/getting-to-maamigili.html, which was never generated and
+  // has no firebase.json rewrite). Phase 32 fix: now applies to every
+  // language uniformly, full or partial.
   uncoveredOutFiles.add('getting-to-maamigili.html');
   $('a[href]').each(function () {
     const el = $(this);
@@ -428,6 +432,25 @@ function localizeBreadcrumbItem(item, dict, lang) {
   }
 }
 
+// Rewrites a JSON-LD node's self-referencing English URL (e.g. a Product's
+// offers.url anchor, or an Article's mainEntityOfPage.@id) to the current
+// locale's own page path, preserving any #fragment. Phase 32 fix: these
+// fields were being localized for name/description but left pointing at
+// the English-root URL on every non-English page -- a real hreflang/
+// canonical-adjacent leak into structured data specifically. Mirrors
+// localizeBreadcrumbItem's URL construction (SITE_ROOT + '/' + lang + '/'
+// [+ outFile]) so both stay consistent. Leaves the URL untouched if it
+// doesn't match this page's own English URL prefix (i.e. it points
+// somewhere else entirely) rather than guessing.
+function localizeSelfUrl(url, pageDef, lang) {
+  if (typeof url !== 'string' || !lang) return url;
+  const prefix = SITE_ROOT + '/' + pageDef.outFile;
+  if (!url.startsWith(prefix)) return url;
+  const suffix = url.slice(prefix.length); // '' or '#fragment'
+  const base = pageDef.outFile === 'index.html' ? SITE_ROOT + '/' + lang + '/' : SITE_ROOT + '/' + lang + '/' + pageDef.outFile;
+  return base + suffix;
+}
+
 function localizeFaqPageNode(node, dict, pageDef, warnings) {
   if (!Array.isArray(node.mainEntity)) return;
   const map = faqKeyMap(pageDef);
@@ -477,6 +500,9 @@ function localizeJsonLdNode(node, dict, metaNs, pageDef, warnings) {
       if (Array.isArray(node.includesAttraction) && node.includesAttraction.length) {
         warnings.push(`TouristDestination.includesAttraction (${node.includesAttraction.length} item(s)) left English — no existing translated equivalent to reuse`);
       }
+      if (node.mainEntityOfPage && typeof node.mainEntityOfPage === 'object') {
+        node.mainEntityOfPage['@id'] = localizeSelfUrl(node.mainEntityOfPage['@id'], pageDef, pageDef.__lang);
+      }
       break;
     }
     case 'Product': {
@@ -494,6 +520,9 @@ function localizeJsonLdNode(node, dict, metaNs, pageDef, warnings) {
         const desc = getPath(dict.static, metaNs + '.description');
         if (title !== undefined) node.name = title;
         if (desc !== undefined) node.description = desc;
+      }
+      if (node.offers && typeof node.offers === 'object') {
+        node.offers.url = localizeSelfUrl(node.offers.url, pageDef, pageDef.__lang);
       }
       break;
     }

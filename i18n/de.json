@@ -173,7 +173,8 @@
       "beforeYouBook": "Bevor Sie buchen:",
       "directSpeedboat": "Direktes Speedboot",
       "transitDhigurah": "Transit über Dhigurah",
-      "domesticFlight": "Inlandsflug"
+      "domesticFlight": "Inlandsflug",
+      "gtmLink": "Möchten Sie das vollständige Bild zu An- und Abreise — internationale Anschlüsse, Wetterstörungen und was Sie vor dem Flug vorbereiten sollten? Lesen Sie unseren <a href=\"getting-to-maamigili.html\">Anreise-Guide nach Maamigili</a>."
     },
     "reviews": {
       "tag": "Was Gäste sagen",
@@ -572,7 +573,9 @@
       "piNote": "Visabestimmungen können sich ändern – aktuelle Anforderungen direkt bei der <a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">maledivischen Einwanderungsbehörde</a> prüfen, statt sich allein auf diesen oder einen anderen Drittanbieter-Reiseführer zu verlassen.",
       "hConclusion": "Fazit",
       "concP1": "Maamigili versucht nicht, eine Resortinsel zu sein – genau das ist der Punkt. Es ist eine aktive maledivische Insel, die zufällig neben einem der verlässlichsten Walhai-Gebiete der Welt liegt, mit eigenem Flughafen, einem echten Dorf und Gästehauspreisen statt Resortpreisen. Für Reisende, die direkten Zugang zu diesem Meeresleben wollen – Walhaie in jedem Monat des Jahres, Mantas zur Saison, Schildkröten und Riffleben dazwischen – ohne die Kosten oder die abgeschlossene Blase eines Privatresorts, ist das eine wirklich gute Option, nicht nur ein Budget-Kompromiss.",
-      "concP2": "Die Kompromisse sind real und sollten vor der Landung bekannt sein: kein Alkohol auf der Insel, dezente Kleidung außerhalb von Bikini Beach, und ein kleineres, ruhigeres Reiseziel als das Postkarten-Resort-Bild der Malediven. Für die richtigen Reisenden sind das keine Nachteile – sie machen den Aufenthalt zu den Malediven jenseits des Prospekts."
+      "concP2": "Die Kompromisse sind real und sollten vor der Landung bekannt sein: kein Alkohol auf der Insel, dezente Kleidung außerhalb von Bikini Beach, und ein kleineres, ruhigeres Reiseziel als das Postkarten-Resort-Bild der Malediven. Für die richtigen Reisenden sind das keine Nachteile – sie machen den Aufenthalt zu den Malediven jenseits des Prospekts.",
+      "htrGtmLink": "Für das vollständige Bild — Ankunfts- und Abflugzeiten, internationale Anschlüsse, Wetterstörungen und was Sie vor dem Flug vorbereiten sollten — sehen Sie sich unseren eigenen <a href=\"getting-to-maamigili.html\">Anreise-Guide nach Maamigili</a> an.",
+      "sunsetCaption": "Sonnenuntergang über Maamigili — der kleinen lokalen Insel im Herzen jedes Vilu-Urlaubs."
     },
     "cmpSnorkel": {
       "title": "Die besten lokalen Inseln der Malediven zum Schnorcheln",
@@ -666,7 +669,8 @@
       "costGuide": "Urlaubskosten-Guide",
       "cmpSnorkelGuide": "Beste Inseln zum Schnorcheln",
       "cmpRegionsGuide": "Süd-Ari vs. Andere Regionen",
-      "thingsGuide": "Was man auf Maamigili unternehmen kann"
+      "thingsGuide": "Was man auf Maamigili unternehmen kann",
+      "gtmGuide": "Anreise nach Maamigili"
     },
     "saaMeta": {
       "title": "Süd-Ari-Atoll Reiseführer, Malediven – Walhaie, Mantarochen & lokale Inseln",
@@ -778,7 +782,8 @@
       "ctaBook": "Verfügbarkeit prüfen",
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "ctaPackages": "Urlaubspakete ansehen",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20S%C3%BCd-Ari-Atoll-Reisef%C3%BChrer%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20S%C3%BCd-Ari-Atoll-Reisef%C3%BChrer%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen.",
+      "breakoutCaption": "Erkundung einer lokalen Insel im Süd-Ari-Atoll — das tägliche Inselleben spielt sich direkt neben dem Riff ab, nicht getrennt davon."
     },
     "wsMeta": {
       "title": "Walhai-Schnorcheln in Maamigili, Süd-Ari-Atoll — Was Sie erwartet",
@@ -871,7 +876,8 @@
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "tocList": "<li><a href=\"#quick-facts\">Kurzübersicht</a></li><li><a href=\"#excursion\">Was der Ausflug beinhaltet</a></li><li><a href=\"#no-sighting\">Wenn wir keinen Walhai finden</a></li><li><a href=\"#group-size\">Gemeinsame Touren, Gruppengröße & private Touren</a></li><li><a href=\"#who-can-join\">Wer kann teilnehmen — Schwimmer, ungeübte Schwimmer & Kinder</a></li><li><a href=\"#responsible-encounters\">Sicherheitseinweisung & verantwortungsvolle Walhai-Begegnungen</a></li><li><a href=\"#weather\">Wetter & Änderungen des Ausflugs</a></li><li><a href=\"#best-season\">Gibt es eine beste Saison?</a></li><li><a href=\"#what-to-bring\">Was sollten Sie mitbringen?</a></li><li><a href=\"#whats-included\">Was ist enthalten</a></li><li><a href=\"#price\">Preis & Buchung</a></li><li><a href=\"#faq\">Häufig gestellte Fragen</a></li>",
       "ctaPackages": "Urlaubspakete ansehen",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Walhai-Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Walhai-Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen.",
+      "breakoutCaption": "Ein Walhai nahe der Wasseroberfläche im Meeresschutzgebiet Süd-Ari, eine kurze Bootsfahrt von Maamigili entfernt."
     },
     "mrMeta": {
       "title": "Mantarochen-Schnorcheln in Maamigili, Süd-Ari-Atoll – Was Sie erwartet",
@@ -973,7 +979,8 @@
       "ctaWhatsapp": "Auf WhatsApp fragen",
       "tocList": "<li><a href=\"#quick-facts\">Kurzübersicht</a></li><li><a href=\"#excursion\">Was der Ausflug beinhaltet</a></li><li><a href=\"#where-we-search\">Wo unsere Guides suchen – und warum sich der Ort ändert</a></li><li><a href=\"#behavior\">Putzerstationen, Fressverhalten und anderes Manta-Verhalten</a></li><li><a href=\"#no-sighting\">Wenn wir keinen Mantarochen finden</a></li><li><a href=\"#group-size\">Gemeinsame Ausflüge, Gruppengröße & private Ausflüge</a></li><li><a href=\"#who-can-join\">Wer teilnehmen kann – Schwimmer, schwache Schwimmer & Kinder</a></li><li><a href=\"#responsible-encounters\">Sicherheitseinweisung & verantwortungsvolle Manta-Begegnungen</a></li><li><a href=\"#weather\">Wetter & Änderungen des Ausflugs</a></li><li><a href=\"#best-season\">Gibt es eine beste Jahreszeit?</a></li><li><a href=\"#what-to-bring\">Was Sie mitbringen sollten</a></li><li><a href=\"#whats-included\">Was ist inbegriffen</a></li><li><a href=\"#price\">Preis & Buchung</a></li><li><a href=\"#faq\">Häufig gestellte Fragen</a></li>",
       "ctaPackages": "Urlaubspakete ansehen",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Mantarochen-Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen."
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Hallo!%20Ich%20habe%20Ihren%20Mantarochen-Schnorcheln%20gelesen%20und%20w%C3%BCrde%20gerne%20Hilfe%20bei%20der%20Planung%20meines%20Malediven-Urlaubs%20mit%20Vilu%20bekommen.",
+      "breakoutCaption": "Die Silhouette eines Mantarochens in den Gewässern von Süd-Ari — Riff-Mantas sind hier ganzjährige Bewohner, keine saisonalen Besucher."
     },
     "hpMeta": {
       "title": "Malediven Urlaubspakete — Walhaie, Mantarochen & mehr | Vilu Residence",
@@ -1760,6 +1767,10 @@
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Zahlung nur bar (USD oder EUR) bei Ankunft — keine Anzahlung, Vorauszahlung oder Kartendaten werden online erhoben",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Kostenlose Stornierung für Direktbuchungen — da niemals im Voraus bezahlt wird, entstehen bei einer Stornierung keine Kosten",
     "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA-Buchungen (Booking.com, Airbnb usw.) unterliegen der Stornierungsbedingung der jeweiligen Plattform, nicht unserer",
-    "Garden view": "Gartenblick"
+    "Garden view": "Gartenblick",
+    "Half-Board — $25/day": "Halbpension — $25/Tag",
+    "Full-Board — $40/day": "Vollpension — $40/Tag",
+    "Photography — $25/hr": "Fotografie — $25/Std.",
+    "Private Island Picnic — $51/person": "Privates Insel-Picknick — $51/Person"
   }
 }

@@ -173,7 +173,8 @@
       "beforeYouBook": "Pred rezerváciou:",
       "directSpeedboat": "Priama rýchloloď",
       "transitDhigurah": "Prestup cez Dhigurah",
-      "domesticFlight": "Vnútroštátny let"
+      "domesticFlight": "Vnútroštátny let",
+      "gtmLink": "Chcete kompletný prehľad o prílete a odlete — medzinárodné nadväzujúce lety, možné narušenie počasím a čo si pripraviť pred cestou? Pozrite si nášho <a href=\"getting-to-maamigili.html\">sprievodcu cestou do Maamigili</a>."
     },
     "reviews": {
       "tag": "Čo hovoria hostia",
@@ -572,7 +573,9 @@
       "piNote": "Vízové pravidlá sa môžu meniť — aktuálne požiadavky si overte priamo u <a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">Maldivskej imigrácie</a> pred cestou, namiesto toho, aby ste sa spoliehali len na tohto alebo iného sprievodcu tretej strany.",
       "hConclusion": "Záver",
       "concP1": "Maamigili sa nesnaží byť ostrovom-rezortom, a to je práve zmysel. Je to fungujúci maldivský ostrov, ktorý má náhodou vedľa seba jednu z najspoľahlivejších oblastí žralokov veľrybích na planéte, s vlastným letiskom, skutočnou dedinou a cenami za penzión namiesto cien za rezort. Pre cestovateľov, ktorí chcú priamy prístup k tomuto morskému životu — žraloky veľrybie každý mesiac v roku, mantové raje v sezóne, korytnačky a útesový život medzitým — bez nákladov alebo uzavretej bubliny súkromného rezortu, je to skutočne silná voľba, nielen rozpočtový kompromis.",
-      "concP2": "Kompromisy sú reálne a stojí za to ich poznať pred pristátím: žiadny alkohol na ostrove, skromné oblečenie mimo Bikini Beach, a menšia, pokojnejšia destinácia než pohľadnicová podoba Maldiv verzie rezort. Pre správneho cestovateľa to nie sú nevýhody — sú to presne tie veci, vďaka ktorým pobyt pôsobí ako Maldivy nad rámec brožúry."
+      "concP2": "Kompromisy sú reálne a stojí za to ich poznať pred pristátím: žiadny alkohol na ostrove, skromné oblečenie mimo Bikini Beach, a menšia, pokojnejšia destinácia než pohľadnicová podoba Maldiv verzie rezort. Pre správneho cestovateľa to nie sú nevýhody — sú to presne tie veci, vďaka ktorým pobyt pôsobí ako Maldivy nad rámec brožúry.",
+      "htrGtmLink": "Kompletný prehľad — časovanie príletu a odletu, medzinárodné nadväzujúce lety, možné narušenie počasím a čo si pripraviť pred cestou — nájdete v našom podrobnom <a href=\"getting-to-maamigili.html\">sprievodcovi cestou do Maamigili</a>.",
+      "sunsetCaption": "Západ slnka nad Maamigili — malým miestnym ostrovom v srdci každej dovolenky s Vilu."
     },
     "cmpSnorkel": {
       "title": "Najlepšie miestne ostrovy na Maldivách na šnorchlovanie",
@@ -666,7 +669,8 @@
       "costGuide": "Sprievodca Nákladmi",
       "cmpSnorkelGuide": "Najlepšie Ostrovy na Šnorchlovanie",
       "cmpRegionsGuide": "Južný Ari vs. Iné Oblasti",
-      "thingsGuide": "Čo Robiť na Maamigili"
+      "thingsGuide": "Čo Robiť na Maamigili",
+      "gtmGuide": "Ako sa dostať do Maamigili"
     },
     "saaMeta": {
       "title": "Sprievodca atolom Južný Ari, Maldivy — žraloky veľrybie, manty a miestne ostrovy",
@@ -778,7 +782,8 @@
       "ctaBook": "Overiť dostupnosť",
       "ctaWhatsapp": "Opýtať sa cez WhatsApp",
       "ctaPackages": "Zobraziť dovolenkové balíčky",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20Sprievodca%20atolom%20Ju%C5%BEn%C3%BD%20Ari%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F"
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20Sprievodca%20atolom%20Ju%C5%BEn%C3%BD%20Ari%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F",
+      "breakoutCaption": "Spoznávanie miestneho ostrova v atole Južný Ari — každodenný život na ostrove sa odohráva bok po boku s útesom, nie oddelene od neho."
     },
     "wsMeta": {
       "title": "Šnorchlovanie so žralokmi veľrybími v Maamigili, atol Južný Ari — Čo očakávať",
@@ -871,7 +876,8 @@
       "ctaWhatsapp": "Opýtať sa na WhatsApp",
       "tocList": "<li><a href=\"#quick-facts\">Rýchle fakty</a></li><li><a href=\"#excursion\">Čo výlet zahŕňa</a></li><li><a href=\"#no-sighting\">Keď žraloka veľrybieho nenájdeme</a></li><li><a href=\"#group-size\">Zdieľané výlety, veľkosť skupiny a súkromné výlety</a></li><li><a href=\"#who-can-join\">Kto sa môže zúčastniť — plavci, slabší plavci a deti</a></li><li><a href=\"#responsible-encounters\">Bezpečnostná inštruktáž a zodpovedné stretnutia so žralokmi veľrybími</a></li><li><a href=\"#weather\">Počasie a zmeny výletu</a></li><li><a href=\"#best-season\">Existuje najlepšia sezóna?</a></li><li><a href=\"#what-to-bring\">Čo si vziať so sebou?</a></li><li><a href=\"#whats-included\">Čo je zahrnuté</a></li><li><a href=\"#price\">Cena a rezervácia</a></li><li><a href=\"#faq\">Často kladené otázky</a></li>",
       "ctaPackages": "Zobraziť dovolenkové balíčky",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20%C5%A0norchlovanie%20so%20%C5%BEralokmi%20ve%C4%BEryb%C3%ADmi%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F"
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20%C5%A0norchlovanie%20so%20%C5%BEralokmi%20ve%C4%BEryb%C3%ADmi%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F",
+      "breakoutCaption": "Žralok veľrybí tesne pod hladinou v chránenej morskej oblasti Južný Ari, kúsok loďou od Maamigili."
     },
     "mrMeta": {
       "title": "Šnorchlovanie s mantami v Maamigili, atol Južný Ari — Čo očakávať",
@@ -973,7 +979,8 @@
       "ctaWhatsapp": "Opýtať sa cez WhatsApp",
       "tocList": "<li><a href=\"#quick-facts\">Rýchly prehľad</a></li><li><a href=\"#excursion\">Čo výlet zahŕňa</a></li><li><a href=\"#where-we-search\">Kde naši sprievodcovia hľadajú — a prečo sa miesto mení</a></li><li><a href=\"#behavior\">Čistiace stanice, žranie a iné správanie mánt</a></li><li><a href=\"#no-sighting\">Ak mantu nenájdeme</a></li><li><a href=\"#group-size\">Spoločné výlety, veľkosť skupiny a súkromné výlety</a></li><li><a href=\"#who-can-join\">Kto sa môže zúčastniť — plavci, slabší plavci a deti</a></li><li><a href=\"#responsible-encounters\">Bezpečnostný inštruktáž a zodpovedné stretnutia s mantami</a></li><li><a href=\"#weather\">Počasie a zmeny výletu</a></li><li><a href=\"#best-season\">Existuje najlepšie obdobie?</a></li><li><a href=\"#what-to-bring\">Čo si vziať so sebou?</a></li><li><a href=\"#whats-included\">Čo je zahrnuté</a></li><li><a href=\"#price\">Cena a rezervácia</a></li><li><a href=\"#faq\">Časté otázky</a></li>",
       "ctaPackages": "Zobraziť dovolenkové balíčky",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20%C5%A0norchlovanie%20s%20mantami%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F"
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=Dobr%C3%BD%20de%C5%88%2C%20zaujal%20ma%20v%C3%A1%C5%A1%20%C5%A0norchlovanie%20s%20mantami%20%E2%80%94%20mohli%20by%20ste%20mi%20pom%C3%B4c%C5%A5%20napl%C3%A1nova%C5%A5%20dovolenku%20na%20Maldiv%C3%A1ch%20s%20Vilu%3F",
+      "breakoutCaption": "Silueta rája manty vo vodách Južného Ari — útesové manty sú tu celoročnými obyvateľmi, nie sezónnymi návštevníkmi."
     },
     "hpMeta": {
       "title": "Dovolenkové balíčky na Maldivy — žraloky veľrybie, manty a viac | Vilu Residence",
@@ -1760,6 +1767,10 @@
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "Platba iba v hotovosti (USD alebo EUR) pri príchode — online sa nevyberá žiadna záloha, platba vopred ani údaje o karte",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "Bezplatné zrušenie priamych rezervácií — keďže platba sa nikdy nevyberá vopred, zrušenie nikdy nespôsobí žiadny poplatok",
     "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "Rezervácie cez OTA (Booking.com, Airbnb atď.) sa riadia storno politikou danej platformy, nie našou",
-    "Garden view": "Výhľad do záhrady"
+    "Garden view": "Výhľad do záhrady",
+    "Half-Board — $25/day": "Polpenzia — $25/deň",
+    "Full-Board — $40/day": "Plná penzia — $40/deň",
+    "Photography — $25/hr": "Fotografovanie — $25/hod.",
+    "Private Island Picnic — $51/person": "Súkromný piknik na ostrove — $51/osoba"
   }
 }

@@ -61,12 +61,20 @@ function applyTranslations(){
   document.documentElement.setAttribute('lang', currentLang);
   document.documentElement.setAttribute('dir', RTL_LANGS[currentLang] ? 'rtl' : 'ltr');
   document.querySelectorAll('.lang-switcher select').forEach(function(sel){ sel.value = currentLang; });
-  // Update this-page-only canonical/hreflang self-reference to reflect the active language.
+  // Phase 32: a partial locale (Spanish today) doesn't generate a real
+  // /{lang}/{file} mirror for every page -- I18N[currentLang][metaNs] is
+  // only populated when build-i18n-pages.js actually built this page for
+  // that language (the same signal the build script itself checks). Only
+  // rewrite the canonical self-reference to the locale path when this page
+  // genuinely has one; otherwise leave it pointing at the real English URL,
+  // matching whatever URL the browser is actually on (setLanguage() applies
+  // the same guard before ever changing that URL, so the two stay in sync).
+  var pageHasLocaleMirror = currentLang === 'en' || !metaNs || (I18N[currentLang] && I18N[currentLang][metaNs] !== undefined);
   var canonical = document.getElementById('canonical-link');
   if (canonical) {
     var base = canonical.getAttribute('data-base-url');
     if (base) {
-      if (currentLang === 'en') {
+      if (currentLang === 'en' || !pageHasLocaleMirror) {
         canonical.setAttribute('href', base);
       } else {
         var u = new URL(base);
@@ -122,10 +130,21 @@ async function setLanguage(lang, opts){
   try { await loadLanguageData(lang); } catch(e) { lang = 'en'; }
   currentLang = lang;
   try { localStorage.setItem('vilu_lang', lang); } catch(e) {}
+  // Phase 32: this page has no real /{lang}/{file} mirror for a partial
+  // locale (Spanish today, or any future one) whenever build-i18n-pages.js
+  // skipped generating it -- the exact same signal the build script itself
+  // uses (PAGE_META_NS absent from the loaded dictionary). Previously the
+  // URL was rewritten to that non-existent path unconditionally, which
+  // looked fine in-session (only the page's own text silently stayed
+  // English) but produced a real 404 on reload, bookmark, or share. Text
+  // still translates wherever the loaded dictionary actually covers it
+  // (shared nav/footer namespaces, for instance) -- only the URL rewrite
+  // is skipped for a genuinely uncovered page.
+  var pageCovered = lang === 'en' || (typeof PAGE_META_NS === 'undefined') || (I18N[lang] && I18N[lang][PAGE_META_NS] !== undefined);
   try {
     var canonical = document.getElementById('canonical-link');
     var base = canonical ? canonical.getAttribute('data-base-url') : null;
-    if (base) {
+    if (base && pageCovered) {
       var u = new URL(base);
       if (lang !== 'en') u.pathname = '/' + lang + u.pathname;
       window.history.replaceState({}, '', u.pathname + window.location.hash);
@@ -192,7 +211,10 @@ function initGuideFaqTracking(){
 async function initPage(){
   var initial = detectInitialLang();
   initLangSwitcher();
-  currentLang = 'en';
+  // Phase 32: seed currentLang with the URL-detected locale (not a hardcoded
+  // 'en') before the first applyTranslations() call -- see the matching
+  // comment in vilu-website.html's own DOMContentLoaded handler for why.
+  currentLang = initial;
   applyTranslations();
   if (initial !== 'en') {
     try { await loadLanguageData(initial); currentLang = initial; } catch(e) { currentLang = 'en'; }

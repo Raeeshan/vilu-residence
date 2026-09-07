@@ -173,7 +173,8 @@
       "beforeYouBook": "예약 전 확인 사항:",
       "directSpeedboat": "직행 스피드보트",
       "transitDhigurah": "디구라 경유",
-      "domesticFlight": "국내선 항공편"
+      "domesticFlight": "국내선 항공편",
+      "gtmLink": "도착과 출발에 대한 전체 그림 — 국제선 연결, 기상 악화, 비행 전 준비 사항이 궁금하신가요? <a href=\"getting-to-maamigili.html\">마미길리 가는 법 가이드</a>를 확인하세요."
     },
     "reviews": {
       "tag": "고객 후기",
@@ -572,7 +573,9 @@
       "piNote": "비자 규정은 변경될 수 있습니다 — 이 가이드나 다른 제3자 가이드에만 의존하지 마시고, 여행 전 <a href=\"https://www.immigration.gov.mv/visa/tourist-visa\" target=\"_blank\" rel=\"noopener\">몰디브 출입국관리소</a>에서 직접 최신 요건을 확인하세요.",
       "hConclusion": "맺음말",
       "concP1": "마미길리는 리조트 아일랜드가 되려고 하지 않으며, 바로 그것이 핵심입니다. 이곳은 우연히 지구상에서 가장 안정적인 고래상어 서식지 중 하나 옆에 자리한, 자체 공항과 진짜 마을, 리조트 요금이 아닌 게스트하우스 요금을 갖춘 활기찬 몰디브 섬입니다. 일 년 내내 고래상어, 시즌에는 만타가오리, 그 사이사이의 거북이와 리프 생물 등 이 해양 생물에 직접 접근하고 싶으면서도 프라이빗 리조트의 비용이나 폐쇄적인 환경은 원치 않는 여행자에게, 이곳은 단순한 저예산 대안이 아니라 정말로 강력한 선택지입니다.",
-      "concP2": "트레이드오프는 실재하며, 착륙 전에 알아둘 만한 가치가 있습니다 — 섬에는 술이 없고, 비키니 비치 밖에서는 단정한 옷차림이 요구되며, 엽서 속 리조트풍 몰디브 이미지보다 더 작고 조용한 여행지입니다. 알맞은 여행자에게 이것들은 단점이 아니라, 브로셔 너머의 진짜 몰디브처럼 느껴지게 만드는 요소들입니다."
+      "concP2": "트레이드오프는 실재하며, 착륙 전에 알아둘 만한 가치가 있습니다 — 섬에는 술이 없고, 비키니 비치 밖에서는 단정한 옷차림이 요구되며, 엽서 속 리조트풍 몰디브 이미지보다 더 작고 조용한 여행지입니다. 알맞은 여행자에게 이것들은 단점이 아니라, 브로셔 너머의 진짜 몰디브처럼 느껴지게 만드는 요소들입니다.",
+      "htrGtmLink": "도착·출발 시간, 국제선 연결, 기상 악화, 비행 전 준비 사항까지 — 전체 정보는 저희의 전용 <a href=\"getting-to-maamigili.html\">마미길리 가는 법 가이드</a>에서 확인하세요.",
+      "sunsetCaption": "마미길리의 석양 — 모든 Vilu 여행의 중심에 있는 작은 로컬 아일랜드."
     },
     "cmpSnorkel": {
       "title": "스노클링하기 좋은 몰디브 최고의 지역 섬",
@@ -666,7 +669,8 @@
       "costGuide": "비용 가이드",
       "cmpSnorkelGuide": "스노클링 최고의 섬",
       "cmpRegionsGuide": "사우스 아리 vs 다른 지역",
-      "thingsGuide": "마미길리에서 할 수 있는 것들"
+      "thingsGuide": "마미길리에서 할 수 있는 것들",
+      "gtmGuide": "마미길리 가는 법"
     },
     "saaMeta": {
       "title": "남아리 환초 여행 가이드, 몰디브 — 고래상어, 만타가오리 & 현지 섬",
@@ -778,7 +782,8 @@
       "ctaBook": "예약 가능 여부 확인",
       "ctaWhatsapp": "WhatsApp으로 문의하기",
       "ctaPackages": "홀리데이 패키지 보기",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EC%82%AC%EC%9A%B0%EC%8A%A4%20%EC%95%84%EB%A6%AC%20%ED%99%98%EC%B4%88%20%EA%B0%80%EC%9D%B4%EB%93%9C%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4."
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EC%82%AC%EC%9A%B0%EC%8A%A4%20%EC%95%84%EB%A6%AC%20%ED%99%98%EC%B4%88%20%EA%B0%80%EC%9D%B4%EB%93%9C%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4.",
+      "breakoutCaption": "사우스 아리 환초의 로컬 아일랜드 탐방 — 섬의 일상은 리프와 동떨어진 것이 아니라 바로 그 옆에서 이어집니다."
     },
     "wsMeta": {
       "title": "마미길리, 남아리 환초 고래상어 스노클링 — 무엇을 기대할 수 있을까",
@@ -871,7 +876,8 @@
       "ctaWhatsapp": "WhatsApp으로 문의하기",
       "tocList": "<li><a href=\"#quick-facts\">빠른 정보</a></li><li><a href=\"#excursion\">투어 진행 방식</a></li><li><a href=\"#no-sighting\">고래상어를 찾지 못했을 경우</a></li><li><a href=\"#group-size\">공동 투어, 그룹 규모, 프라이빗 투어</a></li><li><a href=\"#who-can-join\">누가 참여할 수 있나요 — 수영을 잘하는 분, 서툰 분, 어린이</a></li><li><a href=\"#responsible-encounters\">안전 브리핑 및 책임 있는 고래상어와의 만남</a></li><li><a href=\"#weather\">날씨 및 투어 변경</a></li><li><a href=\"#best-season\">가장 좋은 시즌이 있나요?</a></li><li><a href=\"#what-to-bring\">무엇을 챙겨야 하나요?</a></li><li><a href=\"#whats-included\">포함 사항</a></li><li><a href=\"#price\">가격 및 예약</a></li><li><a href=\"#faq\">자주 묻는 질문</a></li>",
       "ctaPackages": "홀리데이 패키지 보기",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EA%B3%A0%EB%9E%98%EC%83%81%EC%96%B4%20%EC%8A%A4%EB%85%B8%ED%81%B4%EB%A7%81%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4."
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EA%B3%A0%EB%9E%98%EC%83%81%EC%96%B4%20%EC%8A%A4%EB%85%B8%ED%81%B4%EB%A7%81%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4.",
+      "breakoutCaption": "마미길리에서 배로 잠깐이면 닿는 사우스 아리 해양보호구역, 수면 가까이 떠오른 고래상어."
     },
     "mrMeta": {
       "title": "마미길리, 남아리 환초 만타가오리 스노클링 — 알아두어야 할 것",
@@ -973,7 +979,8 @@
       "ctaWhatsapp": "WhatsApp으로 문의하기",
       "tocList": "<li><a href=\"#quick-facts\">빠른 정보</a></li><li><a href=\"#excursion\">투어 내용</a></li><li><a href=\"#where-we-search\">저희 가이드가 탐색하는 장소 — 그리고 장소가 바뀌는 이유</a></li><li><a href=\"#behavior\">클리닝 스테이션, 먹이 활동, 그 외 만타의 행동</a></li><li><a href=\"#no-sighting\">만타가오리를 찾지 못했을 경우</a></li><li><a href=\"#group-size\">공동 투어, 그룹 규모, 프라이빗 투어</a></li><li><a href=\"#who-can-join\">참여 가능한 분 — 수영을 잘하는 분, 서툰 분, 어린이</a></li><li><a href=\"#responsible-encounters\">안전 브리핑 및 책임감 있는 만타가오리 만남</a></li><li><a href=\"#weather\">날씨 및 투어 변경</a></li><li><a href=\"#best-season\">가장 좋은 계절이 있나요?</a></li><li><a href=\"#what-to-bring\">무엇을 준비해야 하나요?</a></li><li><a href=\"#whats-included\">포함 사항</a></li><li><a href=\"#price\">가격 및 예약</a></li><li><a href=\"#faq\">자주 묻는 질문</a></li>",
       "ctaPackages": "홀리데이 패키지 보기",
-      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EC%A5%90%EA%B0%80%EC%98%A4%EB%A6%AC%20%EC%8A%A4%EB%85%B8%ED%81%B4%EB%A7%81%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4."
+      "ctaWhatsappHref": "https://wa.me/9609903339?text=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94!%20%EC%A5%90%EA%B0%80%EC%98%A4%EB%A6%AC%20%EC%8A%A4%EB%85%B8%ED%81%B4%EB%A7%81%EB%A5%BC%20%EC%9D%BD%EA%B3%A0%20Vilu%EC%99%80%20%ED%95%A8%EA%BB%98%20%EB%AA%B0%EB%94%94%EB%B8%8C%20%EC%97%AC%ED%96%89%20%EA%B3%84%ED%9A%8D%EC%9D%84%20%EB%8F%84%EC%99%80%EC%A3%BC%EC%85%A8%EC%9C%BC%EB%A9%B4%20%ED%95%A9%EB%8B%88%EB%8B%A4.",
+      "breakoutCaption": "사우스 아리 바다 속 만타가오리의 실루엣 — 이곳의 리프 만타는 계절성 방문객이 아니라 연중 서식하는 개체입니다."
     },
     "hpMeta": {
       "title": "몰디브 홀리데이 패키지 — 고래상어, 쥐가오리 등 | Vilu Residence",
@@ -1760,6 +1767,10 @@
     "Payment in cash only (USD or EUR), on arrival — no deposit, prepayment, or card details collected online": "결제는 도착 시 현금(미국 달러 또는 유로)으로만 이루어지며, 보증금, 선불금 또는 카드 정보를 온라인으로 수집하지 않습니다",
     "Free cancellation for direct bookings — since no payment is ever taken in advance, cancelling never results in a charge": "다이렉트 예약은 무료로 취소 가능합니다 — 사전에 결제가 이루어지지 않으므로 취소 시 어떠한 비용도 발생하지 않습니다",
     "OTA bookings (Booking.com, Airbnb, etc.) follow that platform's own cancellation policy, not ours": "OTA(Booking.com, Airbnb 등)를 통한 예약은 저희가 아닌 해당 플랫폼 자체의 취소 정책을 따릅니다",
-    "Garden view": "가든 뷰"
+    "Garden view": "가든 뷰",
+    "Half-Board — $25/day": "하프보드 — $25/일",
+    "Full-Board — $40/day": "풀보드 — $40/일",
+    "Photography — $25/hr": "사진 촬영 — $25/시간",
+    "Private Island Picnic — $51/person": "프라이빗 아일랜드 피크닉 — $51/인"
   }
 }
