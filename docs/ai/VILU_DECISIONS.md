@@ -309,3 +309,25 @@ This is the standing editorial standard for all Vilu-published content, not a on
 **Considered and explicitly declined (this phase): named/attributed guest testimonial quotes on conversion pages.** A real, comparable competitor (Koimala Inn) does this well. Vilu has a genuine underlying asset (real 5.0★ Google/Tripadvisor reviews) to draw from, but selecting specific quotes to feature is a reputational/business decision requiring the owner's own review and approval of which real guests' words get featured — not a code change to make unilaterally. Documented as a real, owner-actionable opportunity for a future phase or Growth Operations, not implemented here.
 
 **No fake urgency, scarcity, or countdown language exists anywhere on the site, and none should ever be added** ("only X left," "X people viewing," "almost sold out," countdown timers) unless it reflects real, live system data — confirmed by a sitewide sweep (English + all locale dictionaries) with zero matches, guarded going forward by `test/cro-conversion.test.js`.
+
+---
+
+## PERMANENT: Agency/partner commercial rules (added 2026-09-07, Phase 44)
+
+**Full strategy detail lives in `docs/business/VILU_AGENCY_PARTNER_STRATEGY.md` — this section is the binding, permanent subset.**
+
+**Never publicly expose:** supplier costs, net rates, margins, agency commission structures, confidential partner agreements, private PMS information, or private operational prices — in any language, on any public page. Commission and net-rate figures (`agencyPricePerRoom`, `commission`) exist only inside the authenticated, `agencyId`-isolated Agency Portal. Guarded by `test/agency-growth.test.js`.
+
+**No self-registration exists for agency accounts, and none should be added without a separate, explicit decision** (that decision would itself be Phase 49 scope, not Phase 44). Only Vilu staff/admin may create an agency account in the PMS today.
+
+**Never state "official partner"/"official agency"/"official distributor" unless a real, specific relationship actually exists.** As of Phase 44, zero real external agency relationships are confirmed — only a bootstrap/test account (`agency@viluresidence.com`). Do not imply otherwise anywhere, in copy, schema, or `sameAs`.
+
+**Commission-eligible products are always the same public catalogue** (the 9 packages, standard room types) — never a shadow product invented for agencies only. Transport exclusions and meal-plan terms for agency bookings mirror the exact structure already public on `holiday-packages.html`.
+
+**Special rates or group exceptions require explicit owner approval before being set in any partner's account.** No specific commission percentage, rate, or partner term is ever recorded in a committed document — only process/governance, never values.
+
+**Direct-vs-agency guardrails:** agency growth must never come at the expense of direct-booking economics; no single partner may receive exclusivity over Vilu's product without a specific, separate owner decision; Vilu's own brand/name/real facts must remain visible in how any partner represents the product (never white-labeled into invisibility); success is measured by net value (bookings, revenue, guest quality) per relationship, not gross partner count or gross booking volume alone.
+
+**No automatic outreach.** Do not send emails, WhatsApp messages, or agency-application submissions; do not create partner accounts, sign agreements, offer commissions, or change rates — without current, explicit owner authorization for that specific action. Phase 44 produced research and reusable message *frameworks* only (`docs/business/VILU_AGENCY_PARTNER_STRATEGY.md` §10) — nothing was sent.
+
+**Partner risk/rejection criteria** (full detail in the strategy doc §6): reject or decline any prospective partner who demands unsustainable rates, misrepresents Vilu as a resort, promises guests a guaranteed wildlife sighting, asks Vilu to hide real local-island rules, shows unreliable payment/high chargeback risk, demands harmful exclusivity, or requests private operational data beyond their own booking scope.
