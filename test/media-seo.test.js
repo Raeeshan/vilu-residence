@@ -179,6 +179,18 @@ section('Case G — hero video structure is intact and untouched (protected, per
     const nodes = jsonLdNodes(read('vilu-website.html'));
     assert.ok(!nodes.some(n => n['@type'] === 'VideoObject'), 'a VideoObject node was added for the decorative hero video');
   });
+  test('GSC "No thumbnail URL provided" fix: the hero <video> tag carries a poster attribute pointing to the real, already-shipped poster image (not an invented asset)', () => {
+    const html = read('vilu-website.html');
+    const m = html.match(/<video class="vc-hero-video"[^>]*>/);
+    assert.ok(m, 'hero video tag not found');
+    assert.ok(/poster="images\/hero\/hero-poster-desktop\.jpg"/.test(m[0]), 'poster attribute missing or points somewhere other than the real, existing desktop poster image');
+    assert.ok(html.includes('id="vc-hero-poster"') && html.includes('src="images/hero/hero-poster-desktop.jpg"'), 'the poster attribute no longer reuses the same file already used as the visible LCP poster image');
+  });
+  test('the poster attribute cannot cause a visual regression: .vc-hero-video stays opacity:0 until .vc-video-ready is added on canplay, so a native poster frame is never actually shown to a visitor', () => {
+    const css = read('vilu-website.html');
+    assert.ok(/\.vc-hero-video\{[^}]*opacity:0/.test(css), 'hero video default opacity:0 rule changed -- re-verify the poster attribute is still visually inert before trusting this test');
+    assert.ok(/\.vc-hero-video\.vc-video-ready\{opacity:1\}/.test(css), 'vc-video-ready opacity:1 rule changed -- re-verify the poster attribute is still visually inert before trusting this test');
+  });
 }
 
 section('Summary');
