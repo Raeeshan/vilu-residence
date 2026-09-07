@@ -39,7 +39,7 @@
       "robots": null,
       "hreflang": true,
       "h1": "ViluResidence",
-      "jsonld_types": ["LodgingBusiness", "Organization", "BreadcrumbList"],
+      "jsonld_types": ["LodgingBusiness", "Organization", "WebSite", "BreadcrumbList"],
       "faq_count": 0,
       "required_ids": ["booking", "booking-full-page", "bookingPopupOverlay", "rooms", "hp-grid", "exp-grid", "faq-list", "hamburger", "mobileMenu", "gh-grid"],
       "required_anchors": ["#what-is-vilu", "#rooms", "#booking", "#gallery", "#travel-info", "#contact", "#holiday-packages", "#experiences", "#faq", "#closing"]
