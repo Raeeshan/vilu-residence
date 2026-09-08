@@ -4,6 +4,10 @@
 
 **Access limitation, stated up front**: Claude-in-Chrome (the owner's authenticated Google session) was unavailable throughout this task — checked directly, confirmed not connected, not assumed. Every GBP field that can only be read from the authenticated dashboard (exact rating/review count, Posts, Q&A, photo inventory, verification state, attributes) is marked **UNKNOWN / REQUIRES OWNER** below, per Task 1's explicit instruction not to guess. Everything else is from live, cited public research (search engines, OTA listings, competitor sites, and this repository's own source code) — three parallel research passes plus a direct read of the site's own schema/NAP signals.
 
+**Correction notice (2026-09-08, owner correction, applied to §7/§8 below)**: the original version of this document stated "no 'whale shark' anywhere in Vilu's own copy" — **this was wrong and has been corrected**. Direct inspection of `vilu-website.html` (not re-checked before the original claim was written) shows the site is saturated with whale-shark content: the meta description, the hero subtitle ("Whale sharks, manta rays and a warm island home."), a dedicated hero display line ("Whale sharks."), every package hook, a full `whale-shark-snorkeling.html` page, and a dedicated "South Ari is known for whale sharks..." section citing the Harvey-Carroll research directly. The accurate, narrower finding — which the original research genuinely did support — is that Vilu's **GBP self-description and Facebook bio specifically** (not the website) omit the phrase, and the homepage's own "Who We Are" section uses generic "marine experiences" wording rather than naming whale sharks directly, even though it sits one screen below a hero that already does. See §7/§8 for the corrected finding.
+
+**Confirmation, per owner correction**: the public website is confirmed, by its own current copy, to already be positioned as a broader South Ari holiday/travel platform, not a plain accommodation site — the homepage's own "Who We Are" section headline reads *"Vilu is your way into South Ari,"* with body copy *"Holiday planning, marine experiences and local knowledge — with our own six-room home in Maamigili when you need somewhere to stay."* This phase's recommendations are scoped to strengthen the factual accommodation entity in Google Maps/GBP specifically — nothing in this document proposes narrowing the public website itself toward a guesthouse-first framing, and none of Phase 34's findings require that.
+
 ---
 
 ## 1. Current verified GBP state
@@ -39,14 +43,16 @@ Prior Phase 33 documentation cited "a real, populated Google Business Profile (5
 
 ## 4. Category recommendations
 
-Without direct dashboard access to the current category, these are evidence-based recommendations only, each requiring owner confirmation of the current state first:
+**Correction (2026-09-08, owner correction)**: the original version of this section recommended "Guest house = IMPLEMENT" without weighing a relevant fact the owner then supplied — Google has historically displayed Vilu Residence as a **3-star hotel**, not a guesthouse, in at least some surfaces, and the owner does not want the property's premium positioning weakened by a category change made on this research pass's authority alone. Without direct dashboard access to the current live category, no category change should be presumed correct. Below is a neutral, five-point evaluation of the realistic options — factual fit, Google category availability, local-search effect, perception/positioning effect, and risk — with **no option presumptively marked IMPLEMENT**. No Dive Centre / Tour Operator / Travel Agency option is evaluated, since no such business currently exists (that remains a flat REJECT, not a judgment call).
 
-| Category | Why valid | Local-search benefit | Misrepresentation risk | Decision |
-|---|---|---|---|---|
-| Guest house | Matches the real, registered business type; matches how TripAdvisor and Google Hotels already classify it | Baseline correct categorization | None | **IMPLEMENT** (if not already primary — confirm first) |
-| Lodging | Generic fallback Google category, safe as a secondary | Broadens generic lodging-search eligibility | None | DEFER — only if a secondary-category slot is unused and empty |
-| Hotel | Sometimes used interchangeably with guesthouse in Maldives-market GBP data | Possible visibility in "hotel" queries | Low-moderate — Vilu is genuinely a small guesthouse, not styled as a hotel; only acceptable as a secondary, not primary | DEFER, owner judgment |
-| Dive centre / Tour operator / Travel agency | Explicitly listed as NOT applicable in this task's own framing (no such operation exists yet) | N/A | High — would misrepresent a service that doesn't exist | **REJECT** |
+| Category | Factual fit | Google category availability | Local-search effect | Perception/positioning effect | Risk | Recommendation |
+|---|---|---|---|---|---|---|
+| Guest house | Matches the real, registered business type; matches how TripAdvisor already classifies it | Real, standard Google Business category | Correct baseline eligibility for "guesthouse"/"guest house" local queries | **Lower-tier framing than "hotel"** — a real concern given Google has historically shown Vilu as a 3-star hotel; switching to Guest House could read as a downgrade to a returning searcher or in comparison snippets | Low factual risk, **real positioning risk** given the owner's stated preference | **Owner decision required — do not implement without confirming current category first and weighing the positioning trade-off below** |
+| Hotel | Used loosely/interchangeably with guesthouse in Maldives-market listings; consistent with what Google has apparently already shown historically | Real Google category; some markets restrict it to licensed hotel classifications — unconfirmed for this listing | Broadens eligibility for "hotel" queries, a larger search volume category than "guesthouse" in most Maldives-travel search behavior | **Preserves or matches the existing premium framing the owner wants kept** | Low-moderate — Vilu is a genuine 6-room, family-run guesthouse, not architecturally or operationally styled as a hotel; if Google's classification rules require verifiable hotel-grade amenities/services, this could be a compliance question, not just a branding one | **Owner decision required — closest match to status quo if that status quo is confirmed accurate; verify Google's own classification requirements before treating this as safe** |
+| Lodging | Generic fallback Google category | Real, broad category | Broadens generic lodging-search eligibility without a strong positioning signal either way | Neutral — doesn't help or hurt the hotel-vs-guesthouse question | None identified | Safe as a **secondary** category only, regardless of what the primary is decided to be |
+| Bed and breakfast | Matches the "rooms include daily breakfast" fact already used in the site's own copy (§5) | Real Google category | Narrower than Guest House or Hotel; unlikely to add meaningful new query eligibility | Similar tier concern to Guest House | Low | Not recommended as primary; not worth pursuing as secondary either unless the owner sees a specific reason to |
+
+**This pass makes no primary-category recommendation.** The correct next step is Task 23's first action: confirm the actual current live category directly in the dashboard, then decide Guest House vs. Hotel as a genuine, informed owner trade-off between factual precision and the premium-positioning history Google itself has already shown — not something this document should resolve unilaterally.
 
 ## 5. Description audit + proposed copy
 
@@ -79,13 +85,21 @@ Six same-island/near-island properties researched (Whale Shark Inn, Koimala, Sha
 5. **Shamar** — whale-shark wording found only in third-party directory copy (aMaldives), not confirmed self-authored.
 6. **Dravida** — no whale-shark branding found anywhere, self-authored or otherwise.
 
-**Vilu's position**: at the bottom of this set on this specific dimension — the only property confirmed to have a working own website that *deliberately* omits "whale shark" from its own core narrative. This is the single clearest, most actionable finding of Phase 34.
+**Vilu's position — corrected finding (2026-09-08), distinguishing exactly where the gap does and does not exist**:
+
+- **A. Public WEBSITE copy** — **not a gap.** Verified directly against `vilu-website.html`: the homepage meta description, hero subtitle ("Whale sharks, manta rays and a warm island home."), hero display line ("Whale sharks."), every one of the 9 package hooks, and a dedicated "South Ari is known for whale sharks..." section (citing Harvey-Carroll et al. directly) all already carry this language, on top of the standalone `whale-shark-snorkeling.html` page. Vilu's website is not behind any of the 6 competitors on this dimension — if anything it has more dedicated, better-sourced whale-shark content than most of them.
+- **B. GBP self-authored description** — **genuinely UNKNOWN**, since the live field could not be read this phase (§1). Not confirmed missing; not confirmed present either.
+- **C. Local entity/schema copy** — **not a gap**, but not yet optimal either: the site's JSON-LD `description` field ("Boutique guesthouse in Maamigili, South Ari Atoll, Maldives.") is accurate but doesn't itself name whale sharks, even though the visible meta description one line above it does. A safe, optional, owner-gated future tweak (§15), not an urgent gap.
+- **D. Maps/local-search snippets** — **UNKNOWN**, not independently confirmed this phase beyond the Google Hotels title snippet already recorded in §1.
+- **E. Homepage copy specifically (the "Who We Are" section)** — **a real, narrow, accurately-described gap**: its body copy reads "Holiday planning, marine experiences and local knowledge — with our own six-room home in Maamigili when you need somewhere to stay" — generic "marine experiences" rather than naming whale sharks, even though it sits one screen below a hero that already does. Minor, and arguably a deliberate variety-of-phrasing choice rather than an omission, given how saturated the rest of the page is.
+
+**The single genuinely-supported finding from the original research** (the GBP/social-bio-specific one, from the earlier direct Facebook-page fetch) is: **Vilu's GBP/local self-description does not yet clearly associate the property with Maamigili + South Ari + whale sharks** — this is the corrected, precise version of what was previously overstated as "no whale shark copy anywhere." It cannot yet be confirmed true or false for the GBP field itself (B, above) without dashboard access; it IS confirmed true for the Facebook bio specifically, per the earlier direct fetch.
 
 **Note on Koimala's exact wording** ("the whale sharks never leave," "world's only documented year-round residence") — this edges toward the "non-migratory"/absolute framing this project has explicitly decided NOT to use for Vilu (see `VILU_DECISIONS.md`'s residency-wording correction). Do not adopt this phrasing even though a competitor uses it; Vilu's own standard stays "year-long residency of individuals," per the peer-reviewed source's actual wording.
 
 ## 8. Vilu local-search gaps
 
-1. No "whale shark" language in Vilu's own self-authored GBP/social/homepage description (§7) — the single biggest, most fixable gap.
+1. **Corrected (2026-09-08)**: not "no whale shark language in Vilu's own copy" (false — see §7) but specifically: Vilu's GBP self-description (unconfirmed either way) and Facebook bio (confirmed) do not yet clearly associate the property with Maamigili + South Ari + whale sharks. This is a *local-entity-branding* gap, not a website-content gap — the website itself needs no strengthening here.
 2. No dedicated "About Maamigili / whale sharks" content page comparable to what Koimala and Oren already have ranking (§6) — the Why Maamigili draft page (from the prior session) directly addresses this once published.
 3. Legacy `.com` site still live with zero forward-reference to `.net`, and appears to be what several OTA/search surfaces treat as the "real" site (§14) — a real authority-splitting risk, already documented in prior phases but reconfirmed with a sharper edge this pass (this may extend to GBP's own website field, unconfirmed).
 4. Zero Local Pack presence observed in the most recent live-SERP check (prior session) for whale-shark/local-island queries.
@@ -141,6 +155,17 @@ Google Business Profile Posts remain a real, available feature for most listings
 
 **No blind overwrite of any OTA data was performed or recommended** — every item above is a recorded discrepancy for the owner's own review and correction inside each platform's own dashboard.
 
+**Correction (2026-09-08, owner correction)**: the `.com`/`.net` findings above (and in §19) are **investigation items only** — they describe what was observed, not a remediation recommendation. Nothing in this document proposes redirecting, migrating, deindexing, or DNS-changing `.com`, and no domain action should be taken in Phase 34 without a separate, explicit owner authorization. The concrete next investigation steps, none yet performed (dashboard/authenticated access required for most):
+
+1. Verify directly what URL GBP's own "website" field currently points to (`.com` or `.net`).
+2. Verify each OTA's "website" field (Booking, Expedia, TripAdvisor, Agoda, Hotels.com) the same way — automated fetch was blocked this pass (§14).
+3. Once authenticated GSC access to the legacy `.com` property is available, inspect its historical Search Console data directly rather than inferring from public search snippets.
+4. Identify specific old, still-potentially-ranking `.com` URLs (e.g., `/transportation.php`, confirmed previously per `docs/seo/COMPETITOR_GAPS.md` to rank for "Maamigili speedboat transportation") and record which ones.
+5. Quantify `.com`'s remaining organic impressions/clicks (once GSC access allows) and any external backlinks it holds, so the real equity at stake is known, not assumed.
+6. Map the authority/equity risk of any future action (or inaction) based on 1–5 — this mapping itself is the deliverable of the investigation, not a trigger to act.
+
+This checklist is diagnostic. No fix, redirect, or migration should be inferred from it or from §14/§19 until the owner separately authorizes a specific domain action.
+
 ## 15. Entity/schema findings (verified directly against the codebase this pass)
 
 Read `vilu-website.html`'s own JSON-LD directly (not assumed from memory):
@@ -166,7 +191,7 @@ Per the private Dominance Strategy doc (prior session) and this pass's competito
 
 ## 19. Maps/entity fragmentation findings
 
-None found on Vilu's own side — the single consistent CID reference (§15) rules out on-site fragmentation. The real fragmentation risk is external: the live, un-cross-linked `.com` site (§14) and the possibility (unconfirmed) that some OTA or even GBP's own website field still points there instead of `.net`. No merge/removal action was taken or is recommended without direct confirmation and owner authorization — per the standing `.com` protection rule.
+None found on Vilu's own side — the single consistent CID reference (§15) rules out on-site fragmentation. The real fragmentation risk is external: the live, un-cross-linked `.com` site (§14) and the possibility (unconfirmed) that some OTA or even GBP's own website field still points there instead of `.net`. **This is an observation, not a remediation recommendation** — see the six-point investigation checklist added to §14. No merge/removal/redirect/DNS action was taken or is recommended, and none should be inferred from this finding; any domain action requires a separate, explicit owner authorization per the standing `.com` protection rule.
 
 ## 20. Conversion findings
 
@@ -175,6 +200,38 @@ Package-first CTA hierarchy (Explore Holiday Packages → Check Availability) re
 ## 21. Tracking/KPIs
 
 Real, available-data KPIs only (no fabricated baseline): GBP website clicks, calls, direction requests, and profile views (all read directly from the GBP Insights dashboard once accessible); branded vs. discovery search-term split (same source); Local Pack appearance for the query set in §6, re-checked periodically via live SERP (not WebSearch proxy) as was done in the prior session; review count/velocity and owner-response rate (GBP dashboard); package enquiries attributable to a local/Maps-originated session (existing GA4 attribution setup, no new tracking needed — matches `VILU_PROTECTED_CONTRACTS.md`'s analytics contract).
+
+## 21a. GBP owner review checklist (added 2026-09-08, owner correction)
+
+The exact 20 fields the owner should check directly in the authenticated GBP dashboard before any Phase 34 decision is finalized. **Do not guess any field** — every row below is UNKNOWN in this document until the owner confirms it directly.
+
+1. Business name (exact current text of the name field itself, not a Google Hotels auto-title)
+2. Primary category (exact current value)
+3. Secondary categories (exact current list, if any)
+4. Description (exact current text of the GBP description field)
+5. Website URL (exact current value — `.net` or `.com`)
+6. Phone number (exact current value)
+7. Address (exact current value, compared against §15's schema)
+8. Map pin location (exact current pin placement, compared against the CID in §15)
+9. Check-in / check-out times (exact current values)
+10. Amenities (exact current list)
+11. Services (exact current list, if the feature is enabled)
+12. Photos (current count and general content, by category)
+13. Cover photo (what it currently is)
+14. Logo (whether one is set, and what it is)
+15. Review count (exact current number)
+16. Rating (exact current average, not an OTA rating)
+17. Unanswered reviews (exact current count, if any)
+18. Posts (whether the feature is active, and what if anything is currently posted)
+19. Q&A (current questions/answers, if any exist)
+20. Any warnings, suspension notices, or verification requests currently shown on the profile
+
+## 21b. Reaffirmation of standing rules (added 2026-09-08)
+
+Nothing in this Phase 34 document changes, contradicts, or supersedes two permanently protected decisions:
+
+- **Maamigili-first positioning** (`VILU_DECISIONS.md`): Maamigili remains the primary destination position in every recommendation above, including the proposed GBP description (§5), which leads with Maamigili and South Ari, never frames Maamigili as an alternative to Dhigurah, and treats competitor names (§7) strictly as private search-capture intelligence, never for public use.
+- **Vilu Voyager** (`VILU_IDEA_BACKLOG.md`, `VILU_ROADMAP.md`, `VILU_MASTER_CONTEXT.md`, `VILU_COMPLETION_MATRIX.md` Phase 45): nothing in this document's GBP Services/Products recommendation (§13) or Posts framework (§12) implies or proposes a public excursion marketplace or a separate operating brand — Vilu Voyager remains a post-arrival Guest Guide PDF for already-booked guests, entirely outside this phase's scope.
 
 ## 22. Exact changes implemented this phase
 
