@@ -327,22 +327,59 @@ Consolidated, short version of §9's fuller list, ordered by leverage:
 
 Explicitly not pursued: stock imagery, any implication whale sharks are at the property, and anything that reframes the listing as an excursion-company profile rather than an accommodation with arranged marine experiences.
 
+## 33. Approved GBP changes applied (2026-09-08) — owner-authorized live edits
+
+Per the owner's explicit approval, the following live GBP changes were made this pass — all others (Activities, category, website, media) were explicitly left untouched per the same approval.
+
+**33a. Business name — applied and confirmed live.**
+- Field opened in the Business Profile editor, selected in full, replaced with exactly `Vilu Residence` — no suffix, no keyword text (verified character-for-character before saving).
+- On save, Google returned: *"Your edit is pending. It usually takes up to 10 minutes to be reviewed"* — no warning, no verification re-trigger, no suspension/policy notice.
+- **Re-verified minutes later**: the editor's own "About" tab shows the name field as `Vilu Residence` with no pending banner remaining. The **public, live Google Search knowledge panel** (a fresh, unauthenticated-view reload of the same search query) now shows: name "Vilu Residence", 5.0★, 81 Google reviews, "3-star hotel" — confirming the change is not just applied internally but **already publicly live**, faster than the 10-minute estimate.
+- **GBP NAME UPDATE: LIVE** (not merely pending — directly observed on the public panel).
+
+**33b. Category — confirmed unchanged.** Verified in the same editor pass: primary category is still `Hotel`, no secondary category added. No edit made, per approval.
+
+**33c. Website — confirmed unchanged.** Verified in the Contact tab: `https://viluresidence.net/`, untouched. No edit made, per approval.
+
+**33d. Activities — confirmed untouched.** Scuba, Watercraft rental, and Water skiing were not opened or toggled this pass. Status remains OWNER CONFIRMATION REQUIRED (§32b) — explicitly deferred by the owner's own Task 4 instruction, not a blocker.
+
+**33e. Ten review replies published (owner-approved, controlled batch)** — each opened, read in full, and replied to individually before publishing; none templated, none mentioning AI/staff-discipline/private information:
+
+1. **Ráchel Lokvencová** — replied. *(Full review noted a guide being "perhaps a bit too attentive to women" — see §33f below; the public reply itself does not reference this.)*
+2. **Nela Vohradská** — replied.
+3. **Jiří Michalík** — replied.
+4. **David Dang** — replied. (This is the real 4th-most-recent unreplied review — see §31.17's correction of "Veronika Sandholzová.")
+5. **Jakub Vetchy** — replied.
+6. **Sofie Kurucová** — replied.
+7. **Veronika Sandholzová** — replied. (Located further down the list than originally expected — real, not a phantom review; the earlier "could not be located" note in §31.17/§32c is superseded by finding and replying to her directly here.)
+8. **Jan Hromek** — replied.
+9. **Štěpán Albert** — replied.
+10. **Michaela Halová** — replied.
+
+All ten replies are now live and publicly visible. Verified via the "Unreplied" tab: each reviewer's card disappeared from that list immediately after their reply was submitted, confirming the publish succeeded for all ten.
+
+**33f. Staff-conduct flag retained internally, not exposed publicly.** Ráchel Lokvencová's review states the guide during her snorkeling excursion was "perhaps a bit too attentive to women." The public reply thanks her for the feedback and states the team will follow up internally — it does not name the guide, describe any disciplinary process, or otherwise expose internal details. **This flag is retained here, in this private, non-public document, for the owner's own follow-up** — it is not resolved by this task and requires direct owner/staff action outside GBP.
+
+**33g. Remaining review backlog.** Beyond these 10, the backlog identified in §31.17 continues — the next in the queue at the time of this pass were Josef Šindelář and Radim Horák, with the full backlog stretching back at least 23 weeks (last owner reply on record before this pass: 47 weeks old). Per the owner's explicit instruction not to clear the entire backlog recklessly in one pass, this was intentionally left for a future, separately-authorized batch.
+
+**33h. Marine media — untouched.** No files were uploaded; no Vilu-owned/authorized asset was supplied for this task. The plan in §32d remains future work.
+
 ## 22. Exact changes implemented this phase
 
-**None to GBP, social profiles, or OTA listings.** Two authenticated passes (2026-09-08) had *view* access via Claude-in-Chrome (§31, §32) but made zero edits: the category field was opened to confirm its value and closed via Cancel without saving; the four review replies drafted in §32c were read and composed but never posted; no Activities checkbox was toggled. Every actionable field (name, category, Activities checkboxes, review replies) is explicitly owner-approval-gated per Task 8/Task 10, and no specific field-level approval was given in either message. **No website/code change was implemented either** — the one candidate identified (§15's optional JSON-LD description tweak) remains a proposal, not applied, for the same reason.
+**Updated 2026-09-08 (owner-approved changes applied, §33).** The first two authenticated passes were view-only. This third pass had explicit, itemized owner approval and made real, live changes: **the GBP business name was changed to "Vilu Residence" (confirmed live, §33a)**, and **10 review replies were published (§33e)**. Everything not explicitly approved stayed untouched: category ("Hotel"), website (`viluresidence.net`), the three Activities checkboxes, and marine media — each verified unchanged, not merely left alone by omission. **No website/code change was implemented** — the one candidate identified (§15's optional JSON-LD description tweak) remains a proposal, not applied, since it was outside this task's approval scope.
 
 ## 23. Exact owner decisions required
 
-**Updated 2026-09-08** — items resolved by direct authenticated verification (§31) are marked done; the list below is what genuinely remains.
+**Updated 2026-09-08 (post-approval)** — items resolved by direct authenticated verification (§31) or applied per explicit approval (§33) are marked done; the list below is what genuinely remains, and none of it blocks Phase 34's closure (§28).
 
-1. ~~Verify the actual current GBP name field directly~~ **Done — confirmed literally "Vilu Residence - Best Guesthouse in Maamigili Island" (§31.1).** **Decision needed: RECOMMENDED CHANGE TO "VILU RESIDENCE" (§32a) — a confirmed naming-policy risk, and the plain name already matches the real logo/branding. Not executed — awaiting approval.**
-2. ~~Verify current GBP category, photos, review count/rating, Posts, Q&A, attributes directly~~ **Done (§31).** Category is "Hotel" with no change recommended (§4); description has no field to fill under the current category (§5); photos/reviews/Posts/Q&A all documented in §31.
-3. **Decide whether the proposed GBP description (§5) should wait for a future field, or whether switching category to unlock one is worth the positioning trade-off (§4).**
-4. ~~Confirm GBP's own website field points to `viluresidence.net`, not `.com`~~ **Done — confirmed correct, no action needed (§14/§19/§31.5).**
+1. ~~GBP business name~~ **Done — changed to "Vilu Residence," confirmed live on the public panel (§33a).**
+2. ~~Verify current GBP category, photos, review count/rating, Posts, Q&A, attributes directly~~ **Done (§31).** Category confirmed unchanged at "Hotel" (§33b); description has no field to fill under the current category (§5).
+3. **Decide whether the proposed GBP description (§5) should wait for a future field, or whether switching category to unlock one is worth the positioning trade-off (§4)** — not urgent; the current state (Hotel, no description field) is stable and policy-compliant.
+4. ~~Confirm GBP's own website field points to `viluresidence.net`, not `.com`~~ **Done — confirmed unchanged (§33c).**
 5. **Correct the Facebook page name** if "Vilu residence maldives" is genuinely the Page name field, not just a display artifact (§14) — still unverified, outside GBP itself.
-6. **Confirm whether Scuba, Watercraft rental, and Water skiing are accurate as "offered"** in the Hotel details → Activities section — all three classified OWNER CONFIRMATION REQUIRED, not KEEP or TURN OFF (§32b); none can be responsibly decided without the owner's own knowledge of what's actually arranged for guests.
-7. **Approve, edit, or reject the 4 drafted review replies** (§32c) — Ráchel Lokvencová, Nela Vohradská, Jiří Michalík, David Dang. **Separately**: follow up internally on Ráchel's comment about a guide being "perhaps a bit too attentive to women" — a real staff-conduct note, independent of the public reply. **Also note**: the true unanswered-review backlog is far larger than these 4 (§31.17) — the most recent owner reply on record is 47 weeks old. Clearing it fully is a larger operational decision than this checkpoint scopes.
-8. **Decide on the marine-media capture plan** (§32d) — no images uploaded, plan only.
+6. **Confirm whether Scuba, Watercraft rental, and Water skiing are accurate as "offered"** in the Hotel details → Activities section — left untouched per explicit instruction (§33d); still OWNER CONFIRMATION REQUIRED whenever the owner is ready.
+7. ~~Approve, edit, or reject the 10 review replies~~ **Done — all 10 approved and published (§33e).** **Still open, separately**: follow up internally on Ráchel Lokvencová's comment about a guide being "perhaps a bit too attentive to women" (§33f) — a real staff-conduct note, independent of the public reply, requiring direct owner/staff action outside GBP. **Also still open**: the review-reply backlog continues well beyond these 10 (§33g) — clearing more of it is a future, separately-authorized batch.
+8. **Decide on the marine-media capture plan** (§32d) — no images uploaded, plan only, left untouched per explicit instruction (§33h).
 9. **Decide whether to pursue Visit Maldives/MMPRC and NHGAM membership** (§18) — both are real but require registration/dues, an owner-level business decision.
 10. **Decide whether to pitch MaldivesNomad.com editorially** (§18) — a legitimate, currently-open opportunity.
 11. **Decide whether/when to publish the Why Maamigili page** (already drafted, awaiting your review per the prior session) — this remains the single highest-leverage content move identified across both this phase and the prior Dominance Strategy research.
@@ -369,12 +406,12 @@ None. No public site change was made or required.
 
 ## 28. Phase 34 final status
 
-**PARTIAL — but substantially advanced.** Authenticated GBP access was obtained and verified this pass (§31): every field Task 1 originally listed as UNKNOWN/REQUIRES OWNER has now been read directly, the two largest previously-open risks (the `.com`/`.net` website-field question and the category-vs-positioning trade-off) are resolved, and the business-name policy question moved from hypothetical to confirmed. What still prevents COMPLETE, per this phase's own explicit completion standard ("do not mark Phase 34 COMPLETE merely because research was performed... major discrepancies resolved or owner-approved as intentionally deferred"): the business-name policy decision (§3/§23.1), the Activities accuracy question (§23.6), the 4 unanswered reviews (§23.7), and the citation/membership/Why-Maamigili publication decisions (§23.8-10) are all real, still-open owner decisions — none blocked by missing data anymore, all blocked by an owner call this document cannot make for them.
+**COMPLETE (2026-09-08).** Per this phase's own explicit closing standard (Task 9 of the final owner-approved pass): business-name action successfully applied and confirmed **live** on the public panel (§33a, not merely pending); primary category verified unchanged (§33b); website verified unchanged (§33c); profile warnings checked — none found, at any point across all three authenticated passes (§31.20, §33); approved review-response work completed to a reasonable standard — 10 replies read individually, personalized, and published (§33e); the Activities items remain explicitly owner-deferred, not blocking (§33d, per the owner's own instruction not to touch them yet); marine-media recommendations remain future optimization, not a blocker (§33h); no unresolved critical GBP problem remains. The items still open (§23: Facebook page name, Activities confirmation, the remainder of the review-reply backlog, citation/membership decisions, Why Maamigili publication) are real but are follow-on business/content decisions outside GBP's core state — not unresolved GBP problems, and not blockers per the closing standard's own terms.
 
 ## 29. Updated roadmap totals
 
-Matrix Phase 34 ("Google Business Profile / Maps") remains `PARTIALLY COMPLETE` — real, substantial progress was made this pass (authenticated verification, not just research), but per the same "owner decisions remain" standard, it is not `COMPLETE`. Roadmap totals unchanged: **43 COMPLETE / 1 PARTIALLY COMPLETE / 12 PENDING = 56**.
+Matrix Phase 34 ("Google Business Profile / Maps") moves from `PARTIALLY COMPLETE` to `COMPLETE`. Roadmap totals: **44 COMPLETE / 0 PARTIALLY COMPLETE / 12 PENDING = 56** (Phase 34 moves from the PARTIALLY COMPLETE count into the COMPLETE count; net total unchanged at 56).
 
 ## 30. Recommended next phase
 
-Do not start Phase 36 automatically, per instruction. The single highest-leverage next action is the owner working through the remaining §23 items (1, 3, 5, 6, 7 in particular) — all are now real, informed decisions with complete data behind them, not investigations. Once those are resolved, Phase 34 can close as COMPLETE.
+Do not start Phase 36 automatically, per instruction. With Phase 34 closed, the highest-leverage next steps are owner-paced, not phase work: continuing the review-reply backlog in further controlled batches, confirming the Activities checkboxes, and deciding on the Why Maamigili page publication and citation/membership opportunities (§23).
