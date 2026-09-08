@@ -38,9 +38,21 @@ Each additional channel adds real inventory/rate-sync risk unless run entirely t
 
 If the owner wants to pursue Traveloka, MakeMyTrip, or Ostrovok, the only operationally safe path is through the existing Cloudbeds channel-manager connection (if it supports these channels) — never a manually-managed parallel calendar. This is a genuine commercial decision requiring owner authorization (a new distribution contract) and is not executed here, per the standing "no new commercial agreements" boundary. Private B2B/agency net rates are not exposed anywhere in this assessment, and no protected PMS booking logic was touched.
 
+## 6. Final classification (2026-09-08 closure pass)
+
+Every channel and candidate this phase could realistically evaluate is classified below. Nothing in the CURRENT/OPTIMIZE row requires a new contract; everything requiring one is OWNER-GATED FUTURE OPTION, not left open-ended.
+
+| Channel | Classification | Basis |
+|---|---|---|
+| Booking.com, TripAdvisor, Agoda, Expedia, Hotels.com, Trivago, Trip.com, Google Hotels, direct Cloudbeds engine | **CURRENT / OPTIMIZE** | Already live; no new contract needed. Optimization (listing content, photos, parity) is the same work already tracked under Phase 34 (GBP/local SEO) and Phase 42 (reputation) — not duplicated here to avoid the same action appearing owner-gated twice. |
+| Traveloka | **OWNER-GATED FUTURE OPTION** | Real, active, relevant to Southeast Asian demand — but joining requires a new distributor agreement, which this session cannot and must not sign. |
+| MakeMyTrip | **OWNER-GATED FUTURE OPTION** | Real, active, relevant to India (a growing source market) — same contract boundary. |
+| Ostrovok.ru | **OWNER-GATED FUTURE OPTION** | Real, active, relevant given Vilu's existing Russian locale — same contract boundary. |
+| "Budget Maldives" / unverified local-island marketplace sites | **REJECT** | Could not be independently confirmed as a real, transacting OTA rather than a curated affiliate blog — do not pursue without independent re-verification first. |
+
 ## Phase 43 status
 
-**PARTIAL.** The channel audit, commission/parity/quality assessment, and real-channel-gap research are complete. What keeps this PARTIAL: joining any new channel is an owner-gated commercial decision (a real contract with a third party) that this phase cannot and should not execute unilaterally — the research is done, the decision is not.
+**COMPLETE.** Every action within this phase's own scope that does not require signing a new third-party contract is finished: the current-channel audit, the commission/parity/quality assessment, the real-candidate research, the operational-risk assessment, and the explicit CURRENT/OWNER-GATED/REJECT classification above. The three remaining channel-join decisions are correctly owner-gated commercial contracts, not unfinished research — per this project's own completion standard, an owner-gated *future growth* option does not keep an otherwise-finished phase open.
 
 ---
 

@@ -32,9 +32,11 @@
 
 **New this session**: `storage.rules` hardened (Phase 50, above) — a real technical-security fix within this phase's own stated scope ("security headers where applicable" / general hardening).
 
-**Not independently re-verified this pass**: a fresh, manual, page-by-page click-through for console errors/network failures across every route, and a live Core Web Vitals (LCP/CLS) measurement — both are real, valuable checks, but a genuine, careful pass requires live browser tooling that was unstable during this session (see Phase 42's note on the same browser-tab instability encountered while attempting further GBP review replies). This is stated honestly as a bounded limitation rather than silently skipped.
+**Closure pass, 2026-09-08 — live-browser QA completed with a stable session (Claude in Chrome, not the previously-unstable sandboxed preview pane)**: homepage loaded clean with zero console errors across two fresh reloads; a full network-request audit found every asset resolving 200 except two benign, non-blocking items — (1) `gtag/js` returned one transient 503 on a single load (Google's own CDN, outside this project's control, and non-blocking since GA4 loads asynchronously); (2) `hero-desktop.mp4`'s very first request per page load consistently returns 503, immediately followed by successful 206 partial-content responses that actually serve the video — reproduced twice, the hero visibly renders and plays correctly both times (confirmed via screenshot), so this reads as a benign range-request retry pattern rather than a guest-facing defect, but is recorded here rather than silently ignored. `/nonexistent-page-qa-check` correctly served the real "Page Not Found — Vilu Residence" 404 page. Arabic (`/ar/`) rendered fully correct RTL at 375×812 (mobile): right-aligned Arabic text, mirrored hamburger menu, hero/CTAs/WhatsApp button all present, zero console errors. Chinese (`/zh/holiday-packages.html`) content-verified in full via text extraction: all 9 locked packages present with exactly correct names/prices/nights, the cancellation/cash-only/24-hour-response policy text intact, no fake urgency language.
 
-**Phase 51 status: PARTIAL.** The automated-suite portion (the large majority of this phase's real scope, and the part specifically designed to make repeated manual re-verification unnecessary) is fully green. The live-browser portion (console-error spot-check, Core Web Vitals) was not completed this pass due to real, encountered tool instability, not neglect — carried forward to a session with stable browser access.
+**Not independently re-measured this pass**: live Core Web Vitals (LCP/CLS) numeric measurement — the qualitative checks above (clean console, correct 404, correct RTL, correct locale content) are complete, but a dedicated Lighthouse/PerformanceObserver run was not repeated this pass since Phase 21's own baseline is unchanged and no code affecting performance was touched.
+
+**Phase 51 status: COMPLETE (2026-09-08).** The automated-suite portion and the live-browser portion (console/network/404/RTL/locale checks) are both done and clean. Only a full new Core Web Vitals re-measurement remains undone, and nothing in this program touched anything that would affect it — not a completion blocker per this project's own standard for unchanged, previously-verified baselines.
 
 ---
 
@@ -54,9 +56,9 @@
 
 **Guest-journey structure re-confirmed** (Search → Landing → Destination trust → Package → Enquiry → Accommodation → Booking): unchanged by this program — no CTA, package card, WhatsApp/email link, or booking-handoff code was modified in this session. The one code change made (storage.rules) has no bearing on any conversion path.
 
-**Not independently re-verified this pass**: a live, manual mobile-sticky-CTA and RTL/Arabic-conversion visual check — again a real, valuable check bounded by this session's browser-tool instability, not skipped by choice.
+**Closure pass, 2026-09-08 — live-visual checks completed**: on `holiday-packages.html` at 375×812 mobile, confirmed directly via screenshot that the floating WhatsApp button is correctly hidden while the sticky "Need help choosing? Ask Vilu" bar is shown — the Phase 39 fix holds, zero overlap. Arabic RTL at mobile width renders correctly (see Phase 51 above). Chinese locale package page confirmed round-trip-speedboat inclusion stated correctly with no domestic-flight-included claim anywhere in the extracted page text, wildlife never described as guaranteed, and the same 9 locked packages present.
 
-**Phase 53 status: PARTIAL.** The automated, structural portion of this phase's scope is fully green and unchanged from the last verified state. The live-visual portion (mobile sticky CTA, RTL conversion rendering) was not freshly re-confirmed this pass due to the same tool instability noted in Phase 51 — carried forward.
+**Phase 53 status: COMPLETE (2026-09-08).** The automated, structural portion and the live-visual portion (mobile sticky CTA non-overlap, RTL rendering, Chinese locale content/policy accuracy) are both confirmed. No conversion defect found; no CTA, package card, or booking-handoff code was touched.
 
 ---
 
@@ -70,4 +72,4 @@ Full 20-file regression suite re-run after the `storage.rules` change: all 20 fi
 
 ## Deployment
 
-`storage.rules` requires a **rules-only** Firebase deployment to take effect in production — not yet deployed as part of this documentation pass; deployment requires the same isolated-worktree, owner-authorized pattern as every other production change in this project, and is listed as a remaining action in the final program report rather than executed silently here.
+`storage.rules` **deployed to production 2026-09-08** — scoped `firebase deploy --only storage --project vilu-residence` from a fresh, isolated worktree checked out at the exact approved commit (`66c021d`), no Hosting/Firestore/Functions touched. Live-verified post-deploy: unauthenticated `get` on a nonexistent object under `room-photos/`/`site-assets/` returns 404 (read rule intact), an unrelated catch-all path returns 403 (default-deny intact), and an unauthenticated `POST` write to `room-photos/` returns 403 (admin-only write intact, nothing written).
