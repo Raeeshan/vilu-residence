@@ -171,6 +171,9 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-date-header-row.cb-dragging{cursor:grabbing}
 .cb-date-col{flex-shrink:0;width:var(--cal-col-w);border-right:1px solid #e6e9ee;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:6px 2px 7px;cursor:pointer;scroll-snap-align:start;color:#6b7280}
 .cb-date-col:hover{outline:1px dashed #9aa4b2;outline-offset:-3px}
+.cb-date-col{position:relative}
+.cb-month-chip{position:absolute;top:3px;left:3px;font-size:9px;font-weight:700;letter-spacing:.04em;color:#4b5563;background:#eef1f5;border-radius:3px;padding:1px 5px;white-space:nowrap;z-index:2;pointer-events:none}
+.cb-date-col.today .cb-month-chip{background:#d6e9f8;color:#1f6fd0}
 .cb-date-col.month-sep,.cb-cat-cell.month-sep,.cb-cell.month-sep{border-left:2px solid #c9d3de}
 .cb-date-col.weekend{background:#fbfbf7}
 .cb-date-col.today{background:#e8f3fb;color:#1f6fd0}
@@ -3680,6 +3683,73 @@ let popupResId = null;
 // work) - it only claims the header row, never the booking-row cells,
 // so it can't collide with cell-drag-to-book.
 let calPanActive=false,calPanX=0,calPanY=0,calPanScroll=0,calPanScrollY=0,calPanSA=null,calPanMoved=false;
+
+// ── Continuous timeline (rolling window) ──
+// The rendered grid is a bounded window of days around the anchor (calD):
+// CAL_LEAD days before it and CAL_TRAIL after the calDays view. As the user
+// scrolls/pans within CAL_EDGE_COLS columns of either edge, a CAL_CHUNK of
+// days is prepended/appended; beyond CAL_MAX_DAYS the far side is trimmed,
+// so the DOM never grows unbounded. Prepending (or trimming on the left)
+// shifts scrollLeft by the same number of columns, so what is under the
+// cursor stays put. Navigation only: nothing here touches RES/BLK or
+// Firestore — all reservations are already in memory and are re-drawn by
+// the untouched positioning math for whichever days are rendered.
+const CAL_CHUNK=14, CAL_LEAD=14, CAL_TRAIL=14, CAL_MAX_DAYS=126, CAL_EDGE_COLS=4;
+var calTL={start:null,count:0,anchorKey:null,days:null},calExtending=false,calScrollRaf=null;
+function calAddDays(d,n){var x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()+n);return x;}
+// Re-derives the rendered window from the anchor whenever the anchor
+// (calD, set by Today/prev/next/search) or the view size (calDays) changed;
+// an edge extension changes only start/count and therefore survives redraws.
+function calTimelineSync(){
+  var key=new Date(calD).setHours(12,0,0,0);
+  if(calTL.anchorKey!==key||calTL.days!==calDays||!calTL.start){
+    calTL.start=calAddDays(calD,-CAL_LEAD);
+    calTL.count=calDays+CAL_LEAD+CAL_TRAIL;
+    calTL.anchorKey=key;calTL.days=calDays;
+  }
+}
+// Toolbar month label follows the VISIBLE region of the timeline.
+function calUpdateLabel(){
+  var sa=document.getElementById('cb-scroll-area'),lbl=document.getElementById('cb-lbl');
+  if(!sa||!lbl||!calTL.start)return;
+  var i0=Math.max(0,Math.floor(sa.scrollLeft/CAL_COL_W)),i1=Math.min(calTL.count-1,Math.max(i0,Math.floor((sa.scrollLeft+sa.clientWidth-1)/CAL_COL_W)));
+  var a=calAddDays(calTL.start,i0),b=calAddDays(calTL.start,i1);
+  var m0=MON_NAMES[a.getMonth()].slice(0,3).toUpperCase(),m1=MON_NAMES[b.getMonth()].slice(0,3).toUpperCase();
+  lbl.textContent=(a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear())?m0+' '+a.getFullYear():m0+' '+a.getFullYear()+' – '+m1+' '+b.getFullYear();
+}
+// Grows the window by one chunk in the given direction (-1 = earlier,
+// +1 = later), trims the far side when the cap is exceeded, redraws, and
+// restores the visual position (also for an in-progress drag-pan).
+function calExtend(dir){
+  if(calExtending)return;
+  var sa=document.getElementById('cb-scroll-area'); if(!sa||!calTL.start)return;
+  calExtending=true;
+  try{
+    var prevLeft=sa.scrollLeft,prevTop=sa.scrollTop,shift=0;
+    if(dir<0){
+      calTL.start=calAddDays(calTL.start,-CAL_CHUNK);calTL.count+=CAL_CHUNK;shift=CAL_CHUNK;
+      if(calTL.count>CAL_MAX_DAYS)calTL.count=CAL_MAX_DAYS; // trim the far (right) side
+    }else{
+      calTL.count+=CAL_CHUNK;
+      if(calTL.count>CAL_MAX_DAYS){var over=calTL.count-CAL_MAX_DAYS;calTL.start=calAddDays(calTL.start,over);calTL.count=CAL_MAX_DAYS;shift=-over;} // trim the far (left) side
+    }
+    drawCal();
+    sa.scrollLeft=prevLeft+shift*CAL_COL_W;
+    sa.scrollTop=prevTop;
+    if(calPanActive)calPanScroll+=shift*CAL_COL_W;
+  }finally{calExtending=false;}
+}
+function calOnScroll(sa){
+  if(calScrollRaf)return;
+  calScrollRaf=requestAnimationFrame(function(){
+    calScrollRaf=null;
+    calUpdateLabel();
+    if(calExtending||!calTL.start)return;
+    var edge=CAL_EDGE_COLS*CAL_COL_W;
+    if(sa.scrollLeft<edge)calExtend(-1);
+    else if(sa.scrollLeft>sa.scrollWidth-sa.clientWidth-edge)calExtend(1);
+  });
+}
 document.addEventListener('mousemove',function(e){
   if(!calPanActive||!calPanSA)return;
   var dx=e.clientX-calPanX,dy=e.clientY-calPanY;
@@ -3773,8 +3843,9 @@ function calLocateRes(id){
   var r=RES.find(function(x){return x.id===id;}); if(!r||r.st==='Cancelled') return;
   // Re-anchor the rendered window only when the stay is not already inside it
   // (same calDays view, calD moved so the check-in sits 2 columns in).
-  var first=new Date(calD); first.setHours(12,0,0,0);
-  var last=new Date(first); last.setDate(last.getDate()+calDays-1);
+  calTimelineSync();
+  var first=new Date(calTL.start); first.setHours(12,0,0,0);
+  var last=new Date(first); last.setDate(last.getDate()+calTL.count-1);
   var lD=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
   if(r.co<=lD(first)||r.ci>lD(last)){ var nd=new Date(r.ci+'T12:00'); nd.setDate(nd.getDate()-2); calD=nd; drawCal(); }
   setTimeout(function(){
@@ -3814,11 +3885,9 @@ function updSel(){
 function drawCal(){
   sR=null;sS=null;sE=null;sOn=false;
   var today=tS,dates=[];
-  for(var i=0;i<calDays;i++){var d=new Date(calD);d.setHours(12,0,0,0);d.setDate(d.getDate()+i);dates.push(new Date(d));}
+  calTimelineSync();
+  for(var i=0;i<calTL.count;i++){dates.push(calAddDays(calTL.start,i));}
   function lDs(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-  var endD=dates[dates.length-1];
-  var m0=MON_NAMES[dates[0].getMonth()].slice(0,3).toUpperCase(),m1=MON_NAMES[endD.getMonth()].slice(0,3).toUpperCase();
-  document.getElementById('cb-lbl').textContent=(m0===m1&&dates[0].getFullYear()===endD.getFullYear())?m0+' '+endD.getFullYear():m0+' '+dates[0].getFullYear()+' – '+m1+' '+endD.getFullYear();
   var wrapEl=document.querySelector('.cb-wrap');
   if(wrapEl)wrapEl.style.setProperty('--cal-col-w',CAL_COL_W+'px');
   var occ={};
@@ -3846,7 +3915,8 @@ function drawCal(){
     // occupancy % beside it). Per-category rates now live on the
     // category rows below, next to the category's own free-room count.
     var avail=Math.max(0,VR.length-(occ[ds]||0));
-    gH+='<div class="cb-date-col '+cl+' '+ms+'" data-date="'+ds+'"><span class="cb-avail" title="Vilu Residence rooms available">'+avail+'</span><span class="cb-dt">'+DOW_SHORT[dw]+' '+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span></div>';
+    var chip=(d.getDate()===1||pM===-1)?'<span class="cb-month-chip">'+MON_NAMES[d.getMonth()].slice(0,3).toUpperCase()+' '+d.getFullYear()+'</span>':'';
+    gH+='<div class="cb-date-col '+cl+' '+ms+'" data-date="'+ds+'">'+chip+'<span class="cb-avail" title="Vilu Residence rooms available">'+avail+'</span><span class="cb-dt">'+DOW_SHORT[dw]+' '+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span></div>';
     pM=d.getMonth();
   });
   gH+='</div>';
@@ -3887,7 +3957,7 @@ function drawCal(){
   });
   document.getElementById('cb-grid').innerHTML=gH;
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
-  if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;};
+  if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;calOnScroll(sa);};
   if(sa){
     // Cloudbeds-style press-and-drag panning. Interaction priority is
     // deliberate: a reservation bar is never a pan surface (its own
@@ -3907,7 +3977,7 @@ function drawCal(){
     };
   }
   bDrg=false;
-  setTimeout(function(){
+  (function(){
     var dsl=dates.map(function(d){return lDs(d);});
     RES.filter(function(r){return r.st!=='Cancelled';}).forEach(function(res){
       var row=document.querySelector('.cb-booking-row[data-rn="'+res.rn+'"]');
@@ -3978,7 +4048,8 @@ function drawCal(){
       cell.addEventListener('drop',function(e){e.preventDefault();var data=e.dataTransfer.getData('text/plain').split('|');var res=RES.find(function(x){return x.id===data[0];});if(!res||res.isBlock)return;var dur=nt(res.ci,res.co),newCo=D2(ds,dur);if(isOcc(rn,ds,newCo,data[0])){toast('Cannot move!');return;}showConfirm({title:'Move?',msg:'Move '+res.fn+' '+res.ln+'?',icon:'📅',btnLabel:'Yes, move',btnColor:'#0096c7',onYes:function(){res.rn=rn;res.ci=ds;res.co=newCo;saveRES(res);drawCal();}});});
     });
     document.addEventListener('mouseup',function(){if(sOn){sR=null;sS=null;sE=null;sOn=false;clrSel();}});
-  },50);
+  })();
+  calUpdateLabel();
 }
 
 function drawRes(){
@@ -11276,9 +11347,14 @@ var _t=setInterval(function(){if(typeof window.saveRES==='function'){clearInterv
 // from Firestore, the same class of bug as the hardcoded demo data. The
 // backup itself (autoBackup) and manual Export/Import buttons still work —
 // only the automatic on-load restore prompt is removed.
-function calResetScroll(){var sa=document.getElementById('cb-scroll-area');if(sa)sa.scrollLeft=0;}
-window.calNav=function(d){calD=new Date(calD);calD.setDate(calD.getDate()+d*7);drawCal();calResetScroll();setTimeout(function(){drawCal();calResetScroll();},100);};
-window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);drawCal();calResetScroll();setTimeout(function(){drawCal();calResetScroll();},100);};
+function calResetScroll(){var sa=document.getElementById('cb-scroll-area');if(sa){sa.scrollLeft=CAL_LEAD*CAL_COL_W;calUpdateLabel();}}
+// Re-anchor the rolling timeline on the new calD even when calD itself did
+// not change (e.g. Today pressed while already anchored on today after the
+// window was extended by panning).
+function calReanchor(){calTL.anchorKey=null;drawCal();calResetScroll();setTimeout(function(){drawCal();calResetScroll();},100);}
+function calVisibleStart(){var sa=document.getElementById('cb-scroll-area');return (sa&&calTL.start)?calAddDays(calTL.start,Math.round(sa.scrollLeft/CAL_COL_W)):new Date(calD);}
+window.calNav=function(d){calD=calVisibleStart();calD.setHours(12,0,0,0);calD.setDate(calD.getDate()+d*7);calReanchor();};
+window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);calReanchor();};
 window.getRoomName=function(rn){if(!rn)return rn;var vr=(typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});if(vr)return vr.nm;if(typeof getHR==='function'){var hr=getHR().find(function(r){return r.n===rn;});if(hr){var h=(typeof PH!=='undefined'?PH:[]).find(function(x){return x.id===hr.prop;});return(h?h.nm+' - ':'')+hr.nm;}}return rn;};
 window.saveTransfer=function(id){var boat=(document.getElementById('tr-boat-'+id)||{}).value||'';var time=(document.getElementById('tr-time-'+id)||{}).value||'';var rs=document.getElementById('tr-route-'+id);var route=rs?rs.value:'';if(route==='Other')route=(document.getElementById('tr-cust-'+id)||{}).value||'';var d={};try{d=JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){}d[id]={boat:boat,time:time,route:route};localStorage.setItem('vilu_transfers',JSON.stringify(d));if(typeof toast==='function')toast('Transfer saved!');if(typeof drawOps==='function')drawOps();};
 window.rebuildPendingTrips=function(){
