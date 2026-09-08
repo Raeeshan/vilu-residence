@@ -132,7 +132,7 @@ Six same-island/near-island properties researched (Whale Shark Inn, Koimala, Sha
 
 ## 11. Review-response audit
 
-**Confirmed 2026-09-08 (§31.17)**: 4 reviews are currently unanswered — Ráchel Lokvencová (3 days old), Nela Vohradská, Jiří Michalík, Veronika Sandholzová (all ~4 weeks old). All four are 5-star with no negative content requiring damage control — this is a pure reply-backlog, not a reputation issue. **Principles for whenever the owner replies** (no replies drafted or posted by this task — public review replies are owner-voice content, left for the owner): personalize each response (reference something specific from the actual review, not a template swapped verbatim); never mechanically insert "whale shark"/"Maamigili"/"South Ari" into every single response — only where the guest's own review actually mentioned something relevant, so it reads as genuine, not SEO-stuffed; handle any future negative feedback per §10's principle.
+**Corrected 2026-09-08 (§31.17)**: the real unanswered-review count is far larger than the 4 first identified — the most recent owner reply on record is 47 weeks old. The 4 most recent unanswered reviews are Ráchel Lokvencová (3 days old), Nela Vohradská, Jiří Michalík, and David Dang (all ~4 weeks old) — all 5-star with no negative content requiring damage control beyond one soft staff-conduct comment in Ráchel's review (see §32c). **Drafted, not posted (§32c)**: individual replies for these 4, following the principles below. Clearing the full backlog is a larger operational decision left to the owner. **Principles applied**: personalize each response (reference something specific from the actual review, not a template swapped verbatim); never mechanically insert "whale shark"/"Maamigili"/"South Ari" into every single response — only where the guest's own review actually mentioned something relevant, so it reads as genuine, not SEO-stuffed; handle any future negative feedback per §10's principle.
 
 ## 12. GBP post strategy (framework only — not published)
 
@@ -260,32 +260,93 @@ Read directly from `business.google.com` (Business Profile Manager) and the link
 | 14 | Logo | A real logo image is set: "Vilu Residence · @maamigili" palm-tree wordmark graphic (not a placeholder). |
 | 15 | Review count | **81** |
 | 16 | Rating | **5.0** — confirms the figure §2 flagged as a stale, unconfirmed historical snapshot; now directly re-verified as still accurate. |
-| 17 | Unanswered reviews | **4** — Ráchel Lokvencová (3 days old, 5★, Czech-language, mentions a snorkeling excursion and "the guide from the hotel"), Nela Vohradská (4 weeks old, 5★, "Holiday · Friends"), Jiří Michalík (4 weeks old, 5★, "Best experience on Maldives so far"), Veronika Sandholzová (4 weeks old, 5★). All positive — none require damage-control language, just a reply. |
+| 17 | Unanswered reviews | **Corrected 2026-09-08 (re-verified) — far more than 4.** The prior briefing figure of "4" undercounted this significantly. The most recent owner reply visible in the "Replied" tab is **47 weeks old** ("Thank you Fabio!") — essentially every review from the last ~47 weeks is unanswered, not just the 4 most recent. One pass through the "Unreplied" tab (Newest-first) found at least 15 distinct unreplied reviewers before reaching 23 weeks old, with more beyond that not exhaustively counted — a real operational backlog, not a small pending queue. **Also corrected**: "Veronika Sandholzová," named in the prior briefing as the 4th-most-recent unreplied review, does not appear in that position or anywhere found in this pass. The actual 4 most recent unreplied reviews, in order, are Ráchel Lokvencová (3 days old, mentions a snorkeling excursion and "the guide from the hotel"), Nela Vohradská, Jiří Michalík, and **David Dang** (all ~4 weeks old). This looks like a misidentification in the earlier audit — flagged rather than silently corrected, since it could not be independently confirmed either way. All four are positive — none require damage-control language, just a reply. |
 | 18 | Posts | **None** — "No posts yet." The feature is available (an "Add post" action exists) but unused. |
 | 19 | Q&A | **None** — "No questions are currently available." |
 | 20 | Warnings / verification notices | **None found.** The listing shows a "Verified" badge, "0 Google updates" pending, and the Business Profile settings menu (People and access / Advanced settings / Remove profile / Linked accounts) shows no suspension or policy-warning banner anywhere in the flow. |
 
 **Also newly observed, not in the original 20-item list**: linked social profiles are `x.com/maldivesvilu`, `facebook.com/ViluResidence/`, `instagram.com/vilu_residence/`; service areas are set broadly (Ari Atoll, Maamigili, Maldive Islands, Alif Dhaal Atoll, Alifu Dhaalu Atoll, Maldives) rather than Maamigili alone; opening date is recorded as 1 November 2023; a standalone Google-rendered SERP snippet for the Instagram profile shows its bio already reads *"...Near Whale Shark Point..."* — meaning Instagram's bio, unlike the Facebook bio, already carries whale-shark association (a positive fact §7/§8's Facebook-only finding didn't have visibility into).
 
+## 32. Owner-decision checkpoint (2026-09-08) — business name, Activities, review replies, marine media
+
+Prepared per the owner's explicit request. **Nothing in this section was saved, published, or applied — every item is a draft awaiting approval.**
+
+### 32a. Business name — recommendation
+
+**RECOMMENDED: CHANGE TO "VILU RESIDENCE"**
+
+- **Current policy risk**: confirmed real (§31.1, §3) — "- Best Guesthouse in Maamigili Island" is exactly the kind of added marketing/keyword text Google's naming policy prohibits.
+- **Effect on Maps/search identity**: removing the suffix will likely reduce the keyword-rich text currently shown in Maps/Search snippets for phrases like "best guesthouse Maamigili" — a real, if modest, visibility cost.
+- **Real-world branding/signage check**: the GBP's own logo image (§31.13-14) reads simply **"Vilu Residence · @maamigili"** — the plain name, no marketing suffix. The confirmed real branding already matches "Vilu Residence" alone; the current GBP name field has drifted from the actual brand identity, not the other way around.
+- **Risk of removing the suffix beyond losing keyword text**: none identified beyond that visibility cost. The larger risk runs the other way — a name field that violates policy is not a stable SEO asset; Google can algorithmically flag, auto-edit, or require re-verification of profiles with non-compliant names at any time, which would remove the listing's visibility entirely and unpredictably, versus a controlled, voluntary fix now with a known, bounded cost.
+- **Not executed.** Awaiting owner approval per Task 1's explicit instruction.
+
+### 32b. Activities accuracy — classification
+
+Per Task 2's instruction not to assume a partner-arranged activity means Vilu "offers" it, and without access to Vilu's actual booking/partner records, **all three are classified OWNER CONFIRMATION REQUIRED** — none can be responsibly marked KEEP (no positive evidence found anywhere in Vilu's own site, packages, or reviews that these are real, arranged services) or TURN OFF (no positive evidence they're wrong either, and a small guesthouse arranging watersports through local partners is plausible and not inherently misleading, the way Nela's and David's reviews confirm staff "effortlessly arrange all trips, from whale sharks and manta rays to dolphin watching").
+
+- **Scuba**: OWNER CONFIRMATION REQUIRED — plausible via a local PADI partner (same category of arrangement as the whale-shark/manta trips guests describe), but not documented anywhere in Vilu's own packages, site content, or Vilu Voyager materials.
+- **Watercraft rental**: OWNER CONFIRMATION REQUIRED — marked "offered," not "free" (§31, Activities row) — same reasoning as Scuba.
+- **Water skiing**: OWNER CONFIRMATION REQUIRED — the least substantiated of the three; nothing in any established Vilu material (site, packages, reviews, Vilu Voyager scope) references water skiing at all. Worth the owner's direct attention first.
+
+None of the three checkboxes were changed.
+
+### 32c. Four review-reply drafts (NOT posted — awaiting approval)
+
+Per §31.17's correction, the real 4th-most-recent unreplied review is David Dang's, not "Veronika Sandholzová's" (which could not be located — see §31.17). Full review text was read directly for all four before drafting.
+
+**1. Ráchel Lokvencová** (3 days ago, Czech: *"Úžasné ubytování na lokálním ostrově. V rámci pobytu jsem měla i několik šnorchlovacích výletů - průvodce z hotelu byl ale možná příliš pozorný k ženám. Ubytování je čisté, pohodlné a všichni jsou moc ochotni."* — "Amazing accommodation on a local island. I also had several snorkeling trips during my stay — though the guide from the hotel was perhaps a bit too attentive toward women. The accommodation is clean, comfortable, and everyone is very helpful."):
+
+> Thank you so much, Ráchel! We're really glad you enjoyed your stay and the snorkeling trips during your time with us. We also appreciate you mentioning the guide's manner during the excursions — that's genuinely useful feedback and we'll follow up with our team on it directly. Thank you for staying with us on Maamigili, and we hope to welcome you back.
+
+**Flagged separately from the reply itself, for the owner's direct attention**: this review's mention that a guide was "perhaps a bit too attentive to women" is a real, if softly worded, staff-conduct comment that deserves internal follow-up independent of the public reply — not something this document can resolve, only surface.
+
+**2. Nela Vohradská** (4 weeks ago: *"...Our stay was top-tier in every way... The staff was available 24/7... they can effortlessly arrange all trips, from whale sharks and manta rays to dolphin watching. The breakfasts were delicious... Bikini Beach is only 200 meters away... practically empty... We will definitely come back."*):
+
+> Thank you, Nela! It means a lot to hear the whole stay felt seamless from start to finish. We're so glad the team could help arrange the whale shark, manta ray, and dolphin watching trips, and that you had Bikini Beach almost to yourselves. We'd love to have you back on Maamigili anytime!
+
+**3. Jiří Michalík** (4 weeks ago: *"Best experience on Maledives so far! I would definitely recommend! P.S. Rahul and Def are awesome!"*):
+
+> Thank you, Jiří! We'll be sure to pass this along to Rahul and Def — they'll be thrilled to hear it. Really glad we could make this your best experience in the Maldives so far. Hope to see you again on Maamigili!
+
+**4. David Dang** (4 weeks ago: *"If you want to experience the postcard-perfect beauty of the Maldives without paying private-island resort prices, Residence Maamigili... is an exceptional choice. It offers a warm, authentic local vibe combined with easy access to some of the world's best marine life. We love you DEEEEF and RAHUL ❤️"*):
+
+> Thank you, David! We love hearing that Maamigili gave you that authentic, local-island side of the Maldives. Deeef and Rahul will be so happy to read this — thank you for the kind words about them. Hope to welcome you and your friends back again soon!
+
+None of these were posted. Each references only what its guest actually wrote; no detail was invented, no AI/tool mention, no private information, no repeated "Maamigili whale shark South Ari" keyword insertion — only Nela's naturally mentions whale sharks/mantas because she wrote about them herself.
+
+### 32d. Marine media priority plan (plan only — nothing uploaded)
+
+Consolidated, short version of §9's fuller list, ordered by leverage:
+
+1. A genuine guest-perspective whale-shark or manta-ray photo/video from an actual Vilu-arranged excursion (never stock; never framed as happening at the property itself).
+2. A Maamigili Beyru or general reef/snorkeling-context photo, authentically Vilu's own.
+3. A departure/return moment at the jetty with snorkeling gear — bridges "Vilu Residence" and the marine experience without implying wildlife is at the guesthouse.
+4. Guest-submitted review photos already showing marine content (Ráchel's review alone included 23 photos, §31.17) — with the guest's permission, not assumed.
+5. A short, factually captioned video clip of a real snorkeling trip, if one is ever produced.
+
+Explicitly not pursued: stock imagery, any implication whale sharks are at the property, and anything that reframes the listing as an excursion-company profile rather than an accommodation with arranged marine experiences.
+
 ## 22. Exact changes implemented this phase
 
-**None to GBP, social profiles, or OTA listings.** This pass (2026-09-08) had authenticated *view* access via Claude-in-Chrome (§31) but made zero edits — the category field was opened to confirm its value and closed via Cancel without saving, and every other field was read-only. Every actionable field (name, category, Activities checkboxes, review replies) is explicitly owner-approval-gated per Task 20/Task 10 ("do not make material identity/category/description changes without owner approval"), and no specific field-level approval was given in this message. **No website/code change was implemented either** — the one candidate identified (§15's optional JSON-LD description tweak) remains a proposal, not applied, for the same reason.
+**None to GBP, social profiles, or OTA listings.** Two authenticated passes (2026-09-08) had *view* access via Claude-in-Chrome (§31, §32) but made zero edits: the category field was opened to confirm its value and closed via Cancel without saving; the four review replies drafted in §32c were read and composed but never posted; no Activities checkbox was toggled. Every actionable field (name, category, Activities checkboxes, review replies) is explicitly owner-approval-gated per Task 8/Task 10, and no specific field-level approval was given in either message. **No website/code change was implemented either** — the one candidate identified (§15's optional JSON-LD description tweak) remains a proposal, not applied, for the same reason.
 
 ## 23. Exact owner decisions required
 
 **Updated 2026-09-08** — items resolved by direct authenticated verification (§31) are marked done; the list below is what genuinely remains.
 
-1. ~~Verify the actual current GBP name field directly~~ **Done — confirmed literally "Vilu Residence - Best Guesthouse in Maamigili Island" (§31.1).** **Still owner-gated: decide whether to remove "- Best Guesthouse in Maamigili Island," now a confirmed (not hypothetical) naming-policy risk (§3).**
+1. ~~Verify the actual current GBP name field directly~~ **Done — confirmed literally "Vilu Residence - Best Guesthouse in Maamigili Island" (§31.1).** **Decision needed: RECOMMENDED CHANGE TO "VILU RESIDENCE" (§32a) — a confirmed naming-policy risk, and the plain name already matches the real logo/branding. Not executed — awaiting approval.**
 2. ~~Verify current GBP category, photos, review count/rating, Posts, Q&A, attributes directly~~ **Done (§31).** Category is "Hotel" with no change recommended (§4); description has no field to fill under the current category (§5); photos/reviews/Posts/Q&A all documented in §31.
 3. **Decide whether the proposed GBP description (§5) should wait for a future field, or whether switching category to unlock one is worth the positioning trade-off (§4).**
 4. ~~Confirm GBP's own website field points to `viluresidence.net`, not `.com`~~ **Done — confirmed correct, no action needed (§14/§19/§31.5).**
 5. **Correct the Facebook page name** if "Vilu residence maldives" is genuinely the Page name field, not just a display artifact (§14) — still unverified, outside GBP itself.
-6. **Confirm whether Scuba, Watercraft rental, and Water skiing are accurate as "offered" in the Hotel details → Activities section**, or whether they should be unchecked — Snorkelling is clearly accurate; the other three are not established anywhere else as Vilu-operated services (§31, Activities row).
-7. **Decide how/when to reply to the 4 currently-unanswered reviews** (§11) — all positive, a backlog rather than a reputation issue.
-8. **Decide whether to pursue Visit Maldives/MMPRC and NHGAM membership** (§18) — both are real but require registration/dues, an owner-level business decision.
-9. **Decide whether to pitch MaldivesNomad.com editorially** (§18) — a legitimate, currently-open opportunity.
-10. **Decide whether/when to publish the Why Maamigili page** (already drafted, awaiting your review per the prior session) — this remains the single highest-leverage content move identified across both this phase and the prior Dominance Strategy research.
-11. **Implement the review-request process** (§10) as an operational/staff decision, not a code change.
+6. **Confirm whether Scuba, Watercraft rental, and Water skiing are accurate as "offered"** in the Hotel details → Activities section — all three classified OWNER CONFIRMATION REQUIRED, not KEEP or TURN OFF (§32b); none can be responsibly decided without the owner's own knowledge of what's actually arranged for guests.
+7. **Approve, edit, or reject the 4 drafted review replies** (§32c) — Ráchel Lokvencová, Nela Vohradská, Jiří Michalík, David Dang. **Separately**: follow up internally on Ráchel's comment about a guide being "perhaps a bit too attentive to women" — a real staff-conduct note, independent of the public reply. **Also note**: the true unanswered-review backlog is far larger than these 4 (§31.17) — the most recent owner reply on record is 47 weeks old. Clearing it fully is a larger operational decision than this checkpoint scopes.
+8. **Decide on the marine-media capture plan** (§32d) — no images uploaded, plan only.
+9. **Decide whether to pursue Visit Maldives/MMPRC and NHGAM membership** (§18) — both are real but require registration/dues, an owner-level business decision.
+10. **Decide whether to pitch MaldivesNomad.com editorially** (§18) — a legitimate, currently-open opportunity.
+11. **Decide whether/when to publish the Why Maamigili page** (already drafted, awaiting your review per the prior session) — this remains the single highest-leverage content move identified across both this phase and the prior Dominance Strategy research.
+12. **Implement the review-request process** (§10) as an operational/staff decision, not a code change.
 
 ## 24. Files changed
 
