@@ -3,3 +3,12 @@ firestore-debug.log
 firestore-debug.*.log
 ui-debug.log
 node_modules/
+
+# Private, price-bearing operational documents — never git-tracked, even
+# though this repo's docs/** is already excluded from Firebase Hosting.
+# This repo is public on GitHub; these specific files carry real guest
+# pricing/operational data and must never enter git history. The
+# authoritative copy lives outside this repository entirely — see
+# docs/business/VILU_VOYAGER_GUEST_GUIDE_LOCATION.md for the real path.
+# Do NOT gitignore all of docs/** — only these specific, named files.
+docs/business/VILU_VOYAGER_GUEST_GUIDE.html
