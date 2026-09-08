@@ -95,77 +95,93 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .ivtot .gd td{font-weight:700;font-size:var(--font-size-md);border-top:2px solid #111827;padding-top:10px}
 .ivft{text-align:center;font-size:var(--font-size-xs);color:#9ca3af;padding-top:14px;border-top:1px solid #f3f4f6;line-height:1.8}
 .tn{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;font-size:var(--font-size-xs);color:#92400e;margin-bottom:14px}
-.cb-wrap{display:flex;flex-direction:column;flex:1;background:#fff;border:1px solid #d1d5db;border-radius:8px;overflow:hidden;min-height:0}
-.cb-topbar{display:flex;align-items:center;border-bottom:2px solid #2563eb;background:#fff;flex-shrink:0;padding:0}
-.cb-nav{display:flex;align-items:center;gap:4px;padding:8px 12px;border-right:1px solid #e5e7eb}
-.cb-nav button{padding:4px 8px;font-size:var(--font-size-sm);font-weight:600;border-radius:4px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit}
-.cb-month-lbl{font-size:var(--font-size-md);font-weight:800;color:#1e40af;min-width:160px;padding:0 14px}
-.cb-actions{display:flex;align-items:center;gap:6px;padding:6px 12px;margin-left:auto;border-left:1px solid #e5e7eb}
-.cb-legend{display:flex;align-items:center;gap:14px;padding:5px 12px;background:#fff;border-bottom:1px solid #e5e7eb;flex-wrap:wrap;flex-shrink:0}
-.cb-legend-title{font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.cb-legend-item{display:inline-flex;align-items:center;gap:5px;font-size:var(--font-size-xs);color:#374151;font-weight:600;white-space:nowrap}
-.cb-legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.cb-wrap{display:flex;flex-direction:column;flex:1;background:#fff;border:1px solid #dfe3e8;border-radius:6px;overflow:hidden;min-height:0;--cal-col-w:64px;--cal-row-h:30px;--cal-cat-h:44px;--cal-head-h:74px;--cal-left-w:150px}
+/* Toolbar: pill prev/today/next, uppercase month chip, segmented range
+   switch, green "New booking" — Cloudbeds-like density, Vilu-neutral styling. */
+.cb-topbar{display:flex;align-items:center;gap:12px;height:48px;padding:0 12px;border-bottom:1px solid #dfe3e8;background:#fff;flex-shrink:0}
+.cb-nav{display:flex;align-items:center;gap:6px}
+.cb-nav button{height:28px;min-width:28px;padding:0 11px;font-size:var(--font-size-sm);font-weight:600;border-radius:14px;border:1px solid #c9d3de;background:#fff;cursor:pointer;color:#1f6fd0;font-family:inherit;line-height:1}
+.cb-nav button:hover{background:#eef5fc}
+.cb-month-lbl{font-size:var(--font-size-md);font-weight:700;color:#1f2937;letter-spacing:.02em;text-transform:uppercase;padding:0 4px;white-space:nowrap}
+.cb-range{display:inline-flex;border:1px solid #c9d3de;border-radius:6px;overflow:hidden}
+.cb-range button{height:26px;padding:0 10px;font-size:var(--font-size-xs);font-weight:600;border:none;border-right:1px solid #c9d3de;background:#fff;color:#4b5563;cursor:pointer;font-family:inherit}
+.cb-range button:last-child{border-right:none}
+.cb-range button.on{background:#1f6fd0;color:#fff}
+.cb-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.cb-new-btn{height:30px;padding:0 12px 0 10px;border-radius:15px;border:none;background:#2ea44f;color:#fff;font-weight:600;font-size:var(--font-size-sm);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.cb-new-btn:hover{background:#28963f}
 .cb-body{display:flex;flex:1;overflow:hidden;min-height:0}
-.cb-fixed-col{flex-shrink:0;width:132px;border-right:2px solid #d1d5db;display:flex;flex-direction:column;background:#f8fafc;z-index:10}
-.cb-fixed-head{height:68px;border-bottom:1px solid #d1d5db;display:flex;align-items:center;justify-content:center;padding:6px 8px;background:#f1f5f9;flex-shrink:0}
-.cb-fixed-head-inner{font-size:var(--font-size-xs);font-weight:700;color:#64748b;text-align:center;line-height:1.3}
+/* Sticky left column: section label, category rows (44px, paired with
+   .cb-category-row), room rows (30px, paired with .cb-booking-row). Each
+   label row MUST stay the same height as its grid counterpart. */
+.cb-fixed-col{flex-shrink:0;width:var(--cal-left-w);border-right:1px solid #dfe3e8;display:flex;flex-direction:column;background:#fff;z-index:10}
+.cb-fixed-head{height:var(--cal-head-h);border-bottom:1px solid #dfe3e8;display:flex;align-items:flex-end;padding:0 10px 8px;background:#fff;flex-shrink:0}
+.cb-fixed-head-inner{font-size:var(--font-size-xs);font-weight:600;color:#374151;display:flex;align-items:center;gap:5px}
+.cb-fixed-head-inner .chev,.cb-category-lbl .chev{font-size:8px;color:#6b7280;flex-shrink:0}
 .cb-fixed-rows{flex:1;overflow:hidden;display:flex;flex-direction:column}
-/* Room label: 3 lines (name; category; rate), each single-line
-   truncated with ellipsis (full category text also in a title tooltip,
-   in case an unusually long name still doesn't fit). Row height is the
-   smallest that fits all three lines without clipping/overlap - must
-   stay equal to .cb-booking-row's height since each label row sits
-   beside its matching calendar grid row. overflow:hidden remains the
-   safety net against any future overflow. */
-.cb-room-row-lbl{height:44px;flex-shrink:0;display:flex;align-items:center;padding:2px 8px;border-bottom:1px solid #e5e7eb;overflow:hidden}
-.cb-room-row-lbl.vilu-room{border-left:3px solid #2563eb}
-.cb-room-row-lbl.partner-room{border-left:3px solid #7c3aed}
-.cb-room-info{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0;width:100%}
-.cb-room-row-lbl .rn{font-size:var(--font-size-xs);font-weight:700;color:#1e3a5f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-.cb-room-row-lbl .rc{font-size:10px;color:#64748b;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cb-room-row-lbl .rt{font-size:var(--font-size-xs);color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-.cb-section-lbl{height:18px;flex-shrink:0;display:flex;align-items:center;padding:0 8px;background:#e0e7ff;border-bottom:1px solid #c7d2fe}
-.cb-section-lbl span{font-size:var(--font-size-xs);font-weight:800;color:#3730a3;text-transform:uppercase;letter-spacing:.06em}
-/* Nested category grouping (e.g. "Deluxe Family Room") within a
-   property section - a lighter, indented sub-header, one level below
-   .cb-section-lbl. Must stay the same height as its .cb-category-row
-   counterpart in the scrollable grid, same reasoning as the room-row
-   pairing above. */
-.cb-category-lbl{height:16px;flex-shrink:0;display:flex;align-items:center;gap:5px;padding:0 8px 0 10px;background:#f8fafc;border-bottom:1px solid #e5e7eb;border-left:3px solid #0d9488}
-.cb-category-lbl span{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
+.cb-room-row-lbl{height:var(--cal-row-h);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 10px 0 12px;border-bottom:1px solid #e6e9ee;overflow:hidden;background:#fff}
+.cb-room-row-lbl.partner-room{border-left:3px solid #7c3aed;padding-left:9px}
+.cb-room-row-lbl .rn{font-size:var(--font-size-sm);font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cb-room-row-lbl .rt{font-size:var(--font-size-xs);color:#8a94a6;white-space:nowrap;flex-shrink:0}
+.cb-section-lbl{height:22px;flex-shrink:0;display:flex;align-items:center;padding:0 10px;background:#f3f5f8;border-bottom:1px solid #dfe3e8}
+.cb-section-lbl span{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.06em}
+.cb-category-lbl{height:var(--cal-cat-h);flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px 0 8px;background:#fff;border-bottom:1px solid #e6e9ee}
+.cb-category-lbl .nm{font-size:var(--font-size-sm);font-weight:700;color:#1f2937;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .cb-scroll-area{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
-.cb-scroll-area::-webkit-scrollbar{height:14px;width:14px}
-.cb-scroll-area::-webkit-scrollbar-track{background:#f1f5f9}
-.cb-scroll-area::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:7px;border:3px solid #f1f5f9;background-clip:padding-box}
-.cb-scroll-area::-webkit-scrollbar-thumb:hover{background:#64748b;background-clip:padding-box}
+.cb-scroll-area::-webkit-scrollbar{height:12px;width:12px}
+.cb-scroll-area::-webkit-scrollbar-track{background:#f3f5f8}
+.cb-scroll-area::-webkit-scrollbar-thumb{background:#b8c4cf;border-radius:6px;border:3px solid #f3f5f8;background-clip:padding-box}
+.cb-scroll-area::-webkit-scrollbar-thumb:hover{background:#8a94a6;background-clip:padding-box}
 .cb-grid{display:flex;flex-direction:column;min-width:max-content}
-.cb-date-header-row{display:flex;height:68px;flex-shrink:0;position:sticky;top:0;z-index:8;background:#fff;cursor:grab}
+/* Date header: available-rooms pill · "TUE 8" · occupancy %. Today =
+   light-blue column tint + blue text (continued through every row via
+   .today-cell), never a solid block. */
+.cb-date-header-row{display:flex;height:var(--cal-head-h);flex-shrink:0;position:sticky;top:0;z-index:8;background:#fff;cursor:grab;border-bottom:1px solid #dfe3e8}
 .cb-date-header-row.cb-dragging{cursor:grabbing}
-.cb-date-col{flex-shrink:0;width:50px;border-right:1px solid #e5e7eb;border-bottom:1px solid #d1d5db;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;cursor:pointer;scroll-snap-align:start}
-.cb-date-col:hover{background:#eff6ff}
-.cb-date-col.weekend{background:#fef9f0}
-.cb-date-col.today{background:#1e40af}
-.cb-date-col.today .cb-dow,.cb-date-col.today .cb-occ,.cb-date-col.today .cb-rate{color:#93c5fd}
-.cb-date-col.today .cb-day{color:#fff}
-.cb-dow{font-size:var(--font-size-xs);font-weight:700;color:#94a3b8;text-transform:uppercase}
-.cb-day{font-size:var(--font-size-xl);font-weight:800;color:#1e293b;line-height:1.1}
-.cb-occ{font-size:var(--font-size-xs);color:#94a3b8;background:#f1f5f9;border-radius:10px;padding:1px 6px;margin-top:2px}
-.cb-rate{font-size:9px;color:#059669;font-weight:700;margin-top:1px;line-height:1}
-.cb-booking-row{height:44px;display:flex;flex-shrink:0;position:relative}
-.cb-section-row{height:18px;flex-shrink:0;display:flex;background:#e0e7ff;cursor:grab}
+.cb-date-col{flex-shrink:0;width:var(--cal-col-w);border-right:1px solid #e6e9ee;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:6px 2px 7px;cursor:pointer;scroll-snap-align:start;color:#6b7280}
+.cb-date-col:hover{outline:1px dashed #9aa4b2;outline-offset:-3px}
+.cb-date-col.month-sep,.cb-cat-cell.month-sep,.cb-cell.month-sep{border-left:2px solid #c9d3de}
+.cb-date-col.weekend{background:#fbfbf7}
+.cb-date-col.today{background:#e8f3fb;color:#1f6fd0}
+.cb-avail{min-width:26px;height:16px;line-height:16px;border-radius:8px;background:#b8c4cf;color:#fff;font-size:10px;font-weight:700;text-align:center;padding:0 6px}
+.cb-date-col.today .cb-avail{background:#1f6fd0}
+.cb-dt{font-size:var(--font-size-xs);font-weight:700;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+.cb-occ{font-size:10px;font-weight:600;color:#8a94a6}
+.cb-date-col.today .cb-occ{color:#1f6fd0}
+.cb-booking-row{height:var(--cal-row-h);display:flex;flex-shrink:0;position:relative}
+.cb-section-row{height:22px;flex-shrink:0;display:flex;background:#f3f5f8;cursor:grab;border-bottom:1px solid #dfe3e8}
 .cb-section-row.cb-dragging{cursor:grabbing}
-.cb-category-row{height:16px;flex-shrink:0;display:flex;background:#f8fafc;cursor:grab}
+.cb-category-row{height:var(--cal-cat-h);flex-shrink:0;display:flex;background:#fff;cursor:grab;border-bottom:1px solid #e6e9ee}
 .cb-category-row.cb-dragging{cursor:grabbing}
-.cb-cell{width:50px;flex-shrink:0;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;position:relative;cursor:pointer;background:#fff}
-.cb-cell:hover{background:#e0f7fd}
-.cb-cell.weekend{background:#fefce8}
-.cb-cell.today-cell{background:#eff6ff}
-.cb-cell.sel-start,.cb-cell.sel-end{background:#caf0f8!important;outline:2px solid #00b4d8;outline-offset:-1px;z-index:2}
-.cb-cell.sel-range{background:#b8eef8!important}
+/* Category row cells: rooms free in that category on that date, and the
+   lowest nightly rate for the category (Cloudbeds' "inventory / rate"
+   pairing). Read-only figures derived from existing data. */
+.cb-cat-cell{width:var(--cal-col-w);flex-shrink:0;border-right:1px solid #e6e9ee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:var(--font-size-xs);color:#374151}
+.cb-cat-cell b{font-weight:500}
+.cb-cat-cell .cr{color:#1f6fd0;text-decoration:underline;text-decoration-color:#9fc3ea;text-underline-offset:2px}
+.cb-cat-cell.today-cell{background:#e8f3fb}
+.cb-cat-cell.weekend{background:#fbfbf7}
+.cb-cell{width:var(--cal-col-w);flex-shrink:0;border-right:1px solid #e6e9ee;border-bottom:1px solid #e6e9ee;position:relative;cursor:pointer;background:#fff}
+.cb-cell:hover{background:#f4f9fd}
+.cb-cell.weekend{background:#fbfbf7}
+.cb-cell.today-cell{background:#e8f3fb}
+.cb-cell.sel-start,.cb-cell.sel-end{background:#cfe7f8!important;outline:2px solid #1f6fd0;outline-offset:-1px;z-index:2}
+.cb-cell.sel-range{background:#dcedf9!important}
 .cb-cell.drop-target{background:#fef3c7!important;outline:2px solid #d97706;outline-offset:-1px;z-index:3}
-.cb-bar{position:absolute;top:6px;height:32px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:var(--font-size-xs);font-weight:700;color:#fff;z-index:5;overflow:hidden;white-space:nowrap;cursor:grab;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,.18)}
-.cb-bar:hover{filter:brightness(1.08)}
+/* Reservation bar: 20px, slanted ends (see calBarClip), white bold text.
+   left/width stay inline (JS positioning math) — everything else lives here. */
+.cb-bar{position:absolute;top:5px;height:20px;display:flex;align-items:center;padding:0 12px 0 14px;font-size:var(--font-size-xs);font-weight:700;color:#fff;z-index:5;overflow:hidden;white-space:nowrap;cursor:grab;user-select:none;text-shadow:0 1px 1px rgba(0,0,0,.15)}
+.cb-bar.cb-bar-light{color:#0b3d66;text-shadow:none}
+.cb-bar:hover{filter:brightness(.94)}
 .cb-bar .cb-bar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);flex-shrink:0;margin-right:5px}
+/* Footer strip: legend + interaction hint (Cloudbeds keeps its legend at
+   the bottom-left; this is the compact inline equivalent). */
+.cb-footer{display:flex;align-items:center;gap:14px;height:30px;padding:0 12px;border-top:1px solid #dfe3e8;background:#fff;flex-shrink:0;overflow:hidden}
+.cb-legend-title{font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.cb-legend-item{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#374151;font-weight:600;white-space:nowrap}
+.cb-legend-dot{width:14px;height:9px;display:inline-block;flex-shrink:0;clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)}
+.cb-hint{margin-left:auto;font-size:10px;color:#8a94a6;white-space:nowrap}
+@media (max-width:1100px){.cb-hint{display:none}}
 .cb-sel-tip{position:fixed;background:#111827;color:#fff;padding:6px 12px;border-radius:8px;font-size:var(--font-size-xs);font-weight:600;z-index:9000;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap}
 .cb-sel-tip.on{opacity:1}
 .cb-popup{position:fixed;z-index:700;background:#fff;border-radius:10px;width:320px;box-shadow:0 16px 48px rgba(0,0,0,.25);border:1px solid #e5e7eb;overflow:hidden}
@@ -791,32 +807,19 @@ body.pms-mode { overflow:hidden; }
   <!-- TOP BAR -->
   <div class="cb-topbar">
     <div class="cb-nav">
-      <button onclick="calNav(-1)">←</button>
-      <button onclick="calNavToday()" style="padding:4px 10px">Today</button>
-      <button onclick="calNav(1)">→</button>
+      <button onclick="calNav(-1)" title="Previous week" aria-label="Previous week">&#8249;</button>
+      <button onclick="calNavToday()">TODAY</button>
+      <button onclick="calNav(1)" title="Next week" aria-label="Next week">&#8250;</button>
     </div>
-    <span class="cb-month-lbl" id="cb-lbl">May – June 2026</span>
-    <div style="display:flex;gap:3px;padding:0 10px;border-right:1px solid #e5e7eb">
-      <button onclick="setCalView(14)" id="cbv-14" style="padding:4px 8px;font-size:var(--font-size-xs);border-radius:4px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:600;color:#374151">14d</button>
-      <button onclick="setCalView(30)" id="cbv-30" style="padding:4px 8px;font-size:var(--font-size-xs);border-radius:4px;border:1px solid #1e40af;background:#1e40af;cursor:pointer;font-weight:600;color:#fff">30d</button>
-      <button onclick="setCalView(60)" id="cbv-60" style="padding:4px 8px;font-size:var(--font-size-xs);border-radius:4px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:600;color:#374151">60d</button>
+    <span class="cb-month-lbl" id="cb-lbl">SEP 2026</span>
+    <div class="cb-range" role="group" aria-label="Calendar range">
+      <button onclick="setCalView(14)" id="cbv-14">14 days</button>
+      <button onclick="setCalView(30)" id="cbv-30" class="on">30 days</button>
+      <button onclick="setCalView(60)" id="cbv-60">60 days</button>
     </div>
     <div class="cb-actions">
-      <span style="font-size:var(--font-size-xs);color:#94a3b8"><i class="ti ti-hand-click"></i> Drag empty cells to book · Click bar for details</span>
-      <button class="btn p sm" onclick="go('newbk',document.querySelectorAll('.sl')[9])"><i class="ti ti-plus"></i>New booking</button>
+      <button class="cb-new-btn" onclick="go('newbk',document.querySelectorAll('.sl')[9])"><i class="ti ti-plus"></i>New booking</button>
     </div>
-  </div>
-
-  <!-- LEGEND -->
-  <div class="cb-legend">
-    <span class="cb-legend-title">Legend:</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#16a34a"></i>Confirmed</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#2563eb"></i>Checked in</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#94a3b8"></i>Checked out</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#ca8a04"></i>Pending</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#f59e0b"></i>Maintenance</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#6b7280"></i>Owner use</span>
-    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#db2777"></i>Soft hold</span>
   </div>
 
   <!-- BODY -->
@@ -824,7 +827,7 @@ body.pms-mode { overflow:hidden; }
     <!-- FIXED LEFT COL -->
     <div class="cb-fixed-col" id="cb-fixed-col">
       <div class="cb-fixed-head">
-        <div class="cb-fixed-head-inner">All Rooms<br><span style="color:#94a3b8;font-weight:500">▾</span></div>
+        <div class="cb-fixed-head-inner"><span class="chev">&#9660;</span>All rooms</div>
       </div>
       <div class="cb-fixed-rows" id="cb-fixed-rows"></div>
     </div>
@@ -1084,6 +1087,18 @@ body.pms-mode { overflow:hidden; }
         <div style="font-size:var(--font-size-xs);color:#9ca3af">White Sand Inn</div>
       </td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-05-30'&amp;&amp;x.co&gt;'2026-05-30';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-05-30';sE='2026-05-30';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-05-30"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-05-31'&amp;&amp;x.co&gt;'2026-05-31';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-05-31';sE='2026-05-31';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-05-31"></td><td style="background:#eff6ff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-01'&amp;&amp;x.co&gt;'2026-06-01';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-01';sE='2026-06-01';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-01"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-02'&amp;&amp;x.co&gt;'2026-06-02';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-02';sE='2026-06-02';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-02"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-03'&amp;&amp;x.co&gt;'2026-06-03';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-03';sE='2026-06-03';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-03"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-04'&amp;&amp;x.co&gt;'2026-06-04';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-04';sE='2026-06-04';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-04"></td><td style="background:#fefce8;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-05'&amp;&amp;x.co&gt;'2026-06-05';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-05';sE='2026-06-05';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-05"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-06'&amp;&amp;x.co&gt;'2026-06-06';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-06';sE='2026-06-06';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-06"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-07'&amp;&amp;x.co&gt;'2026-06-07';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-07';sE='2026-06-07';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-07"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-08'&amp;&amp;x.co&gt;'2026-06-08';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-08';sE='2026-06-08';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-08"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-09'&amp;&amp;x.co&gt;'2026-06-09';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-09';sE='2026-06-09';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-09"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-10'&amp;&amp;x.co&gt;'2026-06-10';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-10';sE='2026-06-10';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-10"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-11'&amp;&amp;x.co&gt;'2026-06-11';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-11';sE='2026-06-11';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-11"></td><td style="background:#fefce8;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-12'&amp;&amp;x.co&gt;'2026-06-12';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-12';sE='2026-06-12';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-12"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-13'&amp;&amp;x.co&gt;'2026-06-13';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-13';sE='2026-06-13';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-13"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-14'&amp;&amp;x.co&gt;'2026-06-14';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-14';sE='2026-06-14';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-14"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-15'&amp;&amp;x.co&gt;'2026-06-15';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-15';sE='2026-06-15';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-15"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-16'&amp;&amp;x.co&gt;'2026-06-16';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-16';sE='2026-06-16';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-16"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-17'&amp;&amp;x.co&gt;'2026-06-17';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-17';sE='2026-06-17';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-17"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-18'&amp;&amp;x.co&gt;'2026-06-18';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-18';sE='2026-06-18';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-18"></td><td style="background:#fefce8;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-19'&amp;&amp;x.co&gt;'2026-06-19';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-19';sE='2026-06-19';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-19"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-20'&amp;&amp;x.co&gt;'2026-06-20';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-20';sE='2026-06-20';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-20"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-21'&amp;&amp;x.co&gt;'2026-06-21';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-21';sE='2026-06-21';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-21"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-22'&amp;&amp;x.co&gt;'2026-06-22';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-22';sE='2026-06-22';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-22"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-23'&amp;&amp;x.co&gt;'2026-06-23';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-23';sE='2026-06-23';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-23"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-24'&amp;&amp;x.co&gt;'2026-06-24';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-24';sE='2026-06-24';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-24"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-25'&amp;&amp;x.co&gt;'2026-06-25';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-25';sE='2026-06-25';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-25"></td><td style="background:#fefce8;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-26'&amp;&amp;x.co&gt;'2026-06-26';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-26';sE='2026-06-26';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-26"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-27'&amp;&amp;x.co&gt;'2026-06-27';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-27';sE='2026-06-27';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-27"></td><td style="background:#fff;border:1px solid #e2e8f0;padding:3px 2px;text-align:center;cursor:pointer;overflow:hidden" onclick="event.stopPropagation();(function(){var r=RES.find(function(x){return x.rn==='hb-R8'&amp;&amp;x.st!=='Cancelled'&amp;&amp;x.ci&lt;='2026-06-28'&amp;&amp;x.co&gt;'2026-06-28';});if(r)showDet(r.id);else{sR='hb-R8';sS='2026-06-28';sE='2026-06-28';openCellMenu();}})()" data-rn="hb-R8" data-d="2026-06-28"></td></tr></tbody></table></div>
     </div>
+  </div>
+  <!-- FOOTER: legend + hint -->
+  <div class="cb-footer">
+    <span class="cb-legend-title">Legend</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#4fb3e3"></i>Confirmed</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#3fae5c"></i>Checked in</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#a9d9f2"></i>Pending</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#9aa4b2"></i>Checked out</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#f59e0b"></i>Maintenance</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#6b7280"></i>Owner use</span>
+    <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#db2777"></i>Soft hold</span>
+    <span class="cb-hint"><i class="ti ti-hand-click"></i> Drag empty cells to book · Click a bar for details</span>
   </div>
 </div>
 
@@ -3579,21 +3594,20 @@ const MON_NAMES=['January','February','March','April','May','June','July','Augus
 const SRC_BAR={'Booking.com':'#2563eb','Airbnb':'#e11d48','Agoda':'#d97706','Expedia':'#b45309','Google Hotels':'#4285f4','Direct':'#059669','Phone':'#7c3aed','Walk-in':'#0891b2','Agency':'#4f46e5','Website':'#1e3a5f'};
 // Reservation-bar color by status (Cancelled is never rendered as a bar,
 // so it has no color here) - kept in sync with the calendar legend.
-const RES_STATUS_COLOR={'Confirmed':'#16a34a','Checked in':'#2563eb','Checked out':'#94a3b8','Pending':'#ca8a04'};
+const RES_STATUS_COLOR={'Confirmed':'#4fb3e3','Checked in':'#3fae5c','Checked out':'#9aa4b2','Pending':'#a9d9f2'};
 function resBarColor(res){return RES_STATUS_COLOR[res.st]||RES_STATUS_COLOR.Confirmed;}
-// Chevron/arrow-shaped bar ends (Cloudbeds-style): a check-in that's
-// actually visible in the current date range gets a notch pointing right
-// at its left edge; a checkout visible in range gets a notch pointing
-// left at its right edge. A stay that continues off-screen (the real
-// check-in/checkout isn't in view) keeps a flat cut edge on that side,
-// signalling "this continues" rather than a false endpoint.
-function calBarClip(w,h,leftNotch,rightNotch){
-  var n=Math.min(7,w/4);
-  var pts=['0 0', w+'px 0'];
-  if(rightNotch) pts.push((w-n)+'px '+(h/2)+'px');
-  pts.push(w+'px '+h+'px', '0 '+h+'px');
-  if(leftNotch) pts.push(n+'px '+(h/2)+'px');
-  return 'polygon('+pts.join(',')+')';
+// Slanted bar ends: a check-in that's actually visible in the current
+// date range gets a "/" slant at its left edge; a checkout visible in
+// range gets the matching slant at its right edge (a parallelogram, the
+// way a stay reads on a Cloudbeds-style tape chart). A stay that
+// continues off-screen (the real check-in/checkout isn't in view) keeps
+// a flat cut edge on that side, signalling "this continues" rather than
+// a false endpoint. Shape only — the bar's left/width are computed by
+// the untouched positioning math in drawCal.
+const CAL_BAR_H = 20;
+function calBarClip(w,h,leftSlant,rightSlant){
+  var s=Math.min(8,w/4);
+  return 'polygon('+(leftSlant?s:0)+'px 0,'+w+'px 0,'+(rightSlant?(w-s):w)+'px '+h+'px,0 '+h+'px)';
 }
 // Groups an array of room objects by their `type` field, preserving the
 // order each distinct type first appears in - used to render Vilu
@@ -3612,7 +3626,7 @@ function groupByType(arr){
 // Column width in px for one calendar day — single source of truth for
 // both the CSS (.cb-date-col/.cb-cell) and the JS bar-positioning math
 // below, so the two can never drift out of sync again.
-const CAL_COL_W = 50;
+const CAL_COL_W = 64;
 // Today is the leftmost visible column on open (see calNavToday below) —
 // no day offset here, so there's no flash of a different range before
 // FMAP['cal'] calls calNavToday() shortly after the section is shown.
@@ -3648,8 +3662,7 @@ function setCalView(n){
   ['14','30','60'].forEach(v=>{
     const b=document.getElementById('cbv-'+v);
     if(!b)return;
-    if(v==n){b.style.background='#1e40af';b.style.color='#fff';b.style.borderColor='#1e40af';}
-    else{b.style.background='#fff';b.style.color='#374151';b.style.borderColor='#d1d5db';}
+    b.classList.toggle('on',v==n);
   });
   drawCal();
 }
@@ -3680,19 +3693,22 @@ function drawCal(){
   for(var i=0;i<calDays;i++){var d=new Date(calD);d.setHours(12,0,0,0);d.setDate(d.getDate()+i);dates.push(new Date(d));}
   function lDs(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   var endD=dates[dates.length-1];
-  document.getElementById('cb-lbl').textContent=MON_NAMES[dates[0].getMonth()]+' '+dates[0].getFullYear()+' - '+MON_NAMES[endD.getMonth()]+' '+endD.getFullYear();
+  var m0=MON_NAMES[dates[0].getMonth()].slice(0,3).toUpperCase(),m1=MON_NAMES[endD.getMonth()].slice(0,3).toUpperCase();
+  document.getElementById('cb-lbl').textContent=(m0===m1&&dates[0].getFullYear()===endD.getFullYear())?m0+' '+endD.getFullYear():m0+' '+dates[0].getFullYear()+' – '+m1+' '+endD.getFullYear();
+  var wrapEl=document.querySelector('.cb-wrap');
+  if(wrapEl)wrapEl.style.setProperty('--cal-col-w',CAL_COL_W+'px');
   var occ={};
   dates.forEach(function(d){var ds=lDs(d);occ[ds]=RES.filter(function(r){return r.prop==='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds;}).length;});
   var vrGroups=groupByType(VR);
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
   vrGroups.forEach(function(grp){
-    fH+='<div class="cb-category-lbl"><span>'+grp.type+'</span></div>';
-    grp.rooms.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room"><div class="cb-room-info"><div class="rn">'+rm.nm+'</div><div class="rc" title="'+rm.type+'">'+rm.type+'</div><div class="rt">$'+rm.rate+'/night</div></div></div>';});
+    fH+='<div class="cb-category-lbl"><span class="chev">&#9660;</span><span class="nm">'+grp.type+'</span></div>';
+    grp.rooms.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room" title="'+rm.type+' · $'+rm.rate+'/night"><span class="rn">'+rm.nm+'</span><span class="rt">$'+rm.rate+'</span></div>';});
   });
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
     fH+='<div class="cb-section-lbl" style="background:'+h.color+'22"><span style="color:'+h.color+'">'+h.nm+'</span></div>';
-    hrs.forEach(function(rm){fH+='<div class="cb-room-row-lbl partner-room" style="border-left-color:'+h.color+'"><div class="cb-room-info"><div class="rn">'+rm.nm+'</div><div class="rt">'+h.nm+'</div></div></div>';});
+    hrs.forEach(function(rm){fH+='<div class="cb-room-row-lbl partner-room" style="border-left-color:'+h.color+'" title="'+h.nm+'"><span class="rn">'+rm.nm+'</span><span class="rt">'+h.nm+'</span></div>';});
   });
   document.getElementById('cb-fixed-rows').innerHTML=fH;
   var gH='<div class="cb-date-header-row">';
@@ -3702,30 +3718,41 @@ function drawCal(){
     var cl=iT?'today':iW?'weekend':'';
     var ms=d.getMonth()!==pM&&pM!==-1?'month-sep':'';
     var pct=VR.length?Math.round((occ[ds]||0)/VR.length*100):0;
-    // "From $X" - the lowest Vilu Residence nightly rate for this date,
-    // honoring seasonal/per-date overrides via pmGetPrice (falls back to
-    // the room's static rate when no override exists). Matches the
-    // occupancy % above in being Vilu-Residence-scoped only, the same
-    // established convention.
-    var minRate=VR.length?Math.min.apply(null,VR.map(function(rm){return pmGetPrice(rm.n,ds);})):0;
-    gH+='<div class="cb-date-col '+cl+' '+ms+'" data-date="'+ds+'"><span class="cb-dow">'+DOW_SHORT[dw]+'</span><span class="cb-day">'+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span><span class="cb-rate">$'+minRate+'</span></div>';
+    // Available-rooms pill (Vilu Residence scope, same convention as the
+    // occupancy % beside it). Per-category rates now live on the
+    // category rows below, next to the category's own free-room count.
+    var avail=Math.max(0,VR.length-(occ[ds]||0));
+    gH+='<div class="cb-date-col '+cl+' '+ms+'" data-date="'+ds+'"><span class="cb-avail" title="Vilu Residence rooms available">'+avail+'</span><span class="cb-dt">'+DOW_SHORT[dw]+' '+d.getDate()+'</span><span class="cb-occ">'+pct+'%</span></div>';
     pM=d.getMonth();
   });
   gH+='</div>';
   function mR(rm,ip,col){
     var rn=rm.n;
     var r2='<div class="cb-booking-row" data-rn="'+rn+'" style="position:relative;'+(ip?'background:'+col+'11':'')+'">'; 
+    var rpM=-1;
     dates.forEach(function(d){
       var ds=lDs(d),dw=d.getDay(),iT=ds===today,iW=dw===5;
-      var cl=iT?'today-cell':iW?'weekend':'';
+      var cl=(iT?'today-cell':iW?'weekend':'')+(d.getMonth()!==rpM&&rpM!==-1?' month-sep':'');
       r2+='<div class="cb-cell '+cl+'" data-rn="'+rn+'" data-d="'+ds+'"></div>';
+      rpM=d.getMonth();
     });
     r2+='</div>';
     return r2;
   }
-  gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:#e0e7ff;border-bottom:1px solid #c7d2fe"></div></div>';
+  gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px"></div></div>';
   vrGroups.forEach(function(grp){
-    gH+='<div class="cb-category-row"><div class="cb-category-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:#f8fafc;border-bottom:1px solid #e5e7eb"></div></div>';
+    // Per-date "free rooms / lowest rate" for this category — read-only
+    // figures from the existing isOcc() (RES + BLK) and pmGetPrice().
+    var cc='',cpM=-1;
+    dates.forEach(function(d){
+      var ds=lDs(d),dw=d.getDay(),iT=ds===today,iW=dw===5;
+      var cl=(iT?'today-cell':iW?'weekend':'')+(d.getMonth()!==cpM&&cpM!==-1?' month-sep':'');
+      var free=grp.rooms.filter(function(rm){return !isOcc(rm.n,ds,D2(ds,1));}).length;
+      var rate=Math.min.apply(null,grp.rooms.map(function(rm){return pmGetPrice(rm.n,ds);}));
+      cc+='<div class="cb-cat-cell '+cl+'"><b>'+free+'</b><span class="cr">$'+rate+'</span></div>';
+      cpM=d.getMonth();
+    });
+    gH+='<div class="cb-category-row">'+cc+'</div>';
     grp.rooms.forEach(function(rm){gH+=mR(rm,false,null);});
   });
   PH.forEach(function(h){
@@ -3762,9 +3789,10 @@ function drawCal(){
       var left=sV?si*CAL_COL_W+h2:si*CAL_COL_W,rE=cI>=0?cI*CAL_COL_W+h2:(ei+1)*CAL_COL_W,w=rE-left-2;
       if(w<4)return;
       var bar=document.createElement('div');
-      bar.className='cb-bar';
-      bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:grab;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+(res.isBlock||res.src==='Agency Block'?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):resBarColor(res));
-      bar.style.clipPath=calBarClip(w,32,sV,cI>=0);
+      var isBlk=res.isBlock||res.src==='Agency Block';
+      bar.className='cb-bar'+(((!isBlk&&res.st==='Pending')||(isBlk&&res.blockSt!=='Confirmed'))?' cb-bar-light':'');
+      bar.style.cssText='left:'+left+'px;width:'+w+'px;background:'+(isBlk?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):resBarColor(res));
+      bar.style.clipPath=calBarClip(w,CAL_BAR_H,sV,cI>=0);
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+((res.isBlock||res.src==='Agency Block')&&res.blockSt!=='Confirmed'?'[PENDING] ':(res.isBlock||res.src==='Agency Block')?'[BLOCK] ':'')+esc(res.fn)+' '+esc(res.ln)+'</span>';
       bar.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showDet(res.id);});
       bar.addEventListener('mousedown',function(e){e.stopPropagation();if(!(res.isBlock||res.src==='Agency Block')){bDrg=true;sOn=false;}});
@@ -3792,8 +3820,8 @@ function drawCal(){
       if(w<4)return;
       var bar=document.createElement('div');
       bar.className='cb-bar';
-      bar.style.cssText='position:absolute;top:6px;height:32px;display:flex;align-items:center;padding:0 10px;font-size:var(--font-size-sm);font-weight:600;color:#fff;z-index:4;overflow:hidden;white-space:nowrap;cursor:pointer;border-radius:3px;left:'+left+'px;width:'+w+'px;background:'+blkColor(b.type);
-      bar.style.clipPath=calBarClip(w,32,sV,cI>=0);
+      bar.style.cssText='left:'+left+'px;width:'+w+'px;cursor:pointer;background:'+blkColor(b.type);
+      bar.style.clipPath=calBarClip(w,CAL_BAR_H,sV,cI>=0);
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">[BLOCK] '+(b.type||'Blocked')+(b.note?' — '+b.note:'')+'</span>';
       bar.addEventListener('click',function(e){
         e.preventDefault();e.stopPropagation();
