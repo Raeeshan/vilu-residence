@@ -12,9 +12,23 @@ service firebase.storage {
       return request.auth != null && request.auth.token.email.lower() == 'viluresidence@gmail.com';
     }
 
+    // Phase 50 media/storage safety audit (2026-09-08): all three admin-write
+    // paths below previously allowed any content type/size from the admin
+    // account, with no MIME or size check at the rules level. Since these
+    // objects are served with public read access, an accidental (or
+    // credential-compromise) upload of an HTML/SVG file could be served
+    // inline and create a stored-XSS surface; an uncapped size also had no
+    // cost/quota guard. Added an image-only content-type check and a 15MB
+    // cap to each — additive, reversible (rules-only deploy), doesn't change
+    // any currently-working upload of a real photo.
+    function isValidImageUpload() {
+      return request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
     match /room-photos/{roomId}/{fileName} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isValidImageUpload();
     }
 
     // Descriptively-named SEO-mirror copies written alongside each
@@ -24,7 +38,7 @@ service firebase.storage {
     // an up-to-date, correctly-named source instead of drifting silently.
     match /room-photos-seo/{fileName} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isValidImageUpload();
     }
 
     // General website content images (currently: the About section's
@@ -32,7 +46,7 @@ service firebase.storage {
     // for site assets that aren't tied to a specific room.
     match /site-assets/{fileName} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isValidImageUpload();
     }
 
     match /{allPaths=**} { allow read, write: if false; }

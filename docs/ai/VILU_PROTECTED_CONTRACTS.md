@@ -101,6 +101,8 @@ Full detailed P0–P4 inventory (canonical URL list, `data-page-type`/`data-page
 
 Media cleanup or migration must be additive and reversible, and verified before anything is deleted or moved. Before removing/moving any asset, check: Firebase Storage, Firestore references, HTML references (across all 10 language builds), PMS references, Agency Portal references. Never assume an old `photos[]`-style structure is unused just because it looks legacy.
 
+**`storage.rules` upload-validation contract (added 2026-09-08, Phase 50 media/storage safety audit)**: `room-photos/{roomId}/{fileName}`, `room-photos-seo/{fileName}`, and `site-assets/{fileName}` all require `isValidImageUpload()` (image content-type + 15MB size cap) on admin write, on top of the existing `isAdmin()` check — a real, previously-unaudited gap (no MIME/size validation on these public-read, admin-write paths) that could have allowed a stored-XSS-capable upload (e.g. HTML/SVG served inline) or an unbounded-size upload. Confirmed non-breaking against all current upload code (`uploadRoomPhotoBlob()` and its Room Photo SEO mirror both already set `contentType:'image/jpeg'`). The catch-all `match /{allPaths=**} { allow read, write: if false; }` remains the default-deny backstop. **Not yet deployed** — requires a rules-only Firebase deploy via the isolated deploy worktree; do not weaken or remove `isValidImageUpload()` without re-auditing every current upload call site first.
+
 ## Deployment safety rules (permanent)
 
 - Never deploy from a scratch/temporary Firebase config.
