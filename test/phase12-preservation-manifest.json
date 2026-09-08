@@ -394,7 +394,7 @@
 
   "file_fingerprints": {
     "$comment": "Baseline fingerprints (sha256) — NOT a permanent hash lock. An approved change to either file is acceptable if the owner approves, the semantic tests stay green, and consent/analytics behaviour is re-verified; update these values in the same commit.",
-    "consent.js": "a3b69fa5c9de7fdb3dfb237fa7aa991d33c35854adc99a6a3db5154ebbaea2f2",
+    "consent.js": "cf1e14e02df6b06cfe25252cab1cb3203f6c0f01c2fd3b140e336a5f624540ec",
     "analytics.js": "dfa7c13332a77feaa5d54fcae80b01bfb4459bce003aeb64360c391f3847ebca"
   },
 

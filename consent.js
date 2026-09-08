@@ -92,9 +92,24 @@
   gtag('consent', 'default', gcmSignals(initialCategories));
 
   // ── GA4 LOADING (Basic mode: literally not requested until granted) ──
+  // Only the real public production host may load the production GA4
+  // property. localhost/127.0.0.1, Firebase preview channels
+  // (viluresidence--<branch>-<hash>.web.app) and the bare *.web.app /
+  // *.firebaseapp.com aliases are development/QA surfaces: their sessions
+  // were measurably contaminating production data (2026-09-08 audit).
+  // Consent handling, the Consent Mode signals and trackEvent() itself are
+  // unchanged -- on a non-production host the GA script is simply never
+  // requested, so nothing is ever transmitted.
+  var PRODUCTION_HOSTNAMES = ['viluresidence.net', 'www.viluresidence.net'];
+  function isProductionHost(){
+    try { return PRODUCTION_HOSTNAMES.indexOf(String(location.hostname).toLowerCase()) !== -1; }
+    catch(e) { return false; }
+  }
+
   var gaLoaded = false;
   function loadGA(){
     if (gaLoaded) return;
+    if (!isProductionHost()) return;
     gaLoaded = true;
     var s = document.createElement('script');
     s.async = true;
