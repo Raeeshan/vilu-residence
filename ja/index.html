@@ -2269,7 +2269,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
           <div class="cf-field" id="cf-flight-wrap" style="display:none">
             <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:normal;cursor:pointer">
               <input type="checkbox" id="cf-flight" style="width:auto">
-              <span data-i18n="contact.flightLabel">Add Domestic Flight transfer — $110 per person (optional)</span>
+              <span data-i18n="contact.flightLabel">Add Domestic Flight transfer — $155 per person (optional)</span>
             </label>
           </div>
           <div class="cf-field"><label for="cf-message" data-i18n="contact.message">メッセージ</label><textarea id="cf-message" placeholder="ご旅行のご予定をお聞かせください..." data-i18n-placeholder="contact.messagePlaceholder"></textarea></div>
@@ -5490,7 +5490,7 @@ function sendContactForm(){
   var wantsFlight = flightEl && flightEl.checked;
   var msg = document.getElementById('cf-message').value;
   if(!name||!email||!msg){alert(t('alerts.fillAllFields'));return;}
-  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+(wantsFlight?'\nDomestic Flight transfer requested: Yes ($110/person)':'')+'\n\nMessage:\n'+msg;
+  var bodyText = 'Name: '+name+'\nEmail: '+email+(pkg?'\nPackage: '+pkg:'')+(rooms?'\nRooms needed: '+rooms:'')+(wantsFlight?'\nDomestic Flight transfer requested: Yes ($155/person)':'')+'\n\nMessage:\n'+msg;
   var body = encodeURIComponent(bodyText);
   // A package-context submission (opened via a package's Enquire button)
   // carries genuine package intent -> package_enquire. A plain "Contact

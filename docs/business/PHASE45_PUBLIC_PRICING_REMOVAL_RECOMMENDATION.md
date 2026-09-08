@@ -12,7 +12,7 @@
 | Full-Board meal upgrade | same locations as above | $40/day | Individual add-on |
 | Professional Photography | same locations (appears on most, not all, package cards) | $25/hour | Individual add-on |
 | Private Island Picnic | same locations (appears on some package cards) | $51/person | Individual add-on |
-| Domestic flight transfer | Homepage booking widget label ("$110 per person") **and** a separate homepage JS data object (`transport_arrival_flight: price:'$155 / person, one-way'`) | $110 **and** $155 — two different figures already live on the same page | Transport add-on, not an excursion, but flagged for awareness since it's the same public/private inconsistency already flagged in the private Voyager guide |
+| Domestic flight transfer | Homepage booking widget label + email-body text, and a separate homepage JS data object | **$155/person, one-way** — corrected 2026-09-08 (was briefly inconsistent at $110/$155; the owner confirmed $155 as current and the $110 instances were fixed to match) | Transport add-on, not an excursion; both locations now agree |
 
 **Not public anywhere, confirmed by direct audit**: Big Game Fishing, Sandbank Escape, Nurse Shark Snorkeling, Dolphin Cruise (as a standalone-priced item — it appears only as an unpriced package inclusion), Turtle Snorkeling (standalone), Octopus/Lobster Hunting, Sunset Cruise (standalone), Picnic Island Experience (Voyager's $49 version), Night Fishing (standalone), the three named reef-snorkeling sites, Romantic Beach Dinner, Cinema at the Beach. `things-to-do-maamigili.html` already names most of these activities with **no price**, each with a WhatsApp enquiry link — i.e., the enquiry-first pattern this recommendation proposes extending already exists there today.
 
@@ -30,8 +30,8 @@ Replace, in English and all translated locales:
 ### 2b. Holiday-packages page add-ons
 Replace the four "Optional Add-Ons" price strings (Half-Board, Full-Board, Photography, Private Island Picnic) across all 9 package cards' visible HTML and the `PACKAGES` JS array, in English and all locales, with enquiry-first wording (e.g., "Half-Board — ask us to add this" or a single line under the add-ons list: "Add-on pricing available on request"). The **package totals themselves stay untouched** — only the four add-on line items change.
 
-### 2c. Homepage domestic-flight transfer
-Two options, an owner decision either way: (i) fix the $110-vs-$155 inconsistency to one correct figure (a separate, narrower question from "remove all activity prices," since a flight transfer isn't an excursion), or (ii) fold it into the same enquiry-first treatment as the other add-ons if the owner wants zero individual dollar figures on the public site at all, transport included.
+### 2c. Homepage domestic-flight transfer — RESOLVED 2026-09-08
+The owner explicitly confirmed USD 155 per person, one-way, as the current, authoritative fare. The homepage's hardcoded $110 (the domestic-flight enquiry checkbox label and its matching email-body text) has been corrected to $155 across the English source and all 11 generated locales, and the site rebuilt. This item no longer needs an owner decision; it remains open only as a matter of taste whether to fold this transport line item into the same enquiry-first treatment proposed for the individual excursion prices below (§2a/§2b) — a separate, optional style choice, not a factual correction.
 
 ## 3. JSON-LD / structured-data consequence — a real technical tradeoff, not just a wording change
 
@@ -59,7 +59,7 @@ Removing the whale-shark/manta $85 figures reverses a decision the owner separat
 1. Approve, reject, or modify removing the Whale Shark/Manta USD 85 prices (§2a) — this is the one item the owner has separately approved to stay public "for now," so it needs its own explicit go-ahead to change, distinct from the rest of this plan.
 2. Approve, reject, or modify removing the four package add-on prices (§2b).
 3. Choose a JSON-LD approach for §3 if §2a is approved — remove the Product/Offer block, or replace it with a non-priced schema type.
-4. Decide on the homepade domestic-flight figure (§2c) — a separate, narrower fix (pick $110 or $155) versus folding it into a no-numbers policy.
+4. §2c (domestic-flight figure) is now resolved — $155 confirmed and corrected. Only remaining optional question: whether to later fold this transport line into the same enquiry-first, no-numbers treatment as §2a/§2b, if that broader plan is ever approved.
 
 ## Files changed
 
