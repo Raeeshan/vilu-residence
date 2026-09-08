@@ -256,7 +256,7 @@ This is the standing editorial standard for all Vilu-published content, not a on
 
 **Unresolved, not blocking (owner action, carried forward again):** the legal operator name "Mexiczone" in `privacy-policy.html` predates this and every prior session (present in the original Phase 12 baseline snapshot) and has no corroborating or contradicting source anywhere in this repository. Not guessed at or altered. Continue treating this as an owner-confirmation item, not a blocker for any phase.
 
-**Authority backlog — deliberately not executed in Phase 35:** deeper authority-building work is intentionally sequenced into later phases and must not be pulled forward: Phase 36 (backlinks/digital PR), Phase 37 (AI/AEO/entity authority), Phase 38 (image/video authority), Phase 39 (CRO/trust conversion), Phase 42 (original authority/data report), Phase 54 (search moat), and Post-56 Growth Operations (per the Growth Operating Model above) once Stage 2 is authorized.
+**Authority backlog — deliberately not executed in Phase 35:** deeper authority-building work is intentionally sequenced into later phases and must not be pulled forward: Phase 36 (backlinks/digital PR), Phase 37 (AI/AEO/entity authority), Phase 38 (image/video authority), Phase 39 (CRO/trust conversion), Phase 41 (original data / Vilu South Ari Travel Report — corrected 2026-09-08; this line previously misnumbered it "Phase 42," which is actually Reputation SEO per `VILU_COMPLETION_MATRIX.md`), Phase 54 (search moat), and Post-56 Growth Operations (per the Growth Operating Model above) once Stage 2 is authorized.
 
 ---
 
