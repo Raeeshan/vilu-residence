@@ -1,0 +1,13 @@
+{
+  "name": "functions-ota",
+  "description": "Vilu Residence PMS — OTA/channel-manager functions (owns BEDS24_REFRESH_TOKEN and OTA_WEBHOOK_SECRET). Split from functions/ so its unset secrets never block the core codebase's deploy.",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.3.1"
+  },
+  "private": true
+}

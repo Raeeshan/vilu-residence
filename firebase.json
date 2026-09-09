@@ -1,8 +1,13 @@
 {
   "functions": [
     {
-      "source": "functions",
-      "codebase": "default",
+      "source": "functions-core",
+      "codebase": "core",
+      "runtime": "nodejs20"
+    },
+    {
+      "source": "functions-ota",
+      "codebase": "ota",
       "runtime": "nodejs20"
     }
   ],
@@ -35,6 +40,8 @@
       "package-lock.json",
       "test/**",
       "functions/**",
+      "functions-core/**",
+      "functions-ota/**",
       "firestore.rules",
       "storage.rules",
       "firestore.indexes.json",

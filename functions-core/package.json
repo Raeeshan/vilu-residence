@@ -1,0 +1,13 @@
+{
+  "name": "functions-core",
+  "description": "Vilu Residence PMS — core server-side backstop (no OTA secrets). Split from functions/ so this codebase can deploy independently of the OTA codebase's unset secrets.",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.3.1"
+  },
+  "private": true
+}
