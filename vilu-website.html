@@ -3662,35 +3662,40 @@ async function loadRoomsFromSupabase() {
   }
 }
 
-// Submit booking request to Supabase
+// Submit booking request via the trusted publicBooking Cloud Function.
 // Vilu Residence rooms only — this is the single choke point that writes a
 // reservation for the website, so the VR-only guard lives here as well as
 // in the room list itself.
+// publicBooking performs the identical reservation + room_availability
+// transaction server-side with the Admin SDK (Stage 0 fix): the client-side
+// runTransaction() this used to call here could never actually succeed,
+// since firestore.rules correctly denies an anonymous client's
+// room_availability write, so the whole atomic transaction was denied too.
 // Returns the new reservation id on success, the string 'CONFLICT' if the
-// atomic transaction found the room already taken for those dates, or null
-// on any other failure.
+// server found the room already taken for those dates, or null on any
+// other failure.
 async function submitDirectBooking(booking) {
   if (!booking || !/^VR0[1-6]$/.test(booking.roomId)) return null;
-  const id = 'WEB' + Date.now();
   try {
-    await writeReservation(id, {
-      id: id,
-      room_id: booking.roomId,
-      guest_name: booking.name,
-      guest_email: booking.email,
-      guest_phone: booking.phone||'',
-      guest_country: booking.country||'',
-      check_in: booking.ci,
-      check_out: booking.co,
-      adults: booking.adults||2,
-      children: 0,
-      rate: booking.rate||0,
-      status: 'Pending',
-      source: 'Website'
+    const res = await fetch('https://us-central1-vilu-residence.cloudfunctions.net/publicBooking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roomId: booking.roomId,
+        ci: booking.ci,
+        co: booking.co,
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || '',
+        country: booking.country || '',
+        adults: booking.adults || 2
+      })
     });
-    return id;
-  } catch(e) {
-    if (e.message === 'ROOM_CONFLICT') return 'CONFLICT';
+    if (res.status === 409) return 'CONFLICT';
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.id ? data.id : null;
+  } catch (e) {
     return null;
   }
 }

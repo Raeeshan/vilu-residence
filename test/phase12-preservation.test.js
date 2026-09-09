@@ -863,10 +863,12 @@ section('Booking / PMS — structural preservation (read-only; no Firestore acce
   test('booking entry-point ids (' + B.entry_point_ids.join(', ') + ')', () => { for (const id of B.entry_point_ids) assert.ok(home.includes(`id="${id}"`), id); });
   test('booking entry-point classes (' + B.entry_point_classes.join(', ') + ')', () => { for (const c of B.entry_point_classes) assert.ok(home.includes(c), c); });
   test('nav-shell.js booking hooks (' + B.nav_shell_hooks.join(', ') + ')', () => { for (const h of B.nav_shell_hooks) assert.ok(nav.includes(h), h); });
-  test('submitDirectBooking() writes source "Website" with status "Pending"', () => {
+  test('submitDirectBooking() calls the trusted publicBooking function, which writes source "Website" with status "Pending"', () => {
     const fnBody = home.slice(home.indexOf('function submitDirectBooking('), home.indexOf('function submitDirectBooking(') + 3000);
-    assert.ok(fnBody.includes(`'${B.reservation_source_value}'`) || fnBody.includes(`"${B.reservation_source_value}"`));
-    assert.ok(fnBody.includes(`'${B.reservation_status_value}'`) || fnBody.includes(`"${B.reservation_status_value}"`));
+    assert.ok(fnBody.includes('cloudfunctions.net/publicBooking'), 'submitDirectBooking must call the trusted publicBooking function, not write Firestore directly');
+    const coreFn = read('functions-core/index.js');
+    assert.ok(coreFn.includes(`'${B.reservation_source_value}'`) || coreFn.includes(`"${B.reservation_source_value}"`));
+    assert.ok(coreFn.includes(`'${B.reservation_status_value}'`) || coreFn.includes(`"${B.reservation_status_value}"`));
   });
   test('every content page exposes the navigation booking entry points', () => {
     for (const p of CONTENT_PAGES) { const h = read(p.file); assert.ok(h.includes('js-check-availability') && h.includes('js-live-availability'), p.file); }
@@ -1715,6 +1717,15 @@ section('Phase 12D-B — complete guide family rollout (10 guide pages, full mul
 section('Phase 12E-A — public booking presentation (engine/contract preservation)');
 {
   const site = read('vilu-website.html');
+  // Stage 0 fix (2026-09-09): submitDirectBooking() now delegates to the
+  // trusted publicBooking Cloud Function instead of writing Firestore
+  // directly from an anonymous client (that direct write was silently
+  // impossible anyway -- firestore.rules correctly denies an anonymous
+  // room_availability write, so the whole atomic transaction always failed).
+  // status/source for PUBLIC bookings are now authoritatively set server-side
+  // in functions-core/index.js; writeReservation() itself is untouched dead
+  // code, still used by other flows' documented contract.
+  const coreFn = read('functions-core/index.js');
 
   test('the writeReservation()/submitDirectBooking() reservation-write boundary is untouched', () => {
     assert.ok(/async function writeReservation\(docId, fields, opts\)/.test(site), 'writeReservation signature changed');
@@ -1723,8 +1734,9 @@ section('Phase 12E-A — public booking presentation (engine/contract preservati
     assert.ok(/throw new Error\('ROOM_CONFLICT'\)/.test(site), 'ROOM_CONFLICT literal missing');
     assert.ok((site.match(/ROOM_CONFLICT/g) || []).length >= 2, 'expected both the pre-check and in-transaction ROOM_CONFLICT throws');
     assert.ok(/async function submitDirectBooking\(booking\)/.test(site), 'submitDirectBooking signature changed');
-    assert.ok(/status: ?'Pending'/.test(site), 'public bookings must still be written with status Pending');
-    assert.ok(/source: ?'Website'/.test(site), 'public bookings must still be written with source Website');
+    assert.ok(/cloudfunctions\.net\/publicBooking/.test(site), 'submitDirectBooking must call the trusted publicBooking function');
+    assert.ok(/status: ?'Pending'/.test(coreFn), 'public bookings must still be written with status Pending (now server-side in functions-core/index.js)');
+    assert.ok(/source: ?'Website'/.test(coreFn), 'public bookings must still be written with source Website (now server-side in functions-core/index.js)');
     assert.ok(/\/\^VR0\[1-6\]\$\/\.test\(booking\.roomId\)/.test(site), 'the VR01-VR06 room-id guard on submitDirectBooking is missing/changed');
   });
 

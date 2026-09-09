@@ -25,6 +25,7 @@ const WEBSITE = read('vilu-website.html');
 const PMS = read('vilu-unified.html');
 const AGENCY = read('vilu-agency-portal.html');
 const RULES = read('firestore.rules');
+const CORE_FN = read('functions-core/index.js');
 
 function extractFn(src, name) {
   const m = src.match(new RegExp('async function ' + name + '\\([^)]*\\)\\s*\\{'));
@@ -81,11 +82,17 @@ section('Case A — writeReservation()/hasBlockConflict() are identical across a
 
 section('Case B — Website/direct-booking defaults are still Pending status, Website source');
 {
-  test("submitDirectBooking() still hardcodes status:'Pending', source:'Website'", () => {
+  test("submitDirectBooking() delegates to the trusted publicBooking function, which hardcodes status:'Pending', source:'Website'", () => {
+    // Stage 0 fix (2026-09-09): the client no longer sets status/source
+    // itself -- it can't be trusted to, and the direct Firestore transaction
+    // this used to run was denied anyway (room_availability write blocked
+    // for anonymous clients). Those defaults are now authoritative
+    // server-side in functions-core/index.js's publicBooking handler.
     const m = WEBSITE.match(/async function submitDirectBooking[\s\S]{0,700}/);
     assert.ok(m, 'submitDirectBooking() not found');
-    assert.ok(/status:\s*'Pending'/.test(m[0]), 'status default is no longer Pending');
-    assert.ok(/source:\s*'Website'/.test(m[0]), 'source default is no longer Website');
+    assert.ok(/cloudfunctions\.net\/publicBooking/.test(m[0]), 'submitDirectBooking must call the trusted publicBooking function');
+    assert.ok(/status:\s*'Pending'/.test(CORE_FN), 'status default is no longer Pending in functions-core/index.js');
+    assert.ok(/source:\s*'Website'/.test(CORE_FN), 'source default is no longer Website in functions-core/index.js');
   });
   test('room id filter still restricts direct booking to VR01-VR06', () => {
     const m = WEBSITE.match(/async function submitDirectBooking[\s\S]{0,300}/);
