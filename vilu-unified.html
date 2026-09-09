@@ -1346,6 +1346,7 @@ body.pms-mode { overflow:hidden; }
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Green Tax (per person/night)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Children under 2 exempt</div></div><div class="si"><span>$</span><input type="number" id="st-gt" step="0.5"></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Service Charge</div><div style="font-size:var(--font-size-xs);color:#6b7280">Applied before TGST</div></div><div class="si"><input type="number" id="st-sc" step="0.5"><span>%</span></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Bed Tax (per room/night)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Set 0 if not applicable</div></div><div class="si"><span>$</span><input type="number" id="st-bt" step="0.5"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">3rd Guest Supplement (per night)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Direct/PMS only — covers the 3rd guest, no separate extra-bed charge. Agency/B2B rate is a separate, still-pending decision.</div></div><div class="si"><span>$</span><input type="number" id="st-3g" step="0.5"></div></div>
       <div style="display:flex;gap:8px;margin-top:14px">
         <button class="btn p" onclick="saveTax()"><i class="ti ti-device-floppy"></i>Save tax settings</button>
         <button class="btn sm" onclick="resetTax()">Reset to defaults</button>
@@ -2866,7 +2867,12 @@ const fdf=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{day:'numeric',mont
 const nt=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
 const CW=36;let IC=1000;
 
-let TAX={tgst:17,green:6,svc:10,bed:0};
+// thirdGuest: the complete, canonical 3rd-guest/extra-bed supplement
+// ($/night). This is the SINGLE source of truth for direct/PMS occupancy
+// pricing -- calcTax() and calcPrice() (booking-engine mirror) both read
+// it, and it is never added on top of a separate "extra bed" charge (see
+// calcTax()'s comment for why extraBeds carries no price of its own).
+let TAX={tgst:17,green:6,svc:10,bed:0,thirdGuest:20};
 let PROP={nm:'Vilu Residence Maamigili',addr:'South Ari Atoll, Maamigili, 00100',ph:'+960 9903339',em:'Viluresidence@gmail.com',gst:'MVT-2025-00001',bk:''};
 
 // type must exactly match the room category name as listed on the
@@ -3167,24 +3173,38 @@ function aLog(d,m){SL.unshift({t:'Just now',d,m});}
 
 function calcTax(r){
   const n=nt(r.ci,r.co);
-  const base=+(n*r.rate).toFixed(2);
+  const gp=(r.ad||1)+(r.ch||0);
+  // 3rd-guest supplement: every room caps at 3 guests (VR.cap), so at most
+  // one $thirdGuest/night charge ever applies -- Math.min(1,...) keeps that
+  // true even if a guest count somehow exceeds capacity, rather than
+  // multiplying the fee per head beyond the 3rd. Agency-sourced bookings
+  // are excluded: the owner's $20 rate is direct/PMS only -- the B2B rate
+  // remains a separate, still-pending decision (see EXTRA_OPTIONS/agency
+  // portal, untouched by this fix). This is the ONE place the supplement
+  // is computed; it is never added again anywhere else, and extraBeds
+  // (see anExtraBedCharge()) carries no price of its own precisely so a
+  // guest is never charged both a 3rd-guest fee and a separate bed fee.
+  const thirdGuestCount=r.src==='Agency'?0:Math.min(1,Math.max(0,gp-2));
+  const thirdGuest=+(thirdGuestCount*TAX.thirdGuest*n).toFixed(2);
+  const base=+(n*r.rate+thirdGuest).toFixed(2);
   const svc=+(base*TAX.svc/100).toFixed(2);
   const tgst=+((base+svc)*TAX.tgst/100).toFixed(2);
-  const gp=(r.ad||1)+(r.ch||0);
   const green=+(TAX.green*gp*n).toFixed(2);
   const bed=+(TAX.bed*n).toFixed(2);
-  return{n,base,svc,tgst,green,bed,gp,inf:r.inf||0,total:+(base+svc+tgst+green+TAX.bed*n).toFixed(2)};
+  return{n,base,svc,tgst,green,bed,gp,thirdGuest,inf:r.inf||0,total:+(base+svc+tgst+green+TAX.bed*n).toFixed(2)};
 }
 
 function pbd(r){
   const x=calcTax(r);
   return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN</div>
-<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">${x.n} nights × $${r.rate}</span><span>$${x.base.toFixed(2)}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">${x.n} nights × $${r.rate}</span><span>$${(x.n*r.rate).toFixed(2)}</span></div>
+${x.thirdGuest>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">3rd guest supplement ($${TAX.thirdGuest} × ${x.n} nights)</span><span>$${x.thirdGuest.toFixed(2)}</span></div>`:''}
 <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Service (${TAX.svc}%)</span><span>$${x.svc.toFixed(2)}</span></div>
 <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">TGST (${TAX.tgst}%)</span><span>$${x.tgst.toFixed(2)}</span></div>
 <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax ($${TAX.green} × ${x.gp} persons × ${x.n} nights${x.inf>0?' — '+x.inf+' infant exempt':''})</span><span>$${x.green.toFixed(2)}</span></div>
 ${TAX.bed>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Bed tax</span><span>$${x.bed.toFixed(2)}</span></div>`:''}
-${r.bedCount>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#00b4d8">🛏️ Extra bed (${r.bedCount} bed × $${r.rate} × ${x.n} nights)</span><span style="color:#00b4d8">$${r.bedCharge.toFixed(2)}</span></div>`:''}<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)">${r.bedCount>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#00b4d8">🛏️ Extra bed (${r.bedCount} × $${r.rate} × ${x.n} nights)</span><span style="color:#00b4d8">$${r.bedCharge.toFixed(2)}</span></div>`:''}<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total (incl. all taxes)</span><span style="color:#00b4d8">$${(x.total+(r.bedCharge||0)).toFixed(2)}</span></div>`;
+${(r.extraBeds||0)>0?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:2px 0">🛏️ Extra bed requested — no separate charge, already included in the 3rd guest supplement above</div>`:''}
+<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total (incl. all taxes)</span><span style="color:#00b4d8">$${x.total.toFixed(2)}</span></div>`;
 }
 
 function isOcc(rn,from,to,excl){
@@ -3314,13 +3334,17 @@ function anNightsIn(r,from,to){
 }
 function anViluRes(){return RES.filter(function(r){return anVilu(r)&&anActive(r);});}
 function anFmt(n){return'$'+Math.round(n||0).toLocaleString();}
-// calcTax() doesn't include the extra-bed charge — saveEdit()/pbd() compute
-// it separately and don't persist it to Firestore — so this is the one
-// place that formula lives; anResTotal() and anRevenue() both call it
-// rather than each re-deriving it.
+// Historically this multiplied extraBeds by the room's FULL nightly rate --
+// the exact bug the 2026-09-09 third-guest pricing fix corrects. The $20
+// 3rd-guest/extra-bed supplement is now computed once, inside calcTax()
+// (see its comment), and already included in calcTax(r).total. extraBeds
+// itself is kept only as a housekeeping/logistics flag (does staff need to
+// set up a bed) and carries no price of its own, so this always returns 0
+// -- kept as a named function (rather than deleted) since anResTotal() and
+// anRevenue() both still call it, to guarantee neither can silently
+// reintroduce a double charge by adding a bed-based amount back in.
 function anExtraBedCharge(r){
-  var nights=nt(r.ci,r.co)||1;
-  return(r.extraBeds||0)*(r.rate||0)*nights;
+  return 0;
 }
 // The ONE shared money helper — every dollar figure in this section must
 // go through this, never calcTax(r).total alone (see anExtraBedCharge above
@@ -4386,9 +4410,9 @@ function edC(){
   const rm=getR(rn);if(!rm)return;
   const rateVal=+document.getElementById('ed-rate')?.value||0;
   const bedCount=+(document.getElementById('ed-bed-val')?.textContent||0);
-  const nights=nt(ci,co);
   const baseRate=rateVal||(isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate);
-  const fake={ci,co,rate:baseRate,ad:+document.getElementById('ed-ad').value||1,ch:+document.getElementById('ed-ch').value||0,inf:+document.getElementById('ed-inf').value||0,bedCount,bedCharge:+(bedCount*baseRate*nights).toFixed(2)};
+  const r=RES.find(x=>x.id===editId);
+  const fake={ci,co,rate:baseRate,ad:+document.getElementById('ed-ad').value||1,ch:+document.getElementById('ed-ch').value||0,inf:+document.getElementById('ed-inf').value||0,extraBeds:bedCount,src:r?r.src:undefined};
   document.getElementById('ed-pr').innerHTML=pbd(fake);
 }
 async function saveEdit(){
@@ -4409,7 +4433,6 @@ async function saveEdit(){
   const customRate=+document.getElementById('ed-rate')?.value||0;
   const rate=customRate||(isVR(rn)?getDateRangeRate(rn,ci,co):getR(rn)?.rate)||r.rate;
   const savedBeds=+(document.getElementById('ed-bed-val')?.textContent||0);
-  const nights2=nt(ci,co);
   // Compute the edit as a candidate object first — only merge it into the
   // live RES entry after Firestore accepts the write, so a rejected
   // ROOM_CONFLICT never leaves r showing a room/dates that were never saved.
@@ -4420,7 +4443,6 @@ async function saveEdit(){
     rn,rate,ci,co,
     ad:+document.getElementById('ed-ad').value||1,
     extraBeds:savedBeds,
-    bedCharge:savedBeds>0?+(savedBeds*rate*nights2).toFixed(2):0,
     ch:+document.getElementById('ed-ch').value||0,
     inf:+document.getElementById('ed-inf').value||0,
     st:newSt,pay:document.getElementById('ed-pay').value
@@ -4907,9 +4929,9 @@ function openIM(resId){
   document.getElementById('ni-res').innerHTML=RES.filter(r=>r.st!=='Cancelled').map(r=>`<option value="${r.id}"${r.id===resId?' selected':''}>${r.id}: ${esc(r.fn)} ${esc(r.ln)} — ${rNm(r.rn)} (${fd(r.ci)}–${fd(r.co)})</option>`).join('');
   document.getElementById('ni-notes').value='';
   if(document.getElementById('ni-disc'))document.getElementById('ni-disc').value='';
-  // Load ALL charges: folio items + extra beds
+  // Load folio charges (the reservation's own room/tax/3rd-guest charge is
+  // rendered separately by niPrev()'s pbd(r) call, not added here)
   var folio = resId ? (FOLIOS[resId]||{charges:[]}) : {charges:[]};
-  var res = resId ? RES.find(function(x){return x.id===resId;}) : null;
   invItems = [];
   // Add folio charges with correct pax calculation
   if(folio.charges.length){
@@ -4925,26 +4947,17 @@ function openIM(resId){
       });
     });
   }
-  // Add extra beds if any
-  if(res && res.extraBeds > 0){
-    var bedNights = nt(res.ci, res.co);
-    var bedRate = res.rate || 0;
-    var bedTotal = +(res.extraBeds * bedRate * bedNights).toFixed(2);
-    invItems.push({
-      id:Date.now()+Math.random(),
-      desc:'Extra bed ('+res.extraBeds+' bed'+(res.extraBeds>1?'s':'')+' × '+bedNights+' nights × $'+bedRate+')',
-      qty:1,
-      unit:bedTotal,
-      tax:true,
-      cat:'Extra Bed'
-    });
-  }
+  // Extra beds are NOT added as a separate priced invoice item — the 3rd
+  // guest/extra-bed supplement is already included in calcTax(res).total
+  // (shown by pbd(res) at the top of niPrev()'s output, with a non-priced
+  // note when res.extraBeds>0), and adding a second charge here would be
+  // exactly the double-charge the 2026-09-09 pricing fix removes.
   renderInvItems();
   renderCatButtons();
   niPrev();
   document.getElementById('m-inv').classList.add('on');
-  var loaded = folio.charges.length + (res&&res.extraBeds>0?1:0);
-  if(loaded) toast('✓ '+loaded+' item'+(loaded>1?'s':'')+' loaded — folio charges'+(res&&res.extraBeds>0?' + extra bed':''));
+  var loaded = folio.charges.length;
+  if(loaded) toast('✓ '+loaded+' item'+(loaded>1?'s':'')+' loaded — folio charges');
 }
 function niPrev(){
   const id=document.getElementById('ni-res').value,r=RES.find(x=>x.id===id);
@@ -5573,6 +5586,7 @@ function drawBlkLst(){
 function drawCfg(){
   document.getElementById('st-tgst').value=TAX.tgst;document.getElementById('st-gt').value=TAX.green;
   document.getElementById('st-sc').value=TAX.svc;document.getElementById('st-bt').value=TAX.bed;
+  document.getElementById('st-3g').value=TAX.thirdGuest;
   document.getElementById('st-nm').value=PROP.nm;document.getElementById('st-addr').value=PROP.addr;
   document.getElementById('st-ph').value=PROP.ph;document.getElementById('st-em').value=PROP.em;
   document.getElementById('st-gst').value=PROP.gst;document.getElementById('st-bk').value=PROP.bk;
@@ -5682,20 +5696,30 @@ async function saveTransportGeneral(){
 }
 function drawTaxSum(){
   const el=document.getElementById('tax-sum');if(!el)return;
-  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
     <div style="background:#e8f5f2;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">TGST</div><div style="font-size:var(--font-size-2xl);font-weight:700;color:#00b4d8">${TAX.tgst}%</div><div style="font-size:var(--font-size-xs);color:#6b7280">From July 2025</div></div>
     <div style="background:#fef3c7;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Green Tax</div><div style="font-size:var(--font-size-2xl);font-weight:700;color:#92400e">$${TAX.green}</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per person/night</div></div>
     <div style="background:#f3f4f6;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Service</div><div style="font-size:var(--font-size-2xl);font-weight:700">${TAX.svc}%</div><div style="font-size:var(--font-size-xs);color:#6b7280">Before TGST</div></div>
     <div style="background:#f3f4f6;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Bed Tax</div><div style="font-size:var(--font-size-2xl);font-weight:700">$${TAX.bed}</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per room/night</div></div>
+    <div style="background:#e0f7fa;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">3rd Guest</div><div style="font-size:var(--font-size-2xl);font-weight:700;color:#0096c7">$${TAX.thirdGuest}</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per night, direct/PMS only</div></div>
   </div>
   <div style="padding:10px 14px;background:#fffbeb;border-radius:8px;font-size:var(--font-size-sm);color:#92400e;border:1px solid #fde68a">
-    <strong>Example:</strong> 2 adults, 1 child, 1 infant, 3 nights, $80/night → Room $240 + Service $${(240*TAX.svc/100).toFixed(2)} + TGST $${((240*(1+TAX.svc/100))*TAX.tgst/100).toFixed(2)} + Green $${(TAX.green*3*3).toFixed(2)} (infant exempt) = <strong>$${(240+240*TAX.svc/100+(240*(1+TAX.svc/100))*TAX.tgst/100+TAX.green*3*3).toFixed(2)}</strong>
+    ${(function(){
+      const n=3,rate=80,ad=2,ch=1,gp=ad+ch;
+      const tg=+(Math.min(1,Math.max(0,gp-2))*TAX.thirdGuest*n).toFixed(2);
+      const base=+(n*rate+tg).toFixed(2);
+      const svc=+(base*TAX.svc/100).toFixed(2);
+      const tgst=+((base+svc)*TAX.tgst/100).toFixed(2);
+      const green=+(TAX.green*gp*n).toFixed(2);
+      const total=+(base+svc+tgst+green).toFixed(2);
+      return `<strong>Example:</strong> 2 adults, 1 child, 1 infant, 3 nights, $80/night &rarr; Room $${(n*rate).toFixed(2)} + 3rd guest $${tg.toFixed(2)} (2 adults + 1 child = 3 guests) + Service $${svc.toFixed(2)} + TGST $${tgst.toFixed(2)} + Green $${green.toFixed(2)} (infant exempt) = <strong>$${total.toFixed(2)}</strong>`;
+    })()}
   </div>`;
 }
-function saveTax(){TAX.tgst=+document.getElementById('st-tgst').value||17;TAX.green=+document.getElementById('st-gt').value||6;TAX.svc=+document.getElementById('st-sc').value||10;TAX.bed=+document.getElementById('st-bt').value||0;drawTaxSum();toast('Tax settings saved ✓');
+function saveTax(){TAX.tgst=+document.getElementById('st-tgst').value||17;TAX.green=+document.getElementById('st-gt').value||6;TAX.svc=+document.getElementById('st-sc').value||10;TAX.bed=+document.getElementById('st-bt').value||0;TAX.thirdGuest=+document.getElementById('st-3g').value||20;drawTaxSum();toast('Tax settings saved ✓');
   localStorage.setItem('vilu_tax',JSON.stringify(TAX));
   syncSettingsToBookingEngine();}
-function resetTax(){TAX={tgst:17,green:6,svc:10,bed:0};drawCfg();toast('Reset to MIRA 2025 defaults');}
+function resetTax(){TAX={tgst:17,green:6,svc:10,bed:0,thirdGuest:20};drawCfg();toast('Reset to MIRA 2025 defaults');}
 function saveProp(){
   PROP.nm=document.getElementById('st-nm').value;
   PROP.addr=document.getElementById('st-addr').value;
@@ -9392,8 +9416,12 @@ function loadPMSData_BE(){
 }
 
 function loadPMSTax(){
-  try{var t=localStorage.getItem('vilu_tax');return t?JSON.parse(t):{tgst:17,green:6,svc:10,bed:0};}
-  catch(e){return {tgst:17,green:6,svc:10,bed:0};}
+  // Object.assign onto the default literal (not a bare JSON.parse) so a
+  // vilu_tax blob saved before the 2026-09-09 thirdGuest field existed
+  // still yields thirdGuest:20 here, rather than undefined -> NaN prices.
+  var d={tgst:17,green:6,svc:10,bed:0,thirdGuest:20};
+  try{var t=localStorage.getItem('vilu_tax');return t?Object.assign(d,JSON.parse(t)):d;}
+  catch(e){return d;}
 }
 
 function loadPMSProp(){
@@ -9467,12 +9495,17 @@ function isAvailable(roomId, ci, co){
 
 function calcPrice(rate, ci, co, ad, ch){
   const n = be_nt(ci, co);
-  const base = +(n * rate).toFixed(2);
+  const gp = ad + ch;
+  // Same 3rd-guest supplement as calcTax() (the PMS-side canonical
+  // formula) — direct/public bookings only, capped at one $thirdGuest
+  // charge since every room caps at 3 guests. See calcTax()'s comment.
+  const thirdGuestCount = Math.min(1, Math.max(0, gp - 2));
+  const thirdGuest = +(thirdGuestCount * BE_TAX.thirdGuest * n).toFixed(2);
+  const base = +(n * rate + thirdGuest).toFixed(2);
   const svc = +(base * BE_TAX.svc / 100).toFixed(2);
   const tgst = +((base + svc) * BE_TAX.tgst / 100).toFixed(2);
-  const gp = ad + ch;
   const green = +(BE_TAX.green * gp * n).toFixed(2);
-  return {n, base, svc, tgst, green, total: +(base+svc+tgst+green).toFixed(2)};
+  return {n, base, svc, tgst, green, thirdGuest, total: +(base+svc+tgst+green).toFixed(2)};
 }
 
 // Average per-night price across the stay, using the same date-specific
@@ -9603,7 +9636,8 @@ function selectRoom(roomId,btn){
   document.getElementById('sum-content').innerHTML =
     '<div style="font-size:var(--font-size-base);font-weight:700;margin-bottom:10px">'+room.emoji+' '+room.name+'</div>' +
     '<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:10px">'+be_fd(searchParams.ci)+' → '+be_fd(searchParams.co)+' · '+nights+' nights</div>' +
-    '<div class="sum-row"><span>Room ('+nights+' × $'+Math.round(avgRate)+')</span><span>$'+p.base.toFixed(2)+'</span></div>' +
+    '<div class="sum-row"><span>Room ('+nights+' × $'+Math.round(avgRate)+')</span><span>$'+(p.base-p.thirdGuest).toFixed(2)+'</span></div>' +
+    (p.thirdGuest>0?'<div class="sum-row"><span>3rd guest supplement ($'+BE_TAX.thirdGuest+' × '+nights+' nights)</span><span>$'+p.thirdGuest.toFixed(2)+'</span></div>':'') +
     '<div class="sum-row"><span>Service charge (10%)</span><span>$'+p.svc.toFixed(2)+'</span></div>' +
     '<div class="sum-row"><span>TGST (17%)</span><span>$'+p.tgst.toFixed(2)+'</span></div>' +
     '<div class="sum-row"><span>Green tax ($6/pp/night)</span><span>$'+p.green.toFixed(2)+'</span></div>' +
