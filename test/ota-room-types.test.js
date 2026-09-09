@@ -4,7 +4,7 @@
 const assert = require('assert');
 const path = require('path');
 const F = (p) => require(path.join(__dirname, '..', 'functions', 'lib', p));
-const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES, computeOtaTypePayload } = F('ota-room-types');
+const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES, computeOtaTypePayload, pendingOccupancyModel, pendingChildPricingModel } = F('ota-room-types');
 const { PHYSICAL_ROOMS, ROOM_TYPE_CODES } = F('inventory');
 
 let passed = 0, failed = 0;
@@ -52,12 +52,54 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     }
   });
 
-  await test('unresolved owner-pending fields are explicit null, never invented', () => {
+  await test('owner-locked booking window and same-day cutoff applied to all three types', () => {
     for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
-      for (const field of ['booking_window_days', 'same_day_cutoff', 'occupancy_model', 'child_pricing_model', 'commission', 'cancellation_policy', 'meal_plan_mapping']) {
-        assert.strictEqual(cfg[field], null, cfg.room_type_id + '.' + field);
+      assert.strictEqual(cfg.booking_window_days, 365, cfg.room_type_id);
+      assert.deepStrictEqual(cfg.same_day_cutoff, { time: '12:00', timezone: 'Indian/Maldives' }, cfg.room_type_id);
+    }
+  });
+
+  await test('occupancy/child pricing schema is capable but every leaf value stays owner_pending/null, never derived from old extra-bed logic', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      assert.strictEqual(cfg.occupancy_model.status, 'owner_pending', cfg.room_type_id);
+      for (const field of ['base_occupancy', 'single_occupancy_rate', 'extra_adult_rate']) {
+        assert.strictEqual(cfg.occupancy_model[field], null, cfg.room_type_id + '.occupancy_model.' + field);
+      }
+      assert.strictEqual(cfg.child_pricing_model.status, 'owner_pending', cfg.room_type_id);
+      for (const field of ['age_bands', 'child_supplement', 'infant_rules']) {
+        assert.strictEqual(cfg.child_pricing_model[field], null, cfg.room_type_id + '.child_pricing_model.' + field);
       }
     }
+  });
+
+  await test('cancellation policy stays owner_pending, never reusing an old assumption', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      assert.strictEqual(cfg.cancellation_policy_status, 'owner_pending', cfg.room_type_id);
+    }
+  });
+
+  await test('meal plan intent is Breakfast Included (matches current product); no live OTA mapping created', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      assert.strictEqual(cfg.meal_plan_mapping.intent, 'breakfast_included', cfg.room_type_id);
+      assert.strictEqual(cfg.meal_plan_mapping.ota_mapping, null, cfg.room_type_id);
+    }
+  });
+
+  await test('unresolved owner-pending fields are explicit null, never invented', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      assert.strictEqual(cfg.commission, null, cfg.room_type_id + '.commission');
+    }
+  });
+
+  await test('pendingOccupancyModel/pendingChildPricingModel helpers produce fresh, independent objects (no shared mutable reference across room types)', () => {
+    const a = pendingOccupancyModel();
+    const b = pendingOccupancyModel();
+    assert.notStrictEqual(a, b);
+    assert.deepStrictEqual(a, b);
+    const c = pendingChildPricingModel();
+    const d = pendingChildPricingModel();
+    assert.notStrictEqual(c, d);
+    assert.deepStrictEqual(c, d);
   });
 
   await test('computeOtaTypePayload: normal availability -> numAvail passes through unchanged, stopSell false', () => {
