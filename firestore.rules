@@ -126,6 +126,13 @@ service cloud.firestore {
     match /ota_pushes/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
     match /ota_queue/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
     match /availability_outbound/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    // OTA room-type commercial model (Beds24 pre-integration stage, additive):
+    // separate from physical-room pricing (room_prices/room_details above) and
+    // from live PMS rates -- staff/admin can configure it exactly like any
+    // other pricing-adjacent collection, but nothing reads or writes it from
+    // the public site, and no Cloud Function pushes it externally yet.
+    match /ota_room_types/{id} { allow read: if isAdmin() || isStaff(); allow write: if isAdmin() || isStaff(); }
+    match /ota_room_type_overrides/{id} { allow read: if isAdmin() || isStaff(); allow write: if isAdmin() || isStaff(); }
     // rate_limits stores only a salted hash + a count, never guest PII; kept
     // fully server-only (not even admin/staff read) since it has no UI use.
     match /rate_limits/{id} { allow read, write: if false; }
