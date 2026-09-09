@@ -60,8 +60,8 @@
       "perNight": "1박당",
       "bookNow": "지금 예약하기",
       "doubleRoomDesc": "가든 뷰와 더블베드 1개, 에어컨, 온수 샤워, 전용 욕실을 갖춘 편안한 더블룸. 커플이나 나 홀로 여행객에게 이상적입니다.",
-      "deluxeFamilyDesc": "더블베드 2개와 가든 뷰를 갖춘 넓은 객실로, 가족이나 소규모 그룹에게 이상적이며 더욱 편안한 휴식을 위해 고급 편의시설을 갖추고 있습니다.",
-      "deluxeFamilyOpenDeckDesc": "더블베드 2개와 전용 프라이빗 오픈 데크를 갖춘 최고급 객실 — 이 데크가 객실의 가장 큰 특징이며, 추가 야외 공간을 원하는 가족에게 완벽합니다.",
+      "deluxeFamilyDesc": "더블베드 1개와 가든 뷰를 갖춘 넓은 객실로, 가족이나 소규모 그룹에게 이상적이며 더욱 편안한 휴식을 위해 고급 편의시설을 갖추고 있습니다.",
+      "deluxeFamilyOpenDeckDesc": "더블베드 1개와 전용 프라이빗 오픈 데크를 갖춘 최고급 객실 — 이 데크가 객실의 가장 큰 특징이며, 추가 야외 공간을 원하는 가족에게 완벽합니다.",
       "featureOpenDeck": "전용 오픈 데크",
       "doubleRoomName": "더블룸",
       "deluxeFamilyName": "디럭스 패밀리룸",
@@ -1766,14 +1766,9 @@
     "Garden View": "가든 뷰",
     "Garden/Jungle View": "가든/정글 뷰",
     "Main Street View": "메인 스트리트 뷰",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "더블베드 2개를 갖춘 넓은 패밀리룸으로, 진짜 가든 앤 정글 뷰를 즐기실 수 있습니다. 가족이나 소규모 그룹에게 편안한 추가 공간을 제공합니다.",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "더블베드 2개를 갖춘 넓은 패밀리룸으로, 평화로운 가든/정글 뷰가 특징입니다. 함께 여행하는 가족이나 소규모 그룹에게 잘 어울립니다.",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "가든 뷰와 더블베드 1개를 갖춘 편안한 더블룸으로, 커플이나 나 홀로 여행객에게 적합합니다.",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "더블베드 1개와 진짜 가든 뷰를 갖춘 편안한 더블룸으로, 커플이나 나 홀로 여행객에게 이상적입니다.",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "더블베드 1개와 가든 뷰를 갖춘 편안한 더블룸으로, 커플이나 나 홀로 여행객에게 편안한 선택입니다.",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "더블베드 2개와 전용 프라이빗 오픈 데크를 갖춘 넓은 패밀리룸으로, 이 데크가 객실의 가장 큰 특징입니다. 전망은 경치가 아닌 메인 스트리트 쪽이지만, 데크에서 진정한 나만의 야외 공간을 누리실 수 있습니다.",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "더블베드 2개를 갖춘 넓은 패밀리룸으로, 진짜 가든 뷰를 즐기실 수 있습니다. 가족이나 소규모 그룹에게 편안한 추가 공간을 제공합니다.",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "더블베드 2개를 갖춘 넓은 패밀리룸으로, 평화로운 가든 뷰가 특징입니다. 함께 여행하는 가족이나 소규모 그룹에게 잘 어울립니다.",
     "Double Room": "더블룸",
     "Deluxe Family Room": "디럭스 패밀리룸",
     "Deluxe Family Room with Open Deck": "디럭스 패밀리룸(오픈 데크 포함)",
@@ -1787,6 +1782,9 @@
     "Half-Board — $25/day": "하프보드 — $25/일",
     "Full-Board — $40/day": "풀보드 — $40/일",
     "Photography — $25/hr": "사진 촬영 — $25/시간",
-    "Private Island Picnic — $51/person": "프라이빗 아일랜드 피크닉 — $51/인"
+    "Private Island Picnic — $51/person": "프라이빗 아일랜드 피크닉 — $51/인",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "더블베드 1개를 갖춘 넓은 패밀리룸으로, 진짜 가든 뷰를 즐기실 수 있습니다. 가족이나 소규모 그룹에게 편안한 추가 공간을 제공합니다.",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "더블베드 1개를 갖춘 넓은 패밀리룸으로, 평화로운 가든 뷰가 특징입니다. 함께 여행하는 가족이나 소규모 그룹에게 잘 어울립니다.",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "더블베드 1개와 전용 프라이빗 오픈 데크를 갖춘 넓은 패밀리룸으로, 이 데크가 객실의 가장 큰 특징입니다. 전망은 경치가 아닌 메인 스트리트 쪽이지만, 데크에서 진정한 나만의 야외 공간을 누리실 수 있습니다."
   }
 }

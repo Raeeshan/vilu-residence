@@ -1872,7 +1872,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
         </div>
         <div class="room-card-body">
           <h3 class="room-card-name" data-i18n="rooms.deluxeFamilyName">豪华家庭房</h3>
-          <div class="room-card-desc" data-i18n="rooms.deluxeFamilyDesc">宽敞的房型，配有两张双人床和花园景观，非常适合家庭或小团体，并配备升级设施，让假期更加惬意。</div>
+          <div class="room-card-desc" data-i18n="rooms.deluxeFamilyDesc">宽敞的房型，配有一张双人床和花园景观，非常适合家庭或小团体，并配备升级设施，让假期更加惬意。</div>
           <div class="room-card-features">
             <span class="room-feature"><i class="ti ti-snowflake" aria-hidden="true"></i> <span data-i18n="rooms.featureAirCon">空调</span></span>
             <span class="room-feature"><i class="ti ti-bath" aria-hidden="true"></i> <span data-i18n="rooms.featureEnSuite">独立卫浴</span></span>
@@ -1895,7 +1895,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
         </div>
         <div class="room-card-body">
           <h3 class="room-card-name" data-i18n="rooms.deluxeFamilyOpenDeckName">豪华家庭房（带开放式露台）</h3>
-          <div class="room-card-desc" data-i18n="rooms.deluxeFamilyOpenDeckDesc">我们最优质的房型，配有两张双人床和专属私人露台——本房型的最大亮点，非常适合需要更多户外空间的家庭。</div>
+          <div class="room-card-desc" data-i18n="rooms.deluxeFamilyOpenDeckDesc">我们最优质的房型，配有一张双人床和专属私人露台——本房型的最大亮点，非常适合需要更多户外空间的家庭。</div>
           <div class="room-card-features">
             <span class="room-feature"><i class="ti ti-sun" aria-hidden="true"></i> <span data-i18n="rooms.featureOpenDeck">专属露天甲板</span></span>
             <span class="room-feature"><i class="ti ti-snowflake" aria-hidden="true"></i> <span data-i18n="rooms.featureAirCon">空调</span></span>
@@ -2600,8 +2600,8 @@ en: {
     "perNight": "per night",
     "bookNow": "Book Now",
     "doubleRoomDesc": "Comfortable double rooms with a garden view and one double bed, air conditioning, hot shower, and en-suite bathroom. Ideal for couples or solo travellers.",
-    "deluxeFamilyDesc": "Spacious rooms with two double beds and a garden view, ideal for families or small groups, with upgraded amenities for a more relaxing stay.",
-    "deluxeFamilyOpenDeckDesc": "Our finest room, with two double beds and your own private open deck — the room's standout feature, perfect for families wanting extra outdoor space.",
+    "deluxeFamilyDesc": "Spacious rooms with one double bed and a garden view, ideal for families or small groups, with upgraded amenities for a more relaxing stay.",
+    "deluxeFamilyOpenDeckDesc": "Our finest room, with one double bed and your own private open deck — the room's standout feature, perfect for families wanting extra outdoor space.",
     "featureOpenDeck": "Private open deck",
     "doubleRoomName": "Double Room",
     "deluxeFamilyName": "Deluxe Family Room",
@@ -3764,9 +3764,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 // so guests never see a different room name here vs. Booking.com.
 var DEFAULT_ROOMS = [
   {id:'VR01',name:'Deluxe Family Room',type:'Deluxe Family Room',rate:80,cap:3,view:'Garden View',
-   desc:'A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.'},
+   desc:'A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.'},
   {id:'VR02',name:'Deluxe Family Room',type:'Deluxe Family Room',rate:80,cap:3,view:'Garden View',
-   desc:'A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.'},
+   desc:'A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.'},
   {id:'VR03',name:'Double Room',type:'Double Room',rate:85,cap:3,view:'Garden View',
    desc:'A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.'},
   {id:'VR04',name:'Double Room',type:'Double Room',rate:85,cap:3,view:'Garden View',
@@ -3774,7 +3774,7 @@ var DEFAULT_ROOMS = [
   {id:'VR05',name:'Double Room',type:'Double Room',rate:90,cap:3,view:'Garden View',
    desc:'A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.'},
   {id:'VR06',name:'Deluxe Family Room with Open Deck',type:'Deluxe Family Room with Open Deck',rate:90,cap:3,view:'Main Street View',
-   desc:"A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own."},
+   desc:"A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own."},
 ];
 
 // Room photos/descriptions/amenities, read live from Firestore (see

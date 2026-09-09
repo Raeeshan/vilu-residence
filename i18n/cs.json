@@ -60,8 +60,8 @@
       "perNight": "za noc",
       "bookNow": "Rezervovat",
       "doubleRoomDesc": "Pohodlné dvoulůžkové pokoje s výhledem do zahrady a jednou manželskou postelí, klimatizací, teplou sprchou a vlastní koupelnou. Ideální pro páry nebo cestovatele jednotlivce.",
-      "deluxeFamilyDesc": "Prostorné pokoje se dvěma manželskými postelemi a výhledem do zahrady, ideální pro rodiny nebo malé skupiny, s vylepšeným vybavením pro příjemnější pobyt.",
-      "deluxeFamilyOpenDeckDesc": "Náš nejlepší pokoj se dvěma manželskými postelemi a vlastní soukromou otevřenou terasou — hlavní přednost tohoto pokoje, ideální pro rodiny toužící po dalším venkovním prostoru.",
+      "deluxeFamilyDesc": "Prostorné pokoje s jednou manželskou postelí a výhledem do zahrady, ideální pro rodiny nebo malé skupiny, s vylepšeným vybavením pro příjemnější pobyt.",
+      "deluxeFamilyOpenDeckDesc": "Náš nejlepší pokoj s jednou manželskou postelí a vlastní soukromou otevřenou terasou — hlavní přednost tohoto pokoje, ideální pro rodiny toužící po dalším venkovním prostoru.",
       "featureOpenDeck": "Vlastní otevřená terasa",
       "doubleRoomName": "Dvoulůžkový pokoj",
       "deluxeFamilyName": "Rodinný pokoj Deluxe",
@@ -1766,14 +1766,9 @@
     "Garden View": "Výhled do zahrady",
     "Garden/Jungle View": "Výhled do zahrady/džungle",
     "Main Street View": "Výhled na hlavní ulici",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "Prostorný rodinný pokoj se dvěma manželskými postelemi a skutečným výhledem do zahrady a džungle — příjemný prostor navíc pro rodiny nebo malé skupiny.",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "Prostorný rodinný pokoj se dvěma manželskými postelemi a klidným výhledem do zahrady/džungle, vhodný pro rodiny nebo malé skupiny cestující společně.",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "Pohodlný dvoulůžkový pokoj s výhledem do zahrady a jednou manželskou postelí, vhodný pro páry nebo cestovatele jednotlivce.",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "Pohodlný dvoulůžkový pokoj s jednou manželskou postelí a skutečným výhledem do zahrady, ideální pro páry nebo cestovatele jednotlivce.",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "Pohodlný dvoulůžkový pokoj s jednou manželskou postelí a výhledem do zahrady, příjemná volba pro páry nebo cestovatele jednotlivce.",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "Prostorný rodinný pokoj se dvěma manželskými postelemi a vlastní soukromou otevřenou terasou — hlavní přednost tohoto pokoje. Výhled směřuje na hlavní ulici, nikoli na malebnou scenérii, ale terasa vám poskytuje skutečný vlastní venkovní prostor.",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "Prostorný rodinný pokoj se dvěma manželskými postelemi a skutečným výhledem do zahrady — příjemný prostor navíc pro rodiny nebo malé skupiny.",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "Prostorný rodinný pokoj se dvěma manželskými postelemi a klidným výhledem do zahrady, vhodný pro rodiny nebo malé skupiny cestující společně.",
     "Double Room": "Dvoulůžkový pokoj",
     "Deluxe Family Room": "Rodinný pokoj Deluxe",
     "Deluxe Family Room with Open Deck": "Rodinný pokoj Deluxe s terasou",
@@ -1787,6 +1782,9 @@
     "Half-Board — $25/day": "Polopenze — $25/den",
     "Full-Board — $40/day": "Plná penze — $40/den",
     "Photography — $25/hr": "Fotografování — $25/hod.",
-    "Private Island Picnic — $51/person": "Soukromý piknik na ostrově — $51/osoba"
+    "Private Island Picnic — $51/person": "Soukromý piknik na ostrově — $51/osoba",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "Prostorný rodinný pokoj s jednou manželskou postelí a skutečným výhledem do zahrady — příjemný prostor navíc pro rodiny nebo malé skupiny.",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "Prostorný rodinný pokoj s jednou manželskou postelí a klidným výhledem do zahrady, vhodný pro rodiny nebo malé skupiny cestující společně.",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "Prostorný rodinný pokoj s jednou manželskou postelí a vlastní soukromou otevřenou terasou — hlavní přednost tohoto pokoje. Výhled směřuje na hlavní ulici, nikoli na malebnou scenérii, ale terasa vám poskytuje skutečný vlastní venkovní prostor."
   }
 }

@@ -210,9 +210,9 @@
       "perNight": "por noche",
       "bookNow": "Reservar Ahora",
       "deluxeFamilyName": "Habitación Familiar Deluxe",
-      "deluxeFamilyDesc": "Habitaciones amplias con dos camas de matrimonio y vistas al jardín, ideales para familias o grupos pequeños, con comodidades superiores para una estancia más relajante.",
+      "deluxeFamilyDesc": "Habitaciones amplias con una cama de matrimonio y vistas al jardín, ideales para familias o grupos pequeños, con comodidades superiores para una estancia más relajante.",
       "deluxeFamilyOpenDeckName": "Habitación Familiar Deluxe con Terraza Privada",
-      "deluxeFamilyOpenDeckDesc": "Nuestra mejor habitación, con dos camas de matrimonio y tu propia terraza privada — la gran protagonista de la habitación, perfecta para familias que buscan más espacio al aire libre.",
+      "deluxeFamilyOpenDeckDesc": "Nuestra mejor habitación, con una cama de matrimonio y tu propia terraza privada — la gran protagonista de la habitación, perfecta para familias que buscan más espacio al aire libre.",
       "featureOpenDeck": "Terraza privada",
       "featureBreakfast": "Desayuno incluido"
     },
@@ -714,14 +714,9 @@
     "Garden View": "Vista al Jardín",
     "Garden/Jungle View": "Vista al Jardín/Selva",
     "Main Street View": "Vista a la Calle Principal",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "Una amplia habitación familiar con dos camas dobles y auténticas vistas al jardín y la selva — espacio extra cómodo para familias o grupos pequeños.",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "Una amplia habitación familiar con dos camas dobles y tranquilas vistas al jardín/selva, ideal para familias o grupos pequeños que viajan juntos.",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "Una cómoda habitación doble con vistas al jardín y una cama de matrimonio, ideal para parejas o viajeros en solitario.",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "Una cómoda habitación doble con una cama de matrimonio y auténticas vistas al jardín, ideal para parejas o viajeros en solitario.",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "Una cómoda habitación doble con una cama de matrimonio y vistas al jardín, una opción tranquila para parejas o viajeros en solitario.",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "Una amplia habitación familiar con dos camas dobles y tu propia terraza privada — el punto fuerte de la habitación. Las vistas dan a la calle principal en lugar de un paisaje panorámico, pero la terraza te ofrece un auténtico espacio exterior propio.",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "Una amplia habitación familiar con dos camas dobles y auténticas vistas al jardín — espacio extra cómodo para familias o grupos pequeños.",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "Una amplia habitación familiar con dos camas dobles y tranquilas vistas al jardín, ideal para familias o grupos pequeños que viajan juntos.",
     "Double Room": "Habitación Doble",
     "Deluxe Family Room": "Habitación Familiar Deluxe",
     "Deluxe Family Room with Open Deck": "Habitación Familiar Deluxe con Terraza",
@@ -735,6 +730,9 @@
     "Half-Board — $25/day": "Media Pensión — $25/día",
     "Full-Board — $40/day": "Pensión Completa — $40/día",
     "Photography — $25/hr": "Fotografía — $25/hora",
-    "Private Island Picnic — $51/person": "Picnic Privado en la Isla — $51/persona"
+    "Private Island Picnic — $51/person": "Picnic Privado en la Isla — $51/persona",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "Una amplia habitación familiar con una cama de matrimonio y auténticas vistas al jardín — espacio extra cómodo para familias o grupos pequeños.",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "Una amplia habitación familiar con una cama de matrimonio y tranquilas vistas al jardín, ideal para familias o grupos pequeños que viajan juntos.",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "Una amplia habitación familiar con una cama de matrimonio y tu propia terraza privada — el punto fuerte de la habitación. Las vistas dan a la calle principal en lugar de un paisaje panorámico, pero la terraza te ofrece un auténtico espacio exterior propio."
   }
 }

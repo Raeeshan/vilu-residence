@@ -60,8 +60,8 @@
       "perNight": "1泊あたり",
       "bookNow": "今すぐ予約",
       "doubleRoomDesc": "ガーデンビューとダブルベッド1台、エアコン、温水シャワー、専用バスルームを備えた快適なダブルルーム。カップルや一人旅の方に最適です。",
-      "deluxeFamilyDesc": "ダブルベッド2台とガーデンビューを備えた広々としたお部屋。ご家族や少人数グループに最適で、より快適にお過ごしいただけるようアメニティもグレードアップしています。",
-      "deluxeFamilyOpenDeckDesc": "ダブルベッド2台と専用のプライベートオープンデッキを備えた当ホテル最高のお部屋——このデッキがお部屋の一番の魅力です。屋外スペースを求めるご家族に最適です。",
+      "deluxeFamilyDesc": "ダブルベッド1台とガーデンビューを備えた広々としたお部屋。ご家族や少人数グループに最適で、より快適にお過ごしいただけるようアメニティもグレードアップしています。",
+      "deluxeFamilyOpenDeckDesc": "ダブルベッド1台と専用のプライベートオープンデッキを備えた当ホテル最高のお部屋——このデッキがお部屋の一番の魅力です。屋外スペースを求めるご家族に最適です。",
       "featureOpenDeck": "専用オープンデッキ",
       "doubleRoomName": "ダブルルーム",
       "deluxeFamilyName": "デラックスファミリールーム",
@@ -1766,14 +1766,9 @@
     "Garden View": "ガーデンビュー",
     "Garden/Jungle View": "ガーデン/ジャングルビュー",
     "Main Street View": "メインストリートビュー",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "ダブルベッド2台を備えた広々としたファミリールームで、本物のガーデン&ジャングルビューをお楽しみいただけます。ご家族や少人数グループに快適な広さです。",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "ダブルベッド2台を備えた広々としたファミリールームで、落ち着いたガーデン/ジャングルビューが魅力です。一緒に旅行するご家族や少人数グループに最適です。",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "ガーデンビューとダブルベッド1台を備えた快適なダブルルームで、カップルや一人旅の方に適しています。",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "ダブルベッド1台と本物のガーデンビューを備えた快適なダブルルームで、カップルや一人旅の方に理想的です。",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "ダブルベッド1台とガーデンビューを備えた快適なダブルルームで、カップルや一人旅の方にくつろぎの選択肢です。",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "ダブルベッド2台と専用のプライベートオープンデッキを備えた広々としたファミリールームで、このデッキがお部屋の一番の魅力です。眺めは風光明媚な景色ではなくメインストリート側になりますが、デッキでは本当に自分だけの屋外スペースをお楽しみいただけます。",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "ダブルベッド2台を備えた広々としたファミリールームで、本物のガーデンビューをお楽しみいただけます。ご家族や少人数グループに快適な広さです。",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "ダブルベッド2台を備えた広々としたファミリールームで、落ち着いたガーデンビューが魅力です。一緒に旅行するご家族や少人数グループに最適です。",
     "Double Room": "ダブルルーム",
     "Deluxe Family Room": "デラックスファミリールーム",
     "Deluxe Family Room with Open Deck": "デラックスファミリールーム（オープンデッキ付き）",
@@ -1787,6 +1782,9 @@
     "Half-Board — $25/day": "ハーフボード — $25/日",
     "Full-Board — $40/day": "フルボード — $40/日",
     "Photography — $25/hr": "写真撮影 — $25/時間",
-    "Private Island Picnic — $51/person": "プライベートアイランドピクニック — $51/人"
+    "Private Island Picnic — $51/person": "プライベートアイランドピクニック — $51/人",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "ダブルベッド1台を備えた広々としたファミリールームで、本物のガーデンビューをお楽しみいただけます。ご家族や少人数グループに快適な広さです。",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "ダブルベッド1台を備えた広々としたファミリールームで、落ち着いたガーデンビューが魅力です。一緒に旅行するご家族や少人数グループに最適です。",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "ダブルベッド1台と専用のプライベートオープンデッキを備えた広々としたファミリールームで、このデッキがお部屋の一番の魅力です。眺めは風光明媚な景色ではなくメインストリート側になりますが、デッキでは本当に自分だけの屋外スペースをお楽しみいただけます。"
   }
 }

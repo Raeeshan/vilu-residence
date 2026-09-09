@@ -60,8 +60,8 @@
       "perNight": "за ночь",
       "bookNow": "Забронировать",
       "doubleRoomDesc": "Уютные двухместные номера с видом на сад и одной двуспальной кроватью, кондиционером, горячим душем и собственной ванной комнатой. Идеально подходят для пар или путешественников в одиночку.",
-      "deluxeFamilyDesc": "Просторные номера с двумя двуспальными кроватями и видом на сад, идеально подходят для семей или небольших групп, с улучшенными удобствами для более комфортного отдыха.",
-      "deluxeFamilyOpenDeckDesc": "Наш лучший номер, с двумя двуспальными кроватями и собственной приватной открытой террасой — главная особенность номера, идеально подходит для семей, желающих больше пространства на свежем воздухе.",
+      "deluxeFamilyDesc": "Просторные номера с одной двуспальной кроватью и видом на сад, идеально подходят для семей или небольших групп, с улучшенными удобствами для более комфортного отдыха.",
+      "deluxeFamilyOpenDeckDesc": "Наш лучший номер, с одной двуспальной кроватью и собственной приватной открытой террасой — главная особенность номера, идеально подходит для семей, желающих больше пространства на свежем воздухе.",
       "featureOpenDeck": "Собственная открытая терраса",
       "doubleRoomName": "Двухместный номер",
       "deluxeFamilyName": "Делюкс семейный номер",
@@ -1766,14 +1766,9 @@
     "Garden View": "Вид на сад",
     "Garden/Jungle View": "Вид на сад/джунгли",
     "Main Street View": "Вид на улицу",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "Просторный семейный номер с двумя двуспальными кроватями и настоящим видом на сад и джунгли — дополнительное удобное пространство для семей или небольших групп.",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "Просторный семейный номер с двумя двуспальными кроватями и спокойным видом на сад/джунгли, отлично подходит для семей или небольших групп, путешествующих вместе.",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "Уютный двухместный номер с видом на сад и одной двуспальной кроватью, отлично подходит для пар или путешественников в одиночку.",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "Уютный двухместный номер с одной двуспальной кроватью и настоящим видом на сад, идеально подходит для пар или путешественников в одиночку.",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "Уютный двухместный номер с одной двуспальной кроватью и видом на сад — спокойный выбор для пар или путешественников в одиночку.",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "Просторный семейный номер с двумя двуспальными кроватями и собственной приватной открытой террасой — главная особенность номера. Вид открывается на главную улицу, а не на живописный пейзаж, но терраса дает вам настоящее личное пространство на свежем воздухе.",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "Просторный семейный номер с двумя двуспальными кроватями и настоящим видом на сад — дополнительное удобное пространство для семей или небольших групп.",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "Просторный семейный номер с двумя двуспальными кроватями и спокойным видом на сад, отлично подходит для семей или небольших групп, путешествующих вместе.",
     "Double Room": "Двухместный номер",
     "Deluxe Family Room": "Делюкс семейный номер",
     "Deluxe Family Room with Open Deck": "Делюкс семейный номер с открытой террасой",
@@ -1787,6 +1782,9 @@
     "Half-Board — $25/day": "Полупансион — $25/день",
     "Full-Board — $40/day": "Полный пансион — $40/день",
     "Photography — $25/hr": "Фотосъёмка — $25/час",
-    "Private Island Picnic — $51/person": "Приватный пикник на острове — $51/чел."
+    "Private Island Picnic — $51/person": "Приватный пикник на острове — $51/чел.",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "Просторный семейный номер с одной двуспальной кроватью и настоящим видом на сад — дополнительное удобное пространство для семей или небольших групп.",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "Просторный семейный номер с одной двуспальной кроватью и спокойным видом на сад, отлично подходит для семей или небольших групп, путешествующих вместе.",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "Просторный семейный номер с одной двуспальной кроватью и собственной приватной открытой террасой — главная особенность номера. Вид открывается на главную улицу, а не на живописный пейзаж, но терраса дает вам настоящее личное пространство на свежем воздухе."
   }
 }

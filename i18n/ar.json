@@ -60,8 +60,8 @@
       "perNight": "لليلة الواحدة",
       "bookNow": "احجز الآن",
       "doubleRoomDesc": "غرف مزدوجة مريحة تحتوي على إطلالة على الحديقة وسرير مزدوج واحد، مع تكييف هواء ودش ساخن وحمام خاص. مثالية للأزواج أو المسافرين بمفردهم.",
-      "deluxeFamilyDesc": "غرف واسعة تحتوي على سريرين مزدوجين وإطلالة على الحديقة، مثالية للعائلات أو المجموعات الصغيرة، مع وسائل راحة مطورة لإقامة أكثر استرخاءً.",
-      "deluxeFamilyOpenDeckDesc": "أفضل غرفنا، تحتوي على سريرين مزدوجين وشرفة خارجية خاصة بكم — الميزة الفريدة لهذه الغرفة، مثالية للعائلات الراغبة في مساحة خارجية إضافية.",
+      "deluxeFamilyDesc": "غرف واسعة تحتوي على سرير مزدوج واحد وإطلالة على الحديقة، مثالية للعائلات أو المجموعات الصغيرة، مع وسائل راحة مطورة لإقامة أكثر استرخاءً.",
+      "deluxeFamilyOpenDeckDesc": "أفضل غرفنا، تحتوي على سرير مزدوج واحد وشرفة خارجية خاصة بكم — الميزة الفريدة لهذه الغرفة، مثالية للعائلات الراغبة في مساحة خارجية إضافية.",
       "featureOpenDeck": "سطح خاص مفتوح",
       "doubleRoomName": "غرفة مزدوجة",
       "deluxeFamilyName": "غرفة عائلية فاخرة",
@@ -1766,14 +1766,9 @@
     "Garden View": "إطلالة على الحديقة",
     "Garden/Jungle View": "إطلالة على الحديقة/الغابة",
     "Main Street View": "إطلالة على الشارع الرئيسي",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "غرفة عائلية واسعة تحتوي على سريرين مزدوجين وإطلالة حقيقية على الحديقة والغابة — مساحة إضافية مريحة للعائلات أو المجموعات الصغيرة.",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "غرفة عائلية واسعة تحتوي على سريرين مزدوجين وإطلالة هادئة على الحديقة/الغابة، مناسبة تمامًا للعائلات أو المجموعات الصغيرة المسافرة معًا.",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "غرفة مزدوجة مريحة تحتوي على إطلالة على الحديقة وسرير مزدوج واحد، مناسبة للأزواج أو المسافرين بمفردهم.",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "غرفة مزدوجة مريحة تحتوي على سرير مزدوج واحد وإطلالة حقيقية على الحديقة، مثالية للأزواج أو المسافرين بمفردهم.",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "غرفة مزدوجة مريحة تحتوي على سرير مزدوج واحد وإطلالة على الحديقة، خيار مريح للأزواج أو المسافرين بمفردهم.",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "غرفة عائلية واسعة تحتوي على سريرين مزدوجين وشرفة خارجية خاصة بكم — الميزة الفريدة الحقيقية لهذه الغرفة. تطل الغرفة على الشارع الرئيسي وليس على منظر طبيعي خلاب، لكن الشرفة تمنحكم مساحة خارجية خاصة حقيقية.",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "غرفة عائلية واسعة تحتوي على سريرين مزدوجين وإطلالة حقيقية على الحديقة — مساحة إضافية مريحة للعائلات أو المجموعات الصغيرة.",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "غرفة عائلية واسعة تحتوي على سريرين مزدوجين وإطلالة هادئة على الحديقة، مناسبة تمامًا للعائلات أو المجموعات الصغيرة المسافرة معًا.",
     "Double Room": "غرفة مزدوجة",
     "Deluxe Family Room": "غرفة عائلية فاخرة",
     "Deluxe Family Room with Open Deck": "غرفة عائلية فاخرة بشرفة خارجية",
@@ -1787,6 +1782,9 @@
     "Half-Board — $25/day": "نصف إقامة — $25/يوم",
     "Full-Board — $40/day": "إقامة كاملة — $40/يوم",
     "Photography — $25/hr": "تصوير فوتوغرافي — $25/ساعة",
-    "Private Island Picnic — $51/person": "نزهة خاصة على الجزيرة — $51/فرد"
+    "Private Island Picnic — $51/person": "نزهة خاصة على الجزيرة — $51/فرد",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "غرفة عائلية واسعة تحتوي على سرير مزدوج واحد وإطلالة حقيقية على الحديقة — مساحة إضافية مريحة للعائلات أو المجموعات الصغيرة.",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "غرفة عائلية واسعة تحتوي على سرير مزدوج واحد وإطلالة هادئة على الحديقة، مناسبة تمامًا للعائلات أو المجموعات الصغيرة المسافرة معًا.",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "غرفة عائلية واسعة تحتوي على سرير مزدوج واحد وشرفة خارجية خاصة بكم — الميزة الفريدة الحقيقية لهذه الغرفة. تطل الغرفة على الشارع الرئيسي وليس على منظر طبيعي خلاب، لكن الشرفة تمنحكم مساحة خارجية خاصة حقيقية."
   }
 }

@@ -60,8 +60,8 @@
       "perNight": "每晚",
       "bookNow": "立即预订",
       "doubleRoomDesc": "舒适的双人房，享有花园景观和一张双人床，配备空调、热水淋浴和独立卫浴。非常适合情侣或独自旅行者。",
-      "deluxeFamilyDesc": "宽敞的房型，配有两张双人床和花园景观，非常适合家庭或小团体，并配备升级设施，让假期更加惬意。",
-      "deluxeFamilyOpenDeckDesc": "我们最优质的房型，配有两张双人床和专属私人露台——本房型的最大亮点，非常适合需要更多户外空间的家庭。",
+      "deluxeFamilyDesc": "宽敞的房型，配有一张双人床和花园景观，非常适合家庭或小团体，并配备升级设施，让假期更加惬意。",
+      "deluxeFamilyOpenDeckDesc": "我们最优质的房型，配有一张双人床和专属私人露台——本房型的最大亮点，非常适合需要更多户外空间的家庭。",
       "featureOpenDeck": "专属露天甲板",
       "doubleRoomName": "双人房",
       "deluxeFamilyName": "豪华家庭房",
@@ -1766,14 +1766,9 @@
     "Garden View": "花园景观",
     "Garden/Jungle View": "花园/丛林景观",
     "Main Street View": "街景",
-    "A spacious family room with two double beds and a genuine garden and jungle view — comfortable extra room for families or small groups.": "宽敞的家庭房，配有两张双人床和真实的花园丛林景观——为家庭或小团体提供舒适的额外空间。",
-    "A spacious family room with two double beds and a peaceful garden/jungle view, well suited to families or small groups travelling together.": "宽敞的家庭房，配有两张双人床及宁静的花园/丛林景观，非常适合结伴出行的家庭或小团体。",
     "A comfortable double room with a garden view and one double bed, well suited to couples or solo travellers.": "舒适的双人房，配有一张双人床和花园景观，非常适合情侣或独自旅行者。",
     "A comfortable double room with one double bed and a genuine garden view, ideal for couples or solo travellers.": "舒适的双人房，配有一张双人床和真实的花园景观，是情侣或独自旅行者的理想之选。",
     "A comfortable double room with one double bed and a garden view, a relaxed choice for couples or solo travellers.": "舒适的双人房，配有一张双人床和花园景观，是情侣或独自旅行者的轻松之选。",
-    "A spacious family room with two double beds and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "宽敞的家庭房，配有两张双人床和专属的私人露台——本房型的最大亮点。此房型面向街道，并非景观房，但露台为您提供真正专属的户外空间。",
-    "A spacious family room with two double beds and a genuine garden view — comfortable extra room for families or small groups.": "宽敞的家庭房，配有两张双人床和真实的花园景观——为家庭或小团体提供舒适的额外空间。",
-    "A spacious family room with two double beds and a peaceful garden view, well suited to families or small groups travelling together.": "宽敞的家庭房，配有两张双人床及宁静的花园景观，非常适合结伴出行的家庭或小团体。",
     "Double Room": "双人房",
     "Deluxe Family Room": "豪华家庭房",
     "Deluxe Family Room with Open Deck": "豪华家庭房（带开放式露台）",
@@ -1787,6 +1782,9 @@
     "Half-Board — $25/day": "半膳 — $25/天",
     "Full-Board — $40/day": "全膳 — $40/天",
     "Photography — $25/hr": "摄影服务 — $25/小时",
-    "Private Island Picnic — $51/person": "私人海岛野餐 — $51/人"
+    "Private Island Picnic — $51/person": "私人海岛野餐 — $51/人",
+    "A spacious family room with one double bed and a genuine garden view — comfortable extra room for families or small groups.": "宽敞的家庭房，配有一张双人床和真实的花园景观——为家庭或小团体提供舒适的额外空间。",
+    "A spacious family room with one double bed and a peaceful garden view, well suited to families or small groups travelling together.": "宽敞的家庭房，配有一张双人床及宁静的花园景观，非常适合结伴出行的家庭或小团体。",
+    "A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own.": "宽敞的家庭房，配有一张双人床和专属的私人露台——本房型的最大亮点。此房型面向街道，并非景观房，但露台为您提供真正专属的户外空间。"
   }
 }
