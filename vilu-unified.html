@@ -1961,7 +1961,7 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
         <input type="hidden" id="ed-rm">
         <table class="tb"><thead><tr><th>Room</th><th>Price/night</th><th></th></tr></thead><tbody id="ed-avail-tb"><tr><td colspan="3" style="color:#9ca3af;font-size:var(--font-size-sm);padding:8px">Select dates first...</td></tr></tbody></table>
       </div>
-      <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+      <div class="fg"><label>Adults</label><select id="ed-ad" onchange="edC(); edUpdateBedCount()"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Children</label><select id="ed-ch" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       <div class="fg"><label>Infants</label><select id="ed-inf" onchange="edC()"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>
       <div class="fg"><label>Status</label><select id="ed-st"><option>Confirmed</option><option>Pending</option><option>Checked in</option><option>Checked out</option></select></div>
@@ -4324,8 +4324,9 @@ async function openEdit(id){
   const r=RES.find(x=>x.id===id);if(!r)return;editId=id;
   await edRefreshRoomOptions(r.ci,r.co,r.rn);
   ['ed-fn','ed-ln','ed-em','ed-ph'].forEach((el,i)=>{var e=document.getElementById(el);if(e)e.value=[r.fn,r.ln,r.em||'',r.ph||''][i];});
-  ['ed-ci','ed-co','ed-ad','ed-ch','ed-inf','ed-st','ed-pay','ed-rate'].forEach(function(id){var e=document.getElementById(id);if(!e)return;
-    if(id==='ed-ci')e.value=r.ci;else if(id==='ed-co')e.value=r.co;else if(id==='ed-ad')e.value=r.ad||2;
+  edRebuildAdOptions(r.rn,r.ad||2);
+  ['ed-ci','ed-co','ed-ch','ed-inf','ed-st','ed-pay','ed-rate'].forEach(function(id){var e=document.getElementById(id);if(!e)return;
+    if(id==='ed-ci')e.value=r.ci;else if(id==='ed-co')e.value=r.co;
     else if(id==='ed-ch')e.value=r.ch||0;else if(id==='ed-inf')e.value=r.inf||0;
     else if(id==='ed-st')e.value=r.st;else if(id==='ed-pay')e.value=r.pay||'';else if(id==='ed-rate')e.value=r.rate||0;
   });
@@ -4334,6 +4335,36 @@ async function openEdit(id){
   document.getElementById('ed-cf').style.display='none';
   edC(); edUpdateBedCount();
   document.getElementById('m-edit').classList.add('on');
+}
+
+// Rebuilds #ed-ad's option list from the SELECTED room's own real cap
+// (getR(rn).cap), rather than a hardcoded ceiling -- so a room with a
+// different capacity would automatically offer the right range, and 4+
+// guests can never even be selected for a room capped at 3. When
+// forceValue is given (opening the modal on an existing reservation) the
+// option range is extended to include it if the stored value already
+// exceeds today's cap (e.g. a pre-existing historical booking), so opening
+// the modal never silently rewrites a real reservation's guest count --
+// only a fresh selection is ever capacity-constrained. Otherwise (switching
+// rooms mid-edit) the current selection is clamped down to the new room's cap.
+function edRebuildAdOptions(rn, forceValue){
+  const sel=document.getElementById('ed-ad');
+  if(!sel) return;
+  const rm=getR(rn);
+  const cap=(rm&&rm.cap)||3; // 3 matches every current room; never hardcoded as the ceiling when a room IS resolved
+  const curVal=forceValue!=null?+forceValue:(+sel.value||1);
+  // Only extend past cap for an EXPLICIT forceValue (a real stored value
+  // being preserved on open) -- never for the select's own current value,
+  // or switching to a smaller-cap room could never actually clamp anything
+  // (a stale over-cap selection would just keep re-extending the range).
+  const maxOpt=forceValue!=null?Math.max(cap,curVal):cap;
+  sel.innerHTML='';
+  for(let i=1;i<=maxOpt;i++){
+    const opt=document.createElement('option');
+    opt.value=String(i);opt.textContent=String(i);
+    sel.appendChild(opt);
+  }
+  sel.value=String(Math.min(curVal,maxOpt));
 }
 
 function edBed(delta){
@@ -4392,6 +4423,7 @@ function edSelectRoom(rn){
     const btn=tr.querySelector('button');
     if(btn)btn.textContent=isSel?'Selected':'Select';
   });
+  edRebuildAdOptions(rn); // re-cap Adults to the newly-selected room's own capacity
   edC();
 }
 async function edDatesChanged(){

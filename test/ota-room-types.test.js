@@ -4,7 +4,7 @@
 const assert = require('assert');
 const path = require('path');
 const F = (p) => require(path.join(__dirname, '..', 'functions', 'lib', p));
-const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES, computeOtaTypePayload, pendingOccupancyModel, pendingChildPricingModel } = F('ota-room-types');
+const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES, computeOtaTypePayload, computeOccupancyRate, daysBeforeArrival, computeCancellationCharge, pendingChildPricing } = F('ota-room-types');
 const { PHYSICAL_ROOMS, ROOM_TYPE_CODES } = F('inventory');
 
 let passed = 0, failed = 0;
@@ -59,22 +59,42 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     }
   });
 
-  await test('occupancy/child pricing schema is capable but every leaf value stays owner_pending/null, never derived from old extra-bed logic', () => {
+  await test('occupancy policy is owner-approved: base_occupancy=2, third_guest_supplement=$20/night, applies without an extra bed', () => {
     for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
-      assert.strictEqual(cfg.occupancy_model.status, 'owner_pending', cfg.room_type_id);
-      for (const field of ['base_occupancy', 'single_occupancy_rate', 'extra_adult_rate']) {
-        assert.strictEqual(cfg.occupancy_model[field], null, cfg.room_type_id + '.occupancy_model.' + field);
-      }
-      assert.strictEqual(cfg.child_pricing_model.status, 'owner_pending', cfg.room_type_id);
-      for (const field of ['age_bands', 'child_supplement', 'infant_rules']) {
-        assert.strictEqual(cfg.child_pricing_model[field], null, cfg.room_type_id + '.child_pricing_model.' + field);
-      }
+      assert.strictEqual(cfg.base_occupancy, 2, cfg.room_type_id);
+      assert.deepStrictEqual(cfg.third_guest_supplement, { amount: 20, currency: 'USD', period: 'per_night', applies_without_extra_bed: true }, cfg.room_type_id);
     }
   });
 
-  await test('cancellation policy stays owner_pending, never reusing an old assumption', () => {
+  await test('infant policy is owner-approved (free under 2); child 2+ pricing stays owner_pending, never inferred from old internal discounts', () => {
     for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
-      assert.strictEqual(cfg.cancellation_policy_status, 'owner_pending', cfg.room_type_id);
+      assert.deepStrictEqual(cfg.infant_policy, { free_under_age: 2 }, cfg.room_type_id);
+      assert.strictEqual(cfg.child_pricing.status, 'owner_pending', cfg.room_type_id);
+      assert.strictEqual(Object.keys(cfg.child_pricing).length, 1, cfg.room_type_id + '.child_pricing must not invent extra fields');
+    }
+  });
+
+  await test('payment policy is owner-approved: pay at property, cash USD/EUR (no hardcoded exchange rate), card +3.5%, no online prepayment', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      assert.deepStrictEqual(cfg.payment_policy, {
+        timing: 'pay_at_property',
+        cash_currencies: ['USD', 'EUR'],
+        card_surcharge_percent: 3.5,
+        online_prepayment_default: false,
+      }, cfg.room_type_id);
+    }
+  });
+
+  await test('cancellation policy is owner-approved and tiered: free 30+ days, 50% at 15-29 days, 100% at 0-14 days; no-show stays owner_pending', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      const cp = cfg.cancellation_policy;
+      assert.strictEqual(cp.status, 'approved', cfg.room_type_id);
+      assert.strictEqual(cp.free_from_days_before_arrival, 30, cfg.room_type_id);
+      assert.deepStrictEqual(cp.tiers, [
+        { from_days_before_arrival: 15, to_days_before_arrival: 29, charge_percent: 50 },
+        { from_days_before_arrival: 0, to_days_before_arrival: 14, charge_percent: 100 },
+      ], cfg.room_type_id);
+      assert.strictEqual(cp.no_show.status, 'owner_pending', cfg.room_type_id + ' no-show must never be inferred as 100%');
     }
   });
 
@@ -91,15 +111,11 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     }
   });
 
-  await test('pendingOccupancyModel/pendingChildPricingModel helpers produce fresh, independent objects (no shared mutable reference across room types)', () => {
-    const a = pendingOccupancyModel();
-    const b = pendingOccupancyModel();
+  await test('pendingChildPricing() produces fresh, independent objects (no shared mutable reference across room types)', () => {
+    const a = pendingChildPricing();
+    const b = pendingChildPricing();
     assert.notStrictEqual(a, b);
     assert.deepStrictEqual(a, b);
-    const c = pendingChildPricingModel();
-    const d = pendingChildPricingModel();
-    assert.notStrictEqual(c, d);
-    assert.deepStrictEqual(c, d);
   });
 
   await test('computeOtaTypePayload: normal availability -> numAvail passes through unchanged, stopSell false', () => {
@@ -147,6 +163,87 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     const cfg = Object.assign({}, INITIAL_OTA_ROOM_TYPES.deluxe_family, { max_stay: 30 });
     const out = computeOtaTypePayload({ config: cfg, override: { maxStay: null }, sellableAvailable: 1, sellableTotal: 2 });
     assert.strictEqual(out.maxStay, null);
+  });
+
+  // ── Step 4: occupancy pricing tests ──
+  await test('computeOccupancyRate: Deluxe Family $80 -- 1 and 2 guests = base rate, 3 guests = base + $20', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.deluxe_family;
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 1 }).rate, 80);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 2 }).rate, 80);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 3 }).rate, 100);
+  });
+
+  await test('computeOccupancyRate: Double $90 -- 1 and 2 guests = base rate, 3 guests = base + $20', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.double;
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 1 }).rate, 90);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 2 }).rate, 90);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 3 }).rate, 110);
+  });
+
+  await test('computeOccupancyRate: Open Deck $90 -- 1 and 2 guests = base rate, 3 guests = base + $20', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.open_deck;
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 1 }).rate, 90);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 2 }).rate, 90);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 3 }).rate, 110);
+  });
+
+  await test('5 nights / Double / 3 guests = $550 before taxes/fees (matches the PMS fix\'s own worked example exactly)', () => {
+    const out = computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 3 });
+    assert.strictEqual(out.rate * 5, 550);
+  });
+
+  await test('computeOccupancyRate is capped at exactly one $20 supplement regardless of an over-capacity guest count', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.double;
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 4 }).thirdGuestSupplement, 20);
+    assert.strictEqual(computeOccupancyRate({ config: cfg, guestCount: 5 }).thirdGuestSupplement, 20);
+  });
+
+  // ── Step 4: extra-bed-requested must never change the charge (no double charge) ──
+  await test('extra_bed_requested has no effect on the rate -- computeOccupancyRate does not even accept it as a parameter, by design', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.double;
+    const withoutBed = computeOccupancyRate({ config: cfg, guestCount: 3, extraBedRequested: false });
+    const withBed = computeOccupancyRate({ config: cfg, guestCount: 3, extraBedRequested: true });
+    assert.strictEqual(withoutBed.rate, withBed.rate);
+    assert.strictEqual(withBed.rate, 110);
+  });
+
+  // ── Step 3: cancellation calculation tests (date-only, Maldives-safe) ──
+  await test('daysBeforeArrival: pure date-only day-count, no timezone/DST drift', () => {
+    assert.strictEqual(daysBeforeArrival('2026-10-31', '2026-10-01'), 30);
+    assert.strictEqual(daysBeforeArrival('2026-10-01', '2026-10-01'), 0);
+    assert.strictEqual(daysBeforeArrival('2026-09-30', '2026-10-01'), -1);
+  });
+
+  await test('cancellation boundaries: 31 and 30 days = 0%, 29 and 15 days = 50%, 14 and 1 day = 100%, same-day = 100%', () => {
+    const policy = INITIAL_OTA_ROOM_TYPES.double.cancellation_policy;
+    const cases = [
+      [31, 0], [30, 0],
+      [29, 50], [15, 50],
+      [14, 100], [1, 100], [0, 100],
+    ];
+    for (const [days, pct] of cases) {
+      const out = computeCancellationCharge({ policy, daysBeforeArrival: days, totalBookingValue: null });
+      assert.strictEqual(out.chargePercent, pct, `${days} days before arrival should be ${pct}%`);
+    }
+  });
+
+  await test('cancellation charge amount is computed against the real total booking value, for multiple totals', () => {
+    const policy = INITIAL_OTA_ROOM_TYPES.double.cancellation_policy;
+    assert.strictEqual(computeCancellationCharge({ policy, daysBeforeArrival: 31, totalBookingValue: 550 }).chargeAmount, 0);
+    assert.strictEqual(computeCancellationCharge({ policy, daysBeforeArrival: 20, totalBookingValue: 550 }).chargeAmount, 275);
+    assert.strictEqual(computeCancellationCharge({ policy, daysBeforeArrival: 5, totalBookingValue: 550 }).chargeAmount, 550);
+    assert.strictEqual(computeCancellationCharge({ policy, daysBeforeArrival: 20, totalBookingValue: 900.5 }).chargeAmount, 450.25);
+  });
+
+  await test('computeCancellationCharge never resolves a no-show -- policy.no_show stays owner_pending and is never consulted by this function', () => {
+    const policy = INITIAL_OTA_ROOM_TYPES.double.cancellation_policy;
+    assert.strictEqual(policy.no_show.status, 'owner_pending');
+    // the function itself has no branch that reads policy.no_show at all --
+    // asserting its full source never references it is the strongest
+    // "never inferred" guarantee available to a static test.
+    const src = require('fs').readFileSync(path.join(__dirname, '..', 'functions', 'lib', 'ota-room-types.js'), 'utf8');
+    const fnBody = src.slice(src.indexOf('function computeCancellationCharge'), src.indexOf('module.exports'));
+    assert.ok(!fnBody.includes('no_show'), 'computeCancellationCharge must never read/infer a no-show charge');
   });
 
   await test('this harness never touches Firestore or the network (self-check)', () => {
