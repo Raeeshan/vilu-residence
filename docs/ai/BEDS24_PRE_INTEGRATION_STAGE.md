@@ -5,7 +5,7 @@ Builds on `OTA_READINESS_AUDIT_2026-09-09.md` (Part 10-12 hold the original Beds
 
 ## 1. OTA room-type commercial model — what was built
 
-New, undeployed, pure-function module `functions/lib/ota-room-types.js` (18/18 tests, `test/ota-room-types.test.js`), plus two new additive Firestore collections (`ota_room_types`, `ota_room_type_overrides`; staff/admin read+write, deployed, and re-verified with a dedicated 16/16 Firestore-emulator rules test — `test/ota/ota-room-types-rules-repro.js`) initialized with exactly the owner-locked values below. Nothing reads or writes these collections in production yet — `enabled: false` on all three, and no Cloud Function references this module.
+New, undeployed, pure-function module `functions/lib/ota-room-types.js` (30/30 tests, `test/ota-room-types.test.js`), plus two new additive Firestore collections (`ota_room_types`, `ota_room_type_overrides`; staff/admin read+write, deployed, and re-verified with a dedicated 16/16 Firestore-emulator rules test — `test/ota/ota-room-types-rules-repro.js`) initialized with exactly the owner-locked values below. Nothing reads or writes these collections in production yet — `enabled: false` on all three, and no Cloud Function references this module.
 
 | room_type_id | physical_rooms | base_rate | currency |
 |---|---|---|---|
@@ -15,7 +15,16 @@ New, undeployed, pure-function module `functions/lib/ota-room-types.js` (18/18 t
 
 The Double OTA rate ($90) is deliberately **not** VR03/VR04's physical PMS rate ($85) — this is the owner's resolution of the VR03/VR04-vs-VR05 rate split raised in the earlier preparation pass (option B: publish VR05's rate for the pooled type). Physical PMS rates are unchanged: VR01/VR02 $80, VR03/VR04 $85, VR05/VR06 $90.
 
-Restrictions: `min_stay=1`, `max_stay=null` (no cap), `closed_to_arrival=false`, `closed_to_departure=false`, `availability_buffer=0`, all three types. **Updated 2026-09-09 (Steps 3-7 of the gap-closure pass)**: `booking_window_days=365` and `same_day_cutoff={time:'12:00', timezone:'Indian/Maldives'}` are now owner-locked (were `null`); `tax_mode=net_of_tax` is owner-locked. `occupancy_model`/`child_pricing_model` are now structured (`status:'owner_pending'` with every leaf value still `null`) rather than bare `null`, so the schema can express base/single/extra-adult occupancy pricing and child age-band supplements once the owner decides, without inventing values now. `cancellation_policy_status='owner_pending'` (renamed from the old bare `cancellation_policy: null` field). `meal_plan_mapping={intent:'breakfast_included', ota_mapping:null}` (see §5). Still fully unresolved, explicit `null`: `commission`. All three live Firestore docs were re-written and read back to confirm these values (Step 7) — see the final report for the confirmed field-by-field readout.
+Restrictions: `min_stay=1`, `max_stay=null` (no cap), `closed_to_arrival=false`, `closed_to_departure=false`, `availability_buffer=0`, all three types. `booking_window_days=365` and `same_day_cutoff={time:'12:00', timezone:'Indian/Maldives'}` are owner-locked, as is `tax_mode=net_of_tax`.
+
+**Updated 2026-09-09 (OTA commercial-policy implementation pass, following the PMS third-guest pricing fix in commit `ea921eb`)**: the schema's occupancy/payment/cancellation fields are now the owner-approved commercial policy, not placeholders. `occupancy_model`/`child_pricing_model`/`cancellation_policy_status` (the earlier pending-placeholder fields) have been **removed** from all three live docs and replaced with:
+- `base_occupancy: 2`, `third_guest_supplement: {amount:20, currency:'USD', period:'per_night', applies_without_extra_bed:true}` — mirrors the PMS fix (`calcTax()`/`calcPrice()` in `vilu-unified.html`) exactly: one flat $20/night charge for a 3rd guest, never a second extra-bed charge for the same person.
+- `infant_policy: {free_under_age: 2}` — owner-approved.
+- `child_pricing: {status:'owner_pending'}` — age 2+ still pending, never inferred.
+- `payment_policy: {timing:'pay_at_property', cash_currencies:['USD','EUR'], card_surcharge_percent:3.5, online_prepayment_default:false}` — no hardcoded exchange rate.
+- `cancellation_policy: {status:'approved', free_from_days_before_arrival:30, tiers:[{15-29 days: 50%},{0-14 days: 100%}], no_show:{status:'owner_pending'}}` — no-show is never inferred as 100%.
+
+`meal_plan_mapping={intent:'breakfast_included', ota_mapping:null}` (see §5) is unchanged. Still fully unresolved, explicit `null`: `commission`. All three live Firestore docs were re-written and read back to confirm these values — see the final report for the confirmed field-by-field readout.
 
 `computeOtaTypePayload()` derives the outbound record from (config, an optional date-level override, and the real physical `numAvail` already computed by the existing, untouched `availability.js`) — it never recomputes occupancy itself, so the physical-room lock stays the only conflict authority. `stopSell` is always derived (real inventory reaching 0, or a `manual_stop_sell` staff override), never a value trusted from storage as-is.
 
@@ -139,6 +148,26 @@ Concise summary of §2-§3's findings, for the owner to review before any Beds24
 5. Generate an API v2 authentication setup: Beds24 control panel → account/API settings → generate an invite code, then exchange it for a refresh token via `POST /authentication/setup` (per Beds24 API v2 docs already reviewed in §3/earlier audit).
 6. Hand the resulting refresh token to this session (or store it directly) **only when the owner is ready to proceed past this pre-integration stage** — it becomes `BEDS24_REFRESH_TOKEN` in Secret Manager. Not created, not requested, not stored anywhere in this pass.
 7. Billing: Beds24 trials run free for an initial period; the owner will need to enter payment details directly with Beds24 only if/when they choose to continue past the trial — this session will not do this step under any circumstance.
-8. Only after steps 1-6 above **and** the owner's own explicit decisions on the fields still marked `owner_pending`/`null` in `ota_room_types` — `cancellation_policy_status` (free-cancellation window, late-cancellation charge, no-show charge, prepayment/deposit, pay-at-property behavior), `occupancy_model`, `child_pricing_model`, and `commission` — would the next session be authorized to deploy `otaWebhook`/`processOtaEvent`/`otaCatchUp` and begin a real, sandboxed Beds24 connection. Not authorized by this task.
+8. Only after steps 1-6 above **and** the owner's own explicit decisions on the fields still marked `owner_pending`/`null` in `ota_room_types` — `cancellation_policy.no_show`, `child_pricing` (age 2+), and `commission` — would the next session be authorized to deploy `otaWebhook`/`processOtaEvent`/`otaCatchUp` and begin a real, sandboxed Beds24 connection. Not authorized by this task.
+
+## 8. Beds24 mapping classification (Step 8, 2026-09-09 OTA commercial-policy pass)
+
+Where each approved policy item will ultimately be configured — not every policy belongs in Beds24 itself; several are PMS-only, OTA-schema-only, Booking.com-side, or purely operational.
+
+| Policy item | Vilu PMS | `ota_room_types` | Beds24 property/rate plan | Booking.com Extranet | Operational/manual only |
+|---|---|---|---|---|---|
+| Base occupancy = 2 | ✓ (`calcTax()`/`calcPrice()`, commit `ea921eb`) | ✓ (`base_occupancy`) | — (Beds24 has no per-booking occupancy-pricing concept in its ARI push) | — | — |
+| 3rd guest +$20/night | ✓ (`TAX.thirdGuest`/`BE_TAX.thirdGuest`) | ✓ (`third_guest_supplement`) | Only via Beds24's own direct-booking Upsell Items — **not** the OTA path (§2.1) | Only real path to an OTA-sourced guest: Charges API `PER_PERSON_PER_NIGHT` or Extranet (§2.2) | — |
+| No separate extra-bed charge | ✓ (fixed; `anExtraBedCharge()` always 0) | ✓ (`applies_without_extra_bed:true`) | n/a — Beds24 has no concept of this distinction to configure | n/a | Housekeeping still needs to know a bed was requested — a non-priced flag in the PMS UI only |
+| Infant under 2 free | ✓ (`inf` excluded from `gp`) | ✓ (`infant_policy`) | — | Booking.com's own age-based exemption config, if/when configured (unresearched this pass — see §6's Child/infant tax row) | — |
+| Child 2+ pricing | Independent, unrelated "Child Discount %" field (agency/package context only, not this policy) | `child_pricing.status: 'owner_pending'` | Not configurable until decided | Not configurable until decided | Owner decision pending — nothing to configure anywhere yet |
+| Cancellation tiers (30+/15-29/0-14) | Not yet implemented in the PMS reservation-cancellation flow (only the guest-facing website/Voyager copy states it) | ✓ (`cancellation_policy.tiers`) | Beds24 cancellation-policy templates (`SETTINGS > BOOKING ENGINE > CANCELLATION POLICIES` in Beds24 API v2) — not yet configured, requires trial account | Booking.com's own cancellation-policy selection at rate-plan setup — not yet configured | — |
+| No-show | Not implemented (explicitly pending everywhere) | `cancellation_policy.no_show.status: 'owner_pending'` | Cannot configure until owner decides | Cannot configure until owner decides | Owner decision pending |
+| Pay at property | ✓ (existing PMS behavior, unchanged) | ✓ (`payment_policy.timing`) | Beds24 payment-collection settings (no online prepayment) | Booking.com's "Pay at the property" payment model selection | — |
+| Cash USD/EUR | ✓ (existing PMS behavior) | ✓ (`payment_policy.cash_currencies`) | n/a — cash handling is a property-side operational matter, not a channel-manager field | n/a | Front-desk operational practice |
+| Card +3.5% | ✓ (existing PMS behavior, unchanged this pass) | ✓ (`payment_policy.card_surcharge_percent`) | n/a unless Beds24's own payment-gateway integration is ever used (not planned) | n/a — Booking.com's own payment processing (if "Booking.com Payments" is ever used) has its own separate fee schedule, unrelated to Vilu's card surcharge | Front-desk card-terminal surcharge, operational |
+| Breakfast included | ✓ (existing PMS product) | ✓ (`meal_plan_mapping`) | Rate-plan board configuration (see §5) — not yet created | Extranet board-type setting (see §5) — not yet created | — |
+| Net-of-tax room rates | ✓ (existing PMS `tax_mode`) | ✓ (`tax_mode: 'net_of_tax'`) | n/a — Beds24 doesn't push a tax-inclusive/exclusive flag itself | `excluded: true` flag on each Charges API entry (see §2.2) | — |
+| Green Tax kept separate | ✓ (existing PMS `calcTax()`, unchanged) | ✓ (`tax_mode` + the room rate never includes it) | Not the path (§2.1) | The actual path — Charges API/Extranet (§2.2, §6) | — |
 
 VILU BEDS24 PRE-INTEGRATION STAGE — PREPARATION DOCUMENTED — NO LIVE OTA CONNECTION MADE
