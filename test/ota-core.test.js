@@ -207,6 +207,29 @@ async function assertNoOversell(store) { // physical invariant: no two active re
     await assertNoOversell(c.store);
   });
 
+  await test('ota_pushes doc-ID collision fix: 10 and 100 concurrent syncAvailability calls each produce fully unique audit records, zero overwrites', async () => {
+    // Force every call in this test onto the identical timestamp (rather than
+    // hoping the real clock happens to collide) -- this deterministically
+    // reproduces the original bug scenario instead of relying on chance.
+    const fixedNow = new Date().toISOString();
+
+    const c = await fresh();
+    await Promise.all(Array.from({ length: 10 }, (_, i) => syncAvailability({ store: c.store, from: '2026-11-01', days: 3, trigger: 'retry_like_' + i, now: fixedNow })));
+    assert.strictEqual((await c.store.list('ota_pushes')).length, 10, '10 concurrent calls at the identical timestamp must produce 10 unique ota_pushes records, not fewer (collision would silently overwrite earlier entries)');
+
+    // 100 concurrent calls at the identical timestamp, mixing repeated
+    // trigger names (simulating concurrent multi-room-type syncs and
+    // retry-like repeated calls) to confirm no combination collides.
+    const c2 = await fresh();
+    const triggers = ['reservation:R1', 'block:B1', 'nightly', 'retry', 'reservation:R1'];
+    await Promise.all(Array.from({ length: 100 }, (_, i) => syncAvailability({ store: c2.store, from: '2026-11-01', days: 3, trigger: triggers[i % triggers.length], now: fixedNow })));
+    const pushes = await c2.store.list('ota_pushes');
+    assert.strictEqual(pushes.length, 100, '100 concurrent calls must produce 100 unique ota_pushes records, zero overwrites, zero missing logs');
+    assert.strictEqual(new Set(pushes.map((p) => p._id)).size, 100, 'every ota_pushes doc ID must be distinct');
+    // fixing the ID scheme must not lose or corrupt the fields each record carries
+    for (const p of pushes) { assert.strictEqual(p.at, fixedNow); assert.strictEqual(typeof p.trigger, 'string'); assert.strictEqual(p.result, 'not_connected'); assert.strictEqual(p.retry_count, 0); }
+  });
+
   console.log('\n' + passed + '/' + (passed + failed) + ' ota-core assertions passed');
   process.exit(failed ? 1 : 0);
 })();

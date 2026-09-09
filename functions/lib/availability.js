@@ -4,6 +4,7 @@
 // payload to availability_outbound/{room_type_code} + an ota_pushes log
 // entry. NOT connected to any channel manager: `pushAdapter` is optional and
 // absent in this stage (result recorded as 'not_connected').
+const crypto = require('crypto');
 const { buildRoomTypes, computeSellable, toOutboundPayload, addDays } = require('./inventory');
 
 const HORIZON_DAYS = 365; // event-driven window
@@ -32,7 +33,13 @@ async function syncAvailability({ store, roomsDocs, from, days, trigger, pushAda
   if (pushAdapter && changed.length) {
     try { await pushAdapter.pushAvailability(payload); pushResult = 'pushed'; } catch (e) { pushResult = 'push_failed: ' + e.message; }
   }
-  await store.set('ota_pushes', 'avail_' + nowIso.replace(/[^0-9]/g, ''), { type: 'availability', trigger: trigger || 'manual', at: nowIso, window: { from: start, to }, changed, result: pushResult, error_reason: pushResult.startsWith('push_failed') ? pushResult : null, retry_count: 0 });
+  // Doc ID must be unique per attempt even when two calls share the same
+  // millisecond (concurrent triggers, retries, or fast-clock test loops) --
+  // a timestamp-only ID silently overwrote the earlier audit entry instead of
+  // creating a new one. The timestamp prefix is kept for readability/sorting;
+  // the random suffix is what guarantees uniqueness.
+  const pushId = 'avail_' + nowIso.replace(/[^0-9]/g, '') + '_' + crypto.randomBytes(9).toString('base64url');
+  await store.set('ota_pushes', pushId, { type: 'availability', trigger: trigger || 'manual', at: nowIso, window: { from: start, to }, changed, result: pushResult, error_reason: pushResult.startsWith('push_failed') ? pushResult : null, retry_count: 0 });
   return { payload, changed, pushResult, errors: roomTypes.errors };
 }
 
