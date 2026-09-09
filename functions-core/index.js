@@ -78,7 +78,16 @@ function cors(req, res) {
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS'); res.set('Access-Control-Allow-Headers', 'Content-Type'); res.set('Access-Control-Max-Age', '600');
 }
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s + 'T12:00:00Z'));
-const clean = (s, max) => String(s == null ? '' : s).replace(/[ -<>]/g, '').trim().slice(0, max || 200);
+// Strips only the characters that are actually unsafe to store verbatim
+// (angle brackets -- the same stored-XSS concern esc() guards against
+// elsewhere in the PMS). The previous /[ -<>]/g had an unescaped hyphen
+// between two other characters inside the class, which JS parses as a
+// RANGE (space..'<', i.e. U+0020-U+003C) rather than three literal
+// characters -- silently stripping spaces, hyphens, dots and more from
+// every guest field. That broke the email regex for any real address
+// (the dot never survived "cleaning"), so publicBooking rejected valid
+// guests with GUEST/400 -- caught by a live controlled test booking.
+const clean = (s, max) => String(s == null ? '' : s).replace(/[<>]/g, '').trim().slice(0, max || 200);
 const DEFAULT_RATES = { VR01: 80, VR02: 80, VR03: 85, VR04: 85, VR05: 90, VR06: 90 };
 
 async function serverRate(roomId, ci, co) {
