@@ -79,11 +79,18 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
   await test('payment policy is owner-approved: pay at property, cash USD/EUR (no hardcoded exchange rate), card +3.5%, no online prepayment', () => {
     for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
       assert.deepStrictEqual(cfg.payment_policy, {
+        scope: 'direct_booking_only',
         timing: 'pay_at_property',
         cash_currencies: ['USD', 'EUR'],
         card_surcharge_percent: 3.5,
         online_prepayment_default: false,
       }, cfg.room_type_id);
+    }
+  });
+
+  await test('payment_policy.scope explicitly marks this as direct-booking-only -- an OTA reservation is never governed by it (Step 14, 2026-09-09 channel-aware payment pass)', () => {
+    for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
+      assert.strictEqual(cfg.payment_policy.scope, 'direct_booking_only', cfg.room_type_id);
     }
   });
 

@@ -168,6 +168,27 @@ section('Case G — agency/B2B bookings are excluded (public/direct = $20, agenc
   });
 }
 
+section('Case G2 — OTA-ingested reservations (r.channel_manager set) never get a locally re-added supplement');
+{
+  // 2026-09-09 channel-aware payment pass, Step 11: an OTA channel's own
+  // gross_total already reflects whatever occupancy pricing it charged --
+  // calcTax() must not add a second $20/night supplement on top of that
+  // just because the local ad/ch counts happen to sum past 2.
+  test('channel_manager:"beds24", 3 guests -> $0 locally-recomputed supplement (channel total is authoritative)', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 3, 0, { channel_manager: 'beds24', src: 'Booking.com' }));
+    assert.equal(x.thirdGuest, 0);
+    assert.equal(x.base, 90);
+  });
+  test('channel_manager unset (direct/manual booking with src:"Booking.com" for record-keeping only), 3 guests -> $20 still applies', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 3, 0, { src: 'Booking.com' }));
+    assert.equal(x.thirdGuest, 20);
+  });
+  test('channel_manager:"mock", 2 guests -> no supplement anyway (below the 3rd-guest threshold)', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 0, { channel_manager: 'mock', src: 'Expedia' }));
+    assert.equal(x.thirdGuest, 0);
+  });
+}
+
 section('Case H — reservation edits 2<->3 guests recompute correctly (no stale persisted charge)');
 {
   test('editing ad 2 -> 3 on the same reservation increases base by exactly $20/night', () => {

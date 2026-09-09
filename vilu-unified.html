@@ -3205,7 +3205,17 @@ function calcTax(r){
   // and is the correct category-level answer even with more than one child
   // present, since the policy only ever charges exactly one supplement
   // regardless of how many extra guests share that category.
-  const hasThirdGuest=r.src!=='Agency'&&gp>2;
+  // Step 11 (2026-09-09 channel-aware payment pass): an OTA-ingested
+  // reservation's own gross_total (see r.channel_manager, set only by the
+  // ingest pipeline in functions/lib/ingest.js -- never by a staff-created
+  // direct booking) already reflects whatever occupancy pricing the channel
+  // itself charged the guest, 3rd-guest/child supplement included. Recomputing
+  // and adding Vilu's own thirdGuest supplement on top of that would double-
+  // charge a guest who never sees this internal breakdown. r.channel_manager
+  // is never set today (ingest is undeployed, 0 live OTA reservations), so
+  // this guard has no live effect yet -- it exists so the very first Beds24-
+  // ingested reservation is correct by construction.
+  const hasThirdGuest=r.src!=='Agency'&&!r.channel_manager&&gp>2;
   const thirdGuestIsChild=hasThirdGuest&&ad<3&&ch>=1;
   const thirdGuestFull=hasThirdGuest?TAX.thirdGuest*n:0;
   const thirdGuest=+(thirdGuestIsChild?thirdGuestFull*(1-TAX.childDiscountPercent/100):thirdGuestFull).toFixed(2);
@@ -3217,6 +3227,31 @@ function calcTax(r){
   return{n,base,svc,tgst,green,bed,gp,thirdGuest,thirdGuestIsChild,inf:r.inf||0,total:+(base+svc+tgst+green+TAX.bed*n).toFixed(2)};
 }
 
+// Step 9 (2026-09-09 channel-aware payment pass): renders the channel-aware
+// payment summary for an OTA-ingested reservation (r.channel_manager set by
+// functions/lib/ingest.js's buildFields() -- see ota_payment_model etc. on
+// the Firestore reservation doc, passed through by loadResFromSupabase()).
+// Returns '' for a direct/manual booking so the existing invoice tab is
+// unchanged for every reservation today. Mirrors describeOtaPayment() in
+// functions/lib/ingest.js but as a display block rather than a log line --
+// never invents a number: any field ingest.js couldn't determine (null)
+// renders as "—", it is never assumed to be 0 or equal to the total.
+function otaPaymentBlock(r){
+  if(!r.channel_manager) return '';
+  const cur=r.otaCurrency||'';
+  const fmt=function(n){return n==null?'—':cur+(+n).toFixed(2);};
+  const modelLabels={property_collect:'Property Collect',ota_collect:(r.src||'Channel')+' Collect',virtual_card:'Virtual Card',partial_prepayment:'Partial Prepayment',unknown:'Unknown — review required'};
+  const modelLabel=modelLabels[r.otaPaymentModel]||(r.otaPaymentModel||'—');
+  const reviewFlag=r.otaPaymentStatus==='review_required'?'<div style="margin-top:8px;font-weight:700;color:#dc2626">⚠️ REVIEW REQUIRED — payment model could not be determined from channel data</div>':'';
+  return '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'
+    +'<div style="font-size:var(--font-size-xs);font-weight:700;color:#1e40af;margin-bottom:8px">OTA PAYMENT ('+esc(r.src||r.channel_manager)+')</div>'
+    +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#6b7280">Payment model</span><span>'+esc(modelLabel)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#6b7280">Booking total</span><span>'+fmt(r.otaGrossTotal)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#6b7280">Collected by '+esc(r.src||'channel')+'</span><span>'+fmt(r.otaAmountCollected)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-weight:700;padding:2px 0"><span>Due at property</span><span>'+fmt(r.otaAmountDueAtProperty)+'</span></div>'
+    +reviewFlag
+    +'</div>';
+}
 function pbd(r){
   const x=calcTax(r);
   return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN</div>
@@ -6757,7 +6792,7 @@ function rdRenderTab(n, r){
       };footer.appendChild(nb);
     }
   } else if(n===2){
-    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div><div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div></div>';
+    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div></div>';
     footer.innerHTML='';
     if(!canViewOnly()){
       var ib=document.createElement('button');ib.className='btn p';ib.style.flex='1';
@@ -10769,7 +10804,24 @@ async function loadResFromSupabase() {
       depTransport:local.depTransport||r.dep_transport||'',
       depTo:local.depTo||r.dep_to||'',
       pkgId:local.pkgId||'',         // preserve package link
-      pkgName:local.pkgName||''
+      pkgName:local.pkgName||'',
+      // Step 11/15 (2026-09-09 channel-aware payment pass): pass through the
+      // OTA-ingestion marker and normalized payment fields ingest.js's
+      // buildFields() writes (functions/lib/ingest.js), when present, so the
+      // calcTax() channel_manager guard and any OTA payment display can see
+      // them. Additive only -- every field defaults to a value indistinguishable
+      // from "not an OTA reservation" (undefined/local fallback), so this is a
+      // no-op for every reservation today (ingest is undeployed, 0 live OTA
+      // rows in either store). r.channel_manager itself has no local fallback
+      // on purpose: a direct booking must never accidentally inherit an OTA
+      // marker from stale localStorage.
+      channel_manager:r.channel_manager||undefined,
+      otaPaymentModel:r.ota_payment_model||local.otaPaymentModel||'',
+      otaPaymentStatus:r.ota_payment_status||local.otaPaymentStatus||'',
+      otaAmountCollected:r.ota_amount_collected!=null?r.ota_amount_collected:(local.otaAmountCollected!=null?local.otaAmountCollected:null),
+      otaAmountDueAtProperty:r.ota_amount_due_at_property!=null?r.ota_amount_due_at_property:(local.otaAmountDueAtProperty!=null?local.otaAmountDueAtProperty:null),
+      otaGrossTotal:r.ota_gross_total!=null?r.ota_gross_total:(local.otaGrossTotal!=null?local.otaGrossTotal:null),
+      otaCurrency:r.ota_currency||local.otaCurrency||''
     };
   });
 }

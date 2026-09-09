@@ -10,6 +10,7 @@
 // Failure          = ota_conflicts record + sync_status, never a forced write
 const { buildRoomTypes, freeRoomsForStay, isActiveStatus } = require('./inventory');
 const { writeReservationTx, RoomConflictError } = require('./booking-core');
+const { normalizeOtaPayment } = require('./ota-payment');
 
 const OTA_EVENT_TYPES = ['new', 'modify', 'cancel', 'unknown'];
 
@@ -29,14 +30,32 @@ function mapStatus(cmStatus) {
   return 'Confirmed';
 }
 
+// One-line, channel-aware summary for the PMS reservation list's `pay`
+// column (Step 9) -- never exposes any payment credential, only the
+// normalized amounts already computed by ota-payment.js.
+function describeOtaPayment(cm, payment) {
+  if (payment.booking_total == null) return '';
+  const cur = payment.payment_currency || '';
+  const fmt = (n) => (n == null ? '?' : cur + n);
+  const modelLabel = { property_collect: 'property collect', ota_collect: cm + ' collect', virtual_card: 'virtual card', partial_prepayment: 'partial prepayment', unknown: 'payment model unknown' }[payment.payment_model] || payment.payment_model;
+  return cm + ' ' + modelLabel + ' · total ' + fmt(payment.booking_total) + ' · collected ' + fmt(payment.amount_collected_by_ota) + ' · due at property ' + fmt(payment.amount_due_at_property) + (payment.payment_status === 'review_required' ? ' · REVIEW REQUIRED' : '');
+}
+
 // Canonical booking shape expected from every adapter (Beds24, Channex, mock):
 // { external_id, revision, status, channel, channel_reservation_id, booking_date,
 //   guest:{first,last,email,phone,country}, notes, special_requests, meal_plan, arrival_info,
-//   commercial:{currency, gross_total, net_total, tax_total, commission, paid, balance, rate_includes_tax},
+//   commercial:{currency, gross_total, net_total, tax_total, commission, paid, balance, rate_includes_tax,
+//     payment_model, prepayment_amount, virtual_card:{available,amount,activation_date}, payment_reference},
 //   units:[{ room_type, check_in, check_out, adults, children, child_ages, nightly_rate }] }
+// commercial's payment_model/prepayment_amount/virtual_card/payment_reference
+// are OPTIONAL, adapter-supplied (2026-09-09 pass) -- see ota-payment.js's
+// normalizeOtaPayment() for how they resolve into the canonical channel-
+// aware payment structure below. Omitting them is always safe: it simply
+// yields payment_model:'unknown', never a guessed amount.
 function buildFields(booking, unit, unitIndex, cm, roomId, nowIso) {
   const g = booking.guest || {};
   const c = booking.commercial || {};
+  const payment = normalizeOtaPayment({ commercial: c });
   const nights = Math.round((Date.parse(unit.check_out + 'T12:00:00Z') - Date.parse(unit.check_in + 'T12:00:00Z')) / 864e5);
   const noteParts = [];
   noteParts.push('[' + cm + '] external id ' + booking.external_id + (booking.channel_reservation_id ? ' · ' + (booking.channel || 'channel') + ' ref ' + booking.channel_reservation_id : '') + ' · revision ' + revisionOf(booking.revision) + (booking.units.length > 1 ? ' · unit ' + (unitIndex + 1) + ' of ' + booking.units.length : ''));
@@ -67,9 +86,23 @@ function buildFields(booking, unit, unitIndex, cm, roomId, nowIso) {
     ota_currency: c.currency || '', ota_gross_total: c.gross_total ?? null, ota_net_total: c.net_total ?? null,
     ota_tax_total: c.tax_total ?? null, ota_commission: c.commission ?? null, ota_paid: c.paid ?? null, ota_balance: c.balance ?? null,
     rate_includes_tax: typeof c.rate_includes_tax === 'boolean' ? c.rate_includes_tax : null,
+    // 2026-09-09 — channel-aware payment model (ota-payment.js). Additive:
+    // every field above this comment is untouched, so an older reader that
+    // only knows ota_gross_total/ota_paid/ota_balance keeps working exactly
+    // as before.
+    ota_payment_model: payment.payment_model,
+    ota_payment_status: payment.payment_status,
+    ota_amount_collected: payment.amount_collected_by_ota,
+    ota_amount_due_at_property: payment.amount_due_at_property,
+    ota_prepayment_amount: payment.prepayment_amount,
+    ota_property_collect_amount: payment.property_collect_amount,
+    ota_virtual_card_available: payment.virtual_card_available,
+    ota_virtual_card_amount: payment.virtual_card_amount,
+    ota_virtual_card_activation_date: payment.virtual_card_activation_date,
+    ota_payment_reference: payment.ota_payment_reference,
     meal_plan: booking.meal_plan || '',
     notes: noteParts.join('\n\n'),
-    pay: c.gross_total != null ? (cm + ' ' + (c.currency || '') + ' total ' + c.gross_total + ' · paid ' + (c.paid ?? '-') + ' · balance ' + (c.balance ?? '-')) : '',
+    pay: describeOtaPayment(cm, payment),
     created_at: booking.booking_date || nowIso,
     updated_at: nowIso,
     nights,
@@ -198,4 +231,4 @@ async function ingestEvent({ store, adapter, roomsDocs, event, now }) {
   return { result, event_id: eventId, docs: written.map((w) => w.id), written, conflicts };
 }
 
-module.exports = { ingestEvent, docIdFor, mapStatus, buildFields, newerOrEqual };
+module.exports = { ingestEvent, docIdFor, mapStatus, buildFields, newerOrEqual, describeOtaPayment };

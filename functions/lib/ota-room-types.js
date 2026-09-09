@@ -64,6 +64,13 @@ const INITIAL_OTA_ROOM_TYPES = {
     child_pricing: approvedChildPricing(), // owner-approved 2026-09-09: infant <2 free, child 2-11 = 50% of the 3rd-guest supplement, adult from 12
     commission: null, // not modelled yet
     payment_policy: {
+      // Step 14 (2026-09-09 channel-aware payment pass): this object governs
+      // DIRECT/Vilu-website bookings ONLY. An OTA reservation's actual
+      // settlement is reservation/channel-supplied and never read from here
+      // -- see normalizeOtaPayment() in functions/lib/ota-payment.js, which
+      // derives payment_model/payment_status per booking from the channel's
+      // own commercial data, never from this room type's direct policy.
+      scope: 'direct_booking_only',
       timing: 'pay_at_property',
       cash_currencies: ['USD', 'EUR'], // no hardcoded exchange rate -- cash is accepted at face value in either currency
       card_surcharge_percent: 3.5,
@@ -102,6 +109,13 @@ const INITIAL_OTA_ROOM_TYPES = {
     child_pricing: approvedChildPricing(),
     commission: null,
     payment_policy: {
+      // Step 14 (2026-09-09 channel-aware payment pass): this object governs
+      // DIRECT/Vilu-website bookings ONLY. An OTA reservation's actual
+      // settlement is reservation/channel-supplied and never read from here
+      // -- see normalizeOtaPayment() in functions/lib/ota-payment.js, which
+      // derives payment_model/payment_status per booking from the channel's
+      // own commercial data, never from this room type's direct policy.
+      scope: 'direct_booking_only',
       timing: 'pay_at_property',
       cash_currencies: ['USD', 'EUR'],
       card_surcharge_percent: 3.5,
@@ -140,6 +154,13 @@ const INITIAL_OTA_ROOM_TYPES = {
     child_pricing: approvedChildPricing(),
     commission: null,
     payment_policy: {
+      // Step 14 (2026-09-09 channel-aware payment pass): this object governs
+      // DIRECT/Vilu-website bookings ONLY. An OTA reservation's actual
+      // settlement is reservation/channel-supplied and never read from here
+      // -- see normalizeOtaPayment() in functions/lib/ota-payment.js, which
+      // derives payment_model/payment_status per booking from the channel's
+      // own commercial data, never from this room type's direct policy.
+      scope: 'direct_booking_only',
       timing: 'pay_at_property',
       cash_currencies: ['USD', 'EUR'],
       card_surcharge_percent: 3.5,
