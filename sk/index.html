@@ -2137,7 +2137,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </a>
     <div class="tr-assurances">
       <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Lepšie ceny pri priamej rezervácii u nás</span></div>
-      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Bezplatné zrušenie pri každej priamej rezervácii</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Bezplatné zrušenie 30+ dní pred príchodom</span></div>
       <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17 % a ekologická daň sú súčasťou každej ceny</span></div>
     </div>
   </div>
@@ -2165,7 +2165,11 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     <div class="faq-list" id="faq-list">
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qCancellationPolicy">Účtujete poplatok za zrušenie alebo nedostavenie sa?</span></summary>
-        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">Bezplatné zrušenie pre všetky priame rezervácie uskutočnené priamo u nás — cez našu webovú stránku, WhatsApp alebo telefonicky. Pri týchto rezerváciách nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, iba v hotovosti (USD alebo EUR) —, takže zrušenie alebo zmena rezervácie nikdy nespôsobí žiadny poplatok. Ak ste rezervovali cez OTA (Booking.com, Airbnb alebo inú platformu tretej strany), namiesto našich podmienok platí vlastná storno politika danej platformy, keďže podmienky OTA nemôžeme kontrolovať ani meniť.</div>
+        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">Pre priame rezervácie uskutočnené u nás — cez našu webovú stránku, WhatsApp alebo telefonicky — platí nasledujúca storno politika: bezplatné zrušenie pri 30 a viac dňoch pred príchodom; poplatok vo výške 50 % z celkovej hodnoty rezervácie pri zrušení 15 – 29 dní pred príchodom; a poplatok vo výške 100 % z celkovej hodnoty rezervácie pri zrušení 0 – 14 dní pred príchodom. Naša politika ohľadom nedostavenia sa (no-show) sa stále dokončuje — ak sa vaše plány neočakávane zmenia, kontaktujte nás prosím priamo. Pri týchto rezerváciách nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — samotná platba prebieha osobne, po vašom príchode, v hotovosti (USD alebo EUR) alebo kartou (pri platbe kartou sa účtuje poplatok za spracovanie vo výške 3,5 %). Ak ste rezervovali cez OTA (Booking.com, Airbnb alebo inú platformu tretej strany), namiesto našich podmienok platí vlastná storno politika danej platformy, keďže podmienky OTA nemôžeme kontrolovať ani meniť.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qOccupancyPolicy">Koľko hostí sa zmestí do izby a je za to príplatok?</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aOccupancyPolicy">Cena izby zahŕňa 2 hostí. Každá izba môže v rámci svojej existujúcej kapacity ubytovať 3. hosťa za 20 USD za noc — platí to bez ohľadu na to, či je pripravená prístelka, a žiadny samostatný poplatok za prístelku sa navyše neúčtuje. Deti do 2 rokov majú pobyt zdarma.</div>
       </details>
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qWifi">Má Vilu Residence Wi-Fi?</span></summary>
@@ -2496,7 +2500,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       <div class="bwf-field" style="margin-bottom:20px"><label class="bwf-label" for="gd-country" data-i18n="bfp.country">Krajina</label><input type="text" class="bwf-input" id="gd-country"></div>
       <div id="gd-error" class="bk-error" style="display:none"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()" data-i18n="bfp.confirmBooking">Potvrdiť rezerváciu</button>
-      <div class="bwf-note" data-i18n="bfp.emailNote">Potvrdenie vám pošleme e-mailom. Keďže ide o priamu rezerváciu, teraz sa nevyžaduje žiadna platba a rezerváciu môžete kedykoľvek bezplatne zrušiť — stačí zaplatiť v hotovosti pri príchode.</div>
+      <div class="bwf-note" data-i18n="bfp.emailNote">Potvrdenie vám pošleme e-mailom. Keďže ide o priamu rezerváciu, teraz sa nevyžaduje žiadna platba. Platí naša storno politika (bezplatné zrušenie 30+ dní pred príchodom; bližšie k dátumu príchodu sa účtujú poplatky) — samotná platba prebieha v hotovosti alebo kartou pri príchode.</div>
     </div>
   </div>
 </div>
@@ -2782,7 +2786,9 @@ en: {
     "qPaymentTerms": "What are your payment and booking terms?",
     "qBookingFees": "Do you charge any booking fees?",
     "qCancellationPolicy": "Do you charge a cancellation or no-show fee?",
-    "aCancellationPolicy": "Free cancellation for all direct bookings made with us — through our website, WhatsApp, or phone. We never collect a deposit, prepayment, or card details online for these bookings — payment is made in person, in cash (USD or EUR) only — so cancelling or changing your reservation never results in any charge. If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "aCancellationPolicy": "For direct bookings made with us — through our website, WhatsApp, or phone — our cancellation policy is: free cancellation 30 or more days before arrival; a 50% charge on your total booking value for cancellations 15–29 days before arrival; and a 100% charge on your total booking value for cancellations 0–14 days before arrival. Our no-show policy is still being finalized — please contact us directly if your plans change unexpectedly. We never collect a deposit, prepayment, or card details online — payment itself is made in person, once you're here, in cash (USD or EUR) or by card (a 3.5% processing fee applies to card payments). If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "qOccupancyPolicy": "How many guests can a room hold, and is there an extra charge?",
+    "aOccupancyPolicy": "Our room rate covers 2 guests. Every room can accommodate a 3rd guest within its existing capacity for USD 20 per night — this applies whether or not an extra bed is set up, with no separate extra-bed charge on top. Children under 2 stay free.",
     "qCheckAvailability": "How do I check if my dates are available?",
     "aCheckAvailability": "Use the \"Check Availability\" search in the booking bar at the top of the page, or the {link} further down — both check real-time availability instantly, with no obligation to book.",
     "checkAvailabilityLinkText": "Quick Reservation widget",
@@ -2800,7 +2806,7 @@ en: {
     "subtitle": "Hear directly from guests who've stayed with us at Vilu Residence.",
     "readOnGoogle": "Read Our Reviews on Google",
     "assurance1": "Better rates when you book direct with us",
-    "assurance2": "Free cancellation on every direct booking",
+    "assurance2": "Free cancellation 30+ days before arrival",
     "assurance3": "TGST 17% & Green Tax included in every rate"
   },
   "contact": {
@@ -2873,7 +2879,7 @@ en: {
     "country": "Country",
     "confirmBooking": "Confirm Booking",
     "submitting": "Submitting…",
-    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now and you can cancel anytime at no charge — just pay in cash on arrival.",
+    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now. Our cancellation policy applies (free 30+ days before arrival; charges apply closer to your arrival date) — payment itself is made in cash or by card when you arrive.",
     "notEnoughRooms": "Not enough rooms available for {n} rooms on these dates. Try different dates, fewer rooms, or contact us.",
     "noRoomsAvailable": "No rooms available. Try different dates or contact us.",
     "perNight": "/night",
@@ -3679,35 +3685,40 @@ async function loadRoomsFromSupabase() {
   }
 }
 
-// Submit booking request to Supabase
+// Submit booking request via the trusted publicBooking Cloud Function.
 // Vilu Residence rooms only — this is the single choke point that writes a
 // reservation for the website, so the VR-only guard lives here as well as
 // in the room list itself.
+// publicBooking performs the identical reservation + room_availability
+// transaction server-side with the Admin SDK (Stage 0 fix): the client-side
+// runTransaction() this used to call here could never actually succeed,
+// since firestore.rules correctly denies an anonymous client's
+// room_availability write, so the whole atomic transaction was denied too.
 // Returns the new reservation id on success, the string 'CONFLICT' if the
-// atomic transaction found the room already taken for those dates, or null
-// on any other failure.
+// server found the room already taken for those dates, or null on any
+// other failure.
 async function submitDirectBooking(booking) {
   if (!booking || !/^VR0[1-6]$/.test(booking.roomId)) return null;
-  const id = 'WEB' + Date.now();
   try {
-    await writeReservation(id, {
-      id: id,
-      room_id: booking.roomId,
-      guest_name: booking.name,
-      guest_email: booking.email,
-      guest_phone: booking.phone||'',
-      guest_country: booking.country||'',
-      check_in: booking.ci,
-      check_out: booking.co,
-      adults: booking.adults||2,
-      children: 0,
-      rate: booking.rate||0,
-      status: 'Pending',
-      source: 'Website'
+    const res = await fetch('https://us-central1-vilu-residence.cloudfunctions.net/publicBooking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roomId: booking.roomId,
+        ci: booking.ci,
+        co: booking.co,
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || '',
+        country: booking.country || '',
+        adults: booking.adults || 2
+      })
     });
-    return id;
-  } catch(e) {
-    if (e.message === 'ROOM_CONFLICT') return 'CONFLICT';
+    if (res.status === 409) return 'CONFLICT';
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.id ? data.id : null;
+  } catch (e) {
     return null;
   }
 }
@@ -4757,6 +4768,11 @@ function faqBuildItems() {
     cat:'booking',
     q: t('faq.qCancellationPolicy'),
     a: t('faq.aCancellationPolicy')
+  });
+  items.push({
+    cat:'booking',
+    q: t('faq.qOccupancyPolicy'),
+    a: t('faq.aOccupancyPolicy')
   });
   items.push({
     cat:'booking',

@@ -130,11 +130,11 @@ section('Case D — holiday-packages.html wildlife-sighting disclaimer (highest-
       if (!fs.existsSync(file)) continue;
       const html = read(file);
       const detailsCount = (html.match(/<div class="faq-a"/g) || []).length;
-      assert.equal(detailsCount, 8, `${file}: expected 8 visible FAQ answers, found ${detailsCount}`);
+      assert.equal(detailsCount, 9, `${file}: expected 9 visible FAQ answers, found ${detailsCount}`);
       const nodes = jsonLdNodes(html);
       const faq = nodes.find(n => n['@type'] === 'FAQPage');
-      assert.equal(faq.mainEntity.length, 8, `${file}: expected 8 FAQPage Q&A entries, found ${faq.mainEntity.length}`);
-      assert.ok(!/sightings can never be guaranteed/i.test(JSON.stringify(faq.mainEntity[7])), `${file}: FAQ #8 was left in English (untranslated)`);
+      assert.equal(faq.mainEntity.length, 9, `${file}: expected 9 FAQPage Q&A entries, found ${faq.mainEntity.length}`);
+      assert.ok(!/sightings can never be guaranteed/i.test(JSON.stringify(faq.mainEntity[8])), `${file}: FAQ #9 was left in English (untranslated)`);
     }
   });
 }

@@ -184,7 +184,7 @@
       "subtitle": "Poslechněte si přímo hosty, kteří u nás ve Vilu Residence pobývali.",
       "readOnGoogle": "Přečtěte si naše recenze na Google",
       "assurance1": "Lepší ceny při přímé rezervaci u nás",
-      "assurance2": "Bezplatné zrušení u každé přímé rezervace",
+      "assurance2": "Bezplatné zrušení 30+ dní před příjezdem",
       "assurance3": "TGST 17 % a ekologická daň jsou zahrnuty v každé ceně"
     },
     "contact": {
@@ -258,7 +258,7 @@
       "country": "Země",
       "confirmBooking": "Potvrdit rezervaci",
       "submitting": "Odesílání…",
-      "emailNote": "Potvrzení vám zašleme e-mailem. Jelikož jde o přímou rezervaci, nyní se nevyžaduje žádná platba a rezervaci můžete kdykoli bezplatně zrušit — stačí zaplatit v hotovosti při příjezdu.",
+      "emailNote": "Potvrzení vám zašleme e-mailem. Jelikož jde o přímou rezervaci, nyní se nevyžaduje žádná platba. Platí naše storno politika (bezplatné zrušení 30+ dní před příjezdem; blíže k datu příjezdu se účtují poplatky) — platba samotná probíhá v hotovosti nebo kartou při příjezdu.",
       "notEnoughRooms": "Pro {n} pokojů v těchto termínech není k dispozici dostatek volných pokojů. Zkuste jiné termíny, méně pokojů, nebo nás kontaktujte.",
       "noRoomsAvailable": "Žádné volné pokoje. Zkuste jiné termíny nebo nás kontaktujte.",
       "perNight": "/noc",
@@ -368,14 +368,16 @@
       "aCheckAvailability": "Použijte vyhledávání \"Check Availability\" v rezervační liště v horní části stránky, nebo {link} níže — obě možnosti okamžitě ověří dostupnost v reálném čase, bez jakéhokoli závazku k rezervaci.",
       "checkAvailabilityLinkText": "widget Rychlá rezervace",
       "qCancellationPolicy": "Účtujete poplatek za zrušení nebo nedostavení se?",
-      "aCancellationPolicy": "Bezplatné zrušení pro všechny přímé rezervace uskutečněné přímo u nás — přes naše webové stránky, WhatsApp nebo telefonicky. U těchto rezervací nikdy online nevybíráme zálohu, platbu předem ani údaje o kartě — platba probíhá osobně, pouze v hotovosti (USD nebo EUR) —, takže zrušení nebo změna rezervace nikdy nezpůsobí žádný poplatek. Pokud jste rezervovali přes OTA (Booking.com, Airbnb nebo jinou platformu třetí strany), platí místo našich podmínek storno politika dané platformy, jelikož podmínky OTA nemůžeme kontrolovat ani měnit.",
+      "aCancellationPolicy": "Pro přímé rezervace uskutečněné u nás — přes naše webové stránky, WhatsApp nebo telefonicky — platí následující storno politika: bezplatné zrušení 30 a více dní před příjezdem; poplatek ve výši 50 % z celkové hodnoty rezervace při zrušení 15–29 dní před příjezdem; a poplatek ve výši 100 % z celkové hodnoty rezervace při zrušení 0–14 dní před příjezdem. Naše politika ohledně nedostavení se (no-show) se stále dokončuje — pokud se vaše plány neočekávaně změní, kontaktujte nás prosím přímo. U těchto rezervací nikdy online nevybíráme zálohu, platbu předem ani údaje o kartě — platba samotná probíhá osobně, po vašem příjezdu, v hotovosti (USD nebo EUR) nebo kartou (u platby kartou se účtuje poplatek za zpracování ve výši 3,5 %). Pokud jste rezervovali přes OTA (Booking.com, Airbnb nebo jinou platformu třetí strany), platí místo našich podmínek storno politika dané platformy, jelikož podmínky OTA nemůžeme kontrolovat ani měnit.",
       "catAmenities": "Vybavení",
       "qWifi": "Má Vilu Residence Wi-Fi?",
       "aWifi": "Ano — bezplatné Wi-Fi je k dispozici všem hostům po celou dobu pobytu.",
       "qAircon": "Jsou pokoje klimatizované?",
       "aAircon": "Ano — všechny naše pokoje mají klimatizaci.",
       "qDietary": "Dokážete vyhovět speciálním stravovacím požadavkům?",
-      "aDietary": "Obecně ano — dejte nám vědět o jakýchkoli stravovacích požadavcích (vegetariánská strava, halal, alergie atd.) při rezervaci a uděláme vše pro to, abychom je splnili."
+      "aDietary": "Obecně ano — dejte nám vědět o jakýchkoli stravovacích požadavcích (vegetariánská strava, halal, alergie atd.) při rezervaci a uděláme vše pro to, abychom je splnili.",
+      "qOccupancyPolicy": "Kolik hostů může být v jednom pokoji a je za to příplatek?",
+      "aOccupancyPolicy": "Cena pokoje zahrnuje 2 hosty. Každý pokoj může v rámci své stávající kapacity ubytovat 3. hosta za 20 USD za noc — platí to bez ohledu na to, zda je připravena přistýlka, a žiadny samostatný poplatok za přistýlku se navíc neúčtuje. Děti do 2 let mají pobyt zdarma."
     },
     "travelInfo": {
       "tag": "Naplánujte si cestu",
@@ -1026,7 +1028,7 @@
       "accomLink": "Chcete si ubytování zařídit samostatně? Zkontrolujte dostupnost v reálném čase &rarr;",
       "trustTitle": "Proč rezervovat přímo u Vilu Residence",
       "trust1": "Dotaz je zdarma a k ničemu vás nezavazuje.",
-      "trust2": "Pokud se rozhodnete pokračovat, platí naše zveřejněná politika pro přímé rezervace (web, WhatsApp, e-mail nebo telefon): bezplatné zrušení a nikdy online nevybíráme zálohu, platbu předem ani údaje o kartě — platba probíhá osobně, v hotovosti (USD nebo EUR), během vašeho pobytu. (Rezervace přes platformu třetí strany se řídí storno podmínkami dané platformy.)",
+      "trust2": "Pokud se rozhodnete pokračovat, platí naše storno politika pro přímé rezervace (web, WhatsApp, e-mail nebo telefon): bezplatné zrušení 30+ dní před příjezdem, poplatek 50 % při zrušení 15–29 dní předem a poplatek 100 % při zrušení 0–14 dní předem. Nikdy online nevybíráme zálohu, platbu předem ani údaje o kartě — platba probíhá osobně, v hotovosti (USD nebo EUR) nebo kartou (poplatek za zpracování 3,5 %), během vašeho pobytu. (Rezervace přes platformu třetí strany se řídí storno podmínkami dané platformy.)",
       "trust3": "Odpovídáme do 24 hodin.",
       "trust4": "Transfer rychlým člunem tam i zpět je součástí každého balíčku na této stránce.",
       "trustGoogle": "Přečtěte si naše recenze na Google",
@@ -1041,7 +1043,7 @@
       "faqQ4": "Musím zaplatit zálohu, abych se zeptal nebo si rezervoval balíček?",
       "faqA4": "Ne. Dotaz je zdarma a k ničemu vás nezavazuje. U přímých rezervací online nevybíráme zálohu, platbu předem ani údaje o kartě — platba probíhá osobně, v hotovosti (USD nebo EUR), během vašeho pobytu.",
       "faqQ5": "Co se stane, když budu potřebovat změnit data nebo zrušit rezervaci?",
-      "faqA5": "Naše zveřejněná storno politika pro přímé rezervace (web, WhatsApp, e-mail nebo telefon) je bezplatné zrušení, přičemž záloha se nikdy nevybírá. Pokud rezervujete přes platformu třetí strany, platí storno podmínky dané platformy.",
+      "faqA5": "Naše storno politika pro přímé rezervace (web, WhatsApp, e-mail nebo telefon) je odstupňovaná: bezplatné zrušení 30 a více dní před příjezdem; poplatek 50 % z celkové hodnoty rezervace při zrušení 15–29 dní před příjezdem; a poplatek 100 % z celkové hodnoty rezervace při zrušení 0–14 dní před příjezdem. Pokud rezervujete přes platformu třetí strany, platí storno podmínky dané platformy.",
       "faqQ6": "Jak rychle dostanu odpověď po odeslání dotazu?",
       "faqA6": "Do 24 hodin.",
       "faqQ7": "Co se stane, pokud počasí není pro výlet vhodné?",
@@ -1067,7 +1069,9 @@
       "durationTitle": "Od čtyř nocí do jedenácti",
       "faqQ8": "Je pozorování žraloka velrybího nebo manty na výletech v rámci balíčku zaručeno?",
       "faqA8": "Ne. Žraloci velrybí a manty jsou volně žijící zvířata a pozorování nelze na žádném jednotlivém výletu nikdy zaručit. Pokud se žralok velrybí při hledání nenajde, jsou hosté místo toho odvezeni na šnorchlování na nedaleký útes a Vilu Residence může nabídnout zlevněný druhý pokus jiný den.",
-      "cancelReassure": "Bezplatné storno, žádná záloha — platba osobně během vašeho pobytu."
+      "cancelReassure": "Odstupňovaná storno politika, žádná záloha — platba osobně během vašeho pobytu.",
+      "faqQ9": "Kolik hostů může být v jednom pokoji a je za to příplatek?",
+      "faqA9": "Cena pokoje v každém balíčku zahrnuje 2 hosty. Každý pokoj může v rámci své stávající kapacity ubytovat 3. hosta za 20 USD za noc — platí to bez ohledu na to, zda je připravena přistýlka, a žiadny samostatný poplatok za přistýlku se navíc neúčtuje. Děti do 2 let mají pobyt zdarma."
     },
     "maaMeta": {
       "title": "Průvodce Maamigili — Ostrov, který Vilu Residence nazývá domovem",

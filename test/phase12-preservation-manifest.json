@@ -57,7 +57,7 @@
       "hreflang": true,
       "h1": "Maldives Holiday Packages",
       "jsonld_types": ["BreadcrumbList", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "FAQPage"],
-      "faq_count": 8,
+      "faq_count": 9,
       "required_ids": ["pkg-grid", "hamburger", "mobileMenu"]
     },
     {

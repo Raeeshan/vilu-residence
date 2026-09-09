@@ -184,7 +184,7 @@
       "subtitle": "Vypočujte si priamo hostí, ktorí u nás vo Vilu Residence už boli ubytovaní.",
       "readOnGoogle": "Prečítajte si naše recenzie na Google",
       "assurance1": "Lepšie ceny pri priamej rezervácii u nás",
-      "assurance2": "Bezplatné zrušenie pri každej priamej rezervácii",
+      "assurance2": "Bezplatné zrušenie 30+ dní pred príchodom",
       "assurance3": "TGST 17 % a ekologická daň sú súčasťou každej ceny"
     },
     "contact": {
@@ -258,7 +258,7 @@
       "country": "Krajina",
       "confirmBooking": "Potvrdiť rezerváciu",
       "submitting": "Odosiela sa…",
-      "emailNote": "Potvrdenie vám pošleme e-mailom. Keďže ide o priamu rezerváciu, teraz sa nevyžaduje žiadna platba a rezerváciu môžete kedykoľvek bezplatne zrušiť — stačí zaplatiť v hotovosti pri príchode.",
+      "emailNote": "Potvrdenie vám pošleme e-mailom. Keďže ide o priamu rezerváciu, teraz sa nevyžaduje žiadna platba. Platí naša storno politika (bezplatné zrušenie 30+ dní pred príchodom; bližšie k dátumu príchodu sa účtujú poplatky) — samotná platba prebieha v hotovosti alebo kartou pri príchode.",
       "notEnoughRooms": "Na tieto dátumy nie je k dispozícii dostatok izieb pre {n} izieb. Skúste iné dátumy, menej izieb, alebo nás kontaktujte.",
       "noRoomsAvailable": "Žiadne izby nie sú k dispozícii. Skúste iné dátumy alebo nás kontaktujte.",
       "perNight": "/noc",
@@ -368,14 +368,16 @@
       "aCheckAvailability": "Použite vyhľadávanie \"Check Availability\" v rezervačnom paneli v hornej časti stránky, alebo {link} nižšie — obe možnosti okamžite overia dostupnosť v reálnom čase, bez akéhokoľvek záväzku rezervovať.",
       "checkAvailabilityLinkText": "Widget rýchlej rezervácie",
       "qCancellationPolicy": "Účtujete poplatok za zrušenie alebo nedostavenie sa?",
-      "aCancellationPolicy": "Bezplatné zrušenie pre všetky priame rezervácie uskutočnené priamo u nás — cez našu webovú stránku, WhatsApp alebo telefonicky. Pri týchto rezerváciách nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, iba v hotovosti (USD alebo EUR) —, takže zrušenie alebo zmena rezervácie nikdy nespôsobí žiadny poplatok. Ak ste rezervovali cez OTA (Booking.com, Airbnb alebo inú platformu tretej strany), namiesto našich podmienok platí vlastná storno politika danej platformy, keďže podmienky OTA nemôžeme kontrolovať ani meniť.",
+      "aCancellationPolicy": "Pre priame rezervácie uskutočnené u nás — cez našu webovú stránku, WhatsApp alebo telefonicky — platí nasledujúca storno politika: bezplatné zrušenie pri 30 a viac dňoch pred príchodom; poplatok vo výške 50 % z celkovej hodnoty rezervácie pri zrušení 15 – 29 dní pred príchodom; a poplatok vo výške 100 % z celkovej hodnoty rezervácie pri zrušení 0 – 14 dní pred príchodom. Naša politika ohľadom nedostavenia sa (no-show) sa stále dokončuje — ak sa vaše plány neočakávane zmenia, kontaktujte nás prosím priamo. Pri týchto rezerváciách nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — samotná platba prebieha osobne, po vašom príchode, v hotovosti (USD alebo EUR) alebo kartou (pri platbe kartou sa účtuje poplatok za spracovanie vo výške 3,5 %). Ak ste rezervovali cez OTA (Booking.com, Airbnb alebo inú platformu tretej strany), namiesto našich podmienok platí vlastná storno politika danej platformy, keďže podmienky OTA nemôžeme kontrolovať ani meniť.",
       "catAmenities": "Vybavenie",
       "qWifi": "Má Vilu Residence Wi-Fi?",
       "aWifi": "Áno — bezplatné Wi-Fi je k dispozícii všetkým hosťom počas celého pobytu.",
       "qAircon": "Sú izby klimatizované?",
       "aAircon": "Áno — všetky naše izby majú klimatizáciu.",
       "qDietary": "Dokážete vyhovieť špeciálnym stravovacím požiadavkám?",
-      "aDietary": "Vo všeobecnosti áno — dajte nám vedieť o akýchkoľvek stravovacích požiadavkách (vegetariánska strava, halal, alergie atď.) pri rezervácii a urobíme všetko pre to, aby sme ich splnili."
+      "aDietary": "Vo všeobecnosti áno — dajte nám vedieť o akýchkoľvek stravovacích požiadavkách (vegetariánska strava, halal, alergie atď.) pri rezervácii a urobíme všetko pre to, aby sme ich splnili.",
+      "qOccupancyPolicy": "Koľko hostí sa zmestí do izby a je za to príplatok?",
+      "aOccupancyPolicy": "Cena izby zahŕňa 2 hostí. Každá izba môže v rámci svojej existujúcej kapacity ubytovať 3. hosťa za 20 USD za noc — platí to bez ohľadu na to, či je pripravená prístelka, a žiadny samostatný poplatok za prístelku sa navyše neúčtuje. Deti do 2 rokov majú pobyt zdarma."
     },
     "travelInfo": {
       "tag": "Naplánujte si cestu",
@@ -1026,7 +1028,7 @@
       "accomLink": "Chcete si ubytovanie zariadiť samostatne? Skontrolujte dostupnosť naživo &rarr;",
       "trustTitle": "Prečo rezervovať priamo u Vilu Residence",
       "trust1": "Otázka je zadarmo a k ničomu vás nezaväzuje.",
-      "trust2": "Ak sa rozhodnete pokračovať, platí naša zverejnená politika pre priame rezervácie (web, WhatsApp, e-mail alebo telefón): bezplatné zrušenie a nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, v hotovosti (USD alebo EUR), počas vášho pobytu. (Rezervácie cez platformu tretej strany sa riadia storno podmienkami danej platformy.)",
+      "trust2": "Ak sa rozhodnete pokračovať, platí naša storno politika pre priame rezervácie (web, WhatsApp, e-mail alebo telefón): bezplatné zrušenie 30+ dní pred príchodom, poplatok 50 % pri 15 – 29 dňoch vopred a poplatok 100 % pri 0 – 14 dňoch vopred. Nikdy online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, v hotovosti (USD alebo EUR) alebo kartou (poplatok za spracovanie 3,5 %), počas vášho pobytu. (Rezervácie cez platformu tretej strany sa riadia storno podmienkami danej platformy.)",
       "trust3": "Odpovedáme do 24 hodín.",
       "trust4": "Transfer rýchloloďou tam a späť je súčasťou každého balíčka na tejto stránke.",
       "trustGoogle": "Prečítajte si naše recenzie na Google",
@@ -1041,7 +1043,7 @@
       "faqQ4": "Musím zaplatiť zálohu, aby som sa opýtal alebo si rezervoval balíček?",
       "faqA4": "Nie. Otázka je zadarmo a k ničomu vás nezaväzuje. Pri priamych rezerváciách online nevyberáme zálohu, platbu vopred ani údaje o karte — platba prebieha osobne, v hotovosti (USD alebo EUR), počas vášho pobytu.",
       "faqQ5": "Čo sa stane, ak budem potrebovať zmeniť dátumy alebo zrušiť rezerváciu?",
-      "faqA5": "Naša zverejnená storno politika pre priame rezervácie (web, WhatsApp, e-mail alebo telefón) je bezplatné zrušenie, pričom záloha sa nikdy nevyberá. Ak rezervujete cez platformu tretej strany, platia storno podmienky danej platformy.",
+      "faqA5": "Naša storno politika pre priame rezervácie (web, WhatsApp, e-mail alebo telefón) je odstupňovaná: bezplatné zrušenie pri 30 a viac dňoch pred príchodom; poplatok 50 % z celkovej hodnoty rezervácie pri zrušení 15 – 29 dní pred príchodom; a poplatok 100 % z celkovej hodnoty rezervácie pri zrušení 0 – 14 dní pred príchodom. Ak rezervujete cez platformu tretej strany, platia storno podmienky danej platformy.",
       "faqQ6": "Ako rýchlo dostanem odpoveď po odoslaní otázky?",
       "faqA6": "Do 24 hodín.",
       "faqQ7": "Čo sa stane, ak počasie nie je pre výlet vhodné?",
@@ -1067,7 +1069,9 @@
       "durationTitle": "Od štyroch do jedenástich nocí",
       "faqQ8": "Je pozorovanie žraloka veľrybieho alebo manty na výletoch v rámci balíka zaručené?",
       "faqA8": "Nie. Žraloky veľrybie a manty sú voľne žijúce zvieratá a pozorovanie nemožno na žiadnom jednotlivom výlete nikdy zaručiť. Ak sa žralok veľrybí počas hľadania nenájde, hostia sú namiesto toho odvezení na šnorchlovanie na neďaleký útes a Vilu Residence môže ponúknuť zľavnený druhý pokus v iný deň.",
-      "cancelReassure": "Bezplatné storno, žiadna záloha — platba osobne počas vášho pobytu."
+      "cancelReassure": "Odstupňovaná storno politika, žiadna záloha — platba osobne počas vášho pobytu.",
+      "faqQ9": "Koľko hostí sa zmestí do izby a je za to príplatok?",
+      "faqA9": "Cena izby v každom balíku zahŕňa 2 hostí. Každá izba môže v rámci svojej existujúcej kapacity ubytovať 3. hosťa za 20 USD za noc — platí to bez ohľadu na to, či je pripravená prístelka, a žiadny samostatný poplatok za prístelku sa navyše neúčtuje. Deti do 2 rokov majú pobyt zdarma."
     },
     "maaMeta": {
       "title": "Sprievodca Maamigili — Ostrov, ktorý Vilu Residence nazýva domovom",

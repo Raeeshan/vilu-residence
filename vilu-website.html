@@ -2120,7 +2120,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </a>
     <div class="tr-assurances">
       <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">Better rates when you book direct with us</span></div>
-      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Free cancellation on every direct booking</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">Free cancellation 30+ days before arrival</span></div>
       <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST 17% & Green Tax included in every rate</span></div>
     </div>
   </div>
@@ -2148,7 +2148,11 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     <div class="faq-list" id="faq-list">
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qCancellationPolicy">Do you charge a cancellation or no-show fee?</span></summary>
-        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">Free cancellation for all direct bookings made with us — through our website, WhatsApp, or phone. We never collect a deposit, prepayment, or card details online for these bookings — payment is made in person, in cash (USD or EUR) only — so cancelling or changing your reservation never results in any charge. If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.</div>
+        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">For direct bookings made with us — through our website, WhatsApp, or phone — our cancellation policy is: free cancellation 30 or more days before arrival; a 50% charge on your total booking value for cancellations 15–29 days before arrival; and a 100% charge on your total booking value for cancellations 0–14 days before arrival. Our no-show policy is still being finalized — please contact us directly if your plans change unexpectedly. We never collect a deposit, prepayment, or card details online — payment itself is made in person, once you're here, in cash (USD or EUR) or by card (a 3.5% processing fee applies to card payments). If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qOccupancyPolicy">How many guests can a room hold, and is there an extra charge?</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aOccupancyPolicy">Our room rate covers 2 guests. Every room can accommodate a 3rd guest within its existing capacity for USD 20 per night — this applies whether or not an extra bed is set up, with no separate extra-bed charge on top. Children under 2 stay free.</div>
       </details>
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qWifi">Does Vilu Residence have Wi-Fi?</span></summary>
@@ -2479,7 +2483,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       <div class="bwf-field" style="margin-bottom:20px"><label class="bwf-label" for="gd-country" data-i18n="bfp.country">Country</label><input type="text" class="bwf-input" id="gd-country"></div>
       <div id="gd-error" class="bk-error" style="display:none"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()" data-i18n="bfp.confirmBooking">Confirm Booking</button>
-      <div class="bwf-note" data-i18n="bfp.emailNote">We'll email your confirmation. As a direct booking, no payment is taken now and you can cancel anytime at no charge — just pay in cash on arrival.</div>
+      <div class="bwf-note" data-i18n="bfp.emailNote">We'll email your confirmation. As a direct booking, no payment is taken now. Our cancellation policy applies (free 30+ days before arrival; charges apply closer to your arrival date) — payment itself is made in cash or by card when you arrive.</div>
     </div>
   </div>
 </div>
@@ -2765,7 +2769,9 @@ en: {
     "qPaymentTerms": "What are your payment and booking terms?",
     "qBookingFees": "Do you charge any booking fees?",
     "qCancellationPolicy": "Do you charge a cancellation or no-show fee?",
-    "aCancellationPolicy": "Free cancellation for all direct bookings made with us — through our website, WhatsApp, or phone. We never collect a deposit, prepayment, or card details online for these bookings — payment is made in person, in cash (USD or EUR) only — so cancelling or changing your reservation never results in any charge. If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "aCancellationPolicy": "For direct bookings made with us — through our website, WhatsApp, or phone — our cancellation policy is: free cancellation 30 or more days before arrival; a 50% charge on your total booking value for cancellations 15–29 days before arrival; and a 100% charge on your total booking value for cancellations 0–14 days before arrival. Our no-show policy is still being finalized — please contact us directly if your plans change unexpectedly. We never collect a deposit, prepayment, or card details online — payment itself is made in person, once you're here, in cash (USD or EUR) or by card (a 3.5% processing fee applies to card payments). If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "qOccupancyPolicy": "How many guests can a room hold, and is there an extra charge?",
+    "aOccupancyPolicy": "Our room rate covers 2 guests. Every room can accommodate a 3rd guest within its existing capacity for USD 20 per night — this applies whether or not an extra bed is set up, with no separate extra-bed charge on top. Children under 2 stay free.",
     "qCheckAvailability": "How do I check if my dates are available?",
     "aCheckAvailability": "Use the \"Check Availability\" search in the booking bar at the top of the page, or the {link} further down — both check real-time availability instantly, with no obligation to book.",
     "checkAvailabilityLinkText": "Quick Reservation widget",
@@ -2783,7 +2789,7 @@ en: {
     "subtitle": "Hear directly from guests who've stayed with us at Vilu Residence.",
     "readOnGoogle": "Read Our Reviews on Google",
     "assurance1": "Better rates when you book direct with us",
-    "assurance2": "Free cancellation on every direct booking",
+    "assurance2": "Free cancellation 30+ days before arrival",
     "assurance3": "TGST 17% & Green Tax included in every rate"
   },
   "contact": {
@@ -2856,7 +2862,7 @@ en: {
     "country": "Country",
     "confirmBooking": "Confirm Booking",
     "submitting": "Submitting…",
-    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now and you can cancel anytime at no charge — just pay in cash on arrival.",
+    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now. Our cancellation policy applies (free 30+ days before arrival; charges apply closer to your arrival date) — payment itself is made in cash or by card when you arrive.",
     "notEnoughRooms": "Not enough rooms available for {n} rooms on these dates. Try different dates, fewer rooms, or contact us.",
     "noRoomsAvailable": "No rooms available. Try different dates or contact us.",
     "perNight": "/night",
@@ -4745,6 +4751,11 @@ function faqBuildItems() {
     cat:'booking',
     q: t('faq.qCancellationPolicy'),
     a: t('faq.aCancellationPolicy')
+  });
+  items.push({
+    cat:'booking',
+    q: t('faq.qOccupancyPolicy'),
+    a: t('faq.aOccupancyPolicy')
   });
   items.push({
     cat:'booking',

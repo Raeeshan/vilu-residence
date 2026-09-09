@@ -184,7 +184,7 @@
       "subtitle": "Hören Sie direkt von Gästen, die bei Vilu Residence übernachtet haben.",
       "readOnGoogle": "Unsere Bewertungen auf Google lesen",
       "assurance1": "Bessere Preise bei Direktbuchung",
-      "assurance2": "Kostenlose Stornierung bei jeder Direktbuchung",
+      "assurance2": "Kostenlose Stornierung bis 30+ Tage vor Anreise",
       "assurance3": "TGST 17 % und Umweltsteuer in jedem Preis inbegriffen"
     },
     "contact": {
@@ -258,7 +258,7 @@
       "country": "Land",
       "confirmBooking": "Buchung bestätigen",
       "submitting": "Wird gesendet…",
-      "emailNote": "Wir senden Ihnen Ihre Bestätigung per E-Mail. Da es sich um eine Direktbuchung handelt, wird jetzt keine Zahlung fällig und Sie können jederzeit kostenlos stornieren — zahlen Sie einfach bar bei Ankunft.",
+      "emailNote": "Wir senden Ihnen Ihre Bestätigung per E-Mail. Da es sich um eine Direktbuchung handelt, wird jetzt keine Zahlung fällig. Unsere Stornierungsrichtlinie gilt (kostenlos bei 30+ Tagen vor Anreise; näher am Anreisedatum fallen Gebühren an) — die Zahlung selbst erfolgt bar oder per Karte bei Ihrer Ankunft.",
       "notEnoughRooms": "Für {n} Zimmer sind an diesen Terminen nicht genügend Zimmer verfügbar. Versuchen Sie andere Termine, weniger Zimmer oder kontaktieren Sie uns.",
       "noRoomsAvailable": "Keine Zimmer verfügbar. Versuchen Sie andere Termine oder kontaktieren Sie uns.",
       "perNight": "/Nacht",
@@ -368,14 +368,16 @@
       "aCheckAvailability": "Nutzen Sie die Suche \"Check Availability\" in der Buchungsleiste oben auf der Seite oder das {link} weiter unten — beide prüfen die Verfügbarkeit sofort in Echtzeit, ganz unverbindlich.",
       "checkAvailabilityLinkText": "Schnellreservierungs-Widget",
       "qCancellationPolicy": "Berechnen Sie eine Storno- oder No-Show-Gebühr?",
-      "aCancellationPolicy": "Kostenlose Stornierung für alle Direktbuchungen bei uns — über unsere Website, WhatsApp oder Telefon. Wir erheben für diese Buchungen online niemals eine Anzahlung, Vorauszahlung oder Kartendaten — die Zahlung erfolgt persönlich, ausschließlich in bar (USD oder EUR) —, sodass eine Stornierung oder Änderung Ihrer Reservierung niemals Kosten verursacht. Wenn Sie über ein OTA (Booking.com, Airbnb oder eine andere Drittanbieter-Plattform) gebucht haben, gilt stattdessen die Stornierungsbedingung dieser Plattform, da wir die Bedingungen von OTAs weder kontrollieren noch außer Kraft setzen können.",
+      "aCancellationPolicy": "Für Direktbuchungen bei uns — über unsere Website, WhatsApp oder Telefon — gilt folgende Stornierungsrichtlinie: kostenlose Stornierung bei 30 oder mehr Tagen vor Anreise; eine Gebühr von 50 % des gesamten Buchungswerts bei Stornierung 15–29 Tage vor Anreise; und eine Gebühr von 100 % des gesamten Buchungswerts bei Stornierung 0–14 Tage vor Anreise. Unsere No-Show-Richtlinie wird derzeit noch finalisiert — bitte kontaktieren Sie uns direkt, falls sich Ihre Pläne unerwartet ändern. Wir erheben für diese Buchungen online niemals eine Anzahlung, Vorauszahlung oder Kartendaten — die Zahlung selbst erfolgt persönlich, nach Ihrer Ankunft, in bar (USD oder EUR) oder per Karte (bei Kartenzahlungen fällt eine Bearbeitungsgebühr von 3,5 % an). Wenn Sie über ein OTA (Booking.com, Airbnb oder eine andere Drittanbieter-Plattform) gebucht haben, gilt stattdessen die Stornierungsbedingung dieser Plattform, da wir die Bedingungen von OTAs weder kontrollieren noch außer Kraft setzen können.",
       "catAmenities": "Ausstattung",
       "qWifi": "Gibt es WLAN im Vilu Residence?",
       "aWifi": "Ja — für alle Gäste steht während des gesamten Aufenthalts kostenloses WLAN zur Verfügung.",
       "qAircon": "Sind die Zimmer klimatisiert?",
       "aAircon": "Ja — alle unsere Zimmer verfügen über eine Klimaanlage.",
       "qDietary": "Können Sie auf besondere Ernährungsbedürfnisse eingehen?",
-      "aDietary": "Im Allgemeinen ja — teilen Sie uns bei der Buchung Ihre Ernährungsbedürfnisse mit (vegetarisch, halal, Allergien usw.), und wir tun unser Bestes, um diese zu berücksichtigen."
+      "aDietary": "Im Allgemeinen ja — teilen Sie uns bei der Buchung Ihre Ernährungsbedürfnisse mit (vegetarisch, halal, Allergien usw.), und wir tun unser Bestes, um diese zu berücksichtigen.",
+      "qOccupancyPolicy": "Wie viele Gäste passen in ein Zimmer, und fällt dafür ein Aufpreis an?",
+      "aOccupancyPolicy": "Unser Zimmerpreis gilt für 2 Gäste. Jedes Zimmer kann innerhalb seiner bestehenden Kapazität einen 3. Gast für 20 USD pro Nacht aufnehmen — dies gilt unabhängig davon, ob ein Zustellbett aufgestellt wird, ohne zusätzliche separate Gebühr für das Zustellbett. Kinder unter 2 Jahren übernachten kostenlos."
     },
     "travelInfo": {
       "tag": "Reise planen",
@@ -1026,7 +1028,7 @@
       "accomLink": "Möchten Sie die Unterkunft separat organisieren? Verfügbarkeit live prüfen &rarr;",
       "trustTitle": "Warum direkt bei Vilu Residence buchen",
       "trust1": "Eine Anfrage ist kostenlos und verpflichtet Sie zu nichts.",
-      "trust2": "Wenn Sie sich entscheiden, gilt unsere veröffentlichte Richtlinie für Direktbuchungen (Website, WhatsApp, E-Mail oder Telefon): kostenlose Stornierung, und wir erheben online niemals eine Anzahlung, Vorauszahlung oder Kartendaten — die Zahlung erfolgt persönlich, in bar (USD oder EUR), während Ihres Aufenthalts. (Buchungen über eine Drittanbieter-Plattform unterliegen den Stornobedingungen dieser Plattform.)",
+      "trust2": "Wenn Sie sich entscheiden, gilt unsere Stornierungsrichtlinie für Direktbuchungen (Website, WhatsApp, E-Mail oder Telefon): kostenlose Stornierung bei 30+ Tagen vor Anreise, 50 % Gebühr bei 15–29 Tagen vorher und 100 % Gebühr bei 0–14 Tagen vorher. Wir erheben online niemals eine Anzahlung, Vorauszahlung oder Kartendaten — die Zahlung erfolgt persönlich, in bar (USD oder EUR) oder per Karte (3,5 % Bearbeitungsgebühr), während Ihres Aufenthalts. (Buchungen über eine Drittanbieter-Plattform unterliegen den Stornobedingungen dieser Plattform.)",
       "trust3": "Wir antworten innerhalb von 24 Stunden.",
       "trust4": "Der Speedboot-Transfer hin und zurück ist bei jedem Paket auf dieser Seite enthalten.",
       "trustGoogle": "Unsere Bewertungen auf Google lesen",
@@ -1041,7 +1043,7 @@
       "faqQ4": "Muss ich eine Anzahlung leisten, um eine Anfrage zu stellen oder ein Paket zu reservieren?",
       "faqA4": "Nein. Eine Anfrage ist kostenlos und verpflichtet Sie zu nichts. Wir erheben für Direktbuchungen online keine Anzahlung, Vorauszahlung oder Kartendaten — die Zahlung erfolgt persönlich, in bar (USD oder EUR), während Ihres Aufenthalts.",
       "faqQ5": "Was passiert, wenn ich meine Daten ändern oder stornieren muss?",
-      "faqA5": "Unsere veröffentlichte Stornierungsrichtlinie für Direktbuchungen (Website, WhatsApp, E-Mail oder Telefon) lautet: kostenlose Stornierung, ohne dass jemals eine Anzahlung erhoben wird. Wenn Sie stattdessen über eine Drittanbieter-Plattform buchen, gilt deren eigene Stornierungsbedingung.",
+      "faqA5": "Unsere Stornierungsrichtlinie für Direktbuchungen (Website, WhatsApp, E-Mail oder Telefon) ist gestaffelt: kostenlose Stornierung bei 30 oder mehr Tagen vor Anreise; eine Gebühr von 50 % des gesamten Buchungswerts bei Stornierung 15–29 Tage vor Anreise; und eine Gebühr von 100 % des gesamten Buchungswerts bei Stornierung 0–14 Tage vor Anreise. Wenn Sie stattdessen über eine Drittanbieter-Plattform buchen, gilt deren eigene Stornierungsbedingung.",
       "faqQ6": "Wie schnell erhalte ich nach meiner Anfrage eine Antwort?",
       "faqA6": "Innerhalb von 24 Stunden.",
       "faqQ7": "Was passiert, wenn das Wetter für einen Ausflug nicht geeignet ist?",
@@ -1067,7 +1069,9 @@
       "durationTitle": "Von vier bis elf Nächten",
       "faqQ8": "Sind Walhai- oder Mantarochen-Sichtungen bei den Paket-Ausflügen garantiert?",
       "faqA8": "Nein. Walhaie und Mantarochen sind Wildtiere, und Sichtungen können bei keinem einzelnen Ausflug jemals garantiert werden. Wird bei der Suche kein Walhai gefunden, werden die Gäste stattdessen zu einem nahegelegenen Riff zum Schnorcheln gebracht, und Vilu Residence bietet unter Umständen an einem anderen Tag einen vergünstigten zweiten Versuch an.",
-      "cancelReassure": "Kostenlose Stornierung, keine Anzahlung — Zahlung persönlich während Ihres Aufenthalts."
+      "cancelReassure": "Gestaffelte Stornierungsrichtlinie, keine Anzahlung — Zahlung persönlich während Ihres Aufenthalts.",
+      "faqQ9": "Wie viele Gäste passen in ein Zimmer, und fällt dafür ein Aufpreis an?",
+      "faqA9": "Der Zimmerpreis jedes Pakets gilt für 2 Gäste. Jedes Zimmer kann innerhalb seiner bestehenden Kapazität einen 3. Gast für 20 USD pro Nacht aufnehmen — dies gilt unabhängig davon, ob ein Zustellbett aufgestellt wird, ohne zusätzliche separate Gebühr für das Zustellbett. Kinder unter 2 Jahren übernachten kostenlos."
     },
     "maaMeta": {
       "title": "Maamigili-Reiseführer — die Insel, die Vilu Residence zu Hause nennt",

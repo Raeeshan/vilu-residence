@@ -86,19 +86,20 @@ section('Case C — package enquiry CTAs remain contextual, correct, and locked-
   });
   test('every package shows a real, already-published cancellation/deposit reassurance right at the decision point, not only buried in the FAQ (Phase 39 fix)', () => {
     const html = read('holiday-packages.html');
-    const renderedCount = (html.match(/class="pkg-cta-trust">Free cancellation, no deposit/g) || []).length;
+    const renderedCount = (html.match(/class="pkg-cta-trust">Tiered cancellation policy, no deposit/g) || []).length;
     assert.equal(renderedCount, 9, `expected all 9 pre-rendered packages to carry the reassurance line, found ${renderedCount}`);
   });
-  test('the reassurance text matches the real published policy (free cancellation, no deposit, pay in person) -- no new fact invented', () => {
+  test('the reassurance text matches the real published policy (tiered cancellation, no deposit, pay in person) -- no new fact invented', () => {
     const html = read('holiday-packages.html');
-    assert.ok(html.includes('free cancellation, with no deposit ever collected'), 'the underlying published FAQ policy text this microcopy is drawn from is missing/changed');
+    assert.ok(html.includes('is tiered: free cancellation 30 or more days before arrival'), 'the underlying published FAQ cancellation-policy text this microcopy is drawn from is missing/changed');
+    assert.ok(html.includes("We don't collect deposits, prepayment, or card details online for direct bookings"), 'the underlying published FAQ deposit-policy text this microcopy is drawn from is missing/changed');
   });
   test('the reassurance line is localized (not left in English) in every full locale', () => {
     for (const loc of FULL_LOCALES) {
       const file = `${loc}/holiday-packages.html`;
       if (!fs.existsSync(file)) continue;
       const html = read(file);
-      assert.ok(!/class="pkg-cta-trust">Free cancellation, no deposit/.test(html), `${file}: reassurance line left in English`);
+      assert.ok(!/class="pkg-cta-trust">Tiered cancellation policy, no deposit/.test(html), `${file}: reassurance line left in English`);
       const count = (html.match(/class="pkg-cta-trust"/g) || []).length;
       assert.ok(count >= 9, `${file}: expected at least 9 rendered reassurance lines, found ${count}`);
     }

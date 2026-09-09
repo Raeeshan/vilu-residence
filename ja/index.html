@@ -2137,7 +2137,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </a>
     <div class="tr-assurances">
       <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">直接予約でお得な料金</span></div>
-      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">直接予約はすべてキャンセル無料</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">到着30日以上前ならキャンセル無料</span></div>
       <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">TGST17％とグリーン税はすべての料金に含まれています</span></div>
     </div>
   </div>
@@ -2165,7 +2165,11 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     <div class="faq-list" id="faq-list">
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qCancellationPolicy">キャンセル料や無断キャンセル料はかかりますか？</span></summary>
-        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">当施設のウェブサイト、WhatsApp、またはお電話を通じて直接ご予約いただいた場合はすべて無料でキャンセルいただけます。これらのご予約について、デポジットや前払い、カード情報をオンラインでお預かりすることは一切ございません——お支払いは現地にて現金（USDまたはEUR）のみとなりますので、ご予約のキャンセルやご変更によって費用が発生することはありません。OTA（Booking.com、Airbnbなどの第三者プラットフォーム）経由でご予約いただいた場合は、当施設のポリシーではなく、そのプラットフォーム独自のキャンセルポリシーが適用されます。これは、OTAの規約を当施設が管理・変更する立場にないためです。</div>
+        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">当施設のウェブサイト、WhatsApp、またはお電話を通じて直接ご予約いただいた場合、当施設のキャンセルポリシーは以下の通りです：到着の30日以上前のキャンセルは無料、到着の15〜29日前のキャンセルはご予約総額の50％をご請求、到着の0〜14日前のキャンセルはご予約総額の100％をご請求いたします。ノーショー（無断不泊）に関するポリシーは現在最終調整中です——ご予定が急に変更になった場合は、直接当施設までご連絡ください。これらのご予約について、デポジットや前払い、カード情報をオンラインでお預かりすることは一切ございません——お支払い自体は、ご到着後に現地にて現金（USDまたはEUR）またはカードにてお願いしております（カードでのお支払いには3.5％の手数料がかかります）。OTA（Booking.com、Airbnbなどの第三者プラットフォーム）経由でご予約いただいた場合は、当施設のポリシーではなく、そのプラットフォーム独自のキャンセルポリシーが適用されます。これは、OTAの規約を当施設が管理・変更する立場にないためです。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qOccupancyPolicy">1部屋に何名まで宿泊でき、追加料金はかかりますか？</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aOccupancyPolicy">当施設の客室料金は2名様分です。各客室は既存の定員内で3名目のゲストを1泊USD20にてお受けできます——これはエキストラベッドを設置するかどうかにかかわらず適用され、エキストラベッド分の別料金は発生しません。2歳未満のお子様は無料でご宿泊いただけます。</div>
       </details>
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qWifi">Vilu Residenceにはワイファイがありますか？</span></summary>
@@ -2496,7 +2500,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       <div class="bwf-field" style="margin-bottom:20px"><label class="bwf-label" for="gd-country" data-i18n="bfp.country">国</label><input type="text" class="bwf-input" id="gd-country"></div>
       <div id="gd-error" class="bk-error" style="display:none"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()" data-i18n="bfp.confirmBooking">予約を確定する</button>
-      <div class="bwf-note" data-i18n="bfp.emailNote">確認メールをお送りいたします。直接のご予約のため、現在お支払いの必要はなく、いつでも無料でキャンセルいただけます——現地到着時に現金でお支払いください。</div>
+      <div class="bwf-note" data-i18n="bfp.emailNote">確認メールをお送りいたします。直接のご予約のため、現在お支払いの必要はございません。当施設のキャンセルポリシーが適用されます（到着30日以上前は無料、到着日が近づくにつれて費用が発生します）——お支払い自体はご到着時に現金またはカードでお願いいたします。</div>
     </div>
   </div>
 </div>
@@ -2782,7 +2786,9 @@ en: {
     "qPaymentTerms": "What are your payment and booking terms?",
     "qBookingFees": "Do you charge any booking fees?",
     "qCancellationPolicy": "Do you charge a cancellation or no-show fee?",
-    "aCancellationPolicy": "Free cancellation for all direct bookings made with us — through our website, WhatsApp, or phone. We never collect a deposit, prepayment, or card details online for these bookings — payment is made in person, in cash (USD or EUR) only — so cancelling or changing your reservation never results in any charge. If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "aCancellationPolicy": "For direct bookings made with us — through our website, WhatsApp, or phone — our cancellation policy is: free cancellation 30 or more days before arrival; a 50% charge on your total booking value for cancellations 15–29 days before arrival; and a 100% charge on your total booking value for cancellations 0–14 days before arrival. Our no-show policy is still being finalized — please contact us directly if your plans change unexpectedly. We never collect a deposit, prepayment, or card details online — payment itself is made in person, once you're here, in cash (USD or EUR) or by card (a 3.5% processing fee applies to card payments). If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "qOccupancyPolicy": "How many guests can a room hold, and is there an extra charge?",
+    "aOccupancyPolicy": "Our room rate covers 2 guests. Every room can accommodate a 3rd guest within its existing capacity for USD 20 per night — this applies whether or not an extra bed is set up, with no separate extra-bed charge on top. Children under 2 stay free.",
     "qCheckAvailability": "How do I check if my dates are available?",
     "aCheckAvailability": "Use the \"Check Availability\" search in the booking bar at the top of the page, or the {link} further down — both check real-time availability instantly, with no obligation to book.",
     "checkAvailabilityLinkText": "Quick Reservation widget",
@@ -2800,7 +2806,7 @@ en: {
     "subtitle": "Hear directly from guests who've stayed with us at Vilu Residence.",
     "readOnGoogle": "Read Our Reviews on Google",
     "assurance1": "Better rates when you book direct with us",
-    "assurance2": "Free cancellation on every direct booking",
+    "assurance2": "Free cancellation 30+ days before arrival",
     "assurance3": "TGST 17% & Green Tax included in every rate"
   },
   "contact": {
@@ -2873,7 +2879,7 @@ en: {
     "country": "Country",
     "confirmBooking": "Confirm Booking",
     "submitting": "Submitting…",
-    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now and you can cancel anytime at no charge — just pay in cash on arrival.",
+    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now. Our cancellation policy applies (free 30+ days before arrival; charges apply closer to your arrival date) — payment itself is made in cash or by card when you arrive.",
     "notEnoughRooms": "Not enough rooms available for {n} rooms on these dates. Try different dates, fewer rooms, or contact us.",
     "noRoomsAvailable": "No rooms available. Try different dates or contact us.",
     "perNight": "/night",
@@ -3679,35 +3685,40 @@ async function loadRoomsFromSupabase() {
   }
 }
 
-// Submit booking request to Supabase
+// Submit booking request via the trusted publicBooking Cloud Function.
 // Vilu Residence rooms only — this is the single choke point that writes a
 // reservation for the website, so the VR-only guard lives here as well as
 // in the room list itself.
+// publicBooking performs the identical reservation + room_availability
+// transaction server-side with the Admin SDK (Stage 0 fix): the client-side
+// runTransaction() this used to call here could never actually succeed,
+// since firestore.rules correctly denies an anonymous client's
+// room_availability write, so the whole atomic transaction was denied too.
 // Returns the new reservation id on success, the string 'CONFLICT' if the
-// atomic transaction found the room already taken for those dates, or null
-// on any other failure.
+// server found the room already taken for those dates, or null on any
+// other failure.
 async function submitDirectBooking(booking) {
   if (!booking || !/^VR0[1-6]$/.test(booking.roomId)) return null;
-  const id = 'WEB' + Date.now();
   try {
-    await writeReservation(id, {
-      id: id,
-      room_id: booking.roomId,
-      guest_name: booking.name,
-      guest_email: booking.email,
-      guest_phone: booking.phone||'',
-      guest_country: booking.country||'',
-      check_in: booking.ci,
-      check_out: booking.co,
-      adults: booking.adults||2,
-      children: 0,
-      rate: booking.rate||0,
-      status: 'Pending',
-      source: 'Website'
+    const res = await fetch('https://us-central1-vilu-residence.cloudfunctions.net/publicBooking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roomId: booking.roomId,
+        ci: booking.ci,
+        co: booking.co,
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || '',
+        country: booking.country || '',
+        adults: booking.adults || 2
+      })
     });
-    return id;
-  } catch(e) {
-    if (e.message === 'ROOM_CONFLICT') return 'CONFLICT';
+    if (res.status === 409) return 'CONFLICT';
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.id ? data.id : null;
+  } catch (e) {
     return null;
   }
 }
@@ -4757,6 +4768,11 @@ function faqBuildItems() {
     cat:'booking',
     q: t('faq.qCancellationPolicy'),
     a: t('faq.aCancellationPolicy')
+  });
+  items.push({
+    cat:'booking',
+    q: t('faq.qOccupancyPolicy'),
+    a: t('faq.aOccupancyPolicy')
   });
   items.push({
     cat:'booking',

@@ -2127,7 +2127,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     </a>
     <div class="tr-assurances">
       <div class="tr-assurance"><i class="ti ti-check" aria-hidden="true"></i><span data-i18n="reviews.assurance1">أسعار أفضل عند الحجز المباشر معنا</span></div>
-      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">إلغاء مجاني لكل حجز مباشر</span></div>
+      <div class="tr-assurance"><i class="ti ti-clock-check" aria-hidden="true"></i><span data-i18n="reviews.assurance2">إلغاء مجاني حتى 30 يومًا أو أكثر قبل الوصول</span></div>
       <div class="tr-assurance"><i class="ti ti-currency-dollar" aria-hidden="true"></i><span data-i18n="reviews.assurance3">ضريبة TGST 17% وضريبة الخضرة مشمولتان في كل سعر</span></div>
     </div>
   </div>
@@ -2155,7 +2155,11 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
     <div class="faq-list" id="faq-list">
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qCancellationPolicy">هل تفرضون رسوم إلغاء أو عدم حضور؟</span></summary>
-        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">إلغاء مجاني لجميع الحجوزات المباشرة التي تتم معنا — عبر موقعنا الإلكتروني أو واتساب أو الهاتف. نحن لا نجمع أبدًا عربونًا أو دفعة مقدمة أو بيانات البطاقة عبر الإنترنت لهذه الحجوزات — يتم الدفع شخصيًا نقدًا فقط (بالدولار الأمريكي أو اليورو) — وبالتالي فإن إلغاء أو تغيير حجزك لا يترتب عليه أي رسوم على الإطلاق. إذا قمت بالحجز عبر منصة حجز خارجية (مثل Booking.com أو Airbnb أو أي منصة أخرى)، فإن سياسة الإلغاء الخاصة بتلك المنصة هي التي تُطبَّق بدلاً من سياستنا، حيث إننا لا نتحكم في شروط تلك المنصات ولا يمكننا تجاوزها.</div>
+        <div class="faq-answer-inner" data-i18n="faq.aCancellationPolicy">بالنسبة للحجوزات المباشرة التي تتم معنا — عبر موقعنا الإلكتروني أو واتساب أو الهاتف — فإن سياسة الإلغاء لدينا هي: إلغاء مجاني قبل 30 يومًا أو أكثر من تاريخ الوصول؛ رسوم بنسبة 50% من إجمالي قيمة الحجز للإلغاء بين 15 و29 يومًا قبل الوصول؛ ورسوم بنسبة 100% من إجمالي قيمة الحجز للإلغاء بين 0 و14 يومًا قبل الوصول. لا تزال سياسة عدم الحضور قيد الإعداد النهائي — يُرجى التواصل معنا مباشرة إذا تغيّرت خططكم بشكل غير متوقع. نحن لا نجمع أبدًا عربونًا أو دفعة مقدمة أو بيانات البطاقة عبر الإنترنت — يتم الدفع نفسه شخصيًا، بعد وصولكم، نقدًا (بالدولار الأمريكي أو اليورو) أو بالبطاقة (تُطبَّق رسوم معالجة بنسبة 3.5% على الدفع بالبطاقة). إذا قمتم بالحجز عبر منصة حجز خارجية (مثل Booking.com أو Airbnb أو أي منصة أخرى)، فإن سياسة الإلغاء الخاصة بتلك المنصة هي التي تُطبَّق بدلاً من سياستنا، حيث إننا لا نتحكم في شروط تلك المنصات ولا يمكننا تجاوزها.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><span data-i18n="faq.qOccupancyPolicy">كم عدد الضيوف الذي تستوعبه الغرفة، وهل توجد رسوم إضافية؟</span></summary>
+        <div class="faq-answer-inner" data-i18n="faq.aOccupancyPolicy">يشمل سعر الغرفة ضيفين. يمكن لكل غرفة استيعاب ضيف ثالث ضمن سعتها الحالية مقابل 20 دولارًا أمريكيًا لكل ليلة — وينطبق ذلك سواء تم تجهيز سرير إضافي أم لا، دون أي رسوم منفصلة للسرير الإضافي. الأطفال دون سن الثانية يقيمون مجانًا.</div>
       </details>
       <details class="faq-item">
         <summary class="faq-question"><span data-i18n="faq.qWifi">هل يتوفر واي فاي في Vilu Residence؟</span></summary>
@@ -2486,7 +2490,7 @@ i.ti.dn-icon{width:auto;height:auto;font-size:28px;line-height:1;display:inline-
       <div class="bwf-field" style="margin-bottom:20px"><label class="bwf-label" for="gd-country" data-i18n="bfp.country">الدولة</label><input type="text" class="bwf-input" id="gd-country"></div>
       <div id="gd-error" class="bk-error" style="display:none"></div>
       <button class="bwf-btn" id="gd-submit-btn" onclick="confirmGuestBooking()" data-i18n="bfp.confirmBooking">تأكيد الحجز</button>
-      <div class="bwf-note" data-i18n="bfp.emailNote">سنرسل لك تأكيد الحجز عبر البريد الإلكتروني. بما أن هذا حجز مباشر، لا يلزم أي دفع الآن ويمكنك الإلغاء في أي وقت دون أي رسوم — فقط ادفع نقدًا عند الوصول.</div>
+      <div class="bwf-note" data-i18n="bfp.emailNote">سنرسل لك تأكيد الحجز عبر البريد الإلكتروني. بما أن هذا حجز مباشر، لا يلزم أي دفع الآن. تُطبَّق سياسة الإلغاء لدينا (إلغاء مجاني قبل 30 يومًا أو أكثر من الوصول؛ وتُطبَّق رسوم كلما اقترب تاريخ الوصول) — ويتم الدفع نفسه نقدًا أو بالبطاقة عند وصولك.</div>
     </div>
   </div>
 </div>
@@ -2772,7 +2776,9 @@ en: {
     "qPaymentTerms": "What are your payment and booking terms?",
     "qBookingFees": "Do you charge any booking fees?",
     "qCancellationPolicy": "Do you charge a cancellation or no-show fee?",
-    "aCancellationPolicy": "Free cancellation for all direct bookings made with us — through our website, WhatsApp, or phone. We never collect a deposit, prepayment, or card details online for these bookings — payment is made in person, in cash (USD or EUR) only — so cancelling or changing your reservation never results in any charge. If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "aCancellationPolicy": "For direct bookings made with us — through our website, WhatsApp, or phone — our cancellation policy is: free cancellation 30 or more days before arrival; a 50% charge on your total booking value for cancellations 15–29 days before arrival; and a 100% charge on your total booking value for cancellations 0–14 days before arrival. Our no-show policy is still being finalized — please contact us directly if your plans change unexpectedly. We never collect a deposit, prepayment, or card details online — payment itself is made in person, once you're here, in cash (USD or EUR) or by card (a 3.5% processing fee applies to card payments). If you booked through an OTA (Booking.com, Airbnb, or another third-party platform), that platform's own cancellation policy applies instead, since we don't control or override OTA terms.",
+    "qOccupancyPolicy": "How many guests can a room hold, and is there an extra charge?",
+    "aOccupancyPolicy": "Our room rate covers 2 guests. Every room can accommodate a 3rd guest within its existing capacity for USD 20 per night — this applies whether or not an extra bed is set up, with no separate extra-bed charge on top. Children under 2 stay free.",
     "qCheckAvailability": "How do I check if my dates are available?",
     "aCheckAvailability": "Use the \"Check Availability\" search in the booking bar at the top of the page, or the {link} further down — both check real-time availability instantly, with no obligation to book.",
     "checkAvailabilityLinkText": "Quick Reservation widget",
@@ -2790,7 +2796,7 @@ en: {
     "subtitle": "Hear directly from guests who've stayed with us at Vilu Residence.",
     "readOnGoogle": "Read Our Reviews on Google",
     "assurance1": "Better rates when you book direct with us",
-    "assurance2": "Free cancellation on every direct booking",
+    "assurance2": "Free cancellation 30+ days before arrival",
     "assurance3": "TGST 17% & Green Tax included in every rate"
   },
   "contact": {
@@ -2863,7 +2869,7 @@ en: {
     "country": "Country",
     "confirmBooking": "Confirm Booking",
     "submitting": "Submitting…",
-    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now and you can cancel anytime at no charge — just pay in cash on arrival.",
+    "emailNote": "We'll email your confirmation. As a direct booking, no payment is taken now. Our cancellation policy applies (free 30+ days before arrival; charges apply closer to your arrival date) — payment itself is made in cash or by card when you arrive.",
     "notEnoughRooms": "Not enough rooms available for {n} rooms on these dates. Try different dates, fewer rooms, or contact us.",
     "noRoomsAvailable": "No rooms available. Try different dates or contact us.",
     "perNight": "/night",
@@ -3669,35 +3675,40 @@ async function loadRoomsFromSupabase() {
   }
 }
 
-// Submit booking request to Supabase
+// Submit booking request via the trusted publicBooking Cloud Function.
 // Vilu Residence rooms only — this is the single choke point that writes a
 // reservation for the website, so the VR-only guard lives here as well as
 // in the room list itself.
+// publicBooking performs the identical reservation + room_availability
+// transaction server-side with the Admin SDK (Stage 0 fix): the client-side
+// runTransaction() this used to call here could never actually succeed,
+// since firestore.rules correctly denies an anonymous client's
+// room_availability write, so the whole atomic transaction was denied too.
 // Returns the new reservation id on success, the string 'CONFLICT' if the
-// atomic transaction found the room already taken for those dates, or null
-// on any other failure.
+// server found the room already taken for those dates, or null on any
+// other failure.
 async function submitDirectBooking(booking) {
   if (!booking || !/^VR0[1-6]$/.test(booking.roomId)) return null;
-  const id = 'WEB' + Date.now();
   try {
-    await writeReservation(id, {
-      id: id,
-      room_id: booking.roomId,
-      guest_name: booking.name,
-      guest_email: booking.email,
-      guest_phone: booking.phone||'',
-      guest_country: booking.country||'',
-      check_in: booking.ci,
-      check_out: booking.co,
-      adults: booking.adults||2,
-      children: 0,
-      rate: booking.rate||0,
-      status: 'Pending',
-      source: 'Website'
+    const res = await fetch('https://us-central1-vilu-residence.cloudfunctions.net/publicBooking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roomId: booking.roomId,
+        ci: booking.ci,
+        co: booking.co,
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || '',
+        country: booking.country || '',
+        adults: booking.adults || 2
+      })
     });
-    return id;
-  } catch(e) {
-    if (e.message === 'ROOM_CONFLICT') return 'CONFLICT';
+    if (res.status === 409) return 'CONFLICT';
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.id ? data.id : null;
+  } catch (e) {
     return null;
   }
 }
@@ -4747,6 +4758,11 @@ function faqBuildItems() {
     cat:'booking',
     q: t('faq.qCancellationPolicy'),
     a: t('faq.aCancellationPolicy')
+  });
+  items.push({
+    cat:'booking',
+    q: t('faq.qOccupancyPolicy'),
+    a: t('faq.aOccupancyPolicy')
   });
   items.push({
     cat:'booking',

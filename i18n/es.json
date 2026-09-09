@@ -345,7 +345,7 @@
       "subtitle": "Escucha directamente a los huéspedes que se han alojado con nosotros en Vilu Residence.",
       "readOnGoogle": "Lee Nuestras Opiniones en Google",
       "assurance1": "Mejores tarifas al reservar directamente con nosotros",
-      "assurance2": "Cancelación gratuita en todas las reservas directas",
+      "assurance2": "Cancelación gratuita 30+ días antes de la llegada",
       "assurance3": "TGST 17% e Impuesto Verde incluidos en cada tarifa"
     },
     "faq": {
@@ -354,7 +354,7 @@
       "titleEmphasis": "rápidas",
       "intro": "Busca o navega por categoría — estas respuestas provienen directamente de la información en vivo de nuestros paquetes y de viaje.",
       "qCancellationPolicy": "¿Cobráis alguna tarifa por cancelación o no presentación?",
-      "aCancellationPolicy": "Cancelación gratuita en todas las reservas directas realizadas con nosotros — a través de nuestra web, WhatsApp o teléfono. Nunca solicitamos depósito, pago anticipado ni datos de tarjeta online para estas reservas — el pago se realiza en persona, únicamente en efectivo (USD o EUR) — por lo que cancelar o modificar tu reserva nunca conlleva ningún cargo. Si reservaste a través de una OTA (Booking.com, Airbnb u otra plataforma externa), se aplica la política de cancelación de esa plataforma, ya que no controlamos ni podemos anular las condiciones de las OTA.",
+      "aCancellationPolicy": "Para reservas directas realizadas con nosotros — a través de nuestra web, WhatsApp o teléfono — nuestra política de cancelación es la siguiente: cancelación gratuita con 30 días o más de antelación a la llegada; un cargo del 50% sobre el valor total de la reserva para cancelaciones entre 15 y 29 días antes de la llegada; y un cargo del 100% sobre el valor total de la reserva para cancelaciones entre 0 y 14 días antes de la llegada. Nuestra política de no presentación (no-show) todavía se está finalizando — si tus planes cambian de forma inesperada, contáctanos directamente. Nunca solicitamos depósito, pago anticipado ni datos de tarjeta online para estas reservas — el pago en sí se realiza en persona, una vez que estés aquí, en efectivo (USD o EUR) o con tarjeta (se aplica una comisión de procesamiento del 3,5% a los pagos con tarjeta). Si reservaste a través de una OTA (Booking.com, Airbnb u otra plataforma externa), se aplica la política de cancelación de esa plataforma, ya que no controlamos ni podemos anular las condiciones de las OTA.",
       "qWifi": "¿Tiene Wi-Fi Vilu Residence?",
       "aWifi": "Sí — el Wi-Fi gratuito está disponible para todos los huéspedes durante toda su estancia.",
       "qAircon": "¿Las habitaciones tienen aire acondicionado?",
@@ -383,7 +383,9 @@
       "catPricing": "Paquetes y Precios",
       "catActivities": "Actividades",
       "catBooking": "Reserva y Pago",
-      "catAmenities": "Servicios"
+      "catAmenities": "Servicios",
+      "qOccupancyPolicy": "¿Cuántos huéspedes puede alojar una habitación y hay algún cargo adicional?",
+      "aOccupancyPolicy": "El precio de nuestra habitación cubre a 2 huéspedes. Cada habitación puede alojar a un 3.º huésped dentro de su capacidad existente por USD 20 por noche — esto se aplica tanto si se instala una cama extra como si no, sin cargo adicional independiente por la cama extra. Los niños menores de 2 años se alojan gratis."
     },
     "gallery": {
       "tag": "Galería",
@@ -447,7 +449,7 @@
       "phone": "Teléfono",
       "country": "País",
       "confirmBooking": "Confirmar Reserva",
-      "emailNote": "Te enviaremos la confirmación por email. Al tratarse de una reserva directa, no se realiza ningún cargo ahora y puedes cancelar en cualquier momento sin coste — solo tienes que pagar en efectivo a tu llegada.",
+      "emailNote": "Te enviaremos la confirmación por email. Al tratarse de una reserva directa, no se realiza ningún cargo ahora. Se aplica nuestra política de cancelación (gratuita con 30+ días de antelación a la llegada; se aplican cargos cerca de la fecha de llegada) — el pago en sí se realiza en efectivo o con tarjeta a tu llegada.",
       "allFailedPrefix": "Lo sentimos, no pudimos reservar: {list}. Elige otra(s) habitación(es) o fechas, o contáctanos directamente:",
       "book": "Reservar",
       "bookingConfirmedPlural": "✓ ¡Reservas confirmadas!",
@@ -530,7 +532,7 @@
       "accomLink": "¿Prefieres reservar el alojamiento aparte? Consulta la disponibilidad en tiempo real &rarr;",
       "trustTitle": "Por qué reservar directamente con Vilu Residence",
       "trust1": "Consultar es gratis y no te compromete a nada.",
-      "trust2": "Si decides seguir adelante, se aplica nuestra política publicada para reservas directas (web, WhatsApp, email o teléfono): cancelación gratuita, y nunca solicitamos depósito, pago anticipado ni datos de tarjeta online — el pago se realiza en persona, en efectivo (USD o EUR), durante tu estancia. (Las reservas hechas a través de una plataforma externa siguen las condiciones de cancelación de esa plataforma.)",
+      "trust2": "Si decides seguir adelante, se aplica nuestra política de cancelación para reservas directas (web, WhatsApp, email o teléfono): cancelación gratuita con 30+ días de antelación a la llegada, cargo del 50% con 15-29 días de antelación, y cargo del 100% con 0-14 días de antelación. Nunca solicitamos depósito, pago anticipado ni datos de tarjeta online — el pago se realiza en persona, en efectivo (USD o EUR) o con tarjeta (comisión de procesamiento del 3,5%), durante tu estancia. (Las reservas hechas a través de una plataforma externa siguen las condiciones de cancelación de esa plataforma.)",
       "trust3": "Respondemos en menos de 24 horas.",
       "trust4": "El traslado en lancha rápida de ida y vuelta está incluido en todos los paquetes de esta página.",
       "trustGoogle": "Lee nuestras opiniones en Google",
@@ -545,7 +547,7 @@
       "faqQ4": "¿Hay que pagar un depósito para consultar o reservar un paquete?",
       "faqA4": "No. Consultar es gratis y no te compromete a nada. No solicitamos depósito, pago anticipado ni datos de tarjeta online para reservas directas — el pago se realiza en persona, en efectivo (USD o EUR), durante tu estancia.",
       "faqQ5": "¿Qué pasa si necesito cambiar las fechas o cancelar?",
-      "faqA5": "Nuestra política de cancelación para reservas directas (web, WhatsApp, email o teléfono) es cancelación gratuita, ya que nunca se cobra depósito. Si reservas a través de una plataforma externa, se aplican las condiciones de esa plataforma.",
+      "faqA5": "Nuestra política de cancelación para reservas directas (web, WhatsApp, email o teléfono) es escalonada: cancelación gratuita con 30 días o más de antelación a la llegada; un cargo del 50% sobre el valor total de la reserva para cancelaciones entre 15 y 29 días antes de la llegada; y un cargo del 100% sobre el valor total de la reserva para cancelaciones entre 0 y 14 días antes de la llegada. Si reservas a través de una plataforma externa, se aplican las condiciones de esa plataforma.",
       "faqQ6": "¿En cuánto tiempo recibiré respuesta tras consultar?",
       "faqA6": "En menos de 24 horas.",
       "faqQ7": "¿Qué ocurre si el tiempo no es adecuado para alguna actividad?",
@@ -566,7 +568,9 @@
       "stickyText": "¿Necesitas ayuda para elegir? Pregunta a Vilu",
       "faqQ8": "¿Se garantiza el avistamiento de tiburones ballena o mantarrayas en las excursiones del paquete?",
       "faqA8": "No. Los tiburones ballena y las mantarrayas son animales salvajes, y el avistamiento nunca puede garantizarse en ninguna excursión individual. Si no se encuentra un tiburón ballena durante la búsqueda, los huéspedes son llevados a un arrecife cercano para hacer snorkel en su lugar, y Vilu Residence puede ofrecer un segundo intento con descuento otro día.",
-      "cancelReassure": "Cancelación gratuita, sin depósito — pago en persona durante su estancia."
+      "cancelReassure": "Política de cancelación escalonada, sin depósito — pago en persona durante su estancia.",
+      "faqQ9": "¿Cuántos huéspedes puede alojar una habitación y hay algún cargo adicional?",
+      "faqA9": "El precio de la habitación de cada paquete cubre a 2 huéspedes. Cada habitación puede alojar a un 3.º huésped dentro de su capacidad existente por USD 20 por noche — esto se aplica tanto si se instala una cama extra como si no, sin cargo adicional independiente por la cama extra. Los niños menores de 2 años se alojan gratis."
     },
     "alerts": {
       "enterNameEmail": "Introduce tu nombre y correo electrónico.",
