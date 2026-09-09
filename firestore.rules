@@ -112,6 +112,23 @@ service cloud.firestore {
 
     match /admin_settings/security { allow read, write: if isAdmin(); }
     match /cancellation_attempts/{attemptId} { allow create: if request.auth != null; allow read, update, delete: if false; }
+
+    // ── OTA / channel-manager core (read-only additive rules) ──
+    // Every write to these collections happens ONLY through Cloud Functions
+    // using the Admin SDK, which bypasses these rules entirely — so no
+    // `allow write` clause is needed or given here for any client, including
+    // admin/staff. These rules exist solely so the future PMS "Sync log" /
+    // "OTA channels" screens can read the real data once built; today
+    // nothing in the client reads these collections yet.
+    match /ota_config/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    match /ota_events/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    match /ota_conflicts/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    match /ota_pushes/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    match /ota_queue/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    match /availability_outbound/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    // rate_limits stores only a salted hash + a count, never guest PII; kept
+    // fully server-only (not even admin/staff read) since it has no UI use.
+    match /rate_limits/{id} { allow read, write: if false; }
     match /block_requests/{id} {
       allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid;
       allow read: if request.auth != null && (isAdmin() || isStaff() || resource.data.agencyId == request.auth.uid);
