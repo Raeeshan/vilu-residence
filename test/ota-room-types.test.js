@@ -4,7 +4,7 @@
 const assert = require('assert');
 const path = require('path');
 const F = (p) => require(path.join(__dirname, '..', 'functions', 'lib', p));
-const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES, computeOtaTypePayload, computeOccupancyRate, daysBeforeArrival, computeCancellationCharge, pendingChildPricing } = F('ota-room-types');
+const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES, computeOtaTypePayload, computeOccupancyRate, computeThirdGuestSupplement, classifyGuestAge, ageAtCheckIn, daysBeforeArrival, computeCancellationCharge, computeNoShowCharge, approvedChildPricing } = F('ota-room-types');
 const { PHYSICAL_ROOMS, ROOM_TYPE_CODES } = F('inventory');
 
 let passed = 0, failed = 0;
@@ -66,11 +66,13 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     }
   });
 
-  await test('infant policy is owner-approved (free under 2); child 2+ pricing stays owner_pending, never inferred from old internal discounts', () => {
+  await test('infant/child/adult age policy is owner-approved: infant <2 free, child 2-11 = 50% discount, adult from 12', () => {
     for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
       assert.deepStrictEqual(cfg.infant_policy, { free_under_age: 2 }, cfg.room_type_id);
-      assert.strictEqual(cfg.child_pricing.status, 'owner_pending', cfg.room_type_id);
-      assert.strictEqual(Object.keys(cfg.child_pricing).length, 1, cfg.room_type_id + '.child_pricing must not invent extra fields');
+      assert.strictEqual(cfg.child_pricing.status, 'approved', cfg.room_type_id);
+      assert.deepStrictEqual(cfg.child_pricing.infant, { min_age: 0, max_age_exclusive: 2, discount_percent: 100 }, cfg.room_type_id);
+      assert.deepStrictEqual(cfg.child_pricing.child, { min_age: 2, max_age_exclusive: 12, discount_percent: 50 }, cfg.room_type_id);
+      assert.strictEqual(cfg.child_pricing.adult_from_age, 12, cfg.room_type_id);
     }
   });
 
@@ -85,7 +87,7 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     }
   });
 
-  await test('cancellation policy is owner-approved and tiered: free 30+ days, 50% at 15-29 days, 100% at 0-14 days; no-show stays owner_pending', () => {
+  await test('cancellation policy is owner-approved and tiered: free 30+ days, 50% at 15-29 days, 100% at 0-14 days; no-show is now approved at 100%', () => {
     for (const cfg of Object.values(INITIAL_OTA_ROOM_TYPES)) {
       const cp = cfg.cancellation_policy;
       assert.strictEqual(cp.status, 'approved', cfg.room_type_id);
@@ -94,7 +96,7 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
         { from_days_before_arrival: 15, to_days_before_arrival: 29, charge_percent: 50 },
         { from_days_before_arrival: 0, to_days_before_arrival: 14, charge_percent: 100 },
       ], cfg.room_type_id);
-      assert.strictEqual(cp.no_show.status, 'owner_pending', cfg.room_type_id + ' no-show must never be inferred as 100%');
+      assert.deepStrictEqual(cp.no_show, { status: 'approved', charge_percent: 100 }, cfg.room_type_id);
     }
   });
 
@@ -111,9 +113,9 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     }
   });
 
-  await test('pendingChildPricing() produces fresh, independent objects (no shared mutable reference across room types)', () => {
-    const a = pendingChildPricing();
-    const b = pendingChildPricing();
+  await test('approvedChildPricing() produces fresh, independent objects (no shared mutable reference across room types)', () => {
+    const a = approvedChildPricing();
+    const b = approvedChildPricing();
     assert.notStrictEqual(a, b);
     assert.deepStrictEqual(a, b);
   });
@@ -235,15 +237,105 @@ async function test(name, fn) { try { await fn(); passed++; console.log('ok   ' 
     assert.strictEqual(computeCancellationCharge({ policy, daysBeforeArrival: 20, totalBookingValue: 900.5 }).chargeAmount, 450.25);
   });
 
-  await test('computeCancellationCharge never resolves a no-show -- policy.no_show stays owner_pending and is never consulted by this function', () => {
+  await test('computeCancellationCharge never resolves a no-show, even now that no_show is approved -- it is a distinct event handled by computeNoShowCharge only', () => {
     const policy = INITIAL_OTA_ROOM_TYPES.double.cancellation_policy;
-    assert.strictEqual(policy.no_show.status, 'owner_pending');
+    assert.strictEqual(policy.no_show.status, 'approved');
     // the function itself has no branch that reads policy.no_show at all --
     // asserting its full source never references it is the strongest
-    // "never inferred" guarantee available to a static test.
+    // "never conflated with a pre-arrival cancellation" guarantee available
+    // to a static test.
     const src = require('fs').readFileSync(path.join(__dirname, '..', 'functions', 'lib', 'ota-room-types.js'), 'utf8');
-    const fnBody = src.slice(src.indexOf('function computeCancellationCharge'), src.indexOf('module.exports'));
+    const start = src.indexOf('function computeCancellationCharge');
+    let i = src.indexOf('{', start) + 1, depth = 1;
+    while (depth > 0 && i < src.length) { if (src[i] === '{') depth++; else if (src[i] === '}') depth--; i++; }
+    const fnBody = src.slice(start, i); // brace-matched to the function's own closing '}' -- excludes any comment on the NEXT function
     assert.ok(!fnBody.includes('no_show'), 'computeCancellationCharge must never read/infer a no-show charge');
+  });
+
+  // ── Step 8 / owner-approved no-show ──
+  await test('computeNoShowCharge: approved 100% no-show charge, computed against the real total booking value', () => {
+    const policy = INITIAL_OTA_ROOM_TYPES.double.cancellation_policy;
+    const out = computeNoShowCharge({ policy, totalBookingValue: 550 });
+    assert.strictEqual(out.chargePercent, 100);
+    assert.strictEqual(out.chargeAmount, 550);
+  });
+
+  await test('computeNoShowCharge throws rather than silently charging if no_show is ever reverted to owner_pending', () => {
+    const policy = { no_show: { status: 'owner_pending' } };
+    assert.throws(() => computeNoShowCharge({ policy, totalBookingValue: 550 }), /not approved/);
+  });
+
+  // ── Step 4: age boundary tests ──
+  await test('classifyGuestAge boundaries: age 0 and 1 = infant, age 2 and 11 = child, age 12 and 13 = adult', () => {
+    const cp = INITIAL_OTA_ROOM_TYPES.double.child_pricing;
+    assert.strictEqual(classifyGuestAge(0, cp), 'infant');
+    assert.strictEqual(classifyGuestAge(1, cp), 'infant');
+    assert.strictEqual(classifyGuestAge(2, cp), 'child');
+    assert.strictEqual(classifyGuestAge(11, cp), 'child');
+    assert.strictEqual(classifyGuestAge(12, cp), 'adult');
+    assert.strictEqual(classifyGuestAge(13, cp), 'adult');
+  });
+
+  await test('ageAtCheckIn: age is computed as of the check-in date, not today and not the booking date', () => {
+    // Turns 12 exactly on the check-in date -> already 12 (adult), not 11.
+    assert.strictEqual(ageAtCheckIn('2014-09-09', '2026-09-09'), 12);
+    // Birthday is one day AFTER check-in -> still 11 (child) at check-in.
+    assert.strictEqual(ageAtCheckIn('2014-09-10', '2026-09-09'), 11);
+    // Booking made today (2026-09-09) for a future stay -- age must reflect
+    // the age AT ARRIVAL, not the age today: a child born 2024-08-01 is 2
+    // today, but will have turned 2 well before a 2027-01-15 check-in and
+    // must still resolve to 2 (child), not be miscounted as an infant by
+    // using "today" instead of the real check-in date.
+    assert.strictEqual(ageAtCheckIn('2024-08-01', '2027-01-15'), 2);
+  });
+
+  await test('computeThirdGuestSupplement: adult (no age given) = full $20, never invents a discount for an unknown age', () => {
+    const out = computeThirdGuestSupplement({ config: INITIAL_OTA_ROOM_TYPES.double });
+    assert.strictEqual(out.amount, 20);
+    assert.strictEqual(out.category, 'adult');
+  });
+
+  await test('computeThirdGuestSupplement: child age 2-11 = 50% of $20 = $10', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.double;
+    assert.strictEqual(computeThirdGuestSupplement({ config: cfg, thirdGuestAge: 2 }).amount, 10);
+    assert.strictEqual(computeThirdGuestSupplement({ config: cfg, thirdGuestAge: 11 }).amount, 10);
+  });
+
+  await test('computeThirdGuestSupplement: infant under 2 = $0 (100% discount)', () => {
+    const cfg = INITIAL_OTA_ROOM_TYPES.double;
+    assert.strictEqual(computeThirdGuestSupplement({ config: cfg, thirdGuestAge: 0 }).amount, 0);
+    assert.strictEqual(computeThirdGuestSupplement({ config: cfg, thirdGuestAge: 1 }).amount, 0);
+  });
+
+  await test('computeThirdGuestSupplement: age 12 = adult pricing, full $20 -- not the child discount', () => {
+    const out = computeThirdGuestSupplement({ config: INITIAL_OTA_ROOM_TYPES.double, thirdGuestAge: 12 });
+    assert.strictEqual(out.amount, 20);
+    assert.strictEqual(out.category, 'adult');
+  });
+
+  // ── Step 3: occupancy examples, Double $90/night ──
+  await test('Double $90: 2 adults = $90 before taxes/fees', () => {
+    assert.strictEqual(computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 2 }).rate, 90);
+  });
+  await test('Double $90: 2 adults + 1 adult = $110 before taxes/fees', () => {
+    const out = computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 3, thirdGuestAge: 30 });
+    assert.strictEqual(out.rate, 110);
+  });
+  await test('Double $90: 2 adults + 1 child age 11 = $100 before taxes/fees', () => {
+    const out = computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 3, thirdGuestAge: 11 });
+    assert.strictEqual(out.rate, 100);
+  });
+  await test('Double $90: 2 adults + 1 child age 2 = $100 before taxes/fees', () => {
+    const out = computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 3, thirdGuestAge: 2 });
+    assert.strictEqual(out.rate, 100);
+  });
+  await test('Double $90: 2 adults + 1 infant age 1 = $90 before taxes/fees', () => {
+    const out = computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 3, thirdGuestAge: 1 });
+    assert.strictEqual(out.rate, 90);
+  });
+  await test('Double $90: 3rd guest age 12 = adult pricing = $110 before taxes/fees', () => {
+    const out = computeOccupancyRate({ config: INITIAL_OTA_ROOM_TYPES.double, guestCount: 3, thirdGuestAge: 12 });
+    assert.strictEqual(out.rate, 110);
   });
 
   await test('this harness never touches Firestore or the network (self-check)', () => {

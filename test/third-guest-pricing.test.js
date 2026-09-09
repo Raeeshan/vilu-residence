@@ -1,9 +1,11 @@
-// Third-guest / extra-bed pricing consistency — 2026-09-09 fix.
+// Third-guest / extra-bed / child-age pricing consistency — 2026-09-09 fixes.
 //
 // Verifies the single canonical $20/night 3rd-guest supplement (TAX.thirdGuest
 // / BE_TAX.thirdGuest) used by calcTax() (PMS/staff paths) and calcPrice()
-// (guest-facing booking widget), and that extraBeds/anExtraBedCharge() no
-// longer adds a second, room-rate-based charge for the same person.
+// (guest-facing booking widget), that extraBeds/anExtraBedCharge() no
+// longer adds a second, room-rate-based charge for the same person, and
+// (Case K) the owner-approved child/infant/adult age discount on that same
+// supplement (TAX.childDiscountPercent).
 //
 // Extracts the real functions out of vilu-unified.html via brace-matching
 // (same technique already used by test/pms-hardening.test.js's extractFn) and
@@ -146,9 +148,10 @@ section('Case F — infants never trigger the 3rd-guest supplement (matches exis
     const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 0, { inf: 1 }));
     assert.equal(x.thirdGuest, 0);
   });
-  test('2 adults + 1 child (ch, counted) -> 3rd-guest charge applies', () => {
+  test('2 adults + 1 child (ch, counted) -> discounted 3rd-guest charge applies (owner-approved 2026-09-09: 50% off for a child)', () => {
     const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 1));
-    assert.equal(x.thirdGuest, 20);
+    assert.equal(x.thirdGuest, 10);
+    assert.equal(x.thirdGuestIsChild, true);
   });
 }
 
@@ -209,6 +212,69 @@ section('Case J — guest-facing calcPrice() (booking-engine widget) matches cal
     const p = calcPrice(90, '2026-12-01', '2026-12-06', 3, 0);
     assert.equal(p.n, 5);
     assert.equal(p.base, 550);
+  });
+}
+
+section('Case K — owner-approved child/infant/adult age policy (2026-09-09 pass)');
+{
+  test('TAX.childDiscountPercent defaults to 50', () => {
+    assert.equal(TAX.childDiscountPercent, 50);
+  });
+
+  test('Double $90: 2 adults + 1 adult (3rd adult) = $110 before taxes/fees', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 3, 0));
+    assert.equal(x.base, 110);
+    assert.equal(x.thirdGuestIsChild, false);
+  });
+
+  test('Double $90: 2 adults + 1 child = $100 before taxes/fees (50% off the $20 supplement)', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 1));
+    assert.equal(x.base, 100);
+    assert.equal(x.thirdGuestIsChild, true);
+  });
+
+  test('Double $90: 2 adults + 1 infant = $90 before taxes/fees (infants excluded from the guest count entirely)', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 0, { inf: 1 }));
+    assert.equal(x.base, 90);
+    assert.equal(x.thirdGuest, 0);
+  });
+
+  test('the marginal guest is categorized as an adult once there are already 3+ adults, even if a child is also present', () => {
+    // ad=3, ch=1 (4 total, over the room cap) -- the 3rd/marginal slot is
+    // still resolved as an adult since 3 adults alone already fill it,
+    // matching "if ad>=3 the marginal guest is an adult" exactly.
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 3, 1));
+    assert.equal(x.thirdGuestIsChild, false);
+    assert.equal(x.thirdGuest, 20);
+  });
+
+  test('a mixed 1 adult + 2 children party (3 total) is still priced as exactly one discounted supplement', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 1, 2));
+    assert.equal(x.thirdGuestIsChild, true);
+    assert.equal(x.thirdGuest, 10);
+    assert.equal(x.base, 100);
+  });
+
+  test('calcPrice (guest-facing widget) applies the same child discount as calcTax', () => {
+    const p = calcPrice(90, '2026-12-01', '2026-12-02', 2, 1);
+    assert.equal(p.thirdGuestIsChild, true);
+    assert.equal(p.thirdGuest, 10);
+    assert.equal(p.base, 100);
+  });
+
+  test('the child discount does not change how service charge/TGST are computed -- still a % of the real (now smaller) base', () => {
+    const x = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 1));
+    const expectedSvc = +(100 * TAX.svc / 100).toFixed(2);
+    const expectedTgst = +((100 + expectedSvc) * TAX.tgst / 100).toFixed(2);
+    assert.equal(x.svc, expectedSvc);
+    assert.equal(x.tgst, expectedTgst);
+  });
+
+  test('Green Tax is NOT discounted for a child guest -- still $6 x full headcount x nights, per existing MIRA rules (only infants are exempt)', () => {
+    const withChild = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 2, 1));
+    const withAdult = calcTax(mkRes(90, '2026-12-01', '2026-12-02', 3, 0));
+    assert.equal(withChild.green, withAdult.green, 'Green Tax must be identical regardless of the 3rd guest being a discounted child or a full-rate adult');
+    assert.equal(withChild.green, +(TAX.green * 3 * 1).toFixed(2));
   });
 }
 

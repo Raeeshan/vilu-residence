@@ -377,7 +377,7 @@
       "qDietary": "Pouvez-vous tenir compte de restrictions alimentaires ?",
       "aDietary": "En général, oui — indiquez-nous vos besoins alimentaires (végétarien, halal, allergies, etc.) lors de la réservation, et nous ferons de notre mieux pour nous y adapter.",
       "qOccupancyPolicy": "Combien de personnes une chambre peut-elle accueillir, et y a-t-il un supplément ?",
-      "aOccupancyPolicy": "Le prix de notre chambre couvre 2 personnes. Chaque chambre peut accueillir une 3ᵉ personne dans sa capacité existante pour 20 USD par nuit — cela s'applique qu'un lit d'appoint soit installé ou non, sans frais de lit d'appoint distincts en plus. Les enfants de moins de 2 ans séjournent gratuitement."
+      "aOccupancyPolicy": "Le prix de notre chambre couvre 2 personnes. Chaque chambre peut accueillir une 3ᵉ personne dans sa capacité existante pour 20 USD par nuit — cela s'applique qu'un lit d'appoint soit installé ou non, sans frais de lit d'appoint distincts en plus. Les enfants de moins de 2 ans séjournent gratuitement ; les enfants de 2 à 11 ans bénéficient d'une réduction de 50 % sur le supplément pour la 3ᵉ personne (10 USD par nuit) ; à partir de 12 ans, le tarif adulte complet s'applique."
     },
     "travelInfo": {
       "tag": "Planifiez votre voyage",
@@ -1071,7 +1071,7 @@
       "faqA8": "Non. Les requins-baleines et les raies manta sont des animaux sauvages, et une observation ne peut jamais être garantie sur une excursion donnée. Si aucun requin-baleine n'est trouvé lors de la recherche, les clients sont emmenés à la place sur un récif voisin pour faire du snorkeling, et Vilu Residence peut proposer une seconde tentative à tarif réduit un autre jour.",
       "cancelReassure": "Politique d'annulation échelonnée, aucun acompte — paiement en personne pendant votre séjour.",
       "faqQ9": "Combien de personnes une chambre peut-elle accueillir, et y a-t-il un supplément ?",
-      "faqA9": "Le prix de la chambre de chaque forfait couvre 2 personnes. Chaque chambre peut accueillir une 3ᵉ personne dans sa capacité existante pour 20 USD par nuit — cela s'applique qu'un lit d'appoint soit installé ou non, sans frais de lit d'appoint distincts en plus. Les enfants de moins de 2 ans séjournent gratuitement."
+      "faqA9": "Le prix de notre chambre couvre 2 personnes. Chaque chambre peut accueillir une 3ᵉ personne dans sa capacité existante pour 20 USD par nuit — cela s'applique qu'un lit d'appoint soit installé ou non, sans frais de lit d'appoint distincts en plus. Les enfants de moins de 2 ans séjournent gratuitement ; les enfants de 2 à 11 ans bénéficient d'une réduction de 50 % sur le supplément pour la 3ᵉ personne (10 USD par nuit) ; à partir de 12 ans, le tarif adulte complet s'applique."
     },
     "maaMeta": {
       "title": "Guide de Voyage de Maamigili — L'Île de Vilu Residence",
