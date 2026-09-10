@@ -40,6 +40,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .card h3{font-size:var(--font-size-base);font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
 .met{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px}
 .met label{font-size:var(--font-size-xs);color:#6b7280;font-weight:500;display:block;margin-bottom:5px}
 .met .v{font-size:var(--font-size-3xl);font-weight:700}.met .s{font-size:var(--font-size-xs);color:#6b7280;margin-top:3px}
@@ -708,9 +709,10 @@ body.pms-mode { overflow:hidden; }
 @media(max-width:900px){
   .sb{width:180px;min-width:180px;max-width:180px}
   .g4{grid-template-columns:repeat(2,1fr)}
+  .g5{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:600px){
-  .g4,.g2,.rd-grid,.form-grid,.fg-grid,.igg{grid-template-columns:1fr}
+  .g4,.g2,.g5,.rd-grid,.form-grid,.fg-grid,.igg{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -828,25 +830,23 @@ body.pms-mode { overflow:hidden; }
     <div class="scrl">
 
 <div class="sec on" id="s-dash">
-  <div class="g4" id="d-met">
-    <div class="met"><label>Vilu occupancy</label><div class="v">1/6</div><div class="s">17% today</div></div>
-    <div class="met"><label>Revenue (all)</label><div class="v">$2,864</div><div class="s">incl. all taxes</div></div>
-    <div class="met"><label>Partner guests</label><div class="v">0</div><div class="s">2 hotels</div></div>
-    <div class="met"><label>Invoices</label><div class="v">0</div><div class="s">TGST &amp; Green Tax</div></div></div>
-  <div class="g2">
-    <div class="card"><h3>Today's arrivals <span id="d-ac" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(2)</span></h3><div id="d-arr"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
-    <div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#e8f5f2;color:#00b4d8;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);font-weight:700">CW</div>
-    <div><div style="font-size:var(--font-size-sm);font-weight:600">Chen Wei</div><div style="font-size:var(--font-size-xs);color:#6b7280">Room 106</div></div></div><span class="bx ok">Confirmed</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
-    <div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#e8f5f2;color:#00b4d8;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);font-weight:700">SM</div>
-    <div><div style="font-size:var(--font-size-sm);font-weight:600">Sophie Martin</div><div style="font-size:var(--font-size-xs);color:#6b7280">Room 103</div></div></div><span class="bx ok">Confirmed</span></div></div></div>
-    <div class="card"><h3>Today's departures <span id="d-dc" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-dep"><p style="font-size:var(--font-size-sm);color:#9ca3af">No departures today.</p></div></div>
-    <div class="card"><h3>Room rates <span onclick="go('price',document.querySelectorAll('.sl')[3])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div id="d-rt"><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">Room 101</span><span style="font-weight:600">$80/night</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">Room 102</span><span style="font-weight:600">$80/night</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">Room 103</span><span style="font-weight:600">$85/night</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">Room 104</span><span style="font-weight:600">$85/night</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">Room 105</span><span style="font-weight:600">$90/night</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">Room 106</span><span style="font-weight:600">$90/night</span></div></div></div>
-    <div class="card"><h3>OTA channels</h3><div id="d-ch"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#2563eb"></div><span style="font-size:var(--font-size-sm)">Booking.com</span></div><span style="font-size:var(--font-size-sm);font-weight:600">$5,840</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#e11d48"></div><span style="font-size:var(--font-size-sm)">Airbnb</span></div><span style="font-size:var(--font-size-sm);font-weight:600">$3,920</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#d97706"></div><span style="font-size:var(--font-size-sm)">Agoda</span></div><span style="font-size:var(--font-size-sm);font-weight:600">$2,640</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#f59e0b"></div><span style="font-size:var(--font-size-sm)">Expedia</span></div><span style="font-size:var(--font-size-sm);font-weight:600">$1,820</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#4285f4"></div><span style="font-size:var(--font-size-sm)">Google Hotels</span></div><span style="font-size:var(--font-size-sm);font-weight:600">$840</span></div></div></div>
+  <div class="g5" id="d-summary">
+    <div class="met"><label>Vilu occupancy</label><div class="v">0/6</div><div class="s">0% tonight</div></div>
+    <div class="met"><label>Today's arrivals</label><div class="v">0</div><div class="s">check-in today</div></div>
+    <div class="met"><label>Today's departures</label><div class="v">0</div><div class="s">check-out today</div></div>
+    <div class="met"><label>In house</label><div class="v">0</div><div class="s">staying over</div></div>
+    <div class="met"><label>Revenue (this month)</label><div class="v">$0</div><div class="s">incl. all taxes</div></div>
   </div>
-  <div class="card"><h3>Maldives tax rates <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div style="display:flex;gap:10px;flex-wrap:wrap" id="d-tax">
-    <div style="background:#e8f5f2;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">TGST</div><div style="font-size:var(--font-size-xl);font-weight:700;color:#00b4d8">17%</div></div>
-    <div style="background:#fef3c7;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Green Tax</div><div style="font-size:var(--font-size-xl);font-weight:700;color:#92400e">$6/pp/night</div></div>
-    <div style="background:#f3f4f6;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Service</div><div style="font-size:var(--font-size-xl);font-weight:700">10%</div></div></div></div>
+  <div class="g2">
+    <div class="card"><h3>Today's arrivals <span id="d-ac" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-arr"><p style="font-size:var(--font-size-sm);color:#9ca3af">No arrivals today.</p></div></div>
+    <div class="card"><h3>Today's departures <span id="d-dc" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-dep"><p style="font-size:var(--font-size-sm);color:#9ca3af">No departures today.</p></div></div>
+  </div>
+  <div class="card"><h3>In house / staying over <span id="d-ihc" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-inhouse"><p style="font-size:var(--font-size-sm);color:#9ca3af">No stay-over guests.</p></div></div>
+  <div class="g2">
+    <div class="card"><h3>Physical room rates <span onclick="go('price',document.querySelectorAll('.sl')[3])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div id="d-rt"></div></div>
+    <div class="card"><h3>Maldives tax rates <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div style="display:flex;gap:10px;flex-wrap:wrap" id="d-tax"></div></div>
+  </div>
+  <div class="card" id="d-partners-card" style="display:none"><h3>Partner properties</h3><div id="d-partners"></div></div>
 </div>
 
 <div class="sec" id="s-cal">
@@ -2937,6 +2937,83 @@ function rNm(n){const r=getR(n);if(!r)return n;return r.prop?r.hNm+' — '+r.nm:
 // level of the first <script> block, so it is also a global available to the
 // later <script> blocks in this file.
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+// ── Guest Notes: presentation-layer normalization for migrated reservations ──
+// The Cloudbeds import (2026-09-08) wrote a single semi-structured string
+// into r.notes: a "Cloudbeds #id (room N) · ... · Cloudbeds status X"
+// header, followed by blank-line-separated "[Label] text" blocks (internal
+// note, pricing, guest address, room guest, migration audit line). Nothing
+// here ever rewrites that stored field on its own -- it only PARSES it for
+// display, and (on save) reassembles it byte-identical except for the one
+// block the staff actually edited. No historical document is migrated or
+// bulk-rewritten by this.
+function parseImportedNote(raw){
+  raw=String(raw||'');
+  if(!/^Cloudbeds #/.test(raw.trim())) return null;
+  var blocks=raw.split(/\n\n+/);
+  var header=(blocks.shift()||'').trim();
+  var sections=blocks.map(function(b){
+    var m=/^\[([^\]]+)\]\s*([\s\S]*)$/.exec(b.trim());
+    return m?{label:m[1],text:m[2].trim()}:{label:'',text:b.trim()};
+  }).filter(function(s){return s.label||s.text;});
+  var internal=sections.find(function(s){return /^Cloudbeds internal note/i.test(s.label);})||null;
+  return {header:header,sections:sections,internal:internal};
+}
+function rebuildImportedNote(parsed,newText){
+  var sections=parsed.sections.map(function(s){
+    if(parsed.internal&&s===parsed.internal) return '['+s.label+'] '+newText;
+    return s.label?'['+s.label+'] '+s.text:s.text;
+  });
+  return [parsed.header].concat(sections).join('\n\n');
+}
+// One clean Guest Notes panel, shared by the reservation detail modal and
+// the Calendar side-drawer -- was previously two independently hand-built
+// copies of the same yellow-preview-plus-textarea markup in both places.
+function renderNotesHTML(r,taId){
+  var parsed=parseImportedNote(r.notes);
+  var editableValue,importedHTML='';
+  if(parsed){
+    editableValue=parsed.internal?parsed.internal.text:'';
+    var metaRows=[];
+    metaRows.push(['Source',esc(r.migrated_from?'Cloudbeds (migrated)':(r.src||'Direct'))]);
+    if(r.cb_id) metaRows.push(['Cloudbeds reservation','#'+esc(r.cb_id)]);
+    var idM=/Cloudbeds internal id\s+(\S+)/.exec(parsed.header); if(idM) metaRows.push(['Cloudbeds internal ID',esc(idM[1])]);
+    var srcM=/[·]\s*source\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(srcM) metaRows.push(['Original Cloudbeds source',esc(srcM[1].trim())]);
+    var statM=/Cloudbeds status\s+(.+)$/.exec(parsed.header); if(statM) metaRows.push(['Imported status',esc(statM[1].trim())]);
+    var bookedM=/booked\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(bookedM) metaRows.push(['Imported booking date',esc(bookedM[1].trim())]);
+    if(r.migrated_at){var da=new Date(r.migrated_at);metaRows.push(['Last source update',esc(isNaN(da)?r.migrated_at:da.toLocaleString())]);}
+    var otherSections=parsed.sections.filter(function(s){return s!==parsed.internal;});
+    var sectionsHTML=otherSections.map(function(s){
+      return '<div style="margin-top:8px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">'+esc(s.label)+'</div><div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line">'+esc(s.text)+'</div></div>';
+    }).join('');
+    var internalHTML=parsed.internal?'<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e5e7eb"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">Cloudbeds internal note</div><div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line">'+esc(parsed.internal.text)+'</div></div>':'';
+    importedHTML='<details style="margin-top:10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:7px;padding:8px 12px">'
+      +'<summary style="cursor:pointer;font-size:var(--font-size-sm);font-weight:600;color:#374151">Imported reservation information</summary>'
+      +'<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:var(--font-size-sm)">'
+      +metaRows.map(function(kv){return '<div><span style="color:#6b7280">'+kv[0]+':</span> '+kv[1]+'</div>';}).join('')
+      +'</div>'+sectionsHTML+internalHTML+'</details>';
+  } else {
+    editableValue=r.notes||'';
+  }
+  return '<textarea id="'+taId+'" rows="5" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:96px;margin-bottom:8px" placeholder="Special requests, dietary needs, transfer info...">'+esc(editableValue)+'</textarea>'+importedHTML;
+}
+// The one place any note edit actually reaches Firestore -- both call
+// sites (reservation detail modal, Calendar drawer) route through this
+// instead of only mutating the in-memory RES record, which is what left a
+// saved note silently reverting on the next reload.
+function saveNoteFor(r,taId){
+  var ta=document.getElementById(taId);
+  var txt=((ta&&ta.value)||'').trim();
+  if(!txt){toast('Note is empty');return false;}
+  var parsed=parseImportedNote(r.notes);
+  r.notes=parsed?rebuildImportedNote(parsed,txt):txt;
+  var now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  if(!r.nlog)r.nlog=[];
+  r.nlog.push({t:'"'+txt+'"',time:now});
+  saveRES(r);
+  toast('Note saved ✓');
+  return true;
+}
 function isVR(n){return n&&n.startsWith('VR');}
 function phNm(p){if(p==='vilu')return PROP.nm;const h=PH.find(x=>x.id===p);return h?h.nm:'Partner hotel';}
 // Derive which property a reservation belongs to from its room_id, since
@@ -3366,28 +3443,73 @@ document.addEventListener('keydown', function(e){
 });
 
 // DASHBOARD
+// Canonical Maldives-timezone "today" for the Dashboard's own arrival/
+// departure/occupancy classification. Deliberately a separate helper from
+// the global tS (browser-local date) that Calendar/booking-engine/every
+// other section still uses for their own date defaults and navigation --
+// this fix is scoped to Dashboard's today-boundary bug only, never a
+// redefinition of tS itself, so nothing outside Dashboard's own rendering
+// changes behavior.
+function maldivesToday(){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Indian/Maldives'}).format(new Date());
+}
+// "Still a real, non-cancelled reservation" -- the same blocking test
+// isOcc()/syncAvailability() already use for room-lock/availability
+// purposes (minus the Checked-out exclusion, which only matters for
+// current-occupancy, not for "did/will this guest arrive or depart
+// today"), reused rather than reinvented so Dashboard can never disagree
+// with Calendar's own notion of which reservations count.
+function isBlockingStatus(st){ return st!=='Cancelled'; }
+// Single source of every Dashboard number -- Calendar/Reservations never
+// get a second, dashboard-specific interpretation of the same documents.
+// occupiedRooms reuses isOcc() (Calendar's own per-room lock/conflict
+// check, already covers manual blocks too) instead of the old "st==
+// Checked in" tally, which is why a Confirmed-but-not-yet-clicked-in guest
+// now correctly counts as occupying their room.
+function computeDashData(){
+  var today=maldivesToday(), tomorrow=D2(today,1);
+  var viluRes=RES.filter(function(r){return r.prop==='vilu';});
+  var occupiedRooms=VR.filter(function(vr){return !!isOcc(vr.n,today,tomorrow);}).length;
+  var arrivals=viluRes.filter(function(r){return r.ci===today&&isBlockingStatus(r.st);});
+  var departures=viluRes.filter(function(r){return r.co===today&&isBlockingStatus(r.st);});
+  var inHouse=viluRes.filter(function(r){return r.ci<today&&r.co>today&&isBlockingStatus(r.st)&&r.st!=='Checked out';});
+  var ym=today.slice(0,7);
+  var lastDay=new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();
+  var monthFrom=ym+'-01', monthTo=ym+'-'+String(lastDay).padStart(2,'0');
+  var rev=anRevenue(monthFrom,monthTo);
+  return {today:today,occupiedRooms:occupiedRooms,totalRooms:VR.length,arrivals:arrivals,departures:departures,inHouse:inHouse,revenue:rev.total,monthFrom:monthFrom,monthTo:monthTo};
+}
+function dashGuestRow(r){
+  var initials=(esc(r.fn)[0]||'?')+(esc(r.ln)[0]||'');
+  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">'
+    +'<div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#e8f5f2;color:#00b4d8;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);font-weight:700">'+initials+'</div>'
+    +'<div><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+rNm(r.rn)+' · '+esc(r.src||'Direct')+'</div></div></div>'+stBx(r.st)+'</div>';
+}
 function drawDash(){
-  const occ=RES.filter(r=>r.st==='Checked in'&&r.prop==='vilu').length;
-  const rev=RES.filter(r=>r.prop==='vilu'&&r.st!=='Cancelled').reduce((s,r)=>s+calcTax(r).total,0);
-  const arr=RES.filter(r=>r.ci<=tS&&r.co>tS&&r.st!=='Cancelled'&&r.st!=='Checked out');
-  const dep=RES.filter(r=>r.co===tS&&r.st==='Checked in');
-  document.getElementById('d-met').innerHTML=`
-    <div class="met"><label>Vilu occupancy</label><div class="v">${occ}/${VR.length}</div><div class="s">${Math.round(occ/VR.length*100)}% today</div></div>
-    <div class="met"><label>Revenue (all)</label><div class="v">$${Math.round(rev).toLocaleString()}</div><div class="s">incl. all taxes</div></div>
-    <div class="met"><label>Partner guests</label><div class="v">${RES.filter(r=>r.prop!=='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out').length}</div><div class="s">${PH.length} hotels</div></div>
-    <div class="met"><label>Invoices</label><div class="v">${INV.length}</div><div class="s">TGST & Green Tax</div></div>`;
-  document.getElementById('d-ac').textContent='('+arr.length+')';
-  document.getElementById('d-dc').textContent='('+dep.length+')';
-  document.getElementById('d-arr').innerHTML=arr.length?arr.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
-    <div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#e8f5f2;color:#00b4d8;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);font-weight:700">${esc(r.fn)[0]}${esc(r.ln)[0]}</div>
-    <div><div style="font-size:var(--font-size-sm);font-weight:600">${esc(r.fn)} ${esc(r.ln)}</div><div style="font-size:var(--font-size-xs);color:#6b7280">${rNm(r.rn)}</div></div></div>${stBx(r.st)}</div>`).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No arrivals today.</p>';
-  document.getElementById('d-dep').innerHTML=dep.length?dep.map(r=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><span style="font-size:var(--font-size-sm);font-weight:600">${esc(r.fn)} ${esc(r.ln)}</span>${stBx(r.st)}</div>`).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No departures today.</p>';
+  var d=computeDashData();
+  document.getElementById('d-summary').innerHTML=`
+    <div class="met"><label>Vilu occupancy</label><div class="v">${d.occupiedRooms}/${d.totalRooms}</div><div class="s">${d.totalRooms?Math.round(d.occupiedRooms/d.totalRooms*100):0}% tonight</div></div>
+    <div class="met"><label>Today's arrivals</label><div class="v">${d.arrivals.length}</div><div class="s">check-in today</div></div>
+    <div class="met"><label>Today's departures</label><div class="v">${d.departures.length}</div><div class="s">check-out today</div></div>
+    <div class="met"><label>In house</label><div class="v">${d.inHouse.length}</div><div class="s">staying over</div></div>
+    <div class="met"><label>Revenue (this month)</label><div class="v">$${Math.round(d.revenue).toLocaleString()}</div><div class="s">incl. all taxes</div></div>`;
+  document.getElementById('d-ac').textContent='('+d.arrivals.length+')';
+  document.getElementById('d-dc').textContent='('+d.departures.length+')';
+  document.getElementById('d-ihc').textContent='('+d.inHouse.length+')';
+  document.getElementById('d-arr').innerHTML=d.arrivals.length?d.arrivals.map(dashGuestRow).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No arrivals today.</p>';
+  document.getElementById('d-dep').innerHTML=d.departures.length?d.departures.map(dashGuestRow).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No departures today.</p>';
+  document.getElementById('d-inhouse').innerHTML=d.inHouse.length?d.inHouse.map(dashGuestRow).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No stay-over guests.</p>';
   document.getElementById('d-rt').innerHTML=VR.map(r=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">${r.nm}</span><span style="font-weight:600">$${r.rate}/night</span></div>`).join('');
-  document.getElementById('d-ch').innerHTML=OTAS.map(o=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:${o.color}"></div><span style="font-size:var(--font-size-sm)">${o.nm}</span></div><span style="font-size:var(--font-size-sm);font-weight:600">$${o.rev.toLocaleString()}</span></div>`).join('');
   document.getElementById('d-tax').innerHTML=`
-    <div style="background:#e8f5f2;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">TGST</div><div style="font-size:var(--font-size-xl);font-weight:700;color:#00b4d8">${TAX.tgst}%</div></div>
-    <div style="background:#fef3c7;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Green Tax</div><div style="font-size:var(--font-size-xl);font-weight:700;color:#92400e">$${TAX.green}/pp/night</div></div>
-    <div style="background:#f3f4f6;border-radius:8px;padding:10px 14px;flex:1;min-width:120px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Service</div><div style="font-size:var(--font-size-xl);font-weight:700">${TAX.svc}%</div></div>`;
+    <div style="background:#e8f5f2;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">TGST</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#00b4d8">${TAX.tgst}%</div></div>
+    <div style="background:#fef3c7;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">Green Tax</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#92400e">$${TAX.green}/pp/night</div></div>
+    <div style="background:#f3f4f6;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">Service</div><div style="font-size:var(--font-size-lg);font-weight:700">${TAX.svc}%</div></div>`;
+  var partners=RES.filter(r=>r.prop!=='vilu'&&isBlockingStatus(r.st)&&r.st!=='Checked out');
+  var pCard=document.getElementById('d-partners-card');
+  if(partners.length){
+    pCard.style.display='';
+    document.getElementById('d-partners').innerHTML='<div style="font-size:var(--font-size-sm);color:#6b7280">'+partners.length+' active guest'+(partners.length===1?'':'s')+' across '+PH.length+' partner propert'+(PH.length===1?'y':'ies')+' (not counted in Vilu occupancy)</div>';
+  } else { pCard.style.display='none'; }
 }
 
 // ══════════════════════════════════════════════
@@ -4278,9 +4400,8 @@ function _showDetLegacy(id){
     <div class="np">
       <div class="nh"><span style="font-size:var(--font-size-lg)">📋</span><span style="font-size:var(--font-size-base);font-weight:600;color:#92400e">Guest Notes</span>${hasN?'<span style="background:#f59e0b;color:#fff;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">HAS NOTES</span>':''}</div>
       <div class="nb">
-        ${hasN?`<div style="background:#fefce8;border:1px solid #fde68a;border-radius:7px;padding:9px 12px;margin-bottom:10px;font-size:var(--font-size-sm);color:#713f12;line-height:1.7">⭐ ${esc(r.notes)}</div>`:'<p style="font-size:var(--font-size-sm);color:#9ca3af;margin-bottom:10px">No notes yet.</p>'}
-        <textarea id="note-ta" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:72px;margin-bottom:8px" placeholder="Add special request...">${esc(r.notes)}</textarea>
-        <button class="btn p sm" onclick="saveNote('${id}')"><i class="ti ti-device-floppy"></i>Save note</button>
+        ${renderNotesHTML(r,'note-ta')}
+        <button class="btn p sm" style="margin-top:8px" onclick="saveNote('${id}')"><i class="ti ti-device-floppy"></i>Save note</button>
         ${r.nlog.length?`<div style="margin-top:10px;font-size:var(--font-size-xs);color:#9ca3af">${r.nlog.slice(-3).reverse().map(l=>''+l.t+' — '+l.time).join('<br>')}</div>`:''}
       </div>
     </div>`;
@@ -4419,9 +4540,7 @@ function _showDetLegacy(id){
 
 function saveNote(id){
   const r=RES.find(x=>x.id===id);if(!r)return;
-  const txt=document.getElementById('note-ta').value.trim();if(!txt){toast('Note is empty');return;}
-  const now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  r.nlog.push({t:'"'+txt+'"',time:now});r.notes=txt;toast('Note saved ✓');showDet(id);
+  if(saveNoteFor(r,'note-ta')) showDet(id);
 }
 
 // EDIT BOOKING
@@ -6822,10 +6941,7 @@ function rdRenderTab(n, r){
       }
     }
   } else if(n===1){
-    var hasNotes=r.notes&&r.notes.trim();
-    var h2='';
-    if(hasNotes) h2+='<div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:var(--font-size-base);color:#713f12;line-height:1.7;margin-bottom:14px">⭐ '+esc(r.notes)+'</div>';
-    h2+='<div class="rd-field"><label>Add / update note</label><textarea id="rd-note-ta" rows="5" style="min-height:120px" placeholder="Special requests, dietary needs...">'+esc(r.notes||'')+'</textarea></div>';
+    var h2=renderNotesHTML(r,'rd-note-ta');
     if(r.nlog&&r.nlog.length){h2+='<div class="rd-section">Note history</div>';r.nlog.slice(-5).reverse().forEach(function(l){h2+='<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:3px 0">'+l.time+' — '+l.t+'</div>';});}
     body.innerHTML=h2;
     footer.innerHTML='';
@@ -6833,11 +6949,7 @@ function rdRenderTab(n, r){
       var nb=document.createElement('button');nb.className='btn p';nb.style.flex='1';
       nb.innerHTML='<i class="ti ti-device-floppy"></i> Save note';
       nb.onclick=function(){
-        var txt=(document.getElementById('rd-note-ta').value||'').trim();
-        if(!txt){toast('Note is empty');return;}
-        var now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-        if(!r.nlog)r.nlog=[];r.nlog.push({t:'"'+txt+'"',time:now});r.notes=txt;
-        toast('Note saved ✓');rdTab(1,document.querySelectorAll('.rd-tab')[1]);
+        if(saveNoteFor(r,'rd-note-ta')) rdTab(1,document.querySelectorAll('.rd-tab')[1]);
       };footer.appendChild(nb);
     }
   } else if(n===2){

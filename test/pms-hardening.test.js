@@ -130,9 +130,13 @@ section('Case D — stored-XSS hardening: guest-controlled fields are escaped be
   test('vilu-agency-portal.html defines an HTML-escaping helper', () => {
     assert.ok(/function esc\(/.test(AGENCY), 'esc() helper not found in vilu-agency-portal.html');
   });
-  test('the known dashboard arrivals/departures guest-name render sites use esc()', () => {
-    const dash = PMS.slice(PMS.indexOf('function drawDash'), PMS.indexOf('function drawDash') + 2500);
-    assert.ok(/esc\(r\.fn\)/.test(dash) && /esc\(r\.ln\)/.test(dash), 'drawDash() arrivals/departures guest name is not escaped');
+  test('the known dashboard arrivals/departures/in-house guest-name render site uses esc()', () => {
+    // 2026-09-10: drawDash() now shares one dashGuestRow() row-renderer
+    // across arrivals/departures/in-house instead of building the
+    // arrivals/departures markup inline twice -- check the row-renderer
+    // itself, the single place a guest name actually reaches innerHTML.
+    const row = PMS.slice(PMS.indexOf('function dashGuestRow'), PMS.indexOf('function dashGuestRow') + 800);
+    assert.ok(/esc\(r\.fn\)/.test(row) && /esc\(r\.ln\)/.test(row), 'dashGuestRow() guest name is not escaped');
   });
   test('the reservation-detail edit form (attribute-breakout risk) escapes fn/ln/em/ph/nat/pid in value="..."', () => {
     const tab = PMS.slice(PMS.indexOf('function rdRenderTab'), PMS.indexOf('function rdRenderTab') + 2500);
