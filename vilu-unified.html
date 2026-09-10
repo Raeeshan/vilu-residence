@@ -8464,6 +8464,7 @@ function openCreateInvoice(resId){
 
   html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
     +'<button type="button" onclick="ciSelectScope(\'all\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #2563eb;background:#eff6ff;color:#2563eb;cursor:pointer;font-family:inherit">All unpaid</button>'
+    +'<button type="button" onclick="ciSelectScope(\'room\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">Room only</button>'
     +FOLIO_CATEGORIES.map(function(c){return '<button type="button" onclick="ciSelectScope(\''+esc(c)+'\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">'+c+'</button>';}).join('')
     +'</div>';
 
@@ -8499,13 +8500,21 @@ function openCreateInvoice(resId){
   el.innerHTML=html;
   document.body.appendChild(el.firstChild);
 }
+// "All unpaid" (Step 11) means genuinely everything -- room AND every
+// uninvoiced extra, one combined invoice. "Room only" (Step 10) is its own
+// distinct preset (extras excluded, only #ci-include-room ticked) -- the
+// six presets this dialog offers (All unpaid / Room only / each
+// FOLIO_CATEGORIES entry / Selected items via manual ticking) match Step 8
+// exactly, never fewer.
 function ciSelectScope(scope){
   document.querySelectorAll('.ci-chk').forEach(function(c){
     var row=c.closest('.ci-row');
-    c.checked = scope==='all' ? true : !!(row && row.dataset.cat===scope);
+    c.checked = scope==='all' ? true : scope==='room' ? false : !!(row && row.dataset.cat===scope);
   });
   var selAll=document.getElementById('ci-select-all');
   if(selAll) selAll.checked=(scope==='all');
+  var roomChk=document.getElementById('ci-include-room');
+  if(roomChk && (scope==='all' || scope==='room')) roomChk.checked=true;
 }
 function submitCreateInvoice(resId){
   var folio=FOLIOS[resId]||{charges:[]};

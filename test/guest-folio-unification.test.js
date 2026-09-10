@@ -220,15 +220,17 @@ section('Case E — unified "Create Invoice" (Steps 8-11): replaces the old dupl
     const calBtnRowIdx = PMS.indexOf("btnRow.innerHTML='<button data-rid=\"'+id+'\" onclick=\"openCreateInvoice");
     assert.ok(calBtnRowIdx !== -1, 'Calendar folio section button row must call openCreateInvoice');
   });
-  test('openCreateInvoice() only lists UNINVOICED folio charges (an item with .invoiceId already set is excluded), and offers "All unpaid" plus one preset per FOLIO_CATEGORIES', () => {
+  test('openCreateInvoice() only lists UNINVOICED folio charges (an item with .invoiceId already set is excluded), and offers all 6 Step-8 presets: All unpaid, Room only, one per FOLIO_CATEGORIES, and Selected items (manual ticking)', () => {
     const src = extractByStart(PMS, /function openCreateInvoice\(resId\)\s*\{/);
     assert.match(src, /folio\.charges\.filter\(function\(ch\)\{return !ch\.invoiceId;\}\)/);
     assert.match(src, /ciSelectScope\(\\'all\\'\)/);
+    assert.match(src, /ciSelectScope\(\\'room\\'\)/);
     assert.match(src, /FOLIO_CATEGORIES\.map/);
   });
-  test('ciSelectScope(\'all\') checks every row; a category scope checks only rows whose data-cat matches -- never invents a selection the staff didn\'t ask for', () => {
+  test('ciSelectScope(\'all\') checks every extra AND the room checkbox (Step 11: "All unpaid" is genuinely everything, one combined invoice); ciSelectScope(\'room\') unchecks every extra and checks only room (Step 10: Room only is its own distinct preset); a category scope checks only rows whose data-cat matches and leaves room untouched', () => {
     const src = extractByStart(PMS, /function ciSelectScope\(scope\)\s*\{/);
-    assert.match(src, /scope==='all' \? true : !!\(row && row\.dataset\.cat===scope\)/);
+    assert.match(src, /scope==='all' \? true : scope==='room' \? false : !!\(row && row\.dataset\.cat===scope\)/);
+    assert.match(src, /if\(roomChk && \(scope==='all' \|\| scope==='room'\)\) roomChk\.checked=true;/);
   });
   test('submitCreateInvoice() propagates each selected charge\'s id as chargeId into the invoice-modal draft items, and passes includeRoom through explicitly (never a separately-computed room line, which was the old double-charge bug)', () => {
     const src = extractByStart(PMS, /function submitCreateInvoice\(resId\)\s*\{/);
