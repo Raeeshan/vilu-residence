@@ -217,6 +217,38 @@ exports.beds24RateChangeSync = onDocumentWritten('ota_room_types/{roomTypeId}', 
   await enqueueBeds24Sync('ota_room_types:' + event.params.roomTypeId, { [code]: dates });
 });
 
+// ── Beds24 date-specific rate-override sync (Bulk Price Manager rebuild,
+// 2026-09-10) ──────────────────────────────────────────────────────────────
+// Reacts to ota_room_type_overrides/{roomTypeId} writes -- the per-date
+// override store the category-first Bulk Price Manager now writes alongside
+// the existing room_prices/{VRxx} website/direct-booking path. Unlike
+// beds24RateChangeSync's full booking-window resync (a base-rate change has
+// no natural "affected dates" of its own), an override write DOES: only the
+// date keys that were actually added, changed, or removed between before and
+// after are enqueued -- never the whole horizon -- matching "no full-calendar
+// push for a one-day edit". beds24OutboundWorker re-reads this same
+// collection live at push time (see functions-beds24/index.js
+// roomTypeOverrides()), so it doesn't matter whether THIS trigger, a
+// reservation/block change, or the nightly safety net enqueued the job --
+// the override is always applied fresh, never trusted from enqueue time.
+exports.beds24OverrideChangeSync = onDocumentWritten('ota_room_type_overrides/{roomTypeId}', async (event) => {
+  const code = ROOM_TYPE_ID_TO_CODE[event.params.roomTypeId];
+  if (!code || !BEDS24_ROOM_MAP[code]) return;
+  const before = (event.data.before.exists ? event.data.before.data() : null) || {};
+  const after = (event.data.after.exists ? event.data.after.data() : null) || {};
+  const beforeOverrides = before.overrides || {};
+  const afterOverrides = after.overrides || {};
+  const changedDates = new Set();
+  for (const date of Object.keys(beforeOverrides)) {
+    if (!(date in afterOverrides) || afterOverrides[date] !== beforeOverrides[date]) changedDates.add(date);
+  }
+  for (const date of Object.keys(afterOverrides)) {
+    if (!(date in beforeOverrides) || afterOverrides[date] !== beforeOverrides[date]) changedDates.add(date);
+  }
+  if (!changedDates.size) return; // e.g. a metadata-only write, or before===after
+  await enqueueBeds24Sync('ota_room_type_overrides:' + event.params.roomTypeId, { [code]: Array.from(changedDates).sort() });
+});
+
 // ── nightly reconciliation (Stage 10) ───────────────────────────────────────
 // Full 730-day Vilu-internal availability recompute (unchanged), plus a
 // nightly Beds24 safety-net resync of the full 365-day booking window for

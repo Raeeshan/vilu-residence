@@ -324,8 +324,26 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .pm-tbl td.price-cell{text-align:center;cursor:pointer;position:relative}
 .pm-tbl td.price-cell:hover{background:#e0f7fd}
 .pm-tbl td.price-cell.selected{background:#dbeafe!important;outline:2px solid #2563eb;outline-offset:-1px}
+.pm-tbl td.today-cell,.pm-tbl th.today-col{background:#fefce8}
+.pm-tbl td.wknd-cell,.pm-tbl th.wknd{background:#fff8f0}
+.pm-tbl th.col-sel{background:#dbeafe!important}
 .price-val{font-size:var(--font-size-base);font-weight:700;color:#111827;display:block;line-height:1}
 .price-inp{width:100%;height:100%;border:none;background:transparent;text-align:center;font-size:var(--font-size-base);font-weight:700;font-family:inherit;color:#00b4d8;outline:none;padding:0}
+/* ── Category-first Bulk Price Manager rows (2026-09-10 rebuild) ── */
+.pm-tbl td.cat-lbl{cursor:pointer;display:table-cell}
+.pm-tbl td.cat-lbl:hover{background:#f9fafb}
+.cat-chev{display:inline-block;width:14px;color:#9ca3af;font-size:var(--font-size-xs)}
+.pm-tbl td.room-lbl .rn{font-size:var(--font-size-sm);font-weight:700;color:#111827;display:block;line-height:1.3}
+.pm-tbl td.room-lbl .rt{font-size:var(--font-size-xs);color:#6b7280;display:block;margin-top:1px}
+.pm-tbl tr.cat-sub-row td.room-lbl{padding-left:30px;background:#fafafa}
+.pm-tbl tr.cat-sub-row td.room-lbl .rn{font-weight:600;font-size:var(--font-size-xs);color:#374151}
+.pm-tbl td.ref-cell{text-align:center;background:#fafafa;color:#9ca3af}
+.pm-tbl td.ref-cell .price-val.sub{font-size:var(--font-size-sm);font-weight:600;color:#9ca3af}
+.pm-sync-status{font-size:var(--font-size-xs);font-weight:600;padding:4px 10px;border-radius:20px}
+.pm-sync-status:empty{display:none}
+.pm-sync-saving,.pm-sync-syncing{background:#e0f7fd;color:#00778e}
+.pm-sync-saved,.pm-sync-synced{background:#d1fae5;color:#047857}
+.pm-sync-error,.pm-sync-issue{background:#fee2e2;color:#b91c1c}
 .be-modal{background:#fff;border-radius:14px;width:560px;max-width:96vw;max-height:94vh;overflow-y:auto;padding:0;box-shadow:0 24px 64px rgba(0,0,0,.22)}
 .be-hdr{padding:18px 22px 14px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between}
 .be-hdr h3{font-size:var(--font-size-lg);font-weight:700}
@@ -1351,18 +1369,17 @@ body.pms-mode { overflow:hidden; }
     <button class="btn sm" onclick="setView(90)" id="vb-90">90 days</button>
   </div>
   <button class="btn p" style="margin-left:auto" onclick="openBE()"><i class="ti ti-edit"></i>Bulk edit</button>
-  <button class="btn sm" onclick="pmSaveAll()" style="border-color:#00b4d8;color:#00b4d8"><i class="ti ti-device-floppy"></i>Save &amp; push all</button>
+  <button class="btn sm" onclick="pmSave()" style="border-color:#00b4d8;color:#00b4d8"><i class="ti ti-device-floppy"></i>Save</button>
   <div id="pm-save-badge" style="display:none;background:#fef3c7;color:#92400e;font-size:var(--font-size-xs);font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid #fde68a">● Unsaved changes</div>
+  <div id="pm-sync-status" class="pm-sync-status"></div>
 </div>
 
 <div class="pm-sc" id="pm-sc"><table class="pm-tbl" id="pm-tbl"></table></div>
 
 <div class="pm-legend">
-  <div class="pm-leg-item"><div class="pm-leg-dot" style="background:#f9fafb;border:1px solid #e5e7eb"></div>Weekday</div>
-  <div class="pm-leg-item"><div class="pm-leg-dot" style="background:#fff8f0;border:1px solid #fed7aa"></div>Weekend</div>
   <div class="pm-leg-item"><div class="pm-leg-dot" style="background:#fefce8;border:1px solid #fde68a"></div>Today</div>
   <div class="pm-leg-item"><div class="pm-leg-dot" style="background:#dbeafe;border:1px solid #93c5fd"></div>Selected</div>
-  <div style="margin-left:auto;font-size:var(--font-size-xs);color:#9ca3af"><i class="ti ti-hand-click"></i> Click cell to edit · Click date to select column · Shift+click for range</div>
+  <div style="margin-left:auto;font-size:var(--font-size-xs);color:#9ca3af"><i class="ti ti-hand-click"></i> Click a category's price to edit · Click a category name to show its rooms · Click a date to select the column</div>
 </div>
 </div>
 
@@ -2306,7 +2323,7 @@ Suite</textarea></div>
     </div>
     <div class="be-body">
       <div class="be-section">
-        <div class="be-section-title">Rooms to update</div>
+        <div class="be-section-title">Room categories to update</div>
         <div id="be-rooms"></div>
       </div>
       <div class="be-section">
@@ -3089,6 +3106,27 @@ const VR=[
   {n:'VR05',nm:'Room 105',type:'Double Room',rate:90,cap:3},
   {n:'VR06',nm:'Room 106',type:'Deluxe Family Room with Open Deck',rate:90,cap:3},
 ];
+
+// ── Canonical Vilu room-CATEGORY map (Bulk Price Manager rebuild, 2026-09-10)
+// ────────────────────────────────────────────────────────────────────────
+// Owner-locked, matches functions-core/functions-beds24's own
+// BEDS24_ROOM_MAP (beds24-bridge.js) and ota-room-types.js's
+// INITIAL_OTA_ROOM_TYPES exactly -- never invented here. `otaRoomTypeId` is
+// the Firestore ota_room_types/ota_room_type_overrides doc id; `beds24RoomId`
+// is Beds24's own room id for that category. `legacyDefaultRate` is each
+// VR[]'s own physical-room default (kept ONLY for reference display per
+// Part K -- never blindly treated as the OTA/website sell price, and never
+// overwritten by this page). `otaBaseRate` is the owner-locked current
+// category sell price actually used by ota_room_types (INITIAL_OTA_ROOM_TYPES)
+// -- the Double category is deliberately $90, not the $85/$85/$90 physical
+// defaults of VR03/VR04/VR05.
+const PRICE_CATEGORIES=[
+  {code:'DELUXE_FAMILY',otaRoomTypeId:'deluxe_family',beds24RoomId:727992,label:'Deluxe Family',rooms:['VR01','VR02'],otaBaseRate:80},
+  {code:'DOUBLE',otaRoomTypeId:'double',beds24RoomId:728133,label:'Double',rooms:['VR03','VR04','VR05'],otaBaseRate:90},
+  {code:'DELUXE_FAMILY_OPEN_DECK',otaRoomTypeId:'open_deck',beds24RoomId:728134,label:'Deluxe Family Open Deck',rooms:['VR06'],otaBaseRate:90},
+];
+function catFor(code){ return PRICE_CATEGORIES.find(c=>c.code===code); }
+function catForRoom(rn){ return PRICE_CATEGORIES.find(c=>c.rooms.includes(rn)); }
 
 let PH=[
   {id:'ha',nm:'Ranfaru Inn',addr:'Maafushi Island',color:'#8b5cf6',rooms:['Room 1','Room 2','Room 3','Room 4','Room 5','Room 6','Room 7','Room 8','Room 9','Room 10']},
@@ -5327,17 +5365,25 @@ async function saveEdit(){
 // ══════════════════════════════════════════════
 // PRICING MATRIX
 // ══════════════════════════════════════════════
-let pmStart = new Date();
+// Maldives 'today' minus 2 days -- never browser-local new Date() (see
+// pmToday()'s own comment below for why this matters).
+let pmStart = new Date(tS+'T12:00');
 pmStart.setDate(pmStart.getDate() - 2);
-pmStart.setHours(0,0,0,0);
 let pmDays = 30;
-// roomPrices[roomN][dateStr] = price (overrides default rate)
+// roomPrices[roomN][dateStr] = price (overrides default rate) -- UNCHANGED
+// canonical shape/storage (still per PHYSICAL room): this is the exact
+// structure vilu-website.html's fetchRoomPricesFromFirestore()/getRoomPrice()
+// and functions-core's serverRate() already read from Firestore
+// room_prices/{roomId}. The category-first UI above it (catGetPrice/
+// catSetPrice below) always writes every physical room in a category in
+// lockstep, so the existing website/server read path needs zero changes.
 let roomPrices = (function(){
   try{ var s=localStorage.getItem('vilu_room_prices'); return s?JSON.parse(s):{}; }catch(e){ return {}; }
 })();
 let pmSelCols = new Set(); // selected date columns
-let pmEditing = null; // {rn, date}
+let pmEditing = null; // {catCode, date}
 let pmHasChanges = false;
+let pmOpenCats = new Set(); // categories currently expanded to show physical-room members (reference only)
 
 const WEEKDAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -5355,6 +5401,30 @@ function pmSetPrice(rn, ds, price) {
   document.getElementById('pm-save-badge').style.display='';
 }
 
+// Category-level price resolution: a category's price on a date is its
+// member rooms' pmGetPrice() -- always identical across members once this
+// page has ever saved (catSetPrice below always writes every member in
+// lockstep), so the first member is a safe, representative read once an
+// override exists. Before any override exists for this date, the physical
+// members can still carry their own, possibly-differing legacy defaults
+// (e.g. Double's VR03/VR04 default to $85 while VR05 defaults to $90) --
+// falling back to any one of them would misrepresent the category's real,
+// owner-locked current sell price, so the fallback is the category's own
+// otaBaseRate instead (Part K/C: the category row shows the category's
+// rate, never a single physical room's raw legacy default).
+function catGetPrice(catCode, ds) {
+  const cat=catFor(catCode);
+  const hasOverride = cat.rooms.some(rn=>roomPrices[rn]&&roomPrices[rn][ds]!=null);
+  return hasOverride ? pmGetPrice(cat.rooms[0], ds) : cat.otaBaseRate;
+}
+// Writes the SAME price to every physical room in the category in one call,
+// keeping them permanently in lockstep -- "changes should propagate
+// immediately to the applicable Vilu Residence room category".
+function catSetPrice(catCode, ds, price) {
+  const cat=catFor(catCode);
+  cat.rooms.forEach(rn=>pmSetPrice(rn, ds, price));
+}
+
 function setView(n) {
   pmDays = n;
   ['14','30','60','90'].forEach(v=>{
@@ -5365,10 +5435,23 @@ function setView(n) {
 }
 function pmPrev() { pmStart=new Date(pmStart); pmStart.setDate(pmStart.getDate()-pmDays); drawPM(); }
 function pmNext() { pmStart=new Date(pmStart); pmStart.setDate(pmStart.getDate()+pmDays); drawPM(); }
-function pmToday() { pmStart=new Date(); pmStart.setDate(pmStart.getDate()-2); pmStart.setHours(0,0,0,0); drawPM(); }
+// Maldives 'today' minus 2 days -- FIXED (2026-09-10 category rebuild): was
+// `new Date()` (browser-local midnight, no timezone anchor), which could
+// land on the wrong start date near a day boundary for anyone not in
+// Maldives' own UTC+5. Now anchored to tS (the app-wide Indian/Maldives
+// "today" string) at noon, matching every other canonical date computation
+// in this file (D2() etc.) — never local Date().
+function pmToday() { pmStart=new Date(tS+'T12:00'); pmStart.setDate(pmStart.getDate()-2); drawPM(); }
 
+// Category-first grid (2026-09-10 rebuild): primary rows are the 3 Vilu
+// room categories, never the 6 physical rooms -- matches Cloudbeds' own
+// Base Rates page, which is organized by accommodation type/category tab,
+// not by physical unit (confirmed via a read-only audit of the real
+// authenticated Cloudbeds Rates and Availability / Base Rates page,
+// 2026-09-10). Each category row can expand to show its physical-room
+// members underneath, for reference only -- never independently editable.
 function drawPM() {
-  const today = pmDateStr(new Date());
+  const today = tS; // canonical Maldives "today" -- never pmDateStr(new Date())
   const dates = [];
   for(let i=0;i<pmDays;i++) {
     const d=new Date(pmStart); d.setDate(d.getDate()+i);
@@ -5381,7 +5464,7 @@ function drawPM() {
   document.getElementById('pm-lbl').textContent = startMo === endMo ? startMo : startMo+' – '+endMo;
 
   let h = '<thead><tr>';
-  h += '<th class="room-hdr">Room</th>';
+  h += '<th class="room-hdr">Category</th>';
   dates.forEach((d,i) => {
     const ds=pmDateStr(d), dw=d.getDay(), isWk=dw===0||dw===6, isTd=ds===today;
     const selCls = pmSelCols.has(ds)?'col-sel':'';
@@ -5394,22 +5477,41 @@ function drawPM() {
   });
   h += '</tr></thead><tbody>';
 
-  VR.forEach(rm => {
-    h += `<tr><td class="room-lbl"><div class="rn">${rm.nm}</div><div class="rt">$${rm.rate}/default</div></td>`;
+  PRICE_CATEGORIES.forEach(cat => {
+    const isOpen = pmOpenCats.has(cat.code);
+    const legacyRates = cat.rooms.map(rn=>VR.find(r=>r.n===rn).rate);
+    const legacyLbl = legacyRates.every(r=>r===legacyRates[0]) ? ('$'+legacyRates[0]) : ('$'+Math.min(...legacyRates)+'–$'+Math.max(...legacyRates));
+    h += `<tr class="cat-row"><td class="room-lbl cat-lbl" onclick="pmToggleCat('${cat.code}')" role="button" tabindex="0" aria-expanded="${isOpen}">
+        <span class="cat-chev">${isOpen?'▾':'▸'}</span>
+        <span><span class="rn">${cat.label}</span><span class="rt">${cat.rooms.length} room${cat.rooms.length>1?'s':''} (${cat.rooms.map(rn=>rNm(rn)).join(', ')}) · legacy default ${legacyLbl}</span></span>
+      </td>`;
     dates.forEach(d => {
       const ds=pmDateStr(d), dw=d.getDay(), isWk=dw===0||dw===6, isTd=ds===today;
-      const price = pmGetPrice(rm.n, ds);
-      const hasOverride = roomPrices[rm.n]&&roomPrices[rm.n][ds]!=null;
+      const price = catGetPrice(cat.code, ds);
+      const hasOverride = cat.rooms.some(rn=>roomPrices[rn]&&roomPrices[rn][ds]!=null);
       const isSel = pmSelCols.has(ds);
       const cellCls = isSel?'selected':isTd?'today-cell':isWk?'wknd-cell':'';
-      const diffRate = price - rm.rate;
-      const subTxt = hasOverride ? (diffRate>0?`<span style="color:#00b4d8">+$${diffRate}</span>`:`<span style="color:#dc2626">$${diffRate}</span>`) : '';
-      h+=`<td class="price-cell ${cellCls}" onclick="pmCellClick('${rm.n}','${ds}',event)" data-rn="${rm.n}" data-date="${ds}">
+      const diffRate = price - cat.otaBaseRate;
+      const subTxt = hasOverride ? (diffRate>0?`<span style="color:#00b4d8">+$${diffRate}</span>`:diffRate<0?`<span style="color:#dc2626">$${diffRate}</span>`:'') : '';
+      h+=`<td class="price-cell ${cellCls}" onclick="pmCellClick('${cat.code}','${ds}',event)" data-cat="${cat.code}" data-date="${ds}">
         <div class="price-val">$${price}</div>
         ${hasOverride?`<div class="price-sub">${subTxt}</div>`:''}
       </td>`;
     });
     h += '</tr>';
+    if(isOpen) {
+      cat.rooms.forEach(rn => {
+        const rm=VR.find(r=>r.n===rn);
+        h += `<tr class="cat-sub-row"><td class="room-lbl cat-sub-lbl"><div class="rn">${rm.nm}</div><div class="rt">$${rm.rate}/legacy default</div></td>`;
+        dates.forEach(d => {
+          const ds=pmDateStr(d), dw=d.getDay(), isWk=dw===0||dw===6, isTd=ds===today;
+          const price = pmGetPrice(rn, ds);
+          const cellCls = isTd?'today-cell':isWk?'wknd-cell':'';
+          h+=`<td class="ref-cell ${cellCls}"><div class="price-val sub">$${price}</div></td>`;
+        });
+        h += '</tr>';
+      });
+    }
   });
   h += '</tbody>';
   document.getElementById('pm-tbl').innerHTML=h;
@@ -5423,6 +5525,13 @@ function drawPM() {
     if(mo !== lastMo && lastMo !== -1) th.style.borderLeft='2px solid #d1d5db';
     lastMo=mo;
   });
+}
+// Expands/collapses a category row to show its physical-room members --
+// reference only, matches Part C: "Each category can optionally expand to
+// show the physical-room members underneath for reference only."
+function pmToggleCat(code) {
+  if(pmOpenCats.has(code)) pmOpenCats.delete(code); else pmOpenCats.add(code);
+  drawPM();
 }
 
 // Column click — select/deselect date column
@@ -5444,68 +5553,80 @@ function pmColClick(ds, e) {
 }
 
 // Cell click — inline edit
-function pmCellClick(rn, ds, e) {
+function pmCellClick(catCode, ds, e) {
   e.stopPropagation();
   if(pmEditing) finishEdit();
   const cell=e.currentTarget;
   cell.classList.add('editing');
-  const price=pmGetPrice(rn,ds);
+  const price=catGetPrice(catCode,ds);
   cell.innerHTML=`<input class="price-inp" type="number" value="${price}" min="1" step="5"
     autofocus
-    onblur="commitEdit('${rn}','${ds}',this.value)"
-    onkeydown="pmKeyNav(event,'${rn}','${ds}',this)"
+    onblur="commitEdit('${catCode}','${ds}',this.value)"
+    onkeydown="pmKeyNav(event,'${catCode}','${ds}',this)"
     onclick="event.stopPropagation()">`;
   const inp=cell.querySelector('input');
   inp.focus();inp.select();
-  pmEditing={rn,ds,cell};
+  pmEditing={catCode,ds,cell};
 }
 
 function finishEdit() {
   if(!pmEditing)return;
   const inp=pmEditing.cell.querySelector('input');
-  if(inp) commitEdit(pmEditing.rn,pmEditing.ds,inp.value,false);
+  if(inp) commitEdit(pmEditing.catCode,pmEditing.ds,inp.value,false);
   pmEditing=null;
 }
 
-function commitEdit(rn,ds,val,redraw=true) {
+function commitEdit(catCode,ds,val,redraw=true) {
   const price=parseInt(val)||0;
-  if(price>=1) pmSetPrice(rn,ds,price);
+  if(price>=1) catSetPrice(catCode,ds,price);
   pmEditing=null;
   if(redraw){
-    // Just update this cell
-    const cell=document.querySelector(`#pm-tbl td[data-rn="${rn}"][data-date="${ds}"]`);
+    const cat=catFor(catCode);
+    // If this category's reference rows are open, the whole grid needs
+    // repainting so they never look stale after an edit; otherwise just
+    // patch the one cell that changed.
+    if(pmOpenCats.has(catCode)){ drawPM(); return; }
+    const cell=document.querySelector(`#pm-tbl td[data-cat="${catCode}"][data-date="${ds}"]`);
     if(cell){
-      const rm=VR.find(r=>r.n===rn);
-      const p=pmGetPrice(rn,ds);
-      const hasOv=roomPrices[rn]&&roomPrices[rn][ds]!=null;
-      const diff=p-(rm?.rate||80);
+      const p=catGetPrice(catCode,ds);
+      const hasOv=cat.rooms.some(rn=>roomPrices[rn]&&roomPrices[rn][ds]!=null);
+      const diff=p-cat.otaBaseRate;
       cell.classList.remove('editing');
       cell.innerHTML=`<div class="price-val">$${p}</div>${hasOv?`<div class="price-sub"><span style="color:${diff>=0?'#00b4d8':'#dc2626'}">${diff>=0?'+':''}$${diff}</span></div>`:''}`;
     }
   }
 }
 
-function pmKeyNav(e,rn,ds,inp) {
+function pmKeyNav(e,catCode,ds,inp) {
   if(e.key==='Enter'||e.key==='Tab') {
     e.preventDefault();
-    commitEdit(rn,ds,inp.value);
+    commitEdit(catCode,ds,inp.value);
     // Move to next cell
     const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell'));
-    const cur=cells.findIndex(c=>c.dataset.rn===rn&&c.dataset.date===ds);
+    const cur=cells.findIndex(c=>c.dataset.cat===catCode&&c.dataset.date===ds);
     const next=cells[e.shiftKey?cur-1:cur+1];
     if(next) next.click();
   }
   if(e.key==='Escape'){pmEditing=null;drawPM();}
-  if(e.key==='ArrowRight'){e.preventDefault();commitEdit(rn,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell'));const c=cells.findIndex(c=>c.dataset.rn===rn&&c.dataset.date===ds);if(cells[c+1])cells[c+1].click();}
-  if(e.key==='ArrowLeft'){e.preventDefault();commitEdit(rn,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell'));const c=cells.findIndex(c=>c.dataset.rn===rn&&c.dataset.date===ds);if(cells[c-1])cells[c-1].click();}
-  if(e.key==='ArrowDown'){e.preventDefault();commitEdit(rn,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell[data-date="'+ds+'"]'));const c=cells.findIndex(c=>c.dataset.rn===rn);if(cells[c+1])cells[c+1].click();}
-  if(e.key==='ArrowUp'){e.preventDefault();commitEdit(rn,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell[data-date="'+ds+'"]'));const c=cells.findIndex(c=>c.dataset.rn===rn);if(cells[c-1])cells[c-1].click();}
+  if(e.key==='ArrowRight'){e.preventDefault();commitEdit(catCode,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell'));const c=cells.findIndex(c=>c.dataset.cat===catCode&&c.dataset.date===ds);if(cells[c+1])cells[c+1].click();}
+  if(e.key==='ArrowLeft'){e.preventDefault();commitEdit(catCode,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell'));const c=cells.findIndex(c=>c.dataset.cat===catCode&&c.dataset.date===ds);if(cells[c-1])cells[c-1].click();}
+  if(e.key==='ArrowDown'){e.preventDefault();commitEdit(catCode,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell[data-date="'+ds+'"]'));const c=cells.findIndex(c=>c.dataset.cat===catCode);if(cells[c+1])cells[c+1].click();}
+  if(e.key==='ArrowUp'){e.preventDefault();commitEdit(catCode,ds,inp.value);const cells=Array.from(document.querySelectorAll('#pm-tbl td.price-cell[data-date="'+ds+'"]'));const c=cells.findIndex(c=>c.dataset.cat===catCode);if(cells[c-1])cells[c-1].click();}
 }
 
 // Click outside to close edit
 document.addEventListener('click',()=>{if(pmEditing){finishEdit();}});
 
-function pmSaveAll() {
+// Saves the current in-memory roomPrices overrides to every canonical sell-
+// rate destination: the website/direct-booking path (room_prices, unchanged
+// shape) and the OTA/Beds24 path (ota_room_type_overrides, new use of an
+// existing, previously-empty collection). Never touches ota_room_types'
+// flat base_rate (the "legacy"/OTA fallback -- Part K), never touches
+// packages/agency_packages. Status only ever claims "Synced" once Beds24's
+// own ota_pushes job confirms success (watchOtaPushStatus below) -- never
+// optimistically, per the owner's explicit "do not falsely show Synced"
+// instruction.
+function pmSave() {
   let count=0;
   VR.forEach(rm=>{if(roomPrices[rm.n])count+=Object.keys(roomPrices[rm.n]).length;});
   try{
@@ -5515,33 +5636,103 @@ function pmSaveAll() {
   // Also push current base rates to Supabase so guests on other devices/browsers
   // (not just an admin's own open tabs) see the latest prices, not just same-browser sync.
   if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
-  // Date-specific overrides used to only ever reach localStorage — invisible
-  // to any guest not on the same browser as this PMS session. One document
-  // per room, individual writes (not batched — the packages batch write hit
-  // Firestore's per-request rules-evaluation cap once enough documents were
-  // bundled together; this avoids that entirely).
-  syncRoomPricesToFirestore().catch(function(){});
-  aLog('ok','Saved & pushed '+count+' price overrides to all channels + website');
-  pmHasChanges=false;
-  document.getElementById('pm-save-badge').style.display='none';
-  toast('✓ All prices saved & pushed to all OTAs + website');
+  pmSetStatus('saving');
+  Promise.all([syncRoomPricesToFirestore(), syncCategoryOverridesToFirestore()])
+    .then(function(){
+      pmHasChanges=false;
+      document.getElementById('pm-save-badge').style.display='none';
+      pmSetStatus('saved');
+      aLog('ok','Saved '+count+' price overrides — website + OTA category rates updated');
+      toast('✓ Prices saved — website updated, OTA sync queued');
+      watchOtaPushStatus();
+    })
+    .catch(function(e){
+      console.error('pmSave failed', e);
+      pmSetStatus('error');
+      toast('✗ Save failed — see console');
+    });
 }
 
 async function syncRoomPricesToFirestore(){
   var roomIds = Object.keys(roomPrices);
   await Promise.all(roomIds.map(function(rn){
     return fsDb.collection('room_prices').doc(rn).set({ prices: roomPrices[rn] || {} })
-      .catch(function(e){ console.error('syncRoomPricesToFirestore failed for', rn, e); });
+      .catch(function(e){ console.error('syncRoomPricesToFirestore failed for', rn, e); throw e; });
+  }));
+}
+// Category-level per-date override, mirrored from the SAME roomPrices dates
+// room_prices already holds -- one write per category (never per-room,
+// never per-date-document), into the exact {overrides:{date:rate}} shape
+// functions-beds24's buildDifferentialPayload dateOverrides parameter
+// already consumes (previously unused by any caller). Firestore's own
+// beds24OverrideChangeSync trigger (functions-core/index.js) diffs the
+// write and enqueues an ota_pushes job for exactly the changed dates --
+// this function only ever writes Firestore, never touches ota_pushes or
+// Beds24 directly.
+async function syncCategoryOverridesToFirestore(){
+  await Promise.all(PRICE_CATEGORIES.map(function(cat){
+    var repRoom=cat.rooms[0];
+    var overrides=roomPrices[repRoom]||{};
+    return fsDb.collection('ota_room_type_overrides').doc(cat.otaRoomTypeId).set({ overrides: overrides })
+      .catch(function(e){ console.error('syncCategoryOverridesToFirestore failed for', cat.code, e); throw e; });
   }));
 }
 
+function pmSetStatus(state){
+  var el=document.getElementById('pm-sync-status');
+  if(!el) return;
+  var map={saving:'Saving…',saved:'✓ Saved',syncing:'Syncing OTA…',synced:'✓ Synced',error:'✗ Save failed',issue:'⚠ OTA sync issue — see Reconciliation log'};
+  el.textContent=map[state]||'';
+  el.className='pm-sync-status pm-sync-'+state;
+}
+// Watches the ota_pushes jobs this save just triggered (via
+// beds24OverrideChangeSync) so the status line only ever claims "Synced"
+// once Beds24 itself has actually confirmed every affected category's push
+// succeeded -- never optimistically. A single equality filter (no orderBy
+// on a different field) needs no new Firestore composite index. Times out
+// to a neutral "issue" state after 25s rather than hanging forever or
+// silently claiming success.
+var pmWatchStops=[];
+function watchOtaPushStatus(){
+  pmWatchStops.forEach(function(u){ try{u();}catch(e){} });
+  pmWatchStops=[];
+  pmSetStatus('syncing');
+  var since=new Date(Date.now()-15000).toISOString();
+  var status={}; // {[catCode]: 'synced'|'issue'}
+  function evalStatus(){
+    var vals=PRICE_CATEGORIES.map(function(c){return status[c.code];});
+    if(vals.some(function(v){return v==='issue';})) pmSetStatus('issue');
+    else if(vals.every(function(v){return v==='synced';})) pmSetStatus('synced');
+    // else: still waiting on at least one category -- leave "Syncing OTA…"
+  }
+  PRICE_CATEGORIES.forEach(function(cat){
+    var unsub=fsDb.collection('ota_pushes').where('room_type_code','==',cat.code).limit(20)
+      .onSnapshot(function(snap){
+        var jobs=snap.docs.map(function(d){return d.data();})
+          .filter(function(j){return j.trigger==='ota_room_type_overrides:'+cat.otaRoomTypeId && j.created_at>=since;});
+        if(!jobs.length) return; // job not written yet -- keep waiting
+        if(jobs.some(function(j){return j.status==='failed'||j.status==='review_required';})) status[cat.code]='issue';
+        else if(jobs.every(function(j){return j.status==='succeeded';})) status[cat.code]='synced';
+        else return; // pending/in_flight -- keep waiting
+        evalStatus();
+      }, function(){ /* listener error -- leave status as-is, never claim synced */ });
+    pmWatchStops.push(unsub);
+  });
+  setTimeout(function(){
+    pmWatchStops.forEach(function(u){ try{u();}catch(e){} });
+    pmWatchStops=[];
+    var vals=PRICE_CATEGORIES.map(function(c){return status[c.code];});
+    if(!vals.every(function(v){return v==='synced';})) pmSetStatus('issue');
+  }, 25000);
+}
+
 // ── BULK EDIT MODAL ──
-let beSelRooms=new Set(VR.map(r=>r.n));
+let beSelCats=new Set(PRICE_CATEGORIES.map(c=>c.code));
 let beSelDays=new Set([0,1,2,3,4,5,6]);
 let beMethod='fixed';
 
 function openBE() {
-  beSelRooms=new Set(VR.map(r=>r.n));
+  beSelCats=new Set(PRICE_CATEGORIES.map(c=>c.code));
   beSelDays=new Set([0,1,2,3,4,5,6]);
   beMethod='fixed';
   // Pre-fill dates from selection
@@ -5554,23 +5745,24 @@ function openBE() {
     const endD=new Date(pmStart);endD.setDate(endD.getDate()+pmDays-1);
     beTo.value=pmDateStr(endD);
   }
-  renderBERooms();renderBEDays();setBeMethod('fixed');
+  renderBECats();renderBEDays();setBeMethod('fixed');
   document.getElementById('m-be').classList.add('on');
 }
 
-function renderBERooms() {
+function renderBECats() {
   document.getElementById('be-rooms').innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-    ['all',...VR.map(r=>r.n)].map(n=>{
-      const isAll=n==='all', allOn=beSelRooms.size===VR.length;
-      const on=isAll?allOn:beSelRooms.has(n);
-      const lbl=isAll?'All rooms':VR.find(r=>r.n===n)?.nm||n;
-      return`<button class="room-chip ${on?'on':''}" onclick="beTogRoom('${n}')">${lbl}</button>`;
+    ['all',...PRICE_CATEGORIES.map(c=>c.code)].map(code=>{
+      const isAll=code==='all', allOn=beSelCats.size===PRICE_CATEGORIES.length;
+      const on=isAll?allOn:beSelCats.has(code);
+      const lbl=isAll?'All categories':catFor(code).label;
+      return`<button class="room-chip ${on?'on':''}" onclick="beTogCat('${code}')">${lbl}</button>`;
     }).join('')+'</div>';
 }
-function beTogRoom(n) {
-  if(n==='all'){if(beSelRooms.size===VR.length)beSelRooms.clear();else VR.forEach(r=>beSelRooms.add(r.n));}
-  else{if(beSelRooms.has(n))beSelRooms.delete(n);else beSelRooms.add(n);}
-  renderBERooms();
+function beTogCat(code) {
+  if(code==='all'){if(beSelCats.size===PRICE_CATEGORIES.length)beSelCats.clear();else PRICE_CATEGORIES.forEach(c=>beSelCats.add(c.code));}
+  else{if(beSelCats.has(code))beSelCats.delete(code);else beSelCats.add(code);}
+  renderBECats();
+  previewBE();
 }
 
 function renderBEDays() {
@@ -5610,7 +5802,7 @@ function previewBE() {
   const from=document.getElementById('be-from').value;
   const to=document.getElementById('be-to').value;
   const val=Number(document.getElementById('be-val').value)||0;
-  if(!from||!to||!val||!beSelRooms.size||!beSelDays.size){document.getElementById('be-preview').innerHTML='';return;}
+  if(!from||!to||!val||!beSelCats.size||!beSelDays.size){document.getElementById('be-preview').innerHTML='';return;}
   const dates=[];
   const d=new Date(from+'T12:00');
   while(pmDateStr(d)<=to){if(beSelDays.has(d.getDay()))dates.push(pmDateStr(d));d.setDate(d.getDate()+1);}
@@ -5623,15 +5815,15 @@ function previewBE() {
     if(beMethod==='amt-dn')return Math.max(1,cur-val);
     return cur;
   };
-  const rooms=VR.filter(r=>beSelRooms.has(r.n));
-  let html=`<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PREVIEW — ${dates.length} dates × ${rooms.length} rooms = ${dates.length*rooms.length} cells</div>`;
-  html+=rooms.map(rm=>{
-    const sample=calc(pmGetPrice(rm.n,dates[0]));
-    const sampleEnd=calc(pmGetPrice(rm.n,dates[dates.length-1]));
-    const chg=sample-pmGetPrice(rm.n,dates[0]);
+  const cats=PRICE_CATEGORIES.filter(c=>beSelCats.has(c.code));
+  let html=`<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PREVIEW — ${dates.length} date${dates.length>1?'s':''} × ${cats.length} categor${cats.length>1?'ies':'y'}</div>`;
+  html+=cats.map(cat=>{
+    const oldRate=catGetPrice(cat.code,dates[0]);
+    const sample=calc(oldRate);
+    const chg=sample-oldRate;
     return`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;border-bottom:1px solid #f3f4f6">
-      <span style="font-weight:600">${rm.nm}</span>
-      <span>→ <strong style="color:#00b4d8">$${sample}</strong>/night <span style="color:${chg>=0?'#00b4d8':'#dc2626'};font-size:var(--font-size-xs)">(${chg>=0?'+':''}$${chg})</span></span>
+      <span style="font-weight:600">${cat.label}</span>
+      <span>$${oldRate} → <strong style="color:#00b4d8">$${sample}</strong>/night <span style="color:${chg>=0?'#00b4d8':'#dc2626'};font-size:var(--font-size-xs)">(${chg>=0?'+':''}$${chg})</span></span>
     </div>`;
   }).join('');
   if(dates.length>1)html+=`<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:6px">${fd(dates[0])} → ${fd(dates[dates.length-1])}</div>`;
@@ -5643,36 +5835,34 @@ function applyBE() {
   const to=document.getElementById('be-to').value;
   const val=Number(document.getElementById('be-val').value)||0;
   if(!from||!to||!val){toast('Fill in dates and value');return;}
-  if(!beSelRooms.size){toast('Select at least one room');return;}
+  if(!beSelCats.size){toast('Select at least one category');return;}
   if(!beSelDays.size){toast('Select at least one weekday');return;}
   const d=new Date(from+'T12:00');let count=0;
   while(pmDateStr(d)<=to) {
     const ds=pmDateStr(d);
     if(beSelDays.has(d.getDay())) {
-      beSelRooms.forEach(rn=>{
-        const cur=pmGetPrice(rn,ds);
+      beSelCats.forEach(code=>{
+        const cur=catGetPrice(code,ds);
         let np=cur;
         if(beMethod==='fixed')np=val;
         else if(beMethod==='pct-up')np=Math.round(cur*(1+val/100));
         else if(beMethod==='pct-dn')np=Math.max(1,Math.round(cur*(1-val/100)));
         else if(beMethod==='amt-up')np=cur+val;
         else if(beMethod==='amt-dn')np=Math.max(1,cur-val);
-        pmSetPrice(rn,ds,np);count++;
+        catSetPrice(code,ds,np);count++;
       });
     }
     d.setDate(d.getDate()+1);
   }
   document.getElementById('m-be').classList.remove('on');
-  aLog('ok','Bulk edit: '+count+' cells updated ('+from+' → '+to+')');
-  toast('✓ '+count+' prices updated');drawPM();
+  aLog('ok','Bulk edit: '+count+' category-dates updated ('+from+' → '+to+')');
+  toast('✓ '+count+' prices updated — remember to Save');drawPM();
 }
 
 function drawRT(){drawPM();}
 function drawCmp(){}
 function bpPrev(){}
 function applyBP(){}
-function applyPreset(r){VR.forEach(rm=>rm.rate=r);drawPM();toast('All rooms → $'+r+'/night');}
-function setAllSameRate(){const r=prompt('Set all rooms to ($/night):',VR[0].rate);if(!r||isNaN(+r))return;VR.forEach(rm=>rm.rate=+r);drawPM();toast('All rooms → $'+r+'/night');}
 
 
 // SEASONS

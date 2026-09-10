@@ -28,7 +28,7 @@ const { FirestoreStore } = require('./lib/store-firestore');
 const { Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
 const { BEDS24_ROOM_MAP, buildDifferentialPayload } = require('./lib/beds24-bridge');
-const { CODE_TO_ROOM_TYPE_ID } = require('./lib/ota-room-types');
+const { CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES } = require('./lib/ota-room-types');
 
 initializeApp();
 const db = getFirestore();
@@ -45,10 +45,38 @@ async function roomsDocs() {
   } catch (e) { return PHYSICAL_ROOMS; }
 }
 
+// Falls back to the bundled INITIAL_OTA_ROOM_TYPES constant when the
+// Firestore ota_room_types/{roomTypeId} doc is missing -- the same
+// established pattern roomsDocs() above already uses for the `rooms`
+// collection (Firestore is the live source once an admin edits a category's
+// commercial config; the bundled constant is the safety net so a first
+// deploy, before any doc is ever written, still resolves a valid config
+// instead of failing every push).
 async function roomTypeConfig(roomTypeCode) {
   const roomTypeId = CODE_TO_ROOM_TYPE_ID[roomTypeCode];
   if (!roomTypeId) return null;
-  return store.get('ota_room_types', roomTypeId);
+  try {
+    const doc = await store.get('ota_room_types', roomTypeId);
+    if (doc) return doc;
+  } catch (e) { /* fall through to bundled default */ }
+  return INITIAL_OTA_ROOM_TYPES[roomTypeId] || null;
+}
+
+// Per-date rate overrides for one OTA room type (Bulk Price Manager's
+// category-level date-range edits) -- ota_room_type_overrides/{roomTypeId}
+// = { overrides: { 'YYYY-MM-DD': rate } }. Reused as-is by
+// buildDifferentialPayload()'s pre-existing `dateOverrides` parameter
+// (functions-beds24/lib/beds24-bridge.js resolveRate()), which until now no
+// caller in this codebase ever supplied. Missing doc / read failure = no
+// overrides for that type, never a thrown error -- an override-less push is
+// simply the category's flat base_rate, which is already correct.
+async function roomTypeOverrides(roomTypeCode) {
+  const roomTypeId = CODE_TO_ROOM_TYPE_ID[roomTypeCode];
+  if (!roomTypeId) return {};
+  try {
+    const doc = await store.get('ota_room_type_overrides', roomTypeId);
+    return (doc && doc.overrides) || {};
+  } catch (e) { return {}; }
 }
 
 // ── Beds24 outbound differential-sync worker ────────────────────────────────
@@ -94,6 +122,7 @@ exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', 
   const rooms = await roomsDocs();
   const reservations = (await store.list('reservations')).map((d) => Object.assign({ id: d._id || d.id }, d));
   const blocks = (await store.list('blocks')).map((d) => Object.assign({ id: d._id || d.id }, d));
+  const overridesForCode = await roomTypeOverrides(roomTypeCode);
 
   const built = buildDifferentialPayload({
     roomsDocs: rooms,
@@ -101,6 +130,7 @@ exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', 
     blocks,
     affectedDates: { [roomTypeCode]: affectedDates },
     configs: { [roomTypeCode]: config },
+    dateOverrides: { [roomTypeCode]: overridesForCode },
   });
   if (built.invalid.length) {
     await jobRef.set({ status: 'failed', last_error: { message: 'differential payload invalid: ' + JSON.stringify(built.invalid.slice(0, 5)), http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
