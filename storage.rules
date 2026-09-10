@@ -66,6 +66,35 @@ service firebase.storage {
       allow write: if isAdmin() && isValidImageUpload();
     }
 
+    // Reservation Document Vault (Part A, Document Vault + Catalog +
+    // Invoice Center, 2026-09-10) -- passports, IDs, visas, signed bills,
+    // invoice/receipt copies, etc. Unlike every path above, READ is
+    // deliberately admin-only here too (not `if true`): Part A3 requires
+    // these files -- passport/ID scans above all -- to never be reachable
+    // by an unauthenticated or public URL, so this path does not reuse
+    // the public-read shape used for photos/folio-attachments.
+    // Known limitation, same one already accepted for folio-attachments
+    // above and reported honestly rather than silently worked around:
+    // isAdmin() is hardcoded to a single email (see the isAdmin() comment
+    // at the top of this file -- a broader Firestore-role cross-service
+    // check from Storage rules was tried once for staff_permissions and
+    // found unreliable even after granting the Rules service agent
+    // datastore.viewer). So today only that one admin account can
+    // actually read/write the file bytes here; Manager/Staff get full
+    // metadata access via firestore.rules' reservation_documents
+    // collection (title, type, uploader, timestamps, archive state) but
+    // not the raw file itself until that cross-service gap is revisited
+    // with a more robust mechanism (e.g. custom claims set by a Cloud
+    // Function, since a functions/ deploy already exists in this repo).
+    function isValidDocUpload() {
+      return request.resource.size < 20 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+    }
+    match /reservation-documents/{resId}/{documentId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin() && isValidDocUpload();
+    }
+
     match /{allPaths=**} { allow read, write: if false; }
   }
 }

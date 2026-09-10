@@ -381,7 +381,11 @@ section('Case J — "Open full folio" (Step 15): Calendar → Guest Folios lands
   test('the Reservations-drawer Invoice tab (rdRenderTab n===2 — previously showed NO folio items at all, per the audit) now also renders the same folioSummary() and offers "Open full folio"', () => {
     const idx = PMS.indexOf('} else if(n===2){');
     assert.ok(idx !== -1);
-    const src = PMS.slice(idx, idx + 1600);
+    // 2026-09-10 Document Vault + Catalog + Invoice Center task widened this
+    // tab's footer to the full Part C12 button row (+ Add charge / Create
+    // invoice / Print · Documents / Open full folio), pushing later buttons
+    // further from the branch's start than the previous 1600-char window.
+    const src = PMS.slice(idx, idx + 2600);
     assert.match(src, /renderFolioSummaryHTML\(sum,r\.id\)/);
     assert.match(src, /openFullFolio\(r\.id\)/);
   });

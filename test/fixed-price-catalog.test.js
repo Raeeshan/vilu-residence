@@ -70,25 +70,58 @@ section('Case A — one canonical catalog, two prior stores retired');
   test('INV_CATS (the smaller, independently-authored catalog previously live-wired into folio add-charge) is fully retired', () => {
     assert.doesNotMatch(PMS.replace(/\/\/.*$/gm, ''), /\bINV_CATS\b/);
   });
-  test('SVC_CATALOG_SEED ports FP_DEFAULTS\' 19 items plus INV_CATS\' 2 unique Other-Services items (Laundry, Special Decoration) — 21 total, no duplicates of Extra Bed/Late Check-out', () => {
+  test('SVC_CATALOG_SEED (2026-09-10 owner price-sheet update): 18 Trips & Activities items from the new sheet plus the 13 untouched Food/Transfer/Accommodation-Extra/Other-Service items — 31 total, no duplicates of Extra Bed/Late Check-out', () => {
     const seedSrc = extractConst(PMS, 'SVC_CATALOG_SEED');
     const items = seedSrc.match(/name:'[^']+'/g);
-    assert.equal(items.length, 21, 'expected 21 seed items');
+    assert.equal(items.length, 31, 'expected 31 seed items');
     const names = items.map(s => s.slice(6, -1));
     assert.equal(names.filter(n => n === 'Extra Bed').length, 1);
     assert.equal(names.filter(n => n === 'Late Check-out').length, 1);
     assert.ok(names.includes('Laundry'));
     assert.ok(names.includes('Special Decoration'));
-    assert.ok(names.includes('Manta Ray Tour'));
+    // Manta Ray Tour / Sandbank Visit were renamed+repriced in place to the
+    // sheet's own names; the old names must be gone, not duplicated.
+    assert.ok(!names.includes('Manta Ray Tour'));
+    assert.ok(!names.includes('Sandbank Visit'));
+    assert.ok(names.includes('Manta Ray Snorkeling'));
+    assert.ok(names.includes('Sandbank Escape'));
+    // Superseded items are dropped from the seed entirely (a fresh deploy
+    // should never seed obsolete items) -- the already-populated production
+    // collection instead deactivates them via migrateCatalogToPriceSheet2026().
+    assert.ok(!names.includes('Snorkeling'));
+    assert.ok(!names.includes('Fishing Trip'));
+    assert.ok(!names.includes('Island Hopping'));
+    assert.ok(!names.includes('Night Snorkeling'));
   });
-  test('every seed item uses a canonical category + unitType enum value', () => {
+  test('every seed item uses a canonical category + unitType enum value (including the new PER_HOUR)', () => {
     const seedSrc = extractConst(PMS, 'SVC_CATALOG_SEED');
     const cats = ['TRIPS_ACTIVITIES', 'FOOD_BEVERAGE', 'TRANSFER', 'ACCOMMODATION_EXTRA', 'OTHER_SERVICE'];
-    const units = ['PER_PAX', 'PER_TRIP', 'PER_ITEM', 'PER_NIGHT', 'PER_ROOM'];
+    const units = ['PER_PAX', 'PER_TRIP', 'PER_ITEM', 'PER_NIGHT', 'PER_ROOM', 'PER_HOUR'];
     const catMatches = seedSrc.match(/category:'([A-Z_]+)'/g).map(s => s.match(/'([A-Z_]+)'/)[1]);
     const unitMatches = seedSrc.match(/unitType:'([A-Z_]+)'/g).map(s => s.match(/'([A-Z_]+)'/)[1]);
     catMatches.forEach(c => assert.ok(cats.includes(c), 'unknown category ' + c));
     unitMatches.forEach(u => assert.ok(units.includes(u), 'unknown unitType ' + u));
+  });
+  test('all 18 owner-sheet prices are exact, and Professional Photography is PER_HOUR (never forced into PER_PAX)', () => {
+    const seedSrc = extractConst(PMS, 'SVC_CATALOG_SEED');
+    const expected = [
+      ['Big Game Fishing', 120, 3], ['Sandbank Escape', 89, 3], ['Nurse Shark Snorkeling', 89, 3],
+      ['Whale Shark Snorkeling', 85, 2], ['Manta Ray Snorkeling', 85, 2], ['Dolphin Cruise', 75, 2],
+      ['Turtle Snorkeling', 65, 2], ['Octopus Hunting Experience', 65, 2], ['Lobster Hunting Experience', 65, 2],
+      ['Sunset Cruise', 59, 2], ['Picnic Island Experience', 49, 3], ['Night Fishing Experience', 49, 3],
+      ['Fenfushi Reef Snorkeling', 45, 2], ['Dhiddhoo Reef Snorkeling', 45, 2], ['Ariyadhoo Reef Snorkeling', 45, 2],
+      ['Romantic Beach Dinner', 85, null], ['Cinema at the Beach', 50, null],
+    ];
+    expected.forEach(([name, price, dur]) => {
+      const re = new RegExp("name:'" + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'[^}]*basePrice:" + price);
+      assert.match(seedSrc, re, name + ' should be $' + price);
+      if (dur) {
+        const reDur = new RegExp("name:'" + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'[^}]*durationHours:" + dur);
+        assert.match(seedSrc, reDur, name + ' should be ' + dur + 'h');
+      }
+    });
+    const photoRe = /name:'Professional Photography'[^}]*unitType:'PER_HOUR'[^}]*basePrice:25/;
+    assert.match(seedSrc, photoRe, 'Professional Photography must be PER_HOUR $25, never PER_PAX');
   });
 }
 
@@ -160,7 +193,7 @@ section('Case D — Firestore rules: role-level AND collection-level enforcement
     const idx = RULES.indexOf('match /service_catalog/{itemId}');
     const block = RULES.slice(idx, RULES.indexOf('\n    }', idx));
     assert.match(block, /category in \['TRIPS_ACTIVITIES','FOOD_BEVERAGE','TRANSFER','OTHER_SERVICE','ACCOMMODATION_EXTRA'\]/);
-    assert.match(block, /unitType in \['PER_PAX','PER_TRIP','PER_ITEM','PER_NIGHT','PER_ROOM'\]/);
+    assert.match(block, /unitType in \['PER_PAX','PER_TRIP','PER_ITEM','PER_NIGHT','PER_ROOM','PER_HOUR'\]/);
   });
   test('folios/invoices collections grant Manager the same access as Staff (Manager is "Staff plus pricing authority", not a Staff replacement)', () => {
     const folioIdx = RULES.indexOf('match /folios/{resId}');

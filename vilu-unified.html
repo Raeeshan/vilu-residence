@@ -140,6 +140,7 @@ table.tb{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;
 .bx{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:var(--font-size-xs);font-weight:600}
 .ok{background:#b8eef8;color:#0096c7}.wn{background:#fef3c7;color:#b45309}
 .ib2{background:#dbeafe;color:#1d4ed8}.ot{background:#f3f4f6;color:#4b5563}.er{background:#fee2e2;color:#b91c1c}
+.pnd{background:#ede9fe;color:#6d28d9}
 .sr2{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f3f4f6}
 .sr2:last-child{border-bottom:none}
 .si{display:flex;align-items:center;gap:6px}
@@ -160,6 +161,7 @@ table.tb{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;
 .ivn{font-size:var(--font-size-xl);font-weight:800;margin-bottom:4px}
 .ivs{display:inline-block;padding:4px 12px;border-radius:6px;font-size:var(--font-size-sm);font-weight:700;border:2px solid}
 .ivs.pd{color:#0096c7;border-color:#00b4d8}.ivs.pp{color:#1d4ed8;border-color:#2563eb}.ivs.up{color:#b45309;border-color:#d97706}
+.ivs.pg{color:#6d28d9;border-color:#7c3aed}
 .igg{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f9fafb;border-radius:8px;padding:12px;margin-bottom:16px}
 .igf label{font-size:var(--font-size-xs);color:#6b7280;font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase}
 .igf span{font-size:var(--font-size-sm);font-weight:600}
@@ -1422,8 +1424,11 @@ body.pms-mode { overflow:hidden; }
         <option value="PER_ITEM">Per item</option>
         <option value="PER_NIGHT">Per night</option>
         <option value="PER_ROOM">Per room</option>
+        <option value="PER_HOUR">Per hour</option>
       </select></div>
     <div class="fg"><label>Price ($)</label><input type="number" id="cim-price" min="0" step="0.5" placeholder="0"></div>
+    <div class="fg"><label>Duration (hours, optional)</label><input type="number" id="cim-dur" min="0" step="0.5" placeholder="e.g. 2"></div>
+    <div class="fg"><label>Notes (optional)</label><input type="text" id="cim-notes" placeholder="e.g. Min 2 guests, equipment included"></div>
     <button class="btn p" style="width:100%" onclick="saveCatalogItem()"><i class="ti ti-device-floppy"></i> Save item</button>
   </div>
 </div>
@@ -2272,9 +2277,10 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
     <!-- Payment & Notes -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
       <div class="fg" style="margin-bottom:0"><label>Payment status</label>
-        <select id="ni-pay">
+        <select id="ni-pay" onchange="niPayChanged()">
           <option>Fully paid</option>
           <option>Partially paid</option>
+          <option>Pending payment</option>
           <option>Unpaid</option>
         </select>
       </div>
@@ -2288,6 +2294,20 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
         </div>
       </div>
     </div>
+    <div id="ni-paydetail" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" class="ni-paydetail-grid">
+      <div class="fg" style="margin-bottom:0"><label id="ni-paymethod-label">Payment method</label>
+        <select id="ni-paymethod">
+          <option value="">Select...</option>
+          <option>Cash</option>
+          <option>Card</option>
+          <option>Bank Transfer</option>
+          <option>OTA Channel</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label>Reference / note (optional)</label>
+        <input type="text" id="ni-payref" placeholder="e.g. Transfer ref, last 4 of card"></div>
+    </div>
     <div class="fg"><label>Notes / special message</label>
       <textarea id="ni-notes" rows="2" placeholder="Thank you for staying at Vilu Residence. Check-out: 12:00 PM."></textarea>
     </div>
@@ -2296,7 +2316,7 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
     <div id="ni-prev" style="background:#f9fafb;border-radius:8px;padding:12px;font-size:var(--font-size-sm);margin-bottom:12px;border:1px solid #e5e7eb"></div>
 
     <div style="display:flex;gap:8px">
-      <button class="btn p" style="flex:1" onclick="genInv()"><i class="ti ti-file-invoice"></i>Generate &amp; view invoice</button>
+      <button class="btn p" style="flex:1" onclick="genInv()"><i class="ti ti-file-invoice"></i>Finalize invoice</button>
       <button class="btn" onclick="document.getElementById('m-inv').classList.remove('on')">Cancel</button>
     </div>
   </div>
@@ -2684,6 +2704,7 @@ Photography | 25 | /hr"></textarea>
     <button class="rd-tab on" onclick="rdTab(0,this)">📋 Details &amp; Edit</button>
     <button class="rd-tab" onclick="rdTab(1,this)">🗒️ Notes</button>
     <button class="rd-tab" onclick="rdTab(2,this)">💰 Invoice</button>
+    <button class="rd-tab" onclick="rdTab(3,this)">📄 Documents</button>
   </div>
   <div class="rd-body" id="rd-body"></div>
   <div class="rd-footer" id="rd-footer"></div>
@@ -3462,6 +3483,9 @@ const CATALOG_UNIT_TYPES = [
   {key:'PER_ITEM',  label:'Items', short:'item'},
   {key:'PER_NIGHT', label:'Nights',short:'night'},
   {key:'PER_ROOM',  label:'Rooms', short:'room'},
+  // Added for the owner's 2026-09-10 activity price sheet (Professional
+  // Photography, $25/hour) -- never force an hourly service into PER_PAX.
+  {key:'PER_HOUR',  label:'Hours', short:'hour'},
 ];
 function catalogCategoryLabel(key){ var c=CATALOG_CATEGORIES.find(function(x){return x.key===key;}); return c?c.label:key; }
 function catalogUnitShort(key){ var u=CATALOG_UNIT_TYPES.find(function(x){return x.key===key;}); return u?u.short:'unit'; }
@@ -3474,15 +3498,32 @@ function catalogUnitLabel(key){ var u=CATALOG_UNIT_TYPES.find(function(x){return
 // items with no FP_DEFAULTS equivalent (Laundry, Special Decoration); items
 // already present in both under the same name (Extra Bed, Late Check-out)
 // are not duplicated. Never read again after the collection is seeded.
+// Trips & Activities block reflects the owner's 2026-09-10 current price
+// sheet (Part B of the Document Vault / Catalog / Invoice Center task).
+// Only used by seedServiceCatalogIfEmpty() on a genuinely empty
+// service_catalog collection -- the already-populated production catalog
+// is updated separately by the one-time migrateCatalogToPriceSheet2026()
+// routine (see below), which applies this same mapping in place.
+const CATALOG_EXCURSION_NOTE = 'Min 2 guests (solo travelers may be combined). Snorkeling gear, local guide, drinking water & light refreshments included. Sightings not guaranteed; complimentary 30-min extension if marine life not spotted.';
 const SVC_CATALOG_SEED = [
-  {name:'Snorkeling',         category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:25},
-  {name:'Dolphin Cruise',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:30},
-  {name:'Sandbank Visit',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:20},
-  {name:'Sunset Cruise',      category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:35},
-  {name:'Fishing Trip',       category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:40},
-  {name:'Island Hopping',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:45},
-  {name:'Manta Ray Tour',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:50},
-  {name:'Night Snorkeling',   category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:30},
+  {name:'Big Game Fishing',         category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:120, durationHours:3, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Sandbank Escape',          category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:89,  durationHours:3, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Nurse Shark Snorkeling',   category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:89,  durationHours:3, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Whale Shark Snorkeling',   category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:85,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Manta Ray Snorkeling',     category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:85,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Dolphin Cruise',           category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:75,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Turtle Snorkeling',        category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:65,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Octopus Hunting Experience', category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',basePrice:65,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Lobster Hunting Experience', category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',basePrice:65,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Sunset Cruise',            category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:59,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Picnic Island Experience', category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:49,  durationHours:3, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Night Fishing Experience', category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:49,  durationHours:3, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Fenfushi Reef Snorkeling', category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:45,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Dhiddhoo Reef Snorkeling', category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:45,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Ariyadhoo Reef Snorkeling',category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:45,  durationHours:2, notes:CATALOG_EXCURSION_NOTE},
+  {name:'Professional Photography', category:'TRIPS_ACTIVITIES', unitType:'PER_HOUR', basePrice:25},
+  {name:'Romantic Beach Dinner',    category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:85},
+  {name:'Cinema at the Beach',      category:'TRIPS_ACTIVITIES', unitType:'PER_PAX',  basePrice:50},
   {name:'Breakfast',          category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:12},
   {name:'Lunch',              category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:15},
   {name:'Dinner',             category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:18},
@@ -3530,7 +3571,8 @@ async function seedServiceCatalogIfEmpty(){
       var ref = fsDb.collection('service_catalog').doc();
       batch.set(ref, {
         name: item.name, category: item.category, unitType: item.unitType,
-        basePrice: item.basePrice, active: true, createdAt: now+i, updatedAt: now+i
+        basePrice: item.basePrice, durationHours: item.durationHours||null, notes: item.notes||'',
+        active: true, createdAt: now+i, updatedAt: now+i
       });
     });
     await batch.commit();
@@ -3539,6 +3581,90 @@ async function seedServiceCatalogIfEmpty(){
     _svcCatalogLoaded = true;
     if (document.getElementById('svc-cat-grid')) drawServiceCatalog();
   } catch(e) { console.error('seedServiceCatalogIfEmpty failed', e); }
+}
+
+// One-time, idempotent live migration of the ALREADY-POPULATED production
+// service_catalog collection to the owner's 2026-09-10 activity price
+// sheet (Part B). SVC_CATALOG_SEED above only ever runs on a genuinely
+// EMPTY collection, so it cannot touch production's existing 21 docs --
+// this routine is the separate mechanism that does. Safe to run more than
+// once: every step first checks current state before writing, so a
+// second run is a no-op. Never hard-deletes -- obsolete items are
+// deactivated only (active:false), matching deactivateCatalogItem()'s own
+// "never hard-delete historical catalog records" rule. Console-invoked by
+// an admin once during Part J deploy: migrateCatalogToPriceSheet2026().
+async function migrateCatalogToPriceSheet2026(){
+  if(!canManageCatalog()){ console.warn('migrateCatalogToPriceSheet2026: Admin/Manager only'); return; }
+  var snap = await fsDb.collection('service_catalog').get();
+  var byName = {};
+  snap.docs.forEach(function(d){ byName[d.data().name] = Object.assign({id:d.id}, d.data()); });
+  var now = Date.now();
+  var log = {renamed:[], repriced:[], deactivated:[], created:[], skipped:[]};
+
+  // 1) Rename + reprice in place (same catalogItemId -- historical folio
+  // charges already snapshot name/price at add-time and never re-read the
+  // live catalog, so this is safe).
+  var renames = [
+    {from:'Sandbank Visit', to:'Sandbank Escape', basePrice:89, durationHours:3},
+    {from:'Manta Ray Tour', to:'Manta Ray Snorkeling', basePrice:85, durationHours:2},
+  ];
+  for (var i=0;i<renames.length;i++){
+    var r = renames[i];
+    var existing = byName[r.from] || byName[r.to];
+    if (!existing) { log.skipped.push(r.from+' -> '+r.to+' (not found)'); continue; }
+    if (existing.name===r.to && existing.basePrice===r.basePrice) { log.skipped.push(r.to+' (already migrated)'); continue; }
+    await fsDb.collection('service_catalog').doc(existing.id).set({name:r.to, basePrice:r.basePrice, durationHours:r.durationHours, notes:CATALOG_EXCURSION_NOTE, updatedAt:now}, {merge:true});
+    log.renamed.push(r.from+' -> '+r.to+' ($'+r.basePrice+')');
+  }
+
+  // 2) Update price only (name unchanged).
+  var repriced = [
+    {name:'Dolphin Cruise', basePrice:75, durationHours:2},
+    {name:'Sunset Cruise', basePrice:59, durationHours:2},
+  ];
+  for (var j=0;j<repriced.length;j++){
+    var p = repriced[j];
+    var it = byName[p.name];
+    if (!it) { log.skipped.push(p.name+' (not found)'); continue; }
+    if (it.basePrice===p.basePrice) { log.skipped.push(p.name+' (already migrated)'); continue; }
+    await fsDb.collection('service_catalog').doc(it.id).set({basePrice:p.basePrice, durationHours:p.durationHours, notes:CATALOG_EXCURSION_NOTE, updatedAt:now}, {merge:true});
+    log.repriced.push(p.name+' -> $'+p.basePrice);
+  }
+
+  // 3) Deactivate obsolete items superseded by the new, more specific
+  // sheet items -- never hard-deleted, just hidden from new-charge pickers.
+  var deactivate = ['Snorkeling', 'Fishing Trip', 'Island Hopping', 'Night Snorkeling'];
+  for (var k=0;k<deactivate.length;k++){
+    var name = deactivate[k];
+    var d = byName[name];
+    if (!d) { log.skipped.push(name+' (not found)'); continue; }
+    if (d.active===false) { log.skipped.push(name+' (already inactive)'); continue; }
+    await fsDb.collection('service_catalog').doc(d.id).set({active:false, updatedAt:now}, {merge:true});
+    log.deactivated.push(name);
+  }
+
+  // 4) Create brand-new sheet items with no prior catalog equivalent.
+  var toCreate = SVC_CATALOG_SEED.filter(function(s){
+    return ['Big Game Fishing','Nurse Shark Snorkeling','Whale Shark Snorkeling','Turtle Snorkeling',
+      'Octopus Hunting Experience','Lobster Hunting Experience','Picnic Island Experience','Night Fishing Experience',
+      'Fenfushi Reef Snorkeling','Dhiddhoo Reef Snorkeling','Ariyadhoo Reef Snorkeling','Professional Photography',
+      'Romantic Beach Dinner','Cinema at the Beach'].indexOf(s.name) !== -1;
+  });
+  for (var m=0;m<toCreate.length;m++){
+    var c = toCreate[m];
+    if (byName[c.name]) { log.skipped.push(c.name+' (already exists)'); continue; }
+    var ref = fsDb.collection('service_catalog').doc();
+    await ref.set({name:c.name, category:c.category, unitType:c.unitType, basePrice:c.basePrice,
+      durationHours:c.durationHours||null, notes:c.notes||'', active:true, createdAt:now, updatedAt:now});
+    log.created.push(c.name);
+  }
+
+  var reSnap = await fsDb.collection('service_catalog').get();
+  SVC_CATALOG = reSnap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+  _svcCatalogLoaded = true;
+  if (document.getElementById('svc-cat-grid')) drawServiceCatalog();
+  console.log('migrateCatalogToPriceSheet2026 done:', log);
+  return log;
 }
 
 function drawServiceCatalog(){
@@ -3556,7 +3682,7 @@ function drawServiceCatalog(){
     items.forEach(function(item){
       var inactive = item.active===false;
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;opacity:'+(inactive?'0.5':'1')+'">'
-        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">$/'+catalogUnitShort(item.unitType)+'</span></div>'
+        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+(item.durationHours?item.durationHours+'h &middot; ':'')+'$/'+catalogUnitShort(item.unitType)+'</span></div>'
         + '<div style="display:flex;align-items:center;gap:8px">'
         + '<span style="color:#6b7280;font-size:var(--font-size-sm)">$</span>'
         + '<span style="width:70px;text-align:right;font-size:var(--font-size-base);font-weight:700;color:#111827">'+Number(item.basePrice).toFixed(2)+'</span>'
@@ -3580,6 +3706,8 @@ function openAddCatalogItem(){
   document.getElementById('cim-cat').value=CATALOG_CATEGORIES[0].key;
   document.getElementById('cim-unit').value='PER_PAX';
   document.getElementById('cim-price').value='';
+  document.getElementById('cim-dur').value='';
+  document.getElementById('cim-notes').value='';
   document.getElementById('m-catitem').classList.add('on');
 }
 function openEditCatalogItem(id){
@@ -3592,6 +3720,8 @@ function openEditCatalogItem(id){
   document.getElementById('cim-cat').value=item.category;
   document.getElementById('cim-unit').value=item.unitType;
   document.getElementById('cim-price').value=item.basePrice;
+  document.getElementById('cim-dur').value=item.durationHours||'';
+  document.getElementById('cim-notes').value=item.notes||'';
   document.getElementById('m-catitem').classList.add('on');
 }
 async function saveCatalogItem(){
@@ -3600,17 +3730,20 @@ async function saveCatalogItem(){
   var category=document.getElementById('cim-cat').value;
   var unitType=document.getElementById('cim-unit').value;
   var basePrice=+(document.getElementById('cim-price').value||0);
+  var durRaw=(document.getElementById('cim-dur').value||'').trim();
+  var durationHours=durRaw===''?null:+durRaw;
+  var notes=(document.getElementById('cim-notes').value||'').trim();
   if(!name){ toast('Enter an item name'); return; }
   if(basePrice<0){ toast('Price cannot be negative'); return; }
   var now=Date.now();
   try {
     if(_catalogEditingId){
-      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,updatedAt:now}, {merge:true});
+      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,durationHours:durationHours,notes:notes,updatedAt:now}, {merge:true});
       var existing=SVC_CATALOG.find(function(x){return x.id===_catalogEditingId;});
-      if(existing) Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,updatedAt:now});
+      if(existing) Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,durationHours:durationHours,notes:notes,updatedAt:now});
     } else {
       var ref=fsDb.collection('service_catalog').doc();
-      var doc={name:name,category:category,unitType:unitType,basePrice:basePrice,active:true,createdAt:now,updatedAt:now};
+      var doc={name:name,category:category,unitType:unitType,basePrice:basePrice,durationHours:durationHours,notes:notes,active:true,createdAt:now,updatedAt:now};
       await ref.set(doc);
       SVC_CATALOG.push(Object.assign({id:ref.id},doc));
     }
@@ -5247,7 +5380,7 @@ function _showDetLegacy(id){
     var btnRow=document.createElement('div');
     btnRow.style.cssText='display:flex;gap:8px;margin-top:10px';
     btnRow.innerHTML='<button data-rid="'+id+'" onclick="openCreateInvoice(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit"><i class="ti ti-file-invoice"></i> Create invoice</button>'
-      +'<button data-rid="'+id+'" onclick="printFolio(this.dataset.rid)" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit"><i class="ti ti-printer"></i></button>'
+      +'<button data-rid="'+id+'" onclick="openPrintDocsMenu(this.dataset.rid)" title="Print / Documents" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit"><i class="ti ti-printer"></i></button>'
       +'<button data-rid="'+id+'" onclick="openFullFolio(this.dataset.rid)" style="background:#fff;color:#00b4d8;border:1.5px solid #00b4d8;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit;white-space:nowrap">Open full folio</button>';
     sec.appendChild(btnRow);
     pb.appendChild(sec);
@@ -6109,7 +6242,7 @@ function drawInv(){
     <td style="font-size:var(--font-size-xs)">${fd(v.ci)}–${fd(v.co)}</td>
     <td>$${v.base.toFixed(2)}</td>
     <td style="font-weight:700">$${v.total.toFixed(2)}</td>
-    <td>${v.status==='void'?'<span class="bx er">Void</span>':`<span class="bx ${v.pay==='Fully paid'?'ok':v.pay==='Partially paid'?'ib2':'wn'}">${v.pay}</span>`}</td>
+    <td>${v.status==='void'?'<span class="bx er">Void</span>':`<span class="bx ${v.pay==='Fully paid'?'ok':v.pay==='Partially paid'?'ib2':v.pay==='Pending payment'?'pnd':'wn'}">${v.pay}</span>`}</td>
     <td style="display:flex;gap:2px">
       <button class="ab" onclick="viewInv('${v.id}')"><i class="ti ti-eye"></i></button>
       <button class="ab" onclick="viewInv('${v.id}');setTimeout(()=>window.print(),350)"><i class="ti ti-printer"></i></button>
@@ -6133,6 +6266,10 @@ var invPayerScope='whole';
 function openIM(resId, opts){
   document.getElementById('ni-res').innerHTML=RES.filter(r=>r.st!=='Cancelled').map(r=>`<option value="${r.id}"${r.id===resId?' selected':''}>${r.id}: ${esc(r.fn)} ${esc(r.ln)} — ${rNm(r.rn)} (${fd(r.ci)}–${fd(r.co)})</option>`).join('');
   document.getElementById('ni-notes').value='';
+  if(document.getElementById('ni-pay')) document.getElementById('ni-pay').value='Unpaid';
+  if(document.getElementById('ni-paymethod')) document.getElementById('ni-paymethod').value='';
+  if(document.getElementById('ni-payref')) document.getElementById('ni-payref').value='';
+  niPayChanged();
   if(document.getElementById('ni-disc'))document.getElementById('ni-disc').value='';
   if(document.getElementById('ni-disctype'))document.getElementById('ni-disctype').value='fixed';
   invPayerScope = (opts && opts.payerScope) || 'whole';
@@ -6196,6 +6333,19 @@ function invDiscountAmount(roomTotal, eT){
   const amt=disctype==='percent'?base*discval/100:discval;
   return {type:disctype, value:discval, amount:+Math.min(base,Math.max(0,amt)).toFixed(2)};
 }
+// Part C6/C7: Payment method is required to mark Paid, optional for
+// Pending (an expected-but-not-confirmed bank transfer, say, may not have
+// a method yet); hidden entirely for Unpaid/Partially paid at creation
+// time (no money has actually moved yet in either case).
+function niPayChanged(){
+  var pay=document.getElementById('ni-pay')?document.getElementById('ni-pay').value:'Unpaid';
+  var box=document.getElementById('ni-paydetail');
+  if(!box) return;
+  var show = pay==='Fully paid' || pay==='Pending payment';
+  box.style.display = show ? 'grid' : 'none';
+  var lbl=document.getElementById('ni-paymethod-label');
+  if(lbl) lbl.textContent = pay==='Fully paid' ? 'Payment method' : 'Payment method (optional)';
+}
 function niPrev(){
   const id=document.getElementById('ni-res').value,r=RES.find(x=>x.id===id);
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
@@ -6227,15 +6377,8 @@ document.addEventListener('change',e=>{if(e.target.id==='ni-res'||e.target.id===
 
 let invItems=[]; // [{id,desc,qty,unit,tax,cat}]
 
-function initInvItems(){
-  invItems=[];
-  renderInvItems();
-  renderCatButtons();
-}
 
 
-
-function addInvItem(){ showCatPicker(); }
 
 function removeInvItem(id){
   invItems=invItems.filter(x=>x.id!==id);
@@ -6279,9 +6422,6 @@ function renderInvItems(){
   tbody.innerHTML=rows;
 }
 
-function addER(){showCatPicker();}  // legacy alias
-
-
 function genInv(){
   if(canViewOnly()){toast('⚠️ Agency access — cannot generate invoices');return;}
   const rid=document.getElementById('ni-res').value,r=RES.find(x=>x.id===rid);
@@ -6300,8 +6440,14 @@ function genInv(){
   const d=invDiscountAmount(roomTotal, eT);
   const disc=d.amount;
   const total=+(roomTotal+eT-disc).toFixed(2);
-  IC++;
   const initialPay=document.getElementById('ni-pay').value;
+  const paymentMethod=document.getElementById('ni-paymethod')?document.getElementById('ni-paymethod').value:'';
+  const paymentRef=document.getElementById('ni-payref')?document.getElementById('ni-payref').value:'';
+  // C6: a Paid invoice must record HOW it was paid -- caught here before
+  // IC (the shared invoice-number counter) is even incremented, so a
+  // rejected submission never burns a number.
+  if(initialPay==='Fully paid'&&!paymentMethod){toast('Select a payment method for a Paid invoice');return;}
+  IC++;
   const paidAmount=initialPay==='Fully paid'?total:0;
   // eSubtotal/eTax/disc/discType/discValue -- previously computed here but
   // never actually stored on `v`, so viewInv()'s references to them were
@@ -6309,9 +6455,15 @@ function genInv(){
   // its own printed/reopened view even though it correctly reduced `total`
   // at creation time (Guest Folio unification bug, fixed alongside this
   // task's invoice-discount work since it touches the same object literal).
-  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,payerScope:invPayerScope,payerLabel:invPayerScope==='whole'?'Whole room':guestLabelFor(r,invPayerScope),guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eSubtotal,eTax,eT,disc,discType:d.type,discValue:d.value,total,pay:initialPay,paidAmount,payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
+  const paidByName=(currentUser&&(currentUser.name||currentUser.username))||'Staff';
+  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,payerScope:invPayerScope,payerLabel:invPayerScope==='whole'?'Whole room':guestLabelFor(r,invPayerScope),guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eSubtotal,eTax,eT,disc,discType:d.type,discValue:d.value,total,pay:initialPay,paidAmount,
+    paymentMethod:(initialPay==='Fully paid'||initialPay==='Pending payment')?(paymentMethod||null):null,
+    paymentRef:(initialPay==='Fully paid'||initialPay==='Pending payment')?(paymentRef||null):null,
+    paidAt:initialPay==='Fully paid'?tS:null, paidBy:initialPay==='Fully paid'?paidByName:null,
+    payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation ('+(paymentMethod||'method not set')+')'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
   INV.unshift(v);
   syncInvoiceToFirestore(v);
+  logInvoicePaymentAudit(v.id, null, initialPay, paidAmount, paymentMethod, paymentRef);
   // Mark the source folio charges as invoiced (Step 10/21: never
   // double-invoiced -- an item that funded this invoice's extras[] is
   // struck off the "uninvoiced" pool openCreateInvoice()/openIM() draw
@@ -6346,7 +6498,7 @@ function genInv(){
 }
 function viewInv(id){
   const v=INV.find(x=>x.id===id);if(!v)return;
-  const sc=v.status==='void'?'up':v.pay==='Fully paid'?'pd':v.pay==='Partially paid'?'pp':'up';
+  const sc=v.status==='void'?'up':v.pay==='Fully paid'?'pd':v.pay==='Partially paid'?'pp':v.pay==='Pending payment'?'pg':'up';
   document.getElementById('det-ttl').textContent='Invoice #'+v.num+(v.status==='void'?' (VOID)':'');
   document.getElementById('det-body').innerHTML=`<div class="ivp">
     <div class="ivh"><div style="display:flex;align-items:center;gap:14px"><img class="logo-img" src="data:image/jpeg;base64,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" alt="Vilu Residence" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;border-radius:50%"><div><h2 style="color:#00b4d8;font-size:var(--font-size-2xl)">${PROP.nm}</h2><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:1px">@maamigili</p><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:4px;line-height:1.8">${PROP.addr}<br>Tel: ${PROP.ph} · ${PROP.em}<br>GST Reg: ${PROP.gst}</p></div></div>
@@ -6388,17 +6540,25 @@ function viewInv(id){
       ${(v.paidAmount||0)>0?`<tr><td style="color:#059669">Paid</td><td style="text-align:right;color:#059669">-$${(v.paidAmount||0).toFixed(2)}</td></tr>
       <tr class="gd"><td>Balance due</td><td style="text-align:right">$${Math.max(0,v.total-(v.paidAmount||0)).toFixed(2)}</td></tr>`:''}
     </table></div>
+    ${v.paymentMethod?`<div style="padding:4px 0;font-size:var(--font-size-xs);color:#6b7280">Payment method: <strong>${esc(v.paymentMethod)}</strong>${v.paymentRef?' · Ref: '+esc(v.paymentRef):''}</div>`:''}
     ${(v.payments&&v.payments.length)?`<div style="padding:8px 0;font-size:var(--font-size-xs);color:#6b7280">${v.payments.map(p=>'Payment '+fdf(p.date)+': $'+p.amount.toFixed(2)).join('<br>')}</div>`:''}
     ${v.notes?`<div style="padding:10px 14px;background:#f9fafb;border-radius:8px;font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">${esc(v.notes)}</div>`:''}
     <div class="ivft">Thank you for choosing ${PROP.nm}${PROP.bk?'<br>'+PROP.bk:''}</div>
   </div>`;
   document.getElementById('det-act').innerHTML='';
-  if(v.status!=='void'&&!canViewOnly()){
+  if(v.status!=='void'){
     const da=document.getElementById('det-act');
     const mkBtn=(txt,cls,fn)=>{const b=document.createElement('button');b.className='btn sm '+cls;b.innerHTML=txt;b.onclick=fn;da.appendChild(b);};
-    if((v.paidAmount||0)<v.total-0.01) mkBtn('<i class="ti ti-cash"></i> Record payment','p',()=>recordInvoicePayment(v.id));
-    mkBtn('<i class="ti ti-printer"></i> Print receipt','',()=>printReceipt(v.id));
-    mkBtn('<i class="ti ti-trash"></i> Void invoice','',()=>voidInvoice(v.id));
+    // C10: explicit Print, distinct from Record payment / Void (finalize
+    // already happened in genInv() -- this view IS "the finalized
+    // invoice", so Print here is the whole "Finalize -> Print" step 2).
+    mkBtn('<i class="ti ti-printer"></i> Print','',()=>window.print());
+    if(!canViewOnly()){
+      if((v.paidAmount||0)<v.total-0.01) mkBtn('<i class="ti ti-cash"></i> Record payment','p',()=>recordInvoicePayment(v.id));
+      if(v.pay!=='Pending payment'&&v.pay!=='Fully paid') mkBtn('<i class="ti ti-clock"></i> Mark pending','',()=>markInvoicePending(v.id));
+      if((v.paidAmount||0)>0) mkBtn('<i class="ti ti-receipt"></i> Print receipt','',()=>printReceipt(v.id));
+      mkBtn('<i class="ti ti-trash"></i> Void invoice','',()=>voidInvoice(v.id));
+    }
   }
   document.getElementById('m-det').classList.add('on');
 }
@@ -6420,11 +6580,14 @@ function recordInvoicePayment(invId){
   const amt=+amtStr;
   if(!amt||amt<=0){toast('Invalid amount');return;}
   if(amt>remaining+0.01){toast('Amount exceeds balance ($'+remaining.toFixed(2)+')');return;}
+  var previousStatus=v.pay;
   v.paidAmount=+((v.paidAmount||0)+amt).toFixed(2);
   v.payments=v.payments||[];
   v.payments.push({amount:amt,date:tS,note:'Recorded by '+(currentUser?currentUser.name:'Staff')});
   v.pay=v.paidAmount>=v.total-0.01?'Fully paid':'Partially paid';
+  if(v.pay==='Fully paid'){ v.paidAt=tS; v.paidBy=(currentUser&&(currentUser.name||currentUser.username))||'Staff'; }
   syncInvoiceToFirestore(v);
+  logInvoicePaymentAudit(v.id, previousStatus, v.pay, amt, v.paymentMethod||null, null);
   // ch.paid is a whole-charge marker -- correct for a Whole Room invoice
   // (the charge really is fully settled), but WRONG for a guest-scoped
   // invoice on a split/guest-assigned charge: only THIS guest's share is
@@ -6447,6 +6610,27 @@ function recordInvoicePayment(invId){
   }
   if(v.resId)updateFolioHeaderTotal(v.resId);
   toast('✓ $'+amt.toFixed(2)+' payment recorded');
+  drawInv();
+  viewInv(invId);
+}
+
+// Part C7: staff can flag an invoice as expecting payment (bank transfer
+// pending, OTA payout processing, etc.) without recording actual money --
+// paidAmount/payments are deliberately untouched, exactly the "do NOT
+// subtract pending amount from actual paid balance unless money is
+// confirmed" requirement.
+function markInvoicePending(invId){
+  const v=INV.find(x=>x.id===invId);
+  if(!v||v.status==='void'){toast('Invoice not found');return;}
+  const method=prompt('Payment method expected (optional):','')||null;
+  const ref=prompt('Reference / note (optional):','')||null;
+  const previousStatus=v.pay;
+  v.pay='Pending payment';
+  v.paymentMethod=method||v.paymentMethod||null;
+  v.paymentRef=ref||v.paymentRef||null;
+  syncInvoiceToFirestore(v);
+  logInvoicePaymentAudit(v.id, previousStatus, 'Pending payment', v.paidAmount||0, method, ref);
+  toast('✓ Marked as payment pending');
   drawInv();
   viewInv(invId);
 }
@@ -7719,7 +7903,7 @@ function showCatItems(catKey){
     h+='<span style="font-size:var(--font-size-xs);color:#9ca3af">No active items in this category yet.</span>';
   }
   items.forEach(function(item){
-    h+='<button onclick="invPickItem(\''+item.id+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+esc(item.name)+'<span style="color:#00b4d8;font-weight:700">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</span></button>';
+    h+='<button onclick="invPickItem(\''+item.id+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+esc(item.name)+(item.durationHours?' <span style="color:#9ca3af">&middot; '+item.durationHours+'h</span>':'')+'<span style="color:#00b4d8;font-weight:700">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</span></button>';
   });
   if(canManageCatalog()){
     h+='<button onclick="invAddBlank(\''+catKey+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1.5px dashed #d1d5db;background:#f9fafb;cursor:pointer;color:#6b7280;font-family:inherit">+ Custom item</button>';
@@ -8016,17 +8200,57 @@ function rdRenderTab(n, r){
     // folio items visible at all, a real content gap vs. the other two
     // surfaces (2026-09-10 folio unification pass).
     var sum=folioSummary(r.id);
-    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div><div style="text-align:left;margin-bottom:10px">'+renderFolioSummaryHTML(sum,r.id)+'</div></div>';
+    var instanceId='rd-'+r.id;
+    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div>'
+      +(canViewOnly()?'':'<div id="rd-addcharge-'+r.id+'" style="display:none;text-align:left;margin-bottom:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px">'+buildAddChargeFormHTML(r.id,instanceId)+'</div>')
+      +'<div style="text-align:left;margin-bottom:10px">'+renderFolioSummaryHTML(sum,r.id)+'</div></div>';
     footer.innerHTML='';
     if(!canViewOnly()){
+      // Consolidated billing action row (Part C12): + Add charge / Create
+      // invoice / Print · Documents / Open full folio -- replaces what used
+      // to be scattered, overlapping invoice/print entry points.
+      var ac=document.createElement('button');ac.className='btn';
+      ac.innerHTML='<i class="ti ti-plus"></i> Add charge';
+      ac.onclick=function(){var p=document.getElementById('rd-addcharge-'+r.id);if(p)p.style.display=p.style.display==='none'?'block':'none';};footer.appendChild(ac);
       var ib=document.createElement('button');ib.className='btn p';ib.style.flex='1';
       ib.innerHTML='<i class="ti ti-file-invoice"></i> Create invoice';
       ib.onclick=function(){closeDrawer();openCreateInvoice(r.id);};footer.appendChild(ib);
+      var pb=document.createElement('button');pb.className='btn';
+      pb.innerHTML='<i class="ti ti-printer"></i> Print / Documents';
+      pb.onclick=function(){openPrintDocsMenu(r.id);};footer.appendChild(pb);
       var fb=document.createElement('button');fb.className='btn';
       fb.innerHTML='Open full folio';
       fb.onclick=function(){closeDrawer();openFullFolio(r.id);};footer.appendChild(fb);
     }
+  } else if(n===3){
+    loadReservationDocuments(r.id).then(function(){ if(drawerResId===r.id) rdTab(3, document.querySelectorAll('.rd-tab')[3]); });
+    body.innerHTML = renderDocumentsTabHTML(r.id);
+    footer.innerHTML='';
   }
+}
+
+// Part C14 -- one simple "PRINT / DOCUMENTS" action instead of several
+// large print buttons side by side: Print folio / Print latest invoice /
+// Print receipt / Open documents, in one compact menu.
+function openPrintDocsMenu(resId){
+  var r=RES.find(function(x){return x.id===resId;});
+  if(!r) return;
+  var resInvoices=INV.filter(function(v){return v.resId===resId && v.status!=='void';});
+  var latest=resInvoices.slice().sort(function(a,b){return (b.num||0)-(a.num||0);})[0];
+  var paid=resInvoices.filter(function(v){return v.pay==='Fully paid'||v.pay==='Partially paid';}).sort(function(a,b){return (b.num||0)-(a.num||0);})[0];
+  var m=document.createElement('div'); m.className='mbg on'; m.onclick=function(e){if(e.target===m)m.remove();};
+  m.innerHTML='<div class="mdl" style="width:320px">'
+    +'<div class="mhd"><h3><i class="ti ti-printer" style="color:#0077b6;margin-right:6px"></i>Print / Documents</h3><button class="ab" onclick="this.closest(\'.mbg\').remove()"><i class="ti ti-x"></i></button></div>'
+    +'<button class="btn" style="width:100%;margin-bottom:8px" id="pdm-folio">Print folio</button>'
+    +'<button class="btn" style="width:100%;margin-bottom:8px" id="pdm-inv" '+(latest?'':'disabled')+'>Print latest invoice'+(latest?'':' (none yet)')+'</button>'
+    +'<button class="btn" style="width:100%;margin-bottom:8px" id="pdm-rcpt" '+(paid?'':'disabled')+'>Print receipt'+(paid?'':' (nothing paid yet)')+'</button>'
+    +'<button class="btn p" style="width:100%" id="pdm-docs">Open documents</button>'
+    +'</div>';
+  document.body.appendChild(m);
+  document.getElementById('pdm-folio').onclick=function(){m.remove();printFolio(resId);};
+  if(latest) document.getElementById('pdm-inv').onclick=function(){m.remove();closeDrawer();viewInv(latest.id);setTimeout(function(){window.print();},300);};
+  if(paid) document.getElementById('pdm-rcpt').onclick=function(){m.remove();printReceipt(paid.id);};
+  document.getElementById('pdm-docs').onclick=function(){m.remove();openDrawer(resId);rdTab(3,document.querySelectorAll('.rd-tab')[3]);};
 }
 
 // Rebuilds the drawer's room dropdown from actual availability for the
@@ -8216,6 +8440,23 @@ async function syncInvoiceToFirestore(v){
   try{ await fsDb.collection('invoices').doc(v.id).set(stripUndefined(v)); }
   catch(e){ console.error('syncInvoiceToFirestore failed for', v.id, e); }
 }
+// Part C17: append-only trail of every payment-status change on an
+// invoice -- previous/new status, amount at the time, method, reference,
+// who, and a server timestamp a client can't spoof (see
+// invoice_payment_audit in firestore.rules). Never blocks the UI action
+// it's logging for -- a failed audit write is reported to console, not
+// surfaced as if the payment itself failed.
+async function logInvoicePaymentAudit(invoiceId, previousStatus, newStatus, amount, method, reference){
+  try{
+    var fbUser = firebase.auth().currentUser;
+    await fsDb.collection('invoice_payment_audit').doc().set({
+      invoiceId: invoiceId, previousStatus: previousStatus||'none', newStatus: newStatus,
+      amount: amount==null?null:amount, method: method||null, reference: reference||null,
+      changedByUid: fbUser?fbUser.uid:null, changedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff',
+      changedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e){ console.error('logInvoicePaymentAudit failed', e); }
+}
 async function loadInvoicesFromFirestore(){
   try{
     var snap = await fsDb.collection('invoices').get();
@@ -8312,7 +8553,7 @@ function drawFolios(){
     form.innerHTML=buildAddChargeFormHTML(r.id)+
       '<div style="display:flex;gap:8px;margin-top:10px">'+
         '<button data-rid="'+r.id+'" onclick="openCreateInvoice(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-invoice"></i> Create invoice</button>'+
-        '<button data-rid="'+r.id+'" onclick="printFolio(this.dataset.rid)" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:8px 14px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-printer"></i></button>'+
+        '<button data-rid="'+r.id+'" onclick="openPrintDocsMenu(this.dataset.rid)" title="Print / Documents" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:8px 14px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-printer"></i></button>'+
       '</div>';
 
     // Charges list
@@ -8749,7 +8990,7 @@ function folioShowCatalogCategory(resId,catKey,instanceId){
     return;
   }
   row.innerHTML=items.map(function(item){
-    return '<button type="button" data-rid="'+resId+'" data-iid="'+item.id+'" data-instance="'+instanceId+'" onclick="folioOpenChargeEditor(this.dataset.rid,this.dataset.iid,this.dataset.instance)" style="padding:5px 10px;font-size:var(--font-size-xs);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit">'+esc(item.name)+' <strong style="color:#00b4d8">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</strong></button>';
+    return '<button type="button" data-rid="'+resId+'" data-iid="'+item.id+'" data-instance="'+instanceId+'" onclick="folioOpenChargeEditor(this.dataset.rid,this.dataset.iid,this.dataset.instance)" style="padding:5px 10px;font-size:var(--font-size-xs);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit">'+esc(item.name)+(item.durationHours?' <span style="color:#9ca3af">&middot; '+item.durationHours+'h</span>':'')+' <strong style="color:#00b4d8">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</strong></button>';
   }).join('');
 }
 
@@ -8927,6 +9168,236 @@ async function uploadFolioBill(resId, chargeId, file){
   var path = 'folio-attachments/'+resId+'/'+chargeId+'.jpg';
   var snap = await fsStorage.ref(path).put(blob, {contentType:'image/jpeg'});
   return await snap.ref.getDownloadURL();
+}
+
+// ══════════════════════════════════════════════
+// RESERVATION DOCUMENT VAULT (Part A, Document Vault + Catalog + Invoice
+// Center, 2026-09-10). ONE reservation-scoped document list backing
+// passports/IDs/visas, transfer docs, signed bills, and invoice/receipt
+// copies. Signed bills (A5) and finalized invoices (Part D) are never
+// duplicated here -- they're synthesized on render straight from the
+// existing FOLIOS[resId].charges/INV data that already owns them, so
+// there is always exactly ONE file/reference per real-world document.
+// ══════════════════════════════════════════════
+const RESERVATION_DOC_TYPES = [
+  {key:'PASSPORT',    label:'Passport',               icon:'ti-user-square', sensitive:true},
+  {key:'IDENTITY',    label:'ID / Identity document',  icon:'ti-id-badge-2',  sensitive:true},
+  {key:'TRAVEL',      label:'Visa / Travel document',  icon:'ti-plane',       sensitive:true},
+  {key:'TRANSFER',    label:'Transfer document',       icon:'ti-car',         sensitive:false},
+  {key:'SIGNED_BILL', label:'Signed bill',             icon:'ti-file-check',  sensitive:false},
+  {key:'INVOICE',     label:'Invoice',                 icon:'ti-file-invoice',sensitive:false},
+  {key:'RECEIPT',     label:'Receipt',                 icon:'ti-receipt',     sensitive:false},
+  {key:'OTHER',       label:'Other',                   icon:'ti-file',        sensitive:false},
+];
+function docTypeInfo(key){ return RESERVATION_DOC_TYPES.find(function(t){return t.key===key;}) || {key:key,label:key,icon:'ti-file',sensitive:false}; }
+
+var RES_DOCS = {}; // resId -> Firestore-backed reservation_documents rows (uploaded files only)
+async function loadReservationDocuments(resId){
+  try {
+    var snap = await fsDb.collection('reservation_documents').where('reservationId','==',resId).get();
+    var docs = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
+      .filter(function(d){ return d.status!=='archived' || canUploadDocuments(); }); // Staff never sees archived rows, matches A7's "archive to remove from normal view" intent
+    docs.sort(function(a,b){
+      var am=a.uploadedAt&&a.uploadedAt.toMillis?a.uploadedAt.toMillis():0;
+      var bm=b.uploadedAt&&b.uploadedAt.toMillis?b.uploadedAt.toMillis():0;
+      return bm-am;
+    });
+    RES_DOCS[resId] = docs;
+  } catch(e){ console.error('loadReservationDocuments failed', e); RES_DOCS[resId]=RES_DOCS[resId]||[]; }
+  return RES_DOCS[resId];
+}
+
+// Signed bills already live on the folio charge itself (ch.billUrl, from
+// the EXISTING uploadFolioBill() flow) -- synthesized here as read-only
+// Documents-tab rows rather than copied into reservation_documents, so
+// there is never a second upload/second file for the same bill (A5).
+function getSignedBillDocEntries(resId){
+  var folio = FOLIOS[resId] || {charges:[]};
+  return (folio.charges||[]).filter(function(ch){ return !!ch.billUrl; }).map(function(ch){
+    return {id:'bill-'+ch.id, synthetic:'signed_bill', type:'SIGNED_BILL', title:ch.desc||'Signed bill',
+      folioItemId:ch.id, url:ch.billUrl, uploadedAt:null, uploadedByName:null};
+  });
+}
+// Finalized invoices/receipts already live in INV -- surfaced here so they
+// reach Documents "without manually re-uploading" (Part D) instead of
+// storing a redundant binary copy. View/Print reuse the exact existing
+// viewInv()/printReceipt() actions, same data, same document.
+function getInvoiceDocEntries(resId){
+  var out=[];
+  INV.filter(function(v){ return v.resId===resId && v.status!=='void'; }).forEach(function(v){
+    out.push({id:'inv-'+v.id, synthetic:'invoice', type:'INVOICE', title:'Invoice '+v.id+' ('+v.payerLabel+')',
+      invoiceId:v.id, uploadedAt:null, uploadedByName:null, issued:v.issued, pay:v.pay});
+    if (v.pay==='Fully paid' || v.pay==='Partially paid') {
+      out.push({id:'rcpt-'+v.id, synthetic:'receipt', type:'RECEIPT', title:'Receipt for '+v.id,
+        invoiceId:v.id, uploadedAt:null, uploadedByName:null, issued:v.issued, pay:v.pay});
+    }
+  });
+  return out;
+}
+function mergedDocEntries(resId){
+  var uploaded = (RES_DOCS[resId]||[]).filter(function(d){
+    return docTypeInfo(d.type).sensitive ? canViewSensitiveDocs() : true;
+  });
+  return uploaded.concat(getSignedBillDocEntries(resId)).concat(getInvoiceDocEntries(resId));
+}
+function filterDocEntries(entries, filterKey){
+  if(!filterKey || filterKey==='all') return entries;
+  if(filterKey==='guest') return entries.filter(function(d){ return ['PASSPORT','IDENTITY','TRAVEL','TRANSFER','OTHER'].indexOf(d.type)!==-1; });
+  if(filterKey==='bills') return entries.filter(function(d){ return d.type==='SIGNED_BILL'; });
+  if(filterKey==='invoices') return entries.filter(function(d){ return d.type==='INVOICE'||d.type==='RECEIPT'; });
+  return entries;
+}
+
+async function uploadReservationDocument(resId, file, type, title){
+  if(!canUploadDocuments()){ toast('⛔ Admin/Manager access only'); return; }
+  var r = RES.find(function(x){return x.id===resId;});
+  if(!r || !file) return;
+  var typeInfo = docTypeInfo(type);
+  try {
+    var ref = fsDb.collection('reservation_documents').doc();
+    var contentType = file.type || 'application/octet-stream';
+    var isImage = /^image\//.test(contentType);
+    var blob = file, path;
+    if (isImage) { blob = await resizeImageToBlob(file, 2000, 0.85); contentType='image/jpeg'; path='reservation-documents/'+resId+'/'+ref.id+'.jpg'; }
+    else { var ext=(file.name||'').split('.').pop()||'pdf'; path='reservation-documents/'+resId+'/'+ref.id+'.'+ext.toLowerCase(); }
+    await fsStorage.ref(path).put(blob, {contentType:contentType});
+    var fbUser = firebase.auth().currentUser;
+    await ref.set({
+      reservationId:resId, type:type, title:(title||'').trim()||typeInfo.label,
+      guestName:r.fn+' '+r.ln, folioItemId:null, invoiceId:null,
+      storagePath:path, mimeType:contentType,
+      uploadedByUid: fbUser?fbUser.uid:null, uploadedByName: (currentUser&&currentUser.name)||(currentUser&&currentUser.username)||'Staff',
+      uploadedAt: firebase.firestore.FieldValue.serverTimestamp(), status:'active'
+    });
+    await loadReservationDocuments(resId);
+    toast('✓ '+typeInfo.label+' uploaded');
+    return ref.id;
+  } catch(e){ console.error('uploadReservationDocument failed', e); toast('⚠ Could not upload document'); }
+}
+
+// Never a hard delete (A7) -- ordinary users get "archive", which just
+// removes the row from the normal Documents view (loadReservationDocuments
+// filters status:'archived' out for everyone except Admin/Manager).
+async function archiveReservationDocument(resId, docId, archived){
+  try {
+    var fbUser = firebase.auth().currentUser;
+    await fsDb.collection('reservation_documents').doc(docId).set({
+      status: archived?'archived':'active',
+      archivedAt: archived ? firebase.firestore.FieldValue.serverTimestamp() : null,
+      archivedBy: archived ? (fbUser?fbUser.uid:null) : null
+    }, {merge:true});
+    await loadReservationDocuments(resId);
+    toast(archived?'✓ Archived':'✓ Restored');
+    if(drawerResId===resId) rdTab(3, document.querySelectorAll('.rd-tab')[3]);
+  } catch(e){ console.error('archiveReservationDocument failed', e); toast('⚠ Could not update document'); }
+}
+
+// Storage READ on reservation-documents is admin-only in storage.rules,
+// and deliberately NOT `read:true` like room-photos/folio-attachments
+// (A3: passport/ID files must never be reachable via a public URL). A
+// plain getDownloadURL() would defeat that -- Firebase's download tokens
+// bypass Security Rules entirely once minted. So this fetches the bytes
+// through an authenticated REST call (Bearer ID token) instead, which
+// DOES get evaluated against storage.rules per request, and only ever
+// creates a local, non-shareable blob: URL in this tab.
+async function fetchReservationDocumentBlob(storagePath){
+  var fbUser = firebase.auth().currentUser;
+  if(!fbUser) throw new Error('Not signed in');
+  var idToken = await fbUser.getIdToken();
+  var bucket = fsStorage.app.options.storageBucket;
+  var url = 'https://firebasestorage.googleapis.com/v0/b/'+bucket+'/o/'+encodeURIComponent(storagePath)+'?alt=media';
+  var res = await fetch(url, {headers:{Authorization:'Bearer '+idToken}});
+  if(!res.ok) throw new Error('Storage fetch failed: '+res.status);
+  return await res.blob();
+}
+function _findDocEntry(resId, docId){
+  return mergedDocEntries(resId).find(function(d){ return d.id===docId; });
+}
+async function viewReservationDocument(resId, docId){
+  var d = _findDocEntry(resId, docId);
+  if(!d) return;
+  if (d.synthetic==='signed_bill') { window.open(d.url, '_blank'); return; }
+  if (d.synthetic==='invoice') { closeDrawer(); viewInv(d.invoiceId); return; }
+  if (d.synthetic==='receipt') { closeDrawer(); viewInv(d.invoiceId); return; }
+  try {
+    var blob = await fetchReservationDocumentBlob(d.storagePath);
+    window.open(URL.createObjectURL(blob), '_blank');
+  } catch(e){ console.error('viewReservationDocument failed', e); toast('⚠ Could not open (admin access only)'); }
+}
+async function downloadReservationDocument(resId, docId){
+  var d = _findDocEntry(resId, docId);
+  if(!d) return;
+  if (d.synthetic) { toast('Use View — this is a linked record, not a separate file'); return; }
+  try {
+    var blob = await fetchReservationDocumentBlob(d.storagePath);
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=(d.title||'document').replace(/[^a-z0-9.\-_]+/gi,'_')+(d.mimeType==='application/pdf'?'.pdf':'.jpg');
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch(e){ console.error('downloadReservationDocument failed', e); toast('⚠ Could not download (admin access only)'); }
+}
+
+var _docTabFilter = 'all';
+function docTabSetFilter(f){ _docTabFilter=f; if(drawerResId) rdTab(3, document.querySelectorAll('.rd-tab')[3]); }
+function toggleDocUploadForm(){
+  var el=document.getElementById('doc-upload-form');
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+async function submitDocUpload(resId){
+  var type=document.getElementById('du-type').value;
+  var title=document.getElementById('du-title').value;
+  var fileInput=document.getElementById('du-file');
+  var file=fileInput.files[0];
+  if(!file){ toast('Choose a file first'); return; }
+  await uploadReservationDocument(resId, file, type, title);
+  fileInput.value=''; document.getElementById('du-title').value='';
+  document.getElementById('doc-upload-form').style.display='none';
+  if(drawerResId===resId) rdTab(3, document.querySelectorAll('.rd-tab')[3]);
+}
+
+function renderDocumentsTabHTML(resId){
+  var entries = filterDocEntries(mergedDocEntries(resId), _docTabFilter);
+  var filters = [['all','All'],['guest','Guest documents'],['bills','Signed bills'],['invoices','Invoices & receipts']];
+  var h = '<div class="rd-section">Documents</div>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">';
+  filters.forEach(function(f){
+    var on=_docTabFilter===f[0];
+    h += '<button onclick="docTabSetFilter(\''+f[0]+'\')" style="padding:5px 11px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid '+(on?'#00b4d8':'#d1d5db')+';background:'+(on?'#e0f7fd':'#fff')+';color:'+(on?'#00b4d8':'#374151')+';cursor:pointer;font-family:inherit">'+f[1]+'</button>';
+  });
+  h += '</div>';
+  if (canUploadDocuments()) {
+    var typeOpts = RESERVATION_DOC_TYPES.map(function(t){return '<option value="'+t.key+'">'+esc(t.label)+'</option>';}).join('');
+    h += '<button onclick="toggleDocUploadForm()" class="btn p" style="width:100%;margin-bottom:10px"><i class="ti ti-upload"></i> Upload document</button>';
+    h += '<div id="doc-upload-form" style="display:none;background:#f9fafb;border-radius:10px;padding:12px;margin-bottom:14px">';
+    h += '<div class="rd-field" style="margin-bottom:8px"><label>Document type</label><select id="du-type">'+typeOpts+'</select></div>';
+    h += '<div class="rd-field" style="margin-bottom:8px"><label>Title (optional)</label><input type="text" id="du-title" placeholder="e.g. Passport — John Smith"></div>';
+    h += '<div class="rd-field" style="margin-bottom:10px"><label>File (image or PDF)</label><input type="file" id="du-file" accept="image/*,application/pdf"></div>';
+    h += '<button class="btn p" style="width:100%" onclick="submitDocUpload(\''+resId+'\')"><i class="ti ti-device-floppy"></i> Save document</button>';
+    h += '</div>';
+  }
+  if (!entries.length) {
+    h += '<div style="color:#9ca3af;font-size:var(--font-size-sm);padding:12px;text-align:center">No documents in this view yet.</div>';
+  } else {
+    entries.forEach(function(d){
+      var t = docTypeInfo(d.type);
+      var when = d.issued || (d.uploadedAt&&d.uploadedAt.toDate ? fd(d.uploadedAt.toDate().toISOString().slice(0,10)) : '');
+      var sub = [d.guestName, when?('Uploaded: '+when):null, d.pay?d.pay:null].filter(Boolean).join(' · ');
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f3f4f6">';
+      h += '<div style="display:flex;align-items:center;gap:10px;min-width:0">';
+      h += '<i class="ti '+t.icon+'" style="font-size:var(--font-size-lg);color:#00b4d8;flex-shrink:0"></i>';
+      h += '<div style="min-width:0"><div style="font-weight:600;font-size:var(--font-size-sm);color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.title)+(d.status==='archived'?' <span style="color:#d97706;font-weight:700">ARCHIVED</span>':'')+'</div>';
+      h += '<div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(sub)+'</div></div></div>';
+      h += '<div style="display:flex;gap:4px;flex-shrink:0">';
+      h += '<button onclick="viewReservationDocument(\''+resId+'\',\''+d.id+'\')" title="View" style="background:none;border:none;color:#0077b6;cursor:pointer;padding:4px"><i class="ti ti-eye"></i></button>';
+      if(!d.synthetic) h += '<button onclick="downloadReservationDocument(\''+resId+'\',\''+d.id+'\')" title="Download" style="background:none;border:none;color:#6b7280;cursor:pointer;padding:4px"><i class="ti ti-download"></i></button>';
+      if(!d.synthetic && canUploadDocuments()){
+        h += d.status==='archived'
+          ? '<button onclick="archiveReservationDocument(\''+resId+'\',\''+d.id+'\',false)" title="Restore" style="background:none;border:none;color:#059669;cursor:pointer;padding:4px"><i class="ti ti-rotate"></i></button>'
+          : '<button onclick="archiveReservationDocument(\''+resId+'\',\''+d.id+'\',true)" title="Archive" style="background:none;border:none;color:#d97706;cursor:pointer;padding:4px"><i class="ti ti-archive"></i></button>';
+      }
+      h += '</div></div>';
+    });
+  }
+  return h;
 }
 
 async function addFolioCharge(resId,instanceId){
@@ -9218,7 +9689,6 @@ function openFullFolio(resId){
   }, 150);
 }
 // Keep backward compat with existing call sites (Reservation Quick Bar).
-function openFolioDetail(resId){ openFullFolio(resId); }
 function closeFolioDetail(){ activeFolioResId=null; }
 function folioToInvoice(){ if(activeFolioResId) openCreateInvoice(activeFolioResId); }
 
@@ -10950,6 +11420,22 @@ function canDiscount() {
 // booking & dates"; only an explicit rate override away from the
 // room/date-driven default requires this.
 function canAdjustRoomPrice() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
+}
+// Reservation Document Vault (Part A/F, Document Vault + Catalog + Invoice
+// Center, 2026-09-10). Manual "Upload document" is Admin/Manager only —
+// per Part F, Staff's explicit document action is "attach signed bills"
+// via the existing folio flow (which auto-surfaces in Documents, A5), not
+// a separate upload path. Sensitive identity docs (passport/ID/visa) are
+// Admin/Manager-view-only, matching firestore.rules' reservation_documents
+// read rule exactly -- Staff can see everything else (signed bills,
+// invoices, receipts, transfer docs, other).
+function canUploadDocuments() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
+}
+function canViewSensitiveDocs() {
   if(!currentUser) return false;
   return currentUser.role === 'admin' || currentUser.role === 'manager';
 }

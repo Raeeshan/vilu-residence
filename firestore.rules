@@ -169,11 +169,58 @@ service cloud.firestore {
       allow create, update: if (isAdmin() || isManagerRole())
         && request.resource.data.name is string
         && request.resource.data.category in ['TRIPS_ACTIVITIES','FOOD_BEVERAGE','TRANSFER','OTHER_SERVICE','ACCOMMODATION_EXTRA']
-        && request.resource.data.unitType in ['PER_PAX','PER_TRIP','PER_ITEM','PER_NIGHT','PER_ROOM']
+        && request.resource.data.unitType in ['PER_PAX','PER_TRIP','PER_ITEM','PER_NIGHT','PER_ROOM','PER_HOUR']
         && request.resource.data.basePrice is number
         && request.resource.data.basePrice >= 0
         && request.resource.data.active is bool;
       allow delete: if false;
+    }
+
+    // Reservation Document Vault (Part A, Document Vault + Catalog +
+    // Invoice Center, 2026-09-10). One record per uploaded document,
+    // metadata only -- the actual file bytes live in Storage under
+    // reservation-documents/{resId}/{documentId} (see storage.rules).
+    // Sensitive types (passport/ID/visa) are read-restricted to
+    // Admin/Manager only, matching Part A3/F's least-privilege
+    // requirement; Staff may read non-sensitive types (signed bills,
+    // invoices, receipts, transfer docs, other). Never hard-deleted (A7)
+    // -- `allow delete: if false` mirrors reservation_price_adjustments
+    // above; ordinary Staff may only toggle status active<->archived
+    // (an "Archive" action, not a rewrite of the document's identity),
+    // while Admin/Manager may update any field per role policy.
+    match /reservation_documents/{docId} {
+      allow read: if isAdmin() || isManagerRole()
+        || (isStaff() && !(resource.data.type in ['PASSPORT','IDENTITY','TRAVEL']));
+      allow create: if (isAdmin() || isManagerRole() || isStaff())
+        && request.resource.data.reservationId is string
+        && request.resource.data.type in ['PASSPORT','IDENTITY','TRAVEL','TRANSFER','SIGNED_BILL','INVOICE','RECEIPT','OTHER']
+        && request.resource.data.title is string
+        && request.resource.data.storagePath is string
+        && request.resource.data.uploadedByUid == request.auth.uid
+        && request.resource.data.uploadedAt == request.time
+        && request.resource.data.status == 'active';
+      allow update: if isAdmin() || isManagerRole()
+        || (isStaff()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','archivedAt','archivedBy'])
+            && request.resource.data.status in ['active','archived']);
+      allow delete: if false;
+    }
+
+    // Payment-status change audit trail (Part C17). Append-only, mirrors
+    // reservation_price_adjustments -- previous status/amount, new
+    // status/amount, method, reference, who, and a server timestamp that
+    // can't be spoofed by a client clock. Staff may create entries (they
+    // can change payment status if their invoice-edit permissions allow
+    // it in the UI) but nothing can be edited or deleted after the fact.
+    match /invoice_payment_audit/{id} {
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow create: if (isAdmin() || isStaff() || isManagerRole())
+        && request.resource.data.invoiceId is string
+        && request.resource.data.previousStatus is string
+        && request.resource.data.newStatus is string
+        && request.resource.data.changedByUid == request.auth.uid
+        && request.resource.data.changedAt == request.time;
+      allow update, delete: if false;
     }
 
     match /users/{id} {
