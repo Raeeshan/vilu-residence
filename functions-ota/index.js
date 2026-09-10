@@ -26,8 +26,6 @@ const { FirestoreStore } = require('./lib/store-firestore');
 const { ingestEvent } = require('./lib/ingest');
 const { MockAdapter, Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
-const { BEDS24_ROOM_MAP, buildDifferentialPayload } = require('./lib/beds24-bridge');
-const { CODE_TO_ROOM_TYPE_ID } = require('./lib/ota-room-types');
 
 initializeApp();
 const db = getFirestore();
@@ -101,94 +99,4 @@ exports.otaCatchUp = onSchedule({ schedule: 'every 30 minutes', secrets: [BEDS24
   const retries = await db.collection('ota_queue').where('state', '==', 'retry').get();
   for (const d of retries.docs) { const x = d.data(); if (!x.next_retry_at || x.next_retry_at <= new Date().toISOString()) await processQueued(d.id, x); }
   await store.set('ota_config', 'cursor', { modified_since: new Date().toISOString(), last_catch_up: new Date().toISOString(), queued: ids.length }, { merge: true });
-});
-
-// ── Beds24 outbound differential-sync worker (continuous-sync pass) ────────
-// Vilu PMS -> Beds24 API bridge outbound worker. Triggered by ota_pushes doc
-// CREATION -- but ota_pushes also receives 'availability' audit docs from
-// syncAvailability() (functions-core), so this MUST no-op on anything that
-// isn't a pending beds24_calendar_push job, never assume every doc here is
-// its own work. Reads CURRENT Vilu state fresh (never trusts a value from
-// when the job was enqueued -- Step 4/6 of the continuous-sync pass: always
-// absolute truth, never previous+1/-1, so a delayed or duplicate job can
-// never drift Beds24 away from Vilu's real state). Never marks the job
-// succeeded unless Beds24 itself confirms it; never touches Vilu PMS data.
-const BEDS24_RETRYABLE_ATTEMPTS = 3;
-const BEDS24_RETRY_BACKOFF_MS = [1000, 3000, 9000];
-function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
-
-async function roomTypeConfig(roomTypeCode) {
-  const roomTypeId = CODE_TO_ROOM_TYPE_ID[roomTypeCode];
-  if (!roomTypeId) return null;
-  return store.get('ota_room_types', roomTypeId);
-}
-
-exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', secrets: [BEDS24_TOKEN] }, async (event) => {
-  const snap = event.data; if (!snap) return;
-  const jobRef = db.collection('ota_pushes').doc(event.params.id);
-  const job = snap.data();
-  if (!job || job.type !== 'beds24_calendar_push' || job.status !== 'pending') return; // not our job (e.g. an 'availability' audit doc, or already processed)
-
-  const cfg = (await store.get('ota_config', 'channel_manager')) || {};
-  if (!cfg.enabled || cfg.provider !== 'beds24') {
-    await jobRef.set({ status: 'skipped', last_error: { message: 'Beds24 channel manager not enabled in ota_config -- job left for a future controlled run', http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
-    return;
-  }
-
-  const roomTypeCode = job.room_type_code;
-  const affectedDates = (job.window && job.window.affected_dates) || [];
-  if (!roomTypeCode || !BEDS24_ROOM_MAP[roomTypeCode] || !affectedDates.length) {
-    await jobRef.set({ status: 'failed', last_error: { message: 'malformed job: missing room_type_code or affected_dates', http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
-    return;
-  }
-
-  const config = await roomTypeConfig(roomTypeCode);
-  if (!config) {
-    await jobRef.set({ status: 'failed', last_error: { message: 'no ota_room_types config found for ' + roomTypeCode, http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
-    return;
-  }
-
-  const rooms = await roomsDocs();
-  const reservations = (await store.list('reservations')).map((d) => Object.assign({ id: d._id || d.id }, d));
-  const blocks = (await store.list('blocks')).map((d) => Object.assign({ id: d._id || d.id }, d));
-
-  const built = buildDifferentialPayload({
-    roomsDocs: rooms,
-    reservations,
-    blocks,
-    affectedDates: { [roomTypeCode]: affectedDates },
-    configs: { [roomTypeCode]: config },
-  });
-  if (built.invalid.length) {
-    await jobRef.set({ status: 'failed', last_error: { message: 'differential payload invalid: ' + JSON.stringify(built.invalid.slice(0, 5)), http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
-    return;
-  }
-  const payload = built.grouped; // [{roomId, calendar:[...]}] -- exactly one room here
-  const payloadHash = crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
-  await jobRef.set({ status: 'in_flight', payload, payload_hash: payloadHash, updated_at: new Date().toISOString() }, { merge: true });
-
-  const allowedRoomIds = new Set(Object.values(BEDS24_ROOM_MAP).map((r) => r.beds24_room_id));
-  const adapter = new Beds24Adapter({ enabled: true, token: BEDS24_TOKEN.value() });
-
-  let lastError = null;
-  for (let attempt = 1; attempt <= BEDS24_RETRYABLE_ATTEMPTS; attempt++) {
-    try {
-      const result = await adapter.pushAvailability(payload, { allowedRoomIds });
-      await jobRef.set({ status: 'succeeded', attempt_count: attempt, last_error: null, updated_at: new Date().toISOString(), result: 'pushed', error_reason: null }, { merge: true });
-      return;
-    } catch (e) {
-      // Sanitized logging only: HTTP status, our own error message, the
-      // operation id -- never the refresh token, access token, or any
-      // Authorization header. e.message never contains a credential (see
-      // adapters.js's own tests confirming this).
-      lastError = { message: e.message, http_status: e.httpStatus || null };
-      console.warn('beds24OutboundWorker attempt ' + attempt + ' failed for operation ' + event.params.id, lastError);
-      if (e.retryable === false || attempt === BEDS24_RETRYABLE_ATTEMPTS) {
-        await jobRef.set({ status: e.retryable === false ? 'failed' : 'review_required', attempt_count: attempt, last_error: lastError, updated_at: new Date().toISOString(), result: 'push_failed: ' + e.message, error_reason: e.message }, { merge: true });
-        return;
-      }
-      await jobRef.set({ attempt_count: attempt, last_error: lastError, updated_at: new Date().toISOString() }, { merge: true });
-      await sleep(BEDS24_RETRY_BACKOFF_MS[attempt - 1] || 9000);
-    }
-  }
 });

@@ -1,0 +1,13 @@
+{
+  "name": "functions-beds24",
+  "description": "Vilu Residence PMS — Beds24 outbound differential-sync worker ONLY (owns BEDS24_REFRESH_TOKEN exclusively). Split into its own codebase, separate from functions-ota (which owns OTA_WEBHOOK_SECRET for the still-undeployed inbound otaWebhook/processOtaEvent/otaCatchUp), because Cloud Functions v2 secret discovery validates every declared secret across a whole codebase before --only filtering applies — so as long as OTA_WEBHOOK_SECRET has no value, functions-ota cannot deploy ANY function, including one that never reads it. This codebase declares only BEDS24_REFRESH_TOKEN, so it can deploy independently of that unrelated, still-unset secret.",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.3.1"
+  },
+  "private": true
+}

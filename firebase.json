@@ -9,6 +9,11 @@
       "source": "functions-ota",
       "codebase": "ota",
       "runtime": "nodejs20"
+    },
+    {
+      "source": "functions-beds24",
+      "codebase": "beds24",
+      "runtime": "nodejs20"
     }
   ],
   "firestore": {
@@ -42,6 +47,7 @@
       "functions/**",
       "functions-core/**",
       "functions-ota/**",
+      "functions-beds24/**",
       "firestore.rules",
       "storage.rules",
       "firestore.indexes.json",
