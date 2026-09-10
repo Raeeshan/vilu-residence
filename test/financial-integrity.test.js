@@ -88,8 +88,16 @@ function buildFullSandbox() {
 section('Case A — root cause: one canonical, tax-inclusive money basis (Step 1/2)');
 {
   test('chargeTaxInclusiveEstimate() uses the EXACT same formula genInv() applies to real invoice items (subtotal * (TAX.svc+TAX.tgst)/100, added to the subtotal) -- no second, independently-invented tax formula', () => {
+    // Create Invoice live-preview task (2026-09-11) extracted this formula
+    // out of genInv() into calcInvoiceExtras() -- the ONE canonical extras
+    // engine now shared by genInv() (Finalize) AND niPrev() (live preview),
+    // so a live preview total can never drift a cent from the finalized
+    // invoice. The formula itself is unchanged, just relocated -- assert
+    // against its real home and that genInv() actually calls it.
     const genInvSrc = extractByStart(PMS, /function genInv\(\)\s*\{/);
-    assert.match(genInvSrc, /taxAmt=i\.tax\?\+\(subtotal\*\(TAX\.svc\+TAX\.tgst\)\/100\)\.toFixed\(2\):0/);
+    assert.match(genInvSrc, /calcInvoiceExtras\(invItems,\s*fx\)/);
+    const extrasSrc = extractByStart(PMS, /function calcInvoiceExtras\(items, fx\)\s*\{/);
+    assert.match(extrasSrc, /taxAmt=i\.tax\?\+\(subtotal\*\(TAX\.svc\+TAX\.tgst\)\/100\)\.toFixed\(2\):0/);
     const estSrc = extractByStart(PMS, /function chargeTaxInclusiveEstimate\(amt\)\s*\{/);
     assert.match(estSrc, /amt\*\(TAX\.svc\+TAX\.tgst\)\/100/);
   });

@@ -279,8 +279,14 @@ section('Case H — package/room-price/Beds24/Cloudbeds/OTA isolation (DO NOT TO
     });
   });
   test('Fixed Price Catalog prices are never rewritten for an MVR invoice -- extras carry unitUsd (the untouched catalog price) alongside the converted display unit', () => {
-    const src = extractByStart(PMS, /function genInv\(\)\s*\{/);
-    assert.match(src, /unitUsd:i\.unit/);
+    // Create Invoice live-preview task (2026-09-11): this mapping moved from
+    // inline in genInv() into the shared calcInvoiceExtras() helper (now
+    // also used by niPrev()'s live preview) -- genInv() still gets it via
+    // that call, unchanged in substance.
+    const genInvSrc = extractByStart(PMS, /function genInv\(\)\s*\{/);
+    assert.match(genInvSrc, /calcInvoiceExtras\(invItems,\s*fx\)/);
+    const extrasSrc = extractByStart(PMS, /function calcInvoiceExtras\(items, fx\)\s*\{/);
+    assert.match(extrasSrc, /unitUsd:i\.unit/);
   });
 }
 

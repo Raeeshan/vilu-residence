@@ -300,8 +300,13 @@ section('Case F — the double-room-charge / naive-tax bug (audit Case 6/10) is 
     // USD/MVR billing (2026-09-10): pbd(r) -> pbd(rForInvoice), a shallow
     // copy of r with this invoice's own currency/guestTaxStatus/
     // priceTaxMode applied -- still calcTax() under the hood, still gated
-    // on the exact same includeRoom check.
-    assert.match(src, /let html=includeRoom\?pbd\(rForInvoice\):/);
+    // on the exact same includeRoom check. Live-preview calculator task
+    // (2026-09-11) prepends a "Live preview" badge line via `let html='...'`
+    // and appends the room block with `html+=` instead of the original
+    // `let html=` -- the gating invariant itself (pbd(rForInvoice) only
+    // when includeRoom) is unchanged, so match on that, not on which
+    // operator built the first line of html.
+    assert.match(src, /html\+=includeRoom\?pbd\(rForInvoice\):/);
   });
   test('genInv() zeroes base/svc/tgst/green when includeRoom is false -- an invoice that excludes the room genuinely never carries a room charge in its stored totals', () => {
     const src = extractByStart(PMS, /function genInv\(\)\s*\{/);
