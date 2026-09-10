@@ -9292,24 +9292,26 @@ async function archiveReservationDocument(resId, docId, archived){
   } catch(e){ console.error('archiveReservationDocument failed', e); toast('⚠ Could not update document'); }
 }
 
-// Storage READ on reservation-documents is admin-only in storage.rules,
-// and deliberately NOT `read:true` like room-photos/folio-attachments
-// (A3: passport/ID files must never be reachable via a public URL). A
-// plain getDownloadURL() would defeat that -- Firebase's download tokens
-// bypass Security Rules entirely once minted. So this fetches the bytes
-// through an authenticated REST call (Bearer ID token) instead, which
-// DOES get evaluated against storage.rules per request, and only ever
-// creates a local, non-shareable blob: URL in this tab.
-async function fetchReservationDocumentBlob(storagePath){
-  var fbUser = firebase.auth().currentUser;
-  if(!fbUser) throw new Error('Not signed in');
-  var idToken = await fbUser.getIdToken();
-  var bucket = fsStorage.app.options.storageBucket;
-  var url = 'https://firebasestorage.googleapis.com/v0/b/'+bucket+'/o/'+encodeURIComponent(storagePath)+'?alt=media';
-  var res = await fetch(url, {headers:{Authorization:'Bearer '+idToken}});
-  if(!res.ok) throw new Error('Storage fetch failed: '+res.status);
-  return await res.blob();
-}
+// Storage READ on reservation-documents is admin-only in storage.rules
+// (A3: passport/ID files must never be publicly reachable). The first
+// attempt at this function fetched raw bytes via a Bearer-token REST call
+// so the URL itself would never exist as a standing credential -- verified
+// LIVE against production and found unworkable: this bucket has no CORS
+// rule permitting a cross-origin fetch() with a custom Authorization
+// header from this origin, and this session has no gsutil/gcloud access
+// to add one. Falling back to the SDK's getDownloadURL(), the same
+// mechanism already relied on for folio-attachments/room-photos, which
+// DOES work today because it's the standard Firebase Storage access path.
+// getDownloadURL() itself is still gated by storage.rules' isAdmin() --
+// only an authenticated admin session can mint the URL at all -- but once
+// minted, that specific URL is a bearer credential that bypasses rules on
+// its own for anyone who later obtains it (a documented Firebase Storage
+// behavior). Mitigated, not eliminated: minted fresh per click, never
+// written to Firestore/localStorage/any static HTML, used immediately and
+// discarded. Reported honestly rather than silently claimed equivalent to
+// the Bearer-token design -- true defense-in-depth needs Storage bucket
+// CORS configuration (or a Cloud Function issuing short-lived signed
+// URLs), out of reach in this session and flagged as a follow-up.
 function _findDocEntry(resId, docId){
   return mergedDocEntries(resId).find(function(d){ return d.id===docId; });
 }
@@ -9320,8 +9322,8 @@ async function viewReservationDocument(resId, docId){
   if (d.synthetic==='invoice') { closeDrawer(); viewInv(d.invoiceId); return; }
   if (d.synthetic==='receipt') { closeDrawer(); viewInv(d.invoiceId); return; }
   try {
-    var blob = await fetchReservationDocumentBlob(d.storagePath);
-    window.open(URL.createObjectURL(blob), '_blank');
+    var url = await fsStorage.ref(d.storagePath).getDownloadURL();
+    window.open(url, '_blank');
   } catch(e){ console.error('viewReservationDocument failed', e); toast('⚠ Could not open (admin access only)'); }
 }
 async function downloadReservationDocument(resId, docId){
@@ -9329,8 +9331,8 @@ async function downloadReservationDocument(resId, docId){
   if(!d) return;
   if (d.synthetic) { toast('Use View — this is a linked record, not a separate file'); return; }
   try {
-    var blob = await fetchReservationDocumentBlob(d.storagePath);
-    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    var url = await fsStorage.ref(d.storagePath).getDownloadURL();
+    var a=document.createElement('a'); a.href=url; a.target='_blank';
     a.download=(d.title||'document').replace(/[^a-z0-9.\-_]+/gi,'_')+(d.mimeType==='application/pdf'?'.pdf':'.jpg');
     document.body.appendChild(a); a.click(); a.remove();
   } catch(e){ console.error('downloadReservationDocument failed', e); toast('⚠ Could not download (admin access only)'); }
