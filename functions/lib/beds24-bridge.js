@@ -122,6 +122,46 @@ function deriveSellableByRoomTypeCode({ roomsDocs, reservations, blocks, from, t
 }
 
 // ---------------------------------------------------------------------------
+// Same-day cutoff (owner-locked policy, 2026-09-10 pass): a deterministic
+// Indian/Maldives "now", independent of the server's or browser's own
+// default timezone. Always converts an explicit instant (a Date, an ISO
+// string, or the real current time when `now` is omitted) into Maldives
+// wall-clock date+time via Intl with an explicit `timeZone` -- never reads
+// process.env.TZ, Date.prototype.getHours(), or any other locale-dependent
+// API. Maldives is UTC+5 year-round (no DST), so this conversion never
+// drifts across a DST boundary the way a naive fixed +5h offset could if
+// applied to a zone that actually observes DST.
+const MALDIVES_TZ = 'Indian/Maldives';
+const MALDIVES_DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', { timeZone: MALDIVES_TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const MALDIVES_TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', { timeZone: MALDIVES_TZ, hour: '2-digit', minute: '2-digit', hour12: false });
+
+function maldivesNow(now) {
+  const instant = now instanceof Date ? now : new Date(now || Date.now());
+  return { date: MALDIVES_DATE_FORMATTER.format(instant), time: MALDIVES_TIME_FORMATTER.format(instant) };
+}
+
+function timeToMinutes(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
+
+// Reads the existing, already-approved ota_room_types.same_day_cutoff field
+// -- no second hard-coded policy source. Only ever affects TODAY (Maldives-
+// local calendar date): any other date, past or future, is always false,
+// regardless of what time it is right now. At or after the cutoff time,
+// today's arrival eligibility closes; before it, today is unaffected. This
+// answers only "is same-day arrival closed", never availability -- the
+// caller folds this into the existing CTA input, so numAvail is never
+// touched and the existing manual-stop-sell/CTA/CTD precedence in
+// computeOverride is reused unchanged, not reimplemented.
+function isSameDayCutoffActive({ date, config, now }) {
+  if (!config || !config.same_day_cutoff) return false;
+  const { date: todayMaldives, time: nowTime } = maldivesNow(now);
+  if (date !== todayMaldives) return false;
+  return timeToMinutes(nowTime) >= timeToMinutes(config.same_day_cutoff.time);
+}
+
+// ---------------------------------------------------------------------------
 // Step 5: rate source. Vilu PMS's ota_room_types.base_rate is the default;
 // an explicit per-date override (if the caller supplies one) supersedes it.
 // No persisted rate-override-by-date store exists anywhere in this codebase
@@ -142,7 +182,7 @@ function resolveRate({ config, date, dateOverrides }) {
 // -- this function's only job is translating that canonical, channel-
 // agnostic shape into Beds24's specific wire field names via
 // buildBeds24CalendarPayload. It never recomputes pricing or availability.
-function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sellableTotal, dateOverrides }) {
+function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sellableTotal, dateOverrides, now }) {
   const { rate, overridden } = resolveRate({ config, date, dateOverrides });
   const generic = computeOtaTypePayload({
     config,
@@ -165,6 +205,17 @@ function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sella
   // sold-out night as a deliberate, stronger closure. Only config's own
   // explicit manual_stop_sell flag drives override=blackout here.
   const manualStopSell = !!config.manual_stop_sell;
+  // Same-day cutoff (2026-09-10 pass): folded straight into the CTA input --
+  // never a new override branch -- so the existing, already-tested
+  // precedence in computeOverride (manual stop-sell > CTA+CTD combo > CTA >
+  // CTD > none) handles every combination automatically: a cutoff-closed
+  // today that also has CTD already set correctly becomes
+  // noCheckInOrCheckOut, and a cutoff-closed today under manual_stop_sell
+  // correctly stays blackout. numAvail is completely untouched by this --
+  // closing arrival is not the same fact as having no rooms.
+  const cutoffActive = isSameDayCutoffActive({ date, config, now });
+  const cta = !!generic.closedToArrival || cutoffActive;
+  const ctd = !!generic.closedToDeparture;
   const payload = buildBeds24CalendarPayload({
     roomTypeCode,
     from: date,
@@ -173,11 +224,11 @@ function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sella
     availability: generic.numAvail,
     minStay: generic.minStay,
     maxStay: generic.maxStay,
-    cta: generic.closedToArrival,
-    ctd: generic.closedToDeparture,
+    cta,
+    ctd,
     stopSell: manualStopSell,
   });
-  return { roomTypeCode, date, rate: generic.rate, rateOverridden: overridden, numAvail: generic.numAvail, stopSell: manualStopSell, cta: !!generic.closedToArrival, ctd: !!generic.closedToDeparture, payload };
+  return { roomTypeCode, date, rate: generic.rate, rateOverridden: overridden, numAvail: generic.numAvail, stopSell: manualStopSell, cta, ctd, cutoffActive, payload };
 }
 
 // ---------------------------------------------------------------------------
@@ -203,6 +254,7 @@ function generateInventorySeed({ roomsDocs, reservations, blocks, from, days, da
   let ctdDates = 0;
   let rateOverrideDates = 0;
   let missingRateDates = 0;
+  let cutoffAppliedDates = 0;
 
   for (const code of codes) {
     const roomTypeId = CODE_TO_ROOM_TYPE_ID[code];
@@ -221,7 +273,7 @@ function generateInventorySeed({ roomsDocs, reservations, blocks, from, days, da
       }
       let built;
       try {
-        built = buildDatePayload({ roomTypeCode: code, date, config, sellableAvailable: sellDay.available, sellableTotal: sellDay.total, dateOverrides: overridesForCode });
+        built = buildDatePayload({ roomTypeCode: code, date, config, sellableAvailable: sellDay.available, sellableTotal: sellDay.total, dateOverrides: overridesForCode, now });
       } catch (e) {
         invalid.push({ code, date, reason: e.message });
         continue;
@@ -237,6 +289,7 @@ function generateInventorySeed({ roomsDocs, reservations, blocks, from, days, da
       if (built.cta) ctaDates++;
       if (built.ctd) ctdDates++;
       if (built.rateOverridden) rateOverrideDates++;
+      if (built.cutoffActive) cutoffAppliedDates++;
     }
   }
 
@@ -252,6 +305,7 @@ function generateInventorySeed({ roomsDocs, reservations, blocks, from, days, da
     stop_sell_dates: stopSellDates,
     cta_dates: ctaDates,
     ctd_dates: ctdDates,
+    same_day_cutoff_dates: cutoffAppliedDates,
     rate_override_dates: rateOverrideDates,
     missing_rate_dates: missingRateDates,
     invalid_entries: invalid.length,
@@ -328,11 +382,14 @@ module.exports = {
   BEDS24_PROPERTY_ID,
   BEDS24_ROOM_MAP,
   BEDS24_OVERRIDE,
+  MALDIVES_TZ,
   beds24RoomIdentity,
   computeOverride,
   buildBeds24CalendarPayload,
   deriveSellableByRoomTypeCode,
   resolveRate,
+  maldivesNow,
+  isSameDayCutoffActive,
   buildDatePayload,
   generateInventorySeed,
   computeAffectedDates,

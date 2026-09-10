@@ -8,11 +8,14 @@ const F = (p) => require(path.join(__dirname, '..', 'functions', 'lib', p));
 const {
   BEDS24_ROOM_MAP,
   BEDS24_OVERRIDE,
+  MALDIVES_TZ,
   beds24RoomIdentity,
   computeOverride,
   buildBeds24CalendarPayload,
   deriveSellableByRoomTypeCode,
   resolveRate,
+  maldivesNow,
+  isSameDayCutoffActive,
   buildDatePayload,
   generateInventorySeed,
   computeAffectedDates,
@@ -335,6 +338,87 @@ function block(id, room_id, from_date, to_date, kind) {
   await test('buildBeds24PushRecord: a succeeded attempt reports result "pushed"', () => {
     const { record } = buildBeds24PushRecord({ roomTypeCode: 'DOUBLE', dateRange: { from: '2026-11-15', to: '2026-11-16' }, payload: {}, status: 'succeeded', attemptCount: 1 });
     assert.strictEqual(record.result, 'pushed');
+  });
+
+  // --- Same-day cutoff (owner-locked: 12:00 Indian/Maldives) --------------
+  // Maldives is UTC+5 year-round (no DST): Maldives 12:00 on a given
+  // calendar date is always exactly 07:00 UTC that same date.
+  await test('maldivesNow: converts a UTC instant to Maldives wall-clock date+time via explicit timeZone, never the runtime default zone', () => {
+    const n = maldivesNow('2026-11-20T07:00:00.000Z');
+    assert.strictEqual(n.date, '2026-11-20');
+    assert.strictEqual(n.time, '12:00');
+    assert.strictEqual(MALDIVES_TZ, 'Indian/Maldives');
+  });
+  await test('maldivesNow: correctly crosses a UTC day boundary that is NOT the Maldives day boundary (UTC late-evening = Maldives next-day early-morning)', () => {
+    const n = maldivesNow('2026-11-19T20:00:00.000Z');
+    assert.strictEqual(n.date, '2026-11-20', 'UTC 20:00 on the 19th is already 01:00 on the 20th in UTC+5');
+    assert.strictEqual(n.time, '01:00');
+  });
+  await test('isSameDayCutoffActive: 11:59 Maldives -> same-day arrival still allowed', () => {
+    const active = isSameDayCutoffActive({ date: '2026-11-20', config: INITIAL_OTA_ROOM_TYPES.double, now: '2026-11-20T06:59:00.000Z' });
+    assert.strictEqual(active, false);
+  });
+  await test('isSameDayCutoffActive: exactly 12:00 Maldives -> same-day CTA active (at-or-after semantics)', () => {
+    const active = isSameDayCutoffActive({ date: '2026-11-20', config: INITIAL_OTA_ROOM_TYPES.double, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(active, true);
+  });
+  await test('isSameDayCutoffActive: 12:01 Maldives -> same-day CTA still active', () => {
+    const active = isSameDayCutoffActive({ date: '2026-11-20', config: INITIAL_OTA_ROOM_TYPES.double, now: '2026-11-20T07:01:00.000Z' });
+    assert.strictEqual(active, true);
+  });
+  await test('isSameDayCutoffActive: a FUTURE date is never affected by cutoff, no matter the current time', () => {
+    const active = isSameDayCutoffActive({ date: '2026-12-25', config: INITIAL_OTA_ROOM_TYPES.double, now: '2026-11-20T09:00:00.000Z' });
+    assert.strictEqual(active, false);
+  });
+  await test('isSameDayCutoffActive: a PAST date is never affected by cutoff, no matter the current time', () => {
+    const active = isSameDayCutoffActive({ date: '2026-01-01', config: INITIAL_OTA_ROOM_TYPES.double, now: '2026-11-20T09:00:00.000Z' });
+    assert.strictEqual(active, false);
+  });
+  await test('isSameDayCutoffActive: missing same_day_cutoff config never throws, just returns false', () => {
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { same_day_cutoff: null });
+    assert.strictEqual(isSameDayCutoffActive({ date: '2026-11-20', config, now: '2026-11-20T08:00:00.000Z' }), false);
+  });
+
+  await test('buildDatePayload: before cutoff, today has its normal restriction state (no CTA from cutoff)', () => {
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-20', config: INITIAL_OTA_ROOM_TYPES.double, sellableAvailable: 3, sellableTotal: 3, now: '2026-11-20T06:59:00.000Z' });
+    assert.strictEqual(d.cutoffActive, false);
+    assert.strictEqual(d.cta, false);
+    assert.strictEqual(d.payload.calendar[0].override, 'none');
+    assert.strictEqual(d.numAvail, 3, 'availability must never be touched by cutoff logic');
+  });
+  await test('buildDatePayload: at/after cutoff, today becomes closed-to-arrival (override=noCheckIn), numAvail untouched', () => {
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-20', config: INITIAL_OTA_ROOM_TYPES.double, sellableAvailable: 3, sellableTotal: 3, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(d.cutoffActive, true);
+    assert.strictEqual(d.cta, true);
+    assert.strictEqual(d.payload.calendar[0].override, 'noCheckIn');
+    assert.strictEqual(d.numAvail, 3, 'closing arrival is not the same fact as having no rooms');
+  });
+  await test('buildDatePayload: cutoff is a same-day-only effect -- tomorrow (still within the payload run) is completely unaffected', () => {
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-21', config: INITIAL_OTA_ROOM_TYPES.double, sellableAvailable: 3, sellableTotal: 3, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(d.cutoffActive, false);
+    assert.strictEqual(d.payload.calendar[0].override, 'none');
+  });
+  await test('buildDatePayload: cutoff-driven CTA combined with a pre-existing CTD -> noCheckInOrCheckOut (existing precedence reused, not reimplemented)', () => {
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { closed_to_departure: true });
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-20', config, sellableAvailable: 3, sellableTotal: 3, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(d.payload.calendar[0].override, 'noCheckInOrCheckOut');
+  });
+  await test('buildDatePayload: cutoff-driven CTA is a no-op restriction change when CTA was already true for another reason', () => {
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { closed_to_arrival: true });
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-20', config, sellableAvailable: 3, sellableTotal: 3, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(d.payload.calendar[0].override, 'noCheckIn');
+  });
+  await test('buildDatePayload: manual stop-sell outranks the cutoff -- still blackout, not noCheckIn, when both are true', () => {
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { manual_stop_sell: true });
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-20', config, sellableAvailable: 3, sellableTotal: 3, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(d.payload.calendar[0].override, 'blackout');
+    assert.strictEqual(d.stopSell, true);
+  });
+  await test('buildDatePayload: a natural sellout (numAvail 0, no manual flag) combined with cutoff still surfaces noCheckIn, never blackout', () => {
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-20', config: INITIAL_OTA_ROOM_TYPES.double, sellableAvailable: 0, sellableTotal: 3, now: '2026-11-20T07:00:00.000Z' });
+    assert.strictEqual(d.numAvail, 0);
+    assert.strictEqual(d.stopSell, false, 'still not a manual stop-sell -- the a6bc79f fix must not regress');
+    assert.strictEqual(d.payload.calendar[0].override, 'noCheckIn', 'cutoff CTA still applies on top of a natural sellout');
   });
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
