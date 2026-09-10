@@ -1,5 +1,13 @@
 'use strict';
-// Vilu PMS -> Beds24 API v2 transport bridge (pre-connection stage).
+// Deployment copy for the "core" Functions codebase -- kept in sync with
+// functions/lib/beds24-bridge.js (the canonical copy the test harness
+// imports). Required by functions-core/index.js's differential-sync enqueue
+// logic (availabilityOnReservation/availabilityOnBlock/nightlyReconcile) --
+// used ONLY to compute affected room-type+dates and build the ota_pushes
+// job record; this codebase never calls the Beds24 API itself and never
+// references BEDS24_REFRESH_TOKEN (see this file's own top-of-index.js
+// comment on why "core" must stay secret-free).
+// Vilu PMS -> Beds24 API v2 transport bridge.
 //
 // Architecture (owner-locked): Vilu PMS is the sole PMS / source of truth for
 // rooms, availability, rates, taxes, child pricing, and cancellation policy.
@@ -12,10 +20,7 @@
 // field names. See docs/ai/BEDS24_PRE_INTEGRATION_STAGE.md for the primary-
 // source research this is built on.
 //
-// Undeployed: no network call anywhere in this file. Mirrored (source-only,
-// like ingest.js/ota-payment.js) into functions-ota/lib/beds24-bridge.js --
-// never required by anything the "ota" Cloud Functions codebase actually
-// runs yet.
+// No network call anywhere in this file.
 const crypto = require('crypto');
 const { buildRoomTypes, computeSellable, addDays, dateRange } = require('./inventory');
 const { INITIAL_OTA_ROOM_TYPES, CODE_TO_ROOM_TYPE_ID, computeOtaTypePayload } = require('./ota-room-types');

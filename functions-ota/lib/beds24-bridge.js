@@ -1,8 +1,8 @@
 'use strict';
 // Deployment copy for the "ota" Functions codebase -- kept in sync with
 // functions/lib/beds24-bridge.js (the canonical copy the test harness
-// imports).
-// Vilu PMS -> Beds24 API v2 transport bridge (pre-connection stage).
+// imports). Required by functions-ota/index.js's beds24OutboundWorker.
+// Vilu PMS -> Beds24 API v2 transport bridge.
 //
 // Architecture (owner-locked): Vilu PMS is the sole PMS / source of truth for
 // rooms, availability, rates, taxes, child pricing, and cancellation policy.
@@ -15,8 +15,8 @@
 // field names. See docs/ai/BEDS24_PRE_INTEGRATION_STAGE.md for the primary-
 // source research this is built on.
 //
-// Undeployed: no network call anywhere in this file. Not yet required by
-// functions-ota/index.js -- source-only mirror, like ingest.js/ota-payment.js.
+// No network call anywhere in THIS file -- the actual HTTP calls live in
+// ./adapters.js's Beds24Adapter, which this module's pure output feeds.
 const crypto = require('crypto');
 const { buildRoomTypes, computeSellable, addDays, dateRange } = require('./inventory');
 const { INITIAL_OTA_ROOM_TYPES, CODE_TO_ROOM_TYPE_ID, computeOtaTypePayload } = require('./ota-room-types');
@@ -317,6 +317,115 @@ function generateInventorySeed({ roomsDocs, reservations, blocks, from, days, da
 }
 
 // ---------------------------------------------------------------------------
+// Step 7 (continuous differential sync pass): pure range compression for one
+// room's chronologically-ordered, single-date calendar entries (the exact
+// shape buildBeds24CalendarPayload emits: {from, to, price1, numAvail,
+// minStay, maxStay, override}, with from===to per entry). Only merges
+// adjacent dates when EVERY relevant field is identical -- price1, numAvail,
+// minStay, maxStay, override -- never across any value change. This mirrors
+// the ad hoc compression proven against the real 365-day production dry run
+// (1095 raw dates -> 33 ranges across the 3 real room types), now promoted
+// into the committed, tested module instead of a one-off script.
+function compressBeds24CalendarRanges(calendar) {
+  if (!calendar || !calendar.length) return [];
+  const key = (e) => JSON.stringify([e.price1 ?? null, e.numAvail ?? null, e.minStay ?? null, e.maxStay ?? null, e.override ?? null]);
+  const out = [];
+  let cur = null;
+  let curKey = null;
+  for (const entry of calendar) {
+    const k = key(entry);
+    if (cur && curKey === k && entry.from === addDays(cur.to, 1)) {
+      cur.to = entry.to;
+    } else {
+      if (cur) out.push(cur);
+      cur = Object.assign({}, entry);
+      curKey = k;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+// Reverse of compressBeds24CalendarRanges(): expands a (possibly
+// range-compressed) calendar array back into one entry per date, for
+// round-trip testing and for semantically comparing a compressed source
+// payload against Beds24's own independently-compressed readback (Beds24's
+// internal range boundaries do not have to match ours to be correct -- see
+// the real production readback pass, where Beds24 returned 15/11/10 ranges
+// against our 14/10/9, yet every one of the 1095 underlying dates matched
+// exactly once expanded).
+function expandBeds24CalendarRanges(calendar) {
+  const map = {};
+  for (const entry of calendar || []) {
+    for (const date of dateRange(entry.from, addDays(entry.to, 1))) {
+      map[date] = { price1: entry.price1, numAvail: entry.numAvail, minStay: entry.minStay, maxStay: entry.maxStay, override: entry.override };
+    }
+  }
+  return map;
+}
+
+// Groups generateInventorySeed()/buildDifferentialPayload()-style flat
+// entries (one per {roomTypeCode, date}, each carrying its own
+// single-date .payload.roomId/.payload.calendar[0]) into the POST-ready
+// Beds24 request body shape, compressing each room's date run before
+// returning. This is the one place raw per-date entries become the actual
+// wire payload -- never constructed ad hoc at a call site.
+function groupEntriesByRoom(entries) {
+  const byRoom = {};
+  for (const e of entries) {
+    const roomId = e.payload.roomId;
+    (byRoom[roomId] = byRoom[roomId] || []).push(e.payload.calendar[0]);
+  }
+  return Object.keys(byRoom).map((roomId) => ({ roomId: Number(roomId), calendar: compressBeds24CalendarRanges(byRoom[roomId]) }));
+}
+
+// ---------------------------------------------------------------------------
+// Steps 2-6 (continuous differential sync): builds the payload for ONLY the
+// affected room-type+date set (as produced by computeAffectedDates()), never
+// the full horizon. Every date's state is recomputed from current Vilu PMS
+// truth via the exact same deriveSellableByRoomTypeCode/buildDatePayload
+// path generateInventorySeed uses -- absolute state every time, never a
+// previous-value increment/decrement (so a missed or duplicate trigger can
+// never drift Beds24 away from Vilu's real state).
+// `affectedDates` shape: { [roomTypeCode]: ['2026-11-15', ...] } (from
+// computeAffectedDates(), or hand-built for a rate/restriction-change path).
+// `configs` shape: { [roomTypeCode]: otaRoomTypeConfig } -- the caller's own
+// current ota_room_types read, never the bundled INITIAL_OTA_ROOM_TYPES
+// constant, so a live rate/restriction edit is always reflected.
+function buildDifferentialPayload({ roomsDocs, reservations, blocks, affectedDates, configs, dateOverrides, now }) {
+  const codes = Object.keys(affectedDates || {});
+  if (!codes.length) return { entries: [], invalid: [], grouped: [] };
+  let minDate = null, maxDate = null;
+  for (const code of codes) {
+    for (const date of affectedDates[code]) {
+      if (minDate === null || date < minDate) minDate = date;
+      if (maxDate === null || date > maxDate) maxDate = date;
+    }
+  }
+  const { byCodeDate, errors } = deriveSellableByRoomTypeCode({ roomsDocs, reservations, blocks, from: minDate, to: addDays(maxDate, 1) });
+  const entries = [];
+  const invalid = [];
+  for (const code of codes) {
+    const identity = BEDS24_ROOM_MAP[code];
+    if (!identity) { invalid.push({ code, reason: 'unknown Beds24 room type code ' + code }); continue; }
+    const config = configs && configs[code];
+    if (!config) { invalid.push({ code, reason: 'no ota_room_types config supplied for ' + code }); continue; }
+    const overridesForCode = (dateOverrides && dateOverrides[code]) || null;
+    for (const date of affectedDates[code]) {
+      const sellDay = (byCodeDate[code] || {})[date];
+      if (!sellDay) { invalid.push({ code, date, reason: 'missing sellable data' }); continue; }
+      try {
+        const built = buildDatePayload({ roomTypeCode: code, date, config, sellableAvailable: sellDay.available, sellableTotal: sellDay.total, dateOverrides: overridesForCode, now });
+        entries.push(built);
+      } catch (e) {
+        invalid.push({ code, date, reason: e.message });
+      }
+    }
+  }
+  return { entries, invalid, grouped: groupEntriesByRoom(entries), inventory_errors: errors };
+}
+
+// ---------------------------------------------------------------------------
 // Step 9: differential sync design. Given a reservation's room/date footprint
 // before and after a change (create/modify/cancel a reservation, or a block
 // being added/removed), returns the minimal {roomTypeCode, dates[]} set that
@@ -355,15 +464,24 @@ function computeAffectedDates({ roomsDocs, before, after }) {
 function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, now }) {
   const nowIso = now || new Date().toISOString();
   const operationId = 'beds24_' + nowIso.replace(/[^0-9]/g, '') + '_' + crypto.randomBytes(9).toString('base64url');
+  // Audit-safe payload hash (Step 8, continuous-sync pass): lets a caller or
+  // reviewer confirm two pushes carried identical content, or spot a change,
+  // WITHOUT storing the (potentially large) payload verbatim being the only
+  // way to compare -- never a credential, never PII, just a content digest.
+  const payloadHash = crypto.createHash('sha256').update(JSON.stringify(payload || null)).digest('hex');
+  const identity = BEDS24_ROOM_MAP[roomTypeCode];
   return {
     id: operationId,
     record: {
       type: 'beds24_calendar_push',
+      provider: 'beds24',
       operation_id: operationId,
       trigger: trigger || 'manual',
       room_type_code: roomTypeCode,
+      beds24_room_id: identity ? identity.beds24_room_id : null,
       window: range,
       payload,
+      payload_hash: payloadHash,
       status: status || 'pending', // pending | in_flight | succeeded | failed | review_required
       attempt_count: attemptCount || 0,
       last_error: lastError || null,
@@ -393,6 +511,10 @@ module.exports = {
   isSameDayCutoffActive,
   buildDatePayload,
   generateInventorySeed,
+  compressBeds24CalendarRanges,
+  expandBeds24CalendarRanges,
+  groupEntriesByRoom,
+  buildDifferentialPayload,
   computeAffectedDates,
   buildBeds24PushRecord,
 };

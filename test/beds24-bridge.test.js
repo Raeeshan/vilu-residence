@@ -18,6 +18,10 @@ const {
   isSameDayCutoffActive,
   buildDatePayload,
   generateInventorySeed,
+  compressBeds24CalendarRanges,
+  expandBeds24CalendarRanges,
+  groupEntriesByRoom,
+  buildDifferentialPayload,
   computeAffectedDates,
   buildBeds24PushRecord,
 } = F('beds24-bridge');
@@ -419,6 +423,146 @@ function block(id, room_id, from_date, to_date, kind) {
     assert.strictEqual(d.numAvail, 0);
     assert.strictEqual(d.stopSell, false, 'still not a manual stop-sell -- the a6bc79f fix must not regress');
     assert.strictEqual(d.payload.calendar[0].override, 'noCheckIn', 'cutoff CTA still applies on top of a natural sellout');
+  });
+
+  // --- Range compression (Step 7, continuous differential sync) ---------
+  function singleDate(date, fields) { return Object.assign({ from: date, to: date }, fields); }
+  await test('compressBeds24CalendarRanges: an empty calendar compresses to an empty array', () => {
+    assert.deepStrictEqual(compressBeds24CalendarRanges([]), []);
+  });
+  await test('compressBeds24CalendarRanges: a single entry stays a single range', () => {
+    const out = compressBeds24CalendarRanges([singleDate('2026-11-15', { price1: 90, numAvail: 3, minStay: 1, override: 'none' })]);
+    assert.deepStrictEqual(out, [{ from: '2026-11-15', to: '2026-11-15', price1: 90, numAvail: 3, minStay: 1, override: 'none' }]);
+  });
+  await test('compressBeds24CalendarRanges: consecutive dates with identical values merge into one range', () => {
+    const cal = ['2026-11-15', '2026-11-16', '2026-11-17'].map((d) => singleDate(d, { price1: 90, numAvail: 3, minStay: 1, override: 'none' }));
+    const out = compressBeds24CalendarRanges(cal);
+    assert.strictEqual(out.length, 1);
+    assert.strictEqual(out[0].from, '2026-11-15');
+    assert.strictEqual(out[0].to, '2026-11-17');
+  });
+  await test('compressBeds24CalendarRanges: never merges across ANY value change (numAvail)', () => {
+    const cal = [singleDate('2026-11-15', { price1: 90, numAvail: 3, minStay: 1, override: 'none' }), singleDate('2026-11-16', { price1: 90, numAvail: 2, minStay: 1, override: 'none' })];
+    const out = compressBeds24CalendarRanges(cal);
+    assert.strictEqual(out.length, 2);
+  });
+  await test('compressBeds24CalendarRanges: never merges across a rate change even if availability/restrictions match', () => {
+    const cal = [singleDate('2026-11-15', { price1: 90, numAvail: 3, minStay: 1, override: 'none' }), singleDate('2026-11-16', { price1: 120, numAvail: 3, minStay: 1, override: 'none' })];
+    assert.strictEqual(compressBeds24CalendarRanges(cal).length, 2);
+  });
+  await test('compressBeds24CalendarRanges: never merges across an override change', () => {
+    const cal = [singleDate('2026-11-15', { price1: 90, numAvail: 3, minStay: 1, override: 'none' }), singleDate('2026-11-16', { price1: 90, numAvail: 3, minStay: 1, override: 'noCheckIn' })];
+    assert.strictEqual(compressBeds24CalendarRanges(cal).length, 2);
+  });
+  await test('compressBeds24CalendarRanges: never merges across a non-adjacent date gap even with identical values', () => {
+    const cal = [singleDate('2026-11-15', { price1: 90, numAvail: 3, minStay: 1, override: 'none' }), singleDate('2026-11-20', { price1: 90, numAvail: 3, minStay: 1, override: 'none' })];
+    const out = compressBeds24CalendarRanges(cal);
+    assert.strictEqual(out.length, 2, 'a gap in dates must never be silently bridged');
+  });
+  await test('compressBeds24CalendarRanges: matches the real production result -- 365 dates compress to the exact ranges proven against real data', () => {
+    const seed = generateInventorySeed({ roomsDocs: [], reservations: [{ id: 'r1', room_id: 'VR03', check_in: '2026-11-20', check_out: '2026-11-25', status: 'Confirmed' }], blocks: [], from: '2026-11-15', days: 30 });
+    const doubleEntries = seed.entries.filter((e) => e.roomTypeCode === 'DOUBLE').sort((a, b) => a.date.localeCompare(b.date));
+    const cal = doubleEntries.map((e) => e.payload.calendar[0]);
+    const compressed = compressBeds24CalendarRanges(cal);
+    assert.ok(compressed.length < cal.length, 'compression must reduce the entry count for a mostly-uniform 30-day run');
+  });
+
+  await test('compressBeds24CalendarRanges -> expandBeds24CalendarRanges round trip is semantically identical to the raw input', () => {
+    const seed = generateInventorySeed({ roomsDocs: [], reservations: [{ id: 'r1', room_id: 'VR01', check_in: '2026-11-18', check_out: '2026-11-22', status: 'Confirmed' }], blocks: [{ id: 'b1', room_id: 'VR02', from_date: '2026-12-01', to_date: '2026-12-05' }], from: '2026-11-15', days: 60 });
+    const dfEntries = seed.entries.filter((e) => e.roomTypeCode === 'DELUXE_FAMILY').sort((a, b) => a.date.localeCompare(b.date));
+    const raw = dfEntries.map((e) => e.payload.calendar[0]);
+    const compressed = compressBeds24CalendarRanges(raw);
+    const expandedFromCompressed = expandBeds24CalendarRanges(compressed);
+    for (const entry of raw) {
+      const roundTripped = expandedFromCompressed[entry.from];
+      assert.deepStrictEqual(roundTripped, { price1: entry.price1, numAvail: entry.numAvail, minStay: entry.minStay, maxStay: entry.maxStay, override: entry.override }, 'date ' + entry.from + ' must survive compress->expand unchanged');
+    }
+    assert.strictEqual(Object.keys(expandedFromCompressed).length, raw.length, 'no date gained or lost in the round trip');
+  });
+
+  await test('groupEntriesByRoom: groups a flat 3-room-type entry list into one compressed calendar per Beds24 roomId', () => {
+    const seed = generateInventorySeed({ roomsDocs: [], reservations: [], blocks: [], from: '2026-11-15', days: 10 });
+    const grouped = groupEntriesByRoom(seed.entries);
+    assert.strictEqual(grouped.length, 3);
+    const roomIds = grouped.map((g) => g.roomId).sort((a, b) => a - b);
+    assert.deepStrictEqual(roomIds, [727992, 728133, 728134]);
+    for (const g of grouped) assert.ok(g.calendar.length <= 10, 'a uniform 10-day run must compress to at most 10 ranges');
+  });
+
+  // --- Differential (affected-dates-only) payload builder (Steps 2-6) -----
+  await test('buildDifferentialPayload: with no affected dates, returns empty output and touches nothing', () => {
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations: [], blocks: [], affectedDates: {}, configs: {} });
+    assert.deepStrictEqual(out.entries, []);
+    assert.deepStrictEqual(out.grouped, []);
+  });
+  await test('buildDifferentialPayload: a single new reservation only recomputes its own affected room-type+dates, not the whole horizon', () => {
+    const affectedDates = computeAffectedDates({ roomsDocs: [], before: null, after: { room_id: 'VR04', check_in: '2026-11-15', check_out: '2026-11-18' } });
+    const reservations = [{ id: 'r1', room_id: 'VR04', check_in: '2026-11-15', check_out: '2026-11-18', status: 'Confirmed' }];
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations, blocks: [], affectedDates, configs: { DOUBLE: INITIAL_OTA_ROOM_TYPES.double } });
+    assert.strictEqual(out.entries.length, 3, 'exactly the 3 affected nights, nothing more');
+    assert.ok(out.entries.every((e) => e.roomTypeCode === 'DOUBLE'));
+    assert.ok(out.entries.every((e) => e.numAvail === 2), 'VR04 occupied out of 3 -> 2 available');
+  });
+  await test('buildDifferentialPayload: always recomputes ABSOLUTE state, never previous+1/-1 -- reflects every current occupant, not just the triggering one', () => {
+    const affectedDates = { DOUBLE: ['2026-11-16'] };
+    const reservations = [
+      { id: 'r1', room_id: 'VR03', check_in: '2026-11-15', check_out: '2026-11-20', status: 'Confirmed' },
+      { id: 'r2', room_id: 'VR04', check_in: '2026-11-16', check_out: '2026-11-17', status: 'Confirmed' },
+    ];
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations, blocks: [], affectedDates, configs: { DOUBLE: INITIAL_OTA_ROOM_TYPES.double } });
+    assert.strictEqual(out.entries[0].numAvail, 1, 'VR03 and VR04 both occupied on the 16th -> only VR05 free, regardless of which reservation triggered the recompute');
+  });
+  await test('buildDifferentialPayload: a room-change (VR03 -> VR06) recomputes BOTH affected room types independently', () => {
+    const affectedDates = {
+      ...computeAffectedDates({ roomsDocs: [], before: { room_id: 'VR03', check_in: '2026-11-15', check_out: '2026-11-17' }, after: null }),
+      ...computeAffectedDates({ roomsDocs: [], before: null, after: { room_id: 'VR06', check_in: '2026-11-15', check_out: '2026-11-17' } }),
+    };
+    const reservations = [{ id: 'r1', room_id: 'VR06', check_in: '2026-11-15', check_out: '2026-11-17', status: 'Confirmed' }];
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations, blocks: [], affectedDates, configs: { DOUBLE: INITIAL_OTA_ROOM_TYPES.double, DELUXE_FAMILY_OPEN_DECK: INITIAL_OTA_ROOM_TYPES.open_deck } });
+    const doubleEntries = out.entries.filter((e) => e.roomTypeCode === 'DOUBLE');
+    const openDeckEntries = out.entries.filter((e) => e.roomTypeCode === 'DELUXE_FAMILY_OPEN_DECK');
+    assert.strictEqual(doubleEntries.length, 2);
+    assert.ok(doubleEntries.every((e) => e.numAvail === 3), 'VR03 freed up (reservation moved away) -> Double back to full 3');
+    assert.strictEqual(openDeckEntries.length, 2);
+    assert.ok(openDeckEntries.every((e) => e.numAvail === 0), 'VR06 now occupied -> Open Deck 0');
+  });
+  await test('buildDifferentialPayload: a Cancelled reservation triggering recompute correctly shows the released dates as free', () => {
+    const affectedDates = computeAffectedDates({ roomsDocs: [], before: { room_id: 'VR06', check_in: '2026-11-15', check_out: '2026-11-16' }, after: null });
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations: [{ id: 'r1', room_id: 'VR06', check_in: '2026-11-15', check_out: '2026-11-16', status: 'Cancelled' }], blocks: [], affectedDates, configs: { DELUXE_FAMILY_OPEN_DECK: INITIAL_OTA_ROOM_TYPES.open_deck } });
+    assert.strictEqual(out.entries[0].numAvail, 1);
+  });
+  await test('buildDifferentialPayload: a rate/restriction-only change (no occupancy change) recomputes the caller-specified date range with the new config', () => {
+    const affectedDates = { DOUBLE: ['2026-11-15', '2026-11-16'] };
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { base_rate: 150 });
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations: [], blocks: [], affectedDates, configs: { DOUBLE: config } });
+    assert.ok(out.entries.every((e) => e.rate === 150));
+  });
+  await test('buildDifferentialPayload: rejects an unknown room type code without touching any other room type', () => {
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations: [], blocks: [], affectedDates: { NOT_A_TYPE: ['2026-11-15'], DOUBLE: ['2026-11-15'] }, configs: { DOUBLE: INITIAL_OTA_ROOM_TYPES.double } });
+    assert.strictEqual(out.invalid.some((i) => i.code === 'NOT_A_TYPE'), true);
+    assert.strictEqual(out.entries.filter((e) => e.roomTypeCode === 'DOUBLE').length, 1);
+  });
+  await test('buildDifferentialPayload: grouped output is ready to POST directly (roomId + compressed calendar)', () => {
+    const affectedDates = { DOUBLE: ['2026-11-15', '2026-11-16', '2026-11-17'] };
+    const out = buildDifferentialPayload({ roomsDocs: [], reservations: [], blocks: [], affectedDates, configs: { DOUBLE: INITIAL_OTA_ROOM_TYPES.double } });
+    assert.strictEqual(out.grouped.length, 1);
+    assert.strictEqual(out.grouped[0].roomId, 728133);
+    assert.strictEqual(out.grouped[0].calendar.length, 1, 'three identical uniform days compress to one range');
+  });
+
+  // --- buildBeds24PushRecord additive audit fields (Step 8) ---------------
+  await test('buildBeds24PushRecord: carries provider="beds24" and the resolved beds24_room_id, never a credential or PII', () => {
+    const { record } = buildBeds24PushRecord({ roomTypeCode: 'DOUBLE', dateRange: { from: '2026-11-15', to: '2026-11-16' }, payload: { roomId: 728133, calendar: [] } });
+    assert.strictEqual(record.provider, 'beds24');
+    assert.strictEqual(record.beds24_room_id, 728133);
+    assert.strictEqual(JSON.stringify(record).toLowerCase().includes('refresh'), false);
+  });
+  await test('buildBeds24PushRecord: payload_hash is deterministic for identical payloads and differs for different ones', () => {
+    const a = buildBeds24PushRecord({ roomTypeCode: 'DOUBLE', dateRange: { from: '2026-11-15', to: '2026-11-16' }, payload: { roomId: 728133, calendar: [{ from: '2026-11-15', to: '2026-11-15', numAvail: 2 }] } });
+    const b = buildBeds24PushRecord({ roomTypeCode: 'DOUBLE', dateRange: { from: '2026-11-15', to: '2026-11-16' }, payload: { roomId: 728133, calendar: [{ from: '2026-11-15', to: '2026-11-15', numAvail: 2 }] } });
+    const c = buildBeds24PushRecord({ roomTypeCode: 'DOUBLE', dateRange: { from: '2026-11-15', to: '2026-11-16' }, payload: { roomId: 728133, calendar: [{ from: '2026-11-15', to: '2026-11-15', numAvail: 1 }] } });
+    assert.strictEqual(a.record.payload_hash, b.record.payload_hash);
+    assert.notStrictEqual(a.record.payload_hash, c.record.payload_hash);
   });
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');

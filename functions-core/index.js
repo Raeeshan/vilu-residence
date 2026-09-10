@@ -24,7 +24,15 @@ const crypto = require('crypto');
 const { FirestoreStore } = require('./lib/store-firestore');
 const { writeReservationTx } = require('./lib/booking-core');
 const { syncAvailability, FULL_HORIZON_DAYS } = require('./lib/availability');
-const { PHYSICAL_ROOMS, addDays, isActiveStatus, overlaps } = require('./lib/inventory');
+const { PHYSICAL_ROOMS, addDays, dateRange, isActiveStatus, overlaps } = require('./lib/inventory');
+// Beds24 differential-sync enqueue (2026-09-10 continuous-sync pass): this
+// codebase computes WHICH room-type+dates are affected and writes a pending
+// ota_pushes job -- it never calls the Beds24 API itself and never
+// references BEDS24_REFRESH_TOKEN, preserving the secret-free "core" split
+// explained above. The actual API call happens in the separate "ota"
+// codebase's beds24OutboundWorker, triggered by the ota_pushes doc creation.
+const { computeAffectedDates, buildBeds24PushRecord, BEDS24_ROOM_MAP, maldivesNow } = require('./lib/beds24-bridge');
+const { ROOM_TYPE_ID_TO_CODE } = require('./lib/ota-room-types');
 
 initializeApp();
 const db = getFirestore();
@@ -133,20 +141,95 @@ exports.publicBooking = onRequest({ region: 'us-central1', maxInstances: 5 }, as
 });
 
 // ── availability engine triggers (Stage 6) ───────────────────────────────────
-async function runAvailability(trigger) {
-  const r = await syncAvailability({ store, roomsDocs: await roomsDocs(), trigger });
+async function runAvailability(trigger, roomsDocsList) {
+  const rooms = roomsDocsList || await roomsDocs();
+  const r = await syncAvailability({ store, roomsDocs: rooms, trigger });
   if (r.errors && r.errors.length) console.warn('room type mapping errors', r.errors);
   return r;
 }
+
+// Beds24 differential-sync enqueue: writes ONE pending ota_pushes job per
+// affected room-type code (never a second queue collection -- see Step 8 of
+// the continuous-sync pass). A room type this Vilu build doesn't map to
+// Beds24 (BEDS24_ROOM_MAP has no entry) is silently skipped -- there is
+// nothing to sync for it. An empty affectedDates map enqueues nothing at
+// all, matching "do not rewrite the whole calendar after every reservation."
+async function enqueueBeds24Sync(trigger, affectedDates) {
+  const codes = Object.keys(affectedDates || {});
+  for (const code of codes) {
+    if (!BEDS24_ROOM_MAP[code]) continue;
+    const dates = affectedDates[code];
+    if (!dates || !dates.length) continue;
+    const { id, record } = buildBeds24PushRecord({ roomTypeCode: code, dateRange: { affected_dates: dates }, payload: null, status: 'pending', trigger });
+    await db.collection('ota_pushes').doc(id).set(record);
+  }
+}
+
 exports.availabilityOnReservation = onDocumentWritten('reservations/{id}', async (event) => {
   const b = event.data.before.exists ? event.data.before.data() : null, a = event.data.after.exists ? event.data.after.data() : null;
   const sig = (x) => x && [x.room_id, x.check_in, x.check_out, x.status].join('|');
   if (sig(b) === sig(a)) return; // notes/payment edits do not change inventory
-  await runAvailability('reservation:' + event.params.id);
+  const rooms = await roomsDocs();
+  await runAvailability('reservation:' + event.params.id, rooms);
+  const affectedDates = computeAffectedDates({
+    roomsDocs: rooms,
+    before: b && isActiveStatus(b.status) ? { room_id: b.room_id, check_in: b.check_in, check_out: b.check_out } : null,
+    after: a && isActiveStatus(a.status) ? { room_id: a.room_id, check_in: a.check_in, check_out: a.check_out } : null,
+  });
+  await enqueueBeds24Sync('reservation:' + event.params.id, affectedDates);
 });
-exports.availabilityOnBlock = onDocumentWritten('blocks/{id}', async (event) => { await runAvailability('block:' + event.params.id); });
+exports.availabilityOnBlock = onDocumentWritten('blocks/{id}', async (event) => {
+  const rooms = await roomsDocs();
+  await runAvailability('block:' + event.params.id, rooms);
+  const b = event.data.before.exists ? event.data.before.data() : null, a = event.data.after.exists ? event.data.after.data() : null;
+  const affectedDates = computeAffectedDates({
+    roomsDocs: rooms,
+    before: b ? { room_id: b.room_id, check_in: b.from_date, check_out: b.to_date } : null,
+    after: a ? { room_id: a.room_id, check_in: a.from_date, check_out: a.to_date } : null,
+  });
+  await enqueueBeds24Sync('block:' + event.params.id, affectedDates);
+});
+
+// ── Beds24 rate/restriction-change sync (continuous-sync pass) ──────────────
+// Reacts to an actual field change on ota_room_types/{roomTypeId} (base_rate,
+// min_stay, max_stay, closed_to_arrival, closed_to_departure,
+// manual_stop_sell) -- a no-op write (unrelated field, or identical values)
+// enqueues nothing. A base-rate/restriction change has no natural "affected
+// dates" of its own (unlike a reservation/block), so per the owner's own
+// guidance it resyncs that ONE room type's entire future booking window --
+// never any other room type. ota_room_type_overrides is intentionally NOT
+// wired here yet: no per-date override schema is defined or used anywhere
+// in this codebase (confirmed empty in production), so triggering off an
+// undefined shape would mean inventing behavior -- deferred until the
+// override schema itself is decided.
+exports.beds24RateChangeSync = onDocumentWritten('ota_room_types/{roomTypeId}', async (event) => {
+  const a = event.data.after.exists ? event.data.after.data() : null;
+  if (!a) return; // deletion: not this pass's concern
+  const b = event.data.before.exists ? event.data.before.data() : null;
+  const watchedFields = ['base_rate', 'min_stay', 'max_stay', 'closed_to_arrival', 'closed_to_departure', 'manual_stop_sell'];
+  const changed = watchedFields.some((f) => !b || b[f] !== a[f]);
+  if (!changed) return;
+  const code = ROOM_TYPE_ID_TO_CODE[event.params.roomTypeId];
+  if (!code || !BEDS24_ROOM_MAP[code]) return;
+  const today = maldivesNow().date;
+  const windowDays = a.booking_window_days || 365;
+  const dates = dateRange(today, addDays(today, windowDays));
+  await enqueueBeds24Sync('ota_room_types:' + event.params.roomTypeId, { [code]: dates });
+});
 
 // ── nightly reconciliation (Stage 10) ───────────────────────────────────────
+// Full 730-day Vilu-internal availability recompute (unchanged), plus a
+// nightly Beds24 safety-net resync of the full 365-day booking window for
+// every mapped room type -- self-heals any differential push a trigger
+// might have missed (a failed retry, a deploy gap, a missed event), without
+// ever trusting a remembered "last known Beds24 state": every date is
+// recomputed fresh at push time by the worker, then range-compressed, so
+// this stays cheap even though it touches the whole horizon nightly.
 exports.nightlyReconcile = onSchedule({ schedule: '30 3 * * *', timeZone: 'Indian/Maldives' }, async () => {
-  await syncAvailability({ store, roomsDocs: await roomsDocs(), trigger: 'nightly', days: FULL_HORIZON_DAYS });
+  const rooms = await roomsDocs();
+  await syncAvailability({ store, roomsDocs: rooms, trigger: 'nightly', days: FULL_HORIZON_DAYS });
+  const today = maldivesNow().date;
+  const affectedDates = {};
+  for (const code of Object.keys(BEDS24_ROOM_MAP)) affectedDates[code] = dateRange(today, addDays(today, 365));
+  await enqueueBeds24Sync('nightly', affectedDates);
 });
