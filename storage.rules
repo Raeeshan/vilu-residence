@@ -49,6 +49,23 @@ service firebase.storage {
       allow write: if isAdmin() && isValidImageUpload();
     }
 
+    // Optional signed-bill photo attached to one Guest Folio line item
+    // (2026-09-10 folio unification). Reuses the EXACT existing
+    // upload/resize/delete mechanism and the same admin-only gate as
+    // room-photos above -- not a new backend/security architecture, just
+    // one more path under the same pattern. Known limitation, reported per
+    // that task's own instruction rather than silently worked around:
+    // isAdmin() here is hardcoded to a single email (see the comment at the
+    // top of this file on why a broader isStaff() check proved unreliable
+    // from Storage rules), so today ONLY that admin account can attach a
+    // bill photo -- regular staff cannot. Fixing that would mean revisiting
+    // the cross-service role check this file's own history already notes
+    // was abandoned once; out of scope for this pass.
+    match /folio-attachments/{resId}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImageUpload();
+    }
+
     match /{allPaths=**} { allow read, write: if false; }
   }
 }

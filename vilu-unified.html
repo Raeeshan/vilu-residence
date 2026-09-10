@@ -2223,6 +2223,10 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
     <!-- Reservation selector -->
     <div class="fg"><label>Select reservation</label><select id="ni-res" onchange="niPrev()"></select></div>
 
+    <!-- Room charge toggle (Step 6 fix: one room calculation, always via
+         calcTax(), never a second manually-added room line) -->
+    <div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600"><input type="checkbox" id="ni-include-room" checked style="width:16px;height:16px"> Include room charge</label></div>
+
     <!-- Extra items section -->
     <div style="margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -4993,31 +4997,6 @@ function drawRes(){
 // SHOW DETAIL
 function showDet(id){ _showDetLegacy(id); }
 
-function detAddCharge(resId){
-  try{
-    var desc=(document.getElementById('det-fc-desc')?.value||'').trim();
-    var price=+(document.getElementById('det-fc-price')?.value||0);
-    var qty=+(document.getElementById('det-fc-qty')?.value||1);
-    var cat=document.getElementById('det-fc-cat')?.value||'Other';
-    if(!desc){toast('Enter a description');return;}
-    if(price<=0){toast('Enter a price');return;}
-    if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
-    FOLIOS[resId].charges.push({id:Date.now(),date:tS,desc:desc,price:price,qty:qty,cat:cat});
-    saveFolios();
-    toast(cat+': '+desc+' ($'+(price*qty).toFixed(2)+') added ✓');
-    setTimeout(function(){_showDetLegacy(resId);},100);
-  }catch(e){console.error('detAddCharge:',e);}
-}
-function detRemoveCharge(resId,chargeId){
-  try{
-    if(!FOLIOS[resId])return;
-    FOLIOS[resId].charges=FOLIOS[resId].charges.filter(function(ch){return ch.id!==chargeId;});
-    saveFolios();
-    toast('Charge removed');
-    setTimeout(function(){_showDetLegacy(resId);},100);
-  }catch(e){console.error('detRemoveCharge:',e);}
-}
-
 function detSaveRate(id){
   try{
     var r=RES.find(function(x){return x.id===id;});
@@ -5099,96 +5078,45 @@ function _showDetLegacy(id){
     pb.appendChild(rr);
   },50);
 
-  // Folio section — connected to Guest Folios tab (same FOLIOS data)
+  // Folio section — connected to Guest Folios (same FOLIOS/canonical folio
+  // data, same renderFolioChargesById()/buildAddChargeFormHTML() shared
+  // with the Guest Folios page — Step 14: compact summary + itemized list,
+  // never a separate accounting interface).
   setTimeout(function(){
     var pb=document.getElementById('det-body');
     if(!pb) return;
     var oldF=document.getElementById('det-folio-section');
     if(oldF) oldF.remove();
     if(canViewOnly()) return;
-    var folio=FOLIOS[id]||{charges:[]};
+    var sum=folioSummary(id);
     var sec=document.createElement('div');
     sec.id='det-folio-section';
+    sec.setAttribute('data-folio-rid', id);
     sec.style.cssText='margin:10px 14px 0;border-top:1.5px solid #e5e7eb;padding-top:12px';
-    var tot=folio.charges.reduce(function(s,ch){return s+ch.price*(ch.pax||ch.qty||1);},0);
-    var todayCt=folio.charges.filter(function(ch){return ch.date===tS;}).length;
     var hdr=document.createElement('div');
     hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
-    hdr.innerHTML='<span style="font-size:var(--font-size-base);font-weight:700;color:#374151">📋 Guest Folio</span>'
-      +'<div style="display:flex;gap:8px;align-items:center">'
-      +(todayCt>0?'<span style="background:#b8eef8;color:#059669;font-size:var(--font-size-xs);font-weight:700;padding:2px 8px;border-radius:12px">'+todayCt+' today</span>':'')
-      +(tot>0?'<span style="font-size:var(--font-size-sm);font-weight:700;color:#00b4d8">$'+tot.toFixed(2)+'</span>':'')
-      +'<span style="font-size:var(--font-size-xs);color:#9ca3af">auto-saves</span>'
-      +'</div>';
+    hdr.innerHTML='<span style="font-size:var(--font-size-base);font-weight:700;color:#374151">📋 Guest Folio</span><span style="font-size:var(--font-size-xs);color:#9ca3af">auto-saves</span>';
     sec.appendChild(hdr);
-    if(folio.charges.length){
-      var byDate={};
-      folio.charges.forEach(function(ch){if(!byDate[ch.date])byDate[ch.date]=[];byDate[ch.date].push(ch);});
-      Object.keys(byDate).sort().reverse().forEach(function(date){
-        var dLbl=document.createElement('div');
-        dLbl.style.cssText='font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px';
-        dLbl.textContent=new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-        sec.appendChild(dLbl);
-        byDate[date].forEach(function(ch){
-          var pax=ch.pax||ch.qty||1;
-          var row=document.createElement('div');
-          row.style.cssText='display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f9fafb;border-radius:6px;margin-bottom:3px;font-size:var(--font-size-sm)';
-          var icons={Activity:'🏄',Food:'🍽️','Food & Beverage':'🍹',Transport:'🚤',Spa:'💆',Beverage:'🍹',Service:'🛎️',Other:'📌'};
-          var sp=document.createElement('span');sp.style.flex='1';
-          sp.textContent=(icons[ch.cat]||'📌')+' '+ch.desc+(pax>1?' ('+pax+' pax)':'');
-          var psp=document.createElement('span');psp.style.cssText='font-weight:700;color:#00b4d8;min-width:55px;text-align:right';
-          psp.textContent='$'+(ch.price*pax).toFixed(2);
-          var del=document.createElement('button');del.textContent='×';
-          del.style.cssText='background:none;border:none;color:#dc2626;cursor:pointer;font-size:var(--font-size-lg);padding:0 4px;line-height:1';
-          del.addEventListener('click',(function(cid){return function(){
-            FOLIOS[id].charges=FOLIOS[id].charges.filter(function(x){return x.id!==cid;});
-            saveFolios();toast('Removed');_showDetLegacy(id);
-          };})(ch.id));
-          row.appendChild(sp);row.appendChild(psp);row.appendChild(del);
-          sec.appendChild(row);
-        });
-      });
-      var totRow=document.createElement('div');
-      totRow.style.cssText='display:flex;justify-content:space-between;font-size:var(--font-size-sm);font-weight:700;padding:6px 8px;background:#e0f7fd;border-radius:6px;color:#00b4d8;margin-top:4px';
-      totRow.innerHTML='<span>Extras total</span><span>$'+tot.toFixed(2)+'</span>';
-      sec.appendChild(totRow);
-    }
+    var sumEl=document.createElement('div');
+    sumEl.id='det-folio-summary';
+    sumEl.innerHTML=renderFolioSummaryHTML(sum);
+    sec.appendChild(sumEl);
+    var chargesList=document.createElement('div');
+    chargesList.id='fcharges-'+id;
+    chargesList.style.cssText='margin-top:8px';
+    sec.appendChild(chargesList);
     var form=document.createElement('div');
     form.style.cssText='background:#f8fafc;border:1.5px dashed #00b4d8;border-radius:8px;padding:12px;margin-top:10px';
-    var catOpts=(INV_CATS&&INV_CATS.length?INV_CATS.map(function(cat){return '<option>'+cat.name+'</option>';}).join(''):'')
-      +'<option>Activity</option><option>Food & Beverage</option><option>Transport</option><option>Spa</option><option>Other</option>';
-    form.innerHTML='<div style="font-size:var(--font-size-xs);font-weight:700;color:#00b4d8;margin-bottom:8px">+ Add charge to folio</div>'
-      +'<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;margin-bottom:6px">'
-      +'<input id="fc-desc-'+id+'" type="text" placeholder="e.g. Snorkeling, Breakfast..." style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:var(--font-size-sm);font-family:inherit">'
-      +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">$/PAX</span><input id="fc-price-'+id+'" type="number" min="0" step="0.5" placeholder="$" style="width:80px;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:var(--font-size-sm);text-align:right"></div>'
-      +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input id="fc-pax-'+id+'" type="number" min="1" value="1" style="width:50px;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:var(--font-size-sm);text-align:center"></div>'
-      +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr auto;gap:6px">'
-      +'<select id="fc-cat-'+id+'" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:var(--font-size-sm);font-family:inherit">'+catOpts+'</select>'
-      +'<button id="det-fc-add-btn" style="background:#00b4d8;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Add ✓</button></div>';
+    form.innerHTML=buildAddChargeFormHTML(id);
     sec.appendChild(form);
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:8px;margin-top:10px';
+    btnRow.innerHTML='<button data-rid="'+id+'" onclick="openCreateInvoice(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit"><i class="ti ti-file-invoice"></i> Create invoice</button>'
+      +'<button data-rid="'+id+'" onclick="printFolio(this.dataset.rid)" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit"><i class="ti ti-printer"></i></button>'
+      +'<button data-rid="'+id+'" onclick="openFullFolio(this.dataset.rid)" style="background:#fff;color:#00b4d8;border:1.5px solid #00b4d8;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit;white-space:nowrap">Open full folio</button>';
+    sec.appendChild(btnRow);
     pb.appendChild(sec);
-    var ab=document.getElementById('det-fc-add-btn');
-    if(ab) ab.addEventListener('click',function(){
-      addFolioCharge(id);
-      setTimeout(function(){_showDetLegacy(id);},200);
-    });
-    // Generate invoice button
-    var invBtn=document.createElement('button');
-    invBtn.textContent='🧾 Generate invoice from folio';
-    // Add partial invoice button next to it
-    var partBtn=document.createElement('button');
-    partBtn.className='btn sm';
-    partBtn.style.cssText='flex:1;background:#7c3aed;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit';
-    partBtn.innerHTML='<i class="ti ti-receipt-2"></i> Custom invoice';
-    partBtn.onclick=function(){ openPartialInvoice(id); };
-    sec.appendChild(partBtn);
-    invBtn.style.cssText='width:100%;margin-top:10px;background:#2563eb;color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit';
-    invBtn.addEventListener('click',function(){
-      document.getElementById('m-det').classList.remove('on');
-      setTimeout(function(){folioToInvoiceById(id);},100);
-    });
-    sec.appendChild(invBtn);
+    renderFolioChargesById(id);
   },120);
   document.getElementById('m-det').classList.add('on');
 }
@@ -6001,37 +5929,48 @@ async function drawRecLog(){
 function drawInv(){
   const tb=document.getElementById('inv-tb');
   if(!INV.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:#9ca3af;font-size:var(--font-size-sm)">No invoices yet. Click "+ New invoice" to generate one.</td></tr>';return;}
-  tb.innerHTML=INV.map(v=>`<tr>
+  tb.innerHTML=INV.map(v=>`<tr style="${v.status==='void'?'opacity:.5':''}">
     <td style="font-weight:700">#${v.num}</td><td>${esc(v.guest)}</td>
     <td style="font-size:var(--font-size-xs)">${phBx(v.prop)}</td>
     <td style="font-size:var(--font-size-xs)">${fd(v.ci)}–${fd(v.co)}</td>
     <td>$${v.base.toFixed(2)}</td>
     <td style="font-weight:700">$${v.total.toFixed(2)}</td>
-    <td><span class="bx ${v.pay==='Fully paid'?'ok':v.pay==='Partially paid'?'ib2':'wn'}">${v.pay}</span></td>
+    <td>${v.status==='void'?'<span class="bx er">Void</span>':`<span class="bx ${v.pay==='Fully paid'?'ok':v.pay==='Partially paid'?'ib2':'wn'}">${v.pay}</span>`}</td>
     <td style="display:flex;gap:2px">
       <button class="ab" onclick="viewInv('${v.id}')"><i class="ti ti-eye"></i></button>
       <button class="ab" onclick="viewInv('${v.id}');setTimeout(()=>window.print(),350)"><i class="ti ti-printer"></i></button>
     </td></tr>`).join('');
 }
-function openIM(resId){
+// opts (optional) — {items:[...], includeRoom:bool} — when supplied by
+// openCreateInvoice()'s scope-picker, invItems is set to EXACTLY that
+// (never re-auto-loaded), and each item already carries the chargeId it
+// came from so genInv() can mark that exact folio charge invoiced. With no
+// opts (a bare openIM(resId) call, e.g. from the Reservations drawer's
+// Invoice tab), the default is every UNINVOICED folio charge, matching
+// "Create Invoice → All unpaid" -- an already-invoiced charge is never
+// silently re-added (Step 10/21).
+function openIM(resId, opts){
   document.getElementById('ni-res').innerHTML=RES.filter(r=>r.st!=='Cancelled').map(r=>`<option value="${r.id}"${r.id===resId?' selected':''}>${r.id}: ${esc(r.fn)} ${esc(r.ln)} — ${rNm(r.rn)} (${fd(r.ci)}–${fd(r.co)})</option>`).join('');
   document.getElementById('ni-notes').value='';
   if(document.getElementById('ni-disc'))document.getElementById('ni-disc').value='';
-  // Load folio charges (the reservation's own room/tax/3rd-guest charge is
-  // rendered separately by niPrev()'s pbd(r) call, not added here)
-  var folio = resId ? (FOLIOS[resId]||{charges:[]}) : {charges:[]};
+  var includeRoom = opts && typeof opts.includeRoom==='boolean' ? opts.includeRoom : true;
+  var roomToggle=document.getElementById('ni-include-room');
+  if(roomToggle) roomToggle.checked=includeRoom;
   invItems = [];
-  // Add folio charges with correct pax calculation
-  if(folio.charges.length){
-    folio.charges.forEach(function(ch){
+  if(opts && opts.items){
+    invItems = opts.items;
+  } else {
+    var folio = resId ? (FOLIOS[resId]||{charges:[]}) : {charges:[]};
+    folio.charges.filter(function(ch){return !ch.invoiceId;}).forEach(function(ch){
       var pax = ch.pax||ch.qty||1;
       invItems.push({
         id:Date.now()+Math.random(),
+        chargeId:ch.id,
         desc:ch.desc+(pax>1?' ('+pax+' pax)':''),
         qty:1,
         unit:+(ch.price*pax).toFixed(2),
         tax:ch.tax!==false,
-        cat:ch.cat||'Other'
+        cat:ch.cat||'Other Services'
       });
     });
   }
@@ -6044,19 +5983,26 @@ function openIM(resId){
   renderCatButtons();
   niPrev();
   document.getElementById('m-inv').classList.add('on');
-  var loaded = folio.charges.length;
-  if(loaded) toast('✓ '+loaded+' item'+(loaded>1?'s':'')+' loaded — folio charges');
+  if(invItems.length) toast('✓ '+invItems.length+' item'+(invItems.length>1?'s':'')+' loaded');
 }
+// Room charge is rendered via pbd(r)/calcTax(r) ONLY when includeRoom is
+// checked -- never as a second, independently-computed invItems line (the
+// old "Custom Invoice" bug: checking its room box could show/charge the
+// room twice, once via pbd(r) here and once as a manually-added item, and
+// skipped Green Tax/3rd-guest supplement entirely). One room calculation,
+// one place, always calcTax() (Step 4/6 fix, 2026-09-10 folio unification).
 function niPrev(){
   const id=document.getElementById('ni-res').value,r=RES.find(x=>x.id===id);
   const disc=+(document.getElementById('ni-disc')?.value||0);
+  const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   if(!r){document.getElementById('ni-prev').innerHTML='';return;}
   const x=calcTax(r);
   const eSubtotal=invItems.reduce((s,i)=>s+(i.qty*i.unit),0);
   const eTax=invItems.filter(i=>i.tax).reduce((s,i)=>s+(i.qty*i.unit*(TAX.svc+TAX.tgst)/100),0);
   const eT=eSubtotal+eTax;
-  const total=+(x.total+eT-disc).toFixed(2);
-  let html=pbd(r);
+  const roomTotal=includeRoom?x.total:0;
+  const total=+(roomTotal+eT-disc).toFixed(2);
+  let html=includeRoom?pbd(r):'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:4px 0">Room charge not included in this invoice</div>';
   if(invItems.length){
     html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
       <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">EXTRA CHARGES</div>
@@ -6068,7 +6014,7 @@ function niPrev(){
   html+=`<div style="display:flex;justify-content:space-between;font-weight:700;border-top:2px solid #111827;padding-top:7px;margin-top:6px;font-size:var(--font-size-md);color:#00b4d8"><span>Grand total</span><span>$${total.toFixed(2)}</span></div>`;
   document.getElementById('ni-prev').innerHTML=html;
 }
-document.addEventListener('change',e=>{if(e.target.id==='ni-res')niPrev();});
+document.addEventListener('change',e=>{if(e.target.id==='ni-res'||e.target.id==='ni-include-room')niPrev();});
 
 // ── INVOICE ITEM MANAGEMENT ──
 
@@ -6135,26 +6081,45 @@ function genInv(){
   const rid=document.getElementById('ni-res').value,r=RES.find(x=>x.id===rid);
   if(!r){toast('Select a reservation');return;}
   const disc=+(document.getElementById('ni-disc')?.value||0);
+  const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   const extras=invItems.filter(i=>i.desc&&i.unit>=0).map(i=>{
     const subtotal=+(i.qty*i.unit).toFixed(2);
     const taxAmt=i.tax?+(subtotal*(TAX.svc+TAX.tgst)/100).toFixed(2):0;
-    return{desc:i.desc,qty:i.qty,unit:i.unit,subtotal,tax:i.tax,taxAmt,cat:i.cat,total:+(subtotal+taxAmt).toFixed(2)};
+    return{desc:i.desc,qty:i.qty,unit:i.unit,subtotal,tax:i.tax,taxAmt,cat:i.cat,total:+(subtotal+taxAmt).toFixed(2),chargeId:i.chargeId||null};
   });
   const x=calcTax(r);
   const eSubtotal=+extras.reduce((s,e)=>s+e.subtotal,0).toFixed(2);
   const eTax=+extras.reduce((s,e)=>s+e.taxAmt,0).toFixed(2);
   const eT=+(eSubtotal+eTax).toFixed(2);
-  const total=+(x.total+eT-disc).toFixed(2);
+  const roomTotal=includeRoom?x.total:0;
+  const total=+(roomTotal+eT-disc).toFixed(2);
   IC++;
-  const v={id:'INV-'+IC,num:IC,guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:x.base,svc:x.svc,tgst:x.tgst,green:x.green,gp:x.gp,bed:x.bed,extras,eT,total,pay:document.getElementById('ni-pay').value,notes:document.getElementById('ni-notes').value,src:r.src,ref:r.ref,issued:tS,tax:{...TAX}};
-  INV.unshift(v);document.getElementById('m-inv').classList.remove('on');
+  const initialPay=document.getElementById('ni-pay').value;
+  const paidAmount=initialPay==='Fully paid'?total:0;
+  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eT,total,pay:initialPay,paidAmount,payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
+  INV.unshift(v);
+  syncInvoiceToFirestore(v);
+  // Mark the source folio charges as invoiced (Step 10/21: never
+  // double-invoiced -- an item that funded this invoice's extras[] is
+  // struck off the "uninvoiced" pool openCreateInvoice()/openIM() draw from).
+  var folio=FOLIOS[r.id];
+  if(folio){
+    var touched=false;
+    extras.forEach(function(e){
+      if(!e.chargeId) return;
+      var ch=folio.charges.find(function(c){return c.id===e.chargeId;});
+      if(ch){ ch.invoiceId=v.id; touched=true; }
+    });
+    if(touched){ saveFolios(); syncFolioToFirestore(r.id); renderFolioChargesById(r.id); updateFolioHeaderTotal(r.id); }
+  }
+  document.getElementById('m-inv').classList.remove('on');
   aLog('ok','Invoice #'+IC+' — '+esc(r.fn)+' '+esc(r.ln)+' $'+total+' ('+v.pay+')');
   toast('Invoice #'+IC+' generated');drawInv();drawDash();setTimeout(()=>viewInv(v.id),150);
 }
 function viewInv(id){
   const v=INV.find(x=>x.id===id);if(!v)return;
-  const sc=v.pay==='Fully paid'?'pd':v.pay==='Partially paid'?'pp':'up';
-  document.getElementById('det-ttl').textContent='Invoice #'+v.num;
+  const sc=v.status==='void'?'up':v.pay==='Fully paid'?'pd':v.pay==='Partially paid'?'pp':'up';
+  document.getElementById('det-ttl').textContent='Invoice #'+v.num+(v.status==='void'?' (VOID)':'');
   document.getElementById('det-body').innerHTML=`<div class="ivp">
     <div class="ivh"><div style="display:flex;align-items:center;gap:14px"><img class="logo-img" src="data:image/jpeg;base64,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" alt="Vilu Residence" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;border-radius:50%"><div><h2 style="color:#00b4d8;font-size:var(--font-size-2xl)">${PROP.nm}</h2><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:1px">@maamigili</p><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:4px;line-height:1.8">${PROP.addr}<br>Tel: ${PROP.ph} · ${PROP.em}<br>GST Reg: ${PROP.gst}</p></div></div>
     <div class="ivm"><div class="ivn">Invoice #${v.num}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${fdf(v.issued)}</div><div class="ivs ${sc}">${v.pay}</div></div></div>
@@ -6168,7 +6133,7 @@ function viewInv(id){
     </div>
     <table class="ivt"><thead><tr><th>Description</th><th>Dates</th><th style="text-align:right">Nights</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
-      <tr><td>${v.room} — accommodation</td><td>${fd(v.ci)} → ${fd(v.co)}</td><td class="r">${v.n}</td><td class="r">$${v.rate.toFixed(2)}</td><td class="r">$${v.base.toFixed(2)}</td></tr>
+      ${v.includeRoom!==false?`<tr><td>${v.room} — accommodation</td><td>${fd(v.ci)} → ${fd(v.co)}</td><td class="r">${v.n}</td><td class="r">$${v.rate.toFixed(2)}</td><td class="r">$${v.base.toFixed(2)}</td></tr>`:''}
       ${v.extras.map(e=>`
       <tr>
         <td>${e.desc}<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">${e.cat||''}</span></td>
@@ -6192,12 +6157,119 @@ function viewInv(id){
       <tr><td style="color:#6b7280">Green Tax ($${v.tax.green}×${v.gp} persons×${v.n} nights${v.inf>0?' — '+v.inf+' infant exempt':''})</td><td style="text-align:right">$${v.green.toFixed(2)}</td></tr>
       ${v.tax.bed>0?`<tr><td style="color:#6b7280">Bed tax</td><td style="text-align:right">$${v.bed.toFixed(2)}</td></tr>`:''}
       <tr class="gd"><td>Grand total (USD)</td><td style="text-align:right">$${v.total.toFixed(2)}</td></tr>
+      ${(v.paidAmount||0)>0?`<tr><td style="color:#059669">Paid</td><td style="text-align:right;color:#059669">-$${(v.paidAmount||0).toFixed(2)}</td></tr>
+      <tr class="gd"><td>Balance due</td><td style="text-align:right">$${Math.max(0,v.total-(v.paidAmount||0)).toFixed(2)}</td></tr>`:''}
     </table></div>
+    ${(v.payments&&v.payments.length)?`<div style="padding:8px 0;font-size:var(--font-size-xs);color:#6b7280">${v.payments.map(p=>'Payment '+fdf(p.date)+': $'+p.amount.toFixed(2)).join('<br>')}</div>`:''}
     ${v.notes?`<div style="padding:10px 14px;background:#f9fafb;border-radius:8px;font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">${esc(v.notes)}</div>`:''}
     <div class="ivft">Thank you for choosing ${PROP.nm}${PROP.bk?'<br>'+PROP.bk:''}</div>
   </div>`;
   document.getElementById('det-act').innerHTML='';
+  if(v.status!=='void'&&!canViewOnly()){
+    const da=document.getElementById('det-act');
+    const mkBtn=(txt,cls,fn)=>{const b=document.createElement('button');b.className='btn sm '+cls;b.innerHTML=txt;b.onclick=fn;da.appendChild(b);};
+    if((v.paidAmount||0)<v.total-0.01) mkBtn('<i class="ti ti-cash"></i> Record payment','p',()=>recordInvoicePayment(v.id));
+    mkBtn('<i class="ti ti-printer"></i> Print receipt','',()=>printReceipt(v.id));
+    mkBtn('<i class="ti ti-trash"></i> Void invoice','',()=>voidInvoice(v.id));
+  }
   document.getElementById('m-det').classList.add('on');
+}
+
+// Payment recording (Steps 12-13): a payment is always recorded against
+// ONE invoice, never the whole reservation -- paying the Activities
+// invoice never marks Room "paid" just because it happened to share a
+// guest. Balance is derived (total - paidAmount), never a second
+// hand-edited field. Once paidAmount reaches the invoice total, the exact
+// folio charges THIS invoice covers (via each extra's chargeId) are marked
+// .paid -- never every charge on the reservation.
+function recordInvoicePayment(invId){
+  const v=INV.find(x=>x.id===invId);
+  if(!v||v.status==='void'){toast('Invoice not found');return;}
+  const remaining=+(v.total-(v.paidAmount||0)).toFixed(2);
+  if(remaining<=0){toast('Already fully paid');return;}
+  const amtStr=prompt('Record payment amount (remaining $'+remaining.toFixed(2)+'):',remaining.toFixed(2));
+  if(!amtStr)return;
+  const amt=+amtStr;
+  if(!amt||amt<=0){toast('Invalid amount');return;}
+  if(amt>remaining+0.01){toast('Amount exceeds balance ($'+remaining.toFixed(2)+')');return;}
+  v.paidAmount=+((v.paidAmount||0)+amt).toFixed(2);
+  v.payments=v.payments||[];
+  v.payments.push({amount:amt,date:tS,note:'Recorded by '+(currentUser?currentUser.name:'Staff')});
+  v.pay=v.paidAmount>=v.total-0.01?'Fully paid':'Partially paid';
+  syncInvoiceToFirestore(v);
+  if(v.pay==='Fully paid'&&v.resId){
+    const folio=FOLIOS[v.resId];
+    if(folio){
+      (v.extras||[]).forEach(function(e){
+        if(!e.chargeId)return;
+        const ch=folio.charges.find(function(c){return c.id===e.chargeId;});
+        if(ch)ch.paid=true;
+      });
+      saveFolios();syncFolioToFirestore(v.resId);
+      renderFolioChargesById(v.resId);
+    }
+  }
+  if(v.resId)updateFolioHeaderTotal(v.resId);
+  toast('✓ $'+amt.toFixed(2)+' payment recorded');
+  drawInv();
+  viewInv(invId);
+}
+
+// Void (Steps 8/21): reverses an invoice without deleting its audit
+// record -- stays visible in Invoices marked void, and its constituent
+// folio charges become invoiceable again (the removeFolioCharge() guard
+// that blocks deleting an already-invoiced charge points staff here first).
+function voidInvoice(invId){
+  const v=INV.find(x=>x.id===invId);
+  if(!v){toast('Invoice not found');return;}
+  if(v.status==='void'){toast('Already void');return;}
+  showConfirm({
+    title:'Void invoice '+v.id+'?',
+    msg:esc(v.guest)+' · $'+v.total.toFixed(2),
+    warn:'The invoice stays on record as void. Its charges become available to invoice again.',
+    icon:'🗑️',
+    btnLabel:'Yes, void this invoice',
+    btnColor:'#dc2626',
+    onYes:function(){
+      v.status='void';
+      syncInvoiceToFirestore(v);
+      if(v.resId){
+        const folio=FOLIOS[v.resId];
+        if(folio){
+          (v.extras||[]).forEach(function(e){
+            if(!e.chargeId)return;
+            const ch=folio.charges.find(function(c){return c.id===e.chargeId;});
+            if(ch){delete ch.invoiceId;delete ch.paid;}
+          });
+          saveFolios();syncFolioToFirestore(v.resId);
+          renderFolioChargesById(v.resId);
+        }
+        updateFolioHeaderTotal(v.resId);
+      }
+      toast('Invoice '+v.id+' voided');
+      drawInv();
+      document.getElementById('m-det')?.classList.remove('on');
+    }
+  });
+}
+
+// Print Receipt (Step 17): payment proof only -- never confused with the
+// full Invoice print (all invoice line items) or Print Folio (every
+// charge/payment across the whole reservation).
+function printReceipt(invId){
+  const v=INV.find(x=>x.id===invId);
+  if(!v||!v.payments||!v.payments.length){toast('No payments recorded yet');return;}
+  const w=window.open('','_blank');
+  if(!w){toast('Allow pop-ups to print');return;}
+  const rows=v.payments.map(p=>'<tr><td>'+fdf(p.date)+'</td><td style="text-align:right">$'+p.amount.toFixed(2)+'</td></tr>').join('');
+  w.document.write('<html><head><title>Receipt — Invoice '+esc(v.id)+'</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111827}table{width:100%;border-collapse:collapse;margin-top:10px}td,th{padding:6px 8px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:left}</style></head><body>'
+    +'<h2>Vilu Residence — Payment Receipt</h2>'
+    +'<p>Invoice '+esc(v.id)+' · '+esc(v.guest)+'</p>'
+    +'<table><tr><th>Date</th><th style="text-align:right">Amount</th></tr>'+rows+'</table>'
+    +'<p style="margin-top:14px;font-weight:700">Total paid: $'+(v.paidAmount||0).toFixed(2)+' of $'+v.total.toFixed(2)+'</p>'
+    +'</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},300);
 }
 
 
@@ -7783,12 +7855,20 @@ function rdRenderTab(n, r){
       };footer.appendChild(nb);
     }
   } else if(n===2){
-    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div></div>';
+    // Same canonical folio as Calendar/Guest Folios (folioSummary()) --
+    // this tab previously showed only the room price breakdown with no
+    // folio items visible at all, a real content gap vs. the other two
+    // surfaces (2026-09-10 folio unification pass).
+    var sum=folioSummary(r.id);
+    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div><div style="text-align:left;margin-bottom:10px">'+renderFolioSummaryHTML(sum)+'</div></div>';
     footer.innerHTML='';
     if(!canViewOnly()){
       var ib=document.createElement('button');ib.className='btn p';ib.style.flex='1';
-      ib.innerHTML='<i class="ti ti-file-invoice"></i> Generate invoice';
-      ib.onclick=function(){closeDrawer();openIM(r.id);};footer.appendChild(ib);
+      ib.innerHTML='<i class="ti ti-file-invoice"></i> Create invoice';
+      ib.onclick=function(){closeDrawer();openCreateInvoice(r.id);};footer.appendChild(ib);
+      var fb=document.createElement('button');fb.className='btn';
+      fb.innerHTML='Open full folio';
+      fb.onclick=function(){closeDrawer();openFullFolio(r.id);};footer.appendChild(fb);
     }
   }
 }
@@ -7931,6 +8011,60 @@ function saveFolios(){
 var FOLIOS=loadFolios();
 var activeFolioResId=null;
 
+// ── Folio Firestore backing (2026-09-10 unification pass) ──────────────
+// FOLIOS previously lived in localStorage ONLY -- genuinely the same data
+// behind Calendar's reservation-detail folio and the Guest Folios page
+// (both already read/wrote this exact object), but invisible to any other
+// staff device/browser, which is what "one canonical folio" really
+// requires. localStorage stays as the instant-load/offline cache;
+// Firestore folios/{resId} is now the durable, cross-device source of
+// truth, one doc per reservation (never one giant blob), matching the
+// room_prices/{roomId} pattern already established elsewhere in this file.
+async function syncFolioToFirestore(resId){
+  try{
+    await fsDb.collection('folios').doc(resId).set({ charges: (FOLIOS[resId]||{charges:[]}).charges||[] });
+  }catch(e){ console.error('syncFolioToFirestore failed for', resId, e); }
+}
+async function loadFoliosFromFirestore(){
+  try{
+    var snap = await fsDb.collection('folios').get();
+    var remoteIds = {};
+    snap.forEach(function(d){
+      remoteIds[d.id] = true;
+      FOLIOS[d.id] = { charges: (d.data()||{}).charges || [] };
+    });
+    // One-time migration safety net: a folio that only ever existed in
+    // THIS browser's localStorage (created before Firestore backing
+    // existed) is pushed up now rather than silently shadowed the next
+    // time a different device reads an empty/missing Firestore doc for it.
+    var toMigrate = Object.keys(FOLIOS).filter(function(id){ return !remoteIds[id] && FOLIOS[id] && FOLIOS[id].charges && FOLIOS[id].charges.length; });
+    if(toMigrate.length) await Promise.all(toMigrate.map(syncFolioToFirestore));
+    localStorage.setItem('vilu_folios', JSON.stringify(FOLIOS));
+  }catch(e){ console.error('loadFoliosFromFirestore failed', e); }
+}
+
+// ── Invoice Firestore backing (2026-09-10 unification pass) ────────────
+// INV/IC were previously PURE in-memory (no localStorage, no Firestore) --
+// every generated invoice vanished on refresh, and IC (the invoice-number
+// counter) reset to 1000 every session, risking duplicate invoice numbers.
+// invoices/{invId} is now durable and shared, one doc per invoice.
+async function syncInvoiceToFirestore(v){
+  try{ await fsDb.collection('invoices').doc(v.id).set(v); }
+  catch(e){ console.error('syncInvoiceToFirestore failed for', v.id, e); }
+}
+async function loadInvoicesFromFirestore(){
+  try{
+    var snap = await fsDb.collection('invoices').get();
+    var loaded = [];
+    snap.forEach(function(d){ loaded.push(d.data()); });
+    if(loaded.length){
+      loaded.sort(function(a,b){ return (b.num||0)-(a.num||0); });
+      INV = loaded;
+      IC = loaded.reduce(function(m,v){ return Math.max(m, v.num||0); }, IC);
+    }
+  }catch(e){ console.error('loadInvoicesFromFirestore failed', e); }
+}
+
 function drawFolios(){
   var el=document.getElementById('folio-list');
   if(!el)return;
@@ -7999,32 +8133,29 @@ function drawFolios(){
     body.id='fbody-'+r.id;
     body.style.cssText='display:none;border-top:1px solid #e5e7eb';
 
-    // Add charge form
+    // Summary breakdown (Step 7/16 — full detailed view) — same
+    // folioSummary()/renderFolioSummaryHTML() Calendar's compact folio uses.
+    var summaryWrap=document.createElement('div');
+    summaryWrap.id='folio-summary-'+r.id;
+    summaryWrap.style.cssText='padding:14px 16px 0';
+    summaryWrap.innerHTML=renderFolioSummaryHTML(folioSummary(r.id));
+    body.appendChild(summaryWrap);
+
+    // Add charge form (Step 5: same builder Calendar's compact folio uses)
     var form=document.createElement('div');
     form.style.cssText='padding:14px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb';
 
-    // Build category options
-    var catOpts=INV_CATS.map(function(cat){return '<option>'+cat.name+'</option>';}).join('')+'<option>Activity</option><option>Food &amp; Beverage</option><option>Service</option><option>Other</option>';
-
-    // Quick add buttons
+    // Quick add buttons (existing priced-item catalog, INV_CATS)
     var quickBtns=INV_CATS.map(function(cat,ci){
       return '<button data-rid="'+r.id+'" data-ci="'+ci+'" onclick="_fsItems(this)" style="padding:4px 10px;font-size:var(--font-size-xs);font-weight:600;border-radius:20px;border:1.5px solid #00b4d8;background:#fff;cursor:pointer;color:#00b4d8;font-family:inherit">'+cat.name+'</button>';
     }).join('');
 
-    form.innerHTML=
-      '<div style="font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px">Add charge</div>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
-        '<input type="text" id="fc-desc-'+r.id+'" placeholder="Description e.g. Snorkeling, Breakfast..." style="flex:2;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+
-        '<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+r.id+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'+
-        '<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+r.id+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'+
-        '<select id="fc-cat-'+r.id+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+catOpts+'</select>'+
-        '<button data-rid="'+r.id+'" onclick="addFolioCharge(this.dataset.rid)" style="background:#00b4d8;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-plus"></i> Add</button>'+
-      '</div>'+
-      (quickBtns?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px">'+quickBtns+'</div>':'')+
+    form.innerHTML=buildAddChargeFormHTML(r.id)+
+      (quickBtns?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 6px">'+quickBtns+'</div>':'')+
       '<div id="fitems-'+r.id+'" style="display:flex;flex-wrap:wrap;gap:5px"></div>'+
       '<div style="display:flex;gap:8px;margin-top:10px">'+
-        '<button data-rid="'+r.id+'" onclick="folioToInvoiceById(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-invoice"></i> Generate invoice</button>'+
-        '<button data-rid="'+r.id+'" onclick="openPartialInvoice(this.dataset.rid)" style="flex:1;background:#7c3aed;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-receipt-2"></i> Custom invoice</button>'+
+        '<button data-rid="'+r.id+'" onclick="openCreateInvoice(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-invoice"></i> Create invoice</button>'+
+        '<button data-rid="'+r.id+'" onclick="printFolio(this.dataset.rid)" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:8px 14px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-printer"></i></button>'+
       '</div>';
 
     // Charges list
@@ -8081,6 +8212,55 @@ function folioShowItems(resId,ci){
   });
 }
 
+// Canonical folio-item categories (Step 3: use existing categories where
+// possible, do not overengineer). ROOM is never a folio-item category --
+// accommodation is always the separate calcTax()-driven line shown above
+// the folio (Step 4). PAYMENT_CREDIT is tracked on the invoice's own
+// payments log (recordInvoicePayment()), never as a folio charge type.
+const FOLIO_CATEGORIES=['Food & Beverage','Trips & Activities','Transfers','Other Services'];
+
+// ONE canonical folio summary (Step 7) -- Calendar's compact folio and the
+// full Guest Folios page both call this SAME function so the numbers can
+// never drift between the two screens. Room/accommodation always comes
+// from calcTax(r) (the canonical reservation pricing logic, Step 4/20 --
+// never recomputed here, and never affected by folio extras or a package
+// reservation's own r.rate). "Paid" sums every invoice's paidAmount for
+// THIS reservation (Step 12/13 -- paying one invoice never marks the whole
+// reservation paid, only what that invoice's paidAmount actually reflects).
+function folioSummary(resId){
+  var r=RES.find(function(x){return x.id===resId;});
+  var folio=FOLIOS[resId]||{charges:[]};
+  var room=r?calcTax(r).total:0;
+  var byCat={'Food & Beverage':0,'Trips & Activities':0,'Transfers':0,'Other Services':0};
+  folio.charges.forEach(function(ch){
+    var amt=ch.price*(ch.pax||ch.qty||1);
+    var key=Object.prototype.hasOwnProperty.call(byCat,ch.cat)?ch.cat:'Other Services';
+    byCat[key]+=amt;
+  });
+  var extrasTotal=Object.keys(byCat).reduce(function(s,k){return s+byCat[k];},0);
+  var chargesTotal=+(room+extrasTotal).toFixed(2);
+  var invoicesForRes=INV.filter(function(v){return v.resId===resId&&v.status!=='void';});
+  var paid=+invoicesForRes.reduce(function(s,v){return s+(v.paidAmount||0);},0).toFixed(2);
+  return {
+    room:+room.toFixed(2), food:+byCat['Food & Beverage'].toFixed(2), activities:+byCat['Trips & Activities'].toFixed(2),
+    transfers:+byCat['Transfers'].toFixed(2), other:+byCat['Other Services'].toFixed(2),
+    chargesTotal:chargesTotal, paid:paid, balance:+(chargesTotal-paid).toFixed(2)
+  };
+}
+function renderFolioSummaryHTML(sum){
+  var rows=[['Accommodation',sum.room],['Food & Beverage',sum.food],['Trips & Activities',sum.activities],['Transfers',sum.transfers],['Other Services',sum.other]]
+    .filter(function(r){return r[1]>0;});
+  var h='<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;font-size:var(--font-size-sm)">';
+  rows.forEach(function(r){
+    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;color:#374151"><span>'+r[0]+'</span><span>$'+r[1].toFixed(2)+'</span></div>';
+  });
+  h+='<div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px;border-top:1px solid #e5e7eb;font-weight:700;color:#111827"><span>Charges</span><span>$'+sum.chargesTotal.toFixed(2)+'</span></div>';
+  if(sum.paid>0) h+='<div style="display:flex;justify-content:space-between;padding:2px 0;color:#059669"><span>Paid</span><span>-$'+sum.paid.toFixed(2)+'</span></div>';
+  h+='<div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px;border-top:2px solid #111827;font-weight:800;font-size:var(--font-size-base);color:'+(sum.balance>0?'#dc2626':'#059669')+'"><span>Balance Due</span><span>$'+sum.balance.toFixed(2)+'</span></div>';
+  h+='</div>';
+  return h;
+}
+
 function folioQuickAddById(resId,ci,ii){
   var cat=INV_CATS[ci];
   var item=cat&&cat.items[ii];
@@ -8089,42 +8269,121 @@ function folioQuickAddById(resId,ci,ii){
   var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   FOLIOS[resId].charges.push({id:Date.now(),date:tS,desc:item.name,cat:cat.name,price:item.price,qty:1,tax:item.tax,addedBy:currentUser?currentUser.name:'Staff',time:now});
   saveFolios();
+  syncFolioToFirestore(resId);
   renderFolioChargesById(resId);
   toast('✓ '+item.name+' added');
 }
 
-function addFolioCharge(resId){
+// Shared "Add charge" form (Step 5) -- Calendar's compact folio section and
+// the full Guest Folios page both call this ONE builder instead of each
+// keeping their own near-duplicate HTML block. Note/bill-attachment (Step
+// 6) are collapsed behind a toggle so the common case (no note, no photo)
+// stays a single compact row.
+function buildAddChargeFormHTML(resId){
+  var catOpts=FOLIO_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('');
+  return '<div style="font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px">Add charge</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+      +'<input type="text" id="fc-desc-'+resId+'" placeholder="Description e.g. Snorkeling, Breakfast..." style="flex:2;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'
+      +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+resId+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'
+      +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+resId+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'
+      +'<select id="fc-cat-'+resId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+catOpts+'</select>'
+    +'</div>'
+    +'<div id="fc-more-'+resId+'" style="display:none;margin-bottom:6px">'
+      +'<input type="text" id="fc-note-'+resId+'" placeholder="Optional note" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;margin-bottom:6px;box-sizing:border-box">'
+      +'<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer"><i class="ti ti-camera"></i> Attach signed bill (optional) <input type="file" id="fc-bill-'+resId+'" accept="image/*" style="font-size:var(--font-size-xs)"></label>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<button type="button" onclick="var m=document.getElementById(\'fc-more-'+resId+'\');m.style.display=m.style.display===\'none\'?\'block\':\'none\';" style="background:none;border:none;color:#00b4d8;font-size:var(--font-size-xs);font-weight:700;cursor:pointer;font-family:inherit;padding:0">+ Note / attach bill</button>'
+      +'<div style="flex:1"></div>'
+      +'<button data-rid="'+resId+'" onclick="addFolioCharge(this.dataset.rid)" style="background:#00b4d8;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-plus"></i> Add</button>'
+    +'</div>';
+}
+
+// Uploads an optional signed-bill photo for ONE folio line item, reusing
+// the existing resize/upload pattern (resizeImageToBlob + fsStorage)
+// already used for room photos -- not a new backend/security architecture,
+// just one more path under the same mechanism. Admin-only today (see
+// storage.rules' own comment on folio-attachments: the same isAdmin() gate
+// room-photos already uses -- broadening to all staff needs a separate
+// storage-rules fix, flagged there rather than attempted here).
+async function uploadFolioBill(resId, chargeId, file){
+  var blob = await resizeImageToBlob(file, 1600, 0.85);
+  var path = 'folio-attachments/'+resId+'/'+chargeId+'.jpg';
+  var snap = await fsStorage.ref(path).put(blob, {contentType:'image/jpeg'});
+  return await snap.ref.getDownloadURL();
+}
+
+async function addFolioCharge(resId){
   var desc=(document.getElementById('fc-desc-'+resId)?.value||'').trim();
   var price=+(document.getElementById('fc-price-'+resId)?.value||0);
   var pax=+(document.getElementById('fc-pax-'+resId)?.value||1);
-  var cat=document.getElementById('fc-cat-'+resId)?.value||'Other';
+  var cat=document.getElementById('fc-cat-'+resId)?.value||'Other Services';
+  var note=(document.getElementById('fc-note-'+resId)?.value||'').trim();
+  var billInput=document.getElementById('fc-bill-'+resId);
+  var billFile=billInput&&billInput.files&&billInput.files[0];
   if(!desc){toast('Enter a description');return;}
   if(price<=0){toast('Enter a price');return;}
   if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
   var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  FOLIOS[resId].charges.push({id:Date.now(),date:tS,desc:desc,cat:cat,price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now});
+  var chargeId=Date.now();
+  var charge={id:chargeId,date:tS,desc:desc,cat:cat,price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now};
+  if(note) charge.note=note;
+  FOLIOS[resId].charges.push(charge);
   saveFolios();
+  syncFolioToFirestore(resId);
   var fcDesc=document.getElementById('fc-desc-'+resId);
   var fcPrice=document.getElementById('fc-price-'+resId);
   var fcPax=document.getElementById('fc-pax-'+resId);
+  var fcNote=document.getElementById('fc-note-'+resId);
   if(fcDesc) fcDesc.value='';
   if(fcPrice) fcPrice.value='';
   if(fcPax) fcPax.value='1';
+  if(fcNote) fcNote.value='';
   renderFolioChargesById(resId);
-  // Update just the header total without collapsing cards
+  updateFolioHeaderTotal(resId);
+  toast('✓ '+desc+' added to folio');
+  if(billFile){
+    try{
+      var url=await uploadFolioBill(resId,chargeId,billFile);
+      charge.billUrl=url;
+      saveFolios();
+      syncFolioToFirestore(resId);
+      renderFolioChargesById(resId);
+      toast('✓ Bill attached');
+    }catch(e){
+      console.error('uploadFolioBill failed',e);
+      toast('⚠ Charge added, but bill photo failed to upload');
+    }
+  }
+}
+
+function updateFolioHeaderTotal(resId){
   var hEl=document.querySelector('[data-folio-rid="'+resId+'"]');
   if(hEl){
     var newTot=(FOLIOS[resId]||{charges:[]}).charges.reduce(function(s,ch){return s+ch.price*(ch.pax||ch.qty||1);},0);
     var eEl=hEl.querySelector('.folio-ext-amt');
     if(eEl) eEl.textContent='$'+newTot.toFixed(2);
   }
-  toast('✓ '+desc+' added to folio');
+  // Refresh whichever summary breakdown block is currently open for this
+  // reservation (Calendar's #det-folio-summary or Guest Folios' per-card
+  // #folio-summary-<resId>) -- both render the SAME folioSummary(resId).
+  var detSum=document.getElementById('det-folio-summary');
+  if(detSum && document.getElementById('det-folio-section')?.dataset.folioRid===resId) detSum.innerHTML=renderFolioSummaryHTML(folioSummary(resId));
+  var cardSum=document.getElementById('folio-summary-'+resId);
+  if(cardSum) cardSum.innerHTML=renderFolioSummaryHTML(folioSummary(resId));
 }
 
+// A charge already included on a generated invoice can no longer be
+// silently removed from the folio (Step 21: one canonical item, never
+// quietly orphaned from an invoice a guest may already hold) -- void the
+// invoice first (voidInvoice()) if it was added by mistake.
 function removeFolioCharge(resId,chargeId){
   if(!FOLIOS[resId])return;
+  var charge=FOLIOS[resId].charges.find(function(ch){return ch.id===chargeId;});
+  if(charge&&charge.invoiceId){ toast('Already on invoice '+charge.invoiceId+' — void that invoice first'); return; }
   FOLIOS[resId].charges=FOLIOS[resId].charges.filter(function(ch){return ch.id!==chargeId;});
   saveFolios();
+  syncFolioToFirestore(resId);
   renderFolioChargesById(resId);
   // Update just the header (extras total) without collapsing cards
   var hdrEl=document.querySelector('[data-folio-rid="'+resId+'"]');
@@ -8156,11 +8415,15 @@ function renderFolioChargesById(resId){
     var dayTot=day.reduce(function(s,ch){return s+(ch.price*(ch.pax||ch.qty||1));},0);
     h+='<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;padding:8px 0 4px;display:flex;justify-content:space-between"><span>'+fdf(date)+'</span><span style="color:#00b4d8">$'+dayTot.toFixed(2)+'</span></div>';
     day.forEach(function(ch){
+      var statusBadge=ch.paid
+        ?'<span style="background:#d1fae5;color:#047857;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">Paid</span>'
+        :ch.invoiceId?'<span style="background:#dbeafe;color:#1d4ed8;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">Invoiced</span>':'';
+      var billBadge=ch.billUrl?' · <a href="'+esc(ch.billUrl)+'" target="_blank" rel="noopener" style="color:#00b4d8;text-decoration:none">Bill attached ✓ View</a>':'';
       h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb">';
-      h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+ch.desc+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+ch.cat+' · '+ch.time+(ch.addedBy?' · '+ch.addedBy:'')+'</div></div>';
+      h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(ch.desc)+statusBadge+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(ch.cat)+' · '+ch.time+(ch.addedBy?' · '+esc(ch.addedBy):'')+billBadge+'</div>'+(ch.note?'<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px;font-style:italic">"'+esc(ch.note)+'"</div>':'')+'</div>';
       h+='<div style="font-size:var(--font-size-xs);color:#6b7280">$'+ch.price+'/pax × '+(ch.pax||ch.qty||1)+'</div>';
       h+='<div style="font-size:var(--font-size-sm);font-weight:700;color:#00b4d8;min-width:60px;text-align:right">$'+(ch.price*(ch.pax||ch.qty||1)).toFixed(2)+'</div>';
-      if(!canViewOnly()){h+='<button data-rid="'+resId+'" data-cid="'+ch.id+'" onclick="removeFolioCharge(this.dataset.rid,+this.dataset.cid)" style="background:none;border:none;cursor:pointer;color:#b91c1c;font-size:var(--font-size-base);padding:0 2px">✕</button>';}
+      if(!canViewOnly()){h+='<button data-rid="'+resId+'" data-cid="'+ch.id+'" onclick="removeFolioCharge(this.dataset.rid,+this.dataset.cid)" title="'+(ch.invoiceId?'Already invoiced — void invoice first':'Remove')+'" style="background:none;border:none;cursor:pointer;color:'+(ch.invoiceId?'#d1d5db':'#b91c1c')+';font-size:var(--font-size-base);padding:0 2px">✕</button>';}
       h+='</div>';
     });
   });
@@ -8170,127 +8433,145 @@ function renderFolioChargesById(resId){
 }
 
 // ── PARTIAL INVOICE — let staff select which charges to include ──
-function piSelectAll(cb){document.querySelectorAll(".pi-chk").forEach(function(c){c.checked=cb.checked;});}
-function closePartialInv(){var b=document.getElementById("partial-inv-bg");if(b)b.remove();}
-function openPartialInvoice(resId) {
-  var res = RES.find(function(r){ return r.id===resId; });
-  var folio = FOLIOS[resId] || {charges:[]};
-  if(!folio.charges.length) { toast('No charges in folio yet'); return; }
+// ── UNIFIED "Create Invoice" (Steps 8-11) ───────────────────────────────
+// ONE entry point, replacing the old "Generate invoice" (folioToInvoiceById
+// -- which duplicated openIM's own auto-load) and "Custom invoice"
+// (openPartialInvoice, whose "include room" checkbox double-computed the
+// room charge outside calcTax()). Quick scope presets (All unpaid / each
+// category) pre-check matching rows; staff can still fine-tune before
+// continuing. Only UNINVOICED charges are ever listed -- an already-
+// invoiced charge never re-appears here (Step 10/21).
+function openCreateInvoice(resId){
+  var res=RES.find(function(r){return r.id===resId;});
+  var folio=FOLIOS[resId]||{charges:[]};
+  var uninvoiced=folio.charges.filter(function(ch){return !ch.invoiceId;});
 
-  // Build selection modal
-  var html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center" id="partial-inv-bg" onclick="if(event.target===this)this.remove()">'
-    + '<div style="background:#fff;border-radius:16px;padding:28px;width:580px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">'
-    + '<div><div style="font-size:var(--font-size-xl);font-weight:800;color:#111827">Select Charges for Invoice</div>'
-    + '<div style="font-size:var(--font-size-sm);color:#6b7280;margin-top:2px">'+(res?esc(res.fn)+' '+esc(res.ln):'')+' — tick the charges to include</div></div>'
-    + '<button onclick="closePartialInv()" style="background:#f3f4f6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:var(--font-size-base)">✕ Close</button>'
-    + '</div>';
+  var html='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center" id="ci-bg" onclick="if(event.target===this)this.remove()">'
+    +'<div style="background:#fff;border-radius:16px;padding:28px;width:580px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+    +'<div><div style="font-size:var(--font-size-xl);font-weight:800;color:#111827">Create Invoice</div>'
+    +'<div style="font-size:var(--font-size-sm);color:#6b7280;margin-top:2px">'+(res?esc(res.fn)+' '+esc(res.ln):'')+'</div></div>'
+    +'<button onclick="document.getElementById(\'ci-bg\').remove()" style="background:#f3f4f6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:var(--font-size-base)">✕</button>'
+    +'</div>';
 
-  // Group charges by date
-  var byDate = {};
-  folio.charges.forEach(function(ch, idx) {
-    var d = ch.date || 'Other';
-    if(!byDate[d]) byDate[d] = [];
-    byDate[d].push({ch:ch, idx:idx});
-  });
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
+    +'<button type="button" onclick="ciSelectScope(\'all\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #2563eb;background:#eff6ff;color:#2563eb;cursor:pointer;font-family:inherit">All unpaid</button>'
+    +FOLIO_CATEGORIES.map(function(c){return '<button type="button" onclick="ciSelectScope(\''+esc(c)+'\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">'+c+'</button>';}).join('')
+    +'</div>';
 
-  html += '<div style="margin-bottom:16px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-base);font-weight:700;color:#374151"><input type="checkbox" id="pi-select-all" onchange="piSelectAll(this)" style="width:16px;height:16px"> Select All</label></div>';
-
-  Object.keys(byDate).sort().forEach(function(date) {
-    html += '<div style="margin-bottom:14px">'
-      + '<div style="font-size:var(--font-size-xs);font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #f3f4f6">'
-      + (date !== 'Other' ? new Date(date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) : 'Other Charges')
-      + '</div>';
-    byDate[date].forEach(function(entry) {
-      var ch = entry.ch;
-      var pax = ch.pax||ch.qty||1;
-      var total = (ch.price * pax).toFixed(2);
-      var isTrip = ch.cat==='Trips & Activities';
-      html += '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f9fafb;border:1px solid #e5e7eb">'
-        + '<input type="checkbox" class="pi-chk" data-idx="'+entry.idx+'" style="width:16px;height:16px;cursor:pointer"'+(isTrip?' checked':'')+' >'
-        + '<div style="flex:1">'
-        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#111827">'+ch.desc+(pax>1?' (×'+pax+' pax)':'')+'</div>'
-        + '<div style="font-size:var(--font-size-xs);color:#6b7280">'+ch.cat+'</div>'
-        + '</div>'
-        + '<div style="font-size:var(--font-size-base);font-weight:700;color:#059669">$'+total+'</div>'
-        + '</label>';
+  if(!uninvoiced.length){
+    html+='<div style="font-size:var(--font-size-sm);color:#9ca3af;padding:8px 0 14px">No uninvoiced extra charges — you can still invoice the room only, below.</div>';
+  } else {
+    html+='<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px"><input type="checkbox" id="ci-select-all" onchange="document.querySelectorAll(\'.ci-chk\').forEach(function(c){c.checked=document.getElementById(\'ci-select-all\').checked;})" style="width:16px;height:16px"> Select all extras</label>';
+    var byDate={};
+    uninvoiced.forEach(function(ch){ var d=ch.date||'Other'; (byDate[d]=byDate[d]||[]).push(ch); });
+    Object.keys(byDate).sort().forEach(function(date){
+      html+='<div style="margin-bottom:12px"><div style="font-size:var(--font-size-xs);font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px">'+(date!=='Other'?fdf(date):'Other')+'</div>';
+      byDate[date].forEach(function(ch){
+        var pax=ch.pax||ch.qty||1, total=(ch.price*pax).toFixed(2);
+        html+='<label class="ci-row" data-cat="'+esc(ch.cat)+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f9fafb;border:1px solid #e5e7eb">'
+          +'<input type="checkbox" class="ci-chk" data-cid="'+ch.id+'" style="width:16px;height:16px;cursor:pointer">'
+          +'<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600;color:#111827">'+esc(ch.desc)+(pax>1?' (×'+pax+' pax)':'')+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+esc(ch.cat)+'</div></div>'
+          +'<div style="font-size:var(--font-size-sm);font-weight:700;color:#059669">$'+total+'</div></label>';
+      });
+      html+='</div>';
     });
-    html += '</div>';
-  });
+  }
 
-  // Invoice type selector
-  html += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:16px">'
-    + '<div style="font-size:var(--font-size-sm);font-weight:700;color:#0077b6;margin-bottom:8px">INCLUDE ROOM CHARGE?</div>'
-    + '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-base)"><input type="checkbox" id="pi-include-room" style="width:16px;height:16px"> Include room charge ($'+(res?((res.rate||0)*Math.ceil((new Date(res.co)-new Date(res.ci))/86400000)).toFixed(2):'0.00')+')</label>'
-    + '</div>';
+  var roomTotal=res?calcTax(res).total:0;
+  html+='<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;margin:6px 0 16px">'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-base)"><input type="checkbox" id="ci-include-room" style="width:16px;height:16px"> Include room charge ($'+roomTotal.toFixed(2)+')</label>'
+    +'</div>';
 
-  window._piResId = resId;
-  html += '<button onclick="generatePartialInvoice(window._piResId)" style="background:#0077b6;color:#fff;border:none;padding:12px;border-radius:10px;font-size:var(--font-size-md);font-weight:700;cursor:pointer;font-family:inherit;width:100%">🧾 Generate Selected Invoice</button>'
-    + '</div></div>';
+  window._ciResId=resId;
+  html+='<button onclick="submitCreateInvoice(window._ciResId)" style="background:#2563eb;color:#fff;border:none;padding:12px;border-radius:10px;font-size:var(--font-size-md);font-weight:700;cursor:pointer;font-family:inherit;width:100%">🧾 Continue to Invoice</button>'
+    +'</div></div>';
 
-  var el = document.createElement('div');
-  el.innerHTML = html;
+  var el=document.createElement('div');
+  el.innerHTML=html;
   document.body.appendChild(el.firstChild);
 }
-
-function generatePartialInvoice(resId) {
-  var res = RES.find(function(r){ return r.id===resId; });
-  var folio = FOLIOS[resId] || {charges:[]};
-  var checked = Array.from(document.querySelectorAll('.pi-chk:checked'));
-  var includeRoom = document.getElementById('pi-include-room') && document.getElementById('pi-include-room').checked;
-
-  if(!checked.length && !includeRoom) { toast('Select at least one charge'); return; }
-
-  var selectedCharges = checked.map(function(el) {
-    var idx = parseInt(el.getAttribute('data-idx'));
-    return folio.charges[idx];
-  }).filter(Boolean);
-
-  // Close the modal
-  var bg = document.getElementById('partial-inv-bg');
-  if(bg) bg.remove();
-
-  // Open invoice modal with selected charges
-  openIM(resId);
-  setTimeout(function(){
-    invItems = [];
-
-    // Add room charge if selected
-    if(includeRoom && res) {
-      var nights = Math.ceil((new Date(res.co) - new Date(res.ci)) / 86400000);
-      invItems.push({id:Date.now(), desc:'Room '+res.rn+' ('+nights+' nights)', qty:nights, unit:res.rate||0, tax:true, cat:'Accommodation', pax:1});
-    }
-
-    // Add selected folio charges
-    selectedCharges.forEach(function(ch) {
-      var pax = ch.pax||ch.qty||1;
-      invItems.push({id:Date.now()+Math.random(), desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:+(ch.price*pax).toFixed(2), tax:ch.tax!==false, cat:ch.cat, pax:pax});
-    });
-
-    if(typeof renderInvItems==='function') renderInvItems();
-    if(typeof renderCatButtons==='function') renderCatButtons();
-    if(typeof niPrev==='function') niPrev();
-    toast('✓ '+invItems.length+' item'+(invItems.length>1?'s':'')+' loaded — review and print');
-  }, 200);
+function ciSelectScope(scope){
+  document.querySelectorAll('.ci-chk').forEach(function(c){
+    var row=c.closest('.ci-row');
+    c.checked = scope==='all' ? true : !!(row && row.dataset.cat===scope);
+  });
+  var selAll=document.getElementById('ci-select-all');
+  if(selAll) selAll.checked=(scope==='all');
 }
-
-
-function folioToInvoiceById(resId){
+function submitCreateInvoice(resId){
   var folio=FOLIOS[resId]||{charges:[]};
-  openIM(resId);
-  if(folio.charges.length){
-    setTimeout(function(){
-      invItems=folio.charges.map(function(ch){var pax=ch.pax||ch.qty||1;return{id:Date.now()+Math.random(),desc:ch.desc+(pax>1?' (×'+pax+' pax)':''),qty:1,unit:+(ch.price*pax).toFixed(2),tax:ch.tax!==false,cat:ch.cat,pax:pax};});
-      renderInvItems();renderCatButtons();niPrev();
-      toast('✓ '+folio.charges.length+' folio charge'+(folio.charges.length>1?'s':'')+' loaded into invoice');
-    },150);
-  }
+  var checked=Array.from(document.querySelectorAll('.ci-chk:checked'));
+  var includeRoom=document.getElementById('ci-include-room')&&document.getElementById('ci-include-room').checked;
+  if(!checked.length && !includeRoom){ toast('Select at least one charge, or include the room'); return; }
+  var selected=checked.map(function(el){
+    var cid=+el.getAttribute('data-cid');
+    return folio.charges.find(function(ch){return ch.id===cid;});
+  }).filter(Boolean);
+  var bg=document.getElementById('ci-bg'); if(bg) bg.remove();
+  var items=selected.map(function(ch){
+    var pax=ch.pax||ch.qty||1;
+    return {id:Date.now()+Math.random(), chargeId:ch.id, desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:+(ch.price*pax).toFixed(2), tax:ch.tax!==false, cat:ch.cat, pax:pax};
+  });
+  openIM(resId, {items:items, includeRoom:includeRoom});
 }
 
-// Keep backward compat
-function openFolioDetail(resId){ activeFolioResId=resId; }
+// "Open full folio" (Step 15) — Calendar's compact folio → Guest Folios,
+// landing on and auto-expanding the SAME reservation, never making staff
+// search for the guest again.
+function openFullFolio(resId){
+  var det=document.getElementById('m-det'); if(det) det.classList.remove('on');
+  go('folios', document.querySelector('.sl[onclick*="folios"]'));
+  activeFolioResId=resId;
+  setTimeout(function(){
+    var hdrEl=document.querySelector('[data-folio-rid="'+resId+'"]');
+    if(!hdrEl) return;
+    var body=document.getElementById('fbody-'+resId);
+    if(body && body.style.display!=='block') hdrEl.click();
+    hdrEl.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 150);
+}
+// Keep backward compat with existing call sites (Reservation Quick Bar).
+function openFolioDetail(resId){ openFullFolio(resId); }
 function closeFolioDetail(){ activeFolioResId=null; }
-function folioToInvoice(){ if(activeFolioResId) folioToInvoiceById(activeFolioResId); }
+function folioToInvoice(){ if(activeFolioResId) openCreateInvoice(activeFolioResId); }
+
+// Print Folio (Step 17): every charge + payment history for this
+// reservation, in a separate print-ready window — never confused with an
+// Invoice print (only that invoice's items) or a Receipt (payment proof).
+function printFolio(resId){
+  var r=RES.find(function(x){return x.id===resId;});
+  if(!r) return;
+  var folio=FOLIOS[resId]||{charges:[]};
+  var sum=folioSummary(resId);
+  var invoicesForRes=INV.filter(function(v){return v.resId===resId;});
+  var rows=folio.charges.map(function(ch){
+    var pax=ch.pax||ch.qty||1;
+    return '<tr><td>'+fd(ch.date)+'</td><td>'+esc(ch.desc)+'</td><td>'+esc(ch.cat)+'</td><td style="text-align:right">$'+(ch.price*pax).toFixed(2)+'</td><td>'+(ch.invoiceId?'Invoiced ('+esc(ch.invoiceId)+')':'Open')+'</td></tr>';
+  }).join('');
+  var payRows=[];
+  invoicesForRes.forEach(function(v){ (v.payments||[]).forEach(function(p){ payRows.push('<tr><td>'+fd(p.date)+'</td><td>Invoice '+esc(v.id)+'</td><td style="text-align:right">$'+p.amount.toFixed(2)+'</td></tr>'); }); });
+  var w=window.open('','_blank');
+  if(!w) { toast('Allow pop-ups to print'); return; }
+  w.document.write('<html><head><title>Folio — '+esc(r.fn)+' '+esc(r.ln)+'</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111827}h1{font-size:20px}h3{margin-top:18px}table{width:100%;border-collapse:collapse;margin-top:8px}td,th{padding:6px 8px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:left}</style></head><body>'
+    +'<h1>Vilu Residence — Guest Folio</h1>'
+    +'<p>'+esc(r.fn)+' '+esc(r.ln)+' · '+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</p>'
+    +'<h3>Charges</h3><table><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Status</th></tr>'
+    +(rows||'<tr><td colspan="5" style="color:#9ca3af">No extra charges</td></tr>')+'</table>'
+    +(payRows.length?'<h3>Payments</h3><table><tr><th>Date</th><th>Invoice</th><th>Amount</th></tr>'+payRows.join('')+'</table>':'')
+    +'<h3>Summary</h3><table>'
+    +'<tr><td>Accommodation</td><td style="text-align:right">$'+sum.room.toFixed(2)+'</td></tr>'
+    +'<tr><td>Food &amp; Beverage</td><td style="text-align:right">$'+sum.food.toFixed(2)+'</td></tr>'
+    +'<tr><td>Trips &amp; Activities</td><td style="text-align:right">$'+sum.activities.toFixed(2)+'</td></tr>'
+    +'<tr><td>Transfers</td><td style="text-align:right">$'+sum.transfers.toFixed(2)+'</td></tr>'
+    +'<tr><td>Other Services</td><td style="text-align:right">$'+sum.other.toFixed(2)+'</td></tr>'
+    +'<tr style="font-weight:700"><td>Charges</td><td style="text-align:right">$'+sum.chargesTotal.toFixed(2)+'</td></tr>'
+    +'<tr><td>Paid</td><td style="text-align:right">-$'+sum.paid.toFixed(2)+'</td></tr>'
+    +'<tr style="font-weight:800"><td>Balance Due</td><td style="text-align:right">$'+sum.balance.toFixed(2)+'</td></tr>'
+    +'</table></body></html>');
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 300);
+}
 
 // ══════════════════════════════════════════════
 // RESERVATION QUICK BAR
@@ -8329,9 +8610,7 @@ function qbAddFolio(){
   var id = _qbResId;
   closeQuickBar();
   if(!id) return;
-  // Navigate to guest folios and open that guest's folio
-  go('folios', document.querySelector('.sl[onclick*="folios"]'));
-  setTimeout(function(){openFolioDetail(id);}, 100);
+  openFullFolio(id);
 }
 
 function qbInvoice(){
@@ -11825,6 +12104,8 @@ async function loadAllFromSupabase() {
     localStorage.setItem('vilu_res', JSON.stringify(RES));
   }
   await loadBlksFromFirestore();
+  await loadFoliosFromFirestore();
+  await loadInvoicesFromFirestore();
   const sUsersRaw = await supaFetch('GET','users',null,'select=*');
   // Firestore docs are keyed by email but don't always carry it as an
   // explicit field (some code paths address by doc ID only) — drop any that
@@ -11922,6 +12203,8 @@ document.addEventListener('DOMContentLoaded', function() {
     await loadAllFromSupabase();
     try{drawDash();}catch(e){}
     try{drawCal();}catch(e){}
+    try{drawFolios();}catch(e){}
+    try{drawInv();}catch(e){}
   }, 1500);
   setInterval(pollNewReservationsFromSupabase, 60*1000);
   setInterval(pollBlocksFromSupabase, 60*1000);

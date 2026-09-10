@@ -82,6 +82,23 @@ service cloud.firestore {
       allow write: if isAdmin() || isStaff();
     }
 
+    // Guest Folio unification (2026-09-10): the ONE canonical charge ledger
+    // per reservation, shared by the Calendar reservation-detail folio and
+    // the standalone Guest Folios page (never a public/agency-readable
+    // collection -- this is internal financial detail, not guest-facing
+    // pricing like rooms/room_prices above).
+    match /folios/{resId} {
+      allow read: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff();
+    }
+    // Generated invoices -- previously an in-memory-only JS array (INV)
+    // with no persistence at all; now durable and shared across every
+    // staff session, same access pattern as reservations/folios.
+    match /invoices/{invId} {
+      allow read: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff();
+    }
+
     match /users/{id} {
       // Full-collection listing (the User Management panel) is admin/staff
       // only; anyone else can only ever read their own profile doc — this
