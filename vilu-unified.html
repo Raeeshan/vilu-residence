@@ -75,6 +75,29 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .scope-pill{padding:6px 14px;border-radius:999px;border:1.5px solid #e5e7eb;background:#fff;font-size:var(--font-size-sm);font-weight:600;color:#6b7280;cursor:pointer;font-family:inherit}
 .scope-pill:hover{border-color:#00b4d8}
 .scope-pill.on{background:#00b4d8;border-color:#00b4d8;color:#fff}
+/* ── Forecast (2026-09-10 pass) ── */
+.fc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.fc-nav{display:flex;align-items:center;gap:6px}
+.fc-arrow{width:30px;height:30px;border-radius:50%;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-size:var(--font-size-md);color:#374151;font-family:inherit;line-height:1}
+.fc-arrow:hover{border-color:#00b4d8;color:#00b4d8}
+.fc-range-btn{border:1.5px solid #e5e7eb;background:#fff;border-radius:20px;padding:6px 14px;font-size:var(--font-size-sm);font-weight:600;color:#374151;cursor:pointer;font-family:inherit}
+.fc-range-btn:hover{border-color:#00b4d8}
+.fc-range-picker{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:14px}
+.fc-range-picker label{display:flex;flex-direction:column;gap:3px;font-size:var(--font-size-xs);color:#6b7280;font-weight:600}
+.fc-range-picker input{font-family:inherit;font-size:var(--font-size-sm);padding:5px 8px;border:1px solid #d1d5db;border-radius:6px}
+.fc-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.fc-kpi{border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px}
+.fc-kpi .v{font-size:var(--font-size-lg);font-weight:800;color:#111827}
+.fc-kpi .s{font-size:var(--font-size-xs);color:#6b7280;margin-top:2px}
+.fc-chart-wrap{position:relative;margin-top:14px;overflow-x:auto}
+.fc-avail-table{width:100%;border-collapse:collapse;font-size:var(--font-size-xs)}
+.fc-avail-table th,.fc-avail-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #f3f4f6;white-space:nowrap}
+.fc-avail-table th:first-child,.fc-avail-table td:first-child{text-align:left;position:sticky;left:0;background:#fff}
+.fc-avail-table thead th{background:#e0f7fd;font-weight:700;color:#374151}
+.fc-avail-pill{display:inline-block;min-width:22px;padding:2px 6px;border-radius:10px;background:#e0f7fd;color:#00778e;font-weight:700}
+.fc-avail-zero{background:#fee2e2;color:#b91c1c;border-radius:10px;padding:2px 6px;font-weight:700}
+@media(max-width:900px){.fc-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.fc-kpis{grid-template-columns:repeat(2,1fr)}.fc-hdr{flex-direction:column;align-items:flex-start}}
 .notes-section:first-child{margin-top:0!important}
 .notes-section-h{font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
 @media(max-width:900px){.dash-grid{flex-direction:column}.dash-left{width:100%;flex-direction:row;gap:14px}.dash-left .card{flex:1;margin-bottom:0}}
@@ -903,6 +926,34 @@ body.pms-mode { overflow:hidden; }
         <div class="s" id="d-rev-period" style="font-size:var(--font-size-xs);color:#6b7280;margin-top:3px">incl. all taxes</div>
       </div>
     </div>
+  </div>
+  <div class="card" id="fc-card">
+    <div class="fc-hdr">
+      <h3 style="margin-bottom:0">Forecast</h3>
+      <div class="fc-nav">
+        <button type="button" class="fc-arrow" onclick="fcShiftRange(-1)" aria-label="Previous day">‹</button>
+        <button type="button" class="fc-range-btn" id="fc-range-btn" onclick="fcToggleRangePicker()">📅 <span id="fc-range-label">—</span></button>
+        <button type="button" class="fc-arrow" onclick="fcShiftRange(1)" aria-label="Next day">›</button>
+      </div>
+    </div>
+    <div class="fc-range-picker" id="fc-range-picker" style="display:none">
+      <label>From <input type="date" id="fc-from-inp"></label>
+      <label>To <input type="date" id="fc-to-inp"></label>
+      <button type="button" class="btn p sm" onclick="fcApplyRangePicker()">Apply</button>
+      <button type="button" class="btn sm" onclick="fcSetRange(tS,D(13))">Today</button>
+    </div>
+    <div class="fc-kpis">
+      <div class="fc-kpi"><div class="v" id="fc-occ">0%</div><div class="s">Occupancy</div></div>
+      <div class="fc-kpi"><div class="v" id="fc-rn">0</div><div class="s">Room nights</div></div>
+      <div class="fc-kpi"><div class="v" id="fc-adr">$0</div><div class="s">ADR</div></div>
+      <div class="fc-kpi"><div class="v" id="fc-revpar">$0</div><div class="s">RevPAR</div></div>
+      <div class="fc-kpi"><div class="v" id="fc-rev">$0</div><div class="s">Booked Revenue</div></div>
+    </div>
+    <div class="dash-tabs">
+      <button type="button" class="dash-tab on" id="fc-tab-booked" onclick="fcSetTab('booked')" style="min-width:auto;padding:8px 16px"><span class="dash-tab-lbl" style="font-size:var(--font-size-sm);font-weight:600;color:#111827">Booked &amp; blocked</span></button>
+      <button type="button" class="dash-tab" id="fc-tab-avail" onclick="fcSetTab('availability')" style="min-width:auto;padding:8px 16px"><span class="dash-tab-lbl" style="font-size:var(--font-size-sm);font-weight:600;color:#111827">Availability</span></button>
+    </div>
+    <div id="fc-body"></div>
   </div>
   <div class="g2">
     <div class="card"><h3>Physical room rates <span onclick="go('price',document.querySelectorAll('.sl')[3])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div id="d-rt"></div></div>
@@ -3699,6 +3750,165 @@ function drawDash(){
     pCard.style.display='';
     document.getElementById('d-partners').innerHTML='<div style="font-size:var(--font-size-sm);color:#6b7280">'+partners.length+' active guest'+(partners.length===1?'':'s')+' across '+PH.length+' partner propert'+(PH.length===1?'y':'ies')+' (not counted in Vilu occupancy)</div>';
   } else { pCard.style.display='none'; }
+  drawForecast();
+}
+
+// ── FORECAST (2026-09-10 pass) ──────────────────────────────────────────
+// Structure/interaction observed directly from the real, authenticated
+// Cloudbeds Dashboard (read-only): a date-range strip (prev/next arrows
+// shift the WHOLE window by exactly 1 day, not by the period length; the
+// range label opens a picker), 5 KPI cards (Occupancy/Room nights/ADR/
+// RevPAR/Revenue), and two in-place tabs -- "Booked & blocked" is a line
+// chart of daily occupancy %, "Availability" is a per-accommodation-type
+// table of available-unit counts by date (NOT a second chart -- confirmed
+// live, this was the one place memory would have gotten it wrong).
+// Every number below comes from the same canonical Vilu data/helpers
+// Calendar and Dashboard's own Activity card already use -- isOcc() for
+// per-room occupied/blocked, anRevenue() for room-only revenue (already
+// excludes service/TGST/Green Tax) -- never a second interpretation.
+var FC_FROM='', FC_TO='', FC_TAB='booked';
+function fcDatesInRange(from,to){
+  var out=[],d=from,guard=0;
+  while(d<=to&&guard<400){ out.push(d); d=D2(d,1); guard++; }
+  return out;
+}
+// Per-day, per-room breakdown reusing isOcc() exactly as computeDashData()
+// does -- a reservation-occupied room and a block-occupied room are never
+// conflated, and a room can never be counted twice in one day.
+function fcComputeData(from,to){
+  var dates=fcDatesInRange(from,to);
+  var series=dates.map(function(d){
+    var tomorrow=D2(d,1);
+    var occByRes=0,occByBlk=0;
+    VR.forEach(function(vr){
+      var m=isOcc(vr.n,d,tomorrow);
+      if(m&&m.from!==undefined) occByBlk++;
+      else if(m) occByRes++;
+    });
+    return {date:d,booked:occByRes,blocked:occByBlk,available:Math.max(0,VR.length-occByRes-occByBlk)};
+  });
+  var bookedRoomNights=series.reduce(function(s,x){return s+x.booked;},0);
+  var blockedRoomNights=series.reduce(function(s,x){return s+x.blocked;},0);
+  var totalRoomNights=VR.length*dates.length;
+  var sellableRoomNights=Math.max(0,totalRoomNights-blockedRoomNights);
+  // anRevenue()'s `to` is EXCLUSIVE (matching r.co/isOcc's own half-open
+  // convention) -- from/to here are the INCLUSIVE first/last calendar
+  // dates shown in the panel, so the last visible night (checking in on
+  // `to`, out the day after) would otherwise be silently dropped from
+  // revenue/ADR/RevPAR. D2(to,1) is the correct exclusive boundary.
+  var rev=anRevenue(from,D2(to,1)); // .base = room revenue only, excl. service/TGST/Green Tax -- already the canonical split
+  var occupancyPct=sellableRoomNights?bookedRoomNights/sellableRoomNights*100:0;
+  var adr=bookedRoomNights?rev.base/bookedRoomNights:0;
+  var revpar=sellableRoomNights?rev.base/sellableRoomNights:0;
+  return {dates:dates,series:series,bookedRoomNights:bookedRoomNights,blockedRoomNights:blockedRoomNights,sellableRoomNights:sellableRoomNights,roomRevenue:rev.base,occupancyPct:occupancyPct,adr:adr,revpar:revpar};
+}
+function fcRangeLabel(from,to){
+  var f=formatMaldivesDate(from),t=formatMaldivesDate(to);
+  return f+' – '+t;
+}
+function fcSetRange(from,to){
+  if(to<from){var tmp=from;from=to;to=tmp;}
+  FC_FROM=from; FC_TO=to;
+  var picker=document.getElementById('fc-range-picker'); if(picker) picker.style.display='none';
+  drawForecast();
+}
+// Matches the real Cloudbeds arrows exactly -- shifts the whole window by
+// 1 day, the window LENGTH stays whatever it currently is (confirmed live:
+// clicking next twice on a 14-day window produced two 1-day shifts, not a
+// 14-day jump).
+function fcShiftRange(deltaDays){
+  fcSetRange(D2(FC_FROM,deltaDays),D2(FC_TO,deltaDays));
+}
+function fcToggleRangePicker(){
+  var p=document.getElementById('fc-range-picker');
+  if(!p) return;
+  var show=p.style.display==='none';
+  p.style.display=show?'flex':'none';
+  if(show){document.getElementById('fc-from-inp').value=FC_FROM;document.getElementById('fc-to-inp').value=FC_TO;}
+}
+function fcApplyRangePicker(){
+  var f=document.getElementById('fc-from-inp').value,t=document.getElementById('fc-to-inp').value;
+  if(!f||!t){toast('Pick both dates');return;}
+  fcSetRange(f,t);
+}
+function fcSetTab(tab){
+  FC_TAB=tab;
+  document.getElementById('fc-tab-booked').classList.toggle('on',tab==='booked');
+  document.getElementById('fc-tab-avail').classList.toggle('on',tab==='availability');
+  drawForecast();
+}
+function fcNiceMax(v){
+  if(v<=0) return 10;
+  var steps=[10,20,25,30,40,50,60,70,80,90,100];
+  for(var i=0;i<steps.length;i++) if(v<=steps[i]) return steps[i];
+  return 100;
+}
+// Lightweight inline SVG line chart -- no charting library for one graph,
+// per the task's own instruction. Y-axis auto-scales to the data's max
+// (never a fixed 0-100%), matching the real Cloudbeds chart exactly.
+function fcRenderChart(d){
+  var w=Math.max(560,d.series.length*46),h=220,padL=34,padR=10,padT=10,padB=26;
+  var plotW=w-padL-padR,plotH=h-padT-padB;
+  var yMax=fcNiceMax(Math.max.apply(null,d.series.map(function(x){return VR.length?Math.round((x.booked+x.blocked)/VR.length*100):0;}).concat([10])));
+  var n=d.series.length;
+  var xFor=function(i){return padL+(n>1?i/(n-1):0)*plotW;};
+  var yFor=function(pct){return padT+plotH-(pct/yMax)*plotH;};
+  var pts=d.series.map(function(x,i){
+    var pct=VR.length?(x.booked+x.blocked)/VR.length*100:0;
+    return {x:xFor(i),y:yFor(pct),pct:pct,raw:x};
+  });
+  var pathD=pts.map(function(p,i){return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  var gridLines=[0,0.25,0.5,0.75,1].map(function(f){
+    var y=padT+plotH*(1-f), val=Math.round(yMax*f);
+    return '<line x1="'+padL+'" y1="'+y+'" x2="'+(w-padR)+'" y2="'+y+'" stroke="#eef2f6" stroke-dasharray="3,3"/>'
+      +'<text x="'+(padL-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#9ca3af">'+val+'%</text>';
+  }).join('');
+  var xLabels=pts.map(function(p,i){
+    if(n>16&&i%2!==0) return '';
+    return '<text x="'+p.x+'" y="'+(h-8)+'" text-anchor="middle" font-size="9" fill="#9ca3af">'+fd(d.series[i].date)+'</text>';
+  }).join('');
+  var dots=pts.map(function(p,i){
+    return '<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="#00b4d8" class="fc-dot" data-i="'+i+'"><title>'
+      +d.series[i].date+' — Booked '+d.series[i].booked+', Blocked '+d.series[i].blocked+', Available '+d.series[i].available+', Occupancy '+Math.round(p.pct)+'%'
+      +'</title></circle>';
+  }).join('');
+  return '<div class="fc-chart-wrap"><svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" style="display:block">'
+    +gridLines+'<path d="'+pathD+'" fill="none" stroke="#00b4d8" stroke-width="2"/>'+dots+xLabels+'</svg></div>';
+}
+// Grouped by accommodation TYPE (not per physical room), exactly matching
+// the real Cloudbeds Availability tab's row grouping.
+function fcRenderAvailabilityTable(from,to){
+  var dates=fcDatesInRange(from,to);
+  var types=[]; VR.forEach(function(vr){ if(types.indexOf(vr.type)===-1) types.push(vr.type); });
+  var perTypeRooms={}; types.forEach(function(t){ perTypeRooms[t]=VR.filter(function(vr){return vr.type===t;}).map(function(vr){return vr.n;}); });
+  function availOn(rooms,d){
+    var tomorrow=D2(d,1);
+    return rooms.filter(function(rn){return !isOcc(rn,d,tomorrow);}).length;
+  }
+  var headerTotals=dates.map(function(d){
+    return VR.filter(function(vr){var t=D2(d,1);return !isOcc(vr.n,d,t);}).length;
+  });
+  var head='<tr><th>Accommodation type</th>'+dates.map(function(d,i){return '<th><span class="fc-avail-pill">'+headerTotals[i]+'</span></th>';}).join('')+'</tr>'
+    +'<tr><th></th>'+dates.map(function(d){var p=fd(d).split(' ');return '<th>'+p[1]+'<br>'+p[0]+'</th>';}).join('')+'</tr>';
+  var rows=types.map(function(t){
+    return '<tr><td>'+esc(t)+'</td>'+dates.map(function(d){
+      var a=availOn(perTypeRooms[t],d);
+      return '<td>'+(a===0?'<span class="fc-avail-zero">0</span>':a)+'</td>';
+    }).join('')+'</tr>';
+  }).join('');
+  return '<div class="fc-chart-wrap"><table class="fc-avail-table"><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div>';
+}
+function drawForecast(){
+  if(!document.getElementById('fc-card')) return;
+  if(!FC_FROM||!FC_TO){ FC_FROM=tS; FC_TO=D(13); }
+  document.getElementById('fc-range-label').textContent=fcRangeLabel(FC_FROM,FC_TO);
+  var d=fcComputeData(FC_FROM,FC_TO);
+  document.getElementById('fc-occ').textContent=Math.round(d.occupancyPct)+'%';
+  document.getElementById('fc-rn').textContent=d.bookedRoomNights;
+  document.getElementById('fc-adr').textContent='$'+d.adr.toFixed(2);
+  document.getElementById('fc-revpar').textContent='$'+d.revpar.toFixed(2);
+  document.getElementById('fc-rev').textContent='$'+Math.round(d.roomRevenue).toLocaleString();
+  document.getElementById('fc-body').innerHTML=FC_TAB==='booked'?fcRenderChart(d):fcRenderAvailabilityTable(FC_FROM,FC_TO);
 }
 
 // ══════════════════════════════════════════════
