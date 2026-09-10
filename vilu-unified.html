@@ -2976,12 +2976,20 @@ function renderNotesHTML(r,taId){
     editableValue=parsed.internal?parsed.internal.text:'';
     var metaRows=[];
     metaRows.push(['Source',esc(r.migrated_from?'Cloudbeds (migrated)':(r.src||'Direct'))]);
+    // Prefer r.cb_id/r.migrated_at when the in-memory record carries them,
+    // but every one of these facts is also embedded in the header text
+    // migration itself wrote -- fall back to parsing that so this still
+    // renders fully today, without needing loadResFromSupabase()'s mapper
+    // to be extended to pass those fields through.
+    var idNumM=/^Cloudbeds #(\S+)/.exec(parsed.header);
     if(r.cb_id) metaRows.push(['Cloudbeds reservation','#'+esc(r.cb_id)]);
+    else if(idNumM) metaRows.push(['Cloudbeds reservation','#'+esc(idNumM[1])]);
     var idM=/Cloudbeds internal id\s+(\S+)/.exec(parsed.header); if(idM) metaRows.push(['Cloudbeds internal ID',esc(idM[1])]);
     var srcM=/[·]\s*source\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(srcM) metaRows.push(['Original Cloudbeds source',esc(srcM[1].trim())]);
     var statM=/Cloudbeds status\s+(.+)$/.exec(parsed.header); if(statM) metaRows.push(['Imported status',esc(statM[1].trim())]);
     var bookedM=/booked\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(bookedM) metaRows.push(['Imported booking date',esc(bookedM[1].trim())]);
     if(r.migrated_at){var da=new Date(r.migrated_at);metaRows.push(['Last source update',esc(isNaN(da)?r.migrated_at:da.toLocaleString())]);}
+    else{var chM=/last change\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(chM) metaRows.push(['Last source update',esc(chM[1].trim())]);}
     var otherSections=parsed.sections.filter(function(s){return s!==parsed.internal;});
     var sectionsHTML=otherSections.map(function(s){
       return '<div style="margin-top:8px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">'+esc(s.label)+'</div><div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line">'+esc(s.text)+'</div></div>';
