@@ -903,7 +903,13 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
   <div class="sg">Owner</div>
   <div class="sl" id="sl-analytics" style="display:none" onclick="go('analytics',this)"><i class="ti ti-chart-histogram"></i>Owner analytics</div>
-  <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:var(--font-size-xs);color:#6b7280"><i class="ti ti-circle-check" style="color:#00b4d8"></i> All channels synced</div>
+  <!-- Corrected alongside the OTA Channels accuracy fix (2026-09-10): this
+       was a hardcoded, always-shown "All channels synced" claim with no
+       real sync behind it -- same false-Live-status problem the OTA
+       Channels page itself had, just visible on every page via the
+       sidebar. Booking.com/Expedia/Agoda are Cloudbeds-managed; no OTA is
+       connected via Beds24 today -- see OTA_CHANNELS. -->
+  <div style="margin-top:auto;padding:10px 14px;border-top:1px solid #e5e7eb;font-size:var(--font-size-xs);color:#6b7280"><i class="ti ti-info-circle" style="color:#6b7280"></i> Cloudbeds is the active channel manager</div>
 
   </div>
   <div class="sb-overlay" onclick="toggleSb()"></div>
@@ -1450,7 +1456,11 @@ body.pms-mode { overflow:hidden; }
 </div>
 
 <div class="sec" id="s-ota">
-  <div class="al gn"><i class="ti ti-circle-check" style="font-size:var(--font-size-lg);flex-shrink:0"></i><div>All rate changes push to connected OTAs automatically. OTA bookings go to Vilu Residence rooms only.</div></div>
+  <!-- Corrected 2026-09-10 (OTA Channels accuracy fix): this used to be a
+       green "All rate changes push to connected OTAs automatically" claim
+       -- untrue today, since no OTA is connected via Beds24 yet. See
+       OTA_CHANNELS for the real, per-channel state this page now shows. -->
+  <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-lg);flex-shrink:0"></i><div>Booking.com, Expedia and Agoda are currently managed through Cloudbeds. No channel is connected via Beds24 yet — cutover happens one channel at a time, deliberately, and is never triggered from this page.</div></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px" id="ota-grid"></div>
 </div>
 
@@ -3201,12 +3211,31 @@ let PH=[
   {id:'hb',nm:'White Sand Inn',addr:'Maafushi Island',color:'#06b6d4',rooms:['Room 1','Room 2','Room 3','Room 4','Room 5','Room 6','Room 7','Room 8']},
 ];
 
-const OTAS=[
-  {id:'bc',nm:'Booking.com',color:'#2563eb',comm:15,on:true,bk:18,rev:5840},
-  {id:'ab',nm:'Airbnb',color:'#e11d48',comm:3,on:true,bk:11,rev:3920},
-  {id:'ag',nm:'Agoda',color:'#d97706',comm:18,on:true,bk:8,rev:2640},
-  {id:'ex',nm:'Expedia',color:'#f59e0b',comm:15,on:true,bk:5,rev:1820},
-  {id:'gg',nm:'Google Hotels',color:'#4285f4',comm:0,on:true,bk:3,rev:840},
+// OTA Channels — verified real state (accuracy correction, 2026-09-10).
+// The previous OTAS array was entirely hardcoded mock data: comm/on/bk/rev
+// were sample numbers with no backend behind them at all, and every
+// channel was permanently on:true -- rendering as "Live — Vilu rooms only"
+// with a live-looking toggle and fake booking/revenue/commission figures
+// regardless of actual connection state.
+//
+// No per-channel connection-status backend exists yet to detect this live
+// (confirmed: functions-core/lib/beds24-bridge.js's own architecture
+// comment scopes the Beds24 bridge to Booking.com/Expedia/Agoda ONLY --
+// Airbnb/Google Hotels aren't even in its target scope -- and
+// functions-core/index.js's own comment confirms the OTA-facing functions
+// that would actually talk to Beds24/an OTA "remain undeployed/disabled
+// until real OTA credentials exist"). Per this task's own Step 6 fallback,
+// this is therefore an explicit, conservative, owner-confirmed
+// configuration object reflecting today's REAL state -- not live API
+// detection, and never auto-toggled by this page. Update ONLY when a
+// channel is genuinely, deliberately cut over (a decision made outside
+// this UI), never by flipping anything here.
+const OTA_CHANNELS=[
+  {id:'bc',nm:'Booking.com',  color:'#2563eb', cloudbeds:true,  beds24:false, cutover:'Not started'},
+  {id:'ex',nm:'Expedia',      color:'#f59e0b', cloudbeds:true,  beds24:false, cutover:'Not started'},
+  {id:'ag',nm:'Agoda',        color:'#d97706', cloudbeds:true,  beds24:false, cutover:'Not started'},
+  {id:'ab',nm:'Airbnb',       color:'#e11d48', cloudbeds:false, beds24:false, cutover:'Not configured'},
+  {id:'gg',nm:'Google Hotels',color:'#4285f4', cloudbeds:false, beds24:false, cutover:'Not configured'},
 ];
 
 const SRC_COL={Direct:'#22c55e','Booking.com':'#3b82f6','Airbnb':'#f43f5e','Agoda':'#f59e0b','Expedia':'#eab308','Google Hotels':'#4285f4',Agency:'#4f46e5',Website:'#1e3a5f'};
@@ -6236,25 +6265,58 @@ function drawSn(){
 }
 
 // OTA
-function drawOTA(){
-  document.getElementById('ota-grid').innerHTML=OTAS.map(o=>`<div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-size:var(--font-size-md);font-weight:700;color:${o.color}">${o.nm}</span>
-      <div style="width:38px;height:22px;border-radius:11px;cursor:pointer;background:${o.on?'#00b4d8':'#d1d5db'};position:relative;transition:.2s" onclick="togOTA('${o.id}')">
-        <div style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${o.on?'18px':'2px'};transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
-      <div style="background:#f9fafb;border-radius:6px;padding:7px 8px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600">Bookings</div><div style="font-size:var(--font-size-lg);font-weight:700">${o.bk}</div></div>
-      <div style="background:#f9fafb;border-radius:6px;padding:7px 8px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600">Revenue</div><div style="font-size:var(--font-size-sm);font-weight:700">$${o.rev.toLocaleString()}</div></div>
-      <div style="background:#f9fafb;border-radius:6px;padding:7px 8px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600">Comm.</div><div style="font-size:var(--font-size-lg);font-weight:700">${o.comm}%</div></div>
-    </div>
-    <div style="font-size:var(--font-size-xs);color:${o.on?'#0096c7':'#b45309'};display:flex;align-items:center;gap:5px;margin-bottom:8px"><i class="ti ti-${o.on?'circle-check':'alert-circle'}"></i>${o.on?'Live — Vilu rooms only':'Paused'}</div>
-    <button class="btn sm" onclick="pushOTA('${o.id}')"><i class="ti ti-send"></i>Push rates now</button>
-  </div>`).join('');
+// No fake toggle, no fake booking/revenue/commission cards, no "Push
+// rates now" button -- none of that data exists for any channel today.
+// Cloudbeds-managed channels show a neutral status badge (not a green
+// "connected" toggle, which would wrongly imply this page controls the
+// connection); unconfigured channels show the same, just narrower.
+// otaChannelInfo() is a pure lookup used by the tests below, kept
+// separate from the innerHTML string so the "no fake numbers anywhere"
+// claim is checkable without parsing HTML.
+function otaChannelInfo(o){
+  return {
+    connection: o.cloudbeds ? 'Cloudbeds' : 'Not configured',
+    beds24: o.beds24 ? 'Connected' : 'Not connected',
+    cutover: o.cutover
+  };
 }
-function togOTA(id){const o=OTAS.find(x=>x.id===id);o.on=!o.on;aLog(o.on?'ok':'warn',o.nm+(o.on?' connected':' paused'));toast(o.nm+(o.on?' connected':' disconnected'));drawOTA();}
-function pushOTA(id){const o=OTAS.find(x=>x.id===id);if(!o.on){toast(o.nm+' is disconnected');return;}aLog('ok','Rates pushed to '+o.nm);toast('Rates pushed to '+o.nm);}
+function drawOTA(){
+  document.getElementById('ota-grid').innerHTML=OTA_CHANNELS.map(function(o){
+    var info=otaChannelInfo(o);
+    return '<div class="card">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      +'<span style="font-size:var(--font-size-md);font-weight:700;color:'+o.color+'">'+o.nm+'</span>'
+      +'<span style="font-size:var(--font-size-xs);font-weight:700;padding:3px 9px;border-radius:20px;background:'+(o.cloudbeds?'#f0f9ff':'#f3f4f6')+';color:'+(o.cloudbeds?'#0096c7':'#6b7280')+'">'+(o.cloudbeds?'Cloudbeds-managed':'Not configured')+'</span>'
+      +'</div>'
+      +'<div style="font-size:var(--font-size-sm);color:#374151;margin-bottom:4px"><span style="color:#6b7280">Current connection:</span> '+info.connection+'</div>'
+      +'<div style="font-size:var(--font-size-sm);color:#374151;margin-bottom:4px"><span style="color:#6b7280">Beds24:</span> '+info.beds24+'</div>'
+      +'<div style="font-size:var(--font-size-sm);color:#374151;margin-bottom:12px"><span style="color:#6b7280">Cutover:</span> '+info.cutover+'</div>'
+      +'<button class="btn sm" onclick="otaChannelInfoDialog(\''+o.id+'\')">'+(o.cloudbeds?'Setup / Review':'Configure later')+'</button>'
+      +'</div>';
+  }).join('');
+}
+// Purely informational -- explains today's real state and that a cutover
+// is a deliberate, separate decision made outside this page. Never
+// toggles OTA_CHANNELS, never calls Beds24/Cloudbeds/any OTA, never
+// writes anything -- reuses the existing showConfirm() modal as a plain
+// dismissible info dialog (onYes is a no-op) rather than a 3.2s toast,
+// since the explanation is too long to read in that window.
+function otaChannelInfoDialog(id){
+  var o=OTA_CHANNELS.find(function(x){return x.id===id;});
+  if(!o) return;
+  var msg = o.cloudbeds
+    ? o.nm+' is currently managed through Cloudbeds. It is not yet connected via Beds24, and no cutover has started.'
+    : o.nm+' is not yet configured for this property. It is not connected via Beds24 or Cloudbeds today.';
+  showConfirm({
+    title:o.nm,
+    msg:msg,
+    warn:o.cloudbeds?'Moving a channel to the Vilu PMS → Beds24 → OTA bridge is a deliberate, separate cutover decision — it is never performed from this page.':'',
+    icon:'ℹ️',
+    btnLabel:'Got it',
+    btnColor:'#0096c7',
+    onYes:function(){}
+  });
+}
 
 // SYNC LOG
 function drawLog(){
