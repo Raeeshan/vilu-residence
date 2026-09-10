@@ -1016,6 +1016,7 @@ body.pms-mode { overflow:hidden; }
   <div class="g2">
     <div class="card"><h3>Physical room rates <span onclick="go('price',document.querySelectorAll('.sl')[3])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div id="d-rt"></div></div>
     <div class="card"><h3>Maldives tax rates <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div style="display:flex;gap:10px;flex-wrap:wrap" id="d-tax"></div></div>
+    <div class="card"><h3>MVR Billing <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit settings →</span></h3><div id="d-mvr-card"></div></div>
   </div>
   <div class="card" id="d-partners-card" style="display:none"><h3>Partner properties</h3><div id="d-partners"></div></div>
 </div>
@@ -1516,6 +1517,13 @@ body.pms-mode { overflow:hidden; }
         <div class="fg"><label>Payment</label><select id="nb-pay"><option>Unpaid</option><option>Deposit paid</option><option>Fully paid</option></select></div>
         <div class="fg" style="grid-column:1/-1"><label>Notes / special requests</label><textarea id="nb-notes" placeholder="Early check-in, dietary needs..."></textarea></div>
       </div>
+      <div class="rd-section" style="margin-top:14px">PRICING</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="fg"><label>Currency</label><select id="nb-currency" onchange="nbCurrencyChanged();nbCalc()"><option value="USD">USD</option><option value="MVR">MVR</option></select></div>
+        <div class="fg"><label>Price entered as</label><select id="nb-taxmode" onchange="nbCalc()"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+        <div class="fg"><label>Guest tax status</label><select id="nb-taxstatus" onchange="nbCalc()"><option value="TOURIST">Tourist</option><option value="MALDIVIAN">Maldivian</option><option value="RESIDENT_PERMIT">Resident permit holder</option></select></div>
+      </div>
+      <div class="fg"><label id="nb-rate-override-label">Room rate / night override <span style="color:#9ca3af;font-weight:400">(optional — leave blank to use each selected room's own rate)</span></label><input type="number" id="nb-rate-override" min="0" step="0.01" placeholder="e.g. 700" onchange="nbCalc()"></div>
       <div id="nb-cf" style="display:none;padding:10px 14px;background:#fef3c7;color:#92400e;border-radius:6px;font-size:var(--font-size-sm);margin-top:8px;border:1px solid #fde68a"></div>
       <div id="nb-pr" style="background:#f9fafb;border-radius:8px;padding:12px;font-size:var(--font-size-sm);margin-top:10px"></div>
       <div style="display:flex;gap:8px;margin-top:12px">
@@ -1551,16 +1559,25 @@ body.pms-mode { overflow:hidden; }
     <div class="card">
       <h3><i class="ti ti-receipt-tax" style="margin-right:6px"></i>Maldives Tax Settings</h3>
       <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Per MIRA. Update when rates change — all new invoices use updated rates instantly.</div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">TGST (Tourism GST)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Effective July 1, 2025</div></div><div class="si"><input type="number" id="st-tgst" step="0.1"><span>%</span></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Green Tax (per person/night)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Children under 2 exempt</div></div><div class="si"><span>$</span><input type="number" id="st-gt" step="0.5"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">TGST (Tourism GST)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Effective from <input type="date" id="st-tgst-eff" style="font-family:inherit;font-size:var(--font-size-xs);border:1px solid #d1d5db;border-radius:4px;padding:1px 4px"></div></div><div class="si"><input type="number" id="st-tgst" step="0.1"><span>%</span></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Green Tax (per person/night, USD)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Tourists only — Maldivians/resident permit holders/under-2 exempt. Effective from <input type="date" id="st-green-eff" style="font-family:inherit;font-size:var(--font-size-xs);border:1px solid #d1d5db;border-radius:4px;padding:1px 4px"></div></div><div class="si"><span>$</span><input type="number" id="st-gt" step="0.5"></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Service Charge</div><div style="font-size:var(--font-size-xs);color:#6b7280">Applied before TGST</div></div><div class="si"><input type="number" id="st-sc" step="0.5"><span>%</span></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Bed Tax (per room/night)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Set 0 if not applicable</div></div><div class="si"><span>$</span><input type="number" id="st-bt" step="0.5"></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">3rd Guest Supplement (per night, adult)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Direct/PMS only — covers the 3rd guest, no separate extra-bed charge. Agency/B2B rate is a separate, still-pending decision.</div></div><div class="si"><span>$</span><input type="number" id="st-3g" step="0.5"></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Child Discount on 3rd Guest (age 2–11)</div><div style="font-size:var(--font-size-xs);color:#6b7280">% off the 3rd-guest supplement when the marginal guest is a child. Infants under 2 already pay $0 (excluded from the guest count).</div></div><div class="si"><input type="number" id="st-cd" step="1"><span>%</span></div></div>
       <div style="display:flex;gap:8px;margin-top:14px">
-        <button class="btn p" onclick="saveTax()"><i class="ti ti-device-floppy"></i>Save tax settings</button>
-        <button class="btn sm" onclick="resetTax()">Reset to defaults</button>
+        <button class="btn p" id="st-tax-save-btn" onclick="saveTax()"><i class="ti ti-device-floppy"></i>Save tax settings</button>
+        <button class="btn sm" id="st-tax-reset-btn" onclick="resetTax()">Reset to defaults</button>
       </div>
+    </div>
+    <div class="card">
+      <h3><i class="ti ti-currency-dollar" style="margin-right:6px"></i>MVR Billing — Tax &amp; Currency Settings</h3>
+      <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>TGST and Green Tax are the SAME government tax regardless of invoice currency — there is no separate "MVR TGST" rate. Only the default price mode and the display exchange rate are currency-specific.</div></div>
+      <div id="mvr-billing-card"></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">USD → MVR exchange rate</div><div style="font-size:var(--font-size-xs);color:#6b7280">Manually configured — snapshotted onto every finalized MVR invoice, so a later change never alters an old one</div></div><div class="si"><span>MVR</span><input type="number" id="st-fx-rate" step="0.01" min="0.01"></div></div>
+      <div class="fg"><label>Default price mode — USD invoices</label><select id="st-usd-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+      <div class="fg"><label>Default price mode — MVR invoices</label><select id="st-mvr-mode"><option value="TAX_INCLUDED">Tax included</option><option value="TAX_EXCLUDED">Tax excluded</option></select></div>
+      <button class="btn p" id="st-mvr-save-btn" onclick="saveMvrSettings()"><i class="ti ti-device-floppy"></i>Save MVR billing settings</button>
     </div>
     <div class="card">
       <h3><i class="ti ti-building" style="margin-right:6px"></i>Property Settings</h3>
@@ -2244,6 +2261,17 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
 
     <!-- Reservation selector -->
     <div class="fg"><label>Select reservation</label><select id="ni-res" onchange="niPrev()"></select></div>
+
+    <!-- USD/MVR billing (2026-09-10, Part L): currency/guest tax status/
+         price mode, inside the SAME single Create Invoice flow -- never a
+         separate Local/MVR/Tourist invoice button. Defaults to the
+         reservation's own billingCurrency/guestTaxStatus/priceTaxMode
+         (set at New Booking time) but staff may override per invoice. -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="fg" style="margin-bottom:0"><label>Invoice currency</label><select id="ni-currency" onchange="niPrev()"><option value="USD">USD</option><option value="MVR">MVR</option></select></div>
+      <div class="fg" style="margin-bottom:0"><label>Guest tax status</label><select id="ni-taxstatus" onchange="niPrev()"><option value="TOURIST">Tourist</option><option value="MALDIVIAN">Maldivian</option><option value="RESIDENT_PERMIT">Resident permit</option></select></div>
+      <div class="fg" style="margin-bottom:0"><label>Price mode</label><select id="ni-taxmode" onchange="niPrev()"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+    </div>
 
     <!-- Room charge toggle (Step 6 fix: one room calculation, always via
          calcTax(), never a second manually-added room line). Hidden for a
@@ -3169,7 +3197,22 @@ const CW=36;let IC=1000;
 // thirdGuest when the marginal 3rd guest is a child aged 2-11 -- infants
 // under 2 are already excluded from the guest count entirely (see gp in
 // calcTax()), so they need no separate discount field here.
-let TAX={tgst:17,green:6,svc:10,bed:0,thirdGuest:20,childDiscountPercent:50};
+// USD/MVR billing (2026-09-10): exchangeRateUsdMvr/mvrDefaultPriceMode/
+// usdDefaultPriceMode/effective-from dates are additive fields on the
+// SAME TAX object every existing tgst/green/svc/bed/thirdGuest reference
+// already reads -- never a second, competing settings object. TGST/Green
+// Tax remain the ONE government rate regardless of invoice currency (Part
+// H: "Do NOT create a legally separate MVR TGST rate") -- what's
+// currency-specific is only the default price mode and the display
+// exchange rate. effectiveFrom fields are informational/audit context for
+// the Settings page (Part R); they do not drive date-range rate lookup --
+// a NEW invoice always uses the current TAX object, an already-finalized
+// invoice already snapshots its own v.tax copy at creation time (existing
+// pattern, unchanged), which is what actually keeps historical invoices
+// immutable when a rate later changes.
+let TAX={tgst:17,green:6,svc:10,bed:0,thirdGuest:20,childDiscountPercent:50,
+  exchangeRateUsdMvr:15.42, mvrDefaultPriceMode:'TAX_INCLUDED', usdDefaultPriceMode:'TAX_EXCLUDED',
+  tgstEffectiveFrom:'2025-07-01', greenTaxEffectiveFrom:'2025-01-01'};
 let PROP={nm:'Vilu Residence Maamigili',addr:'South Ari Atoll, Maamigili, 00100',ph:'+960 9903339',em:'Viluresidence@gmail.com',gst:'MVT-2025-00001',bk:''};
 
 // type must exactly match the room category name as listed on the
@@ -3923,6 +3966,60 @@ let SL=[
 ];
 function aLog(d,m){SL.unshift({t:'Just now',d,m});}
 
+// USD/MVR dual-currency billing + tax-inclusive/exclusive pricing + guest
+// tax status (2026-09-10). Pure function, currency/tax-status/tax-mode
+// aware -- calcTax(r) below is a thin backward-compatible wrapper over
+// this, so there is exactly ONE tax engine, never a second "local invoice"
+// calculation living in parallel. A reservation with no billingCurrency/
+// guestTaxStatus/priceTaxMode set reproduces the historical USD/Tourist/
+// Tax-Excluded formula byte-for-byte (verified by test).
+//
+// Design notes (documented here since they're judgment calls the task
+// left open):
+// - Green Tax is ALWAYS a separate, additive statutory line, even under
+//   TAX_INCLUDED pricing (Part K: "tax included" is never assumed to
+//   silently absorb Green Tax) -- the quoted inclusive amount reconciles
+//   to base+service+TGST only.
+// - Green Tax is the only component ever currency-converted: it is a
+//   USD-denominated statutory obligation (greenUsd) regardless of invoice
+//   currency; for an MVR invoice it is additionally converted for display/
+//   totaling (green) using the invoice's own snapshotted exchange rate.
+//   base/service/TGST are computed natively in whatever currency the rate
+//   was quoted in -- they never cross currencies.
+// - Bed tax (TAX.bed) is unchanged/out of scope: it defaults to 0 in this
+//   PMS and is left as a simple same-currency add-on, not part of the new
+//   currency-conversion or tax-inclusive reverse-calculation logic.
+function calcTaxGeneral(input){
+  var tgstRate=input.taxCfg.tgst/100, svcRate=input.taxCfg.svc/100;
+  var gp=(input.adults||0)+(input.children||0); // infants already excluded by the caller, same as the existing Green Tax exemption
+  var greenLiableGuests = input.guestTaxStatus==='TOURIST' ? gp : 0;
+  var greenExempt = input.guestTaxStatus!=='TOURIST';
+  var greenExemptReason = input.guestTaxStatus==='MALDIVIAN' ? 'Maldivian' : (input.guestTaxStatus==='RESIDENT_PERMIT' ? 'Resident permit holder' : null);
+  var greenUsd = +((input.taxCfg.greenUsd||0) * greenLiableGuests * input.nights).toFixed(2);
+  var green = input.currency==='MVR' ? +(greenUsd * (input.taxCfg.exchangeRateUsdMvr||1)).toFixed(2) : greenUsd;
+
+  var roomAndSupplement = +(input.quotedRate*input.nights + (input.thirdGuestSupplement||0)).toFixed(2);
+  var base, svc, tgst;
+  if(input.priceTaxMode==='TAX_INCLUDED'){
+    // Reverse-calculate base/service/TGST from the quoted inclusive
+    // amount (Part J): base = inclusive / ((1+svc%)*(1+tgst%)), then svc
+    // forward from that base, then TGST absorbs whatever cent/laari
+    // remains -- base+svc+tgst === roomAndSupplement EXACTLY by
+    // construction, never off by a rounding cent (deterministic, same
+    // "remainder absorbs into one line" principle splitCentsDeterministic
+    // already uses elsewhere in this file for guest-split rounding).
+    var rawBase = roomAndSupplement / ((1+svcRate)*(1+tgstRate));
+    base = +rawBase.toFixed(2);
+    svc = +(base*svcRate).toFixed(2);
+    tgst = +(roomAndSupplement - base - svc).toFixed(2);
+  } else {
+    base = roomAndSupplement;
+    svc = +(base*svcRate).toFixed(2);
+    tgst = +((base+svc)*tgstRate).toFixed(2);
+  }
+  var total = +(base+svc+tgst+green).toFixed(2);
+  return {base:base, svc:svc, tgst:tgst, green:green, greenUsd:greenUsd, greenExempt:greenExempt, greenExemptReason:greenExemptReason, total:total, currency:input.currency};
+}
 function calcTax(r){
   const n=nt(r.ci,r.co);
   const ad=r.ad||1, ch=r.ch||0;
@@ -3966,12 +4063,28 @@ function calcTax(r){
   const thirdGuestIsChild=hasThirdGuest&&ad<3&&ch>=1;
   const thirdGuestFull=hasThirdGuest?TAX.thirdGuest*n:0;
   const thirdGuest=+(thirdGuestIsChild?thirdGuestFull*(1-TAX.childDiscountPercent/100):thirdGuestFull).toFixed(2);
-  const base=+(n*r.rate+thirdGuest).toFixed(2);
-  const svc=+(base*TAX.svc/100).toFixed(2);
-  const tgst=+((base+svc)*TAX.tgst/100).toFixed(2);
-  const green=+(TAX.green*gp*n).toFixed(2);
+
+  // USD/MVR billing (2026-09-10): a reservation with none of these three
+  // fields set behaves EXACTLY as before -- USD, Tourist (Green Tax
+  // applies to every adult/child, same as always), Tax Excluded (r.rate
+  // is the pre-tax nightly rate, its historical meaning). quotedRate
+  // deliberately reuses r.rate rather than introducing a second, parallel
+  // rate field that the rest of this file's many r.rate call sites
+  // (Bulk Price Manager, edit forms, folio math) would never see kept in
+  // sync -- r.rate already IS "the quoted rate", now with proper
+  // currency/tax-status/tax-mode context alongside it.
+  const currency = r.billingCurrency || 'USD';
+  const guestTaxStatus = r.guestTaxStatus || 'TOURIST';
+  const priceTaxMode = r.priceTaxMode || 'TAX_EXCLUDED';
+  const quotedRate = r.quotedRate!=null ? r.quotedRate : r.rate;
+  const g = calcTaxGeneral({
+    quotedRate:quotedRate, nights:n, adults:ad, children:ch,
+    thirdGuestSupplement:thirdGuest, currency:currency,
+    guestTaxStatus:guestTaxStatus, priceTaxMode:priceTaxMode,
+    taxCfg:{tgst:TAX.tgst, svc:TAX.svc, greenUsd:TAX.green, exchangeRateUsdMvr:TAX.exchangeRateUsdMvr||1}
+  });
   const bed=+(TAX.bed*n).toFixed(2);
-  return{n,base,svc,tgst,green,bed,gp,thirdGuest,thirdGuestIsChild,inf:r.inf||0,total:+(base+svc+tgst+green+TAX.bed*n).toFixed(2)};
+  return{n,base:g.base,svc:g.svc,tgst:g.tgst,green:g.green,greenUsd:g.greenUsd,greenExempt:g.greenExempt,greenExemptReason:g.greenExemptReason,bed,gp,thirdGuest,thirdGuestIsChild,inf:r.inf||0,currency:currency,guestTaxStatus:guestTaxStatus,priceTaxMode:priceTaxMode,total:+(g.base+g.svc+g.tgst+g.green+bed).toFixed(2)};
 }
 
 // Step 9 (2026-09-09 channel-aware payment pass): renders the channel-aware
@@ -3999,17 +4112,34 @@ function otaPaymentBlock(r){
     +reviewFlag
     +'</div>';
 }
+// USD/MVR-aware currency symbol -- 'MVR ' as a prefix (MVR has no single
+// ASCII glyph in common use here), '$' for USD, matching every existing
+// USD display in this file exactly for a reservation with no
+// billingCurrency set.
+function curSym(currency){ return currency==='MVR' ? 'MVR ' : '$'; }
 function pbd(r){
   const x=calcTax(r);
-  return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN</div>
-<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">${x.n} nights × $${r.rate}</span><span>$${(x.n*r.rate).toFixed(2)}</span></div>
-${x.thirdGuest>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">3rd guest supplement${x.thirdGuestIsChild?' (child, '+TAX.childDiscountPercent+'% off)':''} × ${x.n} nights</span><span>$${x.thirdGuest.toFixed(2)}</span></div>`:''}
-<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Service (${TAX.svc}%)</span><span>$${x.svc.toFixed(2)}</span></div>
-<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">TGST (${TAX.tgst}%)</span><span>$${x.tgst.toFixed(2)}</span></div>
-<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax ($${TAX.green} × ${x.gp} persons × ${x.n} nights${x.inf>0?' — '+x.inf+' infant exempt':''})</span><span>$${x.green.toFixed(2)}</span></div>
-${TAX.bed>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Bed tax</span><span>$${x.bed.toFixed(2)}</span></div>`:''}
+  const cs=curSym(x.currency);
+  const inclusive=x.priceTaxMode==='TAX_INCLUDED';
+  // Tax-included pricing (Part J/M): the quoted per-night rate already IS
+  // the final commercial amount -- shown as one "Quoted inclusive amount"
+  // line, with base/service/TGST reverse-calculated and shown as an
+  // "included in the above" breakdown, never implying they're additional.
+  const roomLineLabel = inclusive ? (x.n+' nights × '+cs+r.rate+' (tax included)') : (x.n+' nights × '+cs+r.rate);
+  const roomLineAmt = +(x.n*r.rate).toFixed(2);
+  const greenLine = x.greenExempt
+    ? `<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax</span><span style="color:#059669">Exempt — ${x.greenExemptReason}</span></div>`
+    : `<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax (USD ${TAX.green} × ${x.gp} persons × ${x.n} nights${x.inf>0?' — '+x.inf+' infant exempt':''})</span><span>${cs}${x.green.toFixed(2)}${x.currency==='MVR'?' <span style="color:#9ca3af">(USD '+x.greenUsd.toFixed(2)+' × '+(TAX.exchangeRateUsdMvr||1)+')</span>':''}</span></div>`;
+  return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN${x.currency==='MVR'?' (MVR)':''}</div>
+<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">${roomLineLabel}</span><span>${cs}${roomLineAmt.toFixed(2)}</span></div>
+${x.thirdGuest>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">3rd guest supplement${x.thirdGuestIsChild?' (child, '+TAX.childDiscountPercent+'% off)':''} × ${x.n} nights</span><span>${cs}${x.thirdGuest.toFixed(2)}</span></div>`:''}
+${inclusive?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:2px 0 4px">Included in the above: Base ${cs}${x.base.toFixed(2)} + Service ${cs}${x.svc.toFixed(2)} + TGST ${cs}${x.tgst.toFixed(2)}</div>`:`
+<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Service (${TAX.svc}%)</span><span>${cs}${x.svc.toFixed(2)}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">TGST (${TAX.tgst}%)</span><span>${cs}${x.tgst.toFixed(2)}</span></div>`}
+${greenLine}
+${TAX.bed>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Bed tax</span><span>${cs}${x.bed.toFixed(2)}</span></div>`:''}
 ${(r.extraBeds||0)>0?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:2px 0">🛏️ Extra bed requested — no separate charge, already included in the 3rd guest supplement above</div>`:''}
-<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total (incl. all taxes)</span><span style="color:#00b4d8">$${x.total.toFixed(2)}</span></div>`;
+<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total${x.currency==='MVR'?' (MVR)':' (incl. all taxes)'}</span><span style="color:#00b4d8">${cs}${x.total.toFixed(2)}</span></div>`;
 }
 
 function isOcc(rn,from,to,excl){
@@ -4324,6 +4454,10 @@ function drawDash(){
     <div style="background:#e8f5f2;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">TGST</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#00b4d8">${TAX.tgst}%</div></div>
     <div style="background:#fef3c7;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">Green Tax</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#92400e">$${TAX.green}/pp/night</div></div>
     <div style="background:#f3f4f6;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">Service</div><div style="font-size:var(--font-size-lg);font-weight:700">${TAX.svc}%</div></div>`;
+  // USD/MVR billing (Part V) -- reuses the SAME mvrBillingCardHTML() the
+  // Settings page renders, so the Dashboard and Settings never show two
+  // independently-drifting summaries of the same TAX object.
+  if(document.getElementById('d-mvr-card')) document.getElementById('d-mvr-card').innerHTML=mvrBillingCardHTML();
   var partners=RES.filter(r=>r.prop!=='vilu'&&isBlockingStatus(r.st)&&r.st!=='Checked out');
   var pCard=document.getElementById('d-partners-card');
   if(partners.length){
@@ -6385,8 +6519,8 @@ function drawInv(){
     <td style="font-weight:700">#${v.num}</td><td>${esc(v.guest)}</td>
     <td style="font-size:var(--font-size-xs)">${phBx(v.prop)}</td>
     <td style="font-size:var(--font-size-xs)">${fd(v.ci)}–${fd(v.co)}</td>
-    <td>$${v.base.toFixed(2)}</td>
-    <td style="font-weight:700">$${v.total.toFixed(2)}</td>
+    <td>${curSym(v.currency)}${v.base.toFixed(2)}</td>
+    <td style="font-weight:700">${curSym(v.currency)}${v.total.toFixed(2)}${v.currency==='MVR'?' <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">MVR</span>':''}</td>
     <td>${v.status==='void'?'<span class="bx er">Void</span>':`<span class="bx ${v.pay==='Fully paid'?'ok':v.pay==='Partially paid'?'ib2':v.pay==='Pending payment'?'pnd':'wn'}">${v.pay}</span>`}</td>
     <td style="display:flex;gap:2px">
       <button class="ab" onclick="viewInv('${v.id}')"><i class="ti ti-eye"></i></button>
@@ -6410,6 +6544,15 @@ function drawInv(){
 var invPayerScope='whole';
 function openIM(resId, opts){
   document.getElementById('ni-res').innerHTML=RES.filter(r=>r.st!=='Cancelled').map(r=>`<option value="${r.id}"${r.id===resId?' selected':''}>${r.id}: ${esc(r.fn)} ${esc(r.ln)} — ${rNm(r.rn)} (${fd(r.ci)}–${fd(r.co)})</option>`).join('');
+  // USD/MVR billing (2026-09-10): default the invoice's currency/guest tax
+  // status/price mode to this reservation's own (set at New Booking time,
+  // or USD/Tourist/Tax-Excluded if it never used the Pricing section) --
+  // staff may still change them per invoice via the selects themselves.
+  var resForPricing = resId ? RES.find(function(x){return x.id===resId;}) : null;
+  var curEl=document.getElementById('ni-currency'), statusEl=document.getElementById('ni-taxstatus'), modeEl=document.getElementById('ni-taxmode');
+  if(curEl) curEl.value = (resForPricing&&resForPricing.billingCurrency)||'USD';
+  if(statusEl) statusEl.value = (resForPricing&&resForPricing.guestTaxStatus)||'TOURIST';
+  if(modeEl) modeEl.value = (resForPricing&&resForPricing.priceTaxMode)||'TAX_EXCLUDED';
   document.getElementById('ni-notes').value='';
   if(document.getElementById('ni-pay')) document.getElementById('ni-pay').value='Unpaid';
   if(document.getElementById('ni-paymethod')) document.getElementById('ni-paymethod').value='';
@@ -6491,28 +6634,48 @@ function niPayChanged(){
   var lbl=document.getElementById('ni-paymethod-label');
   if(lbl) lbl.textContent = pay==='Fully paid' ? 'Payment method' : 'Payment method (optional)';
 }
+// USD/MVR billing (2026-09-10): the invoice's own currency/guest tax
+// status/price mode (from the Create Invoice selects) override the
+// reservation's own values for THIS invoice only -- the reservation
+// record itself is never rewritten by generating an invoice.
+function niInvoicePricing(){
+  return {
+    currency: (document.getElementById('ni-currency')||{}).value || 'USD',
+    guestTaxStatus: (document.getElementById('ni-taxstatus')||{}).value || 'TOURIST',
+    priceTaxMode: (document.getElementById('ni-taxmode')||{}).value || 'TAX_EXCLUDED'
+  };
+}
 function niPrev(){
   const id=document.getElementById('ni-res').value,r=RES.find(x=>x.id===id);
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   if(!r){document.getElementById('ni-prev').innerHTML='';return;}
-  const x=calcTax(r);
-  const eSubtotal=invItems.reduce((s,i)=>s+(i.qty*i.unit),0);
-  const eTax=invItems.filter(i=>i.tax).reduce((s,i)=>s+(i.qty*i.unit*(TAX.svc+TAX.tgst)/100),0);
+  const pricing=niInvoicePricing();
+  const rForInvoice=Object.assign({},r,{billingCurrency:pricing.currency,guestTaxStatus:pricing.guestTaxStatus,priceTaxMode:pricing.priceTaxMode});
+  const x=calcTax(rForInvoice);
+  const cs=curSym(pricing.currency);
+  // Extra/catalog items are priced in USD by the Fixed Price Catalog
+  // (unchanged, out of scope -- Part H). For an MVR invoice they're
+  // converted for THIS invoice's display/total only, using the same
+  // snapshotted exchange rate as Green Tax -- the catalog's own stored
+  // USD basePrice is never touched.
+  const fx = pricing.currency==='MVR' ? (TAX.exchangeRateUsdMvr||1) : 1;
+  const eSubtotal=invItems.reduce((s,i)=>s+(i.qty*i.unit*fx),0);
+  const eTax=invItems.filter(i=>i.tax).reduce((s,i)=>s+(i.qty*i.unit*fx*(TAX.svc+TAX.tgst)/100),0);
   const eT=eSubtotal+eTax;
   const roomTotal=includeRoom?x.total:0;
   const d=invDiscountAmount(roomTotal, eT);
   const total=+(roomTotal+eT-d.amount).toFixed(2);
-  let html=includeRoom?pbd(r):'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:4px 0">Room charge not included in this invoice</div>';
+  let html=includeRoom?pbd(rForInvoice):'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:4px 0">Room charge not included in this invoice</div>';
   if(invItems.length){
     html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
-      <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">EXTRA CHARGES</div>
-      ${invItems.map(i=>`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0"><span style="color:#6b7280">${i.desc||'(unnamed)'} × ${i.qty}</span><span>$${(i.qty*i.unit).toFixed(2)}${i.tax?' + tax':''}</span></div>`).join('')}
-      <div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0;color:#6b7280"><span>Extra tax (TGST+Service)</span><span>$${eTax.toFixed(2)}</span></div>
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">EXTRA CHARGES${pricing.currency==='MVR'?' (converted to MVR for this invoice)':''}</div>
+      ${invItems.map(i=>`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0"><span style="color:#6b7280">${i.desc||'(unnamed)'} × ${i.qty}</span><span>${cs}${(i.qty*i.unit*fx).toFixed(2)}${i.tax?' + tax':''}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0;color:#6b7280"><span>Extra tax (TGST+Service)</span><span>${cs}${eTax.toFixed(2)}</span></div>
     </div>`;
   }
-  html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px"><span style="color:#6b7280">Subtotal</span><span>$${(roomTotal+eT).toFixed(2)}</span></div>`;
-  if(d.amount>0)html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;color:#00b4d8"><span>Invoice discount${d.type==='percent'?' ('+d.value+'%)':''}</span><span>-$${d.amount.toFixed(2)}</span></div>`;
-  html+=`<div style="display:flex;justify-content:space-between;font-weight:700;border-top:2px solid #111827;padding-top:7px;margin-top:6px;font-size:var(--font-size-md);color:#00b4d8"><span>Grand total</span><span>$${total.toFixed(2)}</span></div>`;
+  html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px"><span style="color:#6b7280">Subtotal</span><span>${cs}${(roomTotal+eT).toFixed(2)}</span></div>`;
+  if(d.amount>0)html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;color:#00b4d8"><span>Invoice discount${d.type==='percent'?' ('+d.value+'%)':''}</span><span>-${cs}${d.amount.toFixed(2)}</span></div>`;
+  html+=`<div style="display:flex;justify-content:space-between;font-weight:700;border-top:2px solid #111827;padding-top:7px;margin-top:6px;font-size:var(--font-size-md);color:#00b4d8"><span>Grand total</span><span>${cs}${total.toFixed(2)}</span></div>`;
   document.getElementById('ni-prev').innerHTML=html;
 }
 document.addEventListener('change',e=>{if(e.target.id==='ni-res'||e.target.id==='ni-include-room')niPrev();});
@@ -6572,12 +6735,21 @@ function genInv(){
   const rid=document.getElementById('ni-res').value,r=RES.find(x=>x.id===rid);
   if(!r){toast('Select a reservation');return;}
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
+  // USD/MVR billing (2026-09-10): this invoice's own currency/guest tax
+  // status/price mode -- from the Create Invoice selects, defaulting to
+  // (but not necessarily equal to) the reservation's own values. `fx`
+  // converts the Fixed Price Catalog's USD-priced extras for THIS
+  // invoice's display/total only -- the catalog itself is never touched.
+  const pricing=niInvoicePricing();
+  const rForInvoice=Object.assign({},r,{billingCurrency:pricing.currency,guestTaxStatus:pricing.guestTaxStatus,priceTaxMode:pricing.priceTaxMode});
+  const fx = pricing.currency==='MVR' ? (TAX.exchangeRateUsdMvr||1) : 1;
   const extras=invItems.filter(i=>i.desc&&i.unit>=0).map(i=>{
-    const subtotal=+(i.qty*i.unit).toFixed(2);
+    const unitConverted=+(i.unit*fx).toFixed(4);
+    const subtotal=+(i.qty*unitConverted).toFixed(2);
     const taxAmt=i.tax?+(subtotal*(TAX.svc+TAX.tgst)/100).toFixed(2):0;
-    return{desc:i.desc,qty:i.qty,unit:i.unit,subtotal,tax:i.tax,taxAmt,cat:i.cat,total:+(subtotal+taxAmt).toFixed(2),chargeId:i.chargeId||null};
+    return{desc:i.desc,qty:i.qty,unit:unitConverted,unitUsd:i.unit,subtotal,tax:i.tax,taxAmt,cat:i.cat,total:+(subtotal+taxAmt).toFixed(2),chargeId:i.chargeId||null};
   });
-  const x=calcTax(r);
+  const x=calcTax(rForInvoice);
   const eSubtotal=+extras.reduce((s,e)=>s+e.subtotal,0).toFixed(2);
   const eTax=+extras.reduce((s,e)=>s+e.taxAmt,0).toFixed(2);
   const eT=+(eSubtotal+eTax).toFixed(2);
@@ -6602,6 +6774,17 @@ function genInv(){
   // task's invoice-discount work since it touches the same object literal).
   const paidByName=(currentUser&&(currentUser.name||currentUser.username))||'Staff';
   const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,payerScope:invPayerScope,payerLabel:invPayerScope==='whole'?'Whole room':guestLabelFor(r,invPayerScope),guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eSubtotal,eTax,eT,disc,discType:d.type,discValue:d.value,total,pay:initialPay,paidAmount,
+    // USD/MVR billing (Part P) -- enough snapshotted here to reproduce
+    // this exact invoice forever, independent of whatever TAX/exchange
+    // rate/guest status later changes to. currency/guestTaxStatus/
+    // priceTaxMode are THIS invoice's own choice (may differ from the
+    // reservation's), never recomputed from today's live reservation or
+    // settings on reopen.
+    currency:pricing.currency, guestTaxStatus:pricing.guestTaxStatus, priceTaxMode:pricing.priceTaxMode,
+    tgstRate:TAX.tgst, serviceChargeRate:TAX.svc, greenTaxRateUsd:TAX.green,
+    greenTaxUsd:includeRoom?x.greenUsd:0, greenTaxExempt:x.greenExempt, greenTaxExemptReason:x.greenExemptReason||null,
+    exchangeRateUsdMvr:pricing.currency==='MVR'?(TAX.exchangeRateUsdMvr||1):null,
+    exchangeRateSnapshotAt:tS,
     paymentMethod:(initialPay==='Fully paid'||initialPay==='Pending payment')?(paymentMethod||null):null,
     paymentRef:(initialPay==='Fully paid'||initialPay==='Pending payment')?(paymentRef||null):null,
     paidAt:initialPay==='Fully paid'?tS:null, paidBy:initialPay==='Fully paid'?paidByName:null,
@@ -6644,10 +6827,13 @@ function genInv(){
 function viewInv(id){
   const v=INV.find(x=>x.id===id);if(!v)return;
   const sc=v.status==='void'?'up':v.pay==='Fully paid'?'pd':v.pay==='Partially paid'?'pp':v.pay==='Pending payment'?'pg':'up';
+  const ivCs=curSym(v.currency); // USD/MVR billing (2026-09-10) -- curSym('USD') for an old invoice with no v.currency, same $ prefix as always
   document.getElementById('det-ttl').textContent='Invoice #'+v.num+(v.status==='void'?' (VOID)':'');
   document.getElementById('det-body').innerHTML=`<div class="ivp">
     <div class="ivh"><div style="display:flex;align-items:center;gap:14px"><img class="logo-img" src="data:image/jpeg;base64,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" alt="Vilu Residence" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;border-radius:50%"><div><h2 style="color:#00b4d8;font-size:var(--font-size-2xl)">${PROP.nm}</h2><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:1px">@maamigili</p><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:4px;line-height:1.8">${PROP.addr}<br>Tel: ${PROP.ph} · ${PROP.em}<br>GST Reg: ${PROP.gst}</p></div></div>
-    <div class="ivm"><div class="ivn">Invoice #${v.num}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${fdf(v.issued)}</div>${v.payerScope&&v.payerScope!=='whole'?`<div style="font-size:var(--font-size-xs);font-weight:700;color:#7c3aed;background:#f5f3ff;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">${esc(v.payerLabel||v.payerScope)}</div>`:''}<div class="ivs ${sc}">${v.pay}</div></div></div>
+    <div class="ivm"><div class="ivn">Invoice #${v.num}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${fdf(v.issued)}</div>${v.payerScope&&v.payerScope!=='whole'?`<div style="font-size:var(--font-size-xs);font-weight:700;color:#7c3aed;background:#f5f3ff;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">${esc(v.payerLabel||v.payerScope)}</div>`:''}
+    <div style="font-size:var(--font-size-xs);font-weight:700;color:#0096c7;background:#e0f7fd;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">${v.currency||'USD'}${v.priceTaxMode?(v.priceTaxMode==='TAX_INCLUDED'?' · Price includes service charge + TGST':' · Tax excluded'):''}</div>
+    <div class="ivs ${sc}">${v.pay}</div></div></div>
     <div class="igg">
       <div class="igf"><label>Bill to</label><span>${esc(v.guest)}</span></div>
       <div class="igf"><label>Nationality</label><span>${esc(v.nat)||'—'}</span></div>
@@ -6658,35 +6844,35 @@ function viewInv(id){
     </div>
     <table class="ivt"><thead><tr><th>Description</th><th>Dates</th><th style="text-align:right">Nights</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
-      ${v.includeRoom!==false?`<tr><td>${v.room} — accommodation</td><td>${fd(v.ci)} → ${fd(v.co)}</td><td class="r">${v.n}</td><td class="r">$${v.rate.toFixed(2)}</td><td class="r">$${v.base.toFixed(2)}</td></tr>`:''}
+      ${v.includeRoom!==false?`<tr><td>${v.room} — accommodation${v.priceTaxMode==='TAX_INCLUDED'?' <span style="font-size:var(--font-size-xs);color:#9ca3af">(tax included)</span>':''}</td><td>${fd(v.ci)} → ${fd(v.co)}</td><td class="r">${v.n}</td><td class="r">${ivCs}${v.rate.toFixed(2)}</td><td class="r">${ivCs}${v.base.toFixed(2)}</td></tr>`:''}
       ${v.extras.map(e=>`
       <tr>
         <td>${e.desc}<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">${e.cat||''}</span></td>
         <td>${fd(v.ci)} – ${fd(v.co)}</td>
         <td class="r">${e.qty}</td>
-        <td class="r">$${(+e.unit||0).toFixed(2)}</td>
-        <td class="r">$${(+e.subtotal||e.amt||0).toFixed(2)}</td>
+        <td class="r">${ivCs}${(+e.unit||0).toFixed(2)}</td>
+        <td class="r">${ivCs}${(+e.subtotal||e.amt||0).toFixed(2)}</td>
       </tr>
-      ${e.tax&&e.taxAmt>0?`<tr style="background:#fffbeb"><td style="font-size:var(--font-size-xs);color:#92400e;padding-left:18px">↳ Tax on ${e.desc} (TGST ${v.tax.tgst}% + Service ${v.tax.svc}%)</td><td colspan="3"></td><td class="r" style="color:#92400e">$${(+e.taxAmt||0).toFixed(2)}</td></tr>`:''}
+      ${e.tax&&e.taxAmt>0?`<tr style="background:#fffbeb"><td style="font-size:var(--font-size-xs);color:#92400e;padding-left:18px">↳ Tax on ${e.desc} (TGST ${v.tax.tgst}% + Service ${v.tax.svc}%)</td><td colspan="3"></td><td class="r" style="color:#92400e">${ivCs}${(+e.taxAmt||0).toFixed(2)}</td></tr>`:''}
     `).join('')}
-    ${v.disc>0?`<tr style="background:#e0f7fd"><td style="font-weight:600;color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td colspan="3"></td><td class="r" style="color:#0096c7;font-weight:700">-$${(+v.disc||0).toFixed(2)}</td></tr>`:''}
+    ${v.disc>0?`<tr style="background:#e0f7fd"><td style="font-weight:600;color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td colspan="3"></td><td class="r" style="color:#0096c7;font-weight:700">-${ivCs}${(+v.disc||0).toFixed(2)}</td></tr>`:''}
     </tbody></table>
-    <div class="tn"><strong>Maldives tax breakdown (MIRA):</strong> TGST ${v.tax.tgst}% | Service ${v.tax.svc}% | Green Tax $${v.tax.green}/person/night${v.tax.bed>0?' | Bed $'+v.tax.bed+'/night':''}</div>
+    <div class="tn"><strong>Maldives tax breakdown (MIRA):</strong> TGST ${v.tax.tgst}% | Service ${v.tax.svc}% | Green Tax USD ${v.tax.green}/liable tourist/day${v.tax.bed>0?' | Bed $'+v.tax.bed+'/night':''}${v.priceTaxMode==='TAX_INCLUDED'?' — price shown includes service charge + TGST; Green Tax is always shown separately':''}</div>
     <div class="ivtot"><table>
-      <tr><td style="color:#6b7280">Room subtotal</td><td style="text-align:right">$${v.base.toFixed(2)}</td></tr>
-      ${v.eSubtotal>0?`<tr><td style="color:#6b7280">Extra charges subtotal</td><td style="text-align:right">$${(+v.eSubtotal||0).toFixed(2)}</td></tr>`:''}
-      ${v.eTax>0?`<tr><td style="color:#6b7280">Tax on extra charges</td><td style="text-align:right">$${(+v.eTax||0).toFixed(2)}</td></tr>`:''}
-      ${v.disc>0?`<tr><td style="color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td style="text-align:right;color:#0096c7">-$${(+v.disc||0).toFixed(2)}</td></tr>`:''}
-      <tr><td style="color:#6b7280">Service (${v.tax.svc}%)</td><td style="text-align:right">$${v.svc.toFixed(2)}</td></tr>
-      <tr><td style="color:#6b7280">TGST (${v.tax.tgst}%)</td><td style="text-align:right">$${v.tgst.toFixed(2)}</td></tr>
-      <tr><td style="color:#6b7280">Green Tax ($${v.tax.green}×${v.gp} persons×${v.n} nights${v.inf>0?' — '+v.inf+' infant exempt':''})</td><td style="text-align:right">$${v.green.toFixed(2)}</td></tr>
-      ${v.tax.bed>0?`<tr><td style="color:#6b7280">Bed tax</td><td style="text-align:right">$${v.bed.toFixed(2)}</td></tr>`:''}
-      <tr class="gd"><td>Grand total (USD)</td><td style="text-align:right">$${v.total.toFixed(2)}</td></tr>
-      ${(v.paidAmount||0)>0?`<tr><td style="color:#059669">Paid</td><td style="text-align:right;color:#059669">-$${(v.paidAmount||0).toFixed(2)}</td></tr>
-      <tr class="gd"><td>Balance due</td><td style="text-align:right">$${Math.max(0,v.total-(v.paidAmount||0)).toFixed(2)}</td></tr>`:''}
+      <tr><td style="color:#6b7280">Room subtotal${v.priceTaxMode==='TAX_INCLUDED'?' (base, tax-included price)':''}</td><td style="text-align:right">${ivCs}${v.base.toFixed(2)}</td></tr>
+      ${v.eSubtotal>0?`<tr><td style="color:#6b7280">Extra charges subtotal</td><td style="text-align:right">${ivCs}${(+v.eSubtotal||0).toFixed(2)}</td></tr>`:''}
+      ${v.eTax>0?`<tr><td style="color:#6b7280">Tax on extra charges</td><td style="text-align:right">${ivCs}${(+v.eTax||0).toFixed(2)}</td></tr>`:''}
+      ${v.disc>0?`<tr><td style="color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td style="text-align:right;color:#0096c7">-${ivCs}${(+v.disc||0).toFixed(2)}</td></tr>`:''}
+      <tr><td style="color:#6b7280">Service (${v.tax.svc}%)</td><td style="text-align:right">${ivCs}${v.svc.toFixed(2)}</td></tr>
+      <tr><td style="color:#6b7280">TGST (${v.tax.tgst}%)</td><td style="text-align:right">${ivCs}${v.tgst.toFixed(2)}</td></tr>
+      <tr><td style="color:#6b7280">Green Tax${v.greenTaxExempt?'':' (USD '+v.tax.green+'×'+v.gp+' persons×'+v.n+' nights'+(v.inf>0?' — '+v.inf+' infant exempt':'')+')'}</td><td style="text-align:right${v.greenTaxExempt?';color:#059669':''}">${v.greenTaxExempt?'Exempt — '+esc(v.greenTaxExemptReason||''):ivCs+v.green.toFixed(2)+(v.currency==='MVR'?' <span style="font-size:var(--font-size-xs);color:#9ca3af">(USD '+(+v.greenTaxUsd||0).toFixed(2)+' × '+(v.exchangeRateUsdMvr||1)+')</span>':'')}</td></tr>
+      ${v.tax.bed>0?`<tr><td style="color:#6b7280">Bed tax</td><td style="text-align:right">${ivCs}${v.bed.toFixed(2)}</td></tr>`:''}
+      <tr class="gd"><td>Grand total (${v.currency||'USD'})</td><td style="text-align:right">${ivCs}${v.total.toFixed(2)}</td></tr>
+      ${(v.paidAmount||0)>0?`<tr><td style="color:#059669">Paid</td><td style="text-align:right;color:#059669">-${ivCs}${(v.paidAmount||0).toFixed(2)}</td></tr>
+      <tr class="gd"><td>Balance due</td><td style="text-align:right">${ivCs}${Math.max(0,v.total-(v.paidAmount||0)).toFixed(2)}</td></tr>`:''}
     </table></div>
     ${v.paymentMethod?`<div style="padding:4px 0;font-size:var(--font-size-xs);color:#6b7280">Payment method: <strong>${esc(v.paymentMethod)}</strong>${v.paymentRef?' · Ref: '+esc(v.paymentRef):''}</div>`:''}
-    ${(v.payments&&v.payments.length)?`<div style="padding:8px 0;font-size:var(--font-size-xs);color:#6b7280">${v.payments.map(p=>'Payment '+fdf(p.date)+': $'+p.amount.toFixed(2)).join('<br>')}</div>`:''}
+    ${(v.payments&&v.payments.length)?`<div style="padding:8px 0;font-size:var(--font-size-xs);color:#6b7280">${v.payments.map(p=>'Payment '+fdf(p.date)+': '+ivCs+p.amount.toFixed(2)).join('<br>')}</div>`:''}
     ${v.notes?`<div style="padding:10px 14px;background:#f9fafb;border-radius:8px;font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">${esc(v.notes)}</div>`:''}
     <div class="ivft">Thank you for choosing ${PROP.nm}${PROP.bk?'<br>'+PROP.bk:''}</div>
   </div>`;
@@ -6720,11 +6906,16 @@ function recordInvoicePayment(invId){
   if(!v||v.status==='void'){toast('Invoice not found');return;}
   const remaining=+(v.total-(v.paidAmount||0)).toFixed(2);
   if(remaining<=0){toast('Already fully paid');return;}
-  const amtStr=prompt('Record payment amount (remaining $'+remaining.toFixed(2)+'):',remaining.toFixed(2));
+  // USD/MVR billing (Part T): payment is always in the invoice's own
+  // currency -- no cross-currency conversion in this first version, so
+  // the prompt itself states the currency rather than leaving it
+  // ambiguous which one a typed number means.
+  const pcs=curSym(v.currency);
+  const amtStr=prompt('Record payment amount in '+(v.currency||'USD')+' (remaining '+pcs+remaining.toFixed(2)+'):',remaining.toFixed(2));
   if(!amtStr)return;
   const amt=+amtStr;
   if(!amt||amt<=0){toast('Invalid amount');return;}
-  if(amt>remaining+0.01){toast('Amount exceeds balance ($'+remaining.toFixed(2)+')');return;}
+  if(amt>remaining+0.01){toast('Amount exceeds balance ('+pcs+remaining.toFixed(2)+')');return;}
   var previousStatus=v.pay;
   v.paidAmount=+((v.paidAmount||0)+amt).toFixed(2);
   v.payments=v.payments||[];
@@ -6826,12 +7017,16 @@ function printReceipt(invId){
   if(!v||!v.payments||!v.payments.length){toast('No payments recorded yet');return;}
   const w=window.open('','_blank');
   if(!w){toast('Allow pop-ups to print');return;}
-  const rows=v.payments.map(p=>'<tr><td>'+fdf(p.date)+'</td><td style="text-align:right">$'+p.amount.toFixed(2)+'</td></tr>').join('');
+  // USD/MVR billing (2026-09-10, Part S): same currency and snapshot as
+  // the invoice this receipt is proof of payment for -- never a re-
+  // conversion, never a different currency than what was actually paid.
+  const rcs=curSym(v.currency);
+  const rows=v.payments.map(p=>'<tr><td>'+fdf(p.date)+'</td><td style="text-align:right">'+rcs+p.amount.toFixed(2)+'</td></tr>').join('');
   w.document.write('<html><head><title>Receipt — Invoice '+esc(v.id)+'</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111827}table{width:100%;border-collapse:collapse;margin-top:10px}td,th{padding:6px 8px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:left}</style></head><body>'
     +'<h2>Vilu Residence — Payment Receipt</h2>'
-    +'<p>Invoice '+esc(v.id)+' · '+esc(v.guest)+'</p>'
+    +'<p>Invoice '+esc(v.id)+' · '+esc(v.guest)+' · '+(v.currency||'USD')+'</p>'
     +'<table><tr><th>Date</th><th style="text-align:right">Amount</th></tr>'+rows+'</table>'
-    +'<p style="margin-top:14px;font-weight:700">Total paid: $'+(v.paidAmount||0).toFixed(2)+' of $'+v.total.toFixed(2)+'</p>'
+    +'<p style="margin-top:14px;font-weight:700">Total paid: '+rcs+(v.paidAmount||0).toFixed(2)+' of '+rcs+v.total.toFixed(2)+'</p>'
     +'</body></html>');
   w.document.close();
   setTimeout(function(){w.print();},300);
@@ -7067,20 +7262,41 @@ async function initNB(){
   await nbRenderRooms();
   nbCheckSuggestion(document.getElementById('nb-ci').value,document.getElementById('nb-co').value);
 }
+// USD/MVR billing (2026-09-10): defaults the price-mode select to the
+// owner's configured per-currency default (TAX.usdDefaultPriceMode/
+// mvrDefaultPriceMode) when the currency changes -- staff can still
+// override it per booking, this is just the sensible starting point.
+function nbCurrencyChanged(){
+  var cur=document.getElementById('nb-currency').value;
+  var modeEl=document.getElementById('nb-taxmode');
+  if(modeEl) modeEl.value = cur==='MVR' ? (TAX.mvrDefaultPriceMode||'TAX_INCLUDED') : (TAX.usdDefaultPriceMode||'TAX_EXCLUDED');
+}
+function nbPricingFields(){
+  return {
+    billingCurrency: (document.getElementById('nb-currency')||{}).value || 'USD',
+    priceTaxMode: (document.getElementById('nb-taxmode')||{}).value || 'TAX_EXCLUDED',
+    guestTaxStatus: (document.getElementById('nb-taxstatus')||{}).value || 'TOURIST',
+    rateOverride: +((document.getElementById('nb-rate-override')||{}).value || 0) || null
+  };
+}
 function nbCalc(){
   const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
   const pr=document.getElementById('nb-pr');
   pr.innerHTML='';
   if(!ci||!co||co<=ci||!nbSelectedRooms.length)return;
   const ad=+document.getElementById('nb-ad').value||1,ch=+document.getElementById('nb-ch').value||0,inf=+document.getElementById('nb-inf').value||0;
+  const pricing=nbPricingFields();
+  const cs=curSym(pricing.billingCurrency);
   let grandTotal=0,html='';
   nbSelectedRooms.forEach(function(r){
-    const x=calcTax({ci,co,rate:r.rate,ad,ch,inf});
+    const rate=pricing.rateOverride!=null?pricing.rateOverride:r.rate;
+    const resLike={ci,co,rate,ad,ch,inf,billingCurrency:pricing.billingCurrency,priceTaxMode:pricing.priceTaxMode,guestTaxStatus:pricing.guestTaxStatus};
+    const x=calcTax(resLike);
     grandTotal+=x.total;
-    html+='<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb"><div style="font-weight:700;font-size:var(--font-size-sm);margin-bottom:4px">'+r.nm+'</div>'+pbd({ci,co,rate:r.rate,ad,ch,inf})+'</div>';
+    html+='<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb"><div style="font-weight:700;font-size:var(--font-size-sm);margin-bottom:4px">'+r.nm+'</div>'+pbd(resLike)+'</div>';
   });
   if(nbSelectedRooms.length>1){
-    html+='<div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--font-size-md);padding-top:6px"><span>Grand total ('+nbSelectedRooms.length+' rooms)</span><span style="color:#00b4d8">$'+grandTotal.toFixed(2)+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--font-size-md);padding-top:6px"><span>Grand total ('+nbSelectedRooms.length+' rooms)</span><span style="color:#00b4d8">'+cs+grandTotal.toFixed(2)+'</span></div>';
   }
   pr.innerHTML=html;
 }
@@ -7103,10 +7319,20 @@ async function submitNB(){
   // guarantee per room — each room's write is independent, so rooms run
   // sequentially and a failure on one doesn't affect the others.
   const succeeded=[],failed=[];
+  const pricing=nbPricingFields();
   for(let i=0;i<nbSelectedRooms.length;i++){
     const room=nbSelectedRooms[i];
     const id='BK'+String(Date.now()).slice(-5)+'-'+i;
-    const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn:room.n,rate:room.rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop,createdAt:new Date().toISOString()};
+    // USD/MVR billing (2026-09-10): rate stays r.rate (the ONE existing
+    // rate field every other part of this file already reads -- see
+    // calcTax()'s own comment on why quotedRate is not a second, parallel
+    // field), optionally overridden per Part B/C's local-guest-quote flow;
+    // billingCurrency/guestTaxStatus/priceTaxMode default to USD/Tourist/
+    // Tax-Excluded when the Pricing section is left untouched, reproducing
+    // today's exact behavior for every booking that doesn't use it.
+    const rate = pricing.rateOverride!=null ? pricing.rateOverride : room.rate;
+    const newRes={id,fn,ln,em:document.getElementById('nb-em').value,ph:document.getElementById('nb-ph').value,nat:document.getElementById('nb-nat').value,pid:document.getElementById('nb-pid').value,rn:room.n,rate:rate,ci,co,ad:+document.getElementById('nb-ad').value||1,ch:+document.getElementById('nb-ch').value||0,inf:+document.getElementById('nb-inf').value||0,src,pay:document.getElementById('nb-pay').value,st:'Confirmed',ref:'',notes:document.getElementById('nb-notes').value,nlog:[],prop,createdAt:new Date().toISOString(),
+      billingCurrency:pricing.billingCurrency, guestTaxStatus:pricing.guestTaxStatus, priceTaxMode:pricing.priceTaxMode};
     try{
       await writeReservation(id,resToFirestoreFields(newRes));
       RES.unshift(newRes);
@@ -7313,11 +7539,48 @@ function drawCfg(){
   document.getElementById('st-sc').value=TAX.svc;document.getElementById('st-bt').value=TAX.bed;
   document.getElementById('st-3g').value=TAX.thirdGuest;
   document.getElementById('st-cd').value=TAX.childDiscountPercent;
+  document.getElementById('st-tgst-eff').value=TAX.tgstEffectiveFrom||'';
+  document.getElementById('st-green-eff').value=TAX.greenTaxEffectiveFrom||'';
+  document.getElementById('st-fx-rate').value=TAX.exchangeRateUsdMvr;
+  document.getElementById('st-usd-mode').value=TAX.usdDefaultPriceMode||'TAX_EXCLUDED';
+  document.getElementById('st-mvr-mode').value=TAX.mvrDefaultPriceMode||'TAX_INCLUDED';
   document.getElementById('st-nm').value=PROP.nm;document.getElementById('st-addr').value=PROP.addr;
   document.getElementById('st-ph').value=PROP.ph;document.getElementById('st-em').value=PROP.em;
   document.getElementById('st-gst').value=PROP.gst;document.getElementById('st-bk').value=PROP.bk;
+  // Staff can see every tax/currency field but not edit or save any of
+  // them (Part Q) -- inputs go read-only and both Save buttons disable,
+  // rather than hiding the whole card (an Admin/Manager glancing at this
+  // page from a Staff-reported screenshot still needs to see the real
+  // values).
+  var editable=canEditTaxSettings();
+  ['st-tgst','st-gt','st-sc','st-bt','st-3g','st-cd','st-tgst-eff','st-green-eff','st-fx-rate','st-usd-mode','st-mvr-mode'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.disabled=!editable;
+  });
+  ['st-tax-save-btn','st-tax-reset-btn','st-mvr-save-btn'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.disabled=!editable;
+  });
   drawTaxSum();
+  drawMvrBillingCard();
   loadCancellationOverrideCodeField();
+}
+// Compact, read-only summary of the same TAX object the edit form above
+// writes to -- shown on this page (per Part H's example layout) and
+// reused verbatim on the Dashboard (Part V, drawDashMvrCard()) so there
+// is one rendering of "the current MVR billing state", not two that could
+// drift apart.
+function mvrBillingCardHTML(){
+  var updated = TAX.updatedAt ? formatMaldivesDateTime(TAX.updatedAt.toDate?TAX.updatedAt.toDate():new Date(TAX.updatedAt)) : 'Not yet saved to server';
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:var(--font-size-sm);margin-bottom:12px">'
+    +'<div><span style="color:#6b7280">USD → MVR rate</span><br><strong>'+(+TAX.exchangeRateUsdMvr).toFixed(2)+'</strong></div>'
+    +'<div><span style="color:#6b7280">Default MVR pricing</span><br><strong>'+(TAX.mvrDefaultPriceMode==='TAX_INCLUDED'?'Tax included':'Tax excluded')+'</strong></div>'
+    +'<div><span style="color:#6b7280">Government tax</span><br><strong>TGST '+TAX.tgst+'%</strong></div>'
+    +'<div><span style="color:#6b7280">Green Tax</span><br><strong>USD '+TAX.green+' / liable tourist / day</strong></div>'
+    +'<div style="grid-column:1/-1"><span style="color:#6b7280">Last updated</span><br>'+esc(updated)+'</div>'
+    +'</div>';
+}
+function drawMvrBillingCard(){
+  var el=document.getElementById('mvr-billing-card');
+  if(el) el.innerHTML=mvrBillingCardHTML();
 }
 
 // ── TRANSPORTATION ── editable fields for the website's "Getting Here"
@@ -7442,10 +7705,46 @@ function drawTaxSum(){
     })()}
   </div>`;
 }
-function saveTax(){TAX.tgst=+document.getElementById('st-tgst').value||17;TAX.green=+document.getElementById('st-gt').value||6;TAX.svc=+document.getElementById('st-sc').value||10;TAX.bed=+document.getElementById('st-bt').value||0;TAX.thirdGuest=+document.getElementById('st-3g').value||20;TAX.childDiscountPercent=+document.getElementById('st-cd').value||50;drawTaxSum();toast('Tax settings saved ✓');
+function saveTax(){
+  if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
+  var before=Object.assign({},TAX);
+  TAX.tgst=+document.getElementById('st-tgst').value||17;TAX.green=+document.getElementById('st-gt').value||6;TAX.svc=+document.getElementById('st-sc').value||10;TAX.bed=+document.getElementById('st-bt').value||0;TAX.thirdGuest=+document.getElementById('st-3g').value||20;TAX.childDiscountPercent=+document.getElementById('st-cd').value||50;
+  var tgstDateEl=document.getElementById('st-tgst-eff'); if(tgstDateEl&&tgstDateEl.value) TAX.tgstEffectiveFrom=tgstDateEl.value;
+  var greenDateEl=document.getElementById('st-green-eff'); if(greenDateEl&&greenDateEl.value) TAX.greenTaxEffectiveFrom=greenDateEl.value;
+  drawTaxSum();toast('Tax settings saved ✓');
   localStorage.setItem('vilu_tax',JSON.stringify(TAX));
-  syncSettingsToBookingEngine();}
-function resetTax(){TAX={tgst:17,green:6,svc:10,bed:0,thirdGuest:20,childDiscountPercent:50};drawCfg();toast('Reset to MIRA 2025 defaults');}
+  syncSettingsToBookingEngine();
+  persistTaxSettings(before);
+}
+function resetTax(){
+  if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
+  var before=Object.assign({},TAX);
+  Object.assign(TAX,{tgst:17,green:6,svc:10,bed:0,thirdGuest:20,childDiscountPercent:50});
+  drawCfg();toast('Reset to MIRA 2025 defaults');
+  localStorage.setItem('vilu_tax',JSON.stringify(TAX));
+  syncSettingsToBookingEngine();
+  persistTaxSettings(before);
+}
+// USD/MVR currency settings (2026-09-10): exchange rate + per-currency
+// default price mode. Same Admin/Manager gate, same persistTaxSettings()
+// write path (one settings document, one audit trail -- not a second
+// parallel settings system), separate save button since these are
+// genuinely different fields from the government tax rates above.
+function saveMvrSettings(){
+  if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
+  var before=Object.assign({},TAX);
+  var rateEl=document.getElementById('st-fx-rate');
+  var rate=+((rateEl&&rateEl.value)||0);
+  if(!rate||rate<=0){ toast('Enter a valid USD → MVR exchange rate'); return; }
+  TAX.exchangeRateUsdMvr=rate;
+  var mvrModeEl=document.getElementById('st-mvr-mode'); if(mvrModeEl) TAX.mvrDefaultPriceMode=mvrModeEl.value;
+  var usdModeEl=document.getElementById('st-usd-mode'); if(usdModeEl) TAX.usdDefaultPriceMode=usdModeEl.value;
+  drawMvrBillingCard();
+  toast('✓ MVR billing settings saved');
+  localStorage.setItem('vilu_tax',JSON.stringify(TAX));
+  syncSettingsToBookingEngine();
+  persistTaxSettings(before);
+}
 function saveProp(){
   PROP.nm=document.getElementById('st-nm').value;
   PROP.addr=document.getElementById('st-addr').value;
@@ -8633,6 +8932,60 @@ async function logNoteHistory(reservationId, noteType, oldText, newText){
       changedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } catch(e){ console.error('logNoteHistory failed', e); }
+}
+
+// USD/MVR billing tax/currency settings persistence (2026-09-10). Loaded
+// once at startup, merged onto the existing TAX object (never replacing
+// it) so every one of the ~20 existing TAX.tgst/svc/green/bed/thirdGuest
+// call sites throughout this file keeps working unchanged whether or not
+// a Firestore doc exists yet. Falls back to the hardcoded defaults
+// already on TAX's own literal (and to localStorage's vilu_tax, the
+// existing booking-engine sync value) if tax_currency_settings/current
+// has never been saved -- so a brand-new deployment or an offline load
+// behaves exactly as before this task.
+async function loadTaxSettingsFromFirestore(){
+  try{
+    var snap = await fsDb.collection('tax_currency_settings').doc('current').get();
+    if(snap.exists){
+      Object.assign(TAX, snap.data());
+      if(document.getElementById('s-cfg')) drawCfg();
+      if(typeof syncSettingsToBookingEngine==='function') syncSettingsToBookingEngine();
+    }
+  } catch(e){ console.error('loadTaxSettingsFromFirestore failed', e); }
+}
+// Append-only audit entry per changed field (Part Q) -- called once per
+// field that actually changed, never for fields the staff member left
+// alone, so the trail reads as "what actually happened" not a wall of
+// unchanged-value noise.
+async function logTaxSettingsAudit(field, oldValue, newValue){
+  try{
+    var fbUser = firebase.auth().currentUser;
+    await fsDb.collection('tax_settings_audit').doc().set({
+      field:field, oldValue:oldValue==null?null:oldValue, newValue:newValue==null?null:newValue,
+      changedByUid: fbUser?fbUser.uid:null, changedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff',
+      changedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e){ console.error('logTaxSettingsAudit failed', e); }
+}
+// Persists the full current TAX object to Firestore (merge) plus one
+// audit entry per changed field, diffed against `before`. Shared by
+// saveTax() (government tax fields) and saveMvrSettings() (currency/
+// default-mode fields) so there is one write path, not two.
+async function persistTaxSettings(before){
+  try{
+    await fsDb.collection('tax_currency_settings').doc('current').set(
+      Object.assign({}, TAX, {updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff'}),
+      {merge:true}
+    );
+    Object.keys(TAX).forEach(function(field){
+      if(before[field] !== TAX[field]) logTaxSettingsAudit(field, before[field], TAX[field]);
+    });
+    // Local-clock stand-in for the server timestamp so "Last updated" is
+    // accurate immediately, not just after the next reload re-fetches the
+    // real Firestore-resolved value.
+    TAX.updatedAt = new Date();
+    if(document.getElementById('mvr-billing-card')) drawMvrBillingCard();
+  } catch(e){ console.error('persistTaxSettings failed', e); toast('⚠ Could not save to server (saved locally only)'); }
 }
 async function loadInvoicesFromFirestore(){
   try{
@@ -11528,6 +11881,7 @@ async function doLogin() {
   try {
     await loadAllFromSupabase();
   } catch(e) { console.error('post-login loadAllFromSupabase failed', e); }
+  loadTaxSettingsFromFirestore(); // USD/MVR billing (2026-09-10) -- non-blocking, TAX's own hardcoded/localStorage defaults render fine until this resolves
   loginBtns.forEach(function(b){ b.disabled = false; b.textContent = 'Sign in →'; });
 
   document.getElementById('login-screen').style.display = 'none';
@@ -11571,6 +11925,7 @@ async function restoreSession(fbUser) {
     }
     loginRole = profile.role;
     try { await loadAllFromSupabase(); } catch(e) { console.error('session restore loadAllFromSupabase failed', e); }
+    loadTaxSettingsFromFirestore(); // USD/MVR billing (2026-09-10)
     document.getElementById('login-screen').style.display = 'none';
     applyRoleUI(profile.role, profile.name);
     applyUserMgmtVisibility();
@@ -11714,6 +12069,13 @@ function canViewSensitiveDocs() {
 // canAdjustRoomPrice()) rather than the broader canEdit() -- easy to
 // widen to Staff later if the owner wants that, harder to walk back.
 function canEditInternalNotes() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
+}
+// Tax/currency settings (USD/MVR billing, 2026-09-10): Admin/Manager only,
+// per Part Q -- "Staff cannot edit tax/currency configuration". Matches
+// tax_currency_settings' Firestore write rule exactly.
+function canEditTaxSettings() {
   if(!currentUser) return false;
   return currentUser.role === 'admin' || currentUser.role === 'manager';
 }
@@ -13248,6 +13610,7 @@ function resToFirestoreFields(r) {
     adults:r.ad||2, children:r.ch||0,
     rate:r.rate||0, status:r.st||'Confirmed',
     source:r.src||'Direct', notes:r.notes||'', internal_note:r.internalNote||'',
+    billing_currency:r.billingCurrency||null, guest_tax_status:r.guestTaxStatus||null, price_tax_mode:r.priceTaxMode||null,
     extra_beds:r.extraBeds||0,
     trips: JSON.stringify(r.trips||[]),
     food_orders: JSON.stringify(r.foodOrders||[]),
@@ -13587,6 +13950,14 @@ async function loadResFromSupabase() {
       // limitation nlog/priceAdjustments already carry below.
       notes:local.notes||r.notes||'',
       internalNote:local.internalNote||r.internal_note||'',
+      // USD/MVR billing (2026-09-10): Supabase has no columns for these
+      // brand-new fields at all -- local (Firestore-synced cache) is the
+      // only real source, same situation as internalNote just above.
+      // undefined (not '') when never set, so calcTax()'s own `r.field ||
+      // default` fallback chain applies cleanly.
+      billingCurrency:local.billingCurrency||r.billing_currency||undefined,
+      guestTaxStatus:local.guestTaxStatus||r.guest_tax_status||undefined,
+      priceTaxMode:local.priceTaxMode||r.price_tax_mode||undefined,
       extraBeds:r.extra_beds||local.extraBeds||0,
       prop:local.prop||propFromRoomId(r.room_id),
       nlog:local.nlog||[],

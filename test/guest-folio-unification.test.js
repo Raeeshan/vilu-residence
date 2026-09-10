@@ -134,9 +134,14 @@ section('Case C — room charge kept structurally separate from extras (Step 4/2
     const src = extractByStart(PMS, /function folioSummary\(resId\)\s*\{/);
     assert.match(src, /var room=r\?calcTax\(r\)\.total:0;/);
   });
-  test('genInv() still calls the canonical calcTax(r) for the room line -- folio/invoice code never duplicates the room-pricing formula (audit Case 6 confirmed this was already correct and must stay that way)', () => {
+  test('genInv() still calls the canonical calcTax() for the room line -- folio/invoice code never duplicates the room-pricing formula (audit Case 6 confirmed this was already correct and must stay that way)', () => {
     const src = extractByStart(PMS, /function genInv\(\)\s*\{/);
-    assert.match(src, /const x=calcTax\(r\);/);
+    // USD/MVR billing (2026-09-10): calcTax(r) -> calcTax(rForInvoice), a
+    // shallow copy of r with this invoice's own currency/guestTaxStatus/
+    // priceTaxMode applied -- still the one canonical function, never a
+    // second room-pricing formula.
+    assert.match(src, /const x=calcTax\(rForInvoice\);/);
+    assert.match(src, /const rForInvoice=Object\.assign\(\{\},r,/);
   });
   test('no folio/invoice function references packages/agency_packages or a package-total field -- a package reservation\'s room charge flows through the exact same calcTax(r.rate) path as any other reservation, per the audit\'s finding that no r.pkgId/pkgName is ever actually set', () => {
     const folioFns = [
@@ -153,6 +158,9 @@ section('Case C — room charge kept structurally separate from extras (Step 4/2
 section('Case D — canonical folio-item categories (Step 3), behavioral folioSummary() math');
 {
   const vrSrc = extractConst(PMS, 'VR').replace(/^const /, 'var ');
+  // USD/MVR billing (2026-09-10): calcTax() now delegates to
+  // calcTaxGeneral() -- both must be loaded together.
+  const calcTaxGeneralSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
   const calcTaxSrc = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
   const ntMatch = PMS.match(/const nt=\([^)]*\)=>[^;]+;/);
   assert.ok(ntMatch, 'nt() helper not found');
@@ -178,7 +186,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   const remainderSrc = extractByStart(PMS, /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/);
   const box = { TAX: { thirdGuest: 20, childDiscountPercent: 50, svc: 10, tgst: 17, green: 6, bed: 0 } };
   vm.createContext(box);
-  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
+  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxGeneralSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
 
   test('FOLIO_CATEGORIES is exactly the 5 non-room categories (Room is never a folio-item category, Payment/Credit is invoice-level, not a folio charge type; Accommodation Extras added alongside the Fixed Price Catalog Integration for catalog items like Extra Bed/Early Check-in)', () => {
     assert.deepEqual(plain(box.FOLIO_CATEGORIES), ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services']);
@@ -289,7 +297,11 @@ section('Case F — the double-room-charge / naive-tax bug (audit Case 6/10) is 
     const src = extractByStart(PMS, /function niPrev\(\)\s*\{/);
     assert.match(src, /const includeRoom=document\.getElementById\('ni-include-room'\)/);
     assert.match(src, /const roomTotal=includeRoom\?x\.total:0;/);
-    assert.match(src, /let html=includeRoom\?pbd\(r\):/);
+    // USD/MVR billing (2026-09-10): pbd(r) -> pbd(rForInvoice), a shallow
+    // copy of r with this invoice's own currency/guestTaxStatus/
+    // priceTaxMode applied -- still calcTax() under the hood, still gated
+    // on the exact same includeRoom check.
+    assert.match(src, /let html=includeRoom\?pbd\(rForInvoice\):/);
   });
   test('genInv() zeroes base/svc/tgst/green when includeRoom is false -- an invoice that excludes the room genuinely never carries a room charge in its stored totals', () => {
     const src = extractByStart(PMS, /function genInv\(\)\s*\{/);

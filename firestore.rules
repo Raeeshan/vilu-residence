@@ -297,6 +297,33 @@ service cloud.firestore {
     }
 
     match /admin_settings/security { allow read, write: if isAdmin(); }
+
+    // USD/MVR billing + tax settings (2026-09-10). A dedicated collection,
+    // NOT the general /settings/{docId} (staff-writable) -- Part Q
+    // requires Admin/Manager only here, and Firestore rules are
+    // permissive-OR across every matching block, so reusing /settings/
+    // would have let Staff write via that other, broader rule regardless
+    // of anything added here. Read is open to any authenticated staff
+    // (they need the current rate/mode to understand an invoice, just
+    // never to change it).
+    match /tax_currency_settings/{docId} {
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow write: if isAdmin() || isManagerRole();
+    }
+    // Append-only audit trail for every tax/currency settings change
+    // (Part Q) -- same shape as reservation_price_adjustments/
+    // invoice_payment_audit/reservation_note_history: field, old/new
+    // value, who, and a server timestamp a client can't spoof. Only
+    // Admin/Manager may create an entry, matching who may actually change
+    // the underlying setting.
+    match /tax_settings_audit/{id} {
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow create: if (isAdmin() || isManagerRole())
+        && request.resource.data.field is string
+        && request.resource.data.changedByUid == request.auth.uid
+        && request.resource.data.changedAt == request.time;
+      allow update, delete: if false;
+    }
     match /cancellation_attempts/{attemptId} { allow create: if request.auth != null; allow read, update, delete: if false; }
 
     // ── OTA / channel-manager core (read-only additive rules) ──

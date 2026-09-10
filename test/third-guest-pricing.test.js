@@ -41,6 +41,11 @@ function extractByStart(src, startRegex) {
 const ntSrc = 'const nt=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);';
 const beNtSrc = extractByStart(PMS, /function be_nt\(ci,co\)\s*\{/);
 const taxDefaultSrc = extractByStart(PMS, /let TAX=\{tgst:17/).replace(/^let TAX=/, 'var TAX=');
+// USD/MVR billing (2026-09-10): calcTax() now delegates its actual
+// base/service/TGST/Green-Tax arithmetic to calcTaxGeneral() -- both must
+// be loaded into the sandbox together, or calcTax() throws
+// "calcTaxGeneral is not defined" the moment it's actually called.
+const calcTaxGeneralSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
 const calcTaxSrc = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
 const calcPriceSrc = extractByStart(PMS, /function calcPrice\(rate, ci, co, ad, ch\)\s*\{/);
 const anExtraBedChargeSrc = extractByStart(PMS, /function anExtraBedCharge\(r\)\s*\{/);
@@ -48,7 +53,7 @@ const anExtraBedChargeSrc = extractByStart(PMS, /function anExtraBedCharge\(r\)\
 const sandbox = {};
 vm.createContext(sandbox);
 vm.runInContext(
-  [ntSrc, beNtSrc, taxDefaultSrc, 'var BE_TAX = Object.assign({}, TAX);', calcTaxSrc, calcPriceSrc, anExtraBedChargeSrc].join('\n'),
+  [ntSrc, beNtSrc, taxDefaultSrc, 'var BE_TAX = Object.assign({}, TAX);', calcTaxGeneralSrc, calcTaxSrc, calcPriceSrc, anExtraBedChargeSrc].join('\n'),
   sandbox
 );
 const { calcTax, calcPrice, anExtraBedCharge, TAX } = sandbox;

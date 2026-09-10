@@ -309,9 +309,17 @@ section('Case K — existing booked price is preserved; public/OTA/package prici
 {
   test('calcTax() reads r.rate directly (a value snapshotted on the reservation at booking time) -- it never live-looks-up room_prices/category rates for an EXISTING reservation, so a future Bulk Price Manager change can never retroactively reprice one', () => {
     const src = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
-    assert.match(src, /const base=\+\(n\*r\.rate\+thirdGuest\)\.toFixed\(2\);/);
+    // USD/MVR billing (2026-09-10): the actual base=rate*nights+supplement
+    // arithmetic now lives in calcTaxGeneral() (quotedRate*nights+...),
+    // called with quotedRate defaulting straight from r.rate -- calcTax()
+    // itself still reads r.rate directly, never a live pricing lookup.
+    assert.match(src, /const quotedRate = r\.quotedRate!=null \? r\.quotedRate : r\.rate;/);
     assert.doesNotMatch(src, /room_prices/);
     assert.doesNotMatch(src, /getDateRangeRate/);
+    const generalSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
+    assert.match(generalSrc, /var roomAndSupplement = \+\(input\.quotedRate\*input\.nights \+ \(input\.thirdGuestSupplement\|\|0\)\)\.toFixed\(2\);/);
+    assert.doesNotMatch(generalSrc, /room_prices/);
+    assert.doesNotMatch(generalSrc, /getDateRangeRate/);
   });
   test('priceAdjustments only ever mutates r.rate and r.priceAdjustments on ONE reservation -- never room_prices, ota_room_type_overrides, packages, or agency_packages', () => {
     const src = extractByStart(PMS, /async function saveEdit\(\)\s*\{/);

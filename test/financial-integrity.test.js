@@ -77,6 +77,10 @@ function buildFullSandbox() {
   fns.forEach(re => vm.runInContext(extractByStart(PMS, re), ctx));
   const ntMatch = PMS.match(/const nt=\([^)]*\)=>[^;]+;/);
   vm.runInContext('var ' + ntMatch[0].slice('const '.length), ctx);
+  // USD/MVR billing (2026-09-10): calcTax() now delegates to
+  // calcTaxGeneral() -- both must be loaded or calcTax() throws the
+  // moment it's actually called.
+  vm.runInContext(extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/), ctx);
   vm.runInContext(extractByStart(PMS, /function calcTax\(r\)\s*\{/), ctx);
   return ctx;
 }
