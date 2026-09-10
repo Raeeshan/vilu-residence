@@ -17,7 +17,7 @@
 // never required by anything the "ota" Cloud Functions codebase actually
 // runs yet.
 const crypto = require('crypto');
-const { buildRoomTypes, computeSellable, addDays, dateRange } = require('./inventory');
+const { buildRoomTypes, computeSellable, addDays, dateRange, ROOM_TYPE_CODES } = require('./inventory');
 const { INITIAL_OTA_ROOM_TYPES, CODE_TO_ROOM_TYPE_ID, computeOtaTypePayload } = require('./ota-room-types');
 
 // ---------------------------------------------------------------------------
@@ -54,6 +54,28 @@ function beds24RoomIdentity(roomTypeCode) {
   const identity = BEDS24_ROOM_MAP[roomTypeCode];
   if (!identity) throw new Error('beds24-bridge: unknown room type code ' + roomTypeCode);
   return identity;
+}
+
+// ---------------------------------------------------------------------------
+// Inbound direction (Beds24 -> Vilu, continuous-sync pass): the reverse of
+// beds24RoomIdentity(). Given a real Beds24 roomId from an inbound booking,
+// resolves it back to the exact Vilu display-name string that
+// inventory.js's buildRoomTypes()/freeRoomsForStay() key their lookups on
+// ("Deluxe Family Room", "Double Room", "Deluxe Family Room with Open Deck")
+// -- never the room-type code, never the roomId itself. Returns null for an
+// unmapped roomId (a Beds24 room this Vilu integration doesn't recognize) --
+// the caller must treat that as "unknown room type", never guess a mapping.
+const BEDS24_ROOM_ID_TO_CODE = Object.freeze(
+  Object.fromEntries(Object.entries(BEDS24_ROOM_MAP).map(([code, identity]) => [identity.beds24_room_id, code]))
+);
+const CODE_TO_VILU_DISPLAY_NAME = Object.freeze(
+  Object.fromEntries(Object.entries(ROOM_TYPE_CODES).map(([displayName, code]) => [code, displayName]))
+);
+
+function viluRoomTypeForBeds24RoomId(beds24RoomId) {
+  const code = BEDS24_ROOM_ID_TO_CODE[beds24RoomId];
+  if (!code) return null;
+  return CODE_TO_VILU_DISPLAY_NAME[code] || null;
 }
 
 // ---------------------------------------------------------------------------
@@ -502,6 +524,7 @@ module.exports = {
   BEDS24_OVERRIDE,
   MALDIVES_TZ,
   beds24RoomIdentity,
+  viluRoomTypeForBeds24RoomId,
   computeOverride,
   buildBeds24CalendarPayload,
   deriveSellableByRoomTypeCode,

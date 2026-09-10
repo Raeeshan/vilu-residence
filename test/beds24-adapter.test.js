@@ -131,6 +131,115 @@ function fakeFetch(responses) {
     }
   });
 
+  // --- fetchBooking (inbound continuous-sync pass) ------------------------
+  await test('fetchBooking: a successful GET returns the normalized canonical booking, keyed correctly by id', async () => {
+    const rawBookingObj = { id: 4001, roomId: 728133, status: 'confirmed', channel: 'booking', arrival: '2026-12-01', departure: '2026-12-03', numAdult: 2, firstName: 'A', lastName: 'B', email: 'a@b.com', price: 100, invoiceItems: [] };
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [rawBookingObj] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    const booking = await adapter.fetchBooking('4001');
+    assert.strictEqual(booking.external_id, '4001');
+    assert.strictEqual(booking.channel, 'Booking.com');
+    assert.strictEqual(booking.units[0].room_type, 'Double Room');
+  });
+  await test('fetchBooking: requests includeInvoiceItems and includeGuests so financial and PII data come back authoritatively', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    await adapter.fetchBooking('4002');
+    const url = fetchImpl.calls[1].url;
+    assert.ok(url.includes('includeInvoiceItems=true'));
+    assert.ok(url.includes('includeGuests=true'));
+    assert.ok(url.includes('id=4002'));
+  });
+  await test('fetchBooking: Beds24 has no such booking -> returns null (matches ingestEvent\'s "not_found" contract, never throws)', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    const booking = await adapter.fetchBooking('999999');
+    assert.strictEqual(booking, null);
+  });
+  await test('fetchBooking: a 429 during the GET is tagged retryable', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: false, status: 429, body: {} },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    await assert.rejects(() => adapter.fetchBooking('4003'), (e) => { assert.strictEqual(e.retryable, true); return true; });
+  });
+  await test('fetchBooking: a 401 during the GET is tagged non-retryable', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: false, status: 401, body: {} },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    await assert.rejects(() => adapter.fetchBooking('4004'), (e) => { assert.strictEqual(e.retryable, false); return true; });
+  });
+  await test('fetchBooking: per-invocation cache -- a second fetchBooking() call for the same id never hits the network again', async () => {
+    const rawBookingObj = { id: 4005, roomId: 727992, status: 'confirmed', channel: 'agoda', arrival: '2026-12-01', departure: '2026-12-03', invoiceItems: [] };
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [rawBookingObj] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    const first = await adapter.fetchBooking('4005');
+    const callCountAfterFirst = fetchImpl.calls.length;
+    const second = await adapter.fetchBooking('4005');
+    assert.strictEqual(fetchImpl.calls.length, callCountAfterFirst, 'no new network calls for the cached id');
+    assert.deepStrictEqual(second, first);
+  });
+  await test('fetchBooking: a different id is never served from another id\'s cache entry', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [{ id: 4006, roomId: 728133, status: 'confirmed', channel: 'booking', arrival: '2026-12-01', departure: '2026-12-03', invoiceItems: [] }] } },
+      { ok: true, status: 200, body: { token: 'access-2' } },
+      { ok: true, status: 200, body: { data: [{ id: 4007, roomId: 728134, status: 'confirmed', channel: 'expedia', arrival: '2026-12-05', departure: '2026-12-07', invoiceItems: [] }] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    const a = await adapter.fetchBooking('4006');
+    const b = await adapter.fetchBooking('4007');
+    assert.notStrictEqual(a.external_id, b.external_id);
+    assert.strictEqual(fetchImpl.calls.length, 4, 'two distinct ids each cost their own network round trip');
+  });
+
+  // --- listModifiedSince (catch-up/reconciliation) -------------------------
+  await test('listModifiedSince: requests modifiedFrom plus every booking status including cancelled (default GET /bookings omits cancelled)', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    await adapter.listModifiedSince('2026-11-01T00:00:00');
+    const url = fetchImpl.calls[1].url;
+    assert.ok(url.includes('modifiedFrom=2026-11-01T00%3A00%3A00') || url.includes('modifiedFrom=2026-11-01'));
+    for (const s of ['confirmed', 'request', 'new', 'cancelled', 'black', 'inquiry']) {
+      assert.ok(url.includes('status=' + s), 'missing status=' + s + ' in ' + url);
+    }
+  });
+  await test('listModifiedSince: returns the external ids of every modified booking', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: true, status: 200, body: { data: [{ id: 5001 }, { id: 5002 }] } },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    const ids = await adapter.listModifiedSince('2026-11-01T00:00:00');
+    assert.deepStrictEqual(ids, ['5001', '5002']);
+  });
+  await test('listModifiedSince: a 500 is tagged retryable', async () => {
+    const fetchImpl = fakeFetch([
+      { ok: true, status: 200, body: { token: 'access-1' } },
+      { ok: false, status: 500, body: {} },
+    ]);
+    const adapter = new Beds24Adapter({ enabled: true, token: 'refresh-1', fetchImpl });
+    await assert.rejects(() => adapter.listModifiedSince('2026-11-01T00:00:00'), (e) => { assert.strictEqual(e.retryable, true); return true; });
+  });
+
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
   if (failed) process.exit(1);
 })();

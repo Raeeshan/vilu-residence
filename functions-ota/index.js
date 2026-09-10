@@ -26,6 +26,7 @@ const { FirestoreStore } = require('./lib/store-firestore');
 const { ingestEvent } = require('./lib/ingest');
 const { MockAdapter, Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
+const { shouldAutoIngest } = require('./lib/beds24-inbound');
 
 initializeApp();
 const db = getFirestore();
@@ -74,10 +75,53 @@ exports.otaWebhook = onRequest({ region: 'us-central1', secrets: [OTA_WEBHOOK_SE
   return res.status(202).json({ queued: queueId });
 });
 
+// Step 12 gate (Beds24 only -- MockAdapter/mock provider path is completely
+// unaffected, matching every existing ota-core.test.js expectation): a
+// Beds24 booking whose channel is not Booking.com/Expedia/Agoda is real and
+// valid on Beds24's side, but is never auto-ingested into production Vilu.
+// Reuses the EXISTING ota_conflicts collection (never a second review
+// mechanism) with a new `reason: 'unrecognized_channel'` value alongside
+// ingest.js's own 'unknown_room_type'/'no_physical_room' reasons.
+async function raiseChannelReviewRecord(data, peeked) {
+  const id = data.channel_manager + '_' + data.external_id + '_channel_' + Date.now();
+  await db.collection('ota_conflicts').doc(id).set({
+    open: true,
+    channel_manager: data.channel_manager,
+    external_id: data.external_id,
+    event_type: data.type,
+    reason: 'unrecognized_channel',
+    detail: 'Beds24 channel "' + ((peeked && peeked._raw_channel) || 'unknown') + '" is not a recognized OTA for auto-ingestion (Booking.com/Expedia/Agoda only)',
+    at: new Date().toISOString(),
+  });
+}
+
 async function processQueued(queueId, data) {
   const { name, adapter } = await channelAdapter();
   const ref = db.collection('ota_queue').doc(queueId);
   if (!adapter) { await ref.set({ state: 'skipped', error_reason: 'no channel manager adapter configured (' + name + ')' }, { merge: true }); return; }
+  if (name === 'beds24') {
+    // Peek the booking's channel before deciding whether to ingest at all.
+    // Beds24Adapter caches this fetch per invocation, so ingestEvent()'s own
+    // internal fetchBooking() call below costs nothing extra against the
+    // real Beds24 API.
+    let peeked;
+    try {
+      peeked = await adapter.fetchBooking(data.external_id);
+    } catch (e) {
+      const retry = !!e.retryable && (data.retry_count || 0) < 6;
+      await ref.set({ state: retry ? 'retry' : 'done', result: 'error', error_reason: e.message, processed_at: new Date().toISOString(), retry_count: (data.retry_count || 0) + (retry ? 1 : 0), next_retry_at: retry ? new Date(Date.now() + Math.min(60, 2 ** (data.retry_count || 0)) * 60000).toISOString() : null }, { merge: true });
+      return;
+    }
+    if (peeked && !shouldAutoIngest(peeked)) {
+      await raiseChannelReviewRecord(data, peeked);
+      await ref.set({ state: 'done', result: 'unrecognized_channel_review', channel: peeked._raw_channel, processed_at: new Date().toISOString() }, { merge: true });
+      return;
+    }
+    // peeked === null (Beds24 has no such booking) falls through to
+    // ingestEvent(), which independently derives 'not_found' via its own
+    // fetchBooking() call -- one consistent source of truth for that
+    // outcome, not duplicated here.
+  }
   const result = await ingestEvent({ store, adapter, roomsDocs: await roomsDocs(), event: { channel_manager: name, external_id: data.external_id, revision: data.revision, type: data.type, retry_count: data.retry_count || 0 } });
   const retry = result.result === 'error' && result.retryable && (data.retry_count || 0) < 6;
   await ref.set({ state: retry ? 'retry' : 'done', result: result.result, event_id: result.event_id || null, vilu_reservation_ids: result.docs || [], processed_at: new Date().toISOString(), retry_count: (data.retry_count || 0) + (retry ? 1 : 0), next_retry_at: retry ? new Date(Date.now() + Math.min(60, 2 ** (data.retry_count || 0)) * 60000).toISOString() : null }, { merge: true });
