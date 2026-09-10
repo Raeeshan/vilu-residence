@@ -32,7 +32,7 @@ const { PHYSICAL_ROOMS, addDays, dateRange, isActiveStatus, overlaps } = require
 // explained above. The actual API call happens in the separate "ota"
 // codebase's beds24OutboundWorker, triggered by the ota_pushes doc creation.
 const { computeAffectedDates, buildBeds24PushRecord, BEDS24_ROOM_MAP, maldivesNow } = require('./lib/beds24-bridge');
-const { ROOM_TYPE_ID_TO_CODE } = require('./lib/ota-room-types');
+const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES } = require('./lib/ota-room-types');
 
 initializeApp();
 const db = getFirestore();
@@ -98,9 +98,39 @@ const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && 
 const clean = (s, max) => String(s == null ? '' : s).replace(/[<>]/g, '').trim().slice(0, max || 200);
 const DEFAULT_RATES = { VR01: 80, VR02: 80, VR03: 85, VR04: 85, VR05: 90, VR06: 90 };
 
+// Room -> ota_room_types doc id, built once from the same canonical
+// BEDS24_ROOM_MAP the Beds24 bridge itself uses -- never a second mapping.
+const ROOM_ID_TO_ROOM_TYPE_ID = {};
+Object.keys(BEDS24_ROOM_MAP).forEach((code) => {
+  const roomTypeId = CODE_TO_ROOM_TYPE_ID[code];
+  if (!roomTypeId) return;
+  BEDS24_ROOM_MAP[code].vilu_rooms.forEach((roomId) => { ROOM_ID_TO_ROOM_TYPE_ID[roomId] = roomTypeId; });
+});
+
+// Category-canonical fallback (2026-09-10 pricing-consistency pass): the
+// public sell rate for a night with no date-specific room_prices override
+// is the room's CATEGORY's owner-locked base_rate (live ota_room_types doc,
+// falling back to the bundled INITIAL_OTA_ROOM_TYPES default -- the same
+// fallback pattern functions-beds24/index.js's roomTypeConfig() already
+// uses) -- never the physical room's own .rate/DEFAULT_RATES, which is
+// each room's internal/legacy default only and can genuinely differ within
+// one category (VR03/VR04 $85 vs VR05 $90, all three Double). Reading a
+// stale/differing physical default here was the exact bug that let a real
+// publicBooking charge $85 for VR03 while Bulk Price Manager/Calendar/
+// Beds24 all agreed the category's real public sell price was $90.
+async function categoryBaseRate(roomId) {
+  const roomTypeId = ROOM_ID_TO_ROOM_TYPE_ID[roomId];
+  if (!roomTypeId) return null;
+  const otaType = await store.get('ota_room_types', roomTypeId);
+  if (otaType && typeof otaType.base_rate === 'number') return otaType.base_rate;
+  const fallback = INITIAL_OTA_ROOM_TYPES[roomTypeId];
+  return fallback && typeof fallback.base_rate === 'number' ? fallback.base_rate : null;
+}
+
 async function serverRate(roomId, ci, co) {
   const room = await store.get('rooms', roomId);
-  const base = room && typeof room.rate === 'number' ? room.rate : (DEFAULT_RATES[roomId] || 0);
+  const catBase = await categoryBaseRate(roomId);
+  const base = catBase != null ? catBase : (room && typeof room.rate === 'number' ? room.rate : (DEFAULT_RATES[roomId] || 0));
   const prices = ((await store.get('room_prices', roomId)) || {}).prices || {};
   let total = 0, n = 0;
   for (let d = ci; d < co; d = addDays(d, 1)) { total += prices[d] != null ? Number(prices[d]) : base; n++; }

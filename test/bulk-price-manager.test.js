@@ -174,12 +174,27 @@ section('Case C — unknown-room / partner-property rejection');
 
 section('Case D — website booking-engine rate parity: same precedence, same collections, as the PMS');
 {
-  test('vilu-website.html getRoomPrice() checks room_prices override first, then rooms base rate -- identical precedence to pmGetPrice()', () => {
+  test('vilu-website.html getRoomPrice() checks room_prices override first, then the canonical CATEGORY_BASE_RATE -- never a room\'s own possibly-differing legacy .rate (2026-09-10 pricing-consistency pass)', () => {
     const src = extractByStart(WEBSITE, /function getRoomPrice\(roomId, dateStr\)\s*\{/);
     assert.match(src, /_roomPricesCache\[roomId\]/, 'must read the room_prices cache first');
     assert.match(src, /overrides\[dateStr\] != null/);
     assert.match(src, /return \+overrides\[dateStr\]/);
-    assert.match(src, /room\.rate/, 'must fall back to the base rate, same as pmGetPrice()');
+    assert.match(src, /CATEGORY_BASE_RATE\[roomId\]/, 'must fall back to the canonical category base rate, never room.rate');
+    assert.doesNotMatch(src, /\broom\.rate\b/, 'must never fall back to a specific room\'s own legacy .rate');
+  });
+  test('CATEGORY_BASE_RATE matches PRICE_CATEGORIES\' otaBaseRate exactly for every room -- Double\'s VR03/VR04/VR05 all resolve to $90, not their differing $85/$85/$90 legacy defaults', () => {
+    const m = WEBSITE.match(/var CATEGORY_BASE_RATE\s*=\s*\{([^}]*)\}/);
+    assert.ok(m, 'CATEGORY_BASE_RATE not found');
+    const map = {};
+    m[1].split(',').forEach((pair) => { const [k, v] = pair.split(':').map((s) => s.trim()); if (k) map[k] = Number(v); });
+    assert.deepEqual(map, { VR01: 80, VR02: 80, VR03: 90, VR04: 90, VR05: 90, VR06: 90 });
+  });
+  test('the "starting from" room-card price and the booking-bar room-type dropdown both resolve through getRoomPrice()/getAvgPrice(), never raw r.rate, so the marketing price always matches the booking price', () => {
+    const cardIdx = WEBSITE.indexOf('function refreshRoomCards()');
+    assert.ok(cardIdx !== -1);
+    const cardSrc = WEBSITE.slice(cardIdx, cardIdx + 1800);
+    assert.match(cardSrc, /getRoomPrice\(r\.id, todayForCards\)/);
+    assert.doesNotMatch(cardSrc.split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n'), /return r\.rate;/);
   });
   test('vilu-website.html reads room_prices/{roomId} from Firestore directly (cross-device), the same collection pmSave()/syncRoomPricesToFirestore() writes', () => {
     const src = extractByStart(WEBSITE, /async function fetchRoomPricesFromFirestore\(\)\s*\{/);
@@ -189,6 +204,23 @@ section('Case D — website booking-engine rate parity: same precedence, same co
     const src = extractByStart(PMS, /async function syncRoomPricesToFirestore\(\)\s*\{/);
     assert.match(src, /Object\.keys\(roomPrices\)/);
     assert.match(src, /fsDb\.collection\('room_prices'\)\.doc\(rn\)\.set\(\{\s*prices:\s*roomPrices\[rn\]\s*\|\|\s*\{\}\s*\}\)/);
+  });
+  test('functions-core/index.js serverRate() (the REAL server-side price for publicBooking) resolves the category base rate first, then falls back to the physical room .rate/DEFAULT_RATES only as a last resort -- the same fix applied to the website and Calendar', () => {
+    const src = extractByStart(CORE, /async function serverRate\(roomId, ci, co\)\s*\{/);
+    assert.match(src, /categoryBaseRate\(roomId\)/);
+    assert.match(src, /catBase\s*!=\s*null\s*\?\s*catBase\s*:/, 'catBase must be checked BEFORE falling back to room.rate/DEFAULT_RATES');
+  });
+  test('categoryBaseRate() reads the live ota_room_types doc first, falling back to the bundled INITIAL_OTA_ROOM_TYPES constant -- the same fallback pattern functions-beds24/index.js\'s roomTypeConfig() already uses, never a second hardcoded table', () => {
+    const src = extractByStart(CORE, /async function categoryBaseRate\(roomId\)\s*\{/);
+    assert.match(src, /store\.get\('ota_room_types', roomTypeId\)/);
+    assert.match(src, /INITIAL_OTA_ROOM_TYPES\[roomTypeId\]/);
+  });
+  test('ROOM_ID_TO_ROOM_TYPE_ID is built from the same canonical BEDS24_ROOM_MAP the Beds24 bridge uses -- never a second, independently-maintained room-to-category mapping', () => {
+    const idx = CORE.indexOf('const ROOM_ID_TO_ROOM_TYPE_ID = {};');
+    assert.ok(idx !== -1);
+    const src = CORE.slice(idx, idx + 300);
+    assert.match(src, /Object\.keys\(BEDS24_ROOM_MAP\)/);
+    assert.match(src, /CODE_TO_ROOM_TYPE_ID\[code\]/);
   });
 }
 
