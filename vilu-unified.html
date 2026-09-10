@@ -2162,7 +2162,7 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
       <div class="fg"><label>Status</label><select id="ed-st"><option>Confirmed</option><option>Pending</option><option>Checked in</option><option>Checked out</option></select></div>
       <div class="fg"><label>Payment</label><select id="ed-pay"><option>Unpaid</option><option>Deposit paid</option><option>Fully paid</option></select></div>
       <div class="fg" style="grid-column:1/-1">
-        <label>Custom rate ($/night) <span style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">— leave blank to use room default</span></label>
+        <label>Custom rate ($/night) <span style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">— leave blank to use room default. Overriding this from the standard rate is Admin/Manager only and requires a reason.</span></label>
         <input type="number" id="ed-rate" min="0" step="5" value="0" oninput="edC()">
       </div>
       <div class="fg" style="grid-column:1/-1">
@@ -2231,8 +2231,10 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
     <div class="fg"><label>Select reservation</label><select id="ni-res" onchange="niPrev()"></select></div>
 
     <!-- Room charge toggle (Step 6 fix: one room calculation, always via
-         calcTax(), never a second manually-added room line) -->
-    <div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600"><input type="checkbox" id="ni-include-room" checked style="width:16px;height:16px"> Include room charge</label></div>
+         calcTax(), never a second manually-added room line). Hidden for a
+         guest-scoped invoice (Simple guest bill split, Step 15) -- room
+         accommodation defaults to Shared/Whole-room only. -->
+    <div class="fg" id="ni-include-room-row"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600"><input type="checkbox" id="ni-include-room" checked style="width:16px;height:16px"> Include room charge</label></div>
 
     <!-- Extra items section -->
     <div style="margin-bottom:12px">
@@ -5133,18 +5135,6 @@ function drawRes(){
 // SHOW DETAIL
 function showDet(id){ _showDetLegacy(id); }
 
-function detSaveRate(id){
-  try{
-    var r=RES.find(function(x){return x.id===id;});
-    if(!r) return;
-    var v=+document.getElementById('det-rate-inp')?.value;
-    if(!v||v<1){toast('Invalid rate');return;}
-    r.rate=v;
-    saveRES(r);
-    toast('Rate updated to $'+v+'/night ✓');
-    setTimeout(function(){_showDetLegacy(id);},100);
-  }catch(e){console.error('detSaveRate:',e);}
-}
 function _showDetLegacy(id){
   const r=RES.find(x=>x.id===id);if(!r)return;
   if(canViewOnly()){document.getElementById('det-ttl').textContent=r.fn+' '+r.ln;document.getElementById('det-body').innerHTML='<div style="padding:10px 14px;background:#fef3c7;color:#92400e;border-radius:6px;font-size:var(--font-size-sm)">Agency view — '+r.st+' · '+fd(r.ci)+' to '+fd(r.co)+'</div>';document.getElementById('det-act').innerHTML='';document.getElementById('m-det').classList.add('on');return;}
@@ -5164,8 +5154,10 @@ function _showDetLegacy(id){
       ${(function(){var addr=extractImportedAddress(r.notes);return addr?`<div style="grid-column:1/-1"><span style="color:#6b7280;font-size:var(--font-size-xs);display:block;margin-bottom:2px">Address</span>${esc(addr)}</div>`:'';})()}
     </div>
     <div style="background:#f9fafb;border-radius:8px;padding:12px;font-size:var(--font-size-sm);margin-bottom:14px">
-      ${['n: '+x.n+' nights × $'+r.rate+' = $'+x.base.toFixed(2),'Service ('+TAX.svc+'%): $'+x.svc.toFixed(2),'TGST ('+TAX.tgst+'%): $'+x.tgst.toFixed(2),'Green Tax: $'+x.green.toFixed(2)].map(l=>`<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#6b7280">${l.split(':')[0]}</span><span>${l.split(':')[1]||''}</span></div>`).join('')}
-      <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total (room)</span><span>$${x.total.toFixed(2)}</span></div>${(r.extras&&r.extras.length?r.extras.map(ex=>`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:var(--font-size-sm);color:#00b4d8"><span>🛏️ Extra bed (${ex.nights} nights × $${ex.rate})</span><span>$${ex.total.toFixed(2)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--font-size-base);margin-top:6px;padding-top:6px;border-top:2px solid #00b4d8"><span>Grand Total</span><span style="color:#00b4d8">$${(x.total+r.extras.reduce((s,e)=>s+e.total,0)).toFixed(2)}</span></div>`:'')}
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Accommodation</div>
+      ${[[x.n+' night'+(x.n!==1?'s':''),''],['Booked rate','$'+r.rate.toFixed(2)+'/night'],['Accommodation subtotal','$'+x.base.toFixed(2)],['Service ('+TAX.svc+'%)','$'+x.svc.toFixed(2)],['TGST ('+TAX.tgst+'%)','$'+x.tgst.toFixed(2)],['Green Tax','$'+x.green.toFixed(2)]].concat(x.bed>0?[['Bed tax','$'+x.bed.toFixed(2)]]:[]).map(l=>`<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#6b7280">${l[0]}</span><span>${l[1]}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total accommodation</span><span>$${x.total.toFixed(2)}</span></div>${(r.extras&&r.extras.length?r.extras.map(ex=>`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:var(--font-size-sm);color:#00b4d8"><span>🛏️ Extra bed (${ex.nights} nights × $${ex.rate})</span><span>$${ex.total.toFixed(2)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--font-size-base);margin-top:6px;padding-top:6px;border-top:2px solid #00b4d8"><span>Grand Total</span><span style="color:#00b4d8">$${(x.total+r.extras.reduce((s,e)=>s+e.total,0)).toFixed(2)}</span></div>`:'')}
+      ${canAdjustRoomPrice()?`<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb;text-align:right"><a href="#" onclick="document.getElementById('m-det').classList.remove('on');setTimeout(()=>openEdit('${id}'),80);return false;" style="font-size:var(--font-size-xs);color:#00b4d8;text-decoration:none;font-weight:600">Adjust reservation price →</a></div>`:''}
     </div>
     <div class="np">
       <div class="nh"><span style="font-size:var(--font-size-lg)">📋</span><span style="font-size:var(--font-size-base);font-weight:600;color:#92400e">Notes & Details</span>${hasN?'<span style="background:#f59e0b;color:#fff;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">HAS NOTES</span>':''}</div>
@@ -5195,25 +5187,6 @@ function _showDetLegacy(id){
   });
   if(!canViewOnly()){mkBtn('<i class="ti ti-file-invoice"></i> Invoice','',()=>{openIM(id);document.getElementById('m-det').classList.remove('on');});}
 
-  // Rate editor row
-  setTimeout(function(){
-    var pb=document.getElementById('det-body');
-    if(!pb) return;
-    var old=document.getElementById('det-rate-row');
-    if(old) old.remove();
-    var rr=document.createElement('div');
-    rr.id='det-rate-row';
-    rr.style.cssText='display:flex;align-items:center;gap:8px;margin:8px 14px 0;padding-top:8px;border-top:1px solid #e5e7eb';
-    var lbl=document.createElement('span');lbl.style.cssText='font-size:var(--font-size-sm);color:#6b7280;flex:1';lbl.textContent='Rate ($/night)';
-    var inp=document.createElement('input');inp.type='number';inp.id='det-rate-inp';inp.min='1';inp.step='5';inp.value=r.rate;
-    inp.style.cssText='width:70px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:var(--font-size-sm);text-align:right';
-    var btn=document.createElement('button');btn.textContent='Save rate';
-    btn.style.cssText='background:#00b4d8;color:#fff;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:var(--font-size-xs);font-weight:700';
-    btn.addEventListener('click',function(){detSaveRate(id);});
-    rr.appendChild(lbl);rr.appendChild(inp);rr.appendChild(btn);
-    pb.appendChild(rr);
-  },50);
-
   // Folio section — connected to Guest Folios (same FOLIOS/canonical folio
   // data, same renderFolioChargesById()/buildAddChargeFormHTML() shared
   // with the Guest Folios page — Step 14: compact summary + itemized list,
@@ -5235,7 +5208,7 @@ function _showDetLegacy(id){
     sec.appendChild(hdr);
     var sumEl=document.createElement('div');
     sumEl.id='det-folio-summary';
-    sumEl.innerHTML=renderFolioSummaryHTML(sum);
+    sumEl.innerHTML=renderFolioSummaryHTML(sum,id);
     sec.appendChild(sumEl);
     // instanceId ('det-'+id) scopes every generated element id so Calendar's
     // drawer never collides with Guest Folios' own (bare-id) elements for
@@ -5413,7 +5386,31 @@ async function saveEdit(){
 
   const oldRn=r.rn, roomChanged=oldRn!==rn;
   const customRate=+document.getElementById('ed-rate')?.value||0;
-  const rate=customRate||(isVR(rn)?getDateRangeRate(rn,ci,co):getR(rn)?.rate)||r.rate;
+  const naturalRate=(isVR(rn)?getDateRangeRate(rn,ci,co):getR(rn)?.rate)||r.rate;
+  var rate=customRate||naturalRate;
+  var priceAdjustment=null;
+  // Calendar pricing cleanup (2026-09-10): a deliberate rate override (the
+  // typed value differs from what this room/these dates would naturally
+  // produce) is a reservation-specific price change, not routine room/date
+  // editing -- gated like a folio discount (Admin/Manager only), with a
+  // required reason and an audit-trail entry (Step 3). Staff moving a
+  // booking to a different room/dates still works exactly as before and
+  // needs no gating; only an explicit, deliberate override is affected.
+  if(customRate>0 && Math.abs(customRate-naturalRate)>0.005){
+    if(!canAdjustRoomPrice()){
+      toast('⛔ Only Admin/Manager can override the reservation price — using the standard rate ($'+naturalRate.toFixed(2)+'/night) instead');
+      rate=naturalRate;
+    } else {
+      var reason=prompt('Reason for overriding the rate to $'+customRate.toFixed(2)+'/night (required):','');
+      if(!reason||!reason.trim()){
+        toast('Price override cancelled — a reason is required. Using the standard rate ($'+naturalRate.toFixed(2)+'/night) instead');
+        rate=naturalRate;
+      } else {
+        rate=customRate;
+        priceAdjustment={oldRate:r.rate,newRate:customRate,reason:reason.trim(),changedBy:currentUser?currentUser.name:'Admin',changedAt:Date.now()};
+      }
+    }
+  }
   const savedBeds=+(document.getElementById('ed-bed-val')?.textContent||0);
   // Compute the edit as a candidate object first — only merge it into the
   // live RES entry after Firestore accepts the write, so a rejected
@@ -5429,6 +5426,7 @@ async function saveEdit(){
     inf:+document.getElementById('ed-inf').value||0,
     st:newSt,pay:document.getElementById('ed-pay').value
   });
+  if(priceAdjustment) updated.priceAdjustments=(r.priceAdjustments||[]).concat([priceAdjustment]);
 
   const btn=document.querySelectorAll('button[onclick="saveEdit()"]');
   btn.forEach(function(b){b.disabled=true;});
@@ -6090,12 +6088,25 @@ function drawInv(){
 // Invoice tab), the default is every UNINVOICED folio charge, matching
 // "Create Invoice → All unpaid" -- an already-invoiced charge is never
 // silently re-added (Step 10/21).
+// invPayerScope ('whole' or a guestKey like 'guest2') travels with the
+// current invoice draft from openIM() through to genInv(), which reads it
+// to decide whether a source folio charge gets marked via the existing
+// ch.invoiceId (whole room, unchanged behavior) or the new
+// ch.guestInvoiced[guestKey] (guest-specific -- Simple guest bill split,
+// Step 13/16), and stamps it onto the saved invoice as v.payerScope.
+var invPayerScope='whole';
 function openIM(resId, opts){
   document.getElementById('ni-res').innerHTML=RES.filter(r=>r.st!=='Cancelled').map(r=>`<option value="${r.id}"${r.id===resId?' selected':''}>${r.id}: ${esc(r.fn)} ${esc(r.ln)} — ${rNm(r.rn)} (${fd(r.ci)}–${fd(r.co)})</option>`).join('');
   document.getElementById('ni-notes').value='';
   if(document.getElementById('ni-disc'))document.getElementById('ni-disc').value='';
   if(document.getElementById('ni-disctype'))document.getElementById('ni-disctype').value='fixed';
-  var includeRoom = opts && typeof opts.includeRoom==='boolean' ? opts.includeRoom : true;
+  invPayerScope = (opts && opts.payerScope) || 'whole';
+  // Room accommodation defaults to Shared/Whole-room only (Step 15) -- a
+  // guest-specific invoice never includes it, and the checkbox itself is
+  // hidden for that case (see the template below).
+  var includeRoomRow=document.getElementById('ni-include-room-row');
+  if(includeRoomRow) includeRoomRow.style.display = invPayerScope==='whole' ? '' : 'none';
+  var includeRoom = invPayerScope!=='whole' ? false : (opts && typeof opts.includeRoom==='boolean' ? opts.includeRoom : true);
   var roomToggle=document.getElementById('ni-include-room');
   if(roomToggle) roomToggle.checked=includeRoom;
   invItems = [];
@@ -6263,19 +6274,28 @@ function genInv(){
   // its own printed/reopened view even though it correctly reduced `total`
   // at creation time (Guest Folio unification bug, fixed alongside this
   // task's invoice-discount work since it touches the same object literal).
-  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eSubtotal,eTax,eT,disc,discType:d.type,discValue:d.value,total,pay:initialPay,paidAmount,payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
+  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,payerScope:invPayerScope,payerLabel:invPayerScope==='whole'?'Whole room':guestLabelFor(r,invPayerScope),guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eSubtotal,eTax,eT,disc,discType:d.type,discValue:d.value,total,pay:initialPay,paidAmount,payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
   INV.unshift(v);
   syncInvoiceToFirestore(v);
   // Mark the source folio charges as invoiced (Step 10/21: never
   // double-invoiced -- an item that funded this invoice's extras[] is
-  // struck off the "uninvoiced" pool openCreateInvoice()/openIM() draw from).
+  // struck off the "uninvoiced" pool openCreateInvoice()/openIM() draw
+  // from). A Whole Room invoice marks ch.invoiceId exactly as before
+  // (unchanged). A guest-scoped invoice marks ONLY that guest's own
+  // ch.guestInvoiced[guestKey] entry instead -- the charge itself is never
+  // touched, so its OTHER guests' shares (a split) or its shared/whole-room
+  // eligibility stay independently invoiceable (Simple guest bill split,
+  // Step 8/9/13).
   var folio=FOLIOS[r.id];
   if(folio){
     var touched=false;
     extras.forEach(function(e){
       if(!e.chargeId) return;
       var ch=folio.charges.find(function(c){return c.id===e.chargeId;});
-      if(ch){ ch.invoiceId=v.id; touched=true; }
+      if(!ch) return;
+      if(invPayerScope==='whole'){ ch.invoiceId=v.id; }
+      else { ch.guestInvoiced=ch.guestInvoiced||{}; ch.guestInvoiced[invPayerScope]=v.id; }
+      touched=true;
     });
     if(touched){
       saveFolios(); syncFolioToFirestore(r.id); renderFolioChargesById(r.id); updateFolioHeaderTotal(r.id);
@@ -6295,7 +6315,7 @@ function viewInv(id){
   document.getElementById('det-ttl').textContent='Invoice #'+v.num+(v.status==='void'?' (VOID)':'');
   document.getElementById('det-body').innerHTML=`<div class="ivp">
     <div class="ivh"><div style="display:flex;align-items:center;gap:14px"><img class="logo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACMAIwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7Jj/1a/SnU2L/AFa/SnUAFFFFABRRTZZEijaSRtqqMk+goAdRWfY63pN9IY7S/glcHBUNyPwrQpJp7AFFFFMAooooAKKKKACiiigAqrdH94PpVqqt3/rfwoAsRf6tfpTqbF/q1+gp1ABRRRQAUHBBB6VzPjLwmPEUWP7V1C0bt5U7Ko/4CCBmvJvEfhTx14ZLXOla3qzxjhBHcuxI9wTj39AOprmq15038F0Bd+Luj3WjayNU0meS3kJDrtAx649xWz8H/iP/AGs50XV3Iu1IVGbg56YNebyfFPVvsTab4ygN5AeI7tFCSp6kqPlcfr9a82vfEMem+Io9U0522Kdykcbh2xivNjU5KvPT2fQm590SyRxRNLK6oijLMxwAK828X/FzR9Kle109ftU4ONxOAD9K8p+J/wAXL3VNJsNI0t3G63Q3Dx8tI5UcYHvmui+Dnw6mliTX9fygf51MhHH55/WuupXqVJclLTzHc7DwV4j8deJbhblIbW1sd3WSIkY+uev0r05AwQB2DNjkgYyaq2d3p5229vd2zsBgKkik/kKt110YOK1ldjCiiitQCiiigAqrd/638KtVVu/9b+FAFiL/AFa/QU6mxf6tfpTqACiiigDjPGXjSbTJZbHQ9Mk1O9jGZWwfKiPZSRyzE8bR+JrzDXPEfxYu7iSKNzCACRDDaIVIHUcg55/ka9+igghXEcMaDrwoFfPnx0+Jl7JNc6JoTtBbRny5Jk6ynJB5H8PBGO+K87F80FzSm/JITPKfHGo+IGu5k1pLK7mYHzMIqNx/CCuMc+3PJ9K88uIJ7qOUxD7LGgZjHM46Y52t0J746+1eljwRfSeHpfFOtSS2umR7TIpGGkyTkLnqdwI9vpXCWekat4st7jRNM05pZIjJLAHk2KqBSSSO7YHuTxXJBS69QhFSlZsPDtxq1ndQX1rFbXUyD9y0rBguB98qeD078cV32lp4l8X3EcWoeJVkuXYLGLq92KOR8u1sLg+grzHStTvIrmzn1KFBG6eQVhUqybTg9eD2OK9Nn8MX1hpkF/BtvdLuo98M6jKtHkAAg9GJ4I+tKfMl5BOKjJpHfw/BPxSdwWe3ibPDq2VIPuMHjj9a7bwnofxM8LSw+TdDUrAcPZXMu7C/7DHkH07e1cT8DPiLe6ZrEHh7UbuSbSZCY4hMdxgbPG1uu32PHpX0pXbhqNKa54XTBJEdrI01vHK8TRMyglG6qfQ1JRRXoDCiiigAqrd/638KtVVu/wDW/hQBYi/1a/SnU2L/AFa/QU6gAooooArasZBpd0Ys+Z5L7ceu04rxv4c/DMajJ/bWvJuilJbyGHJOQR+HB/OvbSARg9DSIqooRAFUDAA7VhUoRqTUpdAPEv2pbbzPD+iaTbbooHnY7EGF4AAyPbJNH7PPghbKzOq3tthiCq7+fbj04/Q+wr0nxt4Xh8ST6W8xG20uC7eu0jt75ArobaCK2t1ghjWONRgKowKzVBuu5vboKx8baz4GT+3fFvhlIma4tD/aVmqjJIVvLlXP0Mbce9e3/s56WLv4XGx1a3WWD7Q/lpIudnHOPxyfYmsDxsR4f/aQ8P6oJIxFe3QtJUJ6rPHs5/4Fg17pptjaadaLa2UCQQqSQiDAyTk/rUYel7zfa6Naq97m7nhXxI+Fd3pOr2mu+GBI8KSqGiUcxc9cdx0Fe82YYWkIcAMI1BAGBnFS0V006Mabbj1MwooorUAooooAKq3f+t/CrVVbv/W/hQBYi/1a/SnU2L/Vr9BTqACiiigAooooAKKRiQpIBYgcAd65XVfFFtLPJpFpe/2XrwG+2tr+PYtwey5PDKemVOR+lTKSjuB47+1eLiy1XT9VgmdPszQzgB8YZHJBxn2HavoeynS6tIbmM5SVFkX6EZH86+Qv2hPHMfirTmkFt9lnhjWCe1dvnjlXduHTkZ7/AMq9c+FfxKjvfD1rO0U1zNOsGnaTp8ZHmTNFEvmyHPCrvY5Y8AKK46NWKnJ9GzWo1yxPZ6KwdO8VaTd339lwXkN7qMeBcxWIaZISezOBhf8AgRB9q3q7U09jIKKKKYBRRRQAVVu/9b+FWqq3f+t/CgCxF/q1+lOpsX+rX6U7NABRSOyopZmCqOpJwBSK6Om9WVl9QcigB1FUZNW06PUk017uIXb273IiByfKRgrP7AFgP8ml0LVdO1zR7TWNJuo7uwvIlmt50ztkQ9GGexoAq+KRv09om0g6ihGWUzpEF/4ESCD7ivlT4765qenhdNtWuvsrMXS1vb5L0QsO8MwJZD7Z/Ovr+aKKZCk0aSIeqsoIrlLvwd4B8RmaSTRtJvijmKVkVTtYdVOOhFc1elKb0YWufBcmtzahqNzqGqs8kskTGQycFnK7dzepwck9zzU3g/X9XtQiLeSWds0P2d5FbbI8ZOWRD1UMSc45OT2r67uPhP8ABLUNU+xpBpYvixj8iDUQHLDquwNnI9MVraX8DPhlp8olh8Oq7g8NJM7f1rn+rVCeTzMX4PazBJpVtZWOs2OmWvGy1stHlVM9y00g+Zj3J6+texxBhGoZ95xy2MZrDsdC8LeHxBHbWVhYmaQRQ5IUyOQSFGepwCcexqXVfEVlpniTRdAmhuGuNYM4t3RQY08qPe285yMjpgHn0rsowlGNpFGzRRRWoBRRRQAVVu/9b+FWqq3f+t/CgCxF/q1+gpxpsX+rX6U6gCK7t4Ly1ltbqGOeCVSkkcihldT1BB6ivJvBlvrfh+21r4TWttchLQ50TUXiLRR6bPuxuY8NJCd8YU8tiM9CxHr1GKAPLLq9fw1qOseDNIikTStK8IRPp1nHaszvL/pC8SAfNhY0BBPVs96yvA/iK50jwh8IbGwuJotKns0s9TJsXYF0sSypuK5RvNAHuQR1r2jFGOKAPMND8Q+JvFvhjxfb2fmWuqW+r3NraRSWxiaG3RlQKWIwXZQzA5P3vasn4M6Xr+k+J797uCa3t7omGW2dCOUHyzH04+XnqCK6u48T+IpfEd3YWWk7YbV5FbfEzFlXo/BB56gAc4x1ORUsPFnjPar3/hyQI0RJEFhMWRvIgkHBOCA8ksZGQcxk+1c1TDKdWNW7ujWNZxg4LZnnUtlJf6b41kbw82raYnjqW81GKzXGoJDCsGya2GPmIeI5AIZl3bDnFdZB4+PiXxZqcml+KYtL0bR4YriE/ZyVvUkt2bzZd6grCjtg4KkGIqcE1pzeNPGYsYXTwldC4+yzGZGsZiqzKkpjCkHJDNGi4xx5g5NST+JPGrs8MmiSBPtIVJbezmRti3NupPzZ4aKWU/8AbJvXjpMjn9O8W+IrabwkdYW78+a/v/tgTZcQ3/lWjFWtXCAiN3IKDCt95TkdcpPEV7qHjLwR4suBe3zt4e1PUEgWMrD9pMUJ+yxLt3blBZSWJJPvkDof+Ez8R+IbC7+wW7ooMoiSxil84Rm2uvLl3chkaSOMIwxknoOM9v4Du9Tura/XVYruN4riNYTcRMhdDbwkkbgP4zID7g0AeYQeIvFl54E0vxLpfie7u9T13UdHRII7QNaWgkkAnjAKBiNpfeMgqEXkHJNrVvGuveFtV8b29xqV5f29lqmlwxT3FsGFhBcLH58/yIAY03kgHOCDngGvaaKAPI/Eeuakuuab4R0fxRqVrBqtlc38esTQrNO7LLGoggHl7WwrMwBHIwQSAc+tR52Lkt0H3utOxRQAVVu/9b+FWqq3f+t/CgCxF/q1+lOpsX+rX6U6gAooooAKDRRQAUUYFFABRRRQBFbWttaqy21vFCGO5hGgUE+px3qWiigAooooAKKKKACqt3/rfwq1VW7/ANb+FAFiL/Vr9KdTYv8AVr9KdQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFVbv/W/hVqqt3/rR9KAP/9k=" alt="Vilu Residence" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;border-radius:50%"><div><h2 style="color:#00b4d8;font-size:var(--font-size-2xl)">${PROP.nm}</h2><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:1px">@maamigili</p><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:4px;line-height:1.8">${PROP.addr}<br>Tel: ${PROP.ph} · ${PROP.em}<br>GST Reg: ${PROP.gst}</p></div></div>
-    <div class="ivm"><div class="ivn">Invoice #${v.num}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${fdf(v.issued)}</div><div class="ivs ${sc}">${v.pay}</div></div></div>
+    <div class="ivm"><div class="ivn">Invoice #${v.num}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${fdf(v.issued)}</div>${v.payerScope&&v.payerScope!=='whole'?`<div style="font-size:var(--font-size-xs);font-weight:700;color:#7c3aed;background:#f5f3ff;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">${esc(v.payerLabel||v.payerScope)}</div>`:''}<div class="ivs ${sc}">${v.pay}</div></div></div>
     <div class="igg">
       <div class="igf"><label>Bill to</label><span>${esc(v.guest)}</span></div>
       <div class="igf"><label>Nationality</label><span>${esc(v.nat)||'—'}</span></div>
@@ -6370,7 +6390,15 @@ function recordInvoicePayment(invId){
   v.payments.push({amount:amt,date:tS,note:'Recorded by '+(currentUser?currentUser.name:'Staff')});
   v.pay=v.paidAmount>=v.total-0.01?'Fully paid':'Partially paid';
   syncInvoiceToFirestore(v);
-  if(v.pay==='Fully paid'&&v.resId){
+  // ch.paid is a whole-charge marker -- correct for a Whole Room invoice
+  // (the charge really is fully settled), but WRONG for a guest-scoped
+  // invoice on a split/guest-assigned charge: only THIS guest's share is
+  // settled, other guests' shares (or the rest of a split) may still be
+  // open (Simple guest bill split, Step 16). Guest-scoped settlement is
+  // derived instead from folioGuestBalance() (that guest's allocated total
+  // vs. paidAmount from invoices actually scoped to them) -- never from
+  // this boolean.
+  if(v.pay==='Fully paid'&&v.resId&&(!v.payerScope||v.payerScope==='whole')){
     const folio=FOLIOS[v.resId];
     if(folio){
       (v.extras||[]).forEach(function(e){
@@ -7953,7 +7981,7 @@ function rdRenderTab(n, r){
     // folio items visible at all, a real content gap vs. the other two
     // surfaces (2026-09-10 folio unification pass).
     var sum=folioSummary(r.id);
-    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div><div style="text-align:left;margin-bottom:10px">'+renderFolioSummaryHTML(sum)+'</div></div>';
+    body.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:var(--font-size-display);margin-bottom:10px">🧾</div><div style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:6px">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-base);color:#6b7280;margin-bottom:20px">'+rNm(r.rn)+' · '+fd(r.ci)+' → '+fd(r.co)+'</div>'+otaPaymentBlock(r)+'<div style="background:#f9fafb;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:var(--font-size-sm)">'+pbd(r)+'</div><div style="text-align:left;margin-bottom:10px">'+renderFolioSummaryHTML(sum,r.id)+'</div></div>';
     footer.innerHTML='';
     if(!canViewOnly()){
       var ib=document.createElement('button');ib.className='btn p';ib.style.flex='1';
@@ -8239,7 +8267,7 @@ function drawFolios(){
     var summaryWrap=document.createElement('div');
     summaryWrap.id='folio-summary-'+r.id;
     summaryWrap.style.cssText='padding:14px 16px 0';
-    summaryWrap.innerHTML=renderFolioSummaryHTML(folioSummary(r.id));
+    summaryWrap.innerHTML=renderFolioSummaryHTML(folioSummary(r.id),r.id);
     body.appendChild(summaryWrap);
 
     // Add charge form (Step 5: same builder Calendar's compact folio uses)
@@ -8311,6 +8339,92 @@ function chargeFinalAmount(ch){
   return +(chargeGrossAmount(ch) - chargeDiscountAmount(ch)).toFixed(2);
 }
 
+// ── SIMPLE GUEST BILL SPLIT ──
+// (Calendar pricing cleanup + guest bill split, 2026-09-10)
+// Reservations only ever store aggregate adult/child counts plus ONE lead
+// guest name (r.fn/r.ln) -- confirmed by audit, no per-guest name array
+// exists anywhere in this codebase. So "guest identity" for split-billing
+// purposes is: the lead guest's real first name for guest 1 (genuinely
+// known), and generic "Guest N" labels for guests 2+ (never fabricated).
+// Infants are excluded from the guest count, same convention the PER_PAX
+// default already uses elsewhere (folioOpenChargeEditor).
+function reservationGuestCount(r){
+  return Math.max(1,(r&&r.ad||0)+(r&&r.ch||0));
+}
+// Stable storage keys ('guest1','guest2',...) are used on charges/invoices
+// -- never the display label itself -- so a later lead-guest name edit
+// never strands an existing split/assignment under a stale name.
+function reservationGuestLabels(r){
+  var count=reservationGuestCount(r);
+  var lead=(r&&r.fn||'').trim();
+  var labels=[];
+  for(var i=1;i<=count;i++) labels.push({key:'guest'+i, label:(i===1&&lead)?lead:'Guest '+i});
+  return labels;
+}
+function guestLabelFor(r,guestKey){
+  var found=reservationGuestLabels(r).find(function(g){return g.key===guestKey;});
+  return found?found.label:guestKey;
+}
+// Splits a charge's FINAL (post-discount) amount equally across every
+// guest on the reservation, using a deterministic largest-remainder-first
+// method so the allocations always sum to EXACTLY the final amount -- never
+// a $0.01 mismatch (Part 11). The first guest(s) absorb any leftover cent,
+// matching the task's own worked example ($100/3 = $33.34/$33.33/$33.33).
+function chargeSplitAllocations(ch,r){
+  var labels=reservationGuestLabels(r);
+  var n=labels.length;
+  var totalCents=Math.round(chargeFinalAmount(ch)*100);
+  var base=Math.floor(totalCents/n);
+  var remainder=totalCents-base*n;
+  return labels.map(function(g,i){
+    var cents=base+(i<remainder?1:0);
+    return {guestKey:g.key,label:g.label,amount:+(cents/100).toFixed(2)};
+  });
+}
+// How much of ONE charge belongs to a given guest, for guest-specific
+// folio balances and guest-specific invoicing. 'whole'/null means the
+// Whole Room scope -- every charge counts in full regardless of payer
+// assignment (today's existing behavior, unchanged). A Shared charge is
+// never included in any single guest's scope (Part 14 -- no automatic
+// division of shared charges into individual guest invoices).
+function chargeAmountForGuest(ch,r,guestKey){
+  if(!guestKey||guestKey==='whole') return chargeFinalAmount(ch);
+  var payerType=ch.payerType||'shared';
+  if(payerType==='shared') return 0;
+  if(payerType==='guest') return ch.payerGuestKey===guestKey?chargeFinalAmount(ch):0;
+  if(payerType==='split'){
+    var mine=chargeSplitAllocations(ch,r).find(function(a){return a.guestKey===guestKey;});
+    return mine?mine.amount:0;
+  }
+  return 0;
+}
+// Which folio charges are eligible for a NEW invoice under this scope
+// (Step 13/14). Whole Room keeps today's existing eligibility (!ch.invoiceId)
+// exactly as before, with one addition: once a split/guest-assigned charge
+// has been invoiced to ANY specific guest, it's no longer swept up by a
+// later Whole Room invoice (prevents double-invoicing that guest's already-
+// covered portion -- Step 20's "no duplicate invoices"). A guest scope
+// never includes Shared charges (Step 14) and skips whatever's already
+// been invoiced for THAT guest specifically.
+function uninvoicedChargesForPayer(resId,payerScope){
+  var folio=FOLIOS[resId]||{charges:[]};
+  if(!payerScope||payerScope==='whole'){
+    return folio.charges.filter(function(ch){
+      if(ch.invoiceId) return false;
+      var payerType=ch.payerType||'shared';
+      if(payerType!=='shared' && ch.guestInvoiced && Object.keys(ch.guestInvoiced).some(function(k){return ch.guestInvoiced[k];})) return false;
+      return true;
+    });
+  }
+  return folio.charges.filter(function(ch){
+    var payerType=ch.payerType||'shared';
+    if(payerType==='shared') return false;
+    if(payerType==='guest' && ch.payerGuestKey!==payerScope) return false;
+    if(ch.guestInvoiced && ch.guestInvoiced[payerScope]) return false;
+    return true;
+  });
+}
+
 // ONE canonical folio summary (Step 7) -- Calendar's compact folio and the
 // full Guest Folios page both call this SAME function so the numbers can
 // never drift between the two screens. Room/accommodation always comes
@@ -8339,7 +8453,29 @@ function folioSummary(resId){
     chargesTotal:chargesTotal, paid:paid, balance:+(chargesTotal-paid).toFixed(2)
   };
 }
-function renderFolioSummaryHTML(sum){
+// One guest's own slice of the folio (Simple guest bill split, Step 13/16):
+// their assigned charges in full, plus their equal share of any
+// split-equally charges -- shared charges and other guests' assignments
+// are never counted. Room accommodation defaults to Shared (Step 15) so it
+// never appears in a single guest's balance unless explicitly assigned.
+// "Paid" only counts invoices actually scoped to THIS guest
+// (v.payerScope===guestKey) -- a whole-room payment never marks a single
+// guest's balance settled, and vice versa (Step 16).
+function folioGuestBalance(resId,guestKey){
+  var r=RES.find(function(x){return x.id===resId;});
+  var folio=FOLIOS[resId]||{charges:[]};
+  var allocated=folio.charges.reduce(function(s,ch){return s+chargeAmountForGuest(ch,r,guestKey);},0);
+  var invoicesForGuest=INV.filter(function(v){return v.resId===resId&&v.status!=='void'&&v.payerScope===guestKey;});
+  var paid=+invoicesForGuest.reduce(function(s,v){return s+(v.paidAmount||0);},0).toFixed(2);
+  return {allocated:+allocated.toFixed(2), paid:paid, balance:+(allocated-paid).toFixed(2)};
+}
+// Optional resId (Simple guest bill split, Step 16): when given and the
+// reservation has more than one guest, appends each guest's own
+// allocated/paid/balance underneath the room-level summary -- purely
+// informational (invoicing/settlement itself is driven by folioGuestBalance()
+// + submitCreateInvoice(), not by this display), so staff can see who still
+// owes what without generating an invoice first.
+function renderFolioSummaryHTML(sum,resId){
   var rows=[['Accommodation',sum.room],['Food & Beverage',sum.food],['Trips & Activities',sum.activities],['Transfers',sum.transfers],['Accommodation Extras',sum.accExtras],['Other Services',sum.other]]
     .filter(function(r){return r[1]>0;});
   var h='<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;font-size:var(--font-size-sm)">';
@@ -8350,6 +8486,20 @@ function renderFolioSummaryHTML(sum){
   if(sum.paid>0) h+='<div style="display:flex;justify-content:space-between;padding:2px 0;color:#059669"><span>Paid</span><span>-$'+sum.paid.toFixed(2)+'</span></div>';
   h+='<div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px;border-top:2px solid #111827;font-weight:800;font-size:var(--font-size-base);color:'+(sum.balance>0?'#dc2626':'#059669')+'"><span>Balance Due</span><span>$'+sum.balance.toFixed(2)+'</span></div>';
   h+='</div>';
+  if(resId){
+    var r=RES.find(function(x){return x.id===resId;});
+    var guestLabels=reservationGuestLabels(r);
+    if(guestLabels.length>1){
+      h+='<div style="margin-top:6px;padding:8px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;font-size:var(--font-size-xs)">'
+        +'<div style="font-weight:700;color:#6b7280;margin-bottom:4px">Per-guest balance (extras only — room stays Shared)</div>'
+        +guestLabels.map(function(g){
+          var gb=folioGuestBalance(resId,g.key);
+          if(gb.allocated<=0) return '';
+          return '<div style="display:flex;justify-content:space-between;padding:1px 0"><span>'+esc(g.label)+'</span><span style="color:'+(gb.balance>0?'#dc2626':'#059669')+'">$'+gb.balance.toFixed(2)+' due</span></div>';
+        }).join('')
+        +'</div>';
+    }
+  }
   return h;
 }
 
@@ -8384,6 +8534,13 @@ function renderFolioSummaryHTML(sum){
 // still use the real resId -- only DOM element ids use instanceId.
 function buildAddChargeFormHTML(resId,instanceId){
   instanceId=instanceId||resId;
+  var r=RES.find(function(x){return x.id===resId;});
+  var guestLabels=reservationGuestLabels(r);
+  var payerSelectHTML=guestLabels.length>1
+    ? '<select id="fc-payer-'+instanceId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px"><option value="shared">Who pays: Shared</option>'
+      +guestLabels.map(function(g){return '<option value="guest:'+g.key+'">Who pays: '+esc(g.label)+'</option>';}).join('')
+      +'<option value="split">Who pays: Split equally</option></select>'
+    : '';
   var catBtns=CATALOG_CATEGORIES.map(function(cat){
     return '<button type="button" data-rid="'+resId+'" data-instance="'+instanceId+'" data-cat="'+cat.key+'" onclick="folioShowCatalogCategory(this.dataset.rid,this.dataset.cat,this.dataset.instance)" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid '+cat.color+';background:#fff;cursor:pointer;color:'+cat.color+';font-family:inherit">'+cat.label+'</button>';
   }).join('');
@@ -8397,6 +8554,7 @@ function buildAddChargeFormHTML(resId,instanceId){
           +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+instanceId+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'
           +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+instanceId+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'
           +'<select id="fc-cat-'+instanceId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+FOLIO_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'
+          +payerSelectHTML
         +'</div>'
         +'<div style="display:flex;gap:8px;align-items:center">'
           +'<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer"><i class="ti ti-camera"></i> Attach signed bill (optional) <input type="file" id="fc-bill-'+instanceId+'" accept="image/*" style="font-size:var(--font-size-xs)"></label>'
@@ -8448,7 +8606,13 @@ function folioOpenChargeEditor(resId,itemId,instanceId){
   if(!item) return;
   var r=RES.find(function(x){return x.id===resId;});
   var defaultQty = item.unitType==='PER_PAX' ? Math.max(1,(r?(r.ad||0)+(r.ch||0):1)) : 1;
-  _fcState[instanceId]={resId:resId,itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:''};
+  _fcState[instanceId]={resId:resId,itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:'',payerType:'shared',payerGuestKey:null};
+  folioRenderChargeEditor(instanceId);
+}
+function folioSetPayer(instanceId,payerType,guestKey){
+  var st=_fcState[instanceId]; if(!st)return;
+  st.payerType=payerType;
+  st.payerGuestKey=payerType==='guest'?guestKey:null;
   folioRenderChargeEditor(instanceId);
 }
 function folioRenderChargeEditor(instanceId){
@@ -8458,6 +8622,7 @@ function folioRenderChargeEditor(instanceId){
   if(!st){ editorEl.innerHTML=''; return; }
   var item=SVC_CATALOG.find(function(x){return x.id===st.itemId;});
   if(!item){ editorEl.innerHTML=''; return; }
+  var r=RES.find(function(x){return x.id===st.resId;});
   var unitPrice = st.overrideActive ? st.overridePrice : item.basePrice;
   var synth={price:unitPrice,pax:st.qty,discountType:st.discountType,discountValue:st.discountValue};
   var gross=chargeGrossAmount(synth), disc=chargeDiscountAmount(synth), final=chargeFinalAmount(synth);
@@ -8471,6 +8636,27 @@ function folioRenderChargeEditor(instanceId){
     +'<button type="button" onclick="folioAdjustChargeQty(\''+instanceId+'\',1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">+</button>'
     +'<span style="font-size:var(--font-size-xs);color:#9ca3af">× $'+unitPrice.toFixed(2)+' = $'+gross.toFixed(2)+'</span>'
     +'</div>';
+  // Who pays? (Simple guest bill split, Step 6/7/8/9) -- only shown when the
+  // reservation genuinely has more than one guest; for a solo guest,
+  // "Shared" and "Guest 1" are the same person, so the picker would be
+  // pointless clutter (kept compact per the task's own instruction).
+  var guestLabels=reservationGuestLabels(r);
+  if(guestLabels.length>1){
+    var payerOpts=[{type:'shared',key:null,label:'Shared'}]
+      .concat(guestLabels.map(function(g){return {type:'guest',key:g.key,label:g.label};}))
+      .concat([{type:'split',key:null,label:'Split equally'}]);
+    html+='<div style="margin-bottom:8px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">Who pays?</div><div style="display:flex;flex-wrap:wrap;gap:4px">'
+      +payerOpts.map(function(p){
+        var active=st.payerType===p.type&&(p.type!=='guest'||st.payerGuestKey===p.key);
+        return '<button type="button" onclick="folioSetPayer(\''+instanceId+'\',\''+p.type+'\',\''+(p.key||'')+'\')" style="padding:3px 9px;font-size:var(--font-size-xs);border-radius:14px;border:1.5px solid '+(active?'#00b4d8':'#e5e7eb')+';background:'+(active?'#e0f7fd':'#fff')+';color:'+(active?'#00b4d8':'#374151')+';cursor:pointer;font-family:inherit;font-weight:'+(active?'700':'500')+'">'+esc(p.label)+'</button>';
+      }).join('')
+      +'</div>';
+    if(st.payerType==='split'){
+      var previewAllocs=chargeSplitAllocations(synth,r);
+      html+='<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:4px">'+previewAllocs.map(function(a){return esc(a.label)+': $'+a.amount.toFixed(2);}).join(' · ')+'</div>';
+    }
+    html+='</div>';
+  }
   if(canDisc){
     html+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">'
       +'<select onchange="folioSetDiscountType(\''+instanceId+'\',this.value)" style="font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
@@ -8538,7 +8724,8 @@ function folioAddCatalogCharge(instanceId){
   var charge={
     id:Date.now(), date:tS, desc:item.name, cat:catalogCategoryLabel(item.category),
     catalogItemId:item.id, unitType:item.unitType, price:item.basePrice, baseUnitPrice:item.basePrice,
-    pax:st.qty, qty:st.qty, tax:true, addedBy:currentUser?currentUser.name:'Staff', time:now
+    pax:st.qty, qty:st.qty, tax:true, addedBy:currentUser?currentUser.name:'Staff', time:now,
+    payerType:st.payerType||'shared', payerGuestKey:st.payerType==='guest'?st.payerGuestKey:null
   };
   if(st.overrideActive && canDiscount()){
     charge.overridePrice=st.overridePrice;
@@ -8593,6 +8780,7 @@ async function addFolioCharge(resId,instanceId){
   var price=+(document.getElementById('fc-price-'+instanceId)?.value||0);
   var pax=+(document.getElementById('fc-pax-'+instanceId)?.value||1);
   var cat=document.getElementById('fc-cat-'+instanceId)?.value||'Other Services';
+  var payerVal=document.getElementById('fc-payer-'+instanceId)?.value||'shared';
   var billInput=document.getElementById('fc-bill-'+instanceId);
   var billFile=billInput&&billInput.files&&billInput.files[0];
   if(!desc){toast('Enter a description');return;}
@@ -8600,7 +8788,9 @@ async function addFolioCharge(resId,instanceId){
   if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
   var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   var chargeId=Date.now();
-  var charge={id:chargeId,date:tS,desc:desc,cat:cat,price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now};
+  var charge={id:chargeId,date:tS,desc:desc,cat:cat,price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now,
+    payerType:payerVal.indexOf('guest:')===0?'guest':(payerVal==='split'?'split':'shared'),
+    payerGuestKey:payerVal.indexOf('guest:')===0?payerVal.slice(6):null};
   FOLIOS[resId].charges.push(charge);
   saveFolios();
   syncFolioToFirestore(resId);
@@ -8639,9 +8829,9 @@ function updateFolioHeaderTotal(resId){
   // reservation (Calendar's #det-folio-summary or Guest Folios' per-card
   // #folio-summary-<resId>) -- both render the SAME folioSummary(resId).
   var detSum=document.getElementById('det-folio-summary');
-  if(detSum && document.getElementById('det-folio-section')?.dataset.folioRid===resId) detSum.innerHTML=renderFolioSummaryHTML(folioSummary(resId));
+  if(detSum && document.getElementById('det-folio-section')?.dataset.folioRid===resId) detSum.innerHTML=renderFolioSummaryHTML(folioSummary(resId),resId);
   var cardSum=document.getElementById('folio-summary-'+resId);
-  if(cardSum) cardSum.innerHTML=renderFolioSummaryHTML(folioSummary(resId));
+  if(cardSum) cardSum.innerHTML=renderFolioSummaryHTML(folioSummary(resId),resId);
 }
 
 // A charge already included on a generated invoice can no longer be
@@ -8672,6 +8862,7 @@ function renderFolioChargesById(resId,instanceId){
   if(!el)return;
   var folio=FOLIOS[resId]||{charges:[]};
   var charges=folio.charges;
+  var r=RES.find(function(x){return x.id===resId;});
 
   if(!charges.length){
     el.innerHTML='<p style="font-size:var(--font-size-xs);color:#9ca3af;text-align:center;padding:10px 0;margin:0">No charges yet — use the form above to add</p>';
@@ -8704,8 +8895,21 @@ function renderFolioChargesById(resId,instanceId){
       var discLine = disc>0
         ? '<div style="font-size:var(--font-size-xs);color:#dc2626">Discount '+(ch.discountType==='percent'?(ch.discountValue||0)+'%':'$'+(ch.discountValue||0))+' = -$'+disc.toFixed(2)+(ch.discountReason?' ('+esc(ch.discountReason)+')':'')+'</div>'
         : '';
+      // Who pays (Simple guest bill split, Part 12/17): a charge with no
+      // payerType at all (every folio line added before this feature
+      // existed) defaults to Shared -- shown as nothing extra, exactly like
+      // today, so historical charges render unchanged (Part 17, no
+      // migration needed).
+      var payerType=ch.payerType||'shared';
+      var payerLine='';
+      if(payerType==='guest'){
+        payerLine='<div style="font-size:var(--font-size-xs);color:#6b7280">Who pays: '+esc(guestLabelFor(r,ch.payerGuestKey))+'</div>';
+      } else if(payerType==='split'){
+        var allocs=chargeSplitAllocations(ch,r);
+        payerLine='<div style="font-size:var(--font-size-xs);color:#6b7280">Who pays: Split equally — '+allocs.map(function(a){return esc(a.label)+': $'+a.amount.toFixed(2);}).join(' · ')+'</div>';
+      }
       h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb">';
-      h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(ch.desc)+statusBadge+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(ch.cat)+' · '+ch.time+(ch.addedBy?' · Added by '+esc(ch.addedBy):'')+billBadge+'</div>'+qtyLine+discLine+(ch.note?'<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px;font-style:italic">"'+esc(ch.note)+'"</div>':'')+'</div>';
+      h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(ch.desc)+statusBadge+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(ch.cat)+' · '+ch.time+(ch.addedBy?' · Added by '+esc(ch.addedBy):'')+billBadge+'</div>'+qtyLine+discLine+payerLine+(ch.note?'<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px;font-style:italic">"'+esc(ch.note)+'"</div>':'')+'</div>';
       h+='<div style="font-size:var(--font-size-sm);font-weight:700;color:#00b4d8;min-width:60px;text-align:right">$'+final.toFixed(2)+'</div>';
       if(!canViewOnly()){h+='<button data-rid="'+resId+'" data-cid="'+ch.id+'" data-instance="'+instanceId+'" onclick="removeFolioCharge(this.dataset.rid,+this.dataset.cid,this.dataset.instance)" title="'+(ch.invoiceId?'Already invoiced — void invoice first':'Remove')+'" style="background:none;border:none;cursor:pointer;color:'+(ch.invoiceId?'#d1d5db':'#b91c1c')+';font-size:var(--font-size-base);padding:0 2px">✕</button>';}
       h+='</div>';
@@ -8725,10 +8929,12 @@ function renderFolioChargesById(resId,instanceId){
 // category) pre-check matching rows; staff can still fine-tune before
 // continuing. Only UNINVOICED charges are ever listed -- an already-
 // invoiced charge never re-appears here (Step 10/21).
-function openCreateInvoice(resId){
+function openCreateInvoice(resId,payerScope){
+  payerScope=payerScope||'whole';
+  var oldBg=document.getElementById('ci-bg'); if(oldBg) oldBg.remove();
   var res=RES.find(function(r){return r.id===resId;});
-  var folio=FOLIOS[resId]||{charges:[]};
-  var uninvoiced=folio.charges.filter(function(ch){return !ch.invoiceId;});
+  var guestLabels=reservationGuestLabels(res);
+  var eligible=uninvoicedChargesForPayer(resId,payerScope);
 
   var html='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center" id="ci-bg" onclick="if(event.target===this)this.remove()">'
     +'<div style="background:#fff;border-radius:16px;padding:28px;width:580px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
@@ -8738,38 +8944,61 @@ function openCreateInvoice(resId){
     +'<button onclick="document.getElementById(\'ci-bg\').remove()" style="background:#f3f4f6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:var(--font-size-base)">✕</button>'
     +'</div>';
 
-  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
-    +'<button type="button" onclick="ciSelectScope(\'all\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #2563eb;background:#eff6ff;color:#2563eb;cursor:pointer;font-family:inherit">All unpaid</button>'
-    +'<button type="button" onclick="ciSelectScope(\'room\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">Room only</button>'
-    +FOLIO_CATEGORIES.map(function(c){return '<button type="button" onclick="ciSelectScope(\''+esc(c)+'\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">'+c+'</button>';}).join('')
-    +'</div>';
+  // "Invoice for" (Simple guest bill split, Step 13) -- only shown when the
+  // reservation genuinely has more than one guest; a solo guest is always
+  // effectively "Whole room" so the picker would be pointless.
+  if(guestLabels.length>1){
+    var scopeOpts=[{key:'whole',label:'Whole room'}].concat(guestLabels.map(function(g){return {key:g.key,label:g.label};}));
+    html+='<div style="margin-bottom:12px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">Invoice for</div><div style="display:flex;flex-wrap:wrap;gap:6px">'
+      +scopeOpts.map(function(s){
+        var active=s.key===payerScope;
+        return '<button type="button" onclick="openCreateInvoice(\''+resId+'\',\''+s.key+'\')" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid '+(active?'#7c3aed':'#e5e7eb')+';background:'+(active?'#f5f3ff':'#fff')+';color:'+(active?'#7c3aed':'#374151')+';cursor:pointer;font-family:inherit">'+esc(s.label)+'</button>';
+      }).join('')
+      +'</div></div>';
+  }
 
-  if(!uninvoiced.length){
-    html+='<div style="font-size:var(--font-size-sm);color:#9ca3af;padding:8px 0 14px">No uninvoiced extra charges — you can still invoice the room only, below.</div>';
+  // Scope presets (All unpaid/Room only/category) only make sense for the
+  // Whole Room invoice -- a guest-specific invoice is already pre-filtered
+  // to exactly that guest's eligible charges (Step 14), so it skips
+  // straight to the item list, pre-selected in full.
+  if(payerScope==='whole'){
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
+      +'<button type="button" onclick="ciSelectScope(\'all\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #2563eb;background:#eff6ff;color:#2563eb;cursor:pointer;font-family:inherit">All unpaid</button>'
+      +'<button type="button" onclick="ciSelectScope(\'room\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">Room only</button>'
+      +FOLIO_CATEGORIES.map(function(c){return '<button type="button" onclick="ciSelectScope(\''+esc(c)+'\')" style="padding:6px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">'+c+'</button>';}).join('')
+      +'</div>';
+  }
+
+  if(!eligible.length){
+    html+='<div style="font-size:var(--font-size-sm);color:#9ca3af;padding:8px 0 14px">'+(payerScope==='whole'?'No uninvoiced extra charges — you can still invoice the room only, below.':'No unsettled charges assigned to '+esc(guestLabelFor(res,payerScope))+'.')+'</div>';
   } else {
-    html+='<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px"><input type="checkbox" id="ci-select-all" onchange="document.querySelectorAll(\'.ci-chk\').forEach(function(c){c.checked=document.getElementById(\'ci-select-all\').checked;})" style="width:16px;height:16px"> Select all extras</label>';
+    html+='<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px"><input type="checkbox" id="ci-select-all" '+(payerScope!=='whole'?'checked':'')+' onchange="document.querySelectorAll(\'.ci-chk\').forEach(function(c){c.checked=document.getElementById(\'ci-select-all\').checked;})" style="width:16px;height:16px"> Select all'+(payerScope==='whole'?' extras':'')+'</label>';
     var byDate={};
-    uninvoiced.forEach(function(ch){ var d=ch.date||'Other'; (byDate[d]=byDate[d]||[]).push(ch); });
+    eligible.forEach(function(ch){ var d=ch.date||'Other'; (byDate[d]=byDate[d]||[]).push(ch); });
     Object.keys(byDate).sort().forEach(function(date){
       html+='<div style="margin-bottom:12px"><div style="font-size:var(--font-size-xs);font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px">'+(date!=='Other'?fdf(date):'Other')+'</div>';
       byDate[date].forEach(function(ch){
-        var pax=ch.pax||ch.qty||1, total=chargeFinalAmount(ch).toFixed(2);
+        var pax=ch.pax||ch.qty||1, amt=chargeAmountForGuest(ch,res,payerScope);
+        var splitNote=(payerScope!=='whole'&&ch.payerType==='split')?' <span style="color:#9ca3af;font-weight:400">(split — their share)</span>':'';
         html+='<label class="ci-row" data-cat="'+esc(ch.cat)+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f9fafb;border:1px solid #e5e7eb">'
-          +'<input type="checkbox" class="ci-chk" data-cid="'+ch.id+'" style="width:16px;height:16px;cursor:pointer">'
-          +'<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600;color:#111827">'+esc(ch.desc)+(pax>1?' (×'+pax+' pax)':'')+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+esc(ch.cat)+'</div></div>'
-          +'<div style="font-size:var(--font-size-sm);font-weight:700;color:#059669">$'+total+'</div></label>';
+          +'<input type="checkbox" class="ci-chk" data-cid="'+ch.id+'" '+(payerScope!=='whole'?'checked':'')+' style="width:16px;height:16px;cursor:pointer">'
+          +'<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600;color:#111827">'+esc(ch.desc)+(pax>1?' (×'+pax+' pax)':'')+splitNote+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+esc(ch.cat)+'</div></div>'
+          +'<div style="font-size:var(--font-size-sm);font-weight:700;color:#059669">$'+amt.toFixed(2)+'</div></label>';
       });
       html+='</div>';
     });
   }
 
-  var roomTotal=res?calcTax(res).total:0;
-  html+='<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;margin:6px 0 16px">'
-    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-base)"><input type="checkbox" id="ci-include-room" style="width:16px;height:16px"> Include room charge ($'+roomTotal.toFixed(2)+')</label>'
-    +'</div>';
+  if(payerScope==='whole'){
+    var roomTotal=res?calcTax(res).total:0;
+    html+='<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;margin:6px 0 16px">'
+      +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:var(--font-size-base)"><input type="checkbox" id="ci-include-room" style="width:16px;height:16px"> Include room charge ($'+roomTotal.toFixed(2)+')</label>'
+      +'</div>';
+  }
 
   window._ciResId=resId;
-  html+='<button onclick="submitCreateInvoice(window._ciResId)" style="background:#2563eb;color:#fff;border:none;padding:12px;border-radius:10px;font-size:var(--font-size-md);font-weight:700;cursor:pointer;font-family:inherit;width:100%">🧾 Continue to Invoice</button>'
+  window._ciPayerScope=payerScope;
+  html+='<button onclick="submitCreateInvoice(window._ciResId,window._ciPayerScope)" style="background:#2563eb;color:#fff;border:none;padding:12px;border-radius:10px;font-size:var(--font-size-md);font-weight:700;cursor:pointer;font-family:inherit;width:100%">🧾 Continue to Invoice</button>'
     +'</div></div>';
 
   var el=document.createElement('div');
@@ -8781,7 +9010,7 @@ function openCreateInvoice(resId){
 // distinct preset (extras excluded, only #ci-include-room ticked) -- the
 // six presets this dialog offers (All unpaid / Room only / each
 // FOLIO_CATEGORIES entry / Selected items via manual ticking) match Step 8
-// exactly, never fewer.
+// exactly, never fewer. Whole Room scope only (guest scopes skip this row).
 function ciSelectScope(scope){
   document.querySelectorAll('.ci-chk').forEach(function(c){
     var row=c.closest('.ci-row');
@@ -8792,10 +9021,12 @@ function ciSelectScope(scope){
   var roomChk=document.getElementById('ci-include-room');
   if(roomChk && (scope==='all' || scope==='room')) roomChk.checked=true;
 }
-function submitCreateInvoice(resId){
+function submitCreateInvoice(resId,payerScope){
+  payerScope=payerScope||'whole';
+  var res=RES.find(function(r){return r.id===resId;});
   var folio=FOLIOS[resId]||{charges:[]};
   var checked=Array.from(document.querySelectorAll('.ci-chk:checked'));
-  var includeRoom=document.getElementById('ci-include-room')&&document.getElementById('ci-include-room').checked;
+  var includeRoom=payerScope==='whole'&&document.getElementById('ci-include-room')&&document.getElementById('ci-include-room').checked;
   if(!checked.length && !includeRoom){ toast('Select at least one charge, or include the room'); return; }
   var selected=checked.map(function(el){
     var cid=+el.getAttribute('data-cid');
@@ -8804,9 +9035,9 @@ function submitCreateInvoice(resId){
   var bg=document.getElementById('ci-bg'); if(bg) bg.remove();
   var items=selected.map(function(ch){
     var pax=ch.pax||ch.qty||1;
-    return {id:Date.now()+Math.random(), chargeId:ch.id, desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:chargeFinalAmount(ch), tax:ch.tax!==false, cat:ch.cat, pax:pax};
+    return {id:Date.now()+Math.random(), chargeId:ch.id, desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:chargeAmountForGuest(ch,res,payerScope), tax:ch.tax!==false, cat:ch.cat, pax:pax};
   });
-  openIM(resId, {items:items, includeRoom:includeRoom});
+  openIM(resId, {items:items, includeRoom:includeRoom, payerScope:payerScope});
 }
 
 // "Open full folio" (Step 15) — Calendar's compact folio → Guest Folios,
@@ -10547,6 +10778,16 @@ function canManageCatalog() {
 // price (same task, Part 11/14 — "do NOT silently let every staff give
 // unlimited discounts").
 function canDiscount() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
+}
+// Reservation-specific price override (Calendar pricing cleanup, 2026-09-10):
+// distinct from Bulk Price Manager (future public sell rates) -- this only
+// ever touches ONE reservation's own r.rate, same authority level as folio
+// discounts. Staff can still freely edit dates/room/guests via "Edit
+// booking & dates"; only an explicit rate override away from the
+// room/date-driven default requires this.
+function canAdjustRoomPrice() {
   if(!currentUser) return false;
   return currentUser.role === 'admin' || currentUser.role === 'manager';
 }
@@ -12371,6 +12612,14 @@ async function loadResFromSupabase() {
       extraBeds:r.extra_beds||local.extraBeds||0,
       prop:local.prop||propFromRoomId(r.room_id),
       nlog:local.nlog||[],
+      // Reservation price-override audit trail (Calendar pricing cleanup,
+      // 2026-09-10) -- same persistence shape as nlog just above: Supabase's
+      // reservations table has no column for this, so it round-trips only
+      // through the local cache (localStorage 'vilu_res'), same known
+      // limitation nlog already has (documented there) -- a genuinely fresh
+      // browser/device with no local cache won't see prior overrides' audit
+      // entries, only the CURRENT r.rate itself (which IS Supabase-backed).
+      priceAdjustments:local.priceAdjustments||[],
       trips:(function(){
         // Prefer local trips (most up to date), fall back to Supabase trips column
         if(local.trips && local.trips.length) return local.trips;

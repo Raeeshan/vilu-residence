@@ -360,8 +360,11 @@ section('Case M — Calendar quick-add charge: instanceId DOM scoping (fixes the
       esc: (s) => s,
       CATALOG_CATEGORIES: [{ key: 'TRIPS_ACTIVITIES', label: 'Trips & Activities', color: '#0077b6' }],
       FOLIO_CATEGORIES: ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services'],
+      RES: [{ id: 'R123', fn: 'Test', ad: 1, ch: 0 }],
     };
     vm.createContext(ctx);
+    vm.runInContext(extractByStart(PMS, /function reservationGuestCount\(r\)\s*\{/), ctx);
+    vm.runInContext(extractByStart(PMS, /function reservationGuestLabels\(r\)\s*\{/), ctx);
     vm.runInContext(extractByStart(PMS, /function buildAddChargeFormHTML\(resId,instanceId\)\s*\{/), ctx);
     const resId = 'R123';
     const guestFoliosHTML = vm.runInContext(`buildAddChargeFormHTML('${resId}')`, ctx); // Guest Folios: no instanceId arg
@@ -398,8 +401,14 @@ section('Case J — invoice-level discount (Part 12/13) + no double-discount + t
   test('no double-discount: extras[].subtotal (and invItems[].unit feeding it) is built from chargeFinalAmount(ch) -- already-net-of-item-discount -- and the invoice-level discount is a separate figure applied on top, never re-discounting the same amount twice', () => {
     const openIMSrc = extractByStart(PMS, /function openIM\(resId, opts\)\s*\{/);
     assert.match(openIMSrc, /unit:\s*chargeFinalAmount\(ch\)/);
-    const submitSrc = extractByStart(PMS, /function submitCreateInvoice\(resId\)\s*\{/);
-    assert.match(submitSrc, /unit:\s*chargeFinalAmount\(ch\)/);
+    // submitCreateInvoice() (Whole Room or a guest-scoped invoice) computes
+    // unit via chargeAmountForGuest(), which itself resolves to
+    // chargeFinalAmount(ch) for a whole-room/shared charge -- still net-of-
+    // item-discount, never re-discounting.
+    const submitSrc = extractByStart(PMS, /function submitCreateInvoice\(resId,payerScope\)\s*\{/);
+    assert.match(submitSrc, /unit:\s*chargeAmountForGuest\(ch,res,payerScope\)/);
+    const chargeAmountForGuestSrc = extractByStart(PMS, /function chargeAmountForGuest\(ch,r,guestKey\)\s*\{/);
+    assert.match(chargeAmountForGuestSrc, /chargeFinalAmount\(ch\)/);
   });
   test('tax ordering unchanged by this task: extra-charge tax is still computed on eSubtotal BEFORE the invoice discount is subtracted (audited, not guessed, per Part 13)', () => {
     const src = extractByStart(PMS, /function niPrev\(\)\s*\{/);

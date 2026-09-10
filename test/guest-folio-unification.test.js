@@ -230,12 +230,16 @@ section('Case E — unified "Create Invoice" (Steps 8-11): replaces the old dupl
     const calBtnRowIdx = PMS.indexOf("btnRow.innerHTML='<button data-rid=\"'+id+'\" onclick=\"openCreateInvoice");
     assert.ok(calBtnRowIdx !== -1, 'Calendar folio section button row must call openCreateInvoice');
   });
-  test('openCreateInvoice() only lists UNINVOICED folio charges (an item with .invoiceId already set is excluded), and offers all 6 Step-8 presets: All unpaid, Room only, one per FOLIO_CATEGORIES, and Selected items (manual ticking)', () => {
-    const src = extractByStart(PMS, /function openCreateInvoice\(resId\)\s*\{/);
-    assert.match(src, /folio\.charges\.filter\(function\(ch\)\{return !ch\.invoiceId;\}\)/);
+  test('openCreateInvoice() only lists UNINVOICED folio charges via uninvoicedChargesForPayer() (an item with .invoiceId already set is excluded), and offers all 6 Step-8 presets for the Whole Room scope: All unpaid, Room only, one per FOLIO_CATEGORIES, and Selected items (manual ticking)', () => {
+    const src = extractByStart(PMS, /function openCreateInvoice\(resId,payerScope\)\s*\{/);
+    assert.match(src, /uninvoicedChargesForPayer\(resId,payerScope\)/);
     assert.match(src, /ciSelectScope\(\\'all\\'\)/);
     assert.match(src, /ciSelectScope\(\\'room\\'\)/);
     assert.match(src, /FOLIO_CATEGORIES\.map/);
+    // uninvoicedChargesForPayer() itself keeps the original !ch.invoiceId
+    // exclusion for the Whole Room scope, unchanged.
+    const filterSrc = extractByStart(PMS, /function uninvoicedChargesForPayer\(resId,payerScope\)\s*\{/);
+    assert.match(filterSrc, /if\(ch\.invoiceId\) return false;/);
   });
   test('ciSelectScope(\'all\') checks every extra AND the room checkbox (Step 11: "All unpaid" is genuinely everything, one combined invoice); ciSelectScope(\'room\') unchecks every extra and checks only room (Step 10: Room only is its own distinct preset); a category scope checks only rows whose data-cat matches and leaves room untouched', () => {
     const src = extractByStart(PMS, /function ciSelectScope\(scope\)\s*\{/);
@@ -243,9 +247,9 @@ section('Case E — unified "Create Invoice" (Steps 8-11): replaces the old dupl
     assert.match(src, /if\(roomChk && \(scope==='all' \|\| scope==='room'\)\) roomChk\.checked=true;/);
   });
   test('submitCreateInvoice() propagates each selected charge\'s id as chargeId into the invoice-modal draft items, and passes includeRoom through explicitly (never a separately-computed room line, which was the old double-charge bug)', () => {
-    const src = extractByStart(PMS, /function submitCreateInvoice\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function submitCreateInvoice\(resId,payerScope\)\s*\{/);
     assert.match(src, /chargeId:\s*ch\.id/);
-    assert.match(src, /openIM\(resId, \{items:items, includeRoom:includeRoom\}\)/);
+    assert.match(src, /openIM\(resId, \{items:items, includeRoom:includeRoom, payerScope:payerScope\}\)/);
   });
   test('openIM() with no opts (e.g. the Reservations-drawer\'s Invoice tab, or the Quick Bar) defaults to every UNINVOICED folio charge -- same duplicate-prevention guarantee as the scope picker', () => {
     const src = extractByStart(PMS, /function openIM\(resId, opts\)\s*\{/);
@@ -306,9 +310,9 @@ section('Case H — payment recording (Steps 12-13)');
     const src = extractByStart(PMS, /function recordInvoicePayment\(invId\)\s*\{/);
     assert.match(src, /if\(amt>remaining\+0\.01\)\{toast\('Amount exceeds balance/);
   });
-  test('only once an invoice reaches "Fully paid" are its covered folio charges marked .paid -- a partial payment never marks any charge paid', () => {
+  test('only once an invoice reaches "Fully paid" are its covered folio charges marked .paid -- a partial payment never marks any charge paid; a guest-scoped invoice never marks the whole charge paid either (Simple guest bill split, Step 16)', () => {
     const src = extractByStart(PMS, /function recordInvoicePayment\(invId\)\s*\{/);
-    assert.match(src, /if\(v\.pay==='Fully paid'&&v\.resId\)\{/);
+    assert.match(src, /if\(v\.pay==='Fully paid'&&v\.resId&&\(!v\.payerScope\|\|v\.payerScope==='whole'\)\)\{/);
     assert.match(src, /ch\.paid=true;/);
   });
 }
@@ -353,7 +357,7 @@ section('Case J — "Open full folio" (Step 15): Calendar → Guest Folios lands
     const idx = PMS.indexOf('} else if(n===2){');
     assert.ok(idx !== -1);
     const src = PMS.slice(idx, idx + 1600);
-    assert.match(src, /renderFolioSummaryHTML\(sum\)/);
+    assert.match(src, /renderFolioSummaryHTML\(sum,r\.id\)/);
     assert.match(src, /openFullFolio\(r\.id\)/);
   });
 }
