@@ -4,6 +4,10 @@
 //   publicBooking       trusted write path for the unauthenticated website (Stage 0 fix)
 //   availabilityOnReservation / availabilityOnBlock  event-driven sellable-inventory derivation
 //   nightlyReconcile    03:30 Indian/Maldives: full 730-day availability recompute
+//   getReservationDocument / uploadReservationDocument  authenticated,
+//     role-checked read/write for the Reservation Document Vault (passports,
+//     IDs, visas, etc.) -- see the comment above those exports for why they
+//     exist instead of a direct Storage-rules read/write.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -16,10 +20,11 @@
 // the separate "ota" codebase (functions-ota/) and remain undeployed/disabled
 // until real OTA credentials exist.
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
-const { onRequest } = require('firebase-functions/v2/https');
+const { onRequest, onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getStorage } = require('firebase-admin/storage');
 const crypto = require('crypto');
 const { FirestoreStore } = require('./lib/store-firestore');
 const { writeReservationTx } = require('./lib/booking-core');
@@ -294,4 +299,103 @@ exports.nightlyReconcile = onSchedule({ schedule: '30 3 * * *', timeZone: 'India
   const affectedDates = {};
   for (const code of Object.keys(BEDS24_ROOM_MAP)) affectedDates[code] = dateRange(today, addDays(today, 365));
   await enqueueBeds24Sync('nightly', affectedDates);
+});
+
+// ── Reservation Document Vault: authenticated read/write (security
+// hardening pass, 2026-09-10) ────────────────────────────────────────────
+// Storage rules cannot reliably check a caller's Firestore-backed role from
+// Storage's own rule language (the storage.rules file documents an earlier,
+// abandoned attempt at exactly this). The client's original design worked
+// around that with storage.rules gating reservation-documents/ to a single
+// hardcoded admin email, then falling back to getDownloadURL() for actual
+// reads -- but a getDownloadURL() token is a bearer credential that keeps
+// working forever for anyone who obtains it, regardless of Storage rules,
+// which is unacceptable for a passport/ID scan. These two callables replace
+// BOTH the direct client Storage read (getDownloadURL) and the direct
+// client Storage write (fsStorage.ref().put()) for this one path: the
+// client now sends auth + a document/reservation reference, the SERVER
+// checks the caller's real Firestore role (reliable -- same-service, admin
+// SDK, not a client Storage rule), and only then touches the bucket via
+// the Admin SDK, which is never subject to Storage rules at all. No
+// download token, no signed URL, no client-visible file path token is ever
+// created -- the file only ever reaches the client as an in-memory base64
+// payload over the existing HTTPS callable channel, used once, discarded.
+const SENSITIVE_DOC_TYPES = ['PASSPORT', 'IDENTITY', 'TRAVEL'];
+const ALL_DOC_TYPES = ['PASSPORT', 'IDENTITY', 'TRAVEL', 'TRANSFER', 'SIGNED_BILL', 'INVOICE', 'RECEIPT', 'OTHER'];
+const ADMIN_EMAIL = 'viluresidence@gmail.com';
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8MB decoded -- comfortably inside the callable payload limit once base64-encoded (~11MB)
+
+async function callerRole(request) {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in required.');
+  const email = (request.auth.token.email || '').toLowerCase();
+  if (!email) throw new HttpsError('permission-denied', 'No email on this account.');
+  if (email === ADMIN_EMAIL) return { email, role: 'admin' };
+  const userDoc = await db.collection('users').doc(email).get();
+  const role = userDoc.exists ? userDoc.data().role : null;
+  if (role === 'staff') return { email, role: 'staff' };
+  if (role === 'manager') return { email, role: 'manager' };
+  // Mirrors firestore.rules' isStaff(): a staff_permissions/{uid} doc also
+  // grants staff-level access even without users/{email}.role === 'staff'.
+  const staffPerm = await db.collection('staff_permissions').doc(request.auth.uid).get();
+  if (staffPerm.exists) return { email, role: 'staff' };
+  return { email, role: role || 'none' };
+}
+function canAccessDocType(role, type) {
+  if (SENSITIVE_DOC_TYPES.includes(type)) return role === 'admin' || role === 'manager';
+  return role === 'admin' || role === 'manager' || role === 'staff';
+}
+
+exports.getReservationDocument = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { email, role } = await callerRole(request);
+  const documentId = String((request.data || {}).documentId || '');
+  if (!documentId) throw new HttpsError('invalid-argument', 'documentId required.');
+  const docRef = db.collection('reservation_documents').doc(documentId);
+  const snap = await docRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Document not found.');
+  const doc = snap.data();
+  if (!canAccessDocType(role, doc.type)) throw new HttpsError('permission-denied', 'Not authorized for this document type.');
+  const bucket = getStorage().bucket();
+  const [buffer] = await bucket.file(doc.storagePath).download();
+  if (SENSITIVE_DOC_TYPES.includes(doc.type)) {
+    await db.collection('document_access_audit').add({
+      documentId, reservationId: doc.reservationId, type: doc.type, action: 'view',
+      userUid: request.auth.uid, userEmail: email, userRole: role,
+      accessedAt: FieldValue.serverTimestamp(),
+    });
+  }
+  return { base64: buffer.toString('base64'), mimeType: doc.mimeType || 'application/octet-stream', title: doc.title || doc.type };
+});
+
+exports.uploadReservationDocument = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { email, role } = await callerRole(request);
+  if (role !== 'admin' && role !== 'manager') throw new HttpsError('permission-denied', 'Admin/Manager access only.');
+  const d = request.data || {};
+  const resId = String(d.resId || '');
+  const type = String(d.type || '');
+  const base64 = String(d.base64 || '');
+  const mimeType = String(d.mimeType || '');
+  const fileExt = String(d.fileExt || 'bin').replace(/[^a-z0-9]/gi, '').slice(0, 8) || 'bin';
+  if (!resId || !ALL_DOC_TYPES.includes(type)) throw new HttpsError('invalid-argument', 'resId/type required.');
+  if (!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(mimeType)) throw new HttpsError('invalid-argument', 'Only JPEG/PNG/WEBP images or PDF are accepted.');
+  const buffer = Buffer.from(base64, 'base64');
+  if (!buffer.length) throw new HttpsError('invalid-argument', 'Empty file.');
+  if (buffer.length > MAX_UPLOAD_BYTES) throw new HttpsError('invalid-argument', 'File exceeds the 8MB limit.');
+  // guestName is display metadata only (not security-sensitive -- access
+  // control above is entirely by resId/type/role, never by name), so it's
+  // trusted from the client the same way title is, rather than guessed
+  // server-side against a reservation schema this codebase doesn't own a
+  // single canonical field-name convention for (the client's own in-memory
+  // RES shape and the raw Firestore reservations doc use different keys).
+  const docRef = db.collection('reservation_documents').doc();
+  const storagePath = 'reservation-documents/' + resId + '/' + docRef.id + '.' + fileExt;
+  const bucket = getStorage().bucket();
+  await bucket.file(storagePath).save(buffer, { contentType: mimeType, resumable: false });
+  await docRef.set({
+    reservationId: resId, type, title: String(d.title || '').slice(0, 200) || type,
+    guestName: d.guestName ? String(d.guestName).slice(0, 160) : null, folioItemId: null, invoiceId: null,
+    storagePath, mimeType,
+    uploadedByUid: request.auth.uid, uploadedByName: String(d.uploaderName || email).slice(0, 120),
+    uploadedAt: FieldValue.serverTimestamp(), status: 'active',
+  });
+  return { docId: docRef.id };
 });

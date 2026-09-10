@@ -9248,31 +9248,47 @@ function filterDocEntries(entries, filterKey){
   return entries;
 }
 
+// Reads a Blob into a base64 string (no data: prefix) for the
+// uploadReservationDocument callable -- FileReader.readAsDataURL() is the
+// standard browser-side base64 path; we just strip the "data:...;base64,"
+// header the browser adds.
+function blobToBase64(blob){
+  return new Promise(function(resolve,reject){
+    var fr=new FileReader();
+    fr.onload=function(){ var s=String(fr.result); resolve(s.slice(s.indexOf(',')+1)); };
+    fr.onerror=reject;
+    fr.readAsDataURL(blob);
+  });
+}
+// Security hardening (2026-09-10): uploads now go through the
+// uploadReservationDocument Cloud Function (Admin SDK), not a direct
+// fsStorage.ref().put() + fsDb write -- see the storage.rules/
+// firestore.rules comments on reservation-documents/ for why. The
+// client still resizes an image locally first (bandwidth, consistent
+// with every other upload flow in this file) before base64-encoding it.
 async function uploadReservationDocument(resId, file, type, title){
   if(!canUploadDocuments()){ toast('⛔ Admin/Manager access only'); return; }
   var r = RES.find(function(x){return x.id===resId;});
   if(!r || !file) return;
   var typeInfo = docTypeInfo(type);
   try {
-    var ref = fsDb.collection('reservation_documents').doc();
     var contentType = file.type || 'application/octet-stream';
     var isImage = /^image\//.test(contentType);
-    var blob = file, path;
-    if (isImage) { blob = await resizeImageToBlob(file, 2000, 0.85); contentType='image/jpeg'; path='reservation-documents/'+resId+'/'+ref.id+'.jpg'; }
-    else { var ext=(file.name||'').split('.').pop()||'pdf'; path='reservation-documents/'+resId+'/'+ref.id+'.'+ext.toLowerCase(); }
-    await fsStorage.ref(path).put(blob, {contentType:contentType});
-    var fbUser = firebase.auth().currentUser;
-    await ref.set({
-      reservationId:resId, type:type, title:(title||'').trim()||typeInfo.label,
-      guestName:r.fn+' '+r.ln, folioItemId:null, invoiceId:null,
-      storagePath:path, mimeType:contentType,
-      uploadedByUid: fbUser?fbUser.uid:null, uploadedByName: (currentUser&&currentUser.name)||(currentUser&&currentUser.username)||'Staff',
-      uploadedAt: firebase.firestore.FieldValue.serverTimestamp(), status:'active'
+    var blob = file, fileExt = 'bin';
+    if (isImage) { blob = await resizeImageToBlob(file, 2000, 0.85); contentType='image/jpeg'; fileExt='jpg'; }
+    else { fileExt = ((file.name||'').split('.').pop()||'pdf').toLowerCase(); }
+    if (blob.size > 8*1024*1024) { toast('⚠ File too large (8MB max)'); return; }
+    var base64 = await blobToBase64(blob);
+    var call = fsFunctions.httpsCallable('uploadReservationDocument');
+    var res = await call({
+      resId:resId, type:type, title:(title||'').trim()||typeInfo.label,
+      base64:base64, mimeType:contentType, fileExt:fileExt,
+      guestName:r.fn+' '+r.ln, uploaderName:(currentUser&&(currentUser.name||currentUser.username))||'Staff'
     });
     await loadReservationDocuments(resId);
     toast('✓ '+typeInfo.label+' uploaded');
-    return ref.id;
-  } catch(e){ console.error('uploadReservationDocument failed', e); toast('⚠ Could not upload document'); }
+    return res.data.docId;
+  } catch(e){ console.error('uploadReservationDocument failed', e); toast('⚠ Could not upload document: '+(e.message||'')); }
 }
 
 // Never a hard delete (A7) -- ordinary users get "archive", which just
@@ -9292,28 +9308,33 @@ async function archiveReservationDocument(resId, docId, archived){
   } catch(e){ console.error('archiveReservationDocument failed', e); toast('⚠ Could not update document'); }
 }
 
-// Storage READ on reservation-documents is admin-only in storage.rules
-// (A3: passport/ID files must never be publicly reachable). The first
-// attempt at this function fetched raw bytes via a Bearer-token REST call
-// so the URL itself would never exist as a standing credential -- verified
-// LIVE against production and found unworkable: this bucket has no CORS
-// rule permitting a cross-origin fetch() with a custom Authorization
-// header from this origin, and this session has no gsutil/gcloud access
-// to add one. Falling back to the SDK's getDownloadURL(), the same
-// mechanism already relied on for folio-attachments/room-photos, which
-// DOES work today because it's the standard Firebase Storage access path.
-// getDownloadURL() itself is still gated by storage.rules' isAdmin() --
-// only an authenticated admin session can mint the URL at all -- but once
-// minted, that specific URL is a bearer credential that bypasses rules on
-// its own for anyone who later obtains it (a documented Firebase Storage
-// behavior). Mitigated, not eliminated: minted fresh per click, never
-// written to Firestore/localStorage/any static HTML, used immediately and
-// discarded. Reported honestly rather than silently claimed equivalent to
-// the Bearer-token design -- true defense-in-depth needs Storage bucket
-// CORS configuration (or a Cloud Function issuing short-lived signed
-// URLs), out of reach in this session and flagged as a follow-up.
+// Security hardening (2026-09-10): a getDownloadURL()-minted token is a
+// bearer credential that keeps working for anyone who obtains it, for as
+// long as the object exists, regardless of Storage rules -- unacceptable
+// for a passport/ID scan, and flagged rather than silently accepted after
+// live verification. storage.rules now denies every direct client request
+// to reservation-documents/ outright (`allow read, write: if false`).
+// The only real access path is the getReservationDocument Cloud Function
+// (functions-core/index.js): it checks the caller's real Firestore role
+// server-side (not a Storage-rules cross-service call, which this file's
+// own history already documents as unreliable) and, only if authorized,
+// hands back the file as a base64 payload over the existing HTTPS callable
+// channel -- never a URL of any kind, network-reachable or otherwise. The
+// resulting local blob: URL below is scoped to this browser tab only and
+// is never written to Firestore/localStorage/any static HTML.
+function base64ToBlob(base64, mimeType){
+  var bytes = atob(base64);
+  var arr = new Uint8Array(bytes.length);
+  for (var i=0;i<bytes.length;i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], {type: mimeType});
+}
 function _findDocEntry(resId, docId){
   return mergedDocEntries(resId).find(function(d){ return d.id===docId; });
+}
+async function fetchReservationDocumentViaFunction(storageDocId){
+  var call = fsFunctions.httpsCallable('getReservationDocument');
+  var res = await call({documentId: storageDocId});
+  return base64ToBlob(res.data.base64, res.data.mimeType);
 }
 async function viewReservationDocument(resId, docId){
   var d = _findDocEntry(resId, docId);
@@ -9322,20 +9343,20 @@ async function viewReservationDocument(resId, docId){
   if (d.synthetic==='invoice') { closeDrawer(); viewInv(d.invoiceId); return; }
   if (d.synthetic==='receipt') { closeDrawer(); viewInv(d.invoiceId); return; }
   try {
-    var url = await fsStorage.ref(d.storagePath).getDownloadURL();
-    window.open(url, '_blank');
-  } catch(e){ console.error('viewReservationDocument failed', e); toast('⚠ Could not open (admin access only)'); }
+    var blob = await fetchReservationDocumentViaFunction(d.id);
+    window.open(URL.createObjectURL(blob), '_blank');
+  } catch(e){ console.error('viewReservationDocument failed', e); toast('⚠ Could not open: '+(e.message||'not authorized')); }
 }
 async function downloadReservationDocument(resId, docId){
   var d = _findDocEntry(resId, docId);
   if(!d) return;
   if (d.synthetic) { toast('Use View — this is a linked record, not a separate file'); return; }
   try {
-    var url = await fsStorage.ref(d.storagePath).getDownloadURL();
-    var a=document.createElement('a'); a.href=url; a.target='_blank';
+    var blob = await fetchReservationDocumentViaFunction(d.id);
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
     a.download=(d.title||'document').replace(/[^a-z0-9.\-_]+/gi,'_')+(d.mimeType==='application/pdf'?'.pdf':'.jpg');
     document.body.appendChild(a); a.click(); a.remove();
-  } catch(e){ console.error('downloadReservationDocument failed', e); toast('⚠ Could not download (admin access only)'); }
+  } catch(e){ console.error('downloadReservationDocument failed', e); toast('⚠ Could not download: '+(e.message||'not authorized')); }
 }
 
 var _docTabFilter = 'all';
@@ -12806,6 +12827,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-functions-compat.js"></script>
 <script>
 var firebaseConfig = {
   apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
@@ -12822,6 +12844,10 @@ var firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
 var fsStorage = firebase.storage();
+// us-central1 matches functions-core's other v2 callables (see publicBooking
+// etc. in functions-core/index.js) -- the region a v2 onCall defaults to
+// when none is specified, so this must stay in sync if that ever changes.
+var fsFunctions = firebase.app().functions('us-central1');
 
 // Auto-restore session on reload — Firebase Auth persists sign-in across
 // page loads by default, but until now nothing ever checked for an

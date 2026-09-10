@@ -177,9 +177,17 @@ service cloud.firestore {
     }
 
     // Reservation Document Vault (Part A, Document Vault + Catalog +
-    // Invoice Center, 2026-09-10). One record per uploaded document,
-    // metadata only -- the actual file bytes live in Storage under
-    // reservation-documents/{resId}/{documentId} (see storage.rules).
+    // Invoice Center, 2026-09-10; security-hardened 2026-09-10). One
+    // record per uploaded document, metadata only -- the actual file
+    // bytes live in Storage under reservation-documents/{resId}/{docId},
+    // which storage.rules now denies to every direct client request
+    // (`allow read, write: if false`). The real read/write path is the
+    // getReservationDocument / uploadReservationDocument Cloud Functions
+    // (functions-core/index.js), which use the Admin SDK and therefore
+    // never go through this rules file's Storage counterpart at all --
+    // this Firestore rule below is a metadata-layer backstop only,
+    // reachable by a normal authenticated client write, kept as
+    // defense-in-depth even though the callables are now the primary path.
     // Sensitive types (passport/ID/visa) are read-restricted to
     // Admin/Manager only, matching Part A3/F's least-privilege
     // requirement; Staff may read non-sensitive types (signed bills,
@@ -221,6 +229,18 @@ service cloud.firestore {
         && request.resource.data.changedByUid == request.auth.uid
         && request.resource.data.changedAt == request.time;
       allow update, delete: if false;
+    }
+
+    // View/download audit for sensitive reservation documents (security
+    // hardening pass, 2026-09-10). Written ONLY by the getReservationDocument
+    // Cloud Function via the Admin SDK, which bypasses these rules entirely
+    // -- `allow write: if false` here isn't a gap, it's confirmation no
+    // client (however authenticated) can forge or tamper with an access
+    // record. Read-only for Admin/Manager, matching who's allowed to view
+    // the sensitive documents these entries are about.
+    match /document_access_audit/{id} {
+      allow read: if isAdmin() || isManagerRole();
+      allow write: if false;
     }
 
     match /users/{id} {

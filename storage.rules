@@ -67,32 +67,32 @@ service firebase.storage {
     }
 
     // Reservation Document Vault (Part A, Document Vault + Catalog +
-    // Invoice Center, 2026-09-10) -- passports, IDs, visas, signed bills,
-    // invoice/receipt copies, etc. Unlike every path above, READ is
-    // deliberately admin-only here too (not `if true`): Part A3 requires
-    // these files -- passport/ID scans above all -- to never be reachable
-    // by an unauthenticated or public URL, so this path does not reuse
-    // the public-read shape used for photos/folio-attachments.
-    // Known limitation, same one already accepted for folio-attachments
-    // above and reported honestly rather than silently worked around:
-    // isAdmin() is hardcoded to a single email (see the isAdmin() comment
-    // at the top of this file -- a broader Firestore-role cross-service
-    // check from Storage rules was tried once for staff_permissions and
-    // found unreliable even after granting the Rules service agent
-    // datastore.viewer). So today only that one admin account can
-    // actually read/write the file bytes here; Manager/Staff get full
-    // metadata access via firestore.rules' reservation_documents
-    // collection (title, type, uploader, timestamps, archive state) but
-    // not the raw file itself until that cross-service gap is revisited
-    // with a more robust mechanism (e.g. custom claims set by a Cloud
-    // Function, since a functions/ deploy already exists in this repo).
-    function isValidDocUpload() {
-      return request.resource.size < 20 * 1024 * 1024
-        && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
-    }
+    // Invoice Center, 2026-09-10; security-hardened same day). Passports,
+    // IDs, visas, signed bills, invoice/receipt copies, etc.
+    //
+    // SECURITY HARDENING: this path used to be admin-only read/write at
+    // the rules level, with the client falling back to getDownloadURL()
+    // for reads (the only thing that worked given this file's own
+    // documented, abandoned attempt at a cross-service Firestore-role
+    // check from Storage rules -- see isAdmin()'s comment above). That
+    // fallback was flagged and fixed: a getDownloadURL() token is a
+    // bearer credential that keeps working for anyone who obtains it,
+    // for as long as the object exists, regardless of what this rule
+    // says -- unacceptable for a passport/ID scan. Every direct client
+    // request to this path is now denied outright. The ONLY legitimate
+    // access is the getReservationDocument / uploadReservationDocument
+    // Cloud Functions (functions-core/index.js), which use the Admin SDK
+    // and are never subject to Storage rules at all -- they do the real
+    // role check server-side (reliable: same-service Firestore reads,
+    // not a Storage-rules cross-service call) before ever touching the
+    // bucket, and hand the client the file bytes directly over the
+    // existing HTTPS callable channel rather than any kind of URL. This
+    // also resolves the Manager write-access gap folio-attachments still
+    // has above (a genuinely different, still-open limitation there,
+    // unchanged by this pass) -- Manager can now both view AND upload
+    // sensitive documents, matching the UI/Firestore policy exactly.
     match /reservation-documents/{resId}/{documentId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin() && isValidDocUpload();
+      allow read, write: if false;
     }
 
     match /{allPaths=**} { allow read, write: if false; }

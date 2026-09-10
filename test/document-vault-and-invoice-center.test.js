@@ -61,6 +61,22 @@ function ruleBlock(src, matchStr) {
   if (idx === -1) throw new Error('rule block not found: ' + matchStr);
   return src.slice(idx, src.indexOf('\n    }', idx));
 }
+// Paren-matches a whole `exports.NAME = onCall(...)` call, options object
+// and arrow-function body included -- extractByStart's brace-matching
+// would stop at the FIRST `{` after the match, which here is the options
+// object's own brace, not the function body's.
+function extractCallable(src, exportName) {
+  const startStr = 'exports.' + exportName + ' = onCall(';
+  const start = src.indexOf(startStr);
+  if (start === -1) throw new Error('callable not found: ' + exportName);
+  let i = start + startStr.length, depth = 1;
+  while (depth > 0 && i < src.length) {
+    if (src[i] === '(') depth++;
+    else if (src[i] === ')') depth--;
+    i++;
+  }
+  return src.slice(start, i);
+}
 
 section('Case A — Document type enum (Part A2)');
 {
@@ -98,27 +114,114 @@ section('Case B — reservation_documents Firestore rules (Part A3/A4/A7/F)');
   });
 }
 
-section('Case C — reservation-documents Storage rules (Part A3, no public URLs)');
+section('Case C — reservation-documents Storage rules (security hardening pass): no direct client access at all');
 {
   const idx = SRULES.indexOf('match /reservation-documents/{resId}/{documentId}');
   const block = SRULES.slice(idx, SRULES.indexOf('\n    }', idx));
-  test('READ is admin-only, NOT `if true` — deliberately unlike room-photos/folio-attachments, since these can hold passport scans', () => {
-    assert.match(block, /allow read:\s*if\s*isAdmin\(\)\s*;/);
-    assert.doesNotMatch(block, /allow read:\s*if\s*true/);
+  test('every direct client request (read AND write) is denied outright -- the callable Cloud Functions are the only access path', () => {
+    assert.match(block, /allow read, write:\s*if\s*false\s*;/);
   });
-  test('write is admin-gated and validated by isValidDocUpload (image or PDF, size-capped)', () => {
-    assert.match(block, /allow write:\s*if\s*isAdmin\(\)\s*&&\s*isValidDocUpload\(\)/);
+  test('no getDownloadURL()-style bearer-token access remains possible for this path: no isAdmin()/isValidDocUpload condition, no `if true`', () => {
+    assert.doesNotMatch(block, /isAdmin\(\)/);
+    assert.doesNotMatch(block, /if\s*true/);
   });
-  test('isValidDocUpload allows image/* or application/pdf under a 20MB cap', () => {
-    const fnSrc = SRULES.slice(SRULES.indexOf('function isValidDocUpload'), SRULES.indexOf('function isValidDocUpload') + 300);
-    assert.match(fnSrc, /20 \* 1024 \* 1024/);
-    assert.match(fnSrc, /image\/\.\*/);
-    assert.match(fnSrc, /application\/pdf/);
+  test('the fix is documented as a genuine hardening (a getDownloadURL() token is a standing bearer credential once minted), not silently reverted without explanation', () => {
+    const nearby = SRULES.slice(Math.max(0, idx - 1600), idx);
+    assert.match(nearby, /bearer credential/);
+    assert.match(nearby, /getReservationDocument/);
+    assert.match(nearby, /uploadReservationDocument/);
   });
-  test('the admin-only-file-bytes limitation is documented honestly, same as the existing folio-attachments precedent, not silently introduced', () => {
-    const nearby = SRULES.slice(Math.max(0, idx - 1400), idx);
-    assert.match(nearby, /cross-service/);
-    assert.match(nearby, /custom claims/);
+}
+
+section('Case C2 — getReservationDocument / uploadReservationDocument Cloud Functions (functions-core)');
+{
+  const FN = read('functions-core/index.js');
+  test('both callables exist as onCall exports', () => {
+    assert.match(FN, /exports\.getReservationDocument = onCall\(/);
+    assert.match(FN, /exports\.uploadReservationDocument = onCall\(/);
+  });
+  test('getReservationDocument requires auth (via callerRole) before ever touching Firestore/Storage', () => {
+    const src = extractCallable(FN, 'getReservationDocument');
+    assert.match(src, /await callerRole\(request\)/);
+  });
+  test('callerRole() throws unauthenticated when request.auth is missing -- never falls through to a default role', () => {
+    const src = extractByStart(FN, /async function callerRole\(request\)\s*\{/);
+    assert.match(src, /if \(!request\.auth\) throw new HttpsError\('unauthenticated'/);
+  });
+  test('sensitive types (PASSPORT/IDENTITY/TRAVEL) are Admin/Manager only; everything else is Admin/Manager/Staff -- canAccessDocType is the single source of truth for both callables', () => {
+    const src = extractByStart(FN, /function canAccessDocType\(role, type\)\s*\{/);
+    assert.match(src, /SENSITIVE_DOC_TYPES\.includes\(type\)/);
+    assert.match(src, /role === 'admin' \|\| role === 'manager';/);
+    assert.match(src, /role === 'admin' \|\| role === 'manager' \|\| role === 'staff';/);
+  });
+  test('SENSITIVE_DOC_TYPES is exactly PASSPORT/IDENTITY/TRAVEL, matching the client-side RESERVATION_DOC_TYPES sensitive flags', () => {
+    const m = FN.match(/const SENSITIVE_DOC_TYPES = \[([^\]]+)\]/);
+    assert.ok(m, 'SENSITIVE_DOC_TYPES not found');
+    const types = m[1].match(/'([A-Z_]+)'/g).map(s => s.slice(1, -1));
+    assert.deepEqual(types.sort(), ['IDENTITY', 'PASSPORT', 'TRAVEL'].sort());
+  });
+  test('getReservationDocument rejects an unauthorized role with permission-denied before ever calling bucket.file().download()', () => {
+    const src = extractCallable(FN, 'getReservationDocument');
+    const denyIdx = src.indexOf("throw new HttpsError('permission-denied'");
+    const downloadIdx = src.indexOf('.download()');
+    assert.ok(denyIdx !== -1 && downloadIdx !== -1 && denyIdx < downloadIdx, 'permission check must precede the Storage download');
+  });
+  test('a view of a sensitive document writes to document_access_audit with a server timestamp -- never for non-sensitive types (keeps the log lean, per the task\'s own "if practical" scoping)', () => {
+    const src = extractCallable(FN, 'getReservationDocument');
+    assert.match(src, /if \(SENSITIVE_DOC_TYPES\.includes\(doc\.type\)\)/);
+    assert.match(src, /document_access_audit/);
+    assert.match(src, /accessedAt: FieldValue\.serverTimestamp\(\)/);
+  });
+  test('getReservationDocument returns base64 file bytes directly -- never a URL, signed or otherwise', () => {
+    const src = extractCallable(FN, 'getReservationDocument');
+    assert.match(src, /base64: buffer\.toString\('base64'\)/);
+    assert.doesNotMatch(src, /getSignedUrl/);
+    assert.doesNotMatch(src, /getDownloadURL/);
+  });
+  test('uploadReservationDocument requires Admin/Manager (Staff cannot upload, matching Part F and canUploadDocuments())', () => {
+    const src = extractCallable(FN, 'uploadReservationDocument');
+    assert.match(src, /if \(role !== 'admin' && role !== 'manager'\) throw new HttpsError\('permission-denied'/);
+  });
+  test('uploadReservationDocument validates mimeType against an explicit allowlist and enforces a size cap server-side (never trusts client-side validation alone)', () => {
+    const src = extractCallable(FN, 'uploadReservationDocument');
+    assert.match(src, /image\\\/\(jpeg\|png\|webp\)\|application\\\/pdf/);
+    assert.match(src, /buffer\.length > MAX_UPLOAD_BYTES/);
+  });
+  test('uploadReservationDocument stamps uploadedByUid from request.auth.uid server-side -- never trusts a client-supplied uid', () => {
+    const src = extractCallable(FN, 'uploadReservationDocument');
+    assert.match(src, /uploadedByUid: request\.auth\.uid/);
+    assert.match(src, /uploadedAt: FieldValue\.serverTimestamp\(\)/);
+  });
+}
+
+section('Case C3 — document_access_audit Firestore rules: server-write-only');
+{
+  const block = ruleBlock(RULES, 'match /document_access_audit/{id}');
+  test('no client, however authenticated, can write an access-audit entry -- only the Admin-SDK callable can (which bypasses rules entirely)', () => {
+    assert.match(block, /allow write:\s*if\s*false\s*;/);
+  });
+  test('read is Admin/Manager only, matching who is allowed to view the sensitive documents these entries describe', () => {
+    assert.match(block, /allow read:\s*if\s*isAdmin\(\) \|\| isManagerRole\(\)/);
+  });
+}
+
+section('Case C4 — client wires View/Download/Upload through the callables, not a direct Storage read');
+{
+  test('fsFunctions is initialized alongside fsDb/fsStorage', () => {
+    assert.match(PMS, /var fsFunctions = firebase\.app\(\)\.functions\(/);
+  });
+  test('viewReservationDocument()/downloadReservationDocument() call the getReservationDocument callable and build a local blob: URL, never fsStorage.ref(...).getDownloadURL()', () => {
+    const viewSrc = extractByStart(PMS, /async function viewReservationDocument\(resId, docId\)\s*\{/);
+    const dlSrc = extractByStart(PMS, /async function downloadReservationDocument\(resId, docId\)\s*\{/);
+    [viewSrc, dlSrc].forEach(src => {
+      assert.match(src, /fetchReservationDocumentViaFunction/);
+      assert.doesNotMatch(src, /getDownloadURL/);
+    });
+  });
+  test('uploadReservationDocument() calls the uploadReservationDocument callable with a base64 payload, not fsStorage.ref(...).put()', () => {
+    const src = extractByStart(PMS, /async function uploadReservationDocument\(resId, file, type, title\)\s*\{/);
+    assert.match(src, /fsFunctions\.httpsCallable\('uploadReservationDocument'\)/);
+    assert.doesNotMatch(src, /fsStorage\.ref\(/);
   });
 }
 
