@@ -95,6 +95,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Reservation note-edit audit trail (Notes editing fix, 2026-09-10).
+    // Append-only, same shape as reservation_price_adjustments above --
+    // one durable record per Guest/Internal note edit (noteType
+    // distinguishes them), old/new text, who, and a server-authoritative
+    // timestamp a client can't spoof. Guest Notes are Staff-editable
+    // (canEdit() parity), Internal Notes are Admin/Manager-only
+    // (canEditInternalNotes()) -- both write through this same collection,
+    // create is gated to whichever role is actually allowed to write that
+    // noteType so a Staff session can't forge an 'internal' history entry
+    // even by hand-crafting the create call.
+    match /reservation_note_history/{id} {
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow create: if request.resource.data.reservationId is string
+        && request.resource.data.noteType in ['guest','internal']
+        && request.resource.data.oldText is string
+        && request.resource.data.newText is string
+        && request.resource.data.changedByUid == request.auth.uid
+        && request.resource.data.changedAt == request.time
+        && (
+          (request.resource.data.noteType == 'guest' && (isAdmin() || isStaff() || isManagerRole())) ||
+          (request.resource.data.noteType == 'internal' && (isAdmin() || isManagerRole()))
+        );
+      allow update, delete: if false;
+    }
+
     match /blocks/{id} {
       allow read: if true;
       allow write: if isAdmin() || isStaff() || isManagerRole();

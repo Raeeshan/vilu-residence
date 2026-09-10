@@ -3290,9 +3290,13 @@ function notesSection(heading,bodyHTML,extraStyle){
 // it's surfaced in the reservation's own guest-details grid instead);
 // pricing/deposit/balance snapshots stay out entirely, preserved only as
 // raw legacy text inside the collapsed Source Details.
+// taId is the Guest Notes textarea's id; the Internal Notes textarea (when
+// rendered) reuses it with an '-internal' suffix -- see saveInternalNoteFor.
 function renderNotesHTML(r,taId){
   var parsed=parseImportedNote(r.notes);
   var editableValue = parsed ? (parsed.staff?parsed.staff.text:'') : (r.notes||'');
+  var guestHistory = (r.nlog&&r.nlog.length) ? '<div style="margin-top:8px;font-size:var(--font-size-xs);color:#9ca3af">'+r.nlog.slice(-3).reverse().map(function(l){return esc(l.t)+' — '+esc(l.time);}).join('<br>')+'</div>' : '';
+  var guestSaveHTML = canViewOnly() ? '' : '<button class="btn p sm" style="margin-top:8px" onclick="saveGuestNote(\''+r.id+'\',\''+taId+'\')"><i class="ti ti-device-floppy"></i>Save note</button>';
 
   var hasTransfer=r.arrTime||r.arrTransport||r.arrFrom||r.depTime||r.depTransport||r.depTo;
   var transferHTML=hasTransfer?notesSection('Arrival / Transfer',
@@ -3305,11 +3309,24 @@ function renderNotesHTML(r,taId){
     +(r.depTransport?'<div><span style="color:#6b7280">Departure transport:</span> '+esc(r.depTransport)+'</div>':'')
     +'</div>'):'';
 
-  var internalHTML='', sourceHTML='';
-  if(parsed){
-    internalHTML=parsed.internal?notesSection('Internal Notes',
-      '<div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line;background:#f9fafb;border-radius:6px;padding:8px 10px">'+esc(parsed.internal.text)+'</div>'):'';
+  // Internal Notes (Notes editing fix, 2026-09-10): a genuinely NEW,
+  // Vilu-authored, role-gated editable field (r.internalNote) -- entirely
+  // separate from the original Cloudbeds internal note below, which stays
+  // permanently read-only. Non-editors (Staff, per canEditInternalNotes())
+  // see the current text read-only rather than losing visibility of it
+  // entirely -- "Do not accidentally hide the whole tab" applies here too.
+  var canEditInt = canEditInternalNotes();
+  var internalHistory = (r.inlog&&r.inlog.length) ? '<div style="margin-top:8px;font-size:var(--font-size-xs);color:#9ca3af">'+r.inlog.slice(-3).reverse().map(function(l){return esc(l.t)+' — '+esc(l.time);}).join('<br>')+'</div>' : '';
+  var internalEditableHTML = canEditInt
+    ? '<textarea id="'+taId+'-internal" rows="3" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:60px" placeholder="Staff-only operational notes: collect passport copy, balance pending, manager approved discount...">'+esc(r.internalNote||'')+'</textarea>'
+      +'<button class="btn p sm" style="margin-top:8px" onclick="saveInternalNote(\''+r.id+'\',\''+taId+'\')"><i class="ti ti-device-floppy"></i>Save internal note</button>'+internalHistory
+    : (r.internalNote
+        ? '<div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line;background:#f9fafb;border-radius:6px;padding:8px 10px">'+esc(r.internalNote)+'</div>'
+        : '<div style="font-size:var(--font-size-sm);color:#9ca3af">No internal note yet.</div>');
+  var newInternalHTML = notesSection('Internal Notes', internalEditableHTML);
 
+  var sourceHTML='';
+  if(parsed){
     var metaRows=[];
     // Prefer r.cb_id/r.migrated_at when the in-memory record carries them,
     // but every one of these facts is also embedded in the header text
@@ -3325,6 +3342,17 @@ function renderNotesHTML(r,taId){
     var bookedM=/booked\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(bookedM) metaRows.push(['Imported date',esc(bookedM[1].trim())]);
     if(r.migrated_at){var da=new Date(r.migrated_at);metaRows.push(['Last source update',esc(isNaN(da)?r.migrated_at:da.toLocaleString())]);}
     else{var chM=/last change\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(chM) metaRows.push(['Last source update',esc(chM[1].trim())]);}
+
+    // The original Cloudbeds internal note (Step 7, Notes editing fix,
+    // 2026-09-10): moved here from its own top-level section -- imported
+    // metadata, never editable, so it belongs with the rest of Source
+    // Details, not presented as if it were the app's live Internal Notes.
+    var cloudbedsInternalHTML=parsed.internal?(
+      '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e5e7eb">'
+      +'<div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px">Cloudbeds internal note (imported, read-only)</div>'
+      +'<div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line">'+esc(parsed.internal.text)+'</div>'
+      +'</div>'
+    ):'';
 
     // Legacy blocks with no clean home (pricing snapshot, guest address,
     // duplicate room-guest name, migration audit line) stay only as raw
@@ -3342,27 +3370,54 @@ function renderNotesHTML(r,taId){
       +'<summary style="cursor:pointer;font-size:var(--font-size-sm);font-weight:600;color:#374151">Source Details — <span style="font-weight:400;color:#6b7280">imported from Cloudbeds</span></summary>'
       +'<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:var(--font-size-sm)">'
       +metaRows.map(function(kv){return '<div><span style="color:#6b7280">'+kv[0]+':</span> '+kv[1]+'</div>';}).join('')
-      +'</div>'+legacyHTML+'</details>';
+      +'</div>'+cloudbedsInternalHTML+legacyHTML+'</details>';
   }
 
   return notesSection('Guest Notes',
-    '<textarea id="'+taId+'" rows="4" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:80px" placeholder="Special requests, dietary needs, operational notes...">'+esc(editableValue)+'</textarea>','')
-    +transferHTML+internalHTML+sourceHTML;
+    '<textarea id="'+taId+'" rows="4" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:80px" placeholder="Special requests, dietary needs, operational notes...">'+esc(editableValue)+'</textarea>'
+    +guestSaveHTML+guestHistory,
+    '')
+    +transferHTML+newInternalHTML+sourceHTML;
 }
 // The one place any note edit actually reaches Firestore -- both call
 // sites (reservation detail modal, Calendar drawer) route through this
 // instead of only mutating the in-memory RES record, which is what left a
-// saved note silently reverting on the next reload.
+// saved note silently reverting on the next reload. Also logs a durable
+// audit entry (reservation_note_history) alongside the existing r.nlog
+// quick-display cache -- same dual-write pattern already established for
+// price adjustments (client-local array for fast display, Firestore
+// collection for the real, unspoofable record).
 function saveNoteFor(r,taId){
   var ta=document.getElementById(taId);
   var txt=((ta&&ta.value)||'').trim();
   if(!txt){toast('Note is empty');return false;}
+  var oldTxt = parseImportedNote(r.notes) ? (parseImportedNote(r.notes).staff?parseImportedNote(r.notes).staff.text:'') : (r.notes||'');
   r.notes=parseImportedNote(r.notes)?upsertNoteBlock(r.notes,'Staff note',txt):txt;
   var now=formatMaldivesDateTime(new Date());
   if(!r.nlog)r.nlog=[];
   r.nlog.push({t:'"'+txt+'"',time:now});
   saveRES(r);
+  logNoteHistory(r.id,'guest',oldTxt,txt);
   toast('Note saved ✓');
+  return true;
+}
+// Internal Notes save (Notes editing fix, 2026-09-10): Admin/Manager only
+// (canEditInternalNotes()), completely separate field/history from Guest
+// Notes -- never appended into r.notes, never conflated with the
+// Cloudbeds-imported internal note (which this never touches).
+function saveInternalNoteFor(r,taId){
+  if(!canEditInternalNotes()){toast('⛔ Admin/Manager access only');return false;}
+  var ta=document.getElementById(taId+'-internal');
+  var txt=((ta&&ta.value)||'').trim();
+  var oldTxt=r.internalNote||'';
+  if(txt===oldTxt){toast('No changes to save');return false;}
+  r.internalNote=txt;
+  var now=formatMaldivesDateTime(new Date());
+  if(!r.inlog)r.inlog=[];
+  r.inlog.push({t:txt?'"'+txt+'"':'(cleared)',time:now});
+  saveRES(r);
+  logNoteHistory(r.id,'internal',oldTxt,txt);
+  toast('Internal note saved ✓');
   return true;
 }
 function isVR(n){return n&&n.startsWith('VR');}
@@ -5317,8 +5372,6 @@ function _showDetLegacy(id){
       <div class="nh"><span style="font-size:var(--font-size-lg)">📋</span><span style="font-size:var(--font-size-base);font-weight:600;color:#92400e">Notes & Details</span>${hasN?'<span style="background:#f59e0b;color:#fff;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">HAS NOTES</span>':''}</div>
       <div class="nb">
         ${renderNotesHTML(r,'note-ta')}
-        <button class="btn p sm" style="margin-top:8px" onclick="saveNote('${id}')"><i class="ti ti-device-floppy"></i>Save note</button>
-        ${r.nlog.length?`<div style="margin-top:10px;font-size:var(--font-size-xs);color:#9ca3af">${r.nlog.slice(-3).reverse().map(l=>''+l.t+' — '+l.time).join('<br>')}</div>`:''}
       </div>
     </div>`;
   const da=document.getElementById('det-act');da.innerHTML='';
@@ -5405,9 +5458,23 @@ function _showDetLegacy(id){
   document.getElementById('m-det').classList.add('on');
 }
 
-function saveNote(id){
+// Both note-save buttons are embedded directly inside renderNotesHTML()'s
+// own output now (Notes editing fix, 2026-09-10), since which of the TWO
+// separate reservation-detail UIs (m-det/_showDetLegacy vs the Calendar
+// res-drawer) is currently showing it varies by call site -- these two
+// wrappers detect which is actually open and refresh that one, never the
+// wrong modal, instead of each caller duplicating its own button+refresh.
+function saveGuestNote(id,taId){
   const r=RES.find(x=>x.id===id);if(!r)return;
-  if(saveNoteFor(r,'note-ta')) showDet(id);
+  if(!saveNoteFor(r,taId)) return;
+  if(document.getElementById('m-det') && document.getElementById('m-det').classList.contains('on')) showDet(id);
+  else if(typeof drawerResId!=='undefined' && drawerResId===id) rdTab(1, document.querySelectorAll('.rd-tab')[1]);
+}
+function saveInternalNote(id,taId){
+  const r=RES.find(x=>x.id===id);if(!r)return;
+  if(!saveInternalNoteFor(r,taId)) return;
+  if(document.getElementById('m-det') && document.getElementById('m-det').classList.contains('on')) showDet(id);
+  else if(typeof drawerResId!=='undefined' && drawerResId===id) rdTab(1, document.querySelectorAll('.rd-tab')[1]);
 }
 
 // EDIT BOOKING
@@ -8199,17 +8266,16 @@ function rdRenderTab(n, r){
       }
     }
   } else if(n===1){
-    var h2=renderNotesHTML(r,'rd-note-ta');
-    if(r.nlog&&r.nlog.length){h2+='<div class="rd-section">Note history</div>';r.nlog.slice(-5).reverse().forEach(function(l){h2+='<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:3px 0">'+l.time+' — '+l.t+'</div>';});}
-    body.innerHTML=h2;
+    // Guest/Internal Notes history now renders inline inside
+    // renderNotesHTML() itself (shared with _showDetLegacy) -- no separate
+    // "Note history" block here anymore, which used to show the same
+    // r.nlog entries a second time right below it.
+    // Save button(s) for both Guest and Internal Notes are now embedded
+    // directly inside renderNotesHTML()'s own output (see saveGuestNote()/
+    // saveInternalNote()) -- no separate footer button here anymore, which
+    // used to duplicate the same action.
+    body.innerHTML=renderNotesHTML(r,'rd-note-ta');
     footer.innerHTML='';
-    if(!canViewOnly()){
-      var nb=document.createElement('button');nb.className='btn p';nb.style.flex='1';
-      nb.innerHTML='<i class="ti ti-device-floppy"></i> Save note';
-      nb.onclick=function(){
-        if(saveNoteFor(r,'rd-note-ta')) rdTab(1,document.querySelectorAll('.rd-tab')[1]);
-      };footer.appendChild(nb);
-    }
   } else if(n===2){
     // Same canonical folio as Calendar/Guest Folios (folioSummary()) --
     // this tab previously showed only the room price breakdown with no
@@ -8472,6 +8538,24 @@ async function logInvoicePaymentAudit(invoiceId, previousStatus, newStatus, amou
       changedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } catch(e){ console.error('logInvoicePaymentAudit failed', e); }
+}
+// Reservation note-edit audit trail (Notes editing fix, 2026-09-10) --
+// same append-only pattern as logInvoicePaymentAudit/
+// reservation_price_adjustments: a fresh document per edit, server
+// timestamp, old/new text, the real actor. Never blocks the note save it
+// accompanies -- a failed audit write is logged to console, not surfaced
+// as if the note itself failed to save (the note write already succeeded
+// via saveRES()/writeReservation() before this is even called).
+async function logNoteHistory(reservationId, noteType, oldText, newText){
+  try{
+    var fbUser = firebase.auth().currentUser;
+    await fsDb.collection('reservation_note_history').doc().set({
+      reservationId: reservationId, noteType: noteType,
+      oldText: oldText||'', newText: newText||'',
+      changedByUid: fbUser?fbUser.uid:null, changedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff',
+      changedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e){ console.error('logNoteHistory failed', e); }
 }
 async function loadInvoicesFromFirestore(){
   try{
@@ -11478,6 +11562,18 @@ function canViewSensitiveDocs() {
   if(!currentUser) return false;
   return currentUser.role === 'admin' || currentUser.role === 'manager';
 }
+// Internal Notes (Notes editing fix, 2026-09-10): Guest Notes stay
+// Staff-editable (canEdit(), unchanged, already the case). Internal Notes
+// is a genuinely NEW writable capability being introduced here, so per
+// the task's own "if no internal-note permission exists, use the safest
+// existing role rule" instruction, this takes the more conservative
+// existing pattern (Admin/Manager only, matching canDiscount()/
+// canAdjustRoomPrice()) rather than the broader canEdit() -- easy to
+// widen to Staff later if the owner wants that, harder to walk back.
+function canEditInternalNotes() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
+}
 
 
 // INIT — show login, not app
@@ -13008,7 +13104,7 @@ function resToFirestoreFields(r) {
     check_in:r.ci, check_out:r.co,
     adults:r.ad||2, children:r.ch||0,
     rate:r.rate||0, status:r.st||'Confirmed',
-    source:r.src||'Direct', notes:r.notes||'',
+    source:r.src||'Direct', notes:r.notes||'', internal_note:r.internalNote||'',
     extra_beds:r.extraBeds||0,
     trips: JSON.stringify(r.trips||[]),
     food_orders: JSON.stringify(r.foodOrders||[]),
@@ -13331,10 +13427,27 @@ async function loadResFromSupabase() {
       pay:r.pay||local.pay||'',
       createdAt:r.created_at||local.createdAt||'',
       ref:local.ref||'',
-      notes:r.notes||local.notes||'',
+      // Notes editing fix (2026-09-10): this field is edited through the
+      // PMS's own UI and synced to Firestore (writeReservation()), but
+      // NEVER written back to Supabase (no PATCH/POST path exists for
+      // reservations.notes) -- so Supabase's own r.notes is a permanently
+      // stale snapshot of whatever the Cloudbeds import (or last direct
+      // Supabase write) originally set. The old `r.notes||local.notes`
+      // order meant any locally-edited note reverted to that stale import
+      // text on every reload, because r.notes is truthy for virtually
+      // every real (migrated) reservation -- this is why "existing notes
+      // cannot be properly edited": the edit visibly saves, then silently
+      // disappears the next time the page loads. local (this session's
+      // cache, kept current by every saveNoteFor()/saveInternalNoteFor()
+      // call) now wins; r.notes is only the fallback for a genuinely fresh
+      // browser/device with no local cache yet -- same known, documented
+      // limitation nlog/priceAdjustments already carry below.
+      notes:local.notes||r.notes||'',
+      internalNote:local.internalNote||r.internal_note||'',
       extraBeds:r.extra_beds||local.extraBeds||0,
       prop:local.prop||propFromRoomId(r.room_id),
       nlog:local.nlog||[],
+      inlog:local.inlog||[],
       // Reservation price-override audit trail (Calendar pricing cleanup,
       // 2026-09-10) -- same persistence shape as nlog just above: Supabase's
       // reservations table has no column for this, so it round-trips only

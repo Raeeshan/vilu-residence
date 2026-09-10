@@ -347,20 +347,33 @@ const extractImportedAddressSrc = extractByStart(PMS, /function extractImportedA
 const escSrc = 'function esc(s){ return String(s==null?"":s).replace(/[&<>"\']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c]; }); }';
 const rNmSrc = 'function rNm(rn){ return rn; }'; // stubbed -- not under test here
 const stBxSrc = 'function stBx(s){ return "<span>"+s+"</span>"; }';
-const notesSandbox = {};
+// canEditInternalNotes/canViewOnly (Notes editing fix, 2026-09-10):
+// renderNotesHTML() now calls both directly. Default the sandbox to an
+// Admin-like context (internal notes editable, not view-only) since
+// that's the common case most of Case D's pre-existing assertions were
+// already written against; Case E below flips them explicitly to cover
+// the Staff/read-only and Agency/view-only branches.
+let _sandboxCanEditInternal = true, _sandboxCanViewOnly = false;
+const roleStubSrc = 'function canEditInternalNotes(){ return _sandboxCanEditInternal; } function canViewOnly(){ return _sandboxCanViewOnly; }';
+const notesSandbox = { get _sandboxCanEditInternal(){ return _sandboxCanEditInternal; }, get _sandboxCanViewOnly(){ return _sandboxCanViewOnly; } };
 vm.createContext(notesSandbox);
-vm.runInContext([escSrc, rNmSrc, stBxSrc, parseImportedNoteSrc, upsertNoteBlockSrc, notesSectionSrc, extractImportedAddressSrc].join('\n'), notesSandbox);
+vm.runInContext([escSrc, rNmSrc, stBxSrc, roleStubSrc, parseImportedNoteSrc, upsertNoteBlockSrc, notesSectionSrc, extractImportedAddressSrc].join('\n'), notesSandbox);
 const renderNotesHTMLSrc = extractByStart(PMS, /function renderNotesHTML\(r,taId\)\s*\{/);
 vm.runInContext(renderNotesHTMLSrc, notesSandbox);
+function renderNotesAs(r, taId, canEditInternal, viewOnly){
+  _sandboxCanEditInternal = canEditInternal !== false;
+  _sandboxCanViewOnly = !!viewOnly;
+  return notesSandbox.renderNotesHTML(r, taId);
+}
 
 const REAL_MIGRATED_NOTE = "Cloudbeds #4350689601640 (room 106) \u00b7 Cloudbeds internal id 184853238 \u00b7 source Walk-In \u00b7 booked 2026-08-28 01:03 \u00b7 last change 2026-08-28 01:05 \u00b7 Cloudbeds status confirmed\n\n[Cloudbeds internal note 2026-08-28 06:05 \u00b7 Raeeshan Ibrahim] Room with breakfast\nper night $55\nDomestic flight for arrival $155 per persion\nTotal $585\n\n[Cloudbeds pricing] reservation total USD 30.00 (subtotal 0.00, taxes 30.00, extras 0.00) \u00b7 this room total USD 0.00 \u00b7 paid 0.00 \u00b7 balance due 30.00\n\n[Cloudbeds guest address] Rah dhebai magu, South ari atoll, 00100\n\n[Cloudbeds room guest] Wilkinson Ewa Sylwia\n\n[Migration] imported from Cloudbeds on 2026-09-08";
 
 section('Case D — reservation notes: single editor, Cloudbeds metadata separated, nothing dumped into Guest Notes');
 {
-  test('exactly one <textarea> is rendered -- no rendered-preview-plus-textarea duplication', () => {
-    const html = notesSandbox.renderNotesHTML({ notes: REAL_MIGRATED_NOTE, src:'Direct' }, 'note-ta');
-    const count = (html.match(/<textarea/g) || []).length;
-    assert.equal(count, 1);
+  test('exactly one Guest Notes <textarea> is rendered -- no rendered-preview-plus-textarea duplication for that field (a second textarea is the separate, intentional Internal Notes field added 2026-09-10, see Case E)', () => {
+    const html = renderNotesAs({ notes: REAL_MIGRATED_NOTE, src:'Direct' }, 'note-ta', true);
+    const guestTextareas = (html.match(/<textarea id="note-ta"/g) || []).length;
+    assert.equal(guestTextareas, 1);
   });
   test('Guest Notes textarea starts empty for a migrated reservation with no [Staff note] block yet -- the Cloudbeds text is never dumped into it', () => {
     const html = notesSandbox.renderNotesHTML({ notes: REAL_MIGRATED_NOTE, src:'Direct' }, 'note-ta');
@@ -380,20 +393,29 @@ section('Case D — reservation notes: single editor, Cloudbeds metadata separat
     const pricingIdx = html.indexOf('reservation total USD 30.00');
     assert.ok(legacyIdx > -1 && pricingIdx > legacyIdx, 'pricing text must appear only after the Legacy import label');
   });
-  test('the real Cloudbeds internal note is shown exactly once, under "Internal Notes"', () => {
+  test('the real Cloudbeds internal note is shown exactly once, inside the read-only Source Details (Notes editing fix, 2026-09-10: moved out of the top-level "Internal Notes" heading, which is now the separate, genuinely editable Vilu field -- Case E)', () => {
     const html = notesSandbox.renderNotesHTML({ notes: REAL_MIGRATED_NOTE, src:'Direct' }, 'note-ta');
     const occurrences = (html.match(/Room with breakfast/g) || []).length;
     assert.equal(occurrences, 1);
-    assert.match(html, /Internal Notes/);
+    assert.match(html, /Cloudbeds internal note \(imported, read-only\)/);
+    // it must appear inside the <details> Source Details block, never as
+    // its own top-level, seemingly-editable "Internal Notes" section
+    const detailsIdx = html.indexOf('<details');
+    const noteIdx = html.indexOf('Room with breakfast');
+    assert.ok(detailsIdx > -1 && noteIdx > detailsIdx, 'the original Cloudbeds note must be inside Source Details');
   });
   test('source/channel metadata (reservation ID, internal ID, original source/status) is collapsible (<details>), not always-visible', () => {
     const html = notesSandbox.renderNotesHTML({ notes: REAL_MIGRATED_NOTE, src:'Direct' }, 'note-ta');
     assert.match(html, /<details[^>]*>[\s\S]*Source Details[\s\S]*Reservation ID[\s\S]*<\/details>/);
   });
-  test('repeated "Cloudbeds ..." line-prefix wording is gone -- one "Source Details" heading, not one per field', () => {
+  test('repeated "Cloudbeds ..." line-prefix wording is gone -- one "Source Details" heading plus its own relocated "Cloudbeds internal note" label, never one prefix per field', () => {
     const html = notesSandbox.renderNotesHTML({ notes: REAL_MIGRATED_NOTE, src:'Direct' }, 'note-ta');
     const cloudbedsPrefixCount = (html.match(/>Cloudbeds /g) || []).length;
-    assert.ok(cloudbedsPrefixCount <= 1, 'expected at most the single "imported from Cloudbeds" mention, found ' + cloudbedsPrefixCount);
+    // Was <=1 before the Notes editing fix relocated the original Cloudbeds
+    // internal note under Source Details with its own "Cloudbeds internal
+    // note (imported, read-only)" label -- that's one deliberate, scoped
+    // second mention, not a regression back to per-field prefix clutter.
+    assert.ok(cloudbedsPrefixCount <= 2, 'expected at most two "Cloudbeds" mentions (imported-from label + relocated internal-note label), found ' + cloudbedsPrefixCount);
   });
   test('a plain (non-migrated) reservation\'s notes render unchanged -- editable box just holds its own text, no Source Details section', () => {
     const html = notesSandbox.renderNotesHTML({ notes: 'Guest asked for extra pillows', src:'Direct' }, 'note-ta');
@@ -414,6 +436,49 @@ section('Case D — reservation notes: single editor, Cloudbeds metadata separat
     assert.match(updated, /\[Cloudbeds pricing\]/);
     assert.match(updated, /\[Cloudbeds guest address\] Rah dhebai magu/);
     assert.match(updated, /Room with breakfast/); // original internal note untouched
+  });
+}
+
+section('Case E — Internal Notes: new, genuinely editable, role-gated field (Notes editing fix, 2026-09-10)');
+{
+  test('an editor (Admin/Manager) sees an editable Internal Notes textarea, pre-filled with the current value -- "click Edit or edit directly", never forced to add a second note', () => {
+    const html = renderNotesAs({ notes:'', internalNote:'Collect passport copy', src:'Direct' }, 'note-ta', true);
+    const m = html.match(/<textarea id="note-ta-internal"[^>]*>([\s\S]*?)<\/textarea>/);
+    assert.ok(m, 'Internal Notes textarea not found for an editor');
+    assert.equal(m[1].trim(), 'Collect passport copy');
+  });
+  test('a non-editor (Staff, per the chosen canEditInternalNotes() policy) sees the SAME text read-only, never hidden entirely and never a second editable box', () => {
+    const html = renderNotesAs({ notes:'', internalNote:'Balance pending', src:'Direct' }, 'note-ta', false);
+    assert.doesNotMatch(html, /<textarea id="note-ta-internal"/);
+    assert.match(html, /Balance pending/);
+  });
+  test('a reservation with no internal note yet shows an empty editable box for an editor, not an error or missing section', () => {
+    const html = renderNotesAs({ notes:'', internalNote:'', src:'Direct' }, 'note-ta', true);
+    const m = html.match(/<textarea id="note-ta-internal"[^>]*>([\s\S]*?)<\/textarea>/);
+    assert.equal(m[1].trim(), '');
+  });
+  test('Internal Notes renders for a NON-migrated (plain) reservation too -- it is not a Cloudbeds-only concept', () => {
+    const html = renderNotesAs({ notes:'Guest asked for extra pillows', internalNote:'Manager approved discount', src:'Direct' }, 'note-ta', true);
+    assert.match(html, /Internal Notes/);
+    assert.match(html, /Manager approved discount/);
+  });
+  test('the Internal Notes save button calls saveInternalNote(id, taId), completely separate from Guest Notes\' saveGuestNote()', () => {
+    const html = renderNotesAs({ id:'R1', notes:'', internalNote:'x', src:'Direct' }, 'note-ta', true);
+    assert.match(html, /onclick="saveInternalNote\('R1','note-ta'\)"/);
+    assert.match(html, /onclick="saveGuestNote\('R1','note-ta'\)"/);
+  });
+  test('Internal Notes history (r.inlog) renders once, distinct from Guest Notes history (r.nlog) -- never mixed into the same list', () => {
+    const html = renderNotesAs({ id:'R1', notes:'x', internalNote:'y', src:'Direct',
+      nlog:[{t:'"guest history entry"',time:'1 Jan 2026'}],
+      inlog:[{t:'"internal history entry"',time:'2 Jan 2026'}] }, 'note-ta', true);
+    assert.match(html, /guest history entry/);
+    assert.match(html, /internal history entry/);
+    assert.equal((html.match(/guest history entry/g)||[]).length, 1);
+    assert.equal((html.match(/internal history entry/g)||[]).length, 1);
+  });
+  test('view-only (Agency, canViewOnly()) sees neither note history save button -- guestSaveHTML is empty', () => {
+    const html = renderNotesAs({ id:'R1', notes:'existing', internalNote:'', src:'Direct' }, 'note-ta', true, true);
+    assert.doesNotMatch(html, /saveGuestNote/);
   });
 }
 
