@@ -383,6 +383,48 @@ section('Case L — OTA sync-status watcher only waits on categories the save ac
   });
 }
 
+section('Case M — Calendar pricing consistency (live-production bug caught 2026-09-10: Calendar showed Double = $85 while Bulk Price Manager correctly showed Double = $90 for the same date, because Calendar computed Math.min() over each room\'s own possibly-differing legacy default instead of using the shared effective-category-rate resolver)');
+{
+  test('Calendar\'s category-row rate now calls the SAME canonical catGetPrice() resolver Bulk Price Manager uses, keyed off catForRoom() of the group\'s own rooms -- never a second pricing engine', () => {
+    const idx = PMS.indexOf('var cat=catForRoom(grp.rooms[0].n);');
+    assert.ok(idx !== -1, 'drawCal() must resolve the category via catForRoom() before computing its rate');
+    const nearby = PMS.slice(idx, idx + 700);
+    assert.match(nearby, /var rate=cat\?catGetPrice\(cat\.code,ds\):/, 'the category rate must be catGetPrice() first, not Math.min() over per-room legacy defaults');
+  });
+  test('the old Math.min()-over-legacy-defaults calculation is no longer the PRIMARY category rate source (only survives, if at all, as a defensive fallback when no category is found)', () => {
+    const idx = PMS.indexOf('var rate=cat?catGetPrice(cat.code,ds):');
+    assert.ok(idx !== -1);
+    // The primary branch (before the ':') must be catGetPrice -- already
+    // asserted above; here we confirm it is genuinely the FIRST-evaluated
+    // branch of the ternary, i.e. catGetPrice wins whenever a category is
+    // found (true for every real Vilu Residence room, always).
+    assert.match(PMS.slice(idx, idx + 40), /^var rate=cat\?catGetPrice/);
+  });
+  test('the sticky room-row label no longer shows a per-room $ price badge for Vilu rooms (the visible ambiguity Step 4 flagged) -- the legacy default survives only in the tooltip, explicitly labeled "internal default"', () => {
+    const idx = PMS.indexOf('grp.rooms.forEach(function(rm){fH+=\'<div class="cb-room-row-lbl vilu-room"');
+    assert.ok(idx !== -1, 'room-row-label render line not found');
+    const line = PMS.slice(idx, idx + 260);
+    assert.doesNotMatch(line, /<span class="rt">\$/, 'a visible $ price badge must not be rendered on the room row label');
+    assert.match(line, /internal default/, 'the legacy default must be explicitly labeled "internal default" wherever it still appears (the tooltip)');
+  });
+  test('behavioral: for the Double category with no override, the canonical resolver returns the owner-locked $90 -- never $85 (the Math.min() bug\'s exact symptom)', () => {
+    const vrSrc = extractConst(PMS, 'VR').replace(/^const /, 'var ');
+    const catsSrc = extractConst(PMS, 'PRICE_CATEGORIES').replace(/^const /, 'var ');
+    const catForSrc = extractByStart(PMS, /function catFor\(code\)\s*\{/);
+    const catForRoomSrc = extractByStart(PMS, /function catForRoom\(rn\)\s*\{/);
+    const pmGetPriceSrc = extractByStart(PMS, /function pmGetPrice\(rn, ds\)\s*\{/);
+    const catGetPriceSrc = extractByStart(PMS, /function catGetPrice\(catCode, ds\)\s*\{/);
+    const box = { document: { getElementById: () => ({ style: {} }) } };
+    vm.createContext(box);
+    vm.runInContext([vrSrc, catsSrc, catForSrc, catForRoomSrc, 'var roomPrices={};', pmGetPriceSrc, catGetPriceSrc].join('\n'), box);
+    // Mirrors drawCal()'s own line exactly: var cat=catForRoom(grp.rooms[0].n); var rate=cat?catGetPrice(cat.code,ds):...
+    const grpFirstRoom = 'VR03'; // Double group's first room, same as groupByType(VR) would produce
+    const cat = box.catForRoom(grpFirstRoom);
+    const rate = cat ? box.catGetPrice(cat.code, '2027-01-01') : null;
+    assert.equal(rate, 90, 'Calendar must show the category\'s owner-locked $90, not Math.min(85,85,90)=$85');
+  });
+}
+
 console.log(`\n${passed}/${passed + failed} bulk-price-manager assertions passed`);
 if (failed) { console.log('\nFAILED'); process.exit(1); }
 console.log('\nALL TESTS PASSED');

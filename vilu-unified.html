@@ -4748,7 +4748,14 @@ function drawCal(){
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
   vrGroups.forEach(function(grp){
     fH+='<div class="cb-category-lbl"><span class="chev">&#9660;</span><span class="nm">'+grp.type+'</span></div>';
-    grp.rooms.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room" title="'+rm.type+' · $'+rm.rate+'/night"><span class="rn">'+rm.nm+'</span><span class="rt">$'+rm.rate+'</span></div>';});
+    // Room-level $ badge removed (2026-09-10 pricing-consistency pass) --
+    // it showed each room's own internal/legacy default rate (e.g. $85 for
+    // Room 103), which visually conflicted with the category row's public
+    // sell rate ($90) directly above it. The category row is the single
+    // place a price is shown here now; the legacy default survives only in
+    // the tooltip, explicitly labeled "internal default" so it can never be
+    // mistaken for a public sell price.
+    grp.rooms.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room" title="'+rm.type+' · $'+rm.rate+'/night (internal default)"><span class="rn">'+rm.nm+'</span></div>';});
   });
   PH.forEach(function(h){
     var hrs=getHR().filter(function(r){return r.prop===h.id;});
@@ -4787,14 +4794,22 @@ function drawCal(){
   }
   gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px"></div></div>';
   vrGroups.forEach(function(grp){
-    // Per-date "free rooms / lowest rate" for this category — read-only
-    // figures from the existing isOcc() (RES + BLK) and pmGetPrice().
+    // Per-date "free rooms / effective rate" for this category — read-only
+    // free-room count from the existing isOcc() (RES + BLK), and the price
+    // from the SAME canonical effective-category-rate resolver Bulk Price
+    // Manager and the website/Beds24 pipeline already use (catGetPrice() --
+    // an override on any member room if one exists, else the category's
+    // owner-locked otaBaseRate) -- never Math.min() over each room's own
+    // possibly-differing legacy default, which is what produced the
+    // Calendar-vs-Bulk-Price-Manager inconsistency (2026-09-10 pricing-
+    // consistency pass).
+    var cat=catForRoom(grp.rooms[0].n);
     var cc='',cpM=-1;
     dates.forEach(function(d){
       var ds=lDs(d),dw=d.getDay(),iT=ds===today,iW=dw===5;
       var cl=(iT?'today-cell':iW?'weekend':'')+(d.getMonth()!==cpM&&cpM!==-1?' month-sep':'');
       var free=grp.rooms.filter(function(rm){return !isOcc(rm.n,ds,D2(ds,1));}).length;
-      var rate=Math.min.apply(null,grp.rooms.map(function(rm){return pmGetPrice(rm.n,ds);}));
+      var rate=cat?catGetPrice(cat.code,ds):Math.min.apply(null,grp.rooms.map(function(rm){return pmGetPrice(rm.n,ds);}));
       cc+='<div class="cb-cat-cell '+cl+'"><b>'+free+'</b><span class="cr">$'+rate+'</span></div>';
       cpM=d.getMonth();
     });
