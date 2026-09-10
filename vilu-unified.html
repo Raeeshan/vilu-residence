@@ -5384,6 +5384,7 @@ let pmSelCols = new Set(); // selected date columns
 let pmEditing = null; // {catCode, date}
 let pmHasChanges = false;
 let pmOpenCats = new Set(); // categories currently expanded to show physical-room members (reference only)
+let pmDirtyCats = new Set(); // categories touched since the last save -- see catSetPrice()/watchOtaPushStatus()
 
 const WEEKDAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -5419,10 +5420,15 @@ function catGetPrice(catCode, ds) {
 }
 // Writes the SAME price to every physical room in the category in one call,
 // keeping them permanently in lockstep -- "changes should propagate
-// immediately to the applicable Vilu Residence room category".
+// immediately to the applicable Vilu Residence room category". Also marks
+// the category dirty (pmDirtyCats) so pmSave()'s OTA-sync watcher only ever
+// waits on categories THIS save actually touched -- a save that edits only
+// one category correctly never expects (or times out waiting for) an
+// ota_pushes job for an untouched category, since none is ever enqueued.
 function catSetPrice(catCode, ds, price) {
   const cat=catFor(catCode);
   cat.rooms.forEach(rn=>pmSetPrice(rn, ds, price));
+  pmDirtyCats.add(catCode);
 }
 
 function setView(n) {
@@ -5636,15 +5642,23 @@ function pmSave() {
   // Also push current base rates to Supabase so guests on other devices/browsers
   // (not just an admin's own open tabs) see the latest prices, not just same-browser sync.
   if(typeof syncRoomRatesToSupabase==='function') syncRoomRatesToSupabase().catch(()=>{});
+  // Snapshot which categories this save actually touched BEFORE resetting
+  // pmDirtyCats -- syncCategoryOverridesToFirestore() below writes ALL 3
+  // categories every save (so an unrelated category's doc never goes
+  // stale), but beds24OverrideChangeSync only enqueues an ota_pushes job for
+  // a category whose override dates actually changed. Watching an untouched
+  // category would wait forever for a job that was never going to exist.
+  const touchedCats = Array.from(pmDirtyCats);
   pmSetStatus('saving');
   Promise.all([syncRoomPricesToFirestore(), syncCategoryOverridesToFirestore()])
     .then(function(){
       pmHasChanges=false;
+      pmDirtyCats=new Set();
       document.getElementById('pm-save-badge').style.display='none';
       pmSetStatus('saved');
       aLog('ok','Saved '+count+' price overrides — website + OTA category rates updated');
       toast('✓ Prices saved — website updated, OTA sync queued');
-      watchOtaPushStatus();
+      watchOtaPushStatus(touchedCats);
     })
     .catch(function(e){
       console.error('pmSave failed', e);
@@ -5693,19 +5707,28 @@ function pmSetStatus(state){
 // to a neutral "issue" state after 25s rather than hanging forever or
 // silently claiming success.
 var pmWatchStops=[];
-function watchOtaPushStatus(){
+// Only watches the categories THIS save actually touched (touchedCatCodes)
+// -- syncCategoryOverridesToFirestore() writes all 3 category docs every
+// save, but beds24OverrideChangeSync only ever enqueues an ota_pushes job
+// for a category whose override dates genuinely changed value (a same-
+// content rewrite of an untouched category is correctly a no-op diff, see
+// that trigger's own comment). Waiting on an untouched category would time
+// out to "issue" for a save that actually succeeded everywhere it mattered.
+function watchOtaPushStatus(touchedCatCodes){
   pmWatchStops.forEach(function(u){ try{u();}catch(e){} });
   pmWatchStops=[];
+  var cats=PRICE_CATEGORIES.filter(function(c){return (touchedCatCodes||[]).includes(c.code);});
+  if(!cats.length){ pmSetStatus('saved'); return; } // nothing to sync -- e.g. a Save with no category actually edited
   pmSetStatus('syncing');
   var since=new Date(Date.now()-15000).toISOString();
   var status={}; // {[catCode]: 'synced'|'issue'}
   function evalStatus(){
-    var vals=PRICE_CATEGORIES.map(function(c){return status[c.code];});
+    var vals=cats.map(function(c){return status[c.code];});
     if(vals.some(function(v){return v==='issue';})) pmSetStatus('issue');
     else if(vals.every(function(v){return v==='synced';})) pmSetStatus('synced');
-    // else: still waiting on at least one category -- leave "Syncing OTA…"
+    // else: still waiting on at least one touched category -- leave "Syncing OTA…"
   }
-  PRICE_CATEGORIES.forEach(function(cat){
+  cats.forEach(function(cat){
     var unsub=fsDb.collection('ota_pushes').where('room_type_code','==',cat.code).limit(20)
       .onSnapshot(function(snap){
         var jobs=snap.docs.map(function(d){return d.data();})
@@ -5721,7 +5744,7 @@ function watchOtaPushStatus(){
   setTimeout(function(){
     pmWatchStops.forEach(function(u){ try{u();}catch(e){} });
     pmWatchStops=[];
-    var vals=PRICE_CATEGORIES.map(function(c){return status[c.code];});
+    var vals=cats.map(function(c){return status[c.code];});
     if(!vals.every(function(v){return v==='synced';})) pmSetStatus('issue');
   }, 25000);
 }

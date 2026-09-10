@@ -81,7 +81,7 @@ const catsVarSrc = catsSrc.replace(/^const /, 'var ');
 const sandbox = { document: { getElementById: () => ({ style: {} }) } }; // pmSetPrice touches a DOM badge; stub a real element, not null
 vm.createContext(sandbox);
 vm.runInContext(
-  [vrVarSrc, catsVarSrc, catForSrc, catForRoomSrc, 'var roomPrices={}; var pmHasChanges=false;', pmGetPriceSrc, pmSetPriceSrc, catGetPriceSrc, catSetPriceSrc].join('\n'),
+  [vrVarSrc, catsVarSrc, catForSrc, catForRoomSrc, 'var roomPrices={}; var pmHasChanges=false; var pmDirtyCats=new Set();', pmGetPriceSrc, pmSetPriceSrc, catGetPriceSrc, catSetPriceSrc].join('\n'),
   sandbox
 );
 
@@ -358,6 +358,28 @@ section('Case K — Seasonal Rates stays a clearly-separate, non-competing stub 
     assert.doesNotMatch(pmSaveSrc, /\bSNS\b/);
     const snIdx = PMS.indexOf('let BLK=');
     assert.ok(snIdx !== -1);
+  });
+}
+
+section('Case L — OTA sync-status watcher only waits on categories the save actually touched (live-production bug caught 2026-09-10: a single-category edit was timing out to "issue" because syncCategoryOverridesToFirestore() rewrites all 3 category docs every save, but beds24OverrideChangeSync only enqueues a job for the ones that genuinely changed -- watching all 3 unconditionally waited forever on the other two)');
+{
+  test('catSetPrice() marks its category dirty (pmDirtyCats) so pmSave() knows exactly which categories to watch', () => {
+    const src = extractByStart(PMS, /function catSetPrice\(catCode, ds, price\)\s*\{/);
+    assert.match(src, /pmDirtyCats\.add\(catCode\)/);
+  });
+  test('pmSave() snapshots pmDirtyCats BEFORE resetting it, and passes only that snapshot into watchOtaPushStatus()', () => {
+    const src = extractByStart(PMS, /function pmSave\(\)\s*\{/);
+    assert.match(src, /const touchedCats\s*=\s*Array\.from\(pmDirtyCats\)/);
+    assert.match(src, /watchOtaPushStatus\(touchedCats\)/);
+  });
+  test('watchOtaPushStatus() filters PRICE_CATEGORIES down to only the touched ones, and never waits on (or times out on) an untouched category', () => {
+    const src = extractByStart(PMS, /function watchOtaPushStatus\(touchedCatCodes\)\s*\{/);
+    assert.match(src, /PRICE_CATEGORIES\.filter\(function\(c\)\{return \(touchedCatCodes\|\|\[\]\)\.includes\(c\.code\);\}\)/);
+    assert.doesNotMatch(src.replace(/\/\/.*$/gm, ''), /PRICE_CATEGORIES\.forEach/, 'must iterate the filtered `cats`, never the full PRICE_CATEGORIES list');
+  });
+  test('watchOtaPushStatus() with zero touched categories (a Save click with nothing actually edited) sets "saved" directly and never enters "syncing"', () => {
+    const src = extractByStart(PMS, /function watchOtaPushStatus\(touchedCatCodes\)\s*\{/);
+    assert.match(src, /if\(!cats\.length\)\{\s*pmSetStatus\('saved'\);\s*return;\s*\}/);
   });
 }
 
