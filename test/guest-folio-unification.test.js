@@ -170,11 +170,15 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   const grossSrc = extractByStart(PMS, /function chargeGrossAmount\(ch\)\s*\{/);
   const discSrc = extractByStart(PMS, /function chargeDiscountAmount\(ch\)\s*\{/);
   const finalSrc = extractByStart(PMS, /function chargeFinalAmount\(ch\)\s*\{/);
-  const uninvoicedSrc = extractByStart(PMS, /function uninvoicedChargesForPayer\(resId,payerScope\)\s*\{/);
+  const guestCountSrc = extractByStart(PMS, /function reservationGuestCount\(r\)\s*\{/);
+  const guestLabelsSrc = extractByStart(PMS, /function reservationGuestLabels\(r\)\s*\{/);
+  const splitCentsSrc = extractByStart(PMS, /function splitCentsDeterministic\(totalAmount,n\)\s*\{/);
   const taxEstSrc = extractByStart(PMS, /function chargeTaxInclusiveEstimate\(amt\)\s*\{/);
+  const guestTaxIncSrc = extractByStart(PMS, /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/);
+  const remainderSrc = extractByStart(PMS, /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/);
   const box = { TAX: { thirdGuest: 20, childDiscountPercent: 50, svc: 10, tgst: 17, green: 6, bed: 0 } };
   vm.createContext(box);
-  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, uninvoicedSrc, taxEstSrc, folioSummarySrc].join('\n'), box);
+  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
 
   test('FOLIO_CATEGORIES is exactly the 5 non-room categories (Room is never a folio-item category, Payment/Credit is invoice-level, not a folio charge type; Accommodation Extras added alongside the Fixed Price Catalog Integration for catalog items like Extra Bed/Early Check-in)', () => {
     assert.deepEqual(plain(box.FOLIO_CATEGORIES), ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services']);

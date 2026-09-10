@@ -69,6 +69,7 @@ function buildFullSandbox() {
     /function chargeAmountForGuest\(ch,r,guestKey\)\s*\{/,
     /function chargeTaxInclusiveEstimate\(amt\)\s*\{/,
     /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/,
+    /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/,
     /function uninvoicedChargesForPayer\(resId,payerScope\)\s*\{/,
     /function folioSummary\(resId\)\s*\{/,
     /function folioGuestBalance\(resId,guestKey\)\s*\{/,
@@ -91,10 +92,21 @@ section('Case A — root cause: one canonical, tax-inclusive money basis (Step 1
   test('folioSummary()/folioGuestBalance() source "Charged" from the REAL invoice total (v.total) for anything already invoiced -- never recomputed -- and only ESTIMATE tax for what is genuinely still uninvoiced', () => {
     const summarySrc = extractByStart(PMS, /function folioSummary\(resId\)\s*\{/);
     assert.match(summarySrc, /invoicedTotal=\+invoicesForRes\.reduce\(function\(s,v\)\{return s\+\(v\.total\|\|0\);\},0\)/);
-    assert.match(summarySrc, /uninvoicedChargesForPayer\(resId,'whole'\)/);
+    // folioSummary() sums chargeUninvoicedTaxInclusiveRemainder() over every
+    // charge -- deliberately NOT uninvoicedChargesForPayer('whole') (that
+    // one answers "is this charge eligible for a brand-new Whole Room
+    // invoice", which correctly excludes a charge entirely once ANY guest
+    // has invoiced part of it; the aggregate BALANCE must still count the
+    // other guests' still-open shares of that same charge).
+    assert.match(summarySrc, /folio\.charges\.reduce\(function\(s,ch\)\{return s\+chargeUninvoicedTaxInclusiveRemainder\(ch,r\);\},0\)/);
     const guestSrc = extractByStart(PMS, /function folioGuestBalance\(resId,guestKey\)\s*\{/);
     assert.match(guestSrc, /invoicedTotal=\+invoicesForGuest\.reduce\(function\(s,v\)\{return s\+\(v\.total\|\|0\);\},0\)/);
     assert.match(guestSrc, /uninvoicedChargesForPayer\(resId,guestKey\)/);
+  });
+  test('chargeUninvoicedTaxInclusiveRemainder() correctly handles a split charge PARTIALLY invoiced to one guest -- the other guests\' still-open shares are still counted, never silently dropped from the whole-reservation balance', () => {
+    const src = extractByStart(PMS, /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/);
+    assert.match(src, /if\(ch\.invoiceId\) return 0;/);
+    assert.match(src, /alreadyInvoiced\?s:s\+chargeAmountForGuestTaxInclusive\(ch,r,g\.key\)/);
   });
   test('splitCentsDeterministic() is the ONE shared integer-cents allocator, reused by both the pre-tax guest split (chargeSplitAllocations) and the tax-inclusive balance estimate (chargeAmountForGuestTaxInclusive) -- never two independent split formulas', () => {
     const splitSrc = extractByStart(PMS, /function chargeSplitAllocations\(ch,r\)\s*\{/);
@@ -118,6 +130,30 @@ section('Case B — guest fully paid = exactly $0.00 (Step 4)');
     assert.equal(gb.charged, 21.06);
     assert.equal(gb.paid, 21.06);
     assert.equal(gb.balance, 0);
+  });
+  test('a split charge PARTIALLY invoiced to one guest: the whole-reservation balance still counts the OTHER guests\' still-open shares -- caught live during this task\'s own QA (folioSummary() was silently dropping them entirely once any single guest invoiced their portion)', () => {
+    ctx.RES = [{ id: 'R5', fn: 'Lead', ad: 3, ch: 0, rn: 'VR01', ci: '2026-10-01', co: '2026-10-02', rate: 0 }];
+    const dinner = { id: 1, cat: 'Food & Beverage', price: 18, qty: 3, payerType: 'split' };
+    ctx.FOLIOS = { R5: { charges: [dinner] } };
+    ctx.dinner = dinner;
+    const wholeTaxInclusive = vm.runInContext('chargeTaxInclusiveEstimate(chargeFinalAmount(dinner))', ctx);
+    const guest1Share = vm.runInContext(`chargeAmountForGuestTaxInclusive(dinner,RES[0],'guest1')`, ctx);
+    // ad:3 (gp>2) still carries a nonzero 3rd-guest supplement + Green Tax
+    // even with rate:0 -- calcTax() itself, unchanged, still applies both
+    // regardless of the nightly rate, so the room contributes its own real
+    // (nonzero) total here too, exactly as it would live.
+    const roomTotal = vm.runInContext(`calcTax(RES[0]).total`, ctx);
+    dinner.guestInvoiced = { guest1: 'INV-9' }; // ONLY guest1's share has been invoiced so far
+    ctx.INV = [{ id: 'INV-9', resId: 'R5', status: 'active', payerScope: 'guest1', total: guest1Share, paidAmount: guest1Share }];
+    const sum = vm.runInContext(`folioSummary('R5')`, ctx);
+    // chargesTotal must be guest1's real invoice total, PLUS guest2/3's
+    // still-uninvoiced tax-inclusive shares, PLUS the (not yet invoiced)
+    // room -- not just guest1's invoice total alone, which would silently
+    // make guest2/3's money (and the room) disappear from the whole-
+    // reservation view.
+    const guest2and3Remainder = +(wholeTaxInclusive - guest1Share).toFixed(2);
+    assert.equal(sum.chargesTotal, +(guest1Share + guest2and3Remainder + roomTotal).toFixed(2));
+    assert.ok(sum.balance > 0, 'guest2/3 (and the room) still owe their shares -- balance must not be zero or negative');
   });
 }
 
@@ -197,14 +233,14 @@ section('Case G — invoice-level discount and no double tax (Step 13)');
     assert.ok(eTaxIdx !== -1 && discIdx !== -1 && eTaxIdx < discIdx, 'extra tax must still be computed before the invoice discount call');
   });
   test('no double tax: a charge\'s tax is computed exactly once -- either by the real invoice (genInv()\'s own per-item formula) once invoiced, or by chargeTaxInclusiveEstimate() as an estimate before invoicing, never both contributing to the same "Charged" total simultaneously', () => {
-    const summarySrc = extractByStart(PMS, /function folioSummary\(resId\)\s*\{/);
-    // uninvoicedWhole (fed into the tax-inclusive ESTIMATE) is filtered via
-    // uninvoicedChargesForPayer(), which itself excludes anything already
+    // chargeUninvoicedTaxInclusiveRemainder() (fed into folioSummary()'s
+    // tax-inclusive ESTIMATE) itself returns 0 for any charge already
     // carrying an invoiceId -- so an invoiced charge's tax is never
     // estimated a second time on top of its real invoice's contribution.
-    assert.match(summarySrc, /var uninvoicedWhole=uninvoicedChargesForPayer\(resId,'whole'\);/);
-    const eligSrc = extractByStart(PMS, /function uninvoicedChargesForPayer\(resId,payerScope\)\s*\{/);
-    assert.match(eligSrc, /if\(ch\.invoiceId\) return false;/);
+    const remainderSrc = extractByStart(PMS, /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/);
+    assert.match(remainderSrc, /if\(ch\.invoiceId\) return 0;/);
+    const summarySrc = extractByStart(PMS, /function folioSummary\(resId\)\s*\{/);
+    assert.match(summarySrc, /chargeUninvoicedTaxInclusiveRemainder\(ch,r\)/);
   });
 }
 

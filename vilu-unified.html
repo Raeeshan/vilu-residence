@@ -8486,6 +8486,32 @@ function chargeAmountForGuestTaxInclusive(ch,r,guestKey){
   }
   return 0;
 }
+// How much of ONE charge's tax-inclusive value is NOT YET covered by ANY
+// invoice -- whole-room or any individual guest's (Financial integrity
+// correction, 2026-09-10). This is intentionally NOT the same question
+// uninvoicedChargesForPayer('whole') answers (which is "should this charge
+// be offered for a brand-new Whole Room invoice" -- correctly excludes a
+// charge entirely once ANY guest has invoiced part of it, so Whole Room
+// can never double-invoice that guest's covered portion). For the
+// aggregate BALANCE ESTIMATE, excluding the whole charge is wrong: if only
+// Guest 1's split share has been invoiced, Guest 2/3's shares are still
+// genuinely owed and must still show up in the whole-reservation "Charged"
+// total, just not double-counted against Guest 1's already-invoiced share
+// (which flows in separately via invoicedTotal, from that real invoice).
+function chargeUninvoicedTaxInclusiveRemainder(ch,r){
+  if(ch.invoiceId) return 0; // whole-room already invoiced it in full
+  var payerType=ch.payerType||'shared';
+  if(payerType==='shared') return chargeTaxInclusiveEstimate(chargeFinalAmount(ch));
+  if(payerType==='guest') return (ch.guestInvoiced&&ch.guestInvoiced[ch.payerGuestKey])?0:chargeTaxInclusiveEstimate(chargeFinalAmount(ch));
+  if(payerType==='split'){
+    var labels=reservationGuestLabels(r);
+    return +labels.reduce(function(s,g){
+      var alreadyInvoiced=ch.guestInvoiced&&ch.guestInvoiced[g.key];
+      return alreadyInvoiced?s:s+chargeAmountForGuestTaxInclusive(ch,r,g.key);
+    },0).toFixed(2);
+  }
+  return 0;
+}
 // Which folio charges are eligible for a NEW invoice under this scope
 // (Step 13/14). Whole Room keeps today's existing eligibility (!ch.invoiceId)
 // exactly as before, with one addition: once a split/guest-assigned charge
@@ -8550,11 +8576,23 @@ function folioSummary(resId){
   var invoicedTotal=+invoicesForRes.reduce(function(s,v){return s+(v.total||0);},0).toFixed(2);
   var paid=+invoicesForRes.reduce(function(s,v){return s+(v.paidAmount||0);},0).toFixed(2);
   var roomAlreadyInvoiced=invoicesForRes.some(function(v){return v.includeRoom;});
-  var uninvoicedWhole=uninvoicedChargesForPayer(resId,'whole');
-  var uninvoicedExtrasRaw=+uninvoicedWhole.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0).toFixed(2);
-  var uninvoicedExtrasEstimate=+uninvoicedWhole.reduce(function(s,ch){return s+chargeTaxInclusiveEstimate(chargeFinalAmount(ch));},0).toFixed(2);
+  // Every charge's still-genuinely-owed remainder (Financial integrity
+  // correction) -- NOT the same set uninvoicedChargesForPayer('whole')
+  // returns (that one is for invoice-generation ELIGIBILITY and correctly
+  // excludes a charge entirely once any guest has invoiced part of it, to
+  // prevent double-invoicing). Here, a split charge partially invoiced to
+  // one guest still contributes its OTHER guests' still-open shares to the
+  // running total -- see chargeUninvoicedTaxInclusiveRemainder()'s own
+  // comment.
+  var uninvoicedExtrasEstimate=+folio.charges.reduce(function(s,ch){return s+chargeUninvoicedTaxInclusiveRemainder(ch,r);},0).toFixed(2);
   var uninvoicedRoomEstimate=roomAlreadyInvoiced?0:room;
   var chargesTotal=+(invoicedTotal+uninvoicedExtrasEstimate+uninvoicedRoomEstimate).toFixed(2);
+  // Back-derives the raw (pre-tax) portion of the tax-inclusive extras
+  // estimate for the display delta, rather than a second parallel
+  // "remaining raw amount" calculation -- always consistent with
+  // uninvoicedExtrasEstimate by construction, including for a charge
+  // that's only partially guest-invoiced.
+  var uninvoicedExtrasRaw=+(uninvoicedExtrasEstimate/(1+(TAX.svc+TAX.tgst)/100)).toFixed(2);
   var taxOnUninvoicedExtras=+(uninvoicedExtrasEstimate-uninvoicedExtrasRaw).toFixed(2);
   return {
     room:+room.toFixed(2), food:+byCat['Food & Beverage'].toFixed(2), activities:+byCat['Trips & Activities'].toFixed(2),
