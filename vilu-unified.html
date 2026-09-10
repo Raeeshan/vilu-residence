@@ -42,6 +42,43 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
 .met{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+/* ── Dashboard: Cloudbeds-pattern operational layout (2026-09-10 correction pass) ── */
+.dash-grid{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.dash-left{width:220px;flex-shrink:0;display:flex;flex-direction:column}
+.dash-right{flex:1;min-width:0;display:flex;flex-direction:column}
+.dash-date-card{text-align:left}
+.dash-dow{font-size:var(--font-size-sm);color:#6b7280;font-weight:600}
+.dash-daynum{font-size:2.6rem;font-weight:800;line-height:1;margin:4px 0;color:#111827}
+.dash-month{font-size:var(--font-size-sm);color:#6b7280;font-weight:600}
+.dash-occ-card{cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.dash-occ-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.08);border-color:#00b4d8}
+.dash-ring-wrap{position:relative;width:120px;height:120px;margin:0 auto 12px}
+.dash-ring{width:120px;height:120px;transform:rotate(-90deg)}
+.dash-ring-bg{fill:none;stroke:#eef2f6;stroke-width:10}
+.dash-ring-fg{fill:none;stroke:#00b4d8;stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .3s}
+.dash-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dash-ring-label .v{font-size:var(--font-size-xl);font-weight:800;color:#111827}
+.dash-ring-label .s{font-size:var(--font-size-xs);color:#6b7280}
+.dash-occ-stats{font-size:var(--font-size-sm);color:#374151;display:flex;flex-direction:column;gap:4px}
+.dash-occ-stats span{font-weight:700;color:#111827;margin-right:5px}
+.dash-activity-card h3{margin-bottom:14px}
+.dash-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.dash-tab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 16px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;min-width:92px}
+.dash-tab:hover{border-color:#00b4d8}
+.dash-tab.on{border-color:#00b4d8;background:#e8f5f2}
+.dash-tab-n{font-size:var(--font-size-xl);font-weight:800;color:#111827}
+.dash-tab-lbl{font-size:var(--font-size-xs);color:#6b7280;font-weight:600}
+.dash-activity-table tr.clk{cursor:pointer}
+.dash-revenue-card{cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.dash-revenue-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.08);border-color:#00b4d8}
+.dash-empty{font-size:var(--font-size-sm);color:#9ca3af;padding:14px 4px}
+.scope-pill{padding:6px 14px;border-radius:999px;border:1.5px solid #e5e7eb;background:#fff;font-size:var(--font-size-sm);font-weight:600;color:#6b7280;cursor:pointer;font-family:inherit}
+.scope-pill:hover{border-color:#00b4d8}
+.scope-pill.on{background:#00b4d8;border-color:#00b4d8;color:#fff}
+.notes-section:first-child{margin-top:0!important}
+.notes-section-h{font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+@media(max-width:900px){.dash-grid{flex-direction:column}.dash-left{width:100%;flex-direction:row;gap:14px}.dash-left .card{flex:1;margin-bottom:0}}
+@media(max-width:600px){.dash-left{flex-direction:column}.dash-tabs{gap:6px}.dash-tab{min-width:80px;padding:8px 10px}}
 .met label{font-size:var(--font-size-xs);color:#6b7280;font-weight:500;display:block;margin-bottom:5px}
 .met .v{font-size:var(--font-size-3xl);font-weight:700}.met .s{font-size:var(--font-size-xs);color:#6b7280;margin-top:3px}
 .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
@@ -830,18 +867,43 @@ body.pms-mode { overflow:hidden; }
     <div class="scrl">
 
 <div class="sec on" id="s-dash">
-  <div class="g5" id="d-summary">
-    <div class="met"><label>Vilu occupancy</label><div class="v">0/6</div><div class="s">0% tonight</div></div>
-    <div class="met"><label>Today's arrivals</label><div class="v">0</div><div class="s">check-in today</div></div>
-    <div class="met"><label>Today's departures</label><div class="v">0</div><div class="s">check-out today</div></div>
-    <div class="met"><label>In house</label><div class="v">0</div><div class="s">staying over</div></div>
-    <div class="met"><label>Revenue (this month)</label><div class="v">$0</div><div class="s">incl. all taxes</div></div>
+  <div class="dash-grid">
+    <div class="dash-left">
+      <div class="card dash-date-card">
+        <div class="dash-dow" id="d-dow">—</div>
+        <div class="dash-daynum" id="d-daynum">—</div>
+        <div class="dash-month" id="d-month">—</div>
+      </div>
+      <div class="card dash-occ-card" onclick="goCalToday()" onkeydown="if(event.key==='Enter')goCalToday()" role="button" tabindex="0" aria-label="Open Calendar on today" title="Open Calendar on today">
+        <div class="dash-ring-wrap">
+          <svg viewBox="0 0 120 120" class="dash-ring"><circle cx="60" cy="60" r="52" class="dash-ring-bg"/><circle cx="60" cy="60" r="52" class="dash-ring-fg" id="d-ring"/></svg>
+          <div class="dash-ring-label"><div class="v" id="d-occ-pct">0%</div><div class="s">Occupancy</div></div>
+        </div>
+        <div class="dash-occ-stats">
+          <div><span id="d-occ-avail">6</span>Available units</div>
+          <div><span id="d-occ-booked">0</span>Booked units</div>
+          <div><span id="d-occ-blocked">0</span>Blocked</div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-right">
+      <div class="card dash-activity-card">
+        <h3>Activity</h3>
+        <div class="dash-tabs" id="d-tabs">
+          <button type="button" class="dash-tab on" data-tab="arr" onclick="dashSetTab('arr')"><span class="dash-tab-n" id="d-tab-arr-n">0</span><span class="dash-tab-lbl">Arrivals</span></button>
+          <button type="button" class="dash-tab" data-tab="dep" onclick="dashSetTab('dep')"><span class="dash-tab-n" id="d-tab-dep-n">0</span><span class="dash-tab-lbl">Departures</span></button>
+          <button type="button" class="dash-tab" data-tab="inhouse" onclick="dashSetTab('inhouse')"><span class="dash-tab-n" id="d-tab-inhouse-n">0</span><span class="dash-tab-lbl">In house</span></button>
+        </div>
+        <table class="tb"><thead><tr><th>Guest</th><th>Room</th><th>Stay</th><th>Status</th></tr></thead><tbody id="d-activity-body"></tbody></table>
+        <div style="text-align:right;margin-top:10px"><span id="d-viewall" onclick="goResScope(DASH_TAB)" style="font-size:var(--font-size-sm);font-weight:600;color:#00b4d8;cursor:pointer">View all arrivals →</span></div>
+      </div>
+      <div class="card dash-revenue-card" onclick="go('folios',document.querySelectorAll('.sl')[6])" onkeydown="if(event.key==='Enter')go('folios',document.querySelectorAll('.sl')[6])" role="button" tabindex="0" aria-label="Open Guest Folios">
+        <label style="font-size:var(--font-size-xs);color:#6b7280;font-weight:500;display:block;margin-bottom:5px">Revenue (this month)</label>
+        <div class="v" id="d-rev-v" style="font-size:var(--font-size-3xl);font-weight:700">$0</div>
+        <div class="s" id="d-rev-period" style="font-size:var(--font-size-xs);color:#6b7280;margin-top:3px">incl. all taxes</div>
+      </div>
+    </div>
   </div>
-  <div class="g2">
-    <div class="card"><h3>Today's arrivals <span id="d-ac" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-arr"><p style="font-size:var(--font-size-sm);color:#9ca3af">No arrivals today.</p></div></div>
-    <div class="card"><h3>Today's departures <span id="d-dc" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-dep"><p style="font-size:var(--font-size-sm);color:#9ca3af">No departures today.</p></div></div>
-  </div>
-  <div class="card"><h3>In house / staying over <span id="d-ihc" style="font-size:var(--font-size-xs);color:#6b7280;font-weight:400">(0)</span></h3><div id="d-inhouse"><p style="font-size:var(--font-size-sm);color:#9ca3af">No stay-over guests.</p></div></div>
   <div class="g2">
     <div class="card"><h3>Physical room rates <span onclick="go('price',document.querySelectorAll('.sl')[3])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div id="d-rt"></div></div>
     <div class="card"><h3>Maldives tax rates <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div style="display:flex;gap:10px;flex-wrap:wrap" id="d-tax"></div></div>
@@ -1162,6 +1224,12 @@ body.pms-mode { overflow:hidden; }
 
 
 <div class="sec" id="s-res">
+  <div class="dash-tabs" id="res-scope-row" style="margin-bottom:10px">
+    <button type="button" class="scope-pill on" data-scope="" onclick="setResScope('')">All</button>
+    <button type="button" class="scope-pill" data-scope="arr" onclick="setResScope('arr')">Arrivals today</button>
+    <button type="button" class="scope-pill" data-scope="dep" onclick="setResScope('dep')">Departures today</button>
+    <button type="button" class="scope-pill" data-scope="inhouse" onclick="setResScope('inhouse')">In house</button>
+  </div>
   <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
     <input type="text" id="rq" placeholder="Search guest, room, ref..." style="flex:1;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1px solid #d1d5db;border-radius:6px" oninput="drawRes()">
     <select id="rsrc" onchange="drawRes()" style="font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1px solid #d1d5db;border-radius:6px"><option value="">All sources</option><option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Agoda</option><option>Expedia</option><option>Google Hotels</option><option>Phone</option><option>Walk-in</option></select>
@@ -2874,10 +2942,37 @@ Photography | 25 | /hr"></textarea>
 
 const LOGO_SRC="data:image/jpeg;base64,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";
 document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.logo-img').forEach(function(i){i.src=LOGO_SRC;});try{localStorage.setItem('vilu_logo',LOGO_SRC);}catch(e){}});
+// ── Canonical Maldives-timezone date helpers (2026-09-10 correction pass) ──
+// The hotel's operational "today" is Indian/Maldives, full stop -- never
+// the browser's local clock, never a UTC-midnight boundary. Same
+// Intl.DateTimeFormat + 'Indian/Maldives' pattern vilu-website.html's own
+// tcTodayMaldives() already uses, so the PMS and the public site agree.
+// tS (the app-wide "today" string every arrival/departure/occupancy/
+// calendar/booking-default computation already keys off) is now DERIVED
+// from this, not from new Date()'s local fields -- a staff member in a
+// different timezone gets the same hotel-date as someone standing at the
+// front desk. Storage stays untouched: reservation/invoice/log timestamps
+// remain whatever was written (ISO/UTC); only the "what day is it at the
+// hotel" and "format this for a human" layers route through these.
+function getMaldivesDate(d){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Indian/Maldives'}).format(d||new Date());
+}
+function formatMaldivesDate(dateStr){
+  if(!dateStr) return '';
+  var d=dateStr instanceof Date?dateStr:new Date(dateStr+'T12:00:00Z');
+  if(isNaN(d)) return String(dateStr);
+  return new Intl.DateTimeFormat('en-GB',{timeZone:'Indian/Maldives',day:'numeric',month:'short',year:'numeric'}).format(d);
+}
+function formatMaldivesDateTime(isoOrDate){
+  if(!isoOrDate) return '';
+  var d=isoOrDate instanceof Date?isoOrDate:new Date(isoOrDate);
+  if(isNaN(d)) return String(isoOrDate);
+  return new Intl.DateTimeFormat('en-GB',{timeZone:'Indian/Maldives',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)+' Maldives time';
+}
 const TD=new Date();
-const tS=(function(){var d=TD;var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;})();
-const D=n=>{const d=new Date(TD);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const tS=getMaldivesDate();
 const D2=(b,n)=>{const d=new Date(b+'T12:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const D=n=>D2(tS,n);
 const fd=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{day:'numeric',month:'short'});
 const fdf=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
 const nt=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
@@ -2939,14 +3034,17 @@ function rNm(n){const r=getR(n);if(!r)return n;return r.prop?r.hNm+' — '+r.nm:
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
 // ── Guest Notes: presentation-layer normalization for migrated reservations ──
-// The Cloudbeds import (2026-09-08) wrote a single semi-structured string
-// into r.notes: a "Cloudbeds #id (room N) · ... · Cloudbeds status X"
-// header, followed by blank-line-separated "[Label] text" blocks (internal
-// note, pricing, guest address, room guest, migration audit line). Nothing
-// here ever rewrites that stored field on its own -- it only PARSES it for
-// display, and (on save) reassembles it byte-identical except for the one
-// block the staff actually edited. No historical document is migrated or
-// bulk-rewritten by this.
+// (2026-09-10 correction pass, re-audited against Cloudbeds' own real
+// Notes/Guest/Overview tabs.) The Cloudbeds import (2026-09-08) wrote a
+// single semi-structured string into r.notes: a "Cloudbeds #id (room N) ·
+// ... · Cloudbeds status X" header, followed by blank-line-separated
+// "[Label] text" blocks (internal note, pricing, guest address, room
+// guest, migration audit line). Nothing here ever rewrites that stored
+// field on its own -- it only PARSES it for display. A NEW staff note is
+// never merged into the original Cloudbeds internal-note text (that would
+// conflate two different authors/purposes); it's upserted as its own
+// "[Staff note]" block appended to the same field, so the one Firestore
+// field keeps growing safely instead of a second field being introduced.
 function parseImportedNote(raw){
   raw=String(raw||'');
   if(!/^Cloudbeds #/.test(raw.trim())) return null;
@@ -2957,53 +3055,106 @@ function parseImportedNote(raw){
     return m?{label:m[1],text:m[2].trim()}:{label:'',text:b.trim()};
   }).filter(function(s){return s.label||s.text;});
   var internal=sections.find(function(s){return /^Cloudbeds internal note/i.test(s.label);})||null;
-  return {header:header,sections:sections,internal:internal};
+  var staff=sections.find(function(s){return s.label==='Staff note';})||null;
+  return {header:header,sections:sections,internal:internal,staff:staff};
 }
-function rebuildImportedNote(parsed,newText){
+// Replace the named block's text if it exists, else append a new one --
+// used for the Staff note block specifically (upsert), never for the
+// original Cloudbeds internal note (which stays exactly as imported).
+function upsertNoteBlock(rawNotes,label,newText){
+  var parsed=parseImportedNote(rawNotes);
+  if(!parsed) return newText;
+  var found=false;
   var sections=parsed.sections.map(function(s){
-    if(parsed.internal&&s===parsed.internal) return '['+s.label+'] '+newText;
+    if(s.label===label){ found=true; return '['+label+'] '+newText; }
     return s.label?'['+s.label+'] '+s.text:s.text;
   });
+  if(!found) sections.push('['+label+'] '+newText);
   return [parsed.header].concat(sections).join('\n\n');
 }
+// Part M: a migrated reservation's address belongs in guest/contact
+// details, never inside Guest Notes -- pulled out here so the detail
+// modal's own info grid can show it as its own field when present.
+function extractImportedAddress(raw){
+  var parsed=parseImportedNote(raw);
+  if(!parsed) return '';
+  var s=parsed.sections.find(function(x){return x.label==='Cloudbeds guest address';});
+  return s?s.text:'';
+}
+function notesSection(heading,bodyHTML,extraStyle){
+  return '<div class="notes-section" style="margin-top:14px'+(extraStyle||'')+'"><div class="notes-section-h">'+esc(heading)+'</div>'+bodyHTML+'</div>';
+}
 // One clean Guest Notes panel, shared by the reservation detail modal and
-// the Calendar side-drawer -- was previously two independently hand-built
-// copies of the same yellow-preview-plus-textarea markup in both places.
+// the Calendar side-drawer. Cloudbeds itself never dumps reservation
+// metadata/pricing/address into one note field -- Guest Notes, Internal
+// Notes, and source/channel metadata are separate tabs/cards there. This
+// mirrors that: Guest Notes is the one editable box (a plain reservation's
+// own note, or a migrated reservation's own [Staff note] block -- the
+// original Cloudbeds text is never overwritten by it); Arrival/Transfer
+// reads the existing structured fields Transportation already uses, never
+// guessed from free text; Internal Notes shows the real Cloudbeds note
+// once, read-only; guest address is not shown here at all (see Part M --
+// it's surfaced in the reservation's own guest-details grid instead);
+// pricing/deposit/balance snapshots stay out entirely, preserved only as
+// raw legacy text inside the collapsed Source Details.
 function renderNotesHTML(r,taId){
   var parsed=parseImportedNote(r.notes);
-  var editableValue,importedHTML='';
+  var editableValue = parsed ? (parsed.staff?parsed.staff.text:'') : (r.notes||'');
+
+  var hasTransfer=r.arrTime||r.arrTransport||r.arrFrom||r.depTime||r.depTransport||r.depTo;
+  var transferHTML=hasTransfer?notesSection('Arrival / Transfer',
+    '<div style="font-size:var(--font-size-sm);color:#374151;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px">'
+    +(r.arrFrom?'<div><span style="color:#6b7280">Arrival from:</span> '+esc(r.arrFrom)+'</div>':'')
+    +(r.arrTime?'<div><span style="color:#6b7280">Arrival time:</span> '+esc(r.arrTime)+'</div>':'')
+    +(r.arrTransport?'<div><span style="color:#6b7280">Arrival transport:</span> '+esc(r.arrTransport)+'</div>':'')
+    +(r.depTo?'<div><span style="color:#6b7280">Departure to:</span> '+esc(r.depTo)+'</div>':'')
+    +(r.depTime?'<div><span style="color:#6b7280">Departure time:</span> '+esc(r.depTime)+'</div>':'')
+    +(r.depTransport?'<div><span style="color:#6b7280">Departure transport:</span> '+esc(r.depTransport)+'</div>':'')
+    +'</div>'):'';
+
+  var internalHTML='', sourceHTML='';
   if(parsed){
-    editableValue=parsed.internal?parsed.internal.text:'';
+    internalHTML=parsed.internal?notesSection('Internal Notes',
+      '<div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line;background:#f9fafb;border-radius:6px;padding:8px 10px">'+esc(parsed.internal.text)+'</div>'):'';
+
     var metaRows=[];
-    metaRows.push(['Source',esc(r.migrated_from?'Cloudbeds (migrated)':(r.src||'Direct'))]);
     // Prefer r.cb_id/r.migrated_at when the in-memory record carries them,
     // but every one of these facts is also embedded in the header text
     // migration itself wrote -- fall back to parsing that so this still
     // renders fully today, without needing loadResFromSupabase()'s mapper
     // to be extended to pass those fields through.
     var idNumM=/^Cloudbeds #(\S+)/.exec(parsed.header);
-    if(r.cb_id) metaRows.push(['Cloudbeds reservation','#'+esc(r.cb_id)]);
-    else if(idNumM) metaRows.push(['Cloudbeds reservation','#'+esc(idNumM[1])]);
-    var idM=/Cloudbeds internal id\s+(\S+)/.exec(parsed.header); if(idM) metaRows.push(['Cloudbeds internal ID',esc(idM[1])]);
-    var srcM=/[·]\s*source\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(srcM) metaRows.push(['Original Cloudbeds source',esc(srcM[1].trim())]);
-    var statM=/Cloudbeds status\s+(.+)$/.exec(parsed.header); if(statM) metaRows.push(['Imported status',esc(statM[1].trim())]);
-    var bookedM=/booked\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(bookedM) metaRows.push(['Imported booking date',esc(bookedM[1].trim())]);
+    if(r.cb_id) metaRows.push(['Reservation ID','#'+esc(r.cb_id)]);
+    else if(idNumM) metaRows.push(['Reservation ID','#'+esc(idNumM[1])]);
+    var idM=/Cloudbeds internal id\s+(\S+)/.exec(parsed.header); if(idM) metaRows.push(['Internal ID',esc(idM[1])]);
+    var srcM=/[·]\s*source\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(srcM) metaRows.push(['Original source',esc(srcM[1].trim())]);
+    var statM=/Cloudbeds status\s+(.+)$/.exec(parsed.header); if(statM) metaRows.push(['Original status',esc(statM[1].trim())]);
+    var bookedM=/booked\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(bookedM) metaRows.push(['Imported date',esc(bookedM[1].trim())]);
     if(r.migrated_at){var da=new Date(r.migrated_at);metaRows.push(['Last source update',esc(isNaN(da)?r.migrated_at:da.toLocaleString())]);}
     else{var chM=/last change\s+([^·]+?)(?:\s*·|$)/.exec(parsed.header); if(chM) metaRows.push(['Last source update',esc(chM[1].trim())]);}
-    var otherSections=parsed.sections.filter(function(s){return s!==parsed.internal;});
-    var sectionsHTML=otherSections.map(function(s){
-      return '<div style="margin-top:8px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">'+esc(s.label)+'</div><div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line">'+esc(s.text)+'</div></div>';
-    }).join('');
-    var internalHTML=parsed.internal?'<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e5e7eb"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">Cloudbeds internal note</div><div style="font-size:var(--font-size-sm);color:#374151;white-space:pre-line">'+esc(parsed.internal.text)+'</div></div>':'';
-    importedHTML='<details style="margin-top:10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:7px;padding:8px 12px">'
-      +'<summary style="cursor:pointer;font-size:var(--font-size-sm);font-weight:600;color:#374151">Imported reservation information</summary>'
+
+    // Legacy blocks with no clean home (pricing snapshot, guest address,
+    // duplicate room-guest name, migration audit line) stay only as raw
+    // preserved text here -- never a current editable note, never shown as
+    // if it were live financial/contact data.
+    var legacyBlocks=parsed.sections.filter(function(s){return s!==parsed.internal&&s!==parsed.staff&&s.label!=='Cloudbeds guest address';});
+    var legacyHTML=legacyBlocks.length?(
+      '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e5e7eb">'
+      +'<div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px">Legacy import (raw text, not live data)</div>'
+      +legacyBlocks.map(function(s){return '<div style="font-size:var(--font-size-xs);color:#6b7280;white-space:pre-line;margin-bottom:6px">'+esc(s.text)+'</div>';}).join('')
+      +'</div>'
+    ):'';
+
+    sourceHTML='<details class="notes-section" style="margin-top:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:7px;padding:8px 12px">'
+      +'<summary style="cursor:pointer;font-size:var(--font-size-sm);font-weight:600;color:#374151">Source Details — <span style="font-weight:400;color:#6b7280">imported from Cloudbeds</span></summary>'
       +'<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:var(--font-size-sm)">'
       +metaRows.map(function(kv){return '<div><span style="color:#6b7280">'+kv[0]+':</span> '+kv[1]+'</div>';}).join('')
-      +'</div>'+sectionsHTML+internalHTML+'</details>';
-  } else {
-    editableValue=r.notes||'';
+      +'</div>'+legacyHTML+'</details>';
   }
-  return '<textarea id="'+taId+'" rows="5" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:96px;margin-bottom:8px" placeholder="Special requests, dietary needs, transfer info...">'+esc(editableValue)+'</textarea>'+importedHTML;
+
+  return notesSection('Guest Notes',
+    '<textarea id="'+taId+'" rows="4" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:80px" placeholder="Special requests, dietary needs, operational notes...">'+esc(editableValue)+'</textarea>','')
+    +transferHTML+internalHTML+sourceHTML;
 }
 // The one place any note edit actually reaches Firestore -- both call
 // sites (reservation detail modal, Calendar drawer) route through this
@@ -3013,9 +3164,8 @@ function saveNoteFor(r,taId){
   var ta=document.getElementById(taId);
   var txt=((ta&&ta.value)||'').trim();
   if(!txt){toast('Note is empty');return false;}
-  var parsed=parseImportedNote(r.notes);
-  r.notes=parsed?rebuildImportedNote(parsed,txt):txt;
-  var now=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  r.notes=parseImportedNote(r.notes)?upsertNoteBlock(r.notes,'Staff note',txt):txt;
+  var now=formatMaldivesDateTime(new Date());
   if(!r.nlog)r.nlog=[];
   r.nlog.push({t:'"'+txt+'"',time:now});
   saveRES(r);
@@ -3451,16 +3601,6 @@ document.addEventListener('keydown', function(e){
 });
 
 // DASHBOARD
-// Canonical Maldives-timezone "today" for the Dashboard's own arrival/
-// departure/occupancy classification. Deliberately a separate helper from
-// the global tS (browser-local date) that Calendar/booking-engine/every
-// other section still uses for their own date defaults and navigation --
-// this fix is scoped to Dashboard's today-boundary bug only, never a
-// redefinition of tS itself, so nothing outside Dashboard's own rendering
-// changes behavior.
-function maldivesToday(){
-  return new Intl.DateTimeFormat('en-CA',{timeZone:'Indian/Maldives'}).format(new Date());
-}
 // "Still a real, non-cancelled reservation" -- the same blocking test
 // isOcc()/syncAvailability() already use for room-lock/availability
 // purposes (minus the Checked-out exclusion, which only matters for
@@ -3475,9 +3615,16 @@ function isBlockingStatus(st){ return st!=='Cancelled'; }
 // Checked in" tally, which is why a Confirmed-but-not-yet-clicked-in guest
 // now correctly counts as occupying their room.
 function computeDashData(){
-  var today=maldivesToday(), tomorrow=D2(today,1);
+  var today=tS, tomorrow=D(1);
   var viluRes=RES.filter(function(r){return r.prop==='vilu';});
-  var occupiedRooms=VR.filter(function(vr){return !!isOcc(vr.n,today,tomorrow);}).length;
+  // isOcc() returns whichever record (reservation or manual block) is
+  // holding the room -- a block's shape has .from/.to, a reservation's has
+  // .ci/.co, which is how "occupied by a real stay" and "occupied by a
+  // maintenance/owner-use block" are told apart for the two separate
+  // dashboard stats below, without a second occupancy query.
+  var occMatches=VR.map(function(vr){return isOcc(vr.n,today,tomorrow);});
+  var occupiedRooms=occMatches.filter(Boolean).length;
+  var blockedRooms=occMatches.filter(function(m){return m&&m.from!==undefined;}).length;
   var arrivals=viluRes.filter(function(r){return r.ci===today&&isBlockingStatus(r.st);});
   var departures=viluRes.filter(function(r){return r.co===today&&isBlockingStatus(r.st);});
   var inHouse=viluRes.filter(function(r){return r.ci<today&&r.co>today&&isBlockingStatus(r.st)&&r.st!=='Checked out';});
@@ -3485,28 +3632,62 @@ function computeDashData(){
   var lastDay=new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();
   var monthFrom=ym+'-01', monthTo=ym+'-'+String(lastDay).padStart(2,'0');
   var rev=anRevenue(monthFrom,monthTo);
-  return {today:today,occupiedRooms:occupiedRooms,totalRooms:VR.length,arrivals:arrivals,departures:departures,inHouse:inHouse,revenue:rev.total,monthFrom:monthFrom,monthTo:monthTo};
+  return {today:today,occupiedRooms:occupiedRooms,blockedRooms:blockedRooms,totalRooms:VR.length,arrivals:arrivals,departures:departures,inHouse:inHouse,revenue:rev.total,monthFrom:monthFrom,monthTo:monthTo};
 }
+// Clicking a guest row opens that reservation's own detail view directly --
+// the same showDet() every other entry point (Reservations table, Calendar
+// drawer) already uses, never a bespoke dashboard-only reservation view.
 function dashGuestRow(r){
-  var initials=(esc(r.fn)[0]||'?')+(esc(r.ln)[0]||'');
-  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">'
-    +'<div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:#e8f5f2;color:#00b4d8;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);font-weight:700">'+initials+'</div>'
-    +'<div><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+rNm(r.rn)+' · '+esc(r.src||'Direct')+'</div></div></div>'+stBx(r.st)+'</div>';
+  return '<tr class="clk" onclick="showDet(\''+r.id+'\')">'
+    +'<td><div style="font-weight:600;font-size:var(--font-size-sm)">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+esc(r.src||'Direct')+'</div></td>'
+    +'<td style="font-size:var(--font-size-sm)">'+rNm(r.rn)+'</td>'
+    +'<td style="font-size:var(--font-size-sm)">'+fd(r.ci)+' → '+fd(r.co)+'</td>'
+    +'<td>'+stBx(r.st)+'</td></tr>';
+}
+var DASH_TAB='arr';
+function dashSetTab(tab){
+  DASH_TAB=tab;
+  document.querySelectorAll('.dash-tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+  var d=computeDashData();
+  var rows=tab==='arr'?d.arrivals:tab==='dep'?d.departures:d.inHouse;
+  var emptyMsg=tab==='arr'?'No arrivals today.':tab==='dep'?'No departures today.':'No stay-over guests.';
+  document.getElementById('d-activity-body').innerHTML=rows.length?rows.map(dashGuestRow).join(''):'<tr><td colspan="4" class="dash-empty">'+emptyMsg+'</td></tr>';
+  var vaLabel=tab==='arr'?'View all arrivals →':tab==='dep'?'View all departures →':'View all in-house →';
+  var va=document.getElementById('d-viewall'); if(va) va.textContent=vaLabel;
+}
+// Occupancy card is clickable -> Calendar, landing on today specifically
+// (not wherever Calendar was last scrolled), via its own existing
+// calNavToday() -- the same button the "TODAY" pill in Calendar's own
+// header already calls.
+function goCalToday(){
+  go('cal',document.querySelectorAll('.sl')[1]);
+  setTimeout(function(){ if(typeof calNavToday==='function') calNavToday(); },50);
+}
+function drawOccRing(occupied,total){
+  var svg=document.getElementById('d-ring');
+  if(!svg) return;
+  var r=52,C=2*Math.PI*r,frac=total?occupied/total:0;
+  svg.style.strokeDasharray=C;
+  svg.style.strokeDashoffset=C*(1-frac);
 }
 function drawDash(){
   var d=computeDashData();
-  document.getElementById('d-summary').innerHTML=`
-    <div class="met"><label>Vilu occupancy</label><div class="v">${d.occupiedRooms}/${d.totalRooms}</div><div class="s">${d.totalRooms?Math.round(d.occupiedRooms/d.totalRooms*100):0}% tonight</div></div>
-    <div class="met"><label>Today's arrivals</label><div class="v">${d.arrivals.length}</div><div class="s">check-in today</div></div>
-    <div class="met"><label>Today's departures</label><div class="v">${d.departures.length}</div><div class="s">check-out today</div></div>
-    <div class="met"><label>In house</label><div class="v">${d.inHouse.length}</div><div class="s">staying over</div></div>
-    <div class="met"><label>Revenue (this month)</label><div class="v">$${Math.round(d.revenue).toLocaleString()}</div><div class="s">incl. all taxes</div></div>`;
-  document.getElementById('d-ac').textContent='('+d.arrivals.length+')';
-  document.getElementById('d-dc').textContent='('+d.departures.length+')';
-  document.getElementById('d-ihc').textContent='('+d.inHouse.length+')';
-  document.getElementById('d-arr').innerHTML=d.arrivals.length?d.arrivals.map(dashGuestRow).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No arrivals today.</p>';
-  document.getElementById('d-dep').innerHTML=d.departures.length?d.departures.map(dashGuestRow).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No departures today.</p>';
-  document.getElementById('d-inhouse').innerHTML=d.inHouse.length?d.inHouse.map(dashGuestRow).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No stay-over guests.</p>';
+  var mParts=new Intl.DateTimeFormat('en-US',{timeZone:'Indian/Maldives',weekday:'long',day:'numeric',month:'long'}).formatToParts(new Date());
+  var get=function(t){var p=mParts.find(function(x){return x.type===t;});return p?p.value:'';};
+  document.getElementById('d-dow').textContent=get('weekday');
+  document.getElementById('d-daynum').textContent=get('day');
+  document.getElementById('d-month').textContent=get('month');
+  var occPct=d.totalRooms?Math.round(d.occupiedRooms/d.totalRooms*100):0;
+  document.getElementById('d-occ-pct').textContent=occPct+'%';
+  drawOccRing(d.occupiedRooms,d.totalRooms);
+  document.getElementById('d-occ-avail').textContent=Math.max(0,d.totalRooms-d.occupiedRooms);
+  document.getElementById('d-occ-booked').textContent=d.occupiedRooms;
+  document.getElementById('d-occ-blocked').textContent=d.blockedRooms;
+  document.getElementById('d-tab-arr-n').textContent=d.arrivals.length;
+  document.getElementById('d-tab-dep-n').textContent=d.departures.length;
+  document.getElementById('d-tab-inhouse-n').textContent=d.inHouse.length;
+  dashSetTab(DASH_TAB);
+  document.getElementById('d-rev-v').textContent='$'+Math.round(d.revenue).toLocaleString();
   document.getElementById('d-rt').innerHTML=VR.map(r=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">${r.nm}</span><span style="font-weight:600">$${r.rate}/night</span></div>`).join('');
   document.getElementById('d-tax').innerHTML=`
     <div style="background:#e8f5f2;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">TGST</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#00b4d8">${TAX.tgst}%</div></div>
@@ -4313,14 +4494,29 @@ function drawCal(){
   calUpdateLabel();
 }
 
+// Reservations' own date-scope pills ('' | 'arr' | 'dep' | 'inhouse') --
+// the same today/isBlockingStatus check computeDashData() uses for the
+// Dashboard's Arrivals/Departures/In-house tabs, so a card click always
+// lands on a Reservations list that agrees with the number just clicked.
+var RES_SCOPE='';
+function setResScope(scope){
+  RES_SCOPE=scope;
+  drawRes();
+}
+function goResScope(scope){
+  RES_SCOPE=scope;
+  go('res',document.querySelectorAll('.sl')[2]);
+}
 function drawRes(){
+  document.querySelectorAll('#res-scope-row .scope-pill').forEach(function(b){b.classList.toggle('on',b.dataset.scope===RES_SCOPE);});
   const q=(document.getElementById('rq')?.value||'').toLowerCase();
   const sf=document.getElementById('rst')?.value||'';
   const rf=document.getElementById('rsrc')?.value||'';
   const pf=document.getElementById('rprop')?.value||'';
+  const scopeOk=r=>!RES_SCOPE||(RES_SCOPE==='arr'?r.ci===tS&&isBlockingStatus(r.st):RES_SCOPE==='dep'?r.co===tS&&isBlockingStatus(r.st):RES_SCOPE==='inhouse'?(r.ci<tS&&r.co>tS&&isBlockingStatus(r.st)&&r.st!=='Checked out'):true);
   const list=RES.filter(r=>{
     const txt=(r.fn+' '+r.ln+' '+rNm(r.rn)+' '+r.id+' '+(r.ref||'')).toLowerCase();
-    return txt.includes(q)&&(!sf||r.st===sf)&&(!rf||r.src===rf)&&(!pf||(pf==='vilu'?r.prop==='vilu':r.prop!=='vilu'));
+    return scopeOk(r)&&txt.includes(q)&&(!sf||r.st===sf)&&(!rf||r.src===rf)&&(!pf||(pf==='vilu'?r.prop==='vilu':r.prop!=='vilu'));
   });
   function row(r,isH){
     const x=calcTax(r),hasN=r.notes&&r.notes.trim();
@@ -4400,13 +4596,14 @@ function _showDetLegacy(id){
       <div><span style="color:#6b7280;font-size:var(--font-size-xs);display:block;margin-bottom:2px">Check-out</span>${fd(r.co)}</div>
       <div><span style="color:#6b7280;font-size:var(--font-size-xs);display:block;margin-bottom:2px">Guests</span>${r.ad}A${r.ch>0?' '+r.ch+'C':''}${r.inf>0?' '+r.inf+' infant':''}</div>
       <div><span style="color:#6b7280;font-size:var(--font-size-xs);display:block;margin-bottom:2px">Email · Phone</span>${esc(r.em)||'—'} · ${esc(r.ph)||'—'}</div>
+      ${(function(){var addr=extractImportedAddress(r.notes);return addr?`<div style="grid-column:1/-1"><span style="color:#6b7280;font-size:var(--font-size-xs);display:block;margin-bottom:2px">Address</span>${esc(addr)}</div>`:'';})()}
     </div>
     <div style="background:#f9fafb;border-radius:8px;padding:12px;font-size:var(--font-size-sm);margin-bottom:14px">
       ${['n: '+x.n+' nights × $'+r.rate+' = $'+x.base.toFixed(2),'Service ('+TAX.svc+'%): $'+x.svc.toFixed(2),'TGST ('+TAX.tgst+'%): $'+x.tgst.toFixed(2),'Green Tax: $'+x.green.toFixed(2)].map(l=>`<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:#6b7280">${l.split(':')[0]}</span><span>${l.split(':')[1]||''}</span></div>`).join('')}
       <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total (room)</span><span>$${x.total.toFixed(2)}</span></div>${(r.extras&&r.extras.length?r.extras.map(ex=>`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:var(--font-size-sm);color:#00b4d8"><span>🛏️ Extra bed (${ex.nights} nights × $${ex.rate})</span><span>$${ex.total.toFixed(2)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--font-size-base);margin-top:6px;padding-top:6px;border-top:2px solid #00b4d8"><span>Grand Total</span><span style="color:#00b4d8">$${(x.total+r.extras.reduce((s,e)=>s+e.total,0)).toFixed(2)}</span></div>`:'')}
     </div>
     <div class="np">
-      <div class="nh"><span style="font-size:var(--font-size-lg)">📋</span><span style="font-size:var(--font-size-base);font-weight:600;color:#92400e">Guest Notes</span>${hasN?'<span style="background:#f59e0b;color:#fff;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">HAS NOTES</span>':''}</div>
+      <div class="nh"><span style="font-size:var(--font-size-lg)">📋</span><span style="font-size:var(--font-size-base);font-weight:600;color:#92400e">Notes & Details</span>${hasN?'<span style="background:#f59e0b;color:#fff;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">HAS NOTES</span>':''}</div>
       <div class="nb">
         ${renderNotesHTML(r,'note-ta')}
         <button class="btn p sm" style="margin-top:8px" onclick="saveNote('${id}')"><i class="ti ti-device-floppy"></i>Save note</button>
@@ -5149,7 +5346,7 @@ async function drawRecLog(){
   }
   el.innerHTML = snap.docs.map(function(doc){
     var d = doc.data();
-    var when = d.timestamp ? new Date(d.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    var when = d.timestamp ? formatMaldivesDateTime(new Date(d.timestamp)) : '—';
     var isBlock = d.type === 'double_booking_blocked';
     var badge = isBlock
       ? '<span class="bx er">Double-booking blocked</span>'
@@ -6775,7 +6972,7 @@ async function softDelete(res){
   // Move reservation to bin
   const idx = RES.findIndex(r=>r.id===res.id);
   if(idx===-1) return;
-  const deleted = {...RES[idx], deletedAt:new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}), deletedBy:currentUser?.name||'Admin'};
+  const deleted = {...RES[idx], deletedAt:formatMaldivesDateTime(new Date()), deletedBy:currentUser?.name||'Admin'};
   BIN.unshift(deleted);
   RES.splice(idx,1);
   aLog('warn','Reservation '+res.id+' ('+esc(res.fn)+' '+esc(res.ln)+') moved to bin by '+esc(currentUser?.name||'Admin'));
