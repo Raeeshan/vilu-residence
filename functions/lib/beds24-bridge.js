@@ -150,6 +150,21 @@ function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sella
     sellableAvailable,
     sellableTotal,
   });
+  // Beds24-specific stop-sell/blackout semantics (owner policy, confirmed in
+  // the 2026-09-10 production-data validation pass): computeOtaTypePayload's
+  // own `stopSell` is a GENERIC ARI flag that deliberately conflates three
+  // causes -- config.manual_stop_sell, a caller override, and simply running
+  // out of physical rooms (bufferedAvailable<=0) -- because a generic
+  // channel-agnostic feed only needs "is this sellable" as one bit. Beds24's
+  // `override` enum is not that generic bit: `blackout` is a strictly
+  // stronger, explicit "we refuse to sell this, regardless of numAvail"
+  // signal, and must be reserved for an actual manual stop-sell. A date that
+  // is merely fully booked already communicates "0 available" via numAvail
+  // alone -- exactly like every other date with 0 sellable rooms -- and must
+  // NOT also be flagged blackout, or Beds24/an OTA could treat an ordinary
+  // sold-out night as a deliberate, stronger closure. Only config's own
+  // explicit manual_stop_sell flag drives override=blackout here.
+  const manualStopSell = !!config.manual_stop_sell;
   const payload = buildBeds24CalendarPayload({
     roomTypeCode,
     from: date,
@@ -160,9 +175,9 @@ function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sella
     maxStay: generic.maxStay,
     cta: generic.closedToArrival,
     ctd: generic.closedToDeparture,
-    stopSell: generic.stopSell,
+    stopSell: manualStopSell,
   });
-  return { roomTypeCode, date, rate: generic.rate, rateOverridden: overridden, numAvail: generic.numAvail, stopSell: generic.stopSell, cta: !!generic.closedToArrival, ctd: !!generic.closedToDeparture, payload };
+  return { roomTypeCode, date, rate: generic.rate, rateOverridden: overridden, numAvail: generic.numAvail, stopSell: manualStopSell, cta: !!generic.closedToArrival, ctd: !!generic.closedToDeparture, payload };
 }
 
 // ---------------------------------------------------------------------------

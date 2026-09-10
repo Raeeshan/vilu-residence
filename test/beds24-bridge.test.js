@@ -171,17 +171,31 @@ function block(id, room_id, from_date, to_date, kind) {
     assert.strictEqual(d.payload.roomId, 728133);
     assert.strictEqual(d.payload.calendar[0].override, 'none');
   });
-  await test('buildDatePayload: zero sellable availability forces stopSell/blackout regardless of manual flags', () => {
+  await test('buildDatePayload: a NATURAL sellout (numAvail 0 from full occupancy, no manual flag) must NOT become override=blackout -- only numAvail drops to 0', () => {
     const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-15', config: INITIAL_OTA_ROOM_TYPES.double, sellableAvailable: 0, sellableTotal: 3 });
-    assert.strictEqual(d.stopSell, true);
     assert.strictEqual(d.numAvail, 0);
-    assert.strictEqual(d.payload.calendar[0].override, 'blackout');
+    assert.strictEqual(d.stopSell, false, 'a natural sellout is not a manual stop-sell');
+    assert.strictEqual(d.payload.calendar[0].override, 'none', 'blackout must be reserved for an explicit manual stop-sell, never inferred from numAvail alone');
   });
-  await test('buildDatePayload: config.manual_stop_sell forces stop-sell even with availability remaining', () => {
+  await test('buildDatePayload: config.manual_stop_sell forces override=blackout even with availability remaining', () => {
     const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { manual_stop_sell: true });
     const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-15', config, sellableAvailable: 3, sellableTotal: 3 });
     assert.strictEqual(d.stopSell, true);
     assert.strictEqual(d.payload.calendar[0].override, 'blackout');
+  });
+  await test('buildDatePayload: manual_stop_sell AND a natural sellout together still resolve to exactly one blackout, driven by the manual flag', () => {
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { manual_stop_sell: true });
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-15', config, sellableAvailable: 0, sellableTotal: 3 });
+    assert.strictEqual(d.stopSell, true);
+    assert.strictEqual(d.numAvail, 0);
+    assert.strictEqual(d.payload.calendar[0].override, 'blackout');
+  });
+  await test('buildDatePayload: a natural sellout combined with CTA still surfaces CTA in the override, not blackout', () => {
+    const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { closed_to_arrival: true });
+    const d = buildDatePayload({ roomTypeCode: 'DOUBLE', date: '2026-11-15', config, sellableAvailable: 0, sellableTotal: 3 });
+    assert.strictEqual(d.numAvail, 0);
+    assert.strictEqual(d.stopSell, false);
+    assert.strictEqual(d.payload.calendar[0].override, 'noCheckIn');
   });
   await test('buildDatePayload: config.closed_to_arrival maps through to CTA override', () => {
     const config = Object.assign({}, INITIAL_OTA_ROOM_TYPES.double, { closed_to_arrival: true });
@@ -249,14 +263,20 @@ function block(id, room_id, from_date, to_date, kind) {
     assert.strictEqual(stats.days_generated, 30);
     assert.strictEqual(entries.length, 30 * 3);
   });
-  await test('generateInventorySeed: a fully-booked room type shows numAvail 0 / stop-sell on the affected date, others unaffected', () => {
+  await test('generateInventorySeed: a fully-booked room type shows numAvail 0 (natural sellout, NOT a manual stop-sell/blackout) on the affected date, others unaffected', () => {
     const reservations = [reservation('r1', 'VR06', '2026-11-16', '2026-11-17')];
     const { entries } = generateInventorySeed({ roomsDocs: [], reservations, blocks: [], from: '2026-11-15', days: 5 });
     const openDeckDay = entries.find((e) => e.roomTypeCode === 'DELUXE_FAMILY_OPEN_DECK' && e.date === '2026-11-16');
     assert.strictEqual(openDeckDay.numAvail, 0);
-    assert.strictEqual(openDeckDay.stopSell, true);
+    assert.strictEqual(openDeckDay.stopSell, false, 'a fully-booked date is a natural sellout, not a manual stop-sell');
+    assert.strictEqual(openDeckDay.payload.calendar[0].override, 'none');
     const doubleDay = entries.find((e) => e.roomTypeCode === 'DOUBLE' && e.date === '2026-11-16');
     assert.strictEqual(doubleDay.numAvail, 3);
+  });
+  await test('generateInventorySeed: stop_sell_dates in stats counts only manual-blackout dates, never natural-sellout dates', () => {
+    const reservations = [reservation('r1', 'VR06', '2026-11-16', '2026-11-17')];
+    const { stats } = generateInventorySeed({ roomsDocs: [], reservations, blocks: [], from: '2026-11-15', days: 5 });
+    assert.strictEqual(stats.stop_sell_dates, 0, 'no manual_stop_sell configured anywhere in this scenario, despite one naturally sold-out date');
   });
   await test('generateInventorySeed: per-room-type date overrides apply only to that room type', () => {
     const { entries } = generateInventorySeed({ roomsDocs: [], reservations: [], blocks: [], from: '2026-11-15', days: 3, dateOverrides: { DOUBLE: { '2026-11-16': 250 } } });
