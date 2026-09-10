@@ -63,7 +63,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .dash-occ-stats span{font-weight:700;color:#111827;margin-right:5px}
 .dash-activity-card h3{margin-bottom:14px}
 .dash-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.dash-tab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 16px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;min-width:92px}
+.dash-tab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 14px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;min-width:84px}
 .dash-tab:hover{border-color:#00b4d8}
 .dash-tab.on{border-color:#00b4d8;background:#e8f5f2}
 .dash-tab-n{font-size:var(--font-size-xl);font-weight:800;color:#111827}
@@ -72,6 +72,23 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .dash-revenue-card{cursor:pointer;transition:box-shadow .15s,border-color .15s}
 .dash-revenue-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.08);border-color:#00b4d8}
 .dash-empty{font-size:var(--font-size-sm);color:#9ca3af;padding:14px 4px}
+/* ── Dashboard header date-nav + dense Activity rows (parity correction) ── */
+.dash-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.dash-hdr h2{font-size:var(--font-size-lg);font-weight:700;margin:0;color:#111827}
+.dash-nav{display:flex;align-items:center;gap:6px}
+.dash-nav-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-size:var(--font-size-md);color:#374151;font-family:inherit;line-height:1;display:flex;align-items:center;justify-content:center}
+.dash-nav-btn:hover{border-color:#00b4d8;color:#00b4d8}
+.dash-nav-btn.spin i{display:inline-block;animation:dashspin .6s linear infinite}
+@keyframes dashspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.dash-date-btn{border:1.5px solid #e5e7eb;background:#fff;border-radius:20px;padding:6px 16px;font-size:var(--font-size-sm);font-weight:600;color:#374151;cursor:pointer;font-family:inherit;min-width:88px;text-align:center}
+.dash-date-btn:hover{border-color:#00b4d8}
+.dash-row-main{font-weight:600;color:#111827;font-size:var(--font-size-sm)}
+.dash-row-sub{font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px}
+.dash-row-badges{display:flex;gap:6px;margin-top:3px}
+.dash-badge{display:inline-flex;align-items:center;gap:3px;font-size:var(--font-size-xs);color:#6b7280;background:#f3f4f6;border-radius:10px;padding:1px 7px}
+.dash-row-badges i,.dash-row-actions i{font-size:11px}
+.dash-row-actions{display:flex;gap:2px;white-space:nowrap}
+.dash-totals{padding:10px 12px;margin-top:10px;background:#f9fafb;border-radius:8px;font-size:var(--font-size-xs);color:#6b7280;font-weight:600}
 .scope-pill{padding:6px 14px;border-radius:999px;border:1.5px solid #e5e7eb;background:#fff;font-size:var(--font-size-sm);font-weight:600;color:#6b7280;cursor:pointer;font-family:inherit}
 .scope-pill:hover{border-color:#00b4d8}
 .scope-pill.on{background:#00b4d8;border-color:#00b4d8;color:#fff}
@@ -890,6 +907,15 @@ body.pms-mode { overflow:hidden; }
     <div class="scrl">
 
 <div class="sec on" id="s-dash">
+  <div class="dash-hdr">
+    <h2>Today's activity</h2>
+    <div class="dash-nav">
+      <button type="button" class="dash-nav-btn" id="d-refresh-btn" onclick="dashRefresh()" title="Refresh" aria-label="Refresh"><i class="ti ti-refresh"></i></button>
+      <button type="button" class="dash-nav-btn" onclick="dashPrevDay()" title="Previous day" aria-label="Previous day">&#8249;</button>
+      <button type="button" class="dash-date-btn" id="d-date-btn" onclick="dashGoToday()" title="Jump to today">Today</button>
+      <button type="button" class="dash-nav-btn" onclick="dashNextDay()" title="Next day" aria-label="Next day">&#8250;</button>
+    </div>
+  </div>
   <div class="dash-grid">
     <div class="dash-left">
       <div class="card dash-date-card">
@@ -897,7 +923,7 @@ body.pms-mode { overflow:hidden; }
         <div class="dash-daynum" id="d-daynum">—</div>
         <div class="dash-month" id="d-month">—</div>
       </div>
-      <div class="card dash-occ-card" onclick="goCalToday()" onkeydown="if(event.key==='Enter')goCalToday()" role="button" tabindex="0" aria-label="Open Calendar on today" title="Open Calendar on today">
+      <div class="card dash-occ-card" onclick="goCalToday()" onkeydown="if(event.key==='Enter')goCalToday()" role="button" tabindex="0" aria-label="Open Calendar on selected date" title="Open Calendar on selected date">
         <div class="dash-ring-wrap">
           <svg viewBox="0 0 120 120" class="dash-ring"><circle cx="60" cy="60" r="52" class="dash-ring-bg"/><circle cx="60" cy="60" r="52" class="dash-ring-fg" id="d-ring"/></svg>
           <div class="dash-ring-label"><div class="v" id="d-occ-pct">0%</div><div class="s">Occupancy</div></div>
@@ -905,7 +931,8 @@ body.pms-mode { overflow:hidden; }
         <div class="dash-occ-stats">
           <div><span id="d-occ-avail">6</span>Available units</div>
           <div><span id="d-occ-booked">0</span>Booked units</div>
-          <div><span id="d-occ-blocked">0</span>Blocked</div>
+          <div><span id="d-occ-oos">0</span>Out of service</div>
+          <div><span id="d-occ-blocked">0</span>Blocked dates</div>
         </div>
       </div>
     </div>
@@ -916,8 +943,13 @@ body.pms-mode { overflow:hidden; }
           <button type="button" class="dash-tab on" data-tab="arr" onclick="dashSetTab('arr')"><span class="dash-tab-n" id="d-tab-arr-n">0</span><span class="dash-tab-lbl">Arrivals</span></button>
           <button type="button" class="dash-tab" data-tab="dep" onclick="dashSetTab('dep')"><span class="dash-tab-n" id="d-tab-dep-n">0</span><span class="dash-tab-lbl">Departures</span></button>
           <button type="button" class="dash-tab" data-tab="inhouse" onclick="dashSetTab('inhouse')"><span class="dash-tab-n" id="d-tab-inhouse-n">0</span><span class="dash-tab-lbl">In house</span></button>
+          <button type="button" class="dash-tab" data-tab="stayovers" onclick="dashSetTab('stayovers')"><span class="dash-tab-n" id="d-tab-stayovers-n">0</span><span class="dash-tab-lbl">Stayovers</span></button>
+          <button type="button" class="dash-tab" data-tab="bookings" onclick="dashSetTab('bookings')"><span class="dash-tab-n" id="d-tab-bookings-n">0</span><span class="dash-tab-lbl">Bookings</span></button>
+          <button type="button" class="dash-tab" data-tab="cancellations" onclick="dashSetTab('cancellations')"><span class="dash-tab-n" id="d-tab-cancellations-n">0</span><span class="dash-tab-lbl">Cancellations</span></button>
+          <button type="button" class="dash-tab" data-tab="overbookings" onclick="dashSetTab('overbookings')"><span class="dash-tab-n" id="d-tab-overbookings-n">0</span><span class="dash-tab-lbl">Overbookings</span></button>
         </div>
-        <table class="tb"><thead><tr><th>Guest</th><th>Room</th><th>Stay</th><th>Status</th></tr></thead><tbody id="d-activity-body"></tbody></table>
+        <div style="overflow-x:auto"><table class="tb dash-activity-table"><thead><tr><th>Guest</th><th>Accommodation</th><th>Stay</th><th>Status</th><th>Actions</th></tr></thead><tbody id="d-activity-body"></tbody></table></div>
+        <div id="d-totals" class="dash-totals"></div>
         <div style="text-align:right;margin-top:10px"><span id="d-viewall" onclick="goResScope(DASH_TAB)" style="font-size:var(--font-size-sm);font-weight:600;color:#00b4d8;cursor:pointer">View all arrivals →</span></div>
       </div>
       <div class="card dash-revenue-card" onclick="go('folios',document.querySelectorAll('.sl')[6])" onkeydown="if(event.key==='Enter')go('folios',document.querySelectorAll('.sl')[6])" role="button" tabindex="0" aria-label="Open Guest Folios">
@@ -1277,9 +1309,13 @@ body.pms-mode { overflow:hidden; }
 <div class="sec" id="s-res">
   <div class="dash-tabs" id="res-scope-row" style="margin-bottom:10px">
     <button type="button" class="scope-pill on" data-scope="" onclick="setResScope('')">All</button>
-    <button type="button" class="scope-pill" data-scope="arr" onclick="setResScope('arr')">Arrivals today</button>
-    <button type="button" class="scope-pill" data-scope="dep" onclick="setResScope('dep')">Departures today</button>
+    <button type="button" class="scope-pill" data-scope="arr" onclick="setResScope('arr')">Arrivals</button>
+    <button type="button" class="scope-pill" data-scope="dep" onclick="setResScope('dep')">Departures</button>
     <button type="button" class="scope-pill" data-scope="inhouse" onclick="setResScope('inhouse')">In house</button>
+    <button type="button" class="scope-pill" data-scope="stayovers" onclick="setResScope('stayovers')">Stayovers</button>
+    <button type="button" class="scope-pill" data-scope="bookings" onclick="setResScope('bookings')">Bookings</button>
+    <button type="button" class="scope-pill" data-scope="cancellations" onclick="setResScope('cancellations')">Cancellations</button>
+    <button type="button" class="scope-pill" data-scope="overbookings" onclick="setResScope('overbookings')">Overbookings</button>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
     <input type="text" id="rq" placeholder="Search guest, room, ref..." style="flex:1;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1px solid #d1d5db;border-radius:6px" oninput="drawRes()">
@@ -3665,54 +3701,168 @@ function isBlockingStatus(st){ return st!=='Cancelled'; }
 // check, already covers manual blocks too) instead of the old "st==
 // Checked in" tally, which is why a Confirmed-but-not-yet-clicked-in guest
 // now correctly counts as occupying their room.
-function computeDashData(){
-  var today=tS, tomorrow=D(1);
+// Any active room conflict (2+ blocking reservations overlapping the same
+// physical room on the same night) -- genuinely rare since writeReservation()
+// already rejects a conflicting write at save time (ROOM_CONFLICT), but
+// historical/migrated data can carry one. Never invented, never a demo
+// number -- 0 whenever no such overlap exists.
+function computeOverbookings(d0){
+  var tomorrow=D2(d0,1),pairs=[];
+  VR.forEach(function(vr){
+    var matches=RES.filter(function(r){return r.prop==='vilu'&&r.rn===vr.n&&isBlockingStatus(r.st)&&r.ci<tomorrow&&r.co>d0;});
+    if(matches.length>1) pairs.push({room:vr,reservations:matches});
+  });
+  return pairs;
+}
+// Single source of every Dashboard number -- Calendar/Reservations never
+// get a second, dashboard-specific interpretation of the same documents.
+// Takes the SELECTED operational date (defaults to today, but the header's
+// prev/Today/next controls can move it) -- every figure below recomputes
+// for that date, never a mix of "today" and "selected date".
+function computeDashData(date){
+  var today=date||SELECTED_DATE||tS, tomorrow=D2(today,1);
   var viluRes=RES.filter(function(r){return r.prop==='vilu';});
   // isOcc() returns whichever record (reservation or manual block) is
   // holding the room -- a block's shape has .from/.to, a reservation's has
   // .ci/.co, which is how "occupied by a real stay" and "occupied by a
-  // maintenance/owner-use block" are told apart for the two separate
-  // dashboard stats below, without a second occupancy query.
+  // block" are told apart without a second occupancy query. Blocks are
+  // further split by their own real `type` field (set by the existing
+  // Block Rooms form): 'maintenance' = genuinely unsellable (Out of
+  // service); 'owner'/'hold' = intentionally held back (Blocked dates).
   var occMatches=VR.map(function(vr){return isOcc(vr.n,today,tomorrow);});
   var occupiedRooms=occMatches.filter(Boolean).length;
-  var blockedRooms=occMatches.filter(function(m){return m&&m.from!==undefined;}).length;
+  var blockMatches=occMatches.filter(function(m){return m&&m.from!==undefined;});
+  var outOfServiceRooms=blockMatches.filter(function(m){return m.type==='maintenance';}).length;
+  var blockedDatesRooms=blockMatches.length-outOfServiceRooms;
   var arrivals=viluRes.filter(function(r){return r.ci===today&&isBlockingStatus(r.st);});
   var departures=viluRes.filter(function(r){return r.co===today&&isBlockingStatus(r.st);});
-  var inHouse=viluRes.filter(function(r){return r.ci<today&&r.co>today&&isBlockingStatus(r.st)&&r.st!=='Checked out';});
+  // In-house (Cloudbeds-equivalent): everyone currently occupying a room,
+  // INCLUDING today's own arrivals -- <= not <, matching the real Cloudbeds
+  // "In-house" count observed live (it was >= Arrivals + Stayovers).
+  var inHouse=viluRes.filter(function(r){return r.ci<=today&&r.co>today&&isBlockingStatus(r.st)&&r.st!=='Checked out';});
+  // Stayovers: the strict subset who were ALREADY there before today and
+  // remain after today -- no check-in/check-out event today at all. This
+  // is what the previous Dashboard pass mistakenly labeled "In house".
+  var stayovers=viluRes.filter(function(r){return r.ci<today&&r.co>today&&isBlockingStatus(r.st)&&r.st!=='Checked out';});
+  // Bookings: reservations actually received/created on this date (the
+  // booking-engine/staff-entry timestamp), not a stay date at all --
+  // matches Cloudbeds' own "new bookings received today" meaning.
+  var bookings=viluRes.filter(function(r){return r.createdAt&&getMaldivesDate(new Date(r.createdAt))===today&&isBlockingStatus(r.st);});
+  // Cancellations: soft-deleted (Cancelled) reservations whose real
+  // cancellation date (deletedDate, a plain Maldives Y-M-D string set at
+  // delete time) equals this date -- never guessed from a display string.
+  var cancellations=(typeof BIN!=='undefined'?BIN:[]).filter(function(r){return r.prop==='vilu'&&r.st==='Cancelled'&&r.deletedDate===today;});
+  var overbookingPairs=computeOverbookings(today);
+  var overbookingCount=overbookingPairs.reduce(function(s,p){return s+p.reservations.length-1;},0);
   var ym=today.slice(0,7);
   var lastDay=new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();
   var monthFrom=ym+'-01', monthTo=ym+'-'+String(lastDay).padStart(2,'0');
   var rev=anRevenue(monthFrom,monthTo);
-  return {today:today,occupiedRooms:occupiedRooms,blockedRooms:blockedRooms,totalRooms:VR.length,arrivals:arrivals,departures:departures,inHouse:inHouse,revenue:rev.total,monthFrom:monthFrom,monthTo:monthTo};
+  return {today:today,occupiedRooms:occupiedRooms,outOfServiceRooms:outOfServiceRooms,blockedDatesRooms:blockedDatesRooms,
+    totalRooms:VR.length,arrivals:arrivals,departures:departures,inHouse:inHouse,stayovers:stayovers,bookings:bookings,
+    cancellations:cancellations,overbookingPairs:overbookingPairs,overbookingCount:overbookingCount,
+    revenue:rev.total,monthFrom:monthFrom,monthTo:monthTo};
+}
+// Dashboard's own selected operational date -- every Activity/occupancy
+// figure recomputes for this, independent of Calendar's own date-nav
+// state. Defaults to today (Maldives); prev/Today/next move it.
+var SELECTED_DATE=tS;
+function dashPrevDay(){ SELECTED_DATE=D2(SELECTED_DATE,-1); drawDash(); }
+function dashNextDay(){ SELECTED_DATE=D2(SELECTED_DATE,1); drawDash(); }
+function dashGoToday(){ SELECTED_DATE=tS; drawDash(); }
+// Re-reads/re-renders already-loaded canonical data -- never a forced
+// Firestore write, and only re-fetches from the network if a live loader
+// exists (loadAllFromSupabase(), same one DOMContentLoaded already calls).
+function dashRefresh(){
+  var btn=document.getElementById('d-refresh-btn');
+  if(btn) btn.classList.add('spin');
+  var done=function(){ if(btn) setTimeout(function(){btn.classList.remove('spin');},400); drawDash(); };
+  if(typeof loadAllFromSupabase==='function') loadAllFromSupabase().then(done).catch(done);
+  else done();
 }
 // Clicking a guest row opens that reservation's own detail view directly --
 // the same showDet() every other entry point (Reservations table, Calendar
 // drawer) already uses, never a bespoke dashboard-only reservation view.
+// Enriched to match Cloudbeds' own row density: guest+source, room+type,
+// stay range + nights/guests count badges, and the same view/edit/invoice
+// action icons available elsewhere.
 function dashGuestRow(r){
-  return '<tr class="clk" onclick="showDet(\''+r.id+'\')">'
-    +'<td><div style="font-weight:600;font-size:var(--font-size-sm)">'+esc(r.fn)+' '+esc(r.ln)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+esc(r.src||'Direct')+'</div></td>'
-    +'<td style="font-size:var(--font-size-sm)">'+rNm(r.rn)+'</td>'
-    +'<td style="font-size:var(--font-size-sm)">'+fd(r.ci)+' → '+fd(r.co)+'</td>'
-    +'<td>'+stBx(r.st)+'</td></tr>';
+  var room=getR?getR(r.rn):null;
+  var nights=nt(r.ci,r.co);
+  var guestCount=(r.ad||0)+(r.ch||0);
+  return '<tr class="clk dash-row" onclick="showDet(\''+r.id+'\')">'
+    +'<td><div class="dash-row-main">'+esc(r.fn)+' '+esc(r.ln)+'</div><div class="dash-row-sub">'+esc(r.id)+(r.ref?' · '+esc(r.ref):'')+'</div></td>'
+    +'<td><div class="dash-row-main">'+rNm(r.rn)+'</div><div class="dash-row-sub">'+esc((room&&room.type)||'')+'</div></td>'
+    +'<td><div class="dash-row-main">'+fd(r.ci)+' → '+fd(r.co)+'</div><div class="dash-row-badges"><span class="dash-badge"><i class="ti ti-moon"></i>'+nights+'</span><span class="dash-badge"><i class="ti ti-users"></i>'+guestCount+'</span></div></td>'
+    +'<td>'+stBx(r.st)+'</td>'
+    +'<td class="dash-row-actions" onclick="event.stopPropagation()">'
+      +'<button class="ab" onclick="showDet(\''+r.id+'\')" title="View"><i class="ti ti-eye"></i></button>'
+      +(canViewOnly()?'':'<button class="ab" onclick="openIM(\''+r.id+'\')" title="Invoice"><i class="ti ti-file-invoice"></i></button>')
+    +'</td></tr>';
+}
+function dashOverbookingRow(pair){
+  var names=pair.reservations.map(function(r){return esc(r.fn)+' '+esc(r.ln);}).join(' vs. ');
+  return '<tr><td colspan="5"><div class="dash-row-main" style="color:#b91c1c">'+rNm(pair.room.n)+': '+names+'</div>'
+    +'<div class="dash-row-sub">'+pair.reservations.map(function(r){return fd(r.ci)+'→'+fd(r.co);}).join(' · ')+'</div></td></tr>';
 }
 var DASH_TAB='arr';
+var DASH_TAB_META={
+  arr:{label:'Arrivals',empty:'No arrivals for this date.',view:'arrivals'},
+  dep:{label:'Departures',empty:'No departures for this date.',view:'departures'},
+  inhouse:{label:'In-house',empty:'No guests currently in-house.',view:'in-house'},
+  stayovers:{label:'Stayovers',empty:'No stay-over guests.',view:'stayovers'},
+  bookings:{label:'Bookings',empty:'No bookings received on this date.',view:'bookings'},
+  cancellations:{label:'Cancelations',empty:'No cancellations on this date.',view:'cancellations'},
+  overbookings:{label:'Overbookings',empty:'No room conflicts.',view:'overbookings'}
+};
+function dashTabRows(d,tab){
+  switch(tab){
+    case 'arr': return d.arrivals;
+    case 'dep': return d.departures;
+    case 'inhouse': return d.inHouse;
+    case 'stayovers': return d.stayovers;
+    case 'bookings': return d.bookings;
+    case 'cancellations': return d.cancellations;
+    case 'overbookings': return d.overbookingPairs;
+    default: return [];
+  }
+}
 function dashSetTab(tab){
   DASH_TAB=tab;
   document.querySelectorAll('.dash-tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
   var d=computeDashData();
-  var rows=tab==='arr'?d.arrivals:tab==='dep'?d.departures:d.inHouse;
-  var emptyMsg=tab==='arr'?'No arrivals today.':tab==='dep'?'No departures today.':'No stay-over guests.';
-  document.getElementById('d-activity-body').innerHTML=rows.length?rows.map(dashGuestRow).join(''):'<tr><td colspan="4" class="dash-empty">'+emptyMsg+'</td></tr>';
-  var vaLabel=tab==='arr'?'View all arrivals →':tab==='dep'?'View all departures →':'View all in-house →';
-  var va=document.getElementById('d-viewall'); if(va) va.textContent=vaLabel;
+  var rows=dashTabRows(d,tab);
+  var meta=DASH_TAB_META[tab];
+  var isOverbook=tab==='overbookings';
+  document.getElementById('d-activity-body').innerHTML=rows.length
+    ?rows.map(isOverbook?dashOverbookingRow:dashGuestRow).join('')
+    :'<tr><td colspan="5" class="dash-empty">'+meta.empty+'</td></tr>';
+  var va=document.getElementById('d-viewall');
+  if(va){ va.style.display=isOverbook?'none':''; va.textContent='View all '+meta.label.toLowerCase()+' →'; }
+  dashRenderTotals(isOverbook?[]:rows);
 }
-// Occupancy card is clickable -> Calendar, landing on today specifically
-// (not wherever Calendar was last scrolled), via its own existing
-// calNavToday() -- the same button the "TODAY" pill in Calendar's own
-// header already calls.
+// Footer totals row (Total guests/Adults/Children/Rooms), derived live
+// from whichever tab's rows are currently showing -- never hardcoded.
+function dashRenderTotals(rows){
+  var el=document.getElementById('d-totals');
+  if(!el) return;
+  var adults=0,children=0,rooms=0;
+  var seenRooms={};
+  rows.forEach(function(r){
+    adults+=r.ad||0; children+=r.ch||0;
+    if(!seenRooms[r.rn]){ seenRooms[r.rn]=true; rooms++; }
+  });
+  el.textContent='Total guests: '+(adults+children)+'   Adults: '+adults+'   Children: '+children+'   Rooms: '+rooms;
+}
+// Occupancy card is clickable -> Calendar, landing on the Dashboard's
+// currently selected date (not always literal today, and not wherever
+// Calendar was last scrolled), via Calendar's own real date-jump function.
 function goCalToday(){
   go('cal',document.querySelectorAll('.sl')[1]);
-  setTimeout(function(){ if(typeof calNavToday==='function') calNavToday(); },50);
+  setTimeout(function(){
+    if(SELECTED_DATE===tS && typeof calNavToday==='function') calNavToday();
+    else if(typeof calGoToDate==='function') calGoToDate(SELECTED_DATE);
+  },50);
 }
 function drawOccRing(occupied,total){
   var svg=document.getElementById('d-ring');
@@ -3722,21 +3872,33 @@ function drawOccRing(occupied,total){
   svg.style.strokeDashoffset=C*(1-frac);
 }
 function drawDash(){
+  if(!SELECTED_DATE) SELECTED_DATE=tS;
   var d=computeDashData();
-  var mParts=new Intl.DateTimeFormat('en-US',{timeZone:'Indian/Maldives',weekday:'long',day:'numeric',month:'long'}).formatToParts(new Date());
+  var isToday=SELECTED_DATE===tS;
+  // Header date label: "Today" when the selection actually is today
+  // (matching Cloudbeds' own "Today" pill), else the selected date itself
+  // -- always via Intl + Indian/Maldives, never new Date().getDay() etc.
+  var selDateObj=new Date(SELECTED_DATE+'T12:00:00Z');
+  var mParts=new Intl.DateTimeFormat('en-US',{timeZone:'Indian/Maldives',weekday:'long',day:'numeric',month:'long'}).formatToParts(selDateObj);
   var get=function(t){var p=mParts.find(function(x){return x.type===t;});return p?p.value:'';};
   document.getElementById('d-dow').textContent=get('weekday');
   document.getElementById('d-daynum').textContent=get('day');
   document.getElementById('d-month').textContent=get('month');
+  var dateBtn=document.getElementById('d-date-btn'); if(dateBtn) dateBtn.textContent=isToday?'Today':formatMaldivesDate(SELECTED_DATE);
   var occPct=d.totalRooms?Math.round(d.occupiedRooms/d.totalRooms*100):0;
   document.getElementById('d-occ-pct').textContent=occPct+'%';
   drawOccRing(d.occupiedRooms,d.totalRooms);
   document.getElementById('d-occ-avail').textContent=Math.max(0,d.totalRooms-d.occupiedRooms);
   document.getElementById('d-occ-booked').textContent=d.occupiedRooms;
-  document.getElementById('d-occ-blocked').textContent=d.blockedRooms;
+  document.getElementById('d-occ-oos').textContent=d.outOfServiceRooms;
+  document.getElementById('d-occ-blocked').textContent=d.blockedDatesRooms;
   document.getElementById('d-tab-arr-n').textContent=d.arrivals.length;
   document.getElementById('d-tab-dep-n').textContent=d.departures.length;
   document.getElementById('d-tab-inhouse-n').textContent=d.inHouse.length;
+  document.getElementById('d-tab-stayovers-n').textContent=d.stayovers.length;
+  document.getElementById('d-tab-bookings-n').textContent=d.bookings.length;
+  document.getElementById('d-tab-cancellations-n').textContent=d.cancellations.length;
+  document.getElementById('d-tab-overbookings-n').textContent=d.overbookingCount;
   dashSetTab(DASH_TAB);
   document.getElementById('d-rev-v').textContent='$'+Math.round(d.revenue).toLocaleString();
   document.getElementById('d-rt').innerHTML=VR.map(r=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:var(--font-size-sm)"><span style="color:#6b7280">${r.nm}</span><span style="font-weight:600">$${r.rate}/night</span></div>`).join('');
@@ -4723,8 +4885,33 @@ function drawRes(){
   const sf=document.getElementById('rst')?.value||'';
   const rf=document.getElementById('rsrc')?.value||'';
   const pf=document.getElementById('rprop')?.value||'';
-  const scopeOk=r=>!RES_SCOPE||(RES_SCOPE==='arr'?r.ci===tS&&isBlockingStatus(r.st):RES_SCOPE==='dep'?r.co===tS&&isBlockingStatus(r.st):RES_SCOPE==='inhouse'?(r.ci<tS&&r.co>tS&&isBlockingStatus(r.st)&&r.st!=='Checked out'):true);
-  const list=RES.filter(r=>{
+  // Scope date always follows the Dashboard's own selected operational
+  // date (defaults to today) -- so a "View all X" click always lands on
+  // the exact same set of reservations the clicked Dashboard tab counted,
+  // even after the Dashboard's date-nav has moved off today.
+  const scopeDate=(typeof SELECTED_DATE!=='undefined'&&SELECTED_DATE)||tS;
+  var overbookIds=null;
+  if(RES_SCOPE==='overbookings'&&typeof computeOverbookings==='function'){
+    overbookIds={};
+    computeOverbookings(scopeDate).forEach(function(p){p.reservations.forEach(function(r){overbookIds[r.id]=true;});});
+  }
+  const scopeOk=r=>{
+    switch(RES_SCOPE){
+      case '': return true;
+      case 'arr': return r.ci===scopeDate&&isBlockingStatus(r.st);
+      case 'dep': return r.co===scopeDate&&isBlockingStatus(r.st);
+      case 'inhouse': return r.ci<=scopeDate&&r.co>scopeDate&&isBlockingStatus(r.st)&&r.st!=='Checked out';
+      case 'stayovers': return r.ci<scopeDate&&r.co>scopeDate&&isBlockingStatus(r.st)&&r.st!=='Checked out';
+      case 'bookings': return r.createdAt&&getMaldivesDate(new Date(r.createdAt))===scopeDate&&isBlockingStatus(r.st);
+      case 'cancellations': return r.st==='Cancelled'&&r.deletedDate===scopeDate;
+      case 'overbookings': return !!(overbookIds&&overbookIds[r.id]);
+      default: return true;
+    }
+  };
+  // Cancellations live in BIN (soft-deleted), never in the live RES array --
+  // only that one scope reads from BIN, every other scope is unaffected.
+  const sourceList=RES_SCOPE==='cancellations'?(typeof BIN!=='undefined'?BIN:[]):RES;
+  const list=sourceList.filter(r=>{
     const txt=(r.fn+' '+r.ln+' '+rNm(r.rn)+' '+r.id+' '+(r.ref||'')).toLowerCase();
     return scopeOk(r)&&txt.includes(q)&&(!sf||r.st===sf)&&(!rf||r.src===rf)&&(!pf||(pf==='vilu'?r.prop==='vilu':r.prop!=='vilu'));
   });
@@ -7182,7 +7369,7 @@ async function softDelete(res){
   // Move reservation to bin
   const idx = RES.findIndex(r=>r.id===res.id);
   if(idx===-1) return;
-  const deleted = {...RES[idx], deletedAt:formatMaldivesDateTime(new Date()), deletedBy:currentUser?.name||'Admin'};
+  const deleted = {...RES[idx], deletedAt:formatMaldivesDateTime(new Date()), deletedDate:getMaldivesDate(), deletedBy:currentUser?.name||'Admin'};
   BIN.unshift(deleted);
   RES.splice(idx,1);
   aLog('warn','Reservation '+res.id+' ('+esc(res.fn)+' '+esc(res.ln)+') moved to bin by '+esc(currentUser?.name||'Admin'));
@@ -12080,6 +12267,11 @@ function calReanchor(){calTL.anchorKey=null;drawCal();calResetScroll();setTimeou
 function calVisibleStart(){var sa=document.getElementById('cb-scroll-area');return (sa&&calTL.start)?calAddDays(calTL.start,Math.round(sa.scrollLeft/CAL_COL_W)):new Date(calD);}
 window.calNav=function(d){calD=calVisibleStart();calD.setHours(12,0,0,0);calD.setDate(calD.getDate()+d*7);calReanchor();};
 window.calNavToday=function(){calD=new Date();calD.setHours(12,0,0,0);calReanchor();};
+// Jumps to an arbitrary Y-M-D (Maldives date string), same anchor/reanchor
+// pattern as calNavToday() above -- added so Dashboard's occupancy card
+// can land Calendar on whatever date is currently selected there, not
+// only literal today. Calendar's own TODAY button/behavior is untouched.
+window.calGoToDate=function(dateStr){calD=new Date(dateStr+'T12:00');calReanchor();};
 window.getRoomName=function(rn){if(!rn)return rn;var vr=(typeof VR!=='undefined'?VR:[]).find(function(r){return r.n===rn;});if(vr)return vr.nm;if(typeof getHR==='function'){var hr=getHR().find(function(r){return r.n===rn;});if(hr){var h=(typeof PH!=='undefined'?PH:[]).find(function(x){return x.id===hr.prop;});return(h?h.nm+' - ':'')+hr.nm;}}return rn;};
 window.saveTransfer=function(id){var boat=(document.getElementById('tr-boat-'+id)||{}).value||'';var time=(document.getElementById('tr-time-'+id)||{}).value||'';var rs=document.getElementById('tr-route-'+id);var route=rs?rs.value:'';if(route==='Other')route=(document.getElementById('tr-cust-'+id)||{}).value||'';var d={};try{d=JSON.parse(localStorage.getItem('vilu_transfers')||'{}');}catch(e){}d[id]={boat:boat,time:time,route:route};localStorage.setItem('vilu_transfers',JSON.stringify(d));if(typeof toast==='function')toast('Transfer saved!');if(typeof drawOps==='function')drawOps();};
 window.rebuildPendingTrips=function(){

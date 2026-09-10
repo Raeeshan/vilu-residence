@@ -86,7 +86,7 @@ vm.runInContext([
   isOccSrc, isBlockingStatusSrc,
 ].join('\n'), occSandbox);
 
-section('Case B — arrival/departure/in-house classification (real isOcc()/isBlockingStatus(), synthetic data)');
+section('Case B — arrival/departure/in-house/stayovers classification (real isOcc()/isBlockingStatus(), synthetic data)');
 {
   const TODAY = '2026-09-10';
   function classify(RES, BLK) {
@@ -99,17 +99,25 @@ section('Case B — arrival/departure/in-house classification (real isOcc()/isBl
       blockedRooms: occMatches.filter(m => m && m.from !== undefined).length,
       arrivals: RES.filter(r => r.ci === TODAY && occSandbox.isBlockingStatus(r.st)),
       departures: RES.filter(r => r.co === TODAY && occSandbox.isBlockingStatus(r.st)),
-      inHouse: RES.filter(r => r.ci < TODAY && r.co > TODAY && occSandbox.isBlockingStatus(r.st) && r.st !== 'Checked out'),
+      // Broadened (2026-09-10 parity correction) -- includes today's own
+      // arrivals, matching the real Cloudbeds "In-house" count observed
+      // live (>= Arrivals + Stayovers, not a disjoint bucket).
+      inHouse: RES.filter(r => r.ci <= TODAY && r.co > TODAY && occSandbox.isBlockingStatus(r.st) && r.st !== 'Checked out'),
+      // Narrow subset -- already there before today, no check-in/out event
+      // today at all. What the previous Dashboard pass mislabeled "In house".
+      stayovers: RES.filter(r => r.ci < TODAY && r.co > TODAY && occSandbox.isBlockingStatus(r.st) && r.st !== 'Checked out'),
     };
   }
-  test('a guest checking in today is an arrival, not in-house', () => {
+  test('a guest checking in today is an arrival AND counts as in-house (broadened definition), but is not a stayover', () => {
     const d = classify([{ id:'a', rn:'VR01', ci:'2026-09-10', co:'2026-09-14', st:'Confirmed' }], []);
     assert.equal(d.arrivals.length, 1);
-    assert.equal(d.inHouse.length, 0);
+    assert.equal(d.inHouse.length, 1);
+    assert.equal(d.stayovers.length, 0);
   });
-  test('a guest who checked in days ago and checks out later is in-house, never an arrival', () => {
+  test('a guest who checked in days ago and checks out later is in-house AND a stayover, never an arrival', () => {
     const d = classify([{ id:'b', rn:'VR02', ci:'2026-09-05', co:'2026-09-13', st:'Checked in' }], []);
     assert.equal(d.inHouse.length, 1);
+    assert.equal(d.stayovers.length, 1);
     assert.equal(d.arrivals.length, 0);
     assert.equal(d.departures.length, 0);
   });
@@ -121,64 +129,213 @@ section('Case B — arrival/departure/in-house classification (real isOcc()/isBl
   });
   test('a future-only reservation counts nowhere today', () => {
     const d = classify([{ id:'e', rn:'VR04', ci:'2026-09-15', co:'2026-09-18', st:'Confirmed' }], []);
-    assert.equal(d.arrivals.length + d.departures.length + d.inHouse.length + d.occupiedRooms, 0);
+    assert.equal(d.arrivals.length + d.departures.length + d.inHouse.length + d.stayovers.length + d.occupiedRooms, 0);
   });
   test('a cancelled reservation for today is excluded from every classification', () => {
     const d = classify([{ id:'f', rn:'VR05', ci:'2026-09-10', co:'2026-09-12', st:'Cancelled' }], []);
     assert.equal(d.arrivals.length + d.occupiedRooms, 0);
   });
-  test('a same-day arrival+departure appears in both Arrivals and Departures, occupies nothing overnight', () => {
+  test('a same-day arrival+departure appears in both Arrivals and Departures, occupies nothing overnight, and is neither in-house nor a stayover', () => {
     const d = classify([{ id:'g', rn:'VR06', ci:'2026-09-10', co:'2026-09-10', st:'Confirmed' }], []);
     assert.equal(d.arrivals.length, 1);
     assert.equal(d.departures.length, 1);
     assert.equal(d.occupiedRooms, 0);
+    assert.equal(d.inHouse.length, 0);
   });
-  test('a room block occupies the room without appearing as an arrival/departure/in-house guest', () => {
+  test('a room block occupies the room without appearing as an arrival/departure/in-house/stayover guest', () => {
     const d = classify([], [{ id:'BLK1', rn:'VR04', from:'2026-09-10', to:'2026-09-11', type:'maintenance' }]);
     assert.equal(d.occupiedRooms, 1);
     assert.equal(d.blockedRooms, 1);
-    assert.equal(d.arrivals.length + d.departures.length + d.inHouse.length, 0);
+    assert.equal(d.arrivals.length + d.departures.length + d.inHouse.length + d.stayovers.length, 0);
   });
-  test('a multi-room booking (two reservations, two rooms, both spanning today) counts each room once, no double-count', () => {
+  test('a multi-room booking (two reservations, two rooms, both spanning today) counts each room once in in-house and stayovers, no double-count', () => {
     const d = classify([
       { id:'h1', rn:'VR01', ci:'2026-09-08', co:'2026-09-12', st:'Checked in' },
       { id:'h2', rn:'VR02', ci:'2026-09-08', co:'2026-09-12', st:'Checked in' },
     ], []);
     assert.equal(d.occupiedRooms, 2);
     assert.equal(d.inHouse.length, 2);
+    assert.equal(d.stayovers.length, 2);
   });
   test('a partner-property reservation is invisible to this Vilu-room classification (RES here is pre-filtered to prop==="vilu" by computeDashData, same as this test only passing Vilu rows)', () => {
     // computeDashData() filters RES to r.prop==='vilu' before ever calling
     // this classification -- proven structurally in Case D below.
     assert.ok(true);
   });
+  test("a maintenance block is 'Out of service'; an owner/hold block is 'Blocked dates' -- the real block type field, never invented", () => {
+    // Mirrors computeDashData()'s own split exactly: blockMatches (m.from
+    // !== undefined) -> outOfServiceRooms (type==='maintenance') vs
+    // blockedDatesRooms (everything else, i.e. 'owner'/'hold').
+    function splitBlocks(rooms, BLK) {
+      occSandbox.RES = []; occSandbox.BLK = BLK;
+      const occMatches = rooms.map(rn => occSandbox.isOcc(rn, TODAY, '2026-09-11'));
+      const blockMatches = occMatches.filter(m => m && m.from !== undefined);
+      const outOfService = blockMatches.filter(m => m.type === 'maintenance').length;
+      return { outOfService, blockedDates: blockMatches.length - outOfService };
+    }
+    const maint = splitBlocks(['VR01'], [{ id:'BLK2', rn:'VR01', from:'2026-09-10', to:'2026-09-11', type:'maintenance' }]);
+    assert.equal(maint.outOfService, 1);
+    assert.equal(maint.blockedDates, 0);
+    const owner = splitBlocks(['VR01'], [{ id:'BLK3', rn:'VR01', from:'2026-09-10', to:'2026-09-11', type:'owner' }]);
+    assert.equal(owner.outOfService, 0);
+    assert.equal(owner.blockedDates, 1);
+    const hold = splitBlocks(['VR01'], [{ id:'BLK4', rn:'VR01', from:'2026-09-10', to:'2026-09-11', type:'hold' }]);
+    assert.equal(hold.outOfService, 0);
+    assert.equal(hold.blockedDates, 1);
+  });
+  test('bookings: reservations whose createdAt lands on the target Maldives date are counted, regardless of stay dates', () => {
+    const bookedToday = { id:'i', rn:'VR01', ci:'2026-09-20', co:'2026-09-22', st:'Confirmed', createdAt:'2026-09-10T18:00:00Z' }; // 2026-09-10 23:00 Maldives
+    const bookedYesterday = { id:'j', rn:'VR02', ci:'2026-09-20', co:'2026-09-22', st:'Confirmed', createdAt:'2026-09-09T10:00:00Z' };
+    const list = [bookedToday, bookedYesterday];
+    const bookings = list.filter(r => r.createdAt && dateSandbox.getMaldivesDate(new Date(r.createdAt)) === TODAY && occSandbox.isBlockingStatus(r.st));
+    assert.equal(bookings.length, 1);
+    assert.equal(bookings[0].id, 'i');
+  });
+  test('cancellations: BIN entries (soft-deleted) whose deletedDate lands on the target date are counted, live RES is never searched for them', () => {
+    const BIN = [
+      { id:'k', prop:'vilu', st:'Cancelled', deletedDate:'2026-09-10' },
+      { id:'l', prop:'vilu', st:'Cancelled', deletedDate:'2026-09-09' },
+    ];
+    const cancellations = BIN.filter(r => r.prop==='vilu' && r.st==='Cancelled' && r.deletedDate===TODAY);
+    assert.equal(cancellations.length, 1);
+    assert.equal(cancellations[0].id, 'k');
+  });
+  test('overbookings: two genuinely conflicting reservations on the same physical room produce one pair; no conflict produces zero, never an invented count', () => {
+    const conflicting = [
+      { id:'m1', prop:'vilu', rn:'VR01', ci:'2026-09-09', co:'2026-09-12', st:'Confirmed' },
+      { id:'m2', prop:'vilu', rn:'VR01', ci:'2026-09-10', co:'2026-09-13', st:'Confirmed' },
+    ];
+    const tomorrow = '2026-09-11';
+    const matches = conflicting.filter(r => occSandbox.isBlockingStatus(r.st) && r.ci < tomorrow && r.co > TODAY);
+    assert.equal(matches.length, 2, 'both reservations genuinely overlap VR01 on the target date');
+    const clean = [{ id:'n1', prop:'vilu', rn:'VR02', ci:'2026-09-09', co:'2026-09-10', st:'Confirmed' }]; // departs before target date
+    const cleanMatches = clean.filter(r => occSandbox.isBlockingStatus(r.st) && r.ci < tomorrow && r.co > TODAY);
+    assert.equal(cleanMatches.length, 0, 'no genuine conflict must yield 0, never a fabricated overbooking count');
+  });
 }
 
 section('Case C — Dashboard/Reservations click-through wiring');
 {
-  test('computeDashData() filters to prop==="vilu" before classifying (partner-property leakage impossible)', () => {
-    const src = extractByStart(PMS, /function computeDashData\(\)\s*\{/);
+  test('computeDashData(date) filters to prop==="vilu" before classifying (partner-property leakage impossible), and defaults to SELECTED_DATE/tS when no date is passed', () => {
+    const src = extractByStart(PMS, /function computeDashData\(date\)\s*\{/);
     assert.match(src, /r\.prop===['"]vilu['"]/);
+    assert.match(src, /date\|\|SELECTED_DATE\|\|tS/);
+  });
+  test('computeDashData() splits blocks into outOfServiceRooms (type===maintenance) vs blockedDatesRooms (everything else)', () => {
+    const src = extractByStart(PMS, /function computeDashData\(date\)\s*\{/);
+    assert.match(src, /outOfServiceRooms\s*=\s*blockMatches\.filter\(function\(m\)\{return m\.type===['"]maintenance['"];\}\)\.length/);
+    assert.match(src, /blockedDatesRooms\s*=\s*blockMatches\.length-outOfServiceRooms/);
+  });
+  test('computeDashData() defines all 7 Cloudbeds-equivalent activity buckets: arrivals, departures, inHouse, stayovers, bookings, cancellations, overbookingPairs', () => {
+    const src = extractByStart(PMS, /function computeDashData\(date\)\s*\{/);
+    for (const field of ['arrivals', 'departures', 'inHouse', 'stayovers', 'bookings', 'cancellations', 'overbookingPairs', 'overbookingCount']) {
+      assert.match(src, new RegExp('\\b' + field + '\\s*[:=]'), field + ' missing from computeDashData()');
+    }
+  });
+  test('bookings are keyed off createdAt via getMaldivesDate(), never a stay date', () => {
+    const src = extractByStart(PMS, /function computeDashData\(date\)\s*\{/);
+    assert.match(src, /r\.createdAt&&getMaldivesDate\(new Date\(r\.createdAt\)\)===today/);
+  });
+  test('cancellations read from BIN (soft-deleted) keyed by deletedDate, never from live RES', () => {
+    const src = extractByStart(PMS, /function computeDashData\(date\)\s*\{/);
+    assert.match(src, /BIN[\s\S]{0,40}\.filter\(function\(r\)\{return r\.prop===['"]vilu['"]&&r\.st===['"]Cancelled['"]&&r\.deletedDate===today/);
+  });
+  test('softDelete() stamps deletedDate via getMaldivesDate() so Cancellations can be filtered by real date, not a guessed one', () => {
+    const src = extractByStart(PMS, /function softDelete\(res\)\s*\{/);
+    assert.match(src, /deletedDate:\s*getMaldivesDate\(\)/);
+  });
+  test('computeOverbookings() only counts genuine same-room, same-date conflicts (2+ blocking reservations) -- never a fabricated count', () => {
+    const src = extractByStart(PMS, /function computeOverbookings\(d0\)\s*\{/);
+    assert.match(src, /matches\.length>1/);
+  });
+  test('DASH_TAB_META defines exactly the 7 Cloudbeds-equivalent tabs', () => {
+    const src = extractByStart(PMS, /var DASH_TAB_META\s*=\s*\{/);
+    for (const key of ['arr', 'dep', 'inhouse', 'stayovers', 'bookings', 'cancellations', 'overbookings']) {
+      assert.match(src, new RegExp(key + ':\\{'), 'DASH_TAB_META missing tab ' + key);
+    }
+  });
+  test('dashRenderTotals() derives Total guests/Adults/Children/Rooms live from the passed-in rows, never a hardcoded number', () => {
+    const src = extractByStart(PMS, /function dashRenderTotals\(rows\)\s*\{/);
+    assert.match(src, /rows\.forEach/);
+    assert.doesNotMatch(src, /textContent\s*=\s*['"]Total guests: \d/, 'totals must never be a static string');
+  });
+  test('SELECTED_DATE nav (dashPrevDay/dashNextDay/dashGoToday) moves via D2() (Maldives date arithmetic) and redraws, never browser-local Date math', () => {
+    assert.match(PMS, /function dashPrevDay\(\)\{\s*SELECTED_DATE=D2\(SELECTED_DATE,-1\);\s*drawDash\(\);\s*\}/);
+    assert.match(PMS, /function dashNextDay\(\)\{\s*SELECTED_DATE=D2\(SELECTED_DATE,1\);\s*drawDash\(\);\s*\}/);
+    assert.match(PMS, /function dashGoToday\(\)\{\s*SELECTED_DATE=tS;\s*drawDash\(\);\s*\}/);
+  });
+  test('dashRefresh() re-reads canonical data via the existing loader (loadAllFromSupabase) and redraws -- never forces a Firestore write', () => {
+    const src = extractByStart(PMS, /function dashRefresh\(\)\s*\{/);
+    assert.match(src, /loadAllFromSupabase/);
+    assert.doesNotMatch(src, /firestore|collection\(|\.doc\(/i, 'dashRefresh() must never write to Firestore');
+  });
+  test('dashSetTab() swaps the Activity table for all 7 tabs and calls dashRenderTotals() with the currently visible rows', () => {
+    const src = extractByStart(PMS, /function dashSetTab\(tab\)\s*\{/);
+    assert.match(src, /dashTabRows\(d,\s*tab\)/);
+    assert.match(src, /dashRenderTotals\(/);
   });
   test('dashGuestRow() routes a click straight to showDet() -- the same reservation-detail entry point every other list uses', () => {
     const src = extractByStart(PMS, /function dashGuestRow\(r\)\s*\{/);
     assert.match(src, /onclick="showDet\(/);
   });
-  test('goCalToday() navigates to Calendar and calls calNavToday() -- lands on today, not wherever Calendar was last scrolled', () => {
+  test('dashOverbookingRow() never fabricates a count -- renders the actual conflicting reservations, spans all 5 Activity columns', () => {
+    const src = extractByStart(PMS, /function dashOverbookingRow\(pair\)\s*\{/);
+    assert.match(src, /colspan="5"/);
+    assert.match(src, /pair\.reservations/);
+  });
+  test('goCalToday() navigates to Calendar and lands on the Dashboard\'s SELECTED_DATE (today via calNavToday, otherwise via calGoToDate)', () => {
     const src = extractByStart(PMS, /function goCalToday\(\)\s*\{/);
     assert.match(src, /go\('cal'/);
     assert.match(src, /calNavToday\(\)/);
+    assert.match(src, /calGoToDate\(SELECTED_DATE\)/);
   });
-  test('goResScope()/setResScope() exist and drawRes() filters by the same today/isBlockingStatus check as computeDashData()', () => {
+  test('goResScope()/setResScope() exist and drawRes() scopes by the Dashboard\'s own SELECTED_DATE (never a fixed "today"), covering all 7 tab dimensions', () => {
     assert.match(PMS, /function goResScope\(scope\)\s*\{/);
     assert.match(PMS, /function setResScope\(scope\)\s*\{/);
     const src = extractByStart(PMS, /function drawRes\(\)\s*\{/);
     assert.match(src, /RES_SCOPE/);
-    assert.match(src, /isBlockingStatus\(r\.st\)/);
+    assert.match(src, /scopeDate\s*=\s*\(typeof SELECTED_DATE/);
+    for (const scope of ["'arr'", "'dep'", "'inhouse'", "'stayovers'", "'bookings'", "'cancellations'", "'overbookings'"]) {
+      assert.match(src, new RegExp('case ' + scope + ':'), 'drawRes() scope switch missing ' + scope);
+    }
+    assert.match(src, /RES_SCOPE===['"]cancellations['"][\s\S]{0,60}BIN/, "the cancellations scope must read from BIN, not RES");
   });
   test('the revenue card navigates to Guest Folios, the occupancy card to Calendar -- no dead-looking dashboard cards', () => {
     assert.match(PMS, /dash-revenue-card"[^>]*onclick="go\('folios'/);
     assert.match(PMS, /dash-occ-card"[^>]*onclick="goCalToday\(\)"/);
+  });
+  test('the Dashboard header exposes refresh + previous/Today/next date controls, all wired to the SELECTED_DATE nav functions', () => {
+    assert.match(PMS, /id="d-refresh-btn"[^>]*onclick="dashRefresh\(\)"/);
+    assert.match(PMS, /onclick="dashPrevDay\(\)"/);
+    assert.match(PMS, /id="d-date-btn"[^>]*onclick="dashGoToday\(\)"/);
+    assert.match(PMS, /onclick="dashNextDay\(\)"/);
+  });
+  test('the occupancy card renders all 4 Cloudbeds-equivalent stats: Available, Booked, Out of service, Blocked dates', () => {
+    assert.match(PMS, /id="d-occ-avail"/);
+    assert.match(PMS, /id="d-occ-booked"/);
+    assert.match(PMS, /id="d-occ-oos"/);
+    assert.match(PMS, /id="d-occ-blocked"/);
+  });
+  test('the Activity card renders all 7 Cloudbeds-equivalent tab buttons with matching count spans', () => {
+    for (const tab of ['arr', 'dep', 'inhouse', 'stayovers', 'bookings', 'cancellations', 'overbookings']) {
+      assert.match(PMS, new RegExp('data-tab="' + tab + '"[^>]*onclick="dashSetTab\\(\'' + tab + '\'\\)"'), 'tab button missing for ' + tab);
+      assert.match(PMS, new RegExp('id="d-tab-' + tab + '-n"'), 'count span missing for ' + tab);
+    }
+  });
+  test('the Activity table has an Actions column and a footer totals row (#d-totals), never hardcoded', () => {
+    assert.match(PMS, /<th>Actions<\/th>/);
+    assert.match(PMS, /id="d-totals"/);
+  });
+  test('drawDash() reads/writes the selected-date header label via Intl + Indian/Maldives against SELECTED_DATE, never local Date field getters', () => {
+    const src = extractByStart(PMS, /function drawDash\(\)\s*\{/);
+    assert.match(src, /timeZone:\s*'Indian\/Maldives'/);
+    assert.match(src, /SELECTED_DATE/);
+    const codeOnly = src.split('\n').filter(l => !/^\s*\/\//.test(l)).join('\n');
+    assert.doesNotMatch(codeOnly, /\.getDay\(\)|\.getFullYear\(\)/);
+  });
+  test('drawDash() still calls drawForecast() at the end -- the Forecast module is preserved, not regressed by this pass', () => {
+    const src = extractByStart(PMS, /function drawDash\(\)\s*\{/);
+    assert.match(src, /drawForecast\(\);/);
   });
 }
 
