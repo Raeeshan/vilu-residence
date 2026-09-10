@@ -466,5 +466,38 @@ section('Case I — one Create Invoice / Print / Documents workflow (Part C1, C1
   });
 }
 
+section('Case J — Documents is reachable from the ACTUAL Calendar-click reservation view (owner-reported visibility gap, 2026-09-10)');
+{
+  test('Calendar bar clicks, the Dashboard guest row, and the Reservations table row all open showDet()/_showDetLegacy() (m-det) -- confirms which modal is really the "Calendar -> click reservation" surface', () => {
+    assert.match(PMS, /bar\.addEventListener\('click',function\(e\)\{e\.preventDefault\(\);e\.stopPropagation\(\);showDet\(res\.id\);\}\)/);
+    const viewButtons = (PMS.match(/onclick="showDet\(/g) || []).length;
+    assert.ok(viewButtons >= 2, 'expected showDet() wired from at least the Dashboard row and Reservations table row, found ' + viewButtons);
+  });
+  test('_showDetLegacy() has its own always-visible top-level "Documents" action button -- not buried only under the Folio section\'s Print/Documents icon several scrolls down', () => {
+    const src = extractByStart(PMS, /function _showDetLegacy\(id\)\s*\{/);
+    const actionsIdx = src.indexOf("const da=document.getElementById('det-act')");
+    const folioIdx = src.indexOf('Folio section —'); // the actual section-start comment (em-dash), not this fix's own explanatory prose mentioning "the Folio section"
+    const docsButtonIdx = src.indexOf('ti-files');
+    assert.ok(docsButtonIdx !== -1, 'Documents button not found in _showDetLegacy()');
+    assert.ok(docsButtonIdx > actionsIdx && docsButtonIdx < folioIdx, 'Documents button must be in the top action row, before the Folio section');
+  });
+  test('the Documents button opens the SAME Document Vault Documents tab (openDrawer + rdTab(3,...)) rather than rebuilding a second Documents UI inside this modal', () => {
+    const src = extractByStart(PMS, /function _showDetLegacy\(id\)\s*\{/);
+    const docsButtonIdx = src.indexOf('ti-files');
+    const btnSrc = src.slice(docsButtonIdx, docsButtonIdx + 300);
+    assert.match(btnSrc, /openDrawer\(id\)/);
+    assert.match(btnSrc, /rdTab\(3,/);
+  });
+  test('the Documents button is reachable by every role that reaches the action row at all (Agency/canViewOnly() already returns earlier) -- not accidentally hidden behind an extra role check', () => {
+    const src = extractByStart(PMS, /function _showDetLegacy\(id\)\s*\{/);
+    const invIdx = src.indexOf('ti-file-invoice');
+    const docsIdx = src.indexOf('ti-files');
+    // Both sit inside the same `if(!canViewOnly())` block with nothing
+    // stricter in between -- same visibility as the existing Invoice button.
+    const between = src.slice(invIdx, docsIdx);
+    assert.doesNotMatch(between, /if\(/);
+  });
+}
+
 console.log(`\n${passed}/${passed + failed} document-vault-and-invoice-center assertions passed`);
 if (failed) { console.log('\nFAILED'); process.exit(1); } else { console.log('\nALL TESTS PASSED'); }

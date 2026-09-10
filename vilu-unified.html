@@ -5340,6 +5340,22 @@ function _showDetLegacy(id){
     });
   });
   if(!canViewOnly()){mkBtn('<i class="ti ti-file-invoice"></i> Invoice','',()=>{openIM(id);document.getElementById('m-det').classList.remove('on');});}
+  // Documents entry point (owner feedback, 2026-09-10): this modal is what
+  // Calendar's own bar-click actually opens (showDet -> _showDetLegacy),
+  // not the tabbed res-drawer the Document Vault's "Documents" tab lives
+  // in -- so a button belongs right here in the always-visible top action
+  // row, not buried under the Folio section's small printer-icon menu
+  // several scrolls down. Reuses the existing Documents tab wholesale
+  // (openDrawer + rdTab(3,...)) rather than rebuilding it a second time in
+  // this modal. Visible to every role that reaches this action row at all
+  // (Agency/canViewOnly() already returns before this point) -- the actual
+  // per-type/per-role filtering happens inside the Documents tab itself
+  // (mergedDocEntries()/canUploadDocuments()), unchanged by this fix.
+  mkBtn('<i class="ti ti-files"></i> Documents','',()=>{
+    document.getElementById('m-det').classList.remove('on');
+    openDrawer(id);
+    rdTab(3, document.querySelectorAll('.rd-tab')[3]);
+  });
 
   // Folio section — connected to Guest Folios (same FOLIOS/canonical folio
   // data, same renderFolioChargesById()/buildAddChargeFormHTML() shared
