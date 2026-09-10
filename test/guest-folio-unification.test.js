@@ -95,7 +95,7 @@ section('Case B — Firestore backing (folios/{resId}, invoices/{invId}) — the
   });
   test('syncInvoiceToFirestore()/loadInvoicesFromFirestore() give INV real persistence, and IC (the invoice counter) is re-derived from the max existing invoice num on load -- never resets to 1000 and collides after a refresh', () => {
     const syncSrc = extractByStart(PMS, /async function syncInvoiceToFirestore\(v\)\s*\{/);
-    assert.match(syncSrc, /fsDb\.collection\('invoices'\)\.doc\(v\.id\)\.set\(v\)/);
+    assert.match(syncSrc, /fsDb\.collection\('invoices'\)\.doc\(v\.id\)\.set\(/);
     const loadSrc = extractByStart(PMS, /async function loadInvoicesFromFirestore\(\)\s*\{/);
     assert.match(loadSrc, /fsDb\.collection\('invoices'\)\.get\(\)/);
     assert.match(loadSrc, /IC\s*=\s*loaded\.reduce/);
@@ -108,6 +108,20 @@ section('Case B — Firestore backing (folios/{resId}, invoices/{invId}) — the
   test('firestore.rules defines folios/{resId} and invoices/{invId} with the same admin/staff-only pattern as reservations -- never public, never agency-readable', () => {
     assert.match(RULES, /match \/folios\/\{resId\}\s*\{\s*allow read: if isAdmin\(\) \|\| isStaff\(\);\s*allow write: if isAdmin\(\) \|\| isStaff\(\);\s*\}/);
     assert.match(RULES, /match \/invoices\/\{invId\}\s*\{\s*allow read: if isAdmin\(\) \|\| isStaff\(\);\s*allow write: if isAdmin\(\) \|\| isStaff\(\);\s*\}/);
+  });
+  test('live-QA bug (2026-09-10): syncFolioToFirestore()/syncInvoiceToFirestore() strip undefined field values before writing -- Firestore\'s SDK rejects a document containing one (caught live: genInv()\'s ref:r.ref is undefined for any reservation with no booking-reference code, which silently failed the Firestore sync for every such invoice until this fix)', () => {
+    const folioSrc = extractByStart(PMS, /async function syncFolioToFirestore\(resId\)\s*\{/);
+    assert.match(folioSrc, /stripUndefined\(/);
+    const invSrc = extractByStart(PMS, /async function syncInvoiceToFirestore\(v\)\s*\{/);
+    assert.match(invSrc, /stripUndefined\(v\)/);
+    // Behavioral: the actual sanitizer really does drop an undefined field
+    // rather than, say, turning it into the string "undefined".
+    const stripSrc = extractByStart(PMS, /function stripUndefined\(obj\)\s*\{/);
+    const box = {};
+    vm.createContext(box);
+    vm.runInContext(stripSrc, box);
+    const cleaned = box.stripUndefined({ id: 'X', ref: undefined, total: 50 });
+    assert.deepEqual(Object.keys(cleaned).sort(), ['id', 'total']);
   });
 }
 

@@ -8020,9 +8020,17 @@ var activeFolioResId=null;
 // Firestore folios/{resId} is now the durable, cross-device source of
 // truth, one doc per reservation (never one giant blob), matching the
 // room_prices/{roomId} pattern already established elsewhere in this file.
+// JSON.parse(JSON.stringify(...)) strips any `undefined` field value before
+// the write -- Firestore's JS SDK rejects a document containing one
+// (confirmed live, 2026-09-10: genInv()'s invoice object carries `ref:
+// r.ref`, undefined for any reservation with no booking-reference code,
+// which silently failed every such invoice's Firestore sync until this
+// fix). Cheap, harmless safety net for both writers, not just the one
+// field that happened to trigger it first.
+function stripUndefined(obj){ return JSON.parse(JSON.stringify(obj)); }
 async function syncFolioToFirestore(resId){
   try{
-    await fsDb.collection('folios').doc(resId).set({ charges: (FOLIOS[resId]||{charges:[]}).charges||[] });
+    await fsDb.collection('folios').doc(resId).set(stripUndefined({ charges: (FOLIOS[resId]||{charges:[]}).charges||[] }));
   }catch(e){ console.error('syncFolioToFirestore failed for', resId, e); }
 }
 async function loadFoliosFromFirestore(){
@@ -8049,7 +8057,7 @@ async function loadFoliosFromFirestore(){
 // counter) reset to 1000 every session, risking duplicate invoice numbers.
 // invoices/{invId} is now durable and shared, one doc per invoice.
 async function syncInvoiceToFirestore(v){
-  try{ await fsDb.collection('invoices').doc(v.id).set(v); }
+  try{ await fsDb.collection('invoices').doc(v.id).set(stripUndefined(v)); }
   catch(e){ console.error('syncInvoiceToFirestore failed for', v.id, e); }
 }
 async function loadInvoicesFromFirestore(){
