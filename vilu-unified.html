@@ -5237,13 +5237,18 @@ function _showDetLegacy(id){
     sumEl.id='det-folio-summary';
     sumEl.innerHTML=renderFolioSummaryHTML(sum);
     sec.appendChild(sumEl);
+    // instanceId ('det-'+id) scopes every generated element id so Calendar's
+    // drawer never collides with Guest Folios' own (bare-id) elements for
+    // the SAME reservation -- see buildAddChargeFormHTML()'s own comment on
+    // why the two must never share an id.
+    var detInstanceId='det-'+id;
     var chargesList=document.createElement('div');
-    chargesList.id='fcharges-'+id;
+    chargesList.id='fcharges-'+detInstanceId;
     chargesList.style.cssText='margin-top:8px';
     sec.appendChild(chargesList);
     var form=document.createElement('div');
     form.style.cssText='background:#f8fafc;border:1.5px dashed #00b4d8;border-radius:8px;padding:12px;margin-top:10px';
-    form.innerHTML=buildAddChargeFormHTML(id);
+    form.innerHTML=buildAddChargeFormHTML(id,detInstanceId);
     sec.appendChild(form);
     var btnRow=document.createElement('div');
     btnRow.style.cssText='display:flex;gap:8px;margin-top:10px';
@@ -5252,7 +5257,7 @@ function _showDetLegacy(id){
       +'<button data-rid="'+id+'" onclick="openFullFolio(this.dataset.rid)" style="background:#fff;color:#00b4d8;border:1.5px solid #00b4d8;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:var(--font-size-sm);font-weight:700;font-family:inherit;white-space:nowrap">Open full folio</button>';
     sec.appendChild(btnRow);
     pb.appendChild(sec);
-    renderFolioChargesById(id);
+    renderFolioChargesById(id,detInstanceId);
   },120);
   document.getElementById('m-det').classList.add('on');
 }
@@ -6272,7 +6277,13 @@ function genInv(){
       var ch=folio.charges.find(function(c){return c.id===e.chargeId;});
       if(ch){ ch.invoiceId=v.id; touched=true; }
     });
-    if(touched){ saveFolios(); syncFolioToFirestore(r.id); renderFolioChargesById(r.id); updateFolioHeaderTotal(r.id); }
+    if(touched){
+      saveFolios(); syncFolioToFirestore(r.id); renderFolioChargesById(r.id); updateFolioHeaderTotal(r.id);
+      // Also refresh Calendar's own (separately-scoped) charges list if its
+      // drawer happens to be open for this exact reservation right now --
+      // same instanceId scheme buildAddChargeFormHTML() uses.
+      if(document.getElementById('det-folio-section')?.dataset.folioRid===r.id) renderFolioChargesById(r.id,'det-'+r.id);
+    }
   }
   document.getElementById('m-inv').classList.remove('on');
   aLog('ok','Invoice #'+IC+' — '+esc(r.fn)+' '+esc(r.ln)+' $'+total+' ('+v.pay+')');
@@ -8353,32 +8364,51 @@ function renderFolioSummaryHTML(sum){
 // the "staff shouldn't type master prices" problem this task closes for
 // the catalog path -- it's limited to Admin/Manager (canManageCatalog()),
 // same authority level as catalog management itself.
-function buildAddChargeFormHTML(resId){
+// `instanceId` (Calendar quick-add fix, 2026-09-10): every id this builder
+// generates is scoped by `instanceId`, which defaults to `resId` -- so
+// Guest Folios' own call sites (unchanged, still pass just resId) keep the
+// exact ids they always had. Calendar passes a DISTINCT instanceId
+// ('det-'+resId) because Guest Folios pre-renders a folio card (with these
+// same-shaped ids) for EVERY reservation as soon as that page is first
+// visited in a session -- even while collapsed/hidden, those DOM nodes
+// stay in the document. If Calendar's drawer for the SAME reservation then
+// built elements under the bare resId too, the document would contain two
+// elements sharing one id, and getElementById()/querySelector() always
+// resolve to whichever is FIRST in document order (Guest Folios', since
+// #s-folios precedes #m-det in the markup) -- so every click in Calendar's
+// drawer was silently updating the hidden Guest Folios copy instead of the
+// visible one, looking like the buttons did nothing. Giving Calendar its
+// own instanceId makes the two renders address entirely different DOM
+// nodes, so there's no collision regardless of which page was visited
+// first. Data operations (FOLIOS[resId], Firestore, RES lookups) always
+// still use the real resId -- only DOM element ids use instanceId.
+function buildAddChargeFormHTML(resId,instanceId){
+  instanceId=instanceId||resId;
   var catBtns=CATALOG_CATEGORIES.map(function(cat){
-    return '<button type="button" data-rid="'+resId+'" data-cat="'+cat.key+'" onclick="folioShowCatalogCategory(this.dataset.rid,this.dataset.cat)" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid '+cat.color+';background:#fff;cursor:pointer;color:'+cat.color+';font-family:inherit">'+cat.label+'</button>';
+    return '<button type="button" data-rid="'+resId+'" data-instance="'+instanceId+'" data-cat="'+cat.key+'" onclick="folioShowCatalogCategory(this.dataset.rid,this.dataset.cat,this.dataset.instance)" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid '+cat.color+';background:#fff;cursor:pointer;color:'+cat.color+';font-family:inherit">'+cat.label+'</button>';
   }).join('');
   var custom = canManageCatalog()
     ? '<div style="margin-top:6px">'
-      +'<button type="button" onclick="var m=document.getElementById(\'fc-custom-'+resId+'\');m.style.display=m.style.display===\'none\'?\'block\':\'none\';" style="background:none;border:none;color:#9ca3af;font-size:var(--font-size-xs);font-weight:600;cursor:pointer;font-family:inherit;padding:0">+ Custom item (one-off, uncatalogued)</button>'
+      +'<button type="button" onclick="var m=document.getElementById(\'fc-custom-'+instanceId+'\');m.style.display=m.style.display===\'none\'?\'block\':\'none\';" style="background:none;border:none;color:#9ca3af;font-size:var(--font-size-xs);font-weight:600;cursor:pointer;font-family:inherit;padding:0">+ Custom item (one-off, uncatalogued)</button>'
       +'</div>'
-      +'<div id="fc-custom-'+resId+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb">'
+      +'<div id="fc-custom-'+instanceId+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb">'
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
-          +'<input type="text" id="fc-desc-'+resId+'" placeholder="Description e.g. Sailing charter..." style="flex:2;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'
-          +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+resId+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'
-          +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+resId+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'
-          +'<select id="fc-cat-'+resId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+FOLIO_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'
+          +'<input type="text" id="fc-desc-'+instanceId+'" placeholder="Description e.g. Sailing charter..." style="flex:2;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'
+          +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+instanceId+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'
+          +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+instanceId+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'
+          +'<select id="fc-cat-'+instanceId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+FOLIO_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'
         +'</div>'
         +'<div style="display:flex;gap:8px;align-items:center">'
-          +'<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer"><i class="ti ti-camera"></i> Attach signed bill (optional) <input type="file" id="fc-bill-'+resId+'" accept="image/*" style="font-size:var(--font-size-xs)"></label>'
+          +'<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer"><i class="ti ti-camera"></i> Attach signed bill (optional) <input type="file" id="fc-bill-'+instanceId+'" accept="image/*" style="font-size:var(--font-size-xs)"></label>'
           +'<div style="flex:1"></div>'
-          +'<button data-rid="'+resId+'" onclick="addFolioCharge(this.dataset.rid)" style="background:#6b7280;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-plus"></i> Add</button>'
+          +'<button data-rid="'+resId+'" data-instance="'+instanceId+'" onclick="addFolioCharge(this.dataset.rid,this.dataset.instance)" style="background:#6b7280;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-plus"></i> Add</button>'
         +'</div>'
       +'</div>'
     : '';
   return '<div style="font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px">Add charge</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+catBtns+'</div>'
-    +'<div id="fcat-items-'+resId+'" style="display:none;flex-wrap:wrap;gap:5px;margin-bottom:8px"></div>'
-    +'<div id="fc-editor-'+resId+'"></div>'
+    +'<div id="fcat-items-'+instanceId+'" style="display:none;flex-wrap:wrap;gap:5px;margin-bottom:8px"></div>'
+    +'<div id="fc-editor-'+instanceId+'"></div>'
     +custom;
 }
 
@@ -8386,8 +8416,9 @@ function buildAddChargeFormHTML(resId){
 // active items (inactive items never appear here -- Part 5's "disappears
 // from new folio charge selection", the deactivation itself never touches
 // any already-added folio line).
-function folioShowCatalogCategory(resId,catKey){
-  var row=document.getElementById('fcat-items-'+resId);
+function folioShowCatalogCategory(resId,catKey,instanceId){
+  instanceId=instanceId||resId;
+  var row=document.getElementById('fcat-items-'+instanceId);
   if(!row) return;
   row.style.display='flex';
   var items=SVC_CATALOG.filter(function(i){return i.category===catKey&&i.active!==false;})
@@ -8398,26 +8429,31 @@ function folioShowCatalogCategory(resId,catKey){
     return;
   }
   row.innerHTML=items.map(function(item){
-    return '<button type="button" data-rid="'+resId+'" data-iid="'+item.id+'" onclick="folioOpenChargeEditor(this.dataset.rid,this.dataset.iid)" style="padding:5px 10px;font-size:var(--font-size-xs);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit">'+esc(item.name)+' <strong style="color:#00b4d8">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</strong></button>';
+    return '<button type="button" data-rid="'+resId+'" data-iid="'+item.id+'" data-instance="'+instanceId+'" onclick="folioOpenChargeEditor(this.dataset.rid,this.dataset.iid,this.dataset.instance)" style="padding:5px 10px;font-size:var(--font-size-xs);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit">'+esc(item.name)+' <strong style="color:#00b4d8">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</strong></button>';
   }).join('');
 }
 
-// Step 2: compact per-charge editor state, keyed by resId (only one editor
-// open per reservation folio at a time -- opening a different item replaces
-// it). Kept off `window` scoping issues by living on a single module-level
-// object rather than fresh closures per render.
+// Step 2: compact per-charge editor state, keyed by instanceId (NOT resId
+// -- see the instanceId note above buildAddChargeFormHTML: Calendar and
+// Guest Folios can each have their own in-progress editor open for the
+// SAME reservation without colliding). Each state object carries its own
+// `resId` so folioAddCatalogCharge() knows which real folio to write to
+// without needing resId passed back in separately. Kept off `window`
+// scoping issues by living on a single module-level object rather than
+// fresh closures per render.
 var _fcState={};
-function folioOpenChargeEditor(resId,itemId){
+function folioOpenChargeEditor(resId,itemId,instanceId){
+  instanceId=instanceId||resId;
   var item=SVC_CATALOG.find(function(x){return x.id===itemId;});
   if(!item) return;
   var r=RES.find(function(x){return x.id===resId;});
   var defaultQty = item.unitType==='PER_PAX' ? Math.max(1,(r?(r.ad||0)+(r.ch||0):1)) : 1;
-  _fcState[resId]={itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:''};
-  folioRenderChargeEditor(resId);
+  _fcState[instanceId]={resId:resId,itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:''};
+  folioRenderChargeEditor(instanceId);
 }
-function folioRenderChargeEditor(resId){
-  var st=_fcState[resId];
-  var editorEl=document.getElementById('fc-editor-'+resId);
+function folioRenderChargeEditor(instanceId){
+  var st=_fcState[instanceId];
+  var editorEl=document.getElementById('fc-editor-'+instanceId);
   if(!editorEl) return;
   if(!st){ editorEl.innerHTML=''; return; }
   var item=SVC_CATALOG.find(function(x){return x.id===st.itemId;});
@@ -8430,31 +8466,31 @@ function folioRenderChargeEditor(resId){
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-weight:700;color:#111827">'+esc(item.name)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+catalogCategoryLabel(item.category)+'</div></div>';
   html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
     +'<span style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280">'+catalogUnitLabel(item.unitType)+'</span>'
-    +'<button type="button" onclick="folioAdjustChargeQty(\''+resId+'\',-1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">−</button>'
+    +'<button type="button" onclick="folioAdjustChargeQty(\''+instanceId+'\',-1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">−</button>'
     +'<span style="min-width:24px;text-align:center;font-weight:700">'+st.qty+'</span>'
-    +'<button type="button" onclick="folioAdjustChargeQty(\''+resId+'\',1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">+</button>'
+    +'<button type="button" onclick="folioAdjustChargeQty(\''+instanceId+'\',1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">+</button>'
     +'<span style="font-size:var(--font-size-xs);color:#9ca3af">× $'+unitPrice.toFixed(2)+' = $'+gross.toFixed(2)+'</span>'
     +'</div>';
   if(canDisc){
     html+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">'
-      +'<select onchange="folioSetDiscountType(\''+resId+'\',this.value)" style="font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+      +'<select onchange="folioSetDiscountType(\''+instanceId+'\',this.value)" style="font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
         +'<option value="none"'+(st.discountType==='none'?' selected':'')+'>No discount</option>'
         +'<option value="percent"'+(st.discountType==='percent'?' selected':'')+'>Percentage</option>'
         +'<option value="fixed"'+(st.discountType==='fixed'?' selected':'')+'>Fixed amount</option>'
       +'</select>'
-      +(st.discountType!=='none' ? '<input type="number" min="0" value="'+st.discountValue+'" oninput="folioSetDiscountValue(\''+resId+'\',this.value)" placeholder="'+(st.discountType==='percent'?'%':'$')+'" style="width:70px;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">' : '')
+      +(st.discountType!=='none' ? '<input type="number" min="0" value="'+st.discountValue+'" oninput="folioSetDiscountValue(\''+instanceId+'\',this.value)" placeholder="'+(st.discountType==='percent'?'%':'$')+'" style="width:70px;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">' : '')
       +'</div>';
     if(st.discountType!=='none'){
-      html+='<select onchange="folioSetDiscountReason(\''+resId+'\',this.value)" style="width:100%;font-size:var(--font-size-xs);padding:5px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit;margin-bottom:6px">'
+      html+='<select onchange="folioSetDiscountReason(\''+instanceId+'\',this.value)" style="width:100%;font-size:var(--font-size-xs);padding:5px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit;margin-bottom:6px">'
         +'<option value="">Discount reason (required)…</option>'
         +['Guest complaint','Manager approved','Promotion','Repeat guest','Service recovery','Other'].map(function(r){return '<option value="'+r+'"'+(st.discountReason===r?' selected':'')+'>'+r+'</option>';}).join('')
         +'</select>';
     }
-    html+='<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer;margin-bottom:6px"><input type="checkbox" '+(st.overrideActive?'checked':'')+' onchange="folioToggleOverride(\''+resId+'\',this.checked)"> Override price (exception, this line only)</label>';
+    html+='<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer;margin-bottom:6px"><input type="checkbox" '+(st.overrideActive?'checked':'')+' onchange="folioToggleOverride(\''+instanceId+'\',this.checked)"> Override price (exception, this line only)</label>';
     if(st.overrideActive){
       html+='<div style="display:flex;gap:6px;margin-bottom:6px">'
-        +'<input type="number" min="0" step="0.5" value="'+st.overridePrice+'" oninput="folioSetOverridePrice(\''+resId+'\',this.value)" style="width:90px;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
-        +'<input type="text" placeholder="Override reason (required)" value="'+esc(st.overrideReason||'')+'" oninput="folioSetOverrideReason(\''+resId+'\',this.value)" style="flex:1;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+        +'<input type="number" min="0" step="0.5" value="'+st.overridePrice+'" oninput="folioSetOverridePrice(\''+instanceId+'\',this.value)" style="width:90px;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+        +'<input type="text" placeholder="Override reason (required)" value="'+esc(st.overrideReason||'')+'" oninput="folioSetOverrideReason(\''+instanceId+'\',this.value)" style="flex:1;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
         +'</div>';
     }
   }
@@ -8462,27 +8498,30 @@ function folioRenderChargeEditor(resId){
     +(disc>0?'<span style="font-size:var(--font-size-xs);color:#dc2626">Discount: -$'+disc.toFixed(2)+'</span>':'<span></span>')
     +'<span style="font-weight:800;color:#111827">Total: $'+final.toFixed(2)+'</span></div>';
   html+='<div style="display:flex;gap:8px;margin-top:8px">'
-    +'<button type="button" data-rid="'+resId+'" onclick="folioAddCatalogCharge(this.dataset.rid)" style="flex:1;background:#00b4d8;color:#fff;border:none;padding:7px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Add to Folio</button>'
-    +'<button type="button" onclick="folioCancelChargeEditor(\''+resId+'\')" style="background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;padding:7px 12px;border-radius:7px;font-size:var(--font-size-sm);cursor:pointer;font-family:inherit">Cancel</button>'
+    +'<button type="button" onclick="folioAddCatalogCharge(\''+instanceId+'\')" style="flex:1;background:#00b4d8;color:#fff;border:none;padding:7px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Add to Folio</button>'
+    +'<button type="button" onclick="folioCancelChargeEditor(\''+instanceId+'\')" style="background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;padding:7px 12px;border-radius:7px;font-size:var(--font-size-sm);cursor:pointer;font-family:inherit">Cancel</button>'
     +'</div></div>';
   editorEl.innerHTML=html;
 }
-function folioAdjustChargeQty(resId,delta){ var st=_fcState[resId]; if(!st)return; st.qty=Math.max(1,(st.qty||1)+delta); folioRenderChargeEditor(resId); }
-function folioSetDiscountType(resId,val){ var st=_fcState[resId]; if(!st)return; st.discountType=val; if(val==='none'){st.discountValue=0;st.discountReason='';} folioRenderChargeEditor(resId); }
-function folioSetDiscountValue(resId,val){ var st=_fcState[resId]; if(!st)return; st.discountValue=+val||0; folioRenderChargeEditor(resId); }
-function folioSetDiscountReason(resId,val){ var st=_fcState[resId]; if(!st)return; st.discountReason=val; }
-function folioToggleOverride(resId,checked){ var st=_fcState[resId]; if(!st)return; st.overrideActive=checked; folioRenderChargeEditor(resId); }
-function folioSetOverridePrice(resId,val){ var st=_fcState[resId]; if(!st)return; st.overridePrice=+val||0; folioRenderChargeEditor(resId); }
-function folioSetOverrideReason(resId,val){ var st=_fcState[resId]; if(!st)return; st.overrideReason=val; }
-function folioCancelChargeEditor(resId){ delete _fcState[resId]; var el=document.getElementById('fc-editor-'+resId); if(el) el.innerHTML=''; }
+function folioAdjustChargeQty(instanceId,delta){ var st=_fcState[instanceId]; if(!st)return; st.qty=Math.max(1,(st.qty||1)+delta); folioRenderChargeEditor(instanceId); }
+function folioSetDiscountType(instanceId,val){ var st=_fcState[instanceId]; if(!st)return; st.discountType=val; if(val==='none'){st.discountValue=0;st.discountReason='';} folioRenderChargeEditor(instanceId); }
+function folioSetDiscountValue(instanceId,val){ var st=_fcState[instanceId]; if(!st)return; st.discountValue=+val||0; folioRenderChargeEditor(instanceId); }
+function folioSetDiscountReason(instanceId,val){ var st=_fcState[instanceId]; if(!st)return; st.discountReason=val; }
+function folioToggleOverride(instanceId,checked){ var st=_fcState[instanceId]; if(!st)return; st.overrideActive=checked; folioRenderChargeEditor(instanceId); }
+function folioSetOverridePrice(instanceId,val){ var st=_fcState[instanceId]; if(!st)return; st.overridePrice=+val||0; folioRenderChargeEditor(instanceId); }
+function folioSetOverrideReason(instanceId,val){ var st=_fcState[instanceId]; if(!st)return; st.overrideReason=val; }
+function folioCancelChargeEditor(instanceId){ delete _fcState[instanceId]; var el=document.getElementById('fc-editor-'+instanceId); if(el) el.innerHTML=''; }
 
 // Step 3: commit the in-progress editor state as a real folio charge,
 // snapshotting the catalog item's name/price/category at this exact
 // moment (Part 6) -- nothing here ever re-reads SVC_CATALOG later, so a
-// subsequent master-price change never alters this line.
-function folioAddCatalogCharge(resId){
-  var st=_fcState[resId];
+// subsequent master-price change never alters this line. The real resId
+// to write to comes from the state object itself (stamped by
+// folioOpenChargeEditor), not from this function's own argument.
+function folioAddCatalogCharge(instanceId){
+  var st=_fcState[instanceId];
   if(!st){ toast('Select an item first'); return; }
+  var resId=st.resId;
   var item=SVC_CATALOG.find(function(x){return x.id===st.itemId;});
   if(!item){ toast('Item not found'); return; }
   var wantsDiscount = st.discountType && st.discountType!=='none';
@@ -8519,10 +8558,10 @@ function folioAddCatalogCharge(resId){
   FOLIOS[resId].charges.push(charge);
   saveFolios();
   syncFolioToFirestore(resId);
-  delete _fcState[resId];
-  var editorEl=document.getElementById('fc-editor-'+resId); if(editorEl) editorEl.innerHTML='';
-  var catRow=document.getElementById('fcat-items-'+resId); if(catRow){ catRow.style.display='none'; catRow.innerHTML=''; }
-  renderFolioChargesById(resId);
+  delete _fcState[instanceId];
+  var editorEl=document.getElementById('fc-editor-'+instanceId); if(editorEl) editorEl.innerHTML='';
+  var catRow=document.getElementById('fcat-items-'+instanceId); if(catRow){ catRow.style.display='none'; catRow.innerHTML=''; }
+  renderFolioChargesById(resId,instanceId);
   updateFolioHeaderTotal(resId);
   toast('✓ '+item.name+' added to folio');
 }
@@ -8541,7 +8580,8 @@ async function uploadFolioBill(resId, chargeId, file){
   return await snap.ref.getDownloadURL();
 }
 
-async function addFolioCharge(resId){
+async function addFolioCharge(resId,instanceId){
+  instanceId=instanceId||resId;
   // Custom (uncatalogued) items let the adder type an arbitrary price --
   // that's exactly what the catalog exists to prevent for normal items, so
   // this one-off fallback is Admin/Manager only, same as catalog
@@ -8549,12 +8589,11 @@ async function addFolioCharge(resId){
   // "+ Custom item" toggle, checked again here in case this is ever called
   // directly).
   if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
-  var desc=(document.getElementById('fc-desc-'+resId)?.value||'').trim();
-  var price=+(document.getElementById('fc-price-'+resId)?.value||0);
-  var pax=+(document.getElementById('fc-pax-'+resId)?.value||1);
-  var cat=document.getElementById('fc-cat-'+resId)?.value||'Other Services';
-  var note=(document.getElementById('fc-note-'+resId)?.value||'').trim();
-  var billInput=document.getElementById('fc-bill-'+resId);
+  var desc=(document.getElementById('fc-desc-'+instanceId)?.value||'').trim();
+  var price=+(document.getElementById('fc-price-'+instanceId)?.value||0);
+  var pax=+(document.getElementById('fc-pax-'+instanceId)?.value||1);
+  var cat=document.getElementById('fc-cat-'+instanceId)?.value||'Other Services';
+  var billInput=document.getElementById('fc-bill-'+instanceId);
   var billFile=billInput&&billInput.files&&billInput.files[0];
   if(!desc){toast('Enter a description');return;}
   if(price<=0){toast('Enter a price');return;}
@@ -8562,19 +8601,16 @@ async function addFolioCharge(resId){
   var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   var chargeId=Date.now();
   var charge={id:chargeId,date:tS,desc:desc,cat:cat,price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now};
-  if(note) charge.note=note;
   FOLIOS[resId].charges.push(charge);
   saveFolios();
   syncFolioToFirestore(resId);
-  var fcDesc=document.getElementById('fc-desc-'+resId);
-  var fcPrice=document.getElementById('fc-price-'+resId);
-  var fcPax=document.getElementById('fc-pax-'+resId);
-  var fcNote=document.getElementById('fc-note-'+resId);
+  var fcDesc=document.getElementById('fc-desc-'+instanceId);
+  var fcPrice=document.getElementById('fc-price-'+instanceId);
+  var fcPax=document.getElementById('fc-pax-'+instanceId);
   if(fcDesc) fcDesc.value='';
   if(fcPrice) fcPrice.value='';
   if(fcPax) fcPax.value='1';
-  if(fcNote) fcNote.value='';
-  renderFolioChargesById(resId);
+  renderFolioChargesById(resId,instanceId);
   updateFolioHeaderTotal(resId);
   toast('✓ '+desc+' added to folio');
   if(billFile){
@@ -8583,7 +8619,7 @@ async function addFolioCharge(resId){
       charge.billUrl=url;
       saveFolios();
       syncFolioToFirestore(resId);
-      renderFolioChargesById(resId);
+      renderFolioChargesById(resId,instanceId);
       toast('✓ Bill attached');
     }catch(e){
       console.error('uploadFolioBill failed',e);
@@ -8612,14 +8648,15 @@ function updateFolioHeaderTotal(resId){
 // silently removed from the folio (Step 21: one canonical item, never
 // quietly orphaned from an invoice a guest may already hold) -- void the
 // invoice first (voidInvoice()) if it was added by mistake.
-function removeFolioCharge(resId,chargeId){
+function removeFolioCharge(resId,chargeId,instanceId){
+  instanceId=instanceId||resId;
   if(!FOLIOS[resId])return;
   var charge=FOLIOS[resId].charges.find(function(ch){return ch.id===chargeId;});
   if(charge&&charge.invoiceId){ toast('Already on invoice '+charge.invoiceId+' — void that invoice first'); return; }
   FOLIOS[resId].charges=FOLIOS[resId].charges.filter(function(ch){return ch.id!==chargeId;});
   saveFolios();
   syncFolioToFirestore(resId);
-  renderFolioChargesById(resId);
+  renderFolioChargesById(resId,instanceId);
   // Update just the header (extras total) without collapsing cards
   var hdrEl=document.querySelector('[data-folio-rid="'+resId+'"]');
   if(hdrEl){
@@ -8629,8 +8666,9 @@ function removeFolioCharge(resId,chargeId){
   }
 }
 
-function renderFolioChargesById(resId){
-  var el=document.getElementById('fcharges-'+resId);
+function renderFolioChargesById(resId,instanceId){
+  instanceId=instanceId||resId;
+  var el=document.getElementById('fcharges-'+instanceId);
   if(!el)return;
   var folio=FOLIOS[resId]||{charges:[]};
   var charges=folio.charges;
@@ -8669,7 +8707,7 @@ function renderFolioChargesById(resId){
       h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb">';
       h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(ch.desc)+statusBadge+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(ch.cat)+' · '+ch.time+(ch.addedBy?' · Added by '+esc(ch.addedBy):'')+billBadge+'</div>'+qtyLine+discLine+(ch.note?'<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px;font-style:italic">"'+esc(ch.note)+'"</div>':'')+'</div>';
       h+='<div style="font-size:var(--font-size-sm);font-weight:700;color:#00b4d8;min-width:60px;text-align:right">$'+final.toFixed(2)+'</div>';
-      if(!canViewOnly()){h+='<button data-rid="'+resId+'" data-cid="'+ch.id+'" onclick="removeFolioCharge(this.dataset.rid,+this.dataset.cid)" title="'+(ch.invoiceId?'Already invoiced — void invoice first':'Remove')+'" style="background:none;border:none;cursor:pointer;color:'+(ch.invoiceId?'#d1d5db':'#b91c1c')+';font-size:var(--font-size-base);padding:0 2px">✕</button>';}
+      if(!canViewOnly()){h+='<button data-rid="'+resId+'" data-cid="'+ch.id+'" data-instance="'+instanceId+'" onclick="removeFolioCharge(this.dataset.rid,+this.dataset.cid,this.dataset.instance)" title="'+(ch.invoiceId?'Already invoiced — void invoice first':'Remove')+'" style="background:none;border:none;cursor:pointer;color:'+(ch.invoiceId?'#d1d5db':'#b91c1c')+';font-size:var(--font-size-base);padding:0 2px">✕</button>';}
       h+='</div>';
     });
   });

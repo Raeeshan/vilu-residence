@@ -223,7 +223,7 @@ section('Case E — charge math: chargeGrossAmount / chargeDiscountAmount / char
 section('Case F — historical snapshot + deactivation (Part 5/6/21)');
 {
   test('folioAddCatalogCharge() snapshots name/category/baseUnitPrice/pax onto the charge object at add-time', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     assert.match(src, /desc:item\.name/);
     assert.match(src, /baseUnitPrice:item\.basePrice/);
     assert.match(src, /catalogItemId:item\.id/);
@@ -240,7 +240,7 @@ section('Case F — historical snapshot + deactivation (Part 5/6/21)');
     assert.match(src, /active:\s*true/);
   });
   test('folioShowCatalogCategory() only lists items with active!==false — a deactivated item disappears from NEW charge selection', () => {
-    const src = extractByStart(PMS, /function folioShowCatalogCategory\(resId,catKey\)\s*\{/);
+    const src = extractByStart(PMS, /function folioShowCatalogCategory\(resId,catKey,instanceId\)\s*\{/);
     assert.match(src, /active\s*!==\s*false/);
   });
   test('canManageCatalog() gates every catalog-mutating action (add/edit/deactivate/reactivate), not just the UI buttons', () => {
@@ -265,11 +265,11 @@ section('Case G — pax/quantity per unit type (Part 8)');
     assert.match(unitConst, /PER_ROOM/);
   });
   test('folioOpenChargeEditor() defaults PER_PAX quantity to the reservation\'s guest count, but the guest can still adjust it', () => {
-    const src = extractByStart(PMS, /function folioOpenChargeEditor\(resId,itemId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioOpenChargeEditor\(resId,itemId,instanceId\)\s*\{/);
     assert.match(src, /r\.ad\|\|0.*r\.ch\|\|0/);
   });
   test('folioAddCatalogCharge() warns (not blocks) when pax exceeds the reservation\'s guest count — legitimate exceptions stay allowed', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     assert.match(src, /exceeds/);
     assert.doesNotMatch(src, /exceeds[\s\S]{0,80}return;/); // warns, then continues -- never a hard block
   });
@@ -278,27 +278,27 @@ section('Case G — pax/quantity per unit type (Part 8)');
 section('Case H — discount reason required, audit trail stored (Part 10)');
 {
   test('folioAddCatalogCharge() refuses to save a discount with no reason', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     assert.match(src, /wantsDiscount && !st\.discountReason/);
   });
   test('folioAddCatalogCharge() refuses to save a price override with no reason', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     assert.match(src, /overrideActive && !\(st\.overrideReason/);
   });
   test('a saved discount charge stores discountType/discountValue/discountAmount/discountReason/discountedBy/discountedAt', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     ['discountType', 'discountValue', 'discountReason', 'discountedBy', 'discountedAt', 'discountAmount'].forEach(f => {
       assert.match(src, new RegExp('charge\\.' + f), 'missing ' + f);
     });
   });
   test('a saved override stores overridePrice/overrideReason/overrideBy/overrideAt', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     ['overridePrice', 'overrideReason', 'overrideBy', 'overrideAt'].forEach(f => {
       assert.match(src, new RegExp('charge\\.' + f), 'missing ' + f);
     });
   });
   test('discount/override cannot be applied by a non-canDiscount() user, even if the client is tampered with (checked again server-side of the UI, before the charge is pushed)', () => {
-    const src = extractByStart(PMS, /function folioAddCatalogCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
     assert.match(src, /\(wantsDiscount\|\|st\.overrideActive\) && !canDiscount\(\)/);
   });
 }
@@ -306,11 +306,11 @@ section('Case H — discount reason required, audit trail stored (Part 10)');
 section('Case I — the "Custom item" free-price fallback is Admin/Manager only (Part 1\'s "staff should not type master prices" applies here too)');
 {
   test('the folio\'s "Custom item (one-off)" form is only rendered for canManageCatalog() users', () => {
-    const src = extractByStart(PMS, /function buildAddChargeFormHTML\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function buildAddChargeFormHTML\(resId,instanceId\)\s*\{/);
     assert.match(src, /canManageCatalog\(\)\s*\n?\s*\?/);
   });
   test('addFolioCharge() (the custom-item handler) re-checks canManageCatalog() itself, not just the hidden UI', () => {
-    const src = extractByStart(PMS, /async function addFolioCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /async function addFolioCharge\(resId,instanceId\)\s*\{/);
     assert.match(src, /canManageCatalog\(\)/);
   });
   test('the invoice-draft picker\'s own "+ Custom item" button is likewise hidden from non-Admin/Manager, and invAddBlank() re-checks it', () => {
@@ -318,6 +318,65 @@ section('Case I — the "Custom item" free-price fallback is Admin/Manager only 
     assert.match(showCatItemsSrc, /canManageCatalog\(\)/);
     const addBlankSrc = extractByStart(PMS, /function invAddBlank\(catKey\)\s*\{/);
     assert.match(addBlankSrc, /canManageCatalog\(\)/);
+  });
+}
+
+section('Case M — Calendar quick-add charge: instanceId DOM scoping (fixes the real live bug where Guest Folios pre-renders a hidden folio card, with the same-shaped ids, for every reservation as soon as that page is first visited -- so Calendar\'s drawer for the SAME reservation collided with it, and every click silently updated the hidden Guest Folios copy instead of the visible Calendar one)');
+{
+  test('every DOM-addressing function in the shared Add Charge component accepts an instanceId, defaulting to resId (so Guest Folios\' own call sites, unchanged, keep their exact original ids)', () => {
+    const fns = {
+      buildAddChargeFormHTML: /function buildAddChargeFormHTML\(resId,instanceId\)\s*\{\s*instanceId=instanceId\|\|resId;/,
+      folioShowCatalogCategory: /function folioShowCatalogCategory\(resId,catKey,instanceId\)\s*\{\s*instanceId=instanceId\|\|resId;/,
+      folioOpenChargeEditor: /function folioOpenChargeEditor\(resId,itemId,instanceId\)\s*\{\s*instanceId=instanceId\|\|resId;/,
+      addFolioCharge: /async function addFolioCharge\(resId,instanceId\)\s*\{\s*instanceId=instanceId\|\|resId;/,
+      renderFolioChargesById: /function renderFolioChargesById\(resId,instanceId\)\s*\{\s*instanceId=instanceId\|\|resId;/,
+      removeFolioCharge: /function removeFolioCharge\(resId,chargeId,instanceId\)\s*\{\s*instanceId=instanceId\|\|resId;/,
+    };
+    Object.entries(fns).forEach(([name, re]) => assert.match(PMS, re, name + ' must default instanceId to resId'));
+  });
+  test('_fcState is keyed by instanceId and stamps the real resId onto each state object, so folioAddCatalogCharge(instanceId) can always write to the correct reservation\'s folio regardless of which UI instance is open', () => {
+    const openSrc = extractByStart(PMS, /function folioOpenChargeEditor\(resId,itemId,instanceId\)\s*\{/);
+    assert.match(openSrc, /_fcState\[instanceId\]=\{resId:resId,/);
+    const addSrc = extractByStart(PMS, /function folioAddCatalogCharge\(instanceId\)\s*\{/);
+    assert.match(addSrc, /var resId=st\.resId;/);
+  });
+  test('Calendar\'s drawer (_showDetLegacy) passes a DISTINCT instanceId (\'det-\'+id) to buildAddChargeFormHTML/renderFolioChargesById -- never the bare resId Guest Folios already uses for the same reservation', () => {
+    const src = extractByStart(PMS, /function _showDetLegacy\(id\)\s*\{/);
+    assert.match(src, /var detInstanceId='det-'\+id;/);
+    assert.match(src, /buildAddChargeFormHTML\(id,detInstanceId\)/);
+    assert.match(src, /renderFolioChargesById\(id,detInstanceId\)/);
+    assert.match(src, /chargesList\.id='fcharges-'\+detInstanceId/);
+  });
+  test('Guest Folios\' own card render is untouched -- still calls the builder with just resId (no explicit instanceId), so its ids are byte-for-byte identical to before this fix', () => {
+    const foliosFormIdx = PMS.indexOf('form.innerHTML=buildAddChargeFormHTML(r.id)');
+    assert.ok(foliosFormIdx !== -1, 'Guest Folios must still call buildAddChargeFormHTML(r.id) with no second argument');
+    const foliosRenderIdx = PMS.indexOf('renderFolioChargesById(r.id);');
+    assert.ok(foliosRenderIdx !== -1, 'Guest Folios must still call renderFolioChargesById(r.id) with no second argument');
+  });
+  test('behavioral: building the SAME reservation\'s Add Charge form for two different instanceIds (simulating Guest Folios\' pre-rendered hidden card + Calendar\'s drawer, open at once for the same resId) produces two DISTINCT sets of element ids -- proving they can never collide in the live DOM', () => {
+    const ctx = {
+      console,
+      canManageCatalog: () => true,
+      esc: (s) => s,
+      CATALOG_CATEGORIES: [{ key: 'TRIPS_ACTIVITIES', label: 'Trips & Activities', color: '#0077b6' }],
+      FOLIO_CATEGORIES: ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services'],
+    };
+    vm.createContext(ctx);
+    vm.runInContext(extractByStart(PMS, /function buildAddChargeFormHTML\(resId,instanceId\)\s*\{/), ctx);
+    const resId = 'R123';
+    const guestFoliosHTML = vm.runInContext(`buildAddChargeFormHTML('${resId}')`, ctx); // Guest Folios: no instanceId arg
+    const calendarHTML = vm.runInContext(`buildAddChargeFormHTML('${resId}', 'det-${resId}')`, ctx); // Calendar: explicit instanceId
+    // Guest Folios' ids are exactly the bare resId (unchanged behavior)
+    assert.match(guestFoliosHTML, /id="fcat-items-R123"/);
+    assert.match(guestFoliosHTML, /id="fc-editor-R123"/);
+    // Calendar's ids are scoped under det-R123, never plain R123
+    assert.match(calendarHTML, /id="fcat-items-det-R123"/);
+    assert.match(calendarHTML, /id="fc-editor-det-R123"/);
+    assert.doesNotMatch(calendarHTML, /id="fcat-items-R123"/);
+    assert.doesNotMatch(calendarHTML, /id="fc-editor-R123"/);
+    // Both still carry the SAME real resId for data operations (data-rid)
+    assert.match(guestFoliosHTML, /data-rid="R123"/);
+    assert.match(calendarHTML, /data-rid="R123"/);
   });
 }
 

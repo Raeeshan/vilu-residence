@@ -58,25 +58,25 @@ function extractConst(src, name) {
 
 section('Case A — canonical FOLIOS store: no duplicate charge stores between Calendar and Guest Folios');
 {
-  test('Calendar\'s folio section (_showDetLegacy) and Guest Folios (drawFolios) both call renderFolioChargesById() against the SAME global FOLIOS object -- never a second store', () => {
+  test('Calendar\'s folio section (_showDetLegacy) and Guest Folios (drawFolios) both call renderFolioChargesById() against the SAME global FOLIOS object -- never a second store (Calendar passes its own instanceId to avoid a DOM-id collision with Guest Folios\' pre-rendered card for the same reservation -- see the Calendar quick-add-charge fix -- but both still write/read the ONE FOLIOS[resId])', () => {
     assert.match(PMS, /var FOLIOS\s*=\s*loadFolios\(\)/);
     const calSrc = extractByStart(PMS, /function _showDetLegacy\(id\)\s*\{/);
-    assert.match(calSrc, /renderFolioChargesById\(id\)/);
+    assert.match(calSrc, /renderFolioChargesById\(id,detInstanceId\)/);
     const foliosPageIdx = PMS.indexOf('// Render existing charges');
     assert.ok(foliosPageIdx !== -1);
     assert.match(PMS.slice(foliosPageIdx, foliosPageIdx + 100), /renderFolioChargesById\(r\.id\)/);
   });
   test('Calendar\'s folio section and Guest Folios both call the SAME buildAddChargeFormHTML() builder -- no near-duplicate HTML (Step 5)', () => {
     const calSrc = extractByStart(PMS, /function _showDetLegacy\(id\)\s*\{/);
-    assert.match(calSrc, /buildAddChargeFormHTML\(id\)/);
+    assert.match(calSrc, /buildAddChargeFormHTML\(id,detInstanceId\)/);
     const foliosFormIdx = PMS.indexOf('form.innerHTML=buildAddChargeFormHTML(r.id)');
     assert.ok(foliosFormIdx !== -1, 'Guest Folios card must also call buildAddChargeFormHTML()');
   });
   test('addFolioCharge() is the single write path for both screens -- both forms submit to it, and it syncs to Firestore (folios/{resId}), not just localStorage', () => {
-    const src = extractByStart(PMS, /async function addFolioCharge\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /async function addFolioCharge\(resId,instanceId\)\s*\{/);
     assert.match(src, /FOLIOS\[resId\]\.charges\.push/);
     assert.match(src, /syncFolioToFirestore\(resId\)/);
-    assert.match(PMS, /onclick="addFolioCharge\(this\.dataset\.rid\)"/);
+    assert.match(PMS, /onclick="addFolioCharge\(this\.dataset\.rid,this\.dataset\.instance\)"/);
   });
   test('dead, orphaned detAddCharge()/detRemoveCharge() (a THIRD, divergent-shape write path found in the audit) have been removed', () => {
     assert.doesNotMatch(PMS, /function detAddCharge/);
@@ -140,7 +140,7 @@ section('Case C — room charge kept structurally separate from extras (Step 4/2
   });
   test('no folio/invoice function references packages/agency_packages or a package-total field -- a package reservation\'s room charge flows through the exact same calcTax(r.rate) path as any other reservation, per the audit\'s finding that no r.pkgId/pkgName is ever actually set', () => {
     const folioFns = [
-      extractByStart(PMS, /async function addFolioCharge\(resId\)\s*\{/),
+      extractByStart(PMS, /async function addFolioCharge\(resId,instanceId\)\s*\{/),
       extractByStart(PMS, /function genInv\(\)\s*\{/),
       extractByStart(PMS, /function folioSummary\(resId\)\s*\{/),
     ].join('\n');
@@ -284,7 +284,7 @@ section('Case G — invoiced-item marking prevents duplicate invoicing (Step 10/
     assert.match(src, /ch\.invoiceId=v\.id;/);
   });
   test('removeFolioCharge() refuses to delete a charge that already has .invoiceId set -- staff must void the invoice first, so a charge on a printed invoice can never silently vanish from the folio', () => {
-    const src = extractByStart(PMS, /function removeFolioCharge\(resId,chargeId\)\s*\{/);
+    const src = extractByStart(PMS, /function removeFolioCharge\(resId,chargeId,instanceId\)\s*\{/);
     assert.match(src, /if\(charge&&charge\.invoiceId\)\{ toast\(/);
   });
   test('voidInvoice() reverses the marking (deletes .invoiceId/.paid from every charge the voided invoice covered), making them invoiceable again -- an explicit, audited undo, never a silent one', () => {
@@ -374,7 +374,7 @@ section('Case K — bill attachment (Step 6): reuses existing Storage infrastruc
     assert.match(commentBlock, /ONLY that admin account can attach a\s*\n\s*\/\/ bill photo -- regular staff cannot/);
   });
   test('a folio charge with a billUrl renders a visible "Bill attached" link in renderFolioChargesById(), and an optional note renders in italics -- never silently dropped', () => {
-    const src = extractByStart(PMS, /function renderFolioChargesById\(resId\)\s*\{/);
+    const src = extractByStart(PMS, /function renderFolioChargesById\(resId,instanceId\)\s*\{/);
     assert.match(src, /Bill attached ✓ View/);
     assert.match(src, /ch\.note/);
   });
