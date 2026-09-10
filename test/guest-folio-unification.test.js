@@ -105,9 +105,12 @@ section('Case B — Firestore backing (folios/{resId}, invoices/{invId}) — the
     assert.match(src, /await loadFoliosFromFirestore\(\);/);
     assert.match(src, /await loadInvoicesFromFirestore\(\);/);
   });
-  test('firestore.rules defines folios/{resId} and invoices/{invId} with the same admin/staff-only pattern as reservations -- never public, never agency-readable', () => {
-    assert.match(RULES, /match \/folios\/\{resId\}\s*\{\s*allow read: if isAdmin\(\) \|\| isStaff\(\);\s*allow write: if isAdmin\(\) \|\| isStaff\(\);\s*\}/);
-    assert.match(RULES, /match \/invoices\/\{invId\}\s*\{\s*allow read: if isAdmin\(\) \|\| isStaff\(\);\s*allow write: if isAdmin\(\) \|\| isStaff\(\);\s*\}/);
+  test('firestore.rules defines folios/{resId} and invoices/{invId} with the same admin/staff(/manager)-only pattern as reservations -- never public, never agency-readable', () => {
+    // Fixed Price Catalog Integration (2026-09-10) added Manager as a 4th
+    // peer role with the same folios/invoices access as Staff -- these
+    // collections stay admin/staff/manager-only, still never public/agency.
+    assert.match(RULES, /match \/folios\/\{resId\}\s*\{\s*allow read: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*allow write: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*\}/);
+    assert.match(RULES, /match \/invoices\/\{invId\}\s*\{\s*allow read: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*allow write: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*\}/);
   });
   test('live-QA bug (2026-09-10): syncFolioToFirestore()/syncInvoiceToFirestore() strip undefined field values before writing -- Firestore\'s SDK rejects a document containing one (caught live: genInv()\'s ref:r.ref is undefined for any reservation with no booking-reference code, which silently failed the Firestore sync for every such invoice until this fix)', () => {
     const folioSrc = extractByStart(PMS, /async function syncFolioToFirestore\(resId\)\s*\{/);
@@ -156,12 +159,19 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   const ntSrc = 'var ' + ntMatch[0].slice('const '.length);
   const folioCatSrc = extractConst(PMS, 'FOLIO_CATEGORIES').replace(/^const /, 'var ') + ';';
   const folioSummarySrc = extractByStart(PMS, /function folioSummary\(resId\)\s*\{/);
+  // Fixed Price Catalog Integration (2026-09-10): folioSummary() now sums
+  // each charge via chargeFinalAmount(ch) instead of an inline
+  // ch.price*(ch.pax||ch.qty||1), so the sandbox needs all three math
+  // helpers defined before folioSummary() itself can run.
+  const grossSrc = extractByStart(PMS, /function chargeGrossAmount\(ch\)\s*\{/);
+  const discSrc = extractByStart(PMS, /function chargeDiscountAmount\(ch\)\s*\{/);
+  const finalSrc = extractByStart(PMS, /function chargeFinalAmount\(ch\)\s*\{/);
   const box = { TAX: { thirdGuest: 20, childDiscountPercent: 50, svc: 10, tgst: 17, green: 6, bed: 0 } };
   vm.createContext(box);
-  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxSrc, folioSummarySrc].join('\n'), box);
+  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, folioSummarySrc].join('\n'), box);
 
-  test('FOLIO_CATEGORIES is exactly the 4 non-room categories (Room is never a folio-item category, Payment/Credit is invoice-level, not a folio charge type)', () => {
-    assert.deepEqual(plain(box.FOLIO_CATEGORIES), ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Other Services']);
+  test('FOLIO_CATEGORIES is exactly the 5 non-room categories (Room is never a folio-item category, Payment/Credit is invoice-level, not a folio charge type; Accommodation Extras added alongside the Fixed Price Catalog Integration for catalog items like Extra Bed/Early Check-in)', () => {
+    assert.deepEqual(plain(box.FOLIO_CATEGORIES), ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services']);
   });
   test('folioSummary(): room + 4 category totals sum exactly to chargesTotal, with zero paid/invoices the balance equals the full chargesTotal', () => {
     box.RES = [{ id: 'R1', rn: 'VR01', ci: '2026-09-10', co: '2026-09-12', ad: 2, ch: 0, rate: 100, src: 'Direct' }];

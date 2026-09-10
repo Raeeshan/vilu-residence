@@ -13,6 +13,22 @@ service cloud.firestore {
       return request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.token.email.lower())).data.role == 'agency';
     }
+    // Manager (Fixed Price Catalog Integration, 2026-09-10): a 4th peer role
+    // value alongside admin/staff/agency, stored the same way isAgency()
+    // reads it -- users/{email}.role == 'manager'. Manager gets everything
+    // Staff gets (added as `|| isManagerRole()` next to every isStaff() use
+    // below, rather than piggybacking on the staff_permissions doc, since
+    // that doc's own UI toggle is staff-only ("can modify bookings") and
+    // provisioning it for Manager would need new UI this task doesn't
+    // build) PLUS master-catalog/discount authority (service_catalog
+    // writes, folio discount/override fields below).
+    function isManagerRole() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.token.email.lower())).data.role == 'manager';
+    }
+    function canDiscount() {
+      return isAdmin() || isManagerRole();
+    }
     function isCancellingNow() {
       return request.resource.data.status == 'Cancelled' && resource.data.status != 'Cancelled';
     }
@@ -36,13 +52,13 @@ service cloud.firestore {
     }
 
     match /reservations/{id} {
-      allow read: if isAdmin() || isStaff() || (isAgency() && resource.data.agencyId == request.auth.uid);
+      allow read: if isAdmin() || isStaff() || isManagerRole() || (isAgency() && resource.data.agencyId == request.auth.uid);
       allow create: if request.resource.data.room_id is string
                     && request.resource.data.check_in is string
                     && request.resource.data.check_out is string
                     && validReservationShape()
                     && (
-                      isAdmin() || isStaff() ||
+                      isAdmin() || isStaff() || isManagerRole() ||
                       (isAgency() && request.resource.data.agencyId == request.auth.uid && request.resource.data.source == 'Agency') ||
                       (request.auth == null && request.resource.data.source == 'Website' && !('agencyId' in request.resource.data) && request.resource.data.status == 'Pending')
                     );
@@ -50,36 +66,36 @@ service cloud.firestore {
                     && request.resource.data.check_in is string
                     && request.resource.data.check_out is string
                     && validReservationShape()
-                    && (isAdmin() || (isStaff() && (!isCancellingNow() || validOverrideCode())));
+                    && (isAdmin() || ((isStaff() || isManagerRole()) && (!isCancellingNow() || validOverrideCode())));
       allow delete: if false;
     }
 
     match /blocks/{id} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     match /rooms/{id} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     match /website_content/{docId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     match /room_availability/{roomId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
     match /settings/{docId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
     match /reconciliation_log/{docId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     // Guest Folio unification (2026-09-10): the ONE canonical charge ledger
@@ -87,16 +103,52 @@ service cloud.firestore {
     // the standalone Guest Folios page (never a public/agency-readable
     // collection -- this is internal financial detail, not guest-facing
     // pricing like rooms/room_prices above).
+    // NOTE on discount/override enforcement (Fixed Price Catalog Integration,
+    // 2026-09-10): each folio doc stores its charges as ONE array field,
+    // rewritten whole on every save (see syncFolioToFirestore) rather than
+    // one Firestore doc per charge line. Rules can't iterate that array to
+    // validate a specific line's discountType/discountValue/overridePrice
+    // fields without either a schema change (one doc per charge) or a
+    // request.resource.data.charges.hasAny()-style check too brittle to
+    // trust here (same "proved unreliable" territory storage.rules already
+    // documents for cross-service checks) -- so per-item discount authority
+    // (Staff cannot discount; Manager/Admin can, per canDiscount()) is
+    // enforced at the UI level only (canDiscount() gates the discount/
+    // override controls), same as this app already does for other
+    // judgment-heavy in-document fields. Collection-level write access
+    // (any charge at all) stays isAdmin()/isStaff()/isManagerRole(), matching
+    // every other operational collection above.
     match /folios/{resId} {
-      allow read: if isAdmin() || isStaff();
-      allow write: if isAdmin() || isStaff();
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
     // Generated invoices -- previously an in-memory-only JS array (INV)
     // with no persistence at all; now durable and shared across every
     // staff session, same access pattern as reservations/folios.
     match /invoices/{invId} {
-      allow read: if isAdmin() || isStaff();
-      allow write: if isAdmin() || isStaff();
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
+    }
+    // Fixed Price service catalog (Fixed Price Catalog Integration,
+    // 2026-09-10) -- the ONE canonical master item/price list (name,
+    // category, basePrice, unitType, active). Read is broader than write:
+    // Staff need to browse active items when adding a folio charge, but
+    // only Admin/Manager may create/edit/deactivate items or change a
+    // master price. `allow delete: if false` hard-enforces "no hard
+    // delete, ever" (Part 5) at the rules level, not just by omitting a
+    // delete button in the UI -- mirrors the same pattern already used for
+    // /reservations above. Deactivation is a normal field update
+    // (active:false), which stays allowed.
+    match /service_catalog/{itemId} {
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow create, update: if (isAdmin() || isManagerRole())
+        && request.resource.data.name is string
+        && request.resource.data.category in ['TRIPS_ACTIVITIES','FOOD_BEVERAGE','TRANSFER','OTHER_SERVICE','ACCOMMODATION_EXTRA']
+        && request.resource.data.unitType in ['PER_PAX','PER_TRIP','PER_ITEM','PER_NIGHT','PER_ROOM']
+        && request.resource.data.basePrice is number
+        && request.resource.data.basePrice >= 0
+        && request.resource.data.active is bool;
+      allow delete: if false;
     }
 
     match /users/{id} {
@@ -108,7 +160,7 @@ service cloud.firestore {
       // use get() on this same path internally, which bypasses this read
       // rule entirely (rules-internal get()/exists() always succeed), so
       // tightening this doesn't touch that.
-      allow read: if isAdmin() || isStaff() || (request.auth != null && request.auth.token.email.lower() == id);
+      allow read: if isAdmin() || isStaff() || isManagerRole() || (request.auth != null && request.auth.token.email.lower() == id);
       // Self-service writes may never change `role` (existing) or
       // `commission` (added) — both are admin-set fields with no legitimate
       // self-edit path in the app. `uid` is deliberately left self-writable:
@@ -137,36 +189,36 @@ service cloud.firestore {
     // admin/staff. These rules exist solely so the future PMS "Sync log" /
     // "OTA channels" screens can read the real data once built; today
     // nothing in the client reads these collections yet.
-    match /ota_config/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
-    match /ota_events/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
-    match /ota_conflicts/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
-    match /ota_pushes/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
-    match /ota_queue/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
-    match /availability_outbound/{id} { allow read: if isAdmin() || isStaff(); allow write: if false; }
+    match /ota_config/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if false; }
+    match /ota_events/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if false; }
+    match /ota_conflicts/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if false; }
+    match /ota_pushes/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if false; }
+    match /ota_queue/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if false; }
+    match /availability_outbound/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if false; }
     // OTA room-type commercial model (Beds24 pre-integration stage, additive):
     // separate from physical-room pricing (room_prices/room_details above) and
     // from live PMS rates -- staff/admin can configure it exactly like any
     // other pricing-adjacent collection, but nothing reads or writes it from
     // the public site, and no Cloud Function pushes it externally yet.
-    match /ota_room_types/{id} { allow read: if isAdmin() || isStaff(); allow write: if isAdmin() || isStaff(); }
-    match /ota_room_type_overrides/{id} { allow read: if isAdmin() || isStaff(); allow write: if isAdmin() || isStaff(); }
+    match /ota_room_types/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if isAdmin() || isStaff() || isManagerRole(); }
+    match /ota_room_type_overrides/{id} { allow read: if isAdmin() || isStaff() || isManagerRole(); allow write: if isAdmin() || isStaff() || isManagerRole(); }
     // rate_limits stores only a salted hash + a count, never guest PII; kept
     // fully server-only (not even admin/staff read) since it has no UI use.
     match /rate_limits/{id} { allow read, write: if false; }
     match /block_requests/{id} {
       allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid;
-      allow read: if request.auth != null && (isAdmin() || isStaff() || resource.data.agencyId == request.auth.uid);
-      allow update: if isAdmin() || isStaff();
+      allow read: if request.auth != null && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+      allow update: if isAdmin() || isStaff() || isManagerRole();
       allow delete: if false;
     }
 
     match /packages/{packageId} {
-      allow read: if isAdmin() || isStaff()
+      allow read: if isAdmin() || isStaff() || isManagerRole()
         || resource.data.get('visibleToAgencies', 'all') == 'all'
         || (request.auth != null
             && resource.data.visibleToAgencies is list
             && request.auth.token.email.lower() in resource.data.visibleToAgencies);
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     // Per-agency package copies - each agency's own customized package set,
@@ -180,12 +232,12 @@ service cloud.firestore {
 
     match /room_prices/{roomId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     match /room_details/{roomId} {
       allow read: if true;
-      allow write: if isAdmin() || isStaff();
+      allow write: if isAdmin() || isStaff() || isManagerRole();
     }
 
     // Guest reviews - manually entered OTA reviews + platform aggregate

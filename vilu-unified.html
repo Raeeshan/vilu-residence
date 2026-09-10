@@ -877,7 +877,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" onclick="go('cal',this)"><i class="ti ti-calendar"></i>Calendar</div>
   <div class="sl" onclick="go('res',this)"><i class="ti ti-list"></i>Reservations</div>
   <div class="sg">Pricing</div>
-  <div class="sl" onclick="go('price',this)"><i class="ti ti-currency-dollar"></i>Bulk price manager</div>
+  <div class="sl" id="sl-price" onclick="go('price',this)"><i class="ti ti-currency-dollar"></i>Bulk price manager</div>
   <div class="sl" onclick="go('seasons',this)"><i class="ti ti-sun"></i>Seasonal rates</div>
   <div class="sg">Operations</div>
   <div class="sl" onclick="go('ops',this);setTimeout(drawOps,300)"><i class="ti ti-calendar-event"></i>Daily Operations</div>
@@ -1383,42 +1383,49 @@ body.pms-mode { overflow:hidden; }
 </div>
 </div>
 
-<!-- FIXED PRICES EDITOR -->
+<!-- FIXED PRICE SERVICE CATALOG (Admin/Manager only -- also gated by the
+     page-level go('price') check and by applyPricingVisibility() hiding the
+     sidebar entry; canManageCatalog() also guards every mutating action
+     below in case this markup is ever reached some other way) -->
 <div style="margin-top:28px;padding:0 16px 20px">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <div>
-      <div style="font-size:var(--font-size-lg);font-weight:800;color:#111827">Fixed Prices</div>
-      <div style="font-size:var(--font-size-sm);color:#6b7280;margin-top:2px">Set prices for trips, food, transfers and extras — used in guest folios and invoices</div>
+      <div style="font-size:var(--font-size-lg);font-weight:800;color:#111827">Fixed Price Catalog</div>
+      <div style="font-size:var(--font-size-sm);color:#6b7280;margin-top:2px">Master prices for trips, food, transfers and extras — used when Staff add a charge to a guest folio. Only Admin/Manager can change these.</div>
     </div>
-    <button onclick="saveFP()" style="background:#059669;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit">💾 Save Prices</button>
+    <button onclick="openAddCatalogItem()" style="background:#0077b6;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-plus"></i> Add item</button>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px" id="fp-grid">
-    <!-- Rendered by drawFP() -->
-  </div>
-
-  <div style="margin-top:16px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px">
-    <div style="font-size:var(--font-size-base);font-weight:700;color:#374151;margin-bottom:10px">➕ Add Custom Item</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-      <div><label style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;display:block;margin-bottom:4px">CATEGORY</label>
-        <select id="fp-new-cat" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:var(--font-size-sm)">
-          <option value="Trips &amp; Activities">Trips &amp; Activities</option>
-          <option value="Food &amp; Beverage">Food &amp; Beverage</option>
-          <option value="Transport">Transport</option>
-          <option value="Accommodation">Accommodation</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div><label style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;display:block;margin-bottom:4px">ITEM NAME</label>
-        <input type="text" id="fp-new-name" placeholder="e.g. Night Snorkeling" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:var(--font-size-sm);width:180px">
-      </div>
-      <div><label style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;display:block;margin-bottom:4px">PRICE ($/pax)</label>
-        <input type="number" id="fp-new-price" placeholder="0" min="0" step="0.5" style="padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;font-size:var(--font-size-sm);width:100px">
-      </div>
-      <button onclick="addFPItem()" style="background:#0077b6;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Add</button>
-    </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px" id="svc-cat-grid">
+    <!-- Rendered by drawServiceCatalog() -->
   </div>
 </div>
+</div>
+
+<!-- Add/Edit catalog item modal -->
+<div class="mbg" id="m-catitem" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:420px">
+    <div class="mhd"><h3 id="cim-title"></h3>
+      <button class="ab" onclick="document.getElementById('m-catitem').classList.remove('on')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fg"><label>Name</label><input type="text" id="cim-name" placeholder="e.g. Manta Ray Tour"></div>
+    <div class="fg"><label>Category</label><select id="cim-cat">
+        <option value="TRIPS_ACTIVITIES">Trips &amp; Activities</option>
+        <option value="FOOD_BEVERAGE">Food &amp; Beverage</option>
+        <option value="TRANSFER">Transfers</option>
+        <option value="ACCOMMODATION_EXTRA">Accommodation Extras</option>
+        <option value="OTHER_SERVICE">Other Services</option>
+      </select></div>
+    <div class="fg"><label>Unit type</label><select id="cim-unit">
+        <option value="PER_PAX">Per pax</option>
+        <option value="PER_TRIP">Per trip</option>
+        <option value="PER_ITEM">Per item</option>
+        <option value="PER_NIGHT">Per night</option>
+        <option value="PER_ROOM">Per room</option>
+      </select></div>
+    <div class="fg"><label>Price ($)</label><input type="number" id="cim-price" min="0" step="0.5" placeholder="0"></div>
+    <button class="btn p" style="width:100%" onclick="saveCatalogItem()"><i class="ti ti-device-floppy"></i> Save item</button>
+  </div>
 </div>
 
 <div class="sec" id="s-seasons">
@@ -2231,7 +2238,7 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
     <div style="margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <label style="font-size:var(--font-size-xs);font-weight:700;color:#374151"><i class="ti ti-plus-circle" style="color:#00b4d8;margin-right:5px"></i>Additional charges</label>
-        <button class="btn sm" onclick="openCatMgr()" style="border-color:#6b7280;color:#6b7280;font-size:var(--font-size-xs)"><i class="ti ti-settings"></i>Manage categories</button>
+        <button class="btn sm" onclick="openCatalogFromInvoice()" style="border-color:#6b7280;color:#6b7280;font-size:var(--font-size-xs)"><i class="ti ti-settings"></i>Manage catalog</button>
         <button class="btn sm p" onclick="showCatPicker()"><i class="ti ti-plus"></i>Add item</button>
       </div>
 
@@ -2269,8 +2276,14 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
           <option>Unpaid</option>
         </select>
       </div>
-      <div class="fg" style="margin-bottom:0"><label>Discount ($)</label>
-        <input type="number" id="ni-disc" min="0" step="0.5" placeholder="0.00" oninput="niPrev()">
+      <div class="fg" style="margin-bottom:0"><label>Invoice discount</label>
+        <div style="display:flex;gap:6px">
+          <select id="ni-disctype" onchange="niPrev()" style="flex:1">
+            <option value="fixed">$ Fixed</option>
+            <option value="percent">% Percentage</option>
+          </select>
+          <input type="number" id="ni-disc" min="0" step="0.5" placeholder="0.00" oninput="niPrev()" style="width:90px">
+        </div>
       </div>
     </div>
     <div class="fg"><label>Notes / special message</label>
@@ -2406,6 +2419,13 @@ Suite</textarea></div>
           <div>
             <div style="font-size:var(--font-size-base);font-weight:700;color:#1d4ed8">👤 Staff</div>
             <div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">Can add new reservations, edit guest details, extend stays, check in/out guests. <strong>Cannot</strong> cancel bookings, delete data, access pricing or settings.</div>
+          </div>
+        </label>
+        <label onclick="setAURole('manager')" id="role-opt-manager" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all .15s">
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;margin-top:1px;flex-shrink:0;display:flex;align-items:center;justify-content:center" id="radio-manager"></div>
+          <div>
+            <div style="font-size:var(--font-size-base);font-weight:700;color:#7c3aed">⭐ Manager</div>
+            <div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">Everything Staff can do, plus: manage the Fixed Price service catalog and Bulk Price Manager, apply/approve discounts and price overrides on guest folios.</div>
           </div>
         </label>
         <label onclick="setAURole('agency')" id="role-opt-agency" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all .15s">
@@ -3396,101 +3416,209 @@ function markBoatGuestDone(dateStr, boatIdx, guestIdx) {
 }
 
 
-// ── FIXED PRICES ──
-var FP_KEY = 'vilu_fixed_prices';
-var FP_DEFAULTS = [
-  {cat:'Trips & Activities', name:'Snorkeling',         price:25,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Dolphin Cruise',     price:30,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Sandbank Visit',     price:20,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Sunset Cruise',      price:35,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Fishing Trip',       price:40,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Island Hopping',     price:45,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Manta Ray Tour',     price:50,  unit:'$/pax'},
-  {cat:'Trips & Activities', name:'Night Snorkeling',   price:30,  unit:'$/pax'},
-  {cat:'Food & Beverage',    name:'Breakfast',          price:12,  unit:'$/pax'},
-  {cat:'Food & Beverage',    name:'Lunch',              price:15,  unit:'$/pax'},
-  {cat:'Food & Beverage',    name:'Dinner',             price:18,  unit:'$/pax'},
-  {cat:'Food & Beverage',    name:'Welcome Drink',      price:5,   unit:'$/pax'},
-  {cat:'Food & Beverage',    name:'BBQ Night',          price:25,  unit:'$/pax'},
-  {cat:'Transport',          name:'Speedboat Transfer', price:40,  unit:'$/trip'},
-  {cat:'Transport',          name:'Dhoni Transfer',     price:20,  unit:'$/trip'},
-  {cat:'Transport',          name:'Airport Transfer',   price:60,  unit:'$/trip'},
-  {cat:'Accommodation',      name:'Extra Bed',          price:20,  unit:'$/night'},
-  {cat:'Accommodation',      name:'Early Check-in',     price:30,  unit:'$/room'},
-  {cat:'Accommodation',      name:'Late Check-out',     price:30,  unit:'$/room'},
+// ── FIXED PRICE SERVICE CATALOG ──
+// Fixed Price Catalog Integration (2026-09-10): the ONE canonical master
+// item/price list (Firestore `service_catalog`), replacing two prior,
+// non-synced stores -- the old localStorage-only FP_* "Fixed Prices"
+// catalog below (a dead end: read nowhere but its own page) and the
+// smaller, independently-authored INV_CATS catalog (the only one actually
+// wired into folio add-charge / the invoice item-picker before this task).
+// Admin/Manager manage this (canManageCatalog()); Staff read it to add a
+// folio charge at master price, never to edit it (enforced both here via
+// canManageCatalog() gates and in firestore.rules' service_catalog rule).
+const CATALOG_CATEGORIES = [
+  {key:'TRIPS_ACTIVITIES',    label:'Trips & Activities',   color:'#0077b6'},
+  {key:'FOOD_BEVERAGE',       label:'Food & Beverage',      color:'#059669'},
+  {key:'TRANSFER',            label:'Transfers',            color:'#7c3aed'},
+  {key:'ACCOMMODATION_EXTRA', label:'Accommodation Extras', color:'#dc2626'},
+  {key:'OTHER_SERVICE',       label:'Other Services',       color:'#6b7280'},
+];
+const CATALOG_UNIT_TYPES = [
+  {key:'PER_PAX',   label:'Pax',   short:'pax'},
+  {key:'PER_TRIP',  label:'Trips', short:'trip'},
+  {key:'PER_ITEM',  label:'Items', short:'item'},
+  {key:'PER_NIGHT', label:'Nights',short:'night'},
+  {key:'PER_ROOM',  label:'Rooms', short:'room'},
+];
+function catalogCategoryLabel(key){ var c=CATALOG_CATEGORIES.find(function(x){return x.key===key;}); return c?c.label:key; }
+function catalogUnitShort(key){ var u=CATALOG_UNIT_TYPES.find(function(x){return x.key===key;}); return u?u.short:'unit'; }
+function catalogUnitLabel(key){ var u=CATALOG_UNIT_TYPES.find(function(x){return x.key===key;}); return u?u.label:'Qty'; }
+
+// One-time seed source, used only by seedServiceCatalogIfEmpty() the first
+// time the collection is ever read empty -- ports the old FP_DEFAULTS 19
+// items (the richer of the two prior catalogs, and the one matching the
+// real screenshot this task was scoped from) plus INV_CATS' 2 Other-Services
+// items with no FP_DEFAULTS equivalent (Laundry, Special Decoration); items
+// already present in both under the same name (Extra Bed, Late Check-out)
+// are not duplicated. Never read again after the collection is seeded.
+const SVC_CATALOG_SEED = [
+  {name:'Snorkeling',         category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:25},
+  {name:'Dolphin Cruise',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:30},
+  {name:'Sandbank Visit',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:20},
+  {name:'Sunset Cruise',      category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:35},
+  {name:'Fishing Trip',       category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:40},
+  {name:'Island Hopping',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:45},
+  {name:'Manta Ray Tour',     category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:50},
+  {name:'Night Snorkeling',   category:'TRIPS_ACTIVITIES',    unitType:'PER_PAX',   basePrice:30},
+  {name:'Breakfast',          category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:12},
+  {name:'Lunch',              category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:15},
+  {name:'Dinner',             category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:18},
+  {name:'Welcome Drink',      category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:5},
+  {name:'BBQ Night',          category:'FOOD_BEVERAGE',       unitType:'PER_PAX',   basePrice:25},
+  {name:'Speedboat Transfer', category:'TRANSFER',            unitType:'PER_TRIP',  basePrice:40},
+  {name:'Dhoni Transfer',     category:'TRANSFER',            unitType:'PER_TRIP',  basePrice:20},
+  {name:'Airport Transfer',   category:'TRANSFER',            unitType:'PER_TRIP',  basePrice:60},
+  {name:'Extra Bed',          category:'ACCOMMODATION_EXTRA', unitType:'PER_NIGHT', basePrice:20},
+  {name:'Early Check-in',     category:'ACCOMMODATION_EXTRA', unitType:'PER_ROOM',  basePrice:30},
+  {name:'Late Check-out',     category:'ACCOMMODATION_EXTRA', unitType:'PER_ROOM',  basePrice:30},
+  {name:'Laundry',            category:'OTHER_SERVICE',       unitType:'PER_ITEM',  basePrice:15},
+  {name:'Special Decoration', category:'OTHER_SERVICE',       unitType:'PER_ITEM',  basePrice:30},
 ];
 
-function loadFP() {
-  try { var s=localStorage.getItem(FP_KEY); if(s) return JSON.parse(s); } catch(e) {}
-  return JSON.parse(JSON.stringify(FP_DEFAULTS));
+var SVC_CATALOG = []; // in-memory mirror of the service_catalog Firestore collection
+var _svcCatalogLoaded = false;
+
+async function loadServiceCatalogFromFirestore(){
+  try {
+    var snap = await fsDb.collection('service_catalog').get();
+    if (snap.empty) { await seedServiceCatalogIfEmpty(); return; }
+    SVC_CATALOG = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    _svcCatalogLoaded = true;
+    if (document.getElementById('svc-cat-grid')) drawServiceCatalog();
+  } catch(e) { console.error('loadServiceCatalogFromFirestore failed', e); }
 }
-function saveFP() {
-  var items = loadFP();
-  // Read all current values from inputs
-  document.querySelectorAll('.fp-price-input').forEach(function(input) {
-    var idx = parseInt(input.getAttribute('data-idx'));
-    if(!isNaN(idx) && items[idx]) items[idx].price = parseFloat(input.value)||0;
-  });
-  localStorage.setItem(FP_KEY, JSON.stringify(items));
-  if(typeof toast==='function') toast('✅ Prices saved!');
+
+// Runs once, only when the collection is genuinely empty -- re-checks
+// emptiness right before writing so two concurrent admin sessions loading
+// at the same time can't double-seed. Never overwrites existing items.
+async function seedServiceCatalogIfEmpty(){
+  try {
+    var snap = await fsDb.collection('service_catalog').limit(1).get();
+    if (!snap.empty) {
+      var full = await fsDb.collection('service_catalog').get();
+      SVC_CATALOG = full.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      _svcCatalogLoaded = true;
+      if (document.getElementById('svc-cat-grid')) drawServiceCatalog();
+      return;
+    }
+    var now = Date.now();
+    var batch = fsDb.batch();
+    SVC_CATALOG_SEED.forEach(function(item, i){
+      var ref = fsDb.collection('service_catalog').doc();
+      batch.set(ref, {
+        name: item.name, category: item.category, unitType: item.unitType,
+        basePrice: item.basePrice, active: true, createdAt: now+i, updatedAt: now+i
+      });
+    });
+    await batch.commit();
+    var reSnap = await fsDb.collection('service_catalog').get();
+    SVC_CATALOG = reSnap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    _svcCatalogLoaded = true;
+    if (document.getElementById('svc-cat-grid')) drawServiceCatalog();
+  } catch(e) { console.error('seedServiceCatalogIfEmpty failed', e); }
 }
-function drawFP() {
-  var grid = document.getElementById('fp-grid');
+
+function drawServiceCatalog(){
+  var grid = document.getElementById('svc-cat-grid');
   if(!grid) return;
-  var items = loadFP();
-  // Group by category
-  var cats = {};
-  items.forEach(function(item, idx) {
-    if(!cats[item.cat]) cats[item.cat]=[];
-    cats[item.cat].push({item:item, idx:idx});
-  });
-  var catColors = {
-    'Trips & Activities':'#0077b6',
-    'Food & Beverage':'#059669',
-    'Transport':'#7c3aed',
-    'Accommodation':'#dc2626',
-    'Other':'#6b7280'
-  };
+  var byCat = {};
+  SVC_CATALOG.forEach(function(item){ (byCat[item.category]=byCat[item.category]||[]).push(item); });
   var html = '';
-  Object.keys(cats).forEach(function(cat) {
-    var color = catColors[cat]||'#374151';
+  CATALOG_CATEGORIES.forEach(function(cat){
+    var items = (byCat[cat.key]||[]).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
+    if(!items.length) return;
     html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">';
-    html += '<div style="background:'+color+';color:#fff;padding:10px 16px;font-size:var(--font-size-base);font-weight:800">'+cat+'</div>';
+    html += '<div style="background:'+cat.color+';color:#fff;padding:10px 16px;font-size:var(--font-size-base);font-weight:800">'+cat.label+'</div>';
     html += '<div style="padding:12px">';
-    cats[cat].forEach(function(entry) {
-      var item = entry.item;
-      var idx = entry.idx;
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">'
-        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+item.name+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+item.unit+'</span></div>'
-        + '<div style="display:flex;align-items:center;gap:6px">'
+    items.forEach(function(item){
+      var inactive = item.active===false;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;opacity:'+(inactive?'0.5':'1')+'">'
+        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">$/'+catalogUnitShort(item.unitType)+'</span></div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
         + '<span style="color:#6b7280;font-size:var(--font-size-sm)">$</span>'
-        + '<input type="number" class="fp-price-input" data-idx="'+idx+'" value="'+item.price+'" min="0" step="0.5" style="width:70px;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:var(--font-size-base);font-weight:700;text-align:right;font-family:inherit">'
-        + '<button onclick="deleteFPItem('+idx+')" title="Remove" style="background:none;border:none;color:#d1d5db;font-size:var(--font-size-md);cursor:pointer;padding:2px 4px">✕</button>'
+        + '<span style="width:70px;text-align:right;font-size:var(--font-size-base);font-weight:700;color:#111827">'+Number(item.basePrice).toFixed(2)+'</span>'
+        + '<button onclick="openEditCatalogItem(\''+item.id+'\')" title="Edit" style="background:none;border:none;color:#6b7280;font-size:var(--font-size-md);cursor:pointer;padding:2px 4px"><i class="ti ti-edit"></i></button>'
+        + (inactive
+            ? '<button onclick="reactivateCatalogItem(\''+item.id+'\')" title="Reactivate" style="background:none;border:none;color:#059669;font-size:var(--font-size-md);cursor:pointer;padding:2px 4px"><i class="ti ti-rotate"></i></button>'
+            : '<button onclick="deactivateCatalogItem(\''+item.id+'\')" title="Deactivate" style="background:none;border:none;color:#d97706;font-size:var(--font-size-md);cursor:pointer;padding:2px 4px"><i class="ti ti-eye-off"></i></button>')
         + '</div></div>';
     });
     html += '</div></div>';
   });
-  grid.innerHTML = html;
+  grid.innerHTML = html || '<div style="color:#9ca3af;font-size:var(--font-size-sm);padding:12px">No catalog items yet.</div>';
 }
-function addFPItem() {
-  var cat = document.getElementById('fp-new-cat').value;
-  var name = document.getElementById('fp-new-name').value.trim();
-  var price = parseFloat(document.getElementById('fp-new-price').value)||0;
-  if(!name){if(typeof toast==='function')toast('Enter an item name');return;}
-  var items = loadFP();
-  var unitMap = {'Trips & Activities':'$/pax','Food & Beverage':'$/pax','Transport':'$/trip','Accommodation':'$/night','Other':'$/unit'};
-  items.push({cat:cat, name:name, price:price, unit:unitMap[cat]||'$/unit'});
-  localStorage.setItem(FP_KEY, JSON.stringify(items));
-  document.getElementById('fp-new-name').value='';
-  document.getElementById('fp-new-price').value='';
-  drawFP();
-  if(typeof toast==='function') toast('✅ '+name+' added!');
+
+var _catalogEditingId = null;
+function openAddCatalogItem(){
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
+  _catalogEditingId = null;
+  document.getElementById('cim-title').innerHTML = '<i class="ti ti-tag" style="color:#0077b6;margin-right:6px"></i>Add catalog item';
+  document.getElementById('cim-name').value='';
+  document.getElementById('cim-cat').value=CATALOG_CATEGORIES[0].key;
+  document.getElementById('cim-unit').value='PER_PAX';
+  document.getElementById('cim-price').value='';
+  document.getElementById('m-catitem').classList.add('on');
 }
-function deleteFPItem(idx) {
-  var items = loadFP();
-  items.splice(idx,1);
-  localStorage.setItem(FP_KEY, JSON.stringify(items));
-  drawFP();
+function openEditCatalogItem(id){
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
+  var item = SVC_CATALOG.find(function(x){return x.id===id;});
+  if(!item) return;
+  _catalogEditingId = id;
+  document.getElementById('cim-title').innerHTML = '<i class="ti ti-edit" style="color:#0077b6;margin-right:6px"></i>Edit catalog item';
+  document.getElementById('cim-name').value=item.name;
+  document.getElementById('cim-cat').value=item.category;
+  document.getElementById('cim-unit').value=item.unitType;
+  document.getElementById('cim-price').value=item.basePrice;
+  document.getElementById('m-catitem').classList.add('on');
+}
+async function saveCatalogItem(){
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
+  var name=(document.getElementById('cim-name').value||'').trim();
+  var category=document.getElementById('cim-cat').value;
+  var unitType=document.getElementById('cim-unit').value;
+  var basePrice=+(document.getElementById('cim-price').value||0);
+  if(!name){ toast('Enter an item name'); return; }
+  if(basePrice<0){ toast('Price cannot be negative'); return; }
+  var now=Date.now();
+  try {
+    if(_catalogEditingId){
+      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,updatedAt:now}, {merge:true});
+      var existing=SVC_CATALOG.find(function(x){return x.id===_catalogEditingId;});
+      if(existing) Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,updatedAt:now});
+    } else {
+      var ref=fsDb.collection('service_catalog').doc();
+      var doc={name:name,category:category,unitType:unitType,basePrice:basePrice,active:true,createdAt:now,updatedAt:now};
+      await ref.set(doc);
+      SVC_CATALOG.push(Object.assign({id:ref.id},doc));
+    }
+    document.getElementById('m-catitem').classList.remove('on');
+    drawServiceCatalog();
+    toast('✓ '+name+' saved');
+  } catch(e){ console.error('saveCatalogItem failed', e); toast('⚠ Could not save item'); }
+}
+// Deactivate/reactivate, never hard-delete (Part 5) -- an inactive item
+// simply disappears from folioShowCatalogCategory()'s active-item list for
+// NEW charges, while any folio/invoice line that already snapshotted it
+// (Part 6) keeps its own copy of the name/price forever, unaffected.
+async function deactivateCatalogItem(id){
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
+  try {
+    await fsDb.collection('service_catalog').doc(id).set({active:false,updatedAt:Date.now()},{merge:true});
+    var item=SVC_CATALOG.find(function(x){return x.id===id;});
+    if(item) item.active=false;
+    drawServiceCatalog();
+    toast('✓ Deactivated');
+  } catch(e){ console.error('deactivateCatalogItem failed', e); toast('⚠ Could not deactivate'); }
+}
+async function reactivateCatalogItem(id){
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
+  try {
+    await fsDb.collection('service_catalog').doc(id).set({active:true,updatedAt:Date.now()},{merge:true});
+    var item=SVC_CATALOG.find(function(x){return x.id===id;});
+    if(item) item.active=true;
+    drawServiceCatalog();
+    toast('✓ Reactivated');
+  } catch(e){ console.error('reactivateCatalogItem failed', e); toast('⚠ Could not reactivate'); }
 }
 
 
@@ -3656,7 +3784,7 @@ function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>
 
 // NAV
 const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(drawFP,200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -3672,6 +3800,14 @@ function go(id,el){
   // Block non-admins from accessing user management / transportation settings / owner analytics
   if((id==='users'||id==='transport'||id==='analytics') && (!currentUser || currentUser.role!=='admin')){
     toast('⛔ Admin access only');
+    return;
+  }
+  // Bulk Price Manager (also hosts the Fixed Price service catalog) is
+  // Admin/Manager only -- mirrors the block above so a Staff user can't
+  // reach it via a direct go('price') call even with the sidebar entry
+  // hidden. Actual data writes are separately enforced in firestore.rules.
+  if(id==='price' && !canManageCatalog()){
+    toast('⛔ Admin/Manager access only');
     return;
   }
   // Calendar gets a dedicated full-screen workspace (sidebar off-canvas at
@@ -5953,6 +6089,7 @@ function openIM(resId, opts){
   document.getElementById('ni-res').innerHTML=RES.filter(r=>r.st!=='Cancelled').map(r=>`<option value="${r.id}"${r.id===resId?' selected':''}>${r.id}: ${esc(r.fn)} ${esc(r.ln)} — ${rNm(r.rn)} (${fd(r.ci)}–${fd(r.co)})</option>`).join('');
   document.getElementById('ni-notes').value='';
   if(document.getElementById('ni-disc'))document.getElementById('ni-disc').value='';
+  if(document.getElementById('ni-disctype'))document.getElementById('ni-disctype').value='fixed';
   var includeRoom = opts && typeof opts.includeRoom==='boolean' ? opts.includeRoom : true;
   var roomToggle=document.getElementById('ni-include-room');
   if(roomToggle) roomToggle.checked=includeRoom;
@@ -5968,7 +6105,7 @@ function openIM(resId, opts){
         chargeId:ch.id,
         desc:ch.desc+(pax>1?' ('+pax+' pax)':''),
         qty:1,
-        unit:+(ch.price*pax).toFixed(2),
+        unit:chargeFinalAmount(ch),
         tax:ch.tax!==false,
         cat:ch.cat||'Other Services'
       });
@@ -5991,9 +6128,25 @@ function openIM(resId, opts){
 // room twice, once via pbd(r) here and once as a manually-added item, and
 // skipped Green Tax/3rd-guest supplement entirely). One room calculation,
 // one place, always calcTax() (Step 4/6 fix, 2026-09-10 folio unification).
+// Invoice-level discount (Part 12/13): items already carry their own
+// item-level discount baked into invItems[].unit (chargeFinalAmount() --
+// see openIM()/submitCreateInvoice()), so eSubtotal here is already the
+// "after item discounts" figure -- the invoice-level discount below is a
+// SECOND, separate reduction on top, never re-discounting the same amount
+// twice. Tax ordering audited before this change (unchanged): extra-charge
+// tax is computed on eSubtotal BEFORE the invoice discount is subtracted,
+// exactly as the pre-existing flat-dollar-only discount already did --
+// this task only adds a percentage option, it does not move where the
+// discount applies.
+function invDiscountAmount(roomTotal, eT){
+  const disctype=document.getElementById('ni-disctype')?.value||'fixed';
+  const discval=+(document.getElementById('ni-disc')?.value||0);
+  const base=roomTotal+eT;
+  const amt=disctype==='percent'?base*discval/100:discval;
+  return {type:disctype, value:discval, amount:+Math.min(base,Math.max(0,amt)).toFixed(2)};
+}
 function niPrev(){
   const id=document.getElementById('ni-res').value,r=RES.find(x=>x.id===id);
-  const disc=+(document.getElementById('ni-disc')?.value||0);
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   if(!r){document.getElementById('ni-prev').innerHTML='';return;}
   const x=calcTax(r);
@@ -6001,7 +6154,8 @@ function niPrev(){
   const eTax=invItems.filter(i=>i.tax).reduce((s,i)=>s+(i.qty*i.unit*(TAX.svc+TAX.tgst)/100),0);
   const eT=eSubtotal+eTax;
   const roomTotal=includeRoom?x.total:0;
-  const total=+(roomTotal+eT-disc).toFixed(2);
+  const d=invDiscountAmount(roomTotal, eT);
+  const total=+(roomTotal+eT-d.amount).toFixed(2);
   let html=includeRoom?pbd(r):'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:4px 0">Room charge not included in this invoice</div>';
   if(invItems.length){
     html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
@@ -6010,7 +6164,8 @@ function niPrev(){
       <div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0;color:#6b7280"><span>Extra tax (TGST+Service)</span><span>$${eTax.toFixed(2)}</span></div>
     </div>`;
   }
-  if(disc>0)html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;color:#00b4d8;margin-top:4px"><span>Discount</span><span>-$${disc.toFixed(2)}</span></div>`;
+  html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px"><span style="color:#6b7280">Subtotal</span><span>$${(roomTotal+eT).toFixed(2)}</span></div>`;
+  if(d.amount>0)html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;color:#00b4d8"><span>Invoice discount${d.type==='percent'?' ('+d.value+'%)':''}</span><span>-$${d.amount.toFixed(2)}</span></div>`;
   html+=`<div style="display:flex;justify-content:space-between;font-weight:700;border-top:2px solid #111827;padding-top:7px;margin-top:6px;font-size:var(--font-size-md);color:#00b4d8"><span>Grand total</span><span>$${total.toFixed(2)}</span></div>`;
   document.getElementById('ni-prev').innerHTML=html;
 }
@@ -6080,7 +6235,6 @@ function genInv(){
   if(canViewOnly()){toast('⚠️ Agency access — cannot generate invoices');return;}
   const rid=document.getElementById('ni-res').value,r=RES.find(x=>x.id===rid);
   if(!r){toast('Select a reservation');return;}
-  const disc=+(document.getElementById('ni-disc')?.value||0);
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   const extras=invItems.filter(i=>i.desc&&i.unit>=0).map(i=>{
     const subtotal=+(i.qty*i.unit).toFixed(2);
@@ -6092,11 +6246,19 @@ function genInv(){
   const eTax=+extras.reduce((s,e)=>s+e.taxAmt,0).toFixed(2);
   const eT=+(eSubtotal+eTax).toFixed(2);
   const roomTotal=includeRoom?x.total:0;
+  const d=invDiscountAmount(roomTotal, eT);
+  const disc=d.amount;
   const total=+(roomTotal+eT-disc).toFixed(2);
   IC++;
   const initialPay=document.getElementById('ni-pay').value;
   const paidAmount=initialPay==='Fully paid'?total:0;
-  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eT,total,pay:initialPay,paidAmount,payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
+  // eSubtotal/eTax/disc/discType/discValue -- previously computed here but
+  // never actually stored on `v`, so viewInv()'s references to them were
+  // always undefined and a saved invoice's discount silently vanished from
+  // its own printed/reopened view even though it correctly reduced `total`
+  // at creation time (Guest Folio unification bug, fixed alongside this
+  // task's invoice-discount work since it touches the same object literal).
+  const v={id:'INV-'+IC,num:IC,resId:r.id,includeRoom,guest:r.fn+' '+r.ln,nat:r.nat,em:r.em,ph:r.ph,room:getR(r.rn)?.nm||r.rn,prop:r.prop,ci:r.ci,co:r.co,n:x.n,rate:r.rate,src:r.src,ad:r.ad,ch:r.ch,inf:r.inf,base:includeRoom?x.base:0,svc:includeRoom?x.svc:0,tgst:includeRoom?x.tgst:0,green:includeRoom?x.green:0,gp:x.gp,bed:x.bed,extras,eSubtotal,eTax,eT,disc,discType:d.type,discValue:d.value,total,pay:initialPay,paidAmount,payments:paidAmount>0?[{amount:paidAmount,date:tS,note:'Marked paid at creation'}]:[],status:'active',notes:document.getElementById('ni-notes').value,ref:r.ref,issued:tS,tax:{...TAX}};
   INV.unshift(v);
   syncInvoiceToFirestore(v);
   // Mark the source folio charges as invoiced (Step 10/21: never
@@ -6144,14 +6306,14 @@ function viewInv(id){
       </tr>
       ${e.tax&&e.taxAmt>0?`<tr style="background:#fffbeb"><td style="font-size:var(--font-size-xs);color:#92400e;padding-left:18px">↳ Tax on ${e.desc} (TGST ${v.tax.tgst}% + Service ${v.tax.svc}%)</td><td colspan="3"></td><td class="r" style="color:#92400e">$${(+e.taxAmt||0).toFixed(2)}</td></tr>`:''}
     `).join('')}
-    ${v.disc>0?`<tr style="background:#e0f7fd"><td style="font-weight:600;color:#0096c7">Discount</td><td colspan="3"></td><td class="r" style="color:#0096c7;font-weight:700">-$${(+v.disc||0).toFixed(2)}</td></tr>`:''}
+    ${v.disc>0?`<tr style="background:#e0f7fd"><td style="font-weight:600;color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td colspan="3"></td><td class="r" style="color:#0096c7;font-weight:700">-$${(+v.disc||0).toFixed(2)}</td></tr>`:''}
     </tbody></table>
     <div class="tn"><strong>Maldives tax breakdown (MIRA):</strong> TGST ${v.tax.tgst}% | Service ${v.tax.svc}% | Green Tax $${v.tax.green}/person/night${v.tax.bed>0?' | Bed $'+v.tax.bed+'/night':''}</div>
     <div class="ivtot"><table>
       <tr><td style="color:#6b7280">Room subtotal</td><td style="text-align:right">$${v.base.toFixed(2)}</td></tr>
       ${v.eSubtotal>0?`<tr><td style="color:#6b7280">Extra charges subtotal</td><td style="text-align:right">$${(+v.eSubtotal||0).toFixed(2)}</td></tr>`:''}
       ${v.eTax>0?`<tr><td style="color:#6b7280">Tax on extra charges</td><td style="text-align:right">$${(+v.eTax||0).toFixed(2)}</td></tr>`:''}
-      ${v.disc>0?`<tr><td style="color:#0096c7">Discount</td><td style="text-align:right;color:#0096c7">-$${(+v.disc||0).toFixed(2)}</td></tr>`:''}
+      ${v.disc>0?`<tr><td style="color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td style="text-align:right;color:#0096c7">-$${(+v.disc||0).toFixed(2)}</td></tr>`:''}
       <tr><td style="color:#6b7280">Service (${v.tax.svc}%)</td><td style="text-align:right">$${v.svc.toFixed(2)}</td></tr>
       <tr><td style="color:#6b7280">TGST (${v.tax.tgst}%)</td><td style="text-align:right">$${v.tgst.toFixed(2)}</td></tr>
       <tr><td style="color:#6b7280">Green Tax ($${v.tax.green}×${v.gp} persons×${v.n} nights${v.inf>0?' — '+v.inf+' infant exempt':''})</td><td style="text-align:right">$${v.green.toFixed(2)}</td></tr>
@@ -6975,9 +7137,10 @@ let _staffPermsLoading = false;
 function renderUsersTable(){
   const tbody = document.getElementById('users-tbody');
   const roleInfo = {
-    admin:  {label:'🔑 Admin',  cls:'ok',   desc:'Full access'},
-    staff:  {label:'👤 Staff',  cls:'ib2',  desc:'Add & edit bookings'},
-    agency: {label:'🏢 Agency', cls:'wn',   desc:'View only'},
+    admin:   {label:'🔑 Admin',   cls:'ok',   desc:'Full access'},
+    manager: {label:'⭐ Manager', cls:'ib2',  desc:'Staff access + pricing catalog & discounts'},
+    staff:   {label:'👤 Staff',   cls:'ib2',  desc:'Add & edit bookings'},
+    agency:  {label:'🏢 Agency',  cls:'wn',   desc:'View only'},
   };
   tbody.innerHTML = USERS.map((u,i)=>{
     const ri = roleInfo[u.role]||{label:u.role,cls:'ot',desc:''};
@@ -6991,7 +7154,7 @@ function renderUsersTable(){
     return `<tr>
       <td>
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:32px;height:32px;border-radius:50%;background:${u.role==='admin'?'#b8eef8':u.role==='staff'?'#dbeafe':'#fef3c7'};color:${u.role==='admin'?'#0096c7':u.role==='staff'?'#1d4ed8':'#92400e'};display:flex;align-items:center;justify-content:center;font-size:var(--font-size-base);font-weight:700;flex-shrink:0">${u.name[0].toUpperCase()}</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:${u.role==='admin'?'#b8eef8':u.role==='staff'?'#dbeafe':u.role==='manager'?'#ede9fe':'#fef3c7'};color:${u.role==='admin'?'#0096c7':u.role==='staff'?'#1d4ed8':u.role==='manager'?'#7c3aed':'#92400e'};display:flex;align-items:center;justify-content:center;font-size:var(--font-size-base);font-weight:700;flex-shrink:0">${u.name[0].toUpperCase()}</div>
           <div>
             <div style="font-size:var(--font-size-sm);font-weight:700">${u.name}${isMe?' <span style="font-size:var(--font-size-xs);background:#b8eef8;color:#0096c7;padding:1px 6px;border-radius:10px">You</span>':''}</div>
           </div>
@@ -7089,17 +7252,19 @@ function closeAddUser(){
   editingUserEmail = null;
 }
 
+const AU_ROLE_COLORS = {staff:'#2563eb', manager:'#7c3aed', agency:'#d97706'};
+const AU_ROLE_BG = {staff:'#eff6ff', manager:'#f5f3ff', agency:'#fffbeb'};
 function setAURole(role){
   auRoleSelected = role;
-  ['staff','agency'].forEach(r=>{
+  ['staff','manager','agency'].forEach(r=>{
     const opt = document.getElementById('role-opt-'+r);
     const radio = document.getElementById('radio-'+r);
     if(!opt||!radio)return;
     if(r===role){
-      opt.style.borderColor = r==='staff'?'#2563eb':'#d97706';
-      opt.style.background  = r==='staff'?'#eff6ff':'#fffbeb';
-      radio.style.background    = r==='staff'?'#2563eb':'#d97706';
-      radio.style.borderColor   = r==='staff'?'#2563eb':'#d97706';
+      opt.style.borderColor = AU_ROLE_COLORS[r];
+      opt.style.background  = AU_ROLE_BG[r];
+      radio.style.background    = AU_ROLE_COLORS[r];
+      radio.style.borderColor   = AU_ROLE_COLORS[r];
       radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#fff"></div>';
     } else {
       opt.style.borderColor = '#e5e7eb';
@@ -7217,6 +7382,15 @@ function applyUserMgmtVisibility(){
     const sl = document.getElementById(id);
     if(sl) sl.style.display = isAdmin ? '' : 'none';
   });
+}
+
+// Pricing administration (Bulk Price Manager, which also hosts the Fixed
+// Price service catalog via FMAP.price -> drawFP()) is Admin/Manager only —
+// separate gate from applyUserMgmtVisibility() above since Manager must see
+// this but not User Management/Partner Hotels/Transport/Analytics.
+function applyPricingVisibility(){
+  const sl = document.getElementById('sl-price');
+  if(sl) sl.style.display = canManageCatalog() ? '' : 'none';
 }
 
 // ── PER-AGENCY PACKAGE EDITOR (opened from a specific agency's row) ──
@@ -7432,105 +7606,21 @@ async function sendPasswordReset(){
 // INVOICE CATEGORY & ITEM MANAGEMENT
 // ═══════════════════════════════════════════════
 
-// Load categories from localStorage or use defaults
-function loadCats(){
-  const saved = localStorage.getItem('vilu_inv_cats');
-  if(saved) return JSON.parse(saved);
-  return [
-    {id:'c1', name:'Trips & Activities', taxDefault:true, items:[
-      {id:'i1', name:'Snorkelling Trip', price:35, tax:true},
-      {id:'i2', name:'Diving Trip', price:60, tax:true},
-      {id:'i3', name:'Island Hopping', price:45, tax:true},
-      {id:'i4', name:'Airport Transfer', price:30, tax:false},
-      {id:'i5', name:'Sunset Cruise', price:50, tax:true},
-    ]},
-    {id:'c2', name:'Food & Beverages', taxDefault:true, items:[
-      {id:'i6', name:'Breakfast', price:12, tax:true},
-      {id:'i7', name:'Lunch', price:15, tax:true},
-      {id:'i8', name:'Dinner', price:20, tax:true},
-      {id:'i9', name:'Half Board', price:25, tax:true},
-      {id:'i10', name:'Full Board', price:40, tax:true},
-      {id:'i11', name:'Welcome Drink', price:8, tax:true},
-      {id:'i12', name:'Minibar', price:15, tax:true},
-    ]},
-    {id:'c3', name:'Other Services', taxDefault:false, items:[
-      {id:'i13', name:'Extra Bed', price:20, tax:false},
-      {id:'i14', name:'Laundry', price:15, tax:false},
-      {id:'i15', name:'Special Decoration', price:30, tax:false},
-      {id:'i16', name:'Late Checkout', price:25, tax:false},
-    ]},
-  ];
+// This invoice-draft item picker previously read its own independent
+// INV_CATS catalog (localStorage, 3 categories, prices that had quietly
+// drifted from the "real" Fixed Prices catalog the screenshot in the
+// Fixed Price Catalog Integration task was scoped from). Retired in favor
+// of the ONE canonical SVC_CATALOG (Firestore `service_catalog`) so an
+// item added here always carries the same master price as the same item
+// added from a folio's own Add Charge flow -- no more independent catalogs
+// silently drifting apart (Part 1/2). Category management (add/delete
+// category) is retired along with it: the 5 categories are now a fixed
+// enum, managed from the Fixed Price Catalog page (Admin/Manager only),
+// not user-defined here.
+function openCatalogFromInvoice(){
+  document.getElementById('m-inv').classList.remove('on');
+  go('price', document.getElementById('sl-price'));
 }
-function saveCats(){ localStorage.setItem('vilu_inv_cats', JSON.stringify(INV_CATS)); }
-let INV_CATS = loadCats();
-
-// ── CATEGORY MANAGER ──
-function openCatMgr(){
-  renderCatMgr();
-  document.getElementById('m-catmgr').classList.add('on');
-}
-
-function renderCatMgr(){
-  const el=document.getElementById('cat-mgr-list');if(!el)return;
-  if(!INV_CATS.length){el.innerHTML='<p style="text-align:center;padding:20px;font-size:var(--font-size-sm);color:#9ca3af">No categories yet. Add one above.</p>';return;}
-  let h='';
-  INV_CATS.forEach(function(cat,ci){
-    h+='<div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">';
-    h+='<div style="background:#f9fafb;padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #e5e7eb">';
-    h+='<i class="ti ti-folder" style="color:#00b4d8;font-size:var(--font-size-md)"></i>';
-    h+='<span style="font-size:var(--font-size-base);font-weight:700;flex:1">'+cat.name+'</span>';
-    h+='<span style="font-size:var(--font-size-xs);color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:12px">'+(cat.taxDefault?'+ Tax default':'No tax default')+'</span>';
-    h+='<button class="ab" data-ci="'+ci+'" style="color:#b91c1c" title="Delete" onclick="deleteCat(INV_CATS[+this.dataset.ci].id)"><i class="ti ti-trash"></i></button>';
-    h+='</div><div style="padding:8px 14px">';
-    cat.items.forEach(function(item,ii){
-      h+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f9fafb">';
-      h+='<span style="flex:1;font-size:var(--font-size-sm)">'+item.name+'</span>';
-      h+='<span style="font-size:var(--font-size-sm);font-weight:600;color:#00b4d8;min-width:45px;text-align:right">$'+item.price+'</span>';
-      h+='<span style="font-size:var(--font-size-xs);background:'+(item.tax?'#b8eef8':'#f3f4f6')+';color:'+(item.tax?'#0096c7':'#6b7280')+';padding:1px 7px;border-radius:10px">'+  (item.tax?'+ Tax':'No tax')+'</span>';
-      h+='<button class="ab" data-ci="'+ci+'" data-ii="'+ii+'" style="color:#b91c1c;font-size:var(--font-size-sm)" onclick="deleteCatItem(+this.dataset.ci,+this.dataset.ii)"><i class="ti ti-x"></i></button>';
-      h+='</div>';
-    });
-    h+='<div style="display:flex;gap:6px;margin-top:8px;align-items:center">';
-    h+='<input type="text" placeholder="Item name" id="ni-name-'+ci+'" style="flex:1;font-family:inherit;font-size:var(--font-size-sm);padding:5px 9px;border:1px solid #d1d5db;border-radius:6px">';
-    h+='<input type="number" placeholder="$" id="ni-price-'+ci+'" min="0" step="0.5" style="width:65px;font-family:inherit;font-size:var(--font-size-sm);padding:5px 9px;border:1px solid #d1d5db;border-radius:6px;text-align:right">';
-    h+='<select id="ni-tax-'+ci+'" style="font-family:inherit;font-size:var(--font-size-xs);padding:5px 7px;border:1px solid #d1d5db;border-radius:6px"><option value="true">+ Tax</option><option value="false">No tax</option></select>';
-    h+='<button class="btn sm p" data-ci="'+ci+'" onclick="addCatItem(+this.dataset.ci)"><i class="ti ti-plus"></i>Add</button>';
-    h+='</div></div></div>';
-  });
-  el.innerHTML=h;
-}
-function deleteCatItem(ci,ii){
-  INV_CATS[ci].items.splice(ii,1);saveCats();renderCatMgr();toast('Item removed');
-}
-function addCatItem(ci){
-  const name=(document.getElementById('ni-name-'+ci)?.value||'').trim();
-  const price=+(document.getElementById('ni-price-'+ci)?.value||0);
-  const tax=document.getElementById('ni-tax-'+ci)?.value==='true';
-  if(!name){toast('Enter an item name');return;}
-  INV_CATS[ci].items.push({id:'i'+Date.now(),name,price,tax});
-  saveCats();renderCatMgr();toast('Item added');
-}
-
-function addCategory(){
-  const name = (document.getElementById('new-cat-name').value||'').trim();
-  if(!name){ toast('Enter a category name'); return; }
-  const taxDefault = document.getElementById('new-cat-tax').value === 'true';
-  INV_CATS.push({id:'c'+Date.now(), name, taxDefault, items:[]});
-  saveCats();
-  document.getElementById('new-cat-name').value = '';
-  renderCatMgr();
-  toast('✓ Category "'+name+'" added');
-}
-
-function deleteCat(catId){
-  const cat = INV_CATS.find(c=>c.id===catId);
-  if(!cat) return;
-  if(!confirm('Delete category "'+cat.name+'" and all its items?')) return;
-  INV_CATS = INV_CATS.filter(c=>c.id!==catId);
-  saveCats(); renderCatMgr();
-  toast('Category removed');
-}
-
 
 function showCatPicker(){renderCatButtons();}
 
@@ -7539,57 +7629,49 @@ function renderCatButtons(){
   const btnRow=document.getElementById('cat-btn-row');
   if(!btnRow)return;
   let h='<div style="font-size:var(--font-size-xs);color:#9ca3af;width:100%;margin-bottom:6px">Select category:</div>';
-  INV_CATS.forEach(function(cat,ci){
-    h+='<button onclick="showCatItems('+ci+')" style="padding:6px 12px;font-size:var(--font-size-sm);font-weight:600;border-radius:20px;border:1.5px solid #00b4d8;background:#fff;cursor:pointer;color:#00b4d8;font-family:inherit">'+cat.name+'</button>';
+  CATALOG_CATEGORIES.forEach(function(cat){
+    h+='<button onclick="showCatItems(\''+cat.key+'\')" style="padding:6px 12px;font-size:var(--font-size-sm);font-weight:600;border-radius:20px;border:1.5px solid '+cat.color+';background:#fff;cursor:pointer;color:'+cat.color+';font-family:inherit">'+cat.label+'</button>';
   });
-  if(!INV_CATS.length) h='<p style="font-size:var(--font-size-sm);color:#9ca3af">No categories yet. <button onclick="openCatMgr()" style="background:none;border:none;cursor:pointer;color:#00b4d8;font-weight:600;font-family:inherit">Add categories</button></p>';
   btnRow.innerHTML=h;
   document.getElementById('cat-items-row').style.display='none';
 }
-function showCatItems(ci){
-  const cat=INV_CATS[ci];
+function showCatItems(catKey){
   const row=document.getElementById('cat-items-row');
-  if(!row||!cat)return;
-  let h='<div style="font-size:var(--font-size-xs);font-weight:700;color:#00b4d8;width:100%;margin-bottom:6px">'+cat.name+' — click to add:</div>';
-  cat.items.forEach(function(item,ii){
-    h+='<button onclick="invPickItem('+ci+','+ii+')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+item.name+'<span style="color:#00b4d8;font-weight:700">$'+item.price+'</span></button>';
+  if(!row)return;
+  const items=SVC_CATALOG.filter(function(i){return i.category===catKey&&i.active!==false;})
+    .sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
+  let h='<div style="font-size:var(--font-size-xs);font-weight:700;color:#00b4d8;width:100%;margin-bottom:6px">'+catalogCategoryLabel(catKey)+' — click to add:</div>';
+  if(!items.length){
+    h+='<span style="font-size:var(--font-size-xs);color:#9ca3af">No active items in this category yet.</span>';
+  }
+  items.forEach(function(item){
+    h+='<button onclick="invPickItem(\''+item.id+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+esc(item.name)+'<span style="color:#00b4d8;font-weight:700">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</span></button>';
   });
-  h+='<button onclick="invAddBlank('+ci+')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1.5px dashed #d1d5db;background:#f9fafb;cursor:pointer;color:#6b7280;font-family:inherit">+ Custom item</button>';
+  if(canManageCatalog()){
+    h+='<button onclick="invAddBlank(\''+catKey+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1.5px dashed #d1d5db;background:#f9fafb;cursor:pointer;color:#6b7280;font-family:inherit">+ Custom item</button>';
+  }
   row.innerHTML=h;
   row.style.display='flex';
 }
 
-function invToggleCat(ci){
-  const drop=document.getElementById('cat-drop-'+ci);
-  const chev=document.getElementById('cat-chev-'+ci);
-  if(!drop)return;
-  const isOpen=drop.style.display==='block';
-  // Close all
-  INV_CATS.forEach(function(_,i){
-    const d=document.getElementById('cat-drop-'+i);
-    const ch=document.getElementById('cat-chev-'+i);
-    if(d)d.style.display='none';
-    if(ch)ch.style.transform='';
-  });
-  // Open clicked one if it was closed
-  if(!isOpen){
-    drop.style.display='block';
-    if(chev)chev.style.transform='rotate(180deg)';
-  }
-}
-
-function invPickItem(ci,ii){
-  const cat=INV_CATS[ci];const item=cat.items[ii];
-  invItems.push({id:Date.now()+Math.random(),desc:item.name,qty:1,unit:item.price,tax:item.tax,cat:cat.name});
+function invPickItem(itemId){
+  const item=SVC_CATALOG.find(function(x){return x.id===itemId;});
+  if(!item)return;
+  invItems.push({id:Date.now()+Math.random(),desc:item.name,qty:1,unit:item.basePrice,tax:true,cat:catalogCategoryLabel(item.category),catalogItemId:item.id});
   renderInvItems();niPrev();
   catPickerOpen=false;
   document.getElementById('cat-picker').style.display='none';
   toast(item.name+' added');
 }
 
-function invAddBlank(ci){
-  const cat=INV_CATS[ci];
-  invItems.push({id:Date.now()+Math.random(),desc:'',qty:1,unit:0,tax:cat?cat.taxDefault:true,cat:cat?cat.name:'Other'});
+// Custom (uncatalogued, free-price) line -- Admin/Manager only, same
+// reasoning as the folio flow's own "+ Custom item" fallback (a free-typed
+// price here is exactly what the catalog exists to prevent for normal
+// items). showCatItems() already hides this button from Staff; guarded
+// again here in case it's ever called directly.
+function invAddBlank(catKey){
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
+  invItems.push({id:Date.now()+Math.random(),desc:'',qty:1,unit:0,tax:true,cat:catalogCategoryLabel(catKey)});
   renderInvItems();niPrev();
   catPickerOpen=false;
   document.getElementById('cat-picker').style.display='none';
@@ -8097,7 +8179,7 @@ function drawFolios(){
 
   reservations.forEach(function(r){
     var folio=FOLIOS[r.id]||{charges:[]};
-    var ext=folio.charges.reduce(function(s,ch){return s+(ch.price*(ch.pax||ch.qty||1));},0);
+    var ext=folio.charges.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0);
     var tdc=folio.charges.filter(function(ch){return ch.date===tS;}).length;
     var stCol=stCols[r.st]||'#6b7280';
     var srcCol=srcCols[r.src]||'#059669';
@@ -8153,14 +8235,7 @@ function drawFolios(){
     var form=document.createElement('div');
     form.style.cssText='padding:14px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb';
 
-    // Quick add buttons (existing priced-item catalog, INV_CATS)
-    var quickBtns=INV_CATS.map(function(cat,ci){
-      return '<button data-rid="'+r.id+'" data-ci="'+ci+'" onclick="_fsItems(this)" style="padding:4px 10px;font-size:var(--font-size-xs);font-weight:600;border-radius:20px;border:1.5px solid #00b4d8;background:#fff;cursor:pointer;color:#00b4d8;font-family:inherit">'+cat.name+'</button>';
-    }).join('');
-
     form.innerHTML=buildAddChargeFormHTML(r.id)+
-      (quickBtns?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 6px">'+quickBtns+'</div>':'')+
-      '<div id="fitems-'+r.id+'" style="display:flex;flex-wrap:wrap;gap:5px"></div>'+
       '<div style="display:flex;gap:8px;margin-top:10px">'+
         '<button data-rid="'+r.id+'" onclick="openCreateInvoice(this.dataset.rid)" style="flex:1;background:#2563eb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-invoice"></i> Create invoice</button>'+
         '<button data-rid="'+r.id+'" onclick="printFolio(this.dataset.rid)" style="background:#fff;color:#374151;border:1.5px solid #e5e7eb;padding:8px 14px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-printer"></i></button>'+
@@ -8192,40 +8267,38 @@ function drawFolios(){
 }
 
 
-function _fsItems(el){folioShowItems(el.dataset.rid,+el.dataset.ci);}
-
-function folioShowItems(resId,ci){
-  var cat=INV_CATS[ci];
-  var row=document.getElementById('fitems-'+resId);
-  if(!row||!cat)return;
-  row.innerHTML='';
-  row.style.display='flex';
-  row.style.flexWrap='wrap';
-  row.style.gap='5px';
-  var lbl=document.createElement('span');
-  lbl.style.cssText='font-size:var(--font-size-xs);font-weight:700;color:#00b4d8;margin-right:6px;align-self:center';
-  lbl.textContent=cat.name+':';
-  row.appendChild(lbl);
-  cat.items.forEach(function(item,ii){
-    var btn=document.createElement('button');
-    btn.style.cssText='padding:4px 10px;font-size:var(--font-size-xs);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit';
-    btn.innerHTML=item.name+' <strong style="color:#00b4d8">$'+item.price+'</strong>';
-    btn.dataset.resid=resId;
-    btn.dataset.ci=ci;
-    btn.dataset.ii=ii;
-    btn.addEventListener('click',function(){
-      folioQuickAddById(this.dataset.resid,+this.dataset.ci,+this.dataset.ii);
-    });
-    row.appendChild(btn);
-  });
-}
-
 // Canonical folio-item categories (Step 3: use existing categories where
 // possible, do not overengineer). ROOM is never a folio-item category --
 // accommodation is always the separate calcTax()-driven line shown above
 // the folio (Step 4). PAYMENT_CREDIT is tracked on the invoice's own
 // payments log (recordInvoicePayment()), never as a folio charge type.
-const FOLIO_CATEGORIES=['Food & Beverage','Trips & Activities','Transfers','Other Services'];
+// 'Accommodation Extras' added alongside the Fixed Price Catalog
+// Integration (2026-09-10) so catalog items in that category (Extra Bed,
+// Early Check-in, Late Check-out) have a real folio-summary bucket instead
+// of falling into 'Other Services'.
+const FOLIO_CATEGORIES=['Food & Beverage','Trips & Activities','Transfers','Accommodation Extras','Other Services'];
+
+// Gross/discount/final math for ONE folio charge line (Fixed Price Catalog
+// Integration, Part 6/9/14) -- the single place every call site that used
+// to inline `ch.price*(ch.pax||ch.qty||1)` now goes through, so a discount
+// or price override on a catalog-sourced charge is reflected everywhere
+// (folio summary, charge list, invoice creation, invoice payment) without
+// separately re-deriving the math in each place. A charge with no
+// discount/override behaves exactly like the old inline formula --
+// nothing about a pre-existing, undiscounted charge changes.
+function chargeGrossAmount(ch){
+  var unitPrice = (ch.overridePrice!=null) ? ch.overridePrice : ch.price;
+  return unitPrice * (ch.pax||ch.qty||1);
+}
+function chargeDiscountAmount(ch){
+  if(!ch.discountType || ch.discountType==='none') return 0;
+  var gross = chargeGrossAmount(ch);
+  var amt = ch.discountType==='percent' ? gross*(ch.discountValue||0)/100 : (ch.discountValue||0);
+  return Math.min(gross, Math.max(0, amt));
+}
+function chargeFinalAmount(ch){
+  return +(chargeGrossAmount(ch) - chargeDiscountAmount(ch)).toFixed(2);
+}
 
 // ONE canonical folio summary (Step 7) -- Calendar's compact folio and the
 // full Guest Folios page both call this SAME function so the numbers can
@@ -8239,9 +8312,9 @@ function folioSummary(resId){
   var r=RES.find(function(x){return x.id===resId;});
   var folio=FOLIOS[resId]||{charges:[]};
   var room=r?calcTax(r).total:0;
-  var byCat={'Food & Beverage':0,'Trips & Activities':0,'Transfers':0,'Other Services':0};
+  var byCat={'Food & Beverage':0,'Trips & Activities':0,'Transfers':0,'Accommodation Extras':0,'Other Services':0};
   folio.charges.forEach(function(ch){
-    var amt=ch.price*(ch.pax||ch.qty||1);
+    var amt=chargeFinalAmount(ch);
     var key=Object.prototype.hasOwnProperty.call(byCat,ch.cat)?ch.cat:'Other Services';
     byCat[key]+=amt;
   });
@@ -8251,12 +8324,12 @@ function folioSummary(resId){
   var paid=+invoicesForRes.reduce(function(s,v){return s+(v.paidAmount||0);},0).toFixed(2);
   return {
     room:+room.toFixed(2), food:+byCat['Food & Beverage'].toFixed(2), activities:+byCat['Trips & Activities'].toFixed(2),
-    transfers:+byCat['Transfers'].toFixed(2), other:+byCat['Other Services'].toFixed(2),
+    transfers:+byCat['Transfers'].toFixed(2), accExtras:+byCat['Accommodation Extras'].toFixed(2), other:+byCat['Other Services'].toFixed(2),
     chargesTotal:chargesTotal, paid:paid, balance:+(chargesTotal-paid).toFixed(2)
   };
 }
 function renderFolioSummaryHTML(sum){
-  var rows=[['Accommodation',sum.room],['Food & Beverage',sum.food],['Trips & Activities',sum.activities],['Transfers',sum.transfers],['Other Services',sum.other]]
+  var rows=[['Accommodation',sum.room],['Food & Beverage',sum.food],['Trips & Activities',sum.activities],['Transfers',sum.transfers],['Accommodation Extras',sum.accExtras],['Other Services',sum.other]]
     .filter(function(r){return r[1]>0;});
   var h='<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;font-size:var(--font-size-sm)">';
   rows.forEach(function(r){
@@ -8269,42 +8342,189 @@ function renderFolioSummaryHTML(sum){
   return h;
 }
 
-function folioQuickAddById(resId,ci,ii){
-  var cat=INV_CATS[ci];
-  var item=cat&&cat.items[ii];
-  if(!item)return;
-  if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
-  var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  FOLIOS[resId].charges.push({id:Date.now(),date:tS,desc:item.name,cat:cat.name,price:item.price,qty:1,tax:item.tax,addedBy:currentUser?currentUser.name:'Staff',time:now});
-  saveFolios();
-  syncFolioToFirestore(resId);
-  renderFolioChargesById(resId);
-  toast('✓ '+item.name+' added');
+// Shared "Add charge" form (Fixed Price Catalog Integration, Part 7/15/16)
+// -- Calendar's compact folio section and the full Guest Folios page both
+// call this ONE builder, so there is exactly one add-charge implementation
+// (Part 16), not two. Flow: category chips -> active catalog items in that
+// category -> compact charge editor (pax/qty, discount, override, live
+// preview) -> Add to Folio, ~3-4 clicks total (Part 15). "Custom item"
+// stays available as a clearly-separated fallback for genuinely
+// uncatalogued one-off charges, but -- since a free-typed price is exactly
+// the "staff shouldn't type master prices" problem this task closes for
+// the catalog path -- it's limited to Admin/Manager (canManageCatalog()),
+// same authority level as catalog management itself.
+function buildAddChargeFormHTML(resId){
+  var catBtns=CATALOG_CATEGORIES.map(function(cat){
+    return '<button type="button" data-rid="'+resId+'" data-cat="'+cat.key+'" onclick="folioShowCatalogCategory(this.dataset.rid,this.dataset.cat)" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid '+cat.color+';background:#fff;cursor:pointer;color:'+cat.color+';font-family:inherit">'+cat.label+'</button>';
+  }).join('');
+  var custom = canManageCatalog()
+    ? '<div style="margin-top:6px">'
+      +'<button type="button" onclick="var m=document.getElementById(\'fc-custom-'+resId+'\');m.style.display=m.style.display===\'none\'?\'block\':\'none\';" style="background:none;border:none;color:#9ca3af;font-size:var(--font-size-xs);font-weight:600;cursor:pointer;font-family:inherit;padding:0">+ Custom item (one-off, uncatalogued)</button>'
+      +'</div>'
+      +'<div id="fc-custom-'+resId+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb">'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+          +'<input type="text" id="fc-desc-'+resId+'" placeholder="Description e.g. Sailing charter..." style="flex:2;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'
+          +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+resId+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'
+          +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+resId+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'
+          +'<select id="fc-cat-'+resId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+FOLIO_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;align-items:center">'
+          +'<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer"><i class="ti ti-camera"></i> Attach signed bill (optional) <input type="file" id="fc-bill-'+resId+'" accept="image/*" style="font-size:var(--font-size-xs)"></label>'
+          +'<div style="flex:1"></div>'
+          +'<button data-rid="'+resId+'" onclick="addFolioCharge(this.dataset.rid)" style="background:#6b7280;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-plus"></i> Add</button>'
+        +'</div>'
+      +'</div>'
+    : '';
+  return '<div style="font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px">Add charge</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+catBtns+'</div>'
+    +'<div id="fcat-items-'+resId+'" style="display:none;flex-wrap:wrap;gap:5px;margin-bottom:8px"></div>'
+    +'<div id="fc-editor-'+resId+'"></div>'
+    +custom;
 }
 
-// Shared "Add charge" form (Step 5) -- Calendar's compact folio section and
-// the full Guest Folios page both call this ONE builder instead of each
-// keeping their own near-duplicate HTML block. Note/bill-attachment (Step
-// 6) are collapsed behind a toggle so the common case (no note, no photo)
-// stays a single compact row.
-function buildAddChargeFormHTML(resId){
-  var catOpts=FOLIO_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('');
-  return '<div style="font-size:var(--font-size-sm);font-weight:700;color:#374151;margin-bottom:10px">Add charge</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
-      +'<input type="text" id="fc-desc-'+resId+'" placeholder="Description e.g. Snorkeling, Breakfast..." style="flex:2;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'
-      +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PRICE/PAX</span><input type="number" id="fc-price-'+resId+'" placeholder="$" min="0" step="0.5" style="width:80px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:right"></div>'
-      +'<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700;text-align:center">PAX</span><input type="number" id="fc-pax-'+resId+'" value="1" min="1" style="width:50px;font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;text-align:center"></div>'
-      +'<select id="fc-cat-'+resId+'" style="font-family:inherit;font-size:var(--font-size-sm);padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px">'+catOpts+'</select>'
-    +'</div>'
-    +'<div id="fc-more-'+resId+'" style="display:none;margin-bottom:6px">'
-      +'<input type="text" id="fc-note-'+resId+'" placeholder="Optional note" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;margin-bottom:6px;box-sizing:border-box">'
-      +'<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer"><i class="ti ti-camera"></i> Attach signed bill (optional) <input type="file" id="fc-bill-'+resId+'" accept="image/*" style="font-size:var(--font-size-xs)"></label>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;align-items:center">'
-      +'<button type="button" onclick="var m=document.getElementById(\'fc-more-'+resId+'\');m.style.display=m.style.display===\'none\'?\'block\':\'none\';" style="background:none;border:none;color:#00b4d8;font-size:var(--font-size-xs);font-weight:700;cursor:pointer;font-family:inherit;padding:0">+ Note / attach bill</button>'
-      +'<div style="flex:1"></div>'
-      +'<button data-rid="'+resId+'" onclick="addFolioCharge(this.dataset.rid)" style="background:#00b4d8;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-plus"></i> Add</button>'
+// Step 1 of the catalog Add Charge flow: category chip clicked -> list its
+// active items (inactive items never appear here -- Part 5's "disappears
+// from new folio charge selection", the deactivation itself never touches
+// any already-added folio line).
+function folioShowCatalogCategory(resId,catKey){
+  var row=document.getElementById('fcat-items-'+resId);
+  if(!row) return;
+  row.style.display='flex';
+  var items=SVC_CATALOG.filter(function(i){return i.category===catKey&&i.active!==false;})
+    .sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
+  if(!items.length){
+    row.innerHTML='<span style="font-size:var(--font-size-xs);color:#9ca3af">No active items in '+catalogCategoryLabel(catKey)+' yet.'
+      +(canManageCatalog()?' Add one from the Fixed Price Catalog.':'')+'</span>';
+    return;
+  }
+  row.innerHTML=items.map(function(item){
+    return '<button type="button" data-rid="'+resId+'" data-iid="'+item.id+'" onclick="folioOpenChargeEditor(this.dataset.rid,this.dataset.iid)" style="padding:5px 10px;font-size:var(--font-size-xs);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit">'+esc(item.name)+' <strong style="color:#00b4d8">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</strong></button>';
+  }).join('');
+}
+
+// Step 2: compact per-charge editor state, keyed by resId (only one editor
+// open per reservation folio at a time -- opening a different item replaces
+// it). Kept off `window` scoping issues by living on a single module-level
+// object rather than fresh closures per render.
+var _fcState={};
+function folioOpenChargeEditor(resId,itemId){
+  var item=SVC_CATALOG.find(function(x){return x.id===itemId;});
+  if(!item) return;
+  var r=RES.find(function(x){return x.id===resId;});
+  var defaultQty = item.unitType==='PER_PAX' ? Math.max(1,(r?(r.ad||0)+(r.ch||0):1)) : 1;
+  _fcState[resId]={itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:''};
+  folioRenderChargeEditor(resId);
+}
+function folioRenderChargeEditor(resId){
+  var st=_fcState[resId];
+  var editorEl=document.getElementById('fc-editor-'+resId);
+  if(!editorEl) return;
+  if(!st){ editorEl.innerHTML=''; return; }
+  var item=SVC_CATALOG.find(function(x){return x.id===st.itemId;});
+  if(!item){ editorEl.innerHTML=''; return; }
+  var unitPrice = st.overrideActive ? st.overridePrice : item.basePrice;
+  var synth={price:unitPrice,pax:st.qty,discountType:st.discountType,discountValue:st.discountValue};
+  var gross=chargeGrossAmount(synth), disc=chargeDiscountAmount(synth), final=chargeFinalAmount(synth);
+  var canDisc=canDiscount();
+  var html='<div style="background:#fff;border:1.5px solid #bae6fd;border-radius:10px;padding:10px;margin-bottom:8px">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-weight:700;color:#111827">'+esc(item.name)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+catalogCategoryLabel(item.category)+'</div></div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
+    +'<span style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280">'+catalogUnitLabel(item.unitType)+'</span>'
+    +'<button type="button" onclick="folioAdjustChargeQty(\''+resId+'\',-1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">−</button>'
+    +'<span style="min-width:24px;text-align:center;font-weight:700">'+st.qty+'</span>'
+    +'<button type="button" onclick="folioAdjustChargeQty(\''+resId+'\',1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">+</button>'
+    +'<span style="font-size:var(--font-size-xs);color:#9ca3af">× $'+unitPrice.toFixed(2)+' = $'+gross.toFixed(2)+'</span>'
     +'</div>';
+  if(canDisc){
+    html+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">'
+      +'<select onchange="folioSetDiscountType(\''+resId+'\',this.value)" style="font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+        +'<option value="none"'+(st.discountType==='none'?' selected':'')+'>No discount</option>'
+        +'<option value="percent"'+(st.discountType==='percent'?' selected':'')+'>Percentage</option>'
+        +'<option value="fixed"'+(st.discountType==='fixed'?' selected':'')+'>Fixed amount</option>'
+      +'</select>'
+      +(st.discountType!=='none' ? '<input type="number" min="0" value="'+st.discountValue+'" oninput="folioSetDiscountValue(\''+resId+'\',this.value)" placeholder="'+(st.discountType==='percent'?'%':'$')+'" style="width:70px;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">' : '')
+      +'</div>';
+    if(st.discountType!=='none'){
+      html+='<select onchange="folioSetDiscountReason(\''+resId+'\',this.value)" style="width:100%;font-size:var(--font-size-xs);padding:5px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit;margin-bottom:6px">'
+        +'<option value="">Discount reason (required)…</option>'
+        +['Guest complaint','Manager approved','Promotion','Repeat guest','Service recovery','Other'].map(function(r){return '<option value="'+r+'"'+(st.discountReason===r?' selected':'')+'>'+r+'</option>';}).join('')
+        +'</select>';
+    }
+    html+='<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer;margin-bottom:6px"><input type="checkbox" '+(st.overrideActive?'checked':'')+' onchange="folioToggleOverride(\''+resId+'\',this.checked)"> Override price (exception, this line only)</label>';
+    if(st.overrideActive){
+      html+='<div style="display:flex;gap:6px;margin-bottom:6px">'
+        +'<input type="number" min="0" step="0.5" value="'+st.overridePrice+'" oninput="folioSetOverridePrice(\''+resId+'\',this.value)" style="width:90px;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+        +'<input type="text" placeholder="Override reason (required)" value="'+esc(st.overrideReason||'')+'" oninput="folioSetOverrideReason(\''+resId+'\',this.value)" style="flex:1;font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+        +'</div>';
+    }
+  }
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:6px;border-top:1px solid #f3f4f6">'
+    +(disc>0?'<span style="font-size:var(--font-size-xs);color:#dc2626">Discount: -$'+disc.toFixed(2)+'</span>':'<span></span>')
+    +'<span style="font-weight:800;color:#111827">Total: $'+final.toFixed(2)+'</span></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:8px">'
+    +'<button type="button" data-rid="'+resId+'" onclick="folioAddCatalogCharge(this.dataset.rid)" style="flex:1;background:#00b4d8;color:#fff;border:none;padding:7px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Add to Folio</button>'
+    +'<button type="button" onclick="folioCancelChargeEditor(\''+resId+'\')" style="background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;padding:7px 12px;border-radius:7px;font-size:var(--font-size-sm);cursor:pointer;font-family:inherit">Cancel</button>'
+    +'</div></div>';
+  editorEl.innerHTML=html;
+}
+function folioAdjustChargeQty(resId,delta){ var st=_fcState[resId]; if(!st)return; st.qty=Math.max(1,(st.qty||1)+delta); folioRenderChargeEditor(resId); }
+function folioSetDiscountType(resId,val){ var st=_fcState[resId]; if(!st)return; st.discountType=val; if(val==='none'){st.discountValue=0;st.discountReason='';} folioRenderChargeEditor(resId); }
+function folioSetDiscountValue(resId,val){ var st=_fcState[resId]; if(!st)return; st.discountValue=+val||0; folioRenderChargeEditor(resId); }
+function folioSetDiscountReason(resId,val){ var st=_fcState[resId]; if(!st)return; st.discountReason=val; }
+function folioToggleOverride(resId,checked){ var st=_fcState[resId]; if(!st)return; st.overrideActive=checked; folioRenderChargeEditor(resId); }
+function folioSetOverridePrice(resId,val){ var st=_fcState[resId]; if(!st)return; st.overridePrice=+val||0; folioRenderChargeEditor(resId); }
+function folioSetOverrideReason(resId,val){ var st=_fcState[resId]; if(!st)return; st.overrideReason=val; }
+function folioCancelChargeEditor(resId){ delete _fcState[resId]; var el=document.getElementById('fc-editor-'+resId); if(el) el.innerHTML=''; }
+
+// Step 3: commit the in-progress editor state as a real folio charge,
+// snapshotting the catalog item's name/price/category at this exact
+// moment (Part 6) -- nothing here ever re-reads SVC_CATALOG later, so a
+// subsequent master-price change never alters this line.
+function folioAddCatalogCharge(resId){
+  var st=_fcState[resId];
+  if(!st){ toast('Select an item first'); return; }
+  var item=SVC_CATALOG.find(function(x){return x.id===st.itemId;});
+  if(!item){ toast('Item not found'); return; }
+  var wantsDiscount = st.discountType && st.discountType!=='none';
+  if((wantsDiscount||st.overrideActive) && !canDiscount()){ toast('⛔ Only Admin/Manager can apply a discount or price override'); return; }
+  if(wantsDiscount && !st.discountReason){ toast('Select a discount reason'); return; }
+  if(st.overrideActive && !(st.overrideReason||'').trim()){ toast('Enter an override reason'); return; }
+  if(item.unitType==='PER_PAX'){
+    var r=RES.find(function(x){return x.id===resId;});
+    var guestCount=r?(r.ad||0)+(r.ch||0):0;
+    if(guestCount>0 && st.qty>guestCount) toast('⚠ '+st.qty+' pax exceeds '+guestCount+' guests on this reservation — added anyway');
+  }
+  if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
+  var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var charge={
+    id:Date.now(), date:tS, desc:item.name, cat:catalogCategoryLabel(item.category),
+    catalogItemId:item.id, unitType:item.unitType, price:item.basePrice, baseUnitPrice:item.basePrice,
+    pax:st.qty, qty:st.qty, tax:true, addedBy:currentUser?currentUser.name:'Staff', time:now
+  };
+  if(st.overrideActive && canDiscount()){
+    charge.overridePrice=st.overridePrice;
+    charge.overrideReason=st.overrideReason;
+    charge.overrideBy=currentUser?currentUser.name:'Staff';
+    charge.overrideAt=Date.now();
+  }
+  if(wantsDiscount && canDiscount()){
+    charge.discountType=st.discountType;
+    charge.discountValue=st.discountValue;
+    charge.discountReason=st.discountReason;
+    charge.discountedBy=currentUser?currentUser.name:'Staff';
+    charge.discountedAt=Date.now();
+    charge.discountAmount=chargeDiscountAmount(charge);
+  }
+  charge.grossAmount=chargeGrossAmount(charge);
+  FOLIOS[resId].charges.push(charge);
+  saveFolios();
+  syncFolioToFirestore(resId);
+  delete _fcState[resId];
+  var editorEl=document.getElementById('fc-editor-'+resId); if(editorEl) editorEl.innerHTML='';
+  var catRow=document.getElementById('fcat-items-'+resId); if(catRow){ catRow.style.display='none'; catRow.innerHTML=''; }
+  renderFolioChargesById(resId);
+  updateFolioHeaderTotal(resId);
+  toast('✓ '+item.name+' added to folio');
 }
 
 // Uploads an optional signed-bill photo for ONE folio line item, reusing
@@ -8322,6 +8542,13 @@ async function uploadFolioBill(resId, chargeId, file){
 }
 
 async function addFolioCharge(resId){
+  // Custom (uncatalogued) items let the adder type an arbitrary price --
+  // that's exactly what the catalog exists to prevent for normal items, so
+  // this one-off fallback is Admin/Manager only, same as catalog
+  // management itself (mirrors the UI's own canManageCatalog() gate on the
+  // "+ Custom item" toggle, checked again here in case this is ever called
+  // directly).
+  if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
   var desc=(document.getElementById('fc-desc-'+resId)?.value||'').trim();
   var price=+(document.getElementById('fc-price-'+resId)?.value||0);
   var pax=+(document.getElementById('fc-pax-'+resId)?.value||1);
@@ -8368,7 +8595,7 @@ async function addFolioCharge(resId){
 function updateFolioHeaderTotal(resId){
   var hEl=document.querySelector('[data-folio-rid="'+resId+'"]');
   if(hEl){
-    var newTot=(FOLIOS[resId]||{charges:[]}).charges.reduce(function(s,ch){return s+ch.price*(ch.pax||ch.qty||1);},0);
+    var newTot=(FOLIOS[resId]||{charges:[]}).charges.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0);
     var eEl=hEl.querySelector('.folio-ext-amt');
     if(eEl) eEl.textContent='$'+newTot.toFixed(2);
   }
@@ -8396,7 +8623,7 @@ function removeFolioCharge(resId,chargeId){
   // Update just the header (extras total) without collapsing cards
   var hdrEl=document.querySelector('[data-folio-rid="'+resId+'"]');
   if(hdrEl){
-    var tot=FOLIOS[resId].charges.reduce(function(s,ch){return s+ch.price*(ch.pax||ch.qty||1);},0);
+    var tot=FOLIOS[resId].charges.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0);
     var extEl=hdrEl.querySelector('.folio-ext-amt');
     if(extEl) extEl.textContent='$'+tot.toFixed(2);
   }
@@ -8413,24 +8640,35 @@ function renderFolioChargesById(resId){
     return;
   }
 
-  var total=charges.reduce(function(s,ch){return s+(ch.price*(ch.pax||ch.qty||1));},0);
+  var total=charges.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0);
   var byDate={};
   charges.forEach(function(ch){if(!byDate[ch.date])byDate[ch.date]=[];byDate[ch.date].push(ch);});
 
   var h='<div style="margin-top:2px">';
   Object.keys(byDate).sort().reverse().forEach(function(date){
     var day=byDate[date];
-    var dayTot=day.reduce(function(s,ch){return s+(ch.price*(ch.pax||ch.qty||1));},0);
+    var dayTot=day.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0);
     h+='<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;padding:8px 0 4px;display:flex;justify-content:space-between"><span>'+fdf(date)+'</span><span style="color:#00b4d8">$'+dayTot.toFixed(2)+'</span></div>';
     day.forEach(function(ch){
+      // Folio line display (Part 17): "Item / Category / qty × unit = gross
+      // [/ Discount X = -$Y] / Final $Z / Added by NAME [/ Bill attached ✓]"
       var statusBadge=ch.paid
         ?'<span style="background:#d1fae5;color:#047857;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">Paid</span>'
         :ch.invoiceId?'<span style="background:#dbeafe;color:#1d4ed8;font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px">Invoiced</span>':'';
       var billBadge=ch.billUrl?' · <a href="'+esc(ch.billUrl)+'" target="_blank" rel="noopener" style="color:#00b4d8;text-decoration:none">Bill attached ✓ View</a>':'';
+      var qty=ch.pax||ch.qty||1;
+      var unitPrice=(ch.overridePrice!=null)?ch.overridePrice:ch.price;
+      var gross=chargeGrossAmount(ch), disc=chargeDiscountAmount(ch), final=chargeFinalAmount(ch);
+      var unitLabel=ch.unitType?catalogUnitShort(ch.unitType):'pax';
+      var qtyLine='<div style="font-size:var(--font-size-xs);color:#9ca3af">'+qty+' '+unitLabel+' × $'+unitPrice.toFixed(2)+' = $'+gross.toFixed(2)
+        +(ch.overridePrice!=null?' <span style="color:#d97706">(price overridden'+(ch.overrideReason?': '+esc(ch.overrideReason):'')+')</span>':'')
+        +'</div>';
+      var discLine = disc>0
+        ? '<div style="font-size:var(--font-size-xs);color:#dc2626">Discount '+(ch.discountType==='percent'?(ch.discountValue||0)+'%':'$'+(ch.discountValue||0))+' = -$'+disc.toFixed(2)+(ch.discountReason?' ('+esc(ch.discountReason)+')':'')+'</div>'
+        : '';
       h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9fafb">';
-      h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(ch.desc)+statusBadge+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(ch.cat)+' · '+ch.time+(ch.addedBy?' · '+esc(ch.addedBy):'')+billBadge+'</div>'+(ch.note?'<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px;font-style:italic">"'+esc(ch.note)+'"</div>':'')+'</div>';
-      h+='<div style="font-size:var(--font-size-xs);color:#6b7280">$'+ch.price+'/pax × '+(ch.pax||ch.qty||1)+'</div>';
-      h+='<div style="font-size:var(--font-size-sm);font-weight:700;color:#00b4d8;min-width:60px;text-align:right">$'+(ch.price*(ch.pax||ch.qty||1)).toFixed(2)+'</div>';
+      h+='<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600">'+esc(ch.desc)+statusBadge+'</div><div style="font-size:var(--font-size-xs);color:#9ca3af">'+esc(ch.cat)+' · '+ch.time+(ch.addedBy?' · Added by '+esc(ch.addedBy):'')+billBadge+'</div>'+qtyLine+discLine+(ch.note?'<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px;font-style:italic">"'+esc(ch.note)+'"</div>':'')+'</div>';
+      h+='<div style="font-size:var(--font-size-sm);font-weight:700;color:#00b4d8;min-width:60px;text-align:right">$'+final.toFixed(2)+'</div>';
       if(!canViewOnly()){h+='<button data-rid="'+resId+'" data-cid="'+ch.id+'" onclick="removeFolioCharge(this.dataset.rid,+this.dataset.cid)" title="'+(ch.invoiceId?'Already invoiced — void invoice first':'Remove')+'" style="background:none;border:none;cursor:pointer;color:'+(ch.invoiceId?'#d1d5db':'#b91c1c')+';font-size:var(--font-size-base);padding:0 2px">✕</button>';}
       h+='</div>';
     });
@@ -8477,7 +8715,7 @@ function openCreateInvoice(resId){
     Object.keys(byDate).sort().forEach(function(date){
       html+='<div style="margin-bottom:12px"><div style="font-size:var(--font-size-xs);font-weight:800;color:#6b7280;text-transform:uppercase;margin-bottom:6px">'+(date!=='Other'?fdf(date):'Other')+'</div>';
       byDate[date].forEach(function(ch){
-        var pax=ch.pax||ch.qty||1, total=(ch.price*pax).toFixed(2);
+        var pax=ch.pax||ch.qty||1, total=chargeFinalAmount(ch).toFixed(2);
         html+='<label class="ci-row" data-cat="'+esc(ch.cat)+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f9fafb;border:1px solid #e5e7eb">'
           +'<input type="checkbox" class="ci-chk" data-cid="'+ch.id+'" style="width:16px;height:16px;cursor:pointer">'
           +'<div style="flex:1"><div style="font-size:var(--font-size-sm);font-weight:600;color:#111827">'+esc(ch.desc)+(pax>1?' (×'+pax+' pax)':'')+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+esc(ch.cat)+'</div></div>'
@@ -8528,7 +8766,7 @@ function submitCreateInvoice(resId){
   var bg=document.getElementById('ci-bg'); if(bg) bg.remove();
   var items=selected.map(function(ch){
     var pax=ch.pax||ch.qty||1;
-    return {id:Date.now()+Math.random(), chargeId:ch.id, desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:+(ch.price*pax).toFixed(2), tax:ch.tax!==false, cat:ch.cat, pax:pax};
+    return {id:Date.now()+Math.random(), chargeId:ch.id, desc:ch.desc+(pax>1?' (×'+pax+' pax)':''), qty:1, unit:chargeFinalAmount(ch), tax:ch.tax!==false, cat:ch.cat, pax:pax};
   });
   openIM(resId, {items:items, includeRoom:includeRoom});
 }
@@ -8564,7 +8802,7 @@ function printFolio(resId){
   var invoicesForRes=INV.filter(function(v){return v.resId===resId;});
   var rows=folio.charges.map(function(ch){
     var pax=ch.pax||ch.qty||1;
-    return '<tr><td>'+fd(ch.date)+'</td><td>'+esc(ch.desc)+'</td><td>'+esc(ch.cat)+'</td><td style="text-align:right">$'+(ch.price*pax).toFixed(2)+'</td><td>'+(ch.invoiceId?'Invoiced ('+esc(ch.invoiceId)+')':'Open')+'</td></tr>';
+    return '<tr><td>'+fd(ch.date)+'</td><td>'+esc(ch.desc)+'</td><td>'+esc(ch.cat)+'</td><td style="text-align:right">$'+chargeFinalAmount(ch).toFixed(2)+'</td><td>'+(ch.invoiceId?'Invoiced ('+esc(ch.invoiceId)+')':'Open')+'</td></tr>';
   }).join('');
   var payRows=[];
   invoicesForRes.forEach(function(v){ (v.payments||[]).forEach(function(p){ payRows.push('<tr><td>'+fd(p.date)+'</td><td>Invoice '+esc(v.id)+'</td><td style="text-align:right">$'+p.amount.toFixed(2)+'</td></tr>'); }); });
@@ -10128,6 +10366,8 @@ async function doLogin() {
   document.getElementById('login-screen').style.display = 'none';
   applyRoleUI(profile.role, profile.name);
   applyUserMgmtVisibility();
+  applyPricingVisibility();
+  loadServiceCatalogFromFirestore();
   drawDash(); drawCal(); drawLog(); drawPM();
 }
 
@@ -10167,6 +10407,8 @@ async function restoreSession(fbUser) {
     document.getElementById('login-screen').style.display = 'none';
     applyRoleUI(profile.role, profile.name);
     applyUserMgmtVisibility();
+    applyPricingVisibility();
+    loadServiceCatalogFromFirestore();
     drawDash(); drawCal(); drawLog(); drawPM();
     return true;
   } catch(e) {
@@ -10252,7 +10494,23 @@ function canDelete() {
 }
 function canEdit() {
   if(!currentUser) return false;
-  return currentUser.role === 'admin' || currentUser.role === 'staff';
+  return currentUser.role === 'admin' || currentUser.role === 'staff' || currentUser.role === 'manager';
+}
+// Fixed Price service catalog management + Bulk Price Manager: Admin/Manager
+// only (per the Fixed Price Catalog Integration task's Part 3/4). Staff can
+// still USE active catalog items in folios (that's canEdit()'s job), just
+// not manage master prices/categories or room rates.
+function canManageCatalog() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
+}
+// Discount/price-override authority on folio charges: Admin/Manager can
+// apply a discount or price override; Staff may only add items at master
+// price (same task, Part 11/14 — "do NOT silently let every staff give
+// unlimited discounts").
+function canDiscount() {
+  if(!currentUser) return false;
+  return currentUser.role === 'admin' || currentUser.role === 'manager';
 }
 
 
@@ -12645,6 +12903,72 @@ function openTripsModal(resId) {
   modal.classList.add('on');
 }
 
+// Daily Operations -> Guest Folio bridge (Fixed Price Catalog Integration,
+// Part 19/20). res.trips/res.foodOrders are a SEPARATE, older operational
+// record (trip scheduling / food ordering) that never fed the canonical
+// folio ledger -- this offers a one-click bridge instead of silently
+// merging the two systems. Dedup is by a stable sourceId stamped on the
+// resulting folio charge (sourceType:'daily_operation'), never by
+// description: two genuinely separate Dinner orders on different dates
+// each still get their own charge and their own "add to folio" button,
+// but clicking the SAME operational record's button twice can't create a
+// second line. TRIPS_CONFIG carries no price field (confirmed by audit),
+// so a trip can't be auto-priced -- if a catalog item happens to share its
+// exact name, its master price is offered as a prefill, but the price is
+// always staff-confirmed via prompt(), never silently assumed.
+function folioChargeExistsForSource(resId, sourceId){
+  var folio=FOLIOS[resId]||{charges:[]};
+  return folio.charges.some(function(c){return c.sourceType==='daily_operation'&&c.sourceId===sourceId;});
+}
+function addFoodOrderChargeToFolio(resId, idx){
+  var res=RES.find(function(r){return r.id===resId;});
+  if(!res||!res.foodOrders||!res.foodOrders[idx]) return;
+  var o=res.foodOrders[idx];
+  if(!o.id){ o.id='fo'+Date.now(); saveRES(res); }
+  var sourceId='food_'+o.id;
+  if(folioChargeExistsForSource(resId,sourceId)){ toast('Already on the guest folio'); return; }
+  if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
+  var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var charge={id:Date.now(),date:tS,desc:o.item,cat:'Food & Beverage',price:+o.price||0,pax:+o.qty||1,qty:+o.qty||1,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now,sourceType:'daily_operation',sourceId:sourceId};
+  charge.grossAmount=chargeGrossAmount(charge);
+  FOLIOS[resId].charges.push(charge);
+  saveFolios();
+  syncFolioToFirestore(resId);
+  renderFolioChargesById(resId);
+  updateFolioHeaderTotal(resId);
+  renderFoodOrdersList(res);
+  toast('✓ Added to guest folio');
+}
+function addTripChargeToFolio(resId, tripId, date){
+  var res=RES.find(function(r){return r.id===resId;});
+  if(!res) return;
+  var sourceId='trip_'+tripId+'_'+date;
+  if(folioChargeExistsForSource(resId,sourceId)){ toast('Already on the guest folio'); return; }
+  var tripCfg=(typeof TRIPS_CONFIG!=='undefined'?TRIPS_CONFIG:[]).find(function(t){return t.id===tripId;});
+  var tripName=tripCfg?tripCfg.name:tripId;
+  var catalogMatch=SVC_CATALOG.find(function(i){return i.active!==false && (i.name||'').toLowerCase()===(tripName||'').toLowerCase();});
+  var priceStr=prompt('Price per pax for "'+tripName+'"'+(catalogMatch?' (catalog master price: $'+Number(catalogMatch.basePrice).toFixed(2)+')':'')+':', catalogMatch?catalogMatch.basePrice:'');
+  if(priceStr===null) return;
+  var price=+priceStr||0;
+  if(price<=0){ toast('Enter a valid price'); return; }
+  var guestCount=(res.ad||0)+(res.ch||0);
+  var paxStr=prompt('Pax for this charge:', Math.max(1,guestCount||1));
+  if(paxStr===null) return;
+  var pax=Math.max(1,+paxStr||1);
+  if(!FOLIOS[resId])FOLIOS[resId]={charges:[]};
+  var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var charge={id:Date.now(),date:date||tS,desc:tripName,cat:'Trips & Activities',price:price,pax:pax,qty:pax,tax:true,addedBy:currentUser?currentUser.name:'Staff',time:now,sourceType:'daily_operation',sourceId:sourceId};
+  if(catalogMatch) charge.catalogItemId=catalogMatch.id;
+  charge.grossAmount=chargeGrossAmount(charge);
+  FOLIOS[resId].charges.push(charge);
+  saveFolios();
+  syncFolioToFirestore(resId);
+  renderFolioChargesById(resId);
+  updateFolioHeaderTotal(resId);
+  renderTripsList(res);
+  toast('✓ Added to guest folio');
+}
+
 function renderTripsList(res) {
   var body = document.getElementById('trips-list-body');
   if (!body) return;
@@ -12675,6 +12999,9 @@ function renderTripsList(res) {
       + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"done\")" title="Mark done" style="background:#059669;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">✅</button>'
       + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"missed\")" title="Mark missed" style="background:#dc2626;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">❌</button>'
       + '<button onclick="updateTripStatus(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\",\"cancelled\")" title="Guest cancelled" style="background:#6b7280;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">🚫 Cancel</button>'
+      + (folioChargeExistsForSource(res.id,'trip_'+t.tripId+'_'+t.date)
+          ? '<span title="Already on the guest folio" style="font-size:var(--font-size-xs);color:#059669;font-weight:700">✓ On folio</span>'
+          : '<button onclick="addTripChargeToFolio(\"'+res.id+'\",\"'+t.tripId+'\",\"'+t.date+'\")" title="Add charge to guest folio" style="background:#00b4d8;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">🧾 To folio</button>')
       + '<button onclick="removeTripFromRes(\"'+res.id+'\",'+idx+')" title="Remove" style="background:#6b7280;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">🗑️</button>'
       + '</div>'
       + '</div>';
@@ -12692,10 +13019,15 @@ function renderFoodOrdersList(res) {
     return;
   }
   body.innerHTML = orders.map(function(o, idx) {
+    var sourceId='food_'+(o.id||(res.id+'_legacy_'+idx));
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;gap:10px;flex-wrap:wrap">'
       + '<div><div style="font-size:var(--font-size-base);font-weight:700">'+o.item+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">Qty '+o.qty+' × $'+(+o.price).toFixed(2)+' = $'+(o.qty*o.price).toFixed(2)+'</div></div>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + (folioChargeExistsForSource(res.id,sourceId)
+          ? '<span title="Already on the guest folio" style="font-size:var(--font-size-xs);color:#059669;font-weight:700">✓ On folio</span>'
+          : '<button onclick="addFoodOrderChargeToFolio(\''+res.id+'\','+idx+')" title="Add charge to guest folio" style="background:#00b4d8;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">🧾 To folio</button>')
       + '<button onclick="removeFoodOrderFromRes(\''+res.id+'\','+idx+')" title="Remove" style="background:#6b7280;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:var(--font-size-xs);cursor:pointer">🗑️</button>'
-      + '</div>';
+      + '</div></div>';
   }).join('');
 }
 
@@ -12711,7 +13043,7 @@ function addFoodOrderToRes(resId) {
   var qty = +qtyEl.value || 1;
   var price = +priceEl.value || 0;
   if(!item) { toast('Enter a food item'); return; }
-  res.foodOrders.push({ item: item, qty: qty, price: price });
+  res.foodOrders.push({ id:'fo'+Date.now(), item: item, qty: qty, price: price });
   saveRES(res);
   renderFoodOrdersList(res);
   itemEl.value = ''; qtyEl.value = '1'; priceEl.value = '';
