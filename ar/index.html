@@ -3778,6 +3778,18 @@ var DEFAULT_ROOMS = [
    desc:"A spacious family room with one double bed and your own private open deck — the room's standout feature. The view faces the main street rather than a scenic outlook, but the deck gives you a real outdoor space of your own."},
 ];
 
+// Owner-locked public category sell rate, by physical room -- the SAME
+// canonical numbers vilu-unified.html's PRICE_CATEGORIES/catGetPrice() and
+// functions-core's ota_room_types already use (deluxe_family:80, double:90,
+// open_deck:90). VR03/VR04's own $85 "rate" field above is each room's
+// internal/legacy default only -- Double's real public sell price is $90
+// (owner-locked, deliberately distinct from the physical defaults; see
+// ota-room-types.js's own comment). getRoomPrice()/getAvgPrice() fall back
+// to THIS map, never to a room's own .rate, so the website never shows a
+// different "no override" price than Bulk Price Manager/Calendar/Beds24 for
+// the same category (2026-09-10 pricing-consistency pass).
+var CATEGORY_BASE_RATE = { VR01:80, VR02:80, VR03:90, VR04:90, VR05:90, VR06:90 };
+
 // Room photos/descriptions/amenities, read live from Firestore (see
 // fetchRoomDetailsFromFirestore) — replaces a localStorage read that only
 // ever had data on a device where the PMS itself had been opened, so a
@@ -4043,24 +4055,21 @@ async function fetchRoomPricesFromFirestore() {
 }
 
 // Get price for a specific room on a specific date
-// Checks: bulk price matrix (Firestore) → base rate
+// Checks: bulk price matrix (Firestore) → canonical category base rate
+// (never a room's own possibly-differing legacy .rate -- see
+// CATEGORY_BASE_RATE's own comment).
 function getRoomPrice(roomId, dateStr) {
   var overrides = _roomPricesCache[roomId];
   if (overrides && overrides[dateStr] != null) {
     return +overrides[dateStr];
   }
-  // Fallback to base rate from vilu_rooms
-  var rooms = loadPMSRooms();
-  var room = rooms.find(function(r){ return r.id === roomId; });
-  return room ? room.rate : 80;
+  return CATEGORY_BASE_RATE[roomId] != null ? CATEGORY_BASE_RATE[roomId] : 80;
 }
 
 // Get average price for a date range
 function getAvgPrice(roomId, ci, co) {
   if (!ci || !co) {
-    var rooms = loadPMSRooms();
-    var r = rooms.find(function(x){ return x.id === roomId; });
-    return r ? r.rate : 80;
+    return CATEGORY_BASE_RATE[roomId] != null ? CATEGORY_BASE_RATE[roomId] : 80;
   }
   var total = 0, nights = 0;
   var d = new Date(ci + 'T12:00');
@@ -4179,18 +4188,23 @@ setInterval(async function(){ await loadRoomsFromSupabase(); if(typeof refreshRo
 function refreshRoomCards() {
   // The #rooms section shows 3 marketing cards, one per Booking.com room
   // category (Double Room x3, Deluxe Family Room x2, Deluxe Family Room
-  // with Open Deck x1). Group by type, not a single hardcoded id, since a
-  // category can span rooms with slightly different rates — show the
-  // lowest current rate in that category so the price is never overstated.
+  // with Open Deck x1). Group by type, not a single hardcoded id. Every
+  // room in a category now resolves to the SAME canonical effective rate
+  // (getRoomPrice()'s override-or-CATEGORY_BASE_RATE precedence -- never
+  // each room's own possibly-differing legacy .rate, which used to make
+  // Double show $85 here while Bulk Price Manager/Calendar showed $90 for
+  // the same day). Math.min is now just defensive (identical values collapse
+  // to the same number), not load-bearing "never overstated" logic.
   var priceEls = document.querySelectorAll('.room-price-amount');
   var imgEls = document.querySelectorAll('.room-card-img-bg');
   var badgeEls = document.querySelectorAll('.room-card-badge');
   var CARD_TYPES = ['Double Room', 'Deluxe Family Room', 'Deluxe Family Room with Open Deck'];
+  var todayForCards = tcTodayMaldives();
   CARD_TYPES.forEach(function(type, i) {
     if (!priceEls[i]) return;
     var roomsOfType = ROOMS.filter(function(x) { return x.type === type; });
     if (!roomsOfType.length) return;
-    var minRate = Math.min.apply(null, roomsOfType.map(function(r) { return r.rate; }));
+    var minRate = Math.min.apply(null, roomsOfType.map(function(r) { return getRoomPrice(r.id, todayForCards); }));
     priceEls[i].textContent = '$' + minRate;
     var footerPriceEl = document.querySelector('.footer-room-price[data-room-type="' + type + '"]');
     if (footerPriceEl) footerPriceEl.textContent = '$' + minRate;
@@ -4256,7 +4270,7 @@ function refreshBBRoomsAvailability() {
     anyCount += count;
     _bbRoomTypeAvailability[type] = count;
     var minRate = Math.min.apply(null, roomsOfType.map(function(r) {
-      return datesSet && typeof getAvgPrice === 'function' ? getAvgPrice(r.id, ci, co) : r.rate;
+      return datesSet && typeof getAvgPrice === 'function' ? getAvgPrice(r.id, ci, co) : getRoomPrice(r.id, tcTodayMaldives());
     }));
     var label = td(type) + ' — $' + minRate + t('bfp.perNight') + ' (' + count + ' ' + t('bookingBar.available') + ')';
     opts.push('<option value="' + type + '"' + (count < 1 ? ' disabled' : '') + '>' + label + '</option>');
