@@ -8305,9 +8305,24 @@ function rdRenderTab(n, r){
       fb.onclick=function(){closeDrawer();openFullFolio(r.id);};footer.appendChild(fb);
     }
   } else if(n===3){
-    loadReservationDocuments(r.id).then(function(){ if(drawerResId===r.id) rdTab(3, document.querySelectorAll('.rd-tab')[3]); });
-    body.innerHTML = renderDocumentsTabHTML(r.id);
+    // Fixed 2026-09-10: this used to render the (possibly stale/empty)
+    // Documents list immediately, THEN silently re-render the whole tab a
+    // second time once loadReservationDocuments()'s fetch resolved --
+    // typically a few hundred ms later. Any interaction the user had
+    // already started in that window (the upload form opened, a file
+    // picked, type/title typed in) was wiped out by that second render,
+    // which is why "Upload document" appeared to do nothing: it DID open
+    // the form, the async reload just silently closed it again moments
+    // later. Now renders a plain loading placeholder synchronously (no
+    // interactive elements to race with) and renders the real, final
+    // content exactly once, only after the data is actually ready -- and
+    // only if the user hasn't since left this tab/reservation.
+    body.innerHTML = '<div style="text-align:center;padding:24px 0;color:#9ca3af;font-size:var(--font-size-sm)">Loading documents…</div>';
     footer.innerHTML='';
+    loadReservationDocuments(r.id).then(function(){
+      var tabs=document.querySelectorAll('.rd-tab');
+      if(drawerResId===r.id && tabs[3] && tabs[3].classList.contains('on')) body.innerHTML = renderDocumentsTabHTML(r.id);
+    });
   }
 }
 
@@ -9377,7 +9392,7 @@ async function uploadReservationDocument(resId, file, type, title){
     var blob = file, fileExt = 'bin';
     if (isImage) { blob = await resizeImageToBlob(file, 2000, 0.85); contentType='image/jpeg'; fileExt='jpg'; }
     else { fileExt = ((file.name||'').split('.').pop()||'pdf').toLowerCase(); }
-    if (blob.size > 8*1024*1024) { toast('⚠ File too large (8MB max)'); return; }
+    if (blob.size > MAX_DOC_UPLOAD_MB*1024*1024) { toast('⚠ Maximum file size is '+MAX_DOC_UPLOAD_MB+' MB.'); return; }
     var base64 = await blobToBase64(blob);
     var call = fsFunctions.httpsCallable('uploadReservationDocument');
     var res = await call({
@@ -9461,9 +9476,53 @@ async function downloadReservationDocument(resId, docId){
 
 var _docTabFilter = 'all';
 function docTabSetFilter(f){ _docTabFilter=f; if(drawerResId) rdTab(3, document.querySelectorAll('.rd-tab')[3]); }
-function toggleDocUploadForm(){
-  var el=document.getElementById('doc-upload-form');
-  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+// Upload UX rebuild (2026-09-10): "+ Upload document" now DIRECTLY triggers
+// the native file picker (fileInput.click(), a real user gesture on a real
+// <input type="file">, so the browser/OS chooser opens immediately -- no
+// intermediate "reveal a form" step to click through first. The rest of
+// the form (type/title/guest, Upload button) only appears once a file has
+// actually been chosen, per the same "show what's selected, then let them
+// fill in the rest" flow most upload UIs use. du-file/doc-upload-form etc.
+// use plain, unscoped ids deliberately: this whole section lives inside
+// the res-drawer, a page-level singleton (only one is ever open at a
+// time, confirmed live -- unlike Guest Folios' pre-rendered per-reservation
+// cards, which is what actually needed instanceId scoping in an earlier
+// fix), so no duplicate-id collision is possible here.
+const MAX_DOC_UPLOAD_MB = 8; // matches uploadReservationDocument's own MAX_UPLOAD_BYTES server-side cap
+function triggerDocFilePicker(){
+  var el=document.getElementById('du-file');
+  if(el) el.click();
+}
+function handleDocFileChosen(input){
+  var status=document.getElementById('du-status');
+  var panel=document.getElementById('doc-upload-form');
+  var file=input.files && input.files[0];
+  if(!file){ return; } // user cancelled the native picker -- leave everything as it was
+  if(file.size > MAX_DOC_UPLOAD_MB*1024*1024){
+    toast('⚠ Maximum file size is '+MAX_DOC_UPLOAD_MB+' MB.');
+    input.value='';
+    if(panel) panel.style.display='none';
+    return;
+  }
+  var sizeLabel = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.max(1,Math.round(file.size/1024))+' KB';
+  if(status) status.innerHTML='<i class="ti ti-file-check" style="color:#059669"></i> Selected: <strong>'+esc(file.name)+'</strong> ('+sizeLabel+')';
+  var titleInput=document.getElementById('du-title');
+  if(titleInput && !titleInput.value){
+    var typeSel=document.getElementById('du-type');
+    var t=typeSel?docTypeInfo(typeSel.value):null;
+    titleInput.value = t ? t.label : '';
+  }
+  if(panel) panel.style.display='block';
+}
+function cancelDocUpload(){
+  var fileInput=document.getElementById('du-file');
+  if(fileInput) fileInput.value='';
+  var status=document.getElementById('du-status');
+  if(status) status.innerHTML='';
+  var titleInput=document.getElementById('du-title');
+  if(titleInput) titleInput.value='';
+  var panel=document.getElementById('doc-upload-form');
+  if(panel) panel.style.display='none';
 }
 async function submitDocUpload(resId){
   var type=document.getElementById('du-type').value;
@@ -9471,10 +9530,24 @@ async function submitDocUpload(resId){
   var fileInput=document.getElementById('du-file');
   var file=fileInput.files[0];
   if(!file){ toast('Choose a file first'); return; }
-  await uploadReservationDocument(resId, file, type, title);
-  fileInput.value=''; document.getElementById('du-title').value='';
-  document.getElementById('doc-upload-form').style.display='none';
-  if(drawerResId===resId) rdTab(3, document.querySelectorAll('.rd-tab')[3]);
+  var btn=document.getElementById('du-submit-btn');
+  var status=document.getElementById('du-status');
+  if(btn){ btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2"></i> Uploading…'; }
+  if(status) status.innerHTML='<i class="ti ti-loader-2"></i> Uploading…';
+  // uploadReservationDocument() catches its own errors (toasts + returns
+  // undefined rather than throwing, so other simpler callers don't need
+  // their own try/catch) -- check its return value here instead of relying
+  // on an exception, so a failed upload still shows "Upload failed" rather
+  // than silently landing on the success path.
+  var docId = await uploadReservationDocument(resId, file, type, title);
+  if(docId){
+    if(status) status.innerHTML='<i class="ti ti-circle-check" style="color:#059669"></i> Uploaded ✓';
+    fileInput.value=''; document.getElementById('du-title').value='';
+    if(drawerResId===resId) rdTab(3, document.querySelectorAll('.rd-tab')[3]);
+  } else {
+    if(status) status.innerHTML='<i class="ti ti-alert-circle" style="color:#dc2626"></i> Upload failed — try again';
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="ti ti-device-floppy"></i> Upload'; }
+  }
 }
 
 function renderDocumentsTabHTML(resId){
@@ -9489,13 +9562,21 @@ function renderDocumentsTabHTML(resId){
   h += '</div>';
   if (canUploadDocuments()) {
     var typeOpts = RESERVATION_DOC_TYPES.map(function(t){return '<option value="'+t.key+'">'+esc(t.label)+'</option>';}).join('');
-    h += '<button onclick="toggleDocUploadForm()" class="btn p" style="width:100%;margin-bottom:10px"><i class="ti ti-upload"></i> Upload document</button>';
+    // Clicking this calls the native file input's own .click() -- a real
+    // user gesture on a real <input type="file">, so the browser/OS file
+    // chooser opens immediately (Passport/ID/Signed Bill/etc. are just the
+    // TYPE picked afterward, not a folder to browse to; the input itself
+    // opens the normal Desktop/Downloads/Documents/Pictures chooser).
+    h += '<button onclick="triggerDocFilePicker()" class="btn p" style="width:100%;margin-bottom:10px"><i class="ti ti-upload"></i> Upload document</button>';
+    h += '<input type="file" id="du-file" accept="image/*,application/pdf" style="display:none" onchange="handleDocFileChosen(this)">';
+    h += '<div id="du-status" style="font-size:var(--font-size-xs);color:#6b7280;margin:-4px 0 8px 2px"></div>';
     h += '<div id="doc-upload-form" style="display:none;background:#f9fafb;border-radius:10px;padding:12px;margin-bottom:14px">';
     h += '<div class="rd-field" style="margin-bottom:8px"><label>Document type</label><select id="du-type">'+typeOpts+'</select></div>';
-    h += '<div class="rd-field" style="margin-bottom:8px"><label>Title (optional)</label><input type="text" id="du-title" placeholder="e.g. Passport — John Smith"></div>';
-    h += '<div class="rd-field" style="margin-bottom:10px"><label>File (image or PDF)</label><input type="file" id="du-file" accept="image/*,application/pdf"></div>';
-    h += '<button class="btn p" style="width:100%" onclick="submitDocUpload(\''+resId+'\')"><i class="ti ti-device-floppy"></i> Save document</button>';
-    h += '</div>';
+    h += '<div class="rd-field" style="margin-bottom:10px"><label>Title</label><input type="text" id="du-title" placeholder="e.g. Passport — John Smith"></div>';
+    h += '<div style="display:flex;gap:8px">';
+    h += '<button id="du-submit-btn" class="btn p" style="flex:1" onclick="submitDocUpload(\''+resId+'\')"><i class="ti ti-device-floppy"></i> Upload</button>';
+    h += '<button class="btn" onclick="cancelDocUpload()">Cancel</button>';
+    h += '</div></div>';
   }
   if (!entries.length) {
     h += '<div style="color:#9ca3af;font-size:var(--font-size-sm);padding:12px;text-align:center">No documents in this view yet.</div>';
