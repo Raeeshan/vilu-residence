@@ -3099,6 +3099,27 @@ function formatMaldivesDateTime(isoOrDate){
   if(isNaN(d)) return String(isoOrDate);
   return new Intl.DateTimeFormat('en-GB',{timeZone:'Indian/Maldives',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)+' Maldives time';
 }
+// Durable price-adjustment audit trail (Financial integrity correction,
+// 2026-09-10): reads reservation_price_adjustments/{reservationId's
+// records} straight from Firestore (never the client-local
+// r.priceAdjustments cache, which is display-convenience only) and
+// presents the canonical server changedAt in Maldives time via the SAME
+// formatMaldivesDateTime() every other timestamp in this app already uses
+// -- storage stays the canonical Firestore Timestamp, only presentation
+// converts. No dedicated browsing UI is built for this in this pass (out
+// of scope); this exists so the data can be read back and verified
+// correctly wherever/whenever a surface for it is built.
+async function loadPriceAdjustmentsForReservation(reservationId){
+  var snap=await fsDb.collection('reservation_price_adjustments').where('reservationId','==',reservationId).get();
+  return snap.docs.map(function(d){
+    var data=d.data();
+    return Object.assign({id:d.id},data,{changedAtDisplay:formatMaldivesDateTime(data.changedAt&&data.changedAt.toDate?data.changedAt.toDate():null)});
+  }).sort(function(a,b){
+    var at=a.changedAt&&a.changedAt.toMillis?a.changedAt.toMillis():0;
+    var bt=b.changedAt&&b.changedAt.toMillis?b.changedAt.toMillis():0;
+    return bt-at;
+  });
+}
 const TD=new Date();
 const tS=getMaldivesDate();
 const D2=(b,n)=>{const d=new Date(b+'T12:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
@@ -5427,11 +5448,25 @@ async function saveEdit(){
     st:newSt,pay:document.getElementById('ed-pay').value
   });
   if(priceAdjustment) updated.priceAdjustments=(r.priceAdjustments||[]).concat([priceAdjustment]);
+  // Financial integrity correction (2026-09-10): the client-local
+  // priceAdjustment above is a convenience cache (same known localStorage-
+  // only limitation as nlog); the DURABLE record is this one, written by
+  // writeReservation() inside the SAME transaction as the rate change
+  // itself. changedByUid comes from the real Firebase Auth session (never
+  // trusted from currentUser, which carries no uid) so firestore.rules can
+  // verify the actor; priorTotal/newTotal are optional informational
+  // snapshots via the same calcTax() everything else uses.
+  var serverPriceAdjustment=priceAdjustment?{
+    oldRate:priceAdjustment.oldRate, newRate:priceAdjustment.newRate, reason:priceAdjustment.reason,
+    changedByUid:firebase.auth().currentUser?firebase.auth().currentUser.uid:null,
+    changedByName:currentUser?currentUser.name:'Admin',
+    priorTotal:calcTax(r).total, newTotal:calcTax(updated).total
+  }:null;
 
   const btn=document.querySelectorAll('button[onclick="saveEdit()"]');
   btn.forEach(function(b){b.disabled=true;});
   try {
-    await writeReservation(r.id, resToFirestoreFields(updated), roomChanged?{oldRoomId:oldRn}:undefined);
+    await writeReservation(r.id, resToFirestoreFields(updated), Object.assign({}, roomChanged?{oldRoomId:oldRn}:{}, serverPriceAdjustment?{priceAdjustment:serverPriceAdjustment}:{}));
   } catch(e) {
     btn.forEach(function(b){b.disabled=false;});
     if (e.message === 'ROOM_CONFLICT') { toast('⚠️ Conflict'); return; }
@@ -8365,28 +8400,45 @@ function guestLabelFor(r,guestKey){
   var found=reservationGuestLabels(r).find(function(g){return g.key===guestKey;});
   return found?found.label:guestKey;
 }
-// Splits a charge's FINAL (post-discount) amount equally across every
-// guest on the reservation, using a deterministic largest-remainder-first
-// method so the allocations always sum to EXACTLY the final amount -- never
-// a $0.01 mismatch (Part 11). The first guest(s) absorb any leftover cent,
-// matching the task's own worked example ($100/3 = $33.34/$33.33/$33.33).
-function chargeSplitAllocations(ch,r){
-  var labels=reservationGuestLabels(r);
-  var n=labels.length;
-  var totalCents=Math.round(chargeFinalAmount(ch)*100);
+// Splits ANY total amount into n shares (2dp) that sum to EXACTLY that
+// total, via deterministic largest-remainder-first: the earliest share(s)
+// absorb the leftover cent(s) (Part 11's $100/3 = $33.34/$33.33/$33.33
+// example). Integer cents throughout, so this never accumulates the
+// classic floating-point split error -- reused by every place that needs
+// to divide a money amount across guests (pre-tax charge splitting AND
+// the tax-inclusive balance estimate below), one deterministic rounding
+// method, never reimplemented per call site (Financial integrity
+// correction, Step 2/3).
+function splitCentsDeterministic(totalAmount,n){
+  var totalCents=Math.round(totalAmount*100);
   var base=Math.floor(totalCents/n);
   var remainder=totalCents-base*n;
-  return labels.map(function(g,i){
-    var cents=base+(i<remainder?1:0);
-    return {guestKey:g.key,label:g.label,amount:+(cents/100).toFixed(2)};
-  });
+  var out=[];
+  for(var i=0;i<n;i++) out.push(+((base+(i<remainder?1:0))/100).toFixed(2));
+  return out;
+}
+// Splits a charge's FINAL (post-discount) amount equally across every
+// guest on the reservation (Part 11 -- never a $0.01 mismatch). This is
+// the PRE-TAX split shown on the folio line itself (Part 12's display
+// format, e.g. "Guest 1: $30 · Guest 2: $30 · Guest 3: $30") -- tax is
+// applied separately, at actual invoicing time, exactly as it always has
+// been for every other charge in this app (Vilu's tax policy is
+// unchanged; see chargeAmountForGuestTaxInclusive() below for the
+// tax-inclusive figure balance calculations use).
+function chargeSplitAllocations(ch,r){
+  var labels=reservationGuestLabels(r);
+  var amounts=splitCentsDeterministic(chargeFinalAmount(ch),labels.length);
+  return labels.map(function(g,i){ return {guestKey:g.key,label:g.label,amount:amounts[i]}; });
 }
 // How much of ONE charge belongs to a given guest, for guest-specific
 // folio balances and guest-specific invoicing. 'whole'/null means the
 // Whole Room scope -- every charge counts in full regardless of payer
 // assignment (today's existing behavior, unchanged). A Shared charge is
 // never included in any single guest's scope (Part 14 -- no automatic
-// division of shared charges into individual guest invoices).
+// division of shared charges into individual guest invoices). This is the
+// PRE-TAX amount (what actually gets billed as the line's unit price when
+// an invoice is generated -- see submitCreateInvoice()); tax is added at
+// that point by genInv()'s own existing, unchanged per-item formula.
 function chargeAmountForGuest(ch,r,guestKey){
   if(!guestKey||guestKey==='whole') return chargeFinalAmount(ch);
   var payerType=ch.payerType||'shared';
@@ -8395,6 +8447,42 @@ function chargeAmountForGuest(ch,r,guestKey){
   if(payerType==='split'){
     var mine=chargeSplitAllocations(ch,r).find(function(a){return a.guestKey===guestKey;});
     return mine?mine.amount:0;
+  }
+  return 0;
+}
+// Financial integrity correction (2026-09-10): every folio charge is
+// always taxable in this app (tax:true on every charge created via
+// folioAddCatalogCharge()/addFolioCharge() -- confirmed, no code path ever
+// sets tax:false), so a charge's tax-inclusive contribution always uses
+// genInv()'s own formula (subtotal * (TAX.svc+TAX.tgst)/100, added to the
+// subtotal) -- reused here, never a second tax formula. Vilu's tax policy
+// itself is unchanged; this only gives OTHER functions (folioSummary(),
+// folioGuestBalance()) a way to estimate what an UNINVOICED charge WOULD
+// cost tax-inclusive, so "Charged" and "Paid" (always tax-inclusive, from
+// real invoices) are computed on the same basis and actually reconcile.
+function chargeTaxInclusiveEstimate(amt){
+  if(!amt||amt<=0) return 0;
+  var tax=+(amt*(TAX.svc+TAX.tgst)/100).toFixed(2);
+  return +(amt+tax).toFixed(2);
+}
+// The tax-inclusive counterpart of chargeAmountForGuest(), used ONLY for
+// balance estimation (never for what actually gets billed on an invoice --
+// that stays chargeAmountForGuest()'s pre-tax figure, taxed by genInv() at
+// invoicing time, unchanged). For a split charge, the guests' tax-inclusive
+// shares are computed by splitting the CHARGE'S OWN tax-inclusive total
+// (not each guest's pre-tax share taxed independently), so they always sum
+// to exactly that total regardless of guest count (Step 3).
+function chargeAmountForGuestTaxInclusive(ch,r,guestKey){
+  if(!guestKey||guestKey==='whole') return chargeTaxInclusiveEstimate(chargeFinalAmount(ch));
+  var payerType=ch.payerType||'shared';
+  if(payerType==='shared') return 0;
+  if(payerType==='guest') return ch.payerGuestKey===guestKey?chargeTaxInclusiveEstimate(chargeFinalAmount(ch)):0;
+  if(payerType==='split'){
+    var labels=reservationGuestLabels(r);
+    var idx=labels.findIndex(function(g){return g.key===guestKey;});
+    if(idx===-1) return 0;
+    var amounts=splitCentsDeterministic(chargeTaxInclusiveEstimate(chargeFinalAmount(ch)),labels.length);
+    return amounts[idx];
   }
   return 0;
 }
@@ -8430,9 +8518,24 @@ function uninvoicedChargesForPayer(resId,payerScope){
 // never drift between the two screens. Room/accommodation always comes
 // from calcTax(r) (the canonical reservation pricing logic, Step 4/20 --
 // never recomputed here, and never affected by folio extras or a package
-// reservation's own r.rate). "Paid" sums every invoice's paidAmount for
-// THIS reservation (Step 12/13 -- paying one invoice never marks the whole
-// reservation paid, only what that invoice's paidAmount actually reflects).
+// reservation's own r.rate).
+//
+// Financial integrity correction (2026-09-10): "Charged" and "Paid" MUST
+// share one basis -- tax-inclusive -- or a fully-settled balance never
+// reaches exactly $0.00 (the bug this fixes: extras were previously summed
+// pre-tax into chargesTotal while paidAmount, sourced from real invoices,
+// always includes tax on whatever was actually invoiced). The fix: once a
+// charge (or the room) has genuinely been invoiced, its contribution to
+// "Charged" comes from that REAL invoice's own total (v.total -- already
+// tax- and item/invoice-discount-inclusive, exact, never recomputed) --
+// paying that invoice in full then reconciles to $0.00 by construction,
+// since paidAmount is capped at v.total. Only charges/room NOT YET
+// invoiced get an ESTIMATED tax-inclusive figure (chargeTaxInclusiveEstimate,
+// the SAME formula genInv() itself applies), so the running total is still
+// informative before anything is invoiced, without ever double-counting
+// something an invoice has already captured. Vilu's tax policy itself is
+// completely unchanged -- this only fixes what basis the BALANCE display
+// compares against what was actually paid.
 function folioSummary(resId){
   var r=RES.find(function(x){return x.id===resId;});
   var folio=FOLIOS[resId]||{charges:[]};
@@ -8443,31 +8546,43 @@ function folioSummary(resId){
     var key=Object.prototype.hasOwnProperty.call(byCat,ch.cat)?ch.cat:'Other Services';
     byCat[key]+=amt;
   });
-  var extrasTotal=Object.keys(byCat).reduce(function(s,k){return s+byCat[k];},0);
-  var chargesTotal=+(room+extrasTotal).toFixed(2);
   var invoicesForRes=INV.filter(function(v){return v.resId===resId&&v.status!=='void';});
+  var invoicedTotal=+invoicesForRes.reduce(function(s,v){return s+(v.total||0);},0).toFixed(2);
   var paid=+invoicesForRes.reduce(function(s,v){return s+(v.paidAmount||0);},0).toFixed(2);
+  var roomAlreadyInvoiced=invoicesForRes.some(function(v){return v.includeRoom;});
+  var uninvoicedWhole=uninvoicedChargesForPayer(resId,'whole');
+  var uninvoicedExtrasRaw=+uninvoicedWhole.reduce(function(s,ch){return s+chargeFinalAmount(ch);},0).toFixed(2);
+  var uninvoicedExtrasEstimate=+uninvoicedWhole.reduce(function(s,ch){return s+chargeTaxInclusiveEstimate(chargeFinalAmount(ch));},0).toFixed(2);
+  var uninvoicedRoomEstimate=roomAlreadyInvoiced?0:room;
+  var chargesTotal=+(invoicedTotal+uninvoicedExtrasEstimate+uninvoicedRoomEstimate).toFixed(2);
+  var taxOnUninvoicedExtras=+(uninvoicedExtrasEstimate-uninvoicedExtrasRaw).toFixed(2);
   return {
     room:+room.toFixed(2), food:+byCat['Food & Beverage'].toFixed(2), activities:+byCat['Trips & Activities'].toFixed(2),
     transfers:+byCat['Transfers'].toFixed(2), accExtras:+byCat['Accommodation Extras'].toFixed(2), other:+byCat['Other Services'].toFixed(2),
+    taxOnUninvoicedExtras:taxOnUninvoicedExtras,
     chargesTotal:chargesTotal, paid:paid, balance:+(chargesTotal-paid).toFixed(2)
   };
 }
-// One guest's own slice of the folio (Simple guest bill split, Step 13/16):
+// One guest's own slice of the folio (Simple guest bill split, Step 13/16),
+// on the SAME invoice-aware, tax-inclusive basis as folioSummary() above:
 // their assigned charges in full, plus their equal share of any
 // split-equally charges -- shared charges and other guests' assignments
 // are never counted. Room accommodation defaults to Shared (Step 15) so it
 // never appears in a single guest's balance unless explicitly assigned.
 // "Paid" only counts invoices actually scoped to THIS guest
 // (v.payerScope===guestKey) -- a whole-room payment never marks a single
-// guest's balance settled, and vice versa (Step 16).
+// guest's balance settled, and vice versa (Step 16). Once this guest's
+// invoice exists, "Charged" is sourced from its real, exact v.total --
+// paying it in full reconciles to exactly $0.00, never a stray cent.
 function folioGuestBalance(resId,guestKey){
   var r=RES.find(function(x){return x.id===resId;});
-  var folio=FOLIOS[resId]||{charges:[]};
-  var allocated=folio.charges.reduce(function(s,ch){return s+chargeAmountForGuest(ch,r,guestKey);},0);
   var invoicesForGuest=INV.filter(function(v){return v.resId===resId&&v.status!=='void'&&v.payerScope===guestKey;});
+  var invoicedTotal=+invoicesForGuest.reduce(function(s,v){return s+(v.total||0);},0).toFixed(2);
   var paid=+invoicesForGuest.reduce(function(s,v){return s+(v.paidAmount||0);},0).toFixed(2);
-  return {allocated:+allocated.toFixed(2), paid:paid, balance:+(allocated-paid).toFixed(2)};
+  var uninvoicedForGuest=uninvoicedChargesForPayer(resId,guestKey);
+  var uninvoicedEstimate=+uninvoicedForGuest.reduce(function(s,ch){return s+chargeAmountForGuestTaxInclusive(ch,r,guestKey);},0).toFixed(2);
+  var charged=+(invoicedTotal+uninvoicedEstimate).toFixed(2);
+  return {charged:charged, paid:paid, balance:+(charged-paid).toFixed(2)};
 }
 // Optional resId (Simple guest bill split, Step 16): when given and the
 // reservation has more than one guest, appends each guest's own
@@ -8482,6 +8597,15 @@ function renderFolioSummaryHTML(sum,resId){
   rows.forEach(function(r){
     h+='<div style="display:flex;justify-content:space-between;padding:2px 0;color:#374151"><span>'+r[0]+'</span><span>$'+r[1].toFixed(2)+'</span></div>';
   });
+  // Tax row (Financial integrity correction, 2026-09-10): the category
+  // rows above are the raw pre-tax charge amounts (unchanged display), but
+  // "Charges" below is now tax-inclusive and invoice-aware -- this row
+  // makes the jump between them visible instead of the numbers silently
+  // not summing. Only shown when there's a genuine uninvoiced-extras tax
+  // component to explain (0 once everything's been invoiced, since an
+  // invoiced charge's tax is folded into "Charges" via that real invoice's
+  // own total, not shown separately here).
+  if(sum.taxOnUninvoicedExtras>0) h+='<div style="display:flex;justify-content:space-between;padding:2px 0;color:#9ca3af"><span>Tax on uninvoiced extras (est.)</span><span>$'+sum.taxOnUninvoicedExtras.toFixed(2)+'</span></div>';
   h+='<div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px;border-top:1px solid #e5e7eb;font-weight:700;color:#111827"><span>Charges</span><span>$'+sum.chargesTotal.toFixed(2)+'</span></div>';
   if(sum.paid>0) h+='<div style="display:flex;justify-content:space-between;padding:2px 0;color:#059669"><span>Paid</span><span>-$'+sum.paid.toFixed(2)+'</span></div>';
   h+='<div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px;border-top:2px solid #111827;font-weight:800;font-size:var(--font-size-base);color:'+(sum.balance>0?'#dc2626':'#059669')+'"><span>Balance Due</span><span>$'+sum.balance.toFixed(2)+'</span></div>';
@@ -8491,10 +8615,10 @@ function renderFolioSummaryHTML(sum,resId){
     var guestLabels=reservationGuestLabels(r);
     if(guestLabels.length>1){
       h+='<div style="margin-top:6px;padding:8px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;font-size:var(--font-size-xs)">'
-        +'<div style="font-weight:700;color:#6b7280;margin-bottom:4px">Per-guest balance (extras only — room stays Shared)</div>'
+        +'<div style="font-weight:700;color:#6b7280;margin-bottom:4px">Per-guest balance (tax-inclusive — room stays Shared)</div>'
         +guestLabels.map(function(g){
           var gb=folioGuestBalance(resId,g.key);
-          if(gb.allocated<=0) return '';
+          if(gb.charged<=0) return '';
           return '<div style="display:flex;justify-content:space-between;padding:1px 0"><span>'+esc(g.label)+'</span><span style="color:'+(gb.balance>0?'#dc2626':'#059669')+'">$'+gb.balance.toFixed(2)+' due</span></div>';
         }).join('')
         +'</div>';
@@ -12341,11 +12465,26 @@ function resToFirestoreFields(r) {
 // docId/fields describe the reservation as it should end up. Pass
 // opts.oldRoomId when the room is changing so the old room's lock entry is
 // released in the SAME transaction as the new one is acquired.
+// opts.priceAdjustment (Financial integrity correction, 2026-09-10):
+// {oldRate, newRate, reason, changedByUid, changedByName, priorTotal,
+// newTotal} -- when present, writes a durable, append-only audit record to
+// reservation_price_adjustments/{autoId} in the SAME transaction as the
+// reservation update itself, so the rate change and its audit trail can
+// never drift apart (Step 9): either both commit or neither does. The
+// timestamp is FieldValue.serverTimestamp() (Step 7 -- canonical server
+// time, never a trusted browser clock), and firestore.rules independently
+// requires changedAt to equal request.time, so a client can't spoof this
+// even if it tried. Only saveEdit() ever passes this, and only after its
+// own canAdjustRoomPrice() gate -- but the collection's own create rule
+// (Admin/Manager only) is what actually enforces the boundary: a forged
+// write from a Staff session fails that rule, which fails this whole
+// transaction, so the reservation update is rejected right along with it.
 async function writeReservation(docId, fields, opts) {
   opts = opts || {};
   var roomId = fields.room_id;
   var oldRoomId = (opts.oldRoomId && opts.oldRoomId !== roomId) ? opts.oldRoomId : null;
   var isActive = fields.status !== 'Cancelled' && fields.status !== 'Checked out';
+  var priceAdjustment = opts.priceAdjustment || null;
 
   if (isActive && await hasBlockConflict(roomId, fields.check_in, fields.check_out)) {
     throw new Error('ROOM_CONFLICT');
@@ -12354,6 +12493,7 @@ async function writeReservation(docId, fields, opts) {
   var resRef = fsDb.collection('reservations').doc(docId);
   var newAvailRef = fsDb.collection('room_availability').doc(roomId);
   var oldAvailRef = oldRoomId ? fsDb.collection('room_availability').doc(oldRoomId) : null;
+  var priceAdjRef = priceAdjustment ? fsDb.collection('reservation_price_adjustments').doc() : null;
 
   await fsDb.runTransaction(async function(transaction) {
     // All reads must happen before any writes in a Firestore transaction.
@@ -12376,6 +12516,21 @@ async function writeReservation(docId, fields, opts) {
       var oldBookings = ((oldAvailSnap.exists && oldAvailSnap.data().bookings) || [])
         .filter(function(b){ return b.id !== docId; });
       transaction.set(oldAvailRef, { bookings: oldBookings }, { merge: true });
+    }
+
+    if (priceAdjRef && priceAdjustment) {
+      transaction.set(priceAdjRef, {
+        reservationId: docId,
+        oldRate: priceAdjustment.oldRate,
+        newRate: priceAdjustment.newRate,
+        reason: priceAdjustment.reason,
+        changedByUid: priceAdjustment.changedByUid,
+        changedByName: priceAdjustment.changedByName || '',
+        changedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        source: 'pms',
+        priorTotal: priceAdjustment.priorTotal != null ? priceAdjustment.priorTotal : null,
+        newTotal: priceAdjustment.newTotal != null ? priceAdjustment.newTotal : null
+      });
     }
   });
 }

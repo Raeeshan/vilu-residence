@@ -70,6 +70,31 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Durable, append-only audit trail for reservation-specific price
+    // overrides (Financial integrity correction, 2026-09-10). Written in
+    // the SAME Firestore transaction as the reservations/{id} rate change
+    // itself (see writeReservation()'s client code) so the two can never
+    // drift apart -- either both succeed or neither does. Admin/Manager
+    // only, enforced here (not just by hiding the UI control): a Staff
+    // session attempting to forge this write fails its own rule, which
+    // fails the WHOLE transaction atomically, so the reservation's rate
+    // change is rejected right along with it -- Staff cannot achieve a
+    // price override with or without an audit trail. changedByUid must
+    // match the authenticated caller, so the audit trail can never record
+    // a fabricated actor. Never updatable or deletable once written.
+    match /reservation_price_adjustments/{id} {
+      allow read: if isAdmin() || isStaff() || isManagerRole();
+      allow create: if (isAdmin() || isManagerRole())
+        && request.resource.data.reservationId is string
+        && request.resource.data.oldRate is number
+        && request.resource.data.newRate is number
+        && request.resource.data.reason is string && request.resource.data.reason.size() > 0
+        && request.resource.data.changedByUid == request.auth.uid
+        && request.resource.data.source == 'pms'
+        && request.resource.data.changedAt == request.time;
+      allow update, delete: if false;
+    }
+
     match /blocks/{id} {
       allow read: if true;
       allow write: if isAdmin() || isStaff() || isManagerRole();

@@ -51,7 +51,7 @@ function extractByStart(src, startRegex) {
 // Sandbox with every pure helper the split/charge math needs, wired up
 // exactly like the real file (each extracted verbatim, none reimplemented).
 function buildMathSandbox() {
-  const ctx = { console };
+  const ctx = { console, TAX: { svc: 10, tgst: 17, thirdGuest: 20, childDiscountPercent: 50, green: 6, bed: 0 } };
   vm.createContext(ctx);
   const fns = [
     /function chargeGrossAmount\(ch\)\s*\{/,
@@ -60,8 +60,11 @@ function buildMathSandbox() {
     /function reservationGuestCount\(r\)\s*\{/,
     /function reservationGuestLabels\(r\)\s*\{/,
     /function guestLabelFor\(r,guestKey\)\s*\{/,
+    /function splitCentsDeterministic\(totalAmount,n\)\s*\{/,
     /function chargeSplitAllocations\(ch,r\)\s*\{/,
     /function chargeAmountForGuest\(ch,r,guestKey\)\s*\{/,
+    /function chargeTaxInclusiveEstimate\(amt\)\s*\{/,
+    /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/,
   ];
   fns.forEach(re => vm.runInContext(extractByStart(PMS, re), ctx));
   return ctx;
@@ -243,9 +246,9 @@ section('Case G — guest-scoped invoicing: Whole room / Guest N (Steps 13-15)')
 
 section('Case H — partial payment settles only that guest\'s own share (Step 16)');
 {
-  test('folioGuestBalance() sums only THIS guest\'s allocated amount (assigned + their split shares) and only invoices actually scoped to them (v.payerScope===guestKey) -- a whole-room payment or another guest\'s invoice payment never appears here', () => {
+  test('folioGuestBalance() sums only THIS guest\'s charged amount (their real invoices\' totals + a tax-inclusive estimate of anything not yet invoiced) and only invoices actually scoped to them (v.payerScope===guestKey) -- a whole-room payment or another guest\'s invoice payment never appears here', () => {
     const src = extractByStart(PMS, /function folioGuestBalance\(resId,guestKey\)\s*\{/);
-    assert.match(src, /chargeAmountForGuest\(ch,r,guestKey\)/);
+    assert.match(src, /chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)/);
     assert.match(src, /v\.payerScope===guestKey/);
   });
   test('recordInvoicePayment() only marks a charge\'s whole-charge .paid flag true for a Whole Room invoice -- a guest-scoped invoice reaching Fully Paid never marks the underlying (possibly split) charge as paid for everyone', () => {

@@ -39,17 +39,52 @@ function extractFn(src, name) {
   return src.slice(m.index, i);
 }
 
-// Normalizes away the one known, deliberate divergence (the website's extra
-// `await ensureFirebaseReady();` bootstrap call — vilu-website.html is the
-// only one of the three files that lazily waits for Firebase init inside
-// these functions) plus comment lines and blank lines, so the comparison
-// targets the actual reservation-write/conflict logic, not file-specific
-// bootstrap plumbing or comment drift.
+// Removes an entire brace-matched block whose OPENING line contains
+// `marker`, leaving everything else untouched. A plain per-line substring
+// filter can't cleanly remove a multi-line block whose own inner lines
+// (e.g. `reservationId: docId,`, the closing `});`) don't all repeat the
+// marker text -- brace-matching is needed to excise the whole unit as one
+// piece. No-op (returns body unchanged) when the marker isn't present at
+// all, which is exactly the case for vilu-website.html/vilu-agency-portal.html
+// below.
+function stripBlockContaining(body, marker) {
+  const lines = body.split('\n');
+  const startIdx = lines.findIndex(l => l.includes(marker));
+  if (startIdx === -1) return body;
+  let depth = 0, started = false, endIdx = -1;
+  for (let i = startIdx; i < lines.length; i++) {
+    for (const ch of lines[i]) {
+      if (ch === '{') { depth++; started = true; }
+      else if (ch === '}') { depth--; }
+    }
+    if (started && depth === 0) { endIdx = i; break; }
+  }
+  if (endIdx === -1) return body;
+  return lines.slice(0, startIdx).concat(lines.slice(endIdx + 1)).join('\n');
+}
+
+// Normalizes away the known, deliberate divergences plus comment lines and
+// blank lines, so the comparison targets the actual reservation-write/
+// conflict logic, not file-specific plumbing or comment drift:
+//  - the website's extra `await ensureFirebaseReady();` bootstrap call
+//    (vilu-website.html is the only one of the three that lazily waits for
+//    Firebase init inside these functions)
+//  - the PMS-only price-adjustment audit-trail write (Financial integrity
+//    correction, 2026-09-10): an Admin/Manager overriding a reservation's
+//    rate from the Calendar drawer is a PMS-only capability -- the public
+//    website booking flow and the agency portal never construct a
+//    priceAdjustment option, so this whole brace-matched block only ever
+//    exists in vilu-unified.html's copy. Stripping it (and the one-line
+//    `var priceAdjustment = ...` / `var priceAdjRef = ...` declarations
+//    that feed it) leaves the CORE conflict-detection logic -- the part
+//    this test actually guards -- still compared byte-for-byte across all
+//    three files.
 function normalizeForCompare(body) {
+  body = stripBlockContaining(body, 'priceAdjRef && priceAdjustment');
   return body
     .split('\n')
     .map(l => l.replace(/\r$/, ''))
-    .filter(l => l.trim() !== '' && !/^\s*\/\//.test(l) && !/await ensureFirebaseReady\(\);/.test(l))
+    .filter(l => l.trim() !== '' && !/^\s*\/\//.test(l) && !/await ensureFirebaseReady\(\);/.test(l) && !/var priceAdjustment ?=|var priceAdjRef ?=/.test(l))
     .join('\n');
 }
 
