@@ -63,7 +63,8 @@ function buildMathSandbox() {
     /function splitCentsDeterministic\(totalAmount,n\)\s*\{/,
     /function chargeSplitAllocations\(ch,r\)\s*\{/,
     /function chargeAmountForGuest\(ch,r,guestKey\)\s*\{/,
-    /function chargeTaxInclusiveEstimate\(amt\)\s*\{/,
+    /function calcServiceLineTax\(amount, priceTaxMode\)\s*\{/,
+    /function chargeTaxInclusiveEstimate\(ch\)\s*\{/,
     /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/,
   ];
   fns.forEach(re => vm.runInContext(extractByStart(PMS, re), ctx));

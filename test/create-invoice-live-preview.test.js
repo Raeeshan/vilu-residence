@@ -45,6 +45,7 @@ function extractByStart(src, startRegex) {
 
 // ── sandbox: calcInvoiceExtras() + invDiscountAmount(), real bodies ──
 const taxDefaultSrc = extractByStart(PMS, /let TAX=\{tgst:17/).replace(/^let TAX=/, 'var TAX=');
+const calcServiceLineTaxSrc = extractByStart(PMS, /function calcServiceLineTax\(amount, priceTaxMode\)\s*\{/);
 const calcInvoiceExtrasSrc = extractByStart(PMS, /function calcInvoiceExtras\(items, fx\)\s*\{/);
 const invDiscountAmountSrc = extractByStart(PMS, /function invDiscountAmount\(roomTotal, eT\)\s*\{/);
 
@@ -62,7 +63,7 @@ function makeSandbox(discType, discVal) {
     }
   };
   vm.createContext(sandbox);
-  vm.runInContext([taxDefaultSrc, calcInvoiceExtrasSrc, invDiscountAmountSrc].join('\n'), sandbox);
+  vm.runInContext([taxDefaultSrc, calcServiceLineTaxSrc, calcInvoiceExtrasSrc, invDiscountAmountSrc].join('\n'), sandbox);
   return sandbox;
 }
 
@@ -81,12 +82,16 @@ section('Case A — calcInvoiceExtras(): the ONE canonical extras engine niPrev(
     assert.equal(r.eSubtotal, 0);
   });
 
-  test('USD, single taxed item, qty 2 @ $50, 10% svc + 17% tgst -> subtotal 100, tax 27, eT 127', () => {
+  test('USD, single taxed item, qty 2 @ $50 (no priceTaxMode -> falls back TAX_EXCLUDED) -> subtotal 100, Service $10 then TGST 17% of $110 = $18.70, eT 128.70', () => {
+    // Catalog tax-treatment upgrade (2026-09-11) corrected this engine from
+    // a flat (svc+tgst)/100=27% shortcut to the canonical compound
+    // Base->Service->TGST-on-(base+service) order (1.10 x 1.17 = 1.287),
+    // matching calcTaxGeneral()'s own room-charge formula.
     const sb = makeSandbox('fixed', 0);
     const r = vm.runInContext('calcInvoiceExtras([{desc:"Snorkel",qty:2,unit:50,tax:true}], 1)', sb);
     assert.equal(r.eSubtotal, 100);
-    assert.equal(r.eTax, 27);
-    assert.equal(r.eT, 127);
+    assert.equal(r.eTax, 28.70);
+    assert.equal(r.eT, 128.70);
   });
 
   test('an untaxed item contributes to eSubtotal but not eTax', () => {
@@ -117,9 +122,16 @@ section('Case A — calcInvoiceExtras(): the ONE canonical extras engine niPrev(
     // New (correct) behaviour: sum of the ALREADY-ROUNDED per-line tax figures.
     const perLineTaxSum = +r.extras.reduce((s, e) => s + e.taxAmt, 0).toFixed(2);
     assert.equal(r.eTax, perLineTaxSum, 'eTax must equal the sum of the rounded per-line tax amounts (what genInv() now also computes)');
-    // Old (buggy) formula niPrev() used to run: one flat sum of qty*unit*fx over ALL items, taxed as a single lump.
-    const oldFlatTax = items.filter(i => i.tax).reduce((s, i) => s + (i.qty * i.unit * fx * (17 + 10) / 100), 0);
-    assert.notEqual(+oldFlatTax.toFixed(2), r.eTax, 'the old aggregate formula must land on a DIFFERENT cent value than the new per-line formula for this input -- proving preview and finalize really could disagree before this fix');
+    // Old (buggy) formula niPrev() used to run: sum ALL items' subtotals
+    // into one lump first, then tax that lump ONCE -- isolate that
+    // rounding-ORDER bug from the separate flat-27%-vs-compound-1.287x
+    // formula correction (Catalog Tax-Treatment Upgrade, 2026-09-11) by
+    // reapplying the SAME (new, correct) calcServiceLineTax() formula, just
+    // to the aggregate instead of per-line.
+    const aggregateSubtotal = +r.extras.reduce((s, e) => s + e.subtotal, 0).toFixed(2);
+    const aggregateTax = vm.runInContext(`calcServiceLineTax(${aggregateSubtotal}, 'TAX_EXCLUDED')`, sb);
+    const oldStyleAggregateTax = +(aggregateTax.svc + aggregateTax.tgst).toFixed(2);
+    assert.notEqual(oldStyleAggregateTax, r.eTax, 'taxing the aggregate subtotal once must land on a DIFFERENT cent value than summing the rounded per-line tax amounts -- proving preview and finalize really could disagree before per-line rounding was introduced');
   });
 
   test('genInv() calls the SAME calcInvoiceExtras() helper as niPrev() -- not a second, hand-rolled formula', () => {

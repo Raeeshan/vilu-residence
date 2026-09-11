@@ -191,13 +191,22 @@ service cloud.firestore {
     // (active:false), which stays allowed.
     match /service_catalog/{itemId} {
       allow read: if isAdmin() || isStaff() || isManagerRole();
+      // priceTaxMode (Catalog Tax-Treatment Upgrade, 2026-09-11): optional
+      // and backward-compatible -- an item written before this field
+      // existed, or one this rule doesn't touch on update, simply has no
+      // value and falls back client-side (catalogItemPriceTaxMode()).
+      // Validated only when present, so it can never be set to anything
+      // other than the two real values.
       allow create, update: if (isAdmin() || isManagerRole())
         && request.resource.data.name is string
         && request.resource.data.category in ['TRIPS_ACTIVITIES','FOOD_BEVERAGE','TRANSFER','OTHER_SERVICE','ACCOMMODATION_EXTRA']
         && request.resource.data.unitType in ['PER_PAX','PER_TRIP','PER_ITEM','PER_NIGHT','PER_ROOM','PER_HOUR']
         && request.resource.data.basePrice is number
         && request.resource.data.basePrice >= 0
-        && request.resource.data.active is bool;
+        && request.resource.data.active is bool
+        && (!('priceTaxMode' in request.resource.data)
+            || request.resource.data.priceTaxMode == null
+            || request.resource.data.priceTaxMode in ['TAX_INCLUDED','TAX_EXCLUDED']);
       allow delete: if false;
     }
 

@@ -67,7 +67,8 @@ function buildFullSandbox() {
     /function splitCentsDeterministic\(totalAmount,n\)\s*\{/,
     /function chargeSplitAllocations\(ch,r\)\s*\{/,
     /function chargeAmountForGuest\(ch,r,guestKey\)\s*\{/,
-    /function chargeTaxInclusiveEstimate\(amt\)\s*\{/,
+    /function calcServiceLineTax\(amount, priceTaxMode\)\s*\{/,
+    /function chargeTaxInclusiveEstimate\(ch\)\s*\{/,
     /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/,
     /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/,
     /function uninvoicedChargesForPayer\(resId,payerScope\)\s*\{/,
@@ -87,19 +88,27 @@ function buildFullSandbox() {
 
 section('Case A — root cause: one canonical, tax-inclusive money basis (Step 1/2)');
 {
-  test('chargeTaxInclusiveEstimate() uses the EXACT same formula genInv() applies to real invoice items (subtotal * (TAX.svc+TAX.tgst)/100, added to the subtotal) -- no second, independently-invented tax formula', () => {
-    // Create Invoice live-preview task (2026-09-11) extracted this formula
-    // out of genInv() into calcInvoiceExtras() -- the ONE canonical extras
-    // engine now shared by genInv() (Finalize) AND niPrev() (live preview),
-    // so a live preview total can never drift a cent from the finalized
-    // invoice. The formula itself is unchanged, just relocated -- assert
-    // against its real home and that genInv() actually calls it.
+  test('chargeTaxInclusiveEstimate() uses the EXACT same canonical tax engine genInv() applies to real invoice items -- no second, independently-invented tax formula', () => {
+    // Create Invoice live-preview task (2026-09-11) extracted the per-line
+    // tax formula out of genInv() into calcInvoiceExtras() -- the ONE
+    // canonical extras engine shared by genInv() (Finalize) AND niPrev()
+    // (live preview). The Catalog Tax-Treatment Upgrade (2026-09-11) then
+    // moved the actual arithmetic ONE level deeper, into calcServiceLineTax()
+    // -- also correcting it from a flat (svc+tgst)/100=27% shortcut to the
+    // canonical compound Base->Service->TGST-on-(base+service) order
+    // calcTaxGeneral() already used for the room (1.10x1.17=1.287) -- so
+    // assert against calcServiceLineTax()'s real formula, and that both
+    // genInv() (via calcInvoiceExtras()) and chargeTaxInclusiveEstimate()
+    // call it, rather than each inventing their own.
     const genInvSrc = extractByStart(PMS, /function genInv\(\)\s*\{/);
     assert.match(genInvSrc, /calcInvoiceExtras\(invItems,\s*fx\)/);
     const extrasSrc = extractByStart(PMS, /function calcInvoiceExtras\(items, fx\)\s*\{/);
-    assert.match(extrasSrc, /taxAmt=i\.tax\?\+\(subtotal\*\(TAX\.svc\+TAX\.tgst\)\/100\)\.toFixed\(2\):0/);
-    const estSrc = extractByStart(PMS, /function chargeTaxInclusiveEstimate\(amt\)\s*\{/);
-    assert.match(estSrc, /amt\*\(TAX\.svc\+TAX\.tgst\)\/100/);
+    assert.match(extrasSrc, /calcServiceLineTax\(subtotal, mode\)/);
+    const lineTaxSrc = extractByStart(PMS, /function calcServiceLineTax\(amount, priceTaxMode\)\s*\{/);
+    assert.match(lineTaxSrc, /svc=\+\(base\*svcRate\)\.toFixed\(2\)/);
+    assert.match(lineTaxSrc, /tgst=\+\(\(base\+svc\)\*tgstRate\)\.toFixed\(2\)/);
+    const estSrc = extractByStart(PMS, /function chargeTaxInclusiveEstimate\(ch\)\s*\{/);
+    assert.match(estSrc, /calcServiceLineTax\(amt, ch\.priceTaxMode\|\|'TAX_EXCLUDED'\)/);
   });
   test('folioSummary()/folioGuestBalance() source "Charged" from the REAL invoice total (v.total) for anything already invoiced -- never recomputed -- and only ESTIMATE tax for what is genuinely still uninvoiced', () => {
     const summarySrc = extractByStart(PMS, /function folioSummary\(resId\)\s*\{/);
@@ -124,7 +133,11 @@ section('Case A — root cause: one canonical, tax-inclusive money basis (Step 1
     const splitSrc = extractByStart(PMS, /function chargeSplitAllocations\(ch,r\)\s*\{/);
     assert.match(splitSrc, /splitCentsDeterministic\(chargeFinalAmount\(ch\),labels\.length\)/);
     const taxSplitSrc = extractByStart(PMS, /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/);
-    assert.match(taxSplitSrc, /splitCentsDeterministic\(chargeTaxInclusiveEstimate\(chargeFinalAmount\(ch\)\),labels\.length\)/);
+    // Catalog tax-treatment upgrade (2026-09-11): chargeTaxInclusiveEstimate()
+    // now takes the charge object itself (ch), not a pre-computed amount --
+    // it needs ch.priceTaxMode to pick the right formula, and derives
+    // chargeFinalAmount(ch) internally.
+    assert.match(taxSplitSrc, /splitCentsDeterministic\(chargeTaxInclusiveEstimate\(ch\),labels\.length\)/);
     const centsSrc = extractByStart(PMS, /function splitCentsDeterministic\(totalAmount,n\)\s*\{/);
     assert.match(centsSrc, /Math\.round\(totalAmount\*100\)/); // integer cents, per Step 2
   });
@@ -148,7 +161,7 @@ section('Case B — guest fully paid = exactly $0.00 (Step 4)');
     const dinner = { id: 1, cat: 'Food & Beverage', price: 18, qty: 3, payerType: 'split' };
     ctx.FOLIOS = { R5: { charges: [dinner] } };
     ctx.dinner = dinner;
-    const wholeTaxInclusive = vm.runInContext('chargeTaxInclusiveEstimate(chargeFinalAmount(dinner))', ctx);
+    const wholeTaxInclusive = vm.runInContext('chargeTaxInclusiveEstimate(dinner)', ctx);
     const guest1Share = vm.runInContext(`chargeAmountForGuestTaxInclusive(dinner,RES[0],'guest1')`, ctx);
     // ad:3 (gp>2) still carries a nonzero 3rd-guest supplement + Green Tax
     // even with rate:0 -- calcTax() itself, unchanged, still applies both
@@ -198,24 +211,34 @@ section('Case D — partial payment (Step 5)');
 section('Case E — 2-way and 3-way tax-inclusive split allocation, deterministic rounding (Step 3/11)');
 {
   const ctx = buildFullSandbox();
-  test('tax-inclusive total $100/3 (a whole-charge final of ~$78.74 pre-tax) reconciles exactly across 3 guests -- no cent mismatch', () => {
+  test('tax-inclusive total for a 3-way split reconciles exactly across 3 guests -- no cent mismatch, whatever the exact tax-inclusive figure is', () => {
     ctx.r = { fn: 'A', ad: 3, ch: 0 };
-    // Pick a pre-tax final amount whose tax-inclusive total is exactly $100.00
-    const preTax = +(100 / 1.27).toFixed(2);
+    const preTax = 78.74;
     ctx.ch = { price: preTax, pax: 1, payerType: 'split' };
     const g1 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest1')`, ctx);
     const g2 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest2')`, ctx);
     const g3 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest3')`, ctx);
-    const wholeTaxInclusive = vm.runInContext(`chargeTaxInclusiveEstimate(chargeFinalAmount(ch))`, ctx);
+    const wholeTaxInclusive = vm.runInContext(`chargeTaxInclusiveEstimate(ch)`, ctx);
     assert.equal(+(g1 + g2 + g3).toFixed(2), wholeTaxInclusive);
   });
-  test('2-way tax-inclusive split of a $90 pre-tax charge ($114.30 tax-inclusive) is exactly $57.15/$57.15, no remainder', () => {
+  // Catalog tax-treatment upgrade (2026-09-11): the extras/charge tax
+  // formula was corrected from a flat (svc+tgst)/100=27% shortcut to the
+  // canonical compound Base->Service->TGST-on-(base+service) order (see
+  // Case A above) -- a $90 charge's tax-inclusive total is now $115.83
+  // (90 + 9.00 service + 16.83 TGST), not the old $114.30, and its 2-way
+  // split (11583 cents / 2) genuinely does carry a 1-cent remainder --
+  // deterministic allocation gives the earlier guest that cent, so the
+  // meaningful invariant is that the split still reconciles EXACTLY to the
+  // whole, not that both halves happen to be identical.
+  test('2-way tax-inclusive split of a $90 charge reconciles exactly to its whole tax-inclusive total (deterministic remainder allocation, never a lost or duplicated cent)', () => {
     ctx.r = { fn: 'A', ad: 2, ch: 0 };
     ctx.ch = { price: 90, pax: 1, payerType: 'split' };
     const g1 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest1')`, ctx);
     const g2 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest2')`, ctx);
-    assert.equal(g1, 57.15);
-    assert.equal(g2, 57.15);
+    const whole = vm.runInContext(`chargeTaxInclusiveEstimate(ch)`, ctx);
+    assert.equal(whole, 115.83);
+    assert.equal(+(g1 + g2).toFixed(2), whole);
+    assert.ok(+Math.abs(g1 - g2).toFixed(2) <= 0.01, 'the two shares must differ by at most one cent');
   });
 }
 
@@ -227,8 +250,8 @@ section('Case F — discount + split + tax composition (Step 3/10)');
     ctx.ch = { price: 100, pax: 1, discountType: 'percent', discountValue: 10, payerType: 'split' };
     const final = vm.runInContext('chargeFinalAmount(ch)', ctx);
     assert.equal(final, 90); // discount applied first
-    const taxInclusive = vm.runInContext('chargeTaxInclusiveEstimate(chargeFinalAmount(ch))', ctx);
-    assert.equal(taxInclusive, 114.30); // 90 * 1.27, tax on the DISCOUNTED amount, never the pre-discount gross
+    const taxInclusive = vm.runInContext('chargeTaxInclusiveEstimate(ch)', ctx);
+    assert.equal(taxInclusive, 115.83); // $90 discounted amount: +$9.00 service, +$16.83 TGST (on base+service) -- tax on the DISCOUNTED amount, never the pre-discount gross
     const g1 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest1')`, ctx);
     const g2 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest2')`, ctx);
     const g3 = vm.runInContext(`chargeAmountForGuestTaxInclusive(ch,r,'guest3')`, ctx);

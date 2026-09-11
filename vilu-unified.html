@@ -1405,6 +1405,15 @@ body.pms-mode { overflow:hidden; }
     <button onclick="openAddCatalogItem()" style="background:#0077b6;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-plus"></i> Add item</button>
   </div>
 
+  <!-- Catalog tax-treatment upgrade (2026-09-11, Part Q): simple 3-way
+       filter so the owner can see at a glance which prices are final
+       (tax included) vs which still get Service+TGST added on top. -->
+  <div style="display:flex;gap:6px;margin-bottom:12px" id="svc-cat-filter">
+    <button type="button" onclick="setSvcCatFilter('all')" data-filter="all" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #0077b6;background:#0077b6;color:#fff;cursor:pointer;font-family:inherit">All</button>
+    <button type="button" onclick="setSvcCatFilter('TAX_INCLUDED')" data-filter="TAX_INCLUDED" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">Tax included</button>
+    <button type="button" onclick="setSvcCatFilter('TAX_EXCLUDED')" data-filter="TAX_EXCLUDED" style="padding:5px 12px;font-size:var(--font-size-xs);font-weight:700;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;font-family:inherit">Tax excluded</button>
+  </div>
+
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px" id="svc-cat-grid">
     <!-- Rendered by drawServiceCatalog() -->
   </div>
@@ -1418,7 +1427,7 @@ body.pms-mode { overflow:hidden; }
       <button class="ab" onclick="document.getElementById('m-catitem').classList.remove('on')"><i class="ti ti-x"></i></button>
     </div>
     <div class="fg"><label>Name</label><input type="text" id="cim-name" placeholder="e.g. Manta Ray Tour"></div>
-    <div class="fg"><label>Category</label><select id="cim-cat">
+    <div class="fg"><label>Category</label><select id="cim-cat" onchange="cimCategoryChanged()">
         <option value="TRIPS_ACTIVITIES">Trips &amp; Activities</option>
         <option value="FOOD_BEVERAGE">Food &amp; Beverage</option>
         <option value="TRANSFER">Transfers</option>
@@ -1434,6 +1443,12 @@ body.pms-mode { overflow:hidden; }
         <option value="PER_HOUR">Per hour</option>
       </select></div>
     <div class="fg"><label>Price ($)</label><input type="number" id="cim-price" min="0" step="0.5" placeholder="0"></div>
+    <div class="fg"><label>Price treatment</label><select id="cim-taxmode" onchange="cimUpdateTaxModeHint()">
+        <option value="TAX_INCLUDED">Tax included</option>
+        <option value="TAX_EXCLUDED">Tax excluded</option>
+      </select>
+      <div id="cim-taxmode-hint" style="font-size:var(--font-size-xs);color:#6b7280;margin-top:3px"></div>
+    </div>
     <div class="fg"><label>Duration (hours, optional)</label><input type="number" id="cim-dur" min="0" step="0.5" placeholder="e.g. 2"></div>
     <div class="fg"><label>Notes (optional)</label><input type="text" id="cim-notes" placeholder="e.g. Min 2 guests, equipment included"></div>
     <button class="btn p" style="width:100%" onclick="saveCatalogItem()"><i class="ti ti-device-floppy"></i> Save item</button>
@@ -3617,6 +3632,53 @@ const CATALOG_UNIT_TYPES = [
 function catalogCategoryLabel(key){ var c=CATALOG_CATEGORIES.find(function(x){return x.key===key;}); return c?c.label:key; }
 function catalogUnitShort(key){ var u=CATALOG_UNIT_TYPES.find(function(x){return x.key===key;}); return u?u.short:'unit'; }
 function catalogUnitLabel(key){ var u=CATALOG_UNIT_TYPES.find(function(x){return x.key===key;}); return u?u.label:'Qty'; }
+// Catalog tax-treatment upgrade (2026-09-11): TAX_INCLUDED = the entered
+// catalog price is the FINAL commercial selling price (Service Charge +
+// TGST already inside it); TAX_EXCLUDED = the entered price is pre-tax,
+// Service Charge + TGST are added on top. Green Tax is NEVER part of this
+// setting (Part P) -- it stays reservation/guest-night based, computed
+// only by calcTax()/calcTaxGeneral() for the room.
+// Fallback for a catalog item with no explicit priceTaxMode yet: Trips &
+// Activities matches the owner's actual pricing convention (their entered
+// prices already ARE the final selling price), so it defaults to
+// TAX_INCLUDED; every other category preserves its historical behavior
+// (tax always added on top) until the owner explicitly marks otherwise --
+// Part E's "audit first, do not blindly change commercial behavior".
+function catalogItemPriceTaxMode(item){
+  if(item && item.priceTaxMode) return item.priceTaxMode;
+  return (item && item.category==='TRIPS_ACTIVITIES') ? 'TAX_INCLUDED' : 'TAX_EXCLUDED';
+}
+// Canonical per-line service/activity tax decomposition -- the SAME
+// Base -> Service Charge -> TGST-on-(base+service) order calcTaxGeneral()
+// already uses for the room charge (10% then 17%, combined 1.10x1.17 =
+// 1.287 multiplier), now applied to every catalog/extra charge line too.
+// Before this task, the extras engine (calcInvoiceExtras/
+// chargeTaxInclusiveEstimate) used a flat (svc+tgst)/100 = 27% shortcut
+// instead of compounding TGST on top of Service -- a real, separate
+// under-charge bug from the tax-mode question this task was scoped for,
+// caught by reconciling this task's own worked examples (Whale Shark $85
+// tax-excluded -> $109.40 final only reconciles under 1.287x, not 1.27x)
+// against the existing code. Fixed here, once, for every caller.
+//   TAX_EXCLUDED (default/fallback, matches all historical behavior --
+//     Part S): `amount` is pre-tax; service and TGST are added on top.
+//   TAX_INCLUDED: `amount` IS the final commercial price already;
+//     reverse-decomposed so base+svc+tgst reconciles to EXACTLY `amount`
+//     (TGST absorbs the rounding remainder -- same technique
+//     calcTaxGeneral() already uses for a tax-included room rate).
+function calcServiceLineTax(amount, priceTaxMode){
+  var svcRate=TAX.svc/100, tgstRate=TAX.tgst/100;
+  if(priceTaxMode==='TAX_INCLUDED'){
+    var rawBase=amount/((1+svcRate)*(1+tgstRate));
+    var base=+rawBase.toFixed(2);
+    var svc=+(base*svcRate).toFixed(2);
+    var tgst=+(amount-base-svc).toFixed(2);
+    return {base:base, svc:svc, tgst:tgst, final:+amount.toFixed(2)};
+  }
+  var base=+amount.toFixed(2);
+  var svc=+(base*svcRate).toFixed(2);
+  var tgst=+((base+svc)*tgstRate).toFixed(2);
+  return {base:base, svc:svc, tgst:tgst, final:+(base+svc+tgst).toFixed(2)};
+}
 
 // One-time seed source, used only by seedServiceCatalogIfEmpty() the first
 // time the collection is ever read empty -- ports the old FP_DEFAULTS 19
@@ -3699,6 +3761,12 @@ async function seedServiceCatalogIfEmpty(){
       batch.set(ref, {
         name: item.name, category: item.category, unitType: item.unitType,
         basePrice: item.basePrice, durationHours: item.durationHours||null, notes: item.notes||'',
+        // Catalog tax-treatment upgrade (2026-09-11): a freshly-seeded
+        // catalog (only ever runs on a genuinely empty collection) gets
+        // Trips & Activities pre-set to TAX_INCLUDED, matching the owner's
+        // actual pricing convention -- every other category is left
+        // unset, falling back to TAX_EXCLUDED via catalogItemPriceTaxMode().
+        priceTaxMode: item.category==='TRIPS_ACTIVITIES' ? 'TAX_INCLUDED' : null,
         active: true, createdAt: now+i, updatedAt: now+i
       });
     });
@@ -3794,11 +3862,71 @@ async function migrateCatalogToPriceSheet2026(){
   return log;
 }
 
+// One-time, idempotent live migration for the Catalog Tax-Treatment
+// Upgrade (2026-09-11, Part B/R): marks the owner's current 18 Trips &
+// Activities selling prices as TAX_INCLUDED -- these ARE the final
+// commercial amounts already (Service Charge + TGST included inside them),
+// so the PMS must stop adding tax again on top for these specific items.
+// Touches ONLY priceTaxMode -- never basePrice/name/duration/unitType, and
+// never any item outside this named list (the 4 already-INACTIVE legacy
+// items -- Snorkeling, Fishing Trip, Island Hopping, Night Snorkeling --
+// are deliberately left alone; they are historical, not current pricing).
+// Safe to run more than once: skips any item already TAX_INCLUDED.
+// Console-invoked by an admin once during deploy: migrateCatalogAddPriceTaxMode2026().
+async function migrateCatalogAddPriceTaxMode2026(){
+  if(!canManageCatalog()){ console.warn('migrateCatalogAddPriceTaxMode2026: Admin/Manager only'); return; }
+  var CURRENT_ACTIVITY_PRICES_2026 = [
+    'Big Game Fishing','Sandbank Escape','Nurse Shark Snorkeling','Whale Shark Snorkeling','Manta Ray Snorkeling',
+    'Dolphin Cruise','Turtle Snorkeling','Octopus Hunting Experience','Lobster Hunting Experience','Sunset Cruise',
+    'Picnic Island Experience','Night Fishing Experience','Fenfushi Reef Snorkeling','Dhiddhoo Reef Snorkeling',
+    'Ariyadhoo Reef Snorkeling','Professional Photography','Romantic Beach Dinner','Cinema at the Beach'
+  ];
+  var snap = await fsDb.collection('service_catalog').get();
+  var byName = {};
+  snap.docs.forEach(function(d){ byName[d.data().name] = Object.assign({id:d.id}, d.data()); });
+  var now = Date.now();
+  var log = {migrated:[], alreadyDone:[], notFound:[]};
+  for (var i=0;i<CURRENT_ACTIVITY_PRICES_2026.length;i++){
+    var name = CURRENT_ACTIVITY_PRICES_2026[i];
+    var item = byName[name];
+    if (!item) { log.notFound.push(name); continue; }
+    if (item.priceTaxMode==='TAX_INCLUDED') { log.alreadyDone.push(name); continue; }
+    await fsDb.collection('service_catalog').doc(item.id).set({priceTaxMode:'TAX_INCLUDED', updatedAt:now}, {merge:true});
+    log.migrated.push(name+' ($'+item.basePrice+')');
+  }
+  var reSnap = await fsDb.collection('service_catalog').get();
+  SVC_CATALOG = reSnap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+  _svcCatalogLoaded = true;
+  if (document.getElementById('svc-cat-grid')) drawServiceCatalog();
+  console.log('migrateCatalogAddPriceTaxMode2026 done:', log);
+  return log;
+}
+
+var _svcCatFilter = 'all';
+function setSvcCatFilter(mode){
+  _svcCatFilter = mode;
+  var row = document.getElementById('svc-cat-filter');
+  if(row) row.querySelectorAll('button').forEach(function(b){
+    var active = b.dataset.filter===mode;
+    b.style.background = active ? '#0077b6' : '#fff';
+    b.style.color = active ? '#fff' : '#374151';
+    b.style.borderColor = active ? '#0077b6' : '#e5e7eb';
+  });
+  drawServiceCatalog();
+}
+// Compact "$85 / pax · Tax included" style badge (Part Q) -- lets the
+// owner see at a glance how every price behaves without opening the editor.
+function catalogTaxModeBadge(item){
+  var mode = catalogItemPriceTaxMode(item);
+  var included = mode==='TAX_INCLUDED';
+  return '<span style="font-size:var(--font-size-xs);font-weight:700;padding:1px 7px;border-radius:10px;background:'+(included?'#e0f7fd':'#f3f4f6')+';color:'+(included?'#0077b6':'#6b7280')+'">'+(included?'Tax included':'Tax excluded')+'</span>';
+}
 function drawServiceCatalog(){
   var grid = document.getElementById('svc-cat-grid');
   if(!grid) return;
+  var visible = _svcCatFilter==='all' ? SVC_CATALOG : SVC_CATALOG.filter(function(i){return catalogItemPriceTaxMode(i)===_svcCatFilter;});
   var byCat = {};
-  SVC_CATALOG.forEach(function(item){ (byCat[item.category]=byCat[item.category]||[]).push(item); });
+  visible.forEach(function(item){ (byCat[item.category]=byCat[item.category]||[]).push(item); });
   var html = '';
   CATALOG_CATEGORIES.forEach(function(cat){
     var items = (byCat[cat.key]||[]).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
@@ -3809,7 +3937,7 @@ function drawServiceCatalog(){
     items.forEach(function(item){
       var inactive = item.active===false;
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;opacity:'+(inactive?'0.5':'1')+'">'
-        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+(item.durationHours?item.durationHours+'h &middot; ':'')+'$/'+catalogUnitShort(item.unitType)+'</span></div>'
+        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+(item.durationHours?item.durationHours+'h &middot; ':'')+'$/'+catalogUnitShort(item.unitType)+'</span><div style="margin-top:3px">'+catalogTaxModeBadge(item)+'</div></div>'
         + '<div style="display:flex;align-items:center;gap:8px">'
         + '<span style="color:#6b7280;font-size:var(--font-size-sm)">$</span>'
         + '<span style="width:70px;text-align:right;font-size:var(--font-size-base);font-weight:700;color:#111827">'+Number(item.basePrice).toFixed(2)+'</span>'
@@ -3825,6 +3953,25 @@ function drawServiceCatalog(){
 }
 
 var _catalogEditingId = null;
+// Better wording than a bare "Taxes added" (ambiguous) -- spells out
+// exactly what each option means, right under the select (Part C).
+function cimUpdateTaxModeHint(){
+  var el=document.getElementById('cim-taxmode-hint'); if(!el) return;
+  var included=document.getElementById('cim-taxmode').value==='TAX_INCLUDED';
+  el.textContent = included
+    ? 'Entered price already includes Service Charge + TGST.'
+    : 'Service Charge + TGST will be added on top.';
+}
+// New-item default (Part D): Trips & Activities defaults to Tax included,
+// matching the owner's normal commercial pricing practice; every other
+// category defaults to Tax excluded (existing/historical behavior). Only
+// applies while ADDING a brand-new item -- switching category on an item
+// already being EDITED never clobbers its real saved treatment.
+function cimCategoryChanged(){
+  if(_catalogEditingId) return;
+  document.getElementById('cim-taxmode').value = document.getElementById('cim-cat').value==='TRIPS_ACTIVITIES' ? 'TAX_INCLUDED' : 'TAX_EXCLUDED';
+  cimUpdateTaxModeHint();
+}
 function openAddCatalogItem(){
   if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
   _catalogEditingId = null;
@@ -3833,6 +3980,8 @@ function openAddCatalogItem(){
   document.getElementById('cim-cat').value=CATALOG_CATEGORIES[0].key;
   document.getElementById('cim-unit').value='PER_PAX';
   document.getElementById('cim-price').value='';
+  document.getElementById('cim-taxmode').value=CATALOG_CATEGORIES[0].key==='TRIPS_ACTIVITIES'?'TAX_INCLUDED':'TAX_EXCLUDED';
+  cimUpdateTaxModeHint();
   document.getElementById('cim-dur').value='';
   document.getElementById('cim-notes').value='';
   document.getElementById('m-catitem').classList.add('on');
@@ -3847,6 +3996,8 @@ function openEditCatalogItem(id){
   document.getElementById('cim-cat').value=item.category;
   document.getElementById('cim-unit').value=item.unitType;
   document.getElementById('cim-price').value=item.basePrice;
+  document.getElementById('cim-taxmode').value=catalogItemPriceTaxMode(item);
+  cimUpdateTaxModeHint();
   document.getElementById('cim-dur').value=item.durationHours||'';
   document.getElementById('cim-notes').value=item.notes||'';
   document.getElementById('m-catitem').classList.add('on');
@@ -3857,6 +4008,7 @@ async function saveCatalogItem(){
   var category=document.getElementById('cim-cat').value;
   var unitType=document.getElementById('cim-unit').value;
   var basePrice=+(document.getElementById('cim-price').value||0);
+  var priceTaxMode=document.getElementById('cim-taxmode').value;
   var durRaw=(document.getElementById('cim-dur').value||'').trim();
   var durationHours=durRaw===''?null:+durRaw;
   var notes=(document.getElementById('cim-notes').value||'').trim();
@@ -3865,12 +4017,12 @@ async function saveCatalogItem(){
   var now=Date.now();
   try {
     if(_catalogEditingId){
-      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,durationHours:durationHours,notes:notes,updatedAt:now}, {merge:true});
+      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,updatedAt:now}, {merge:true});
       var existing=SVC_CATALOG.find(function(x){return x.id===_catalogEditingId;});
-      if(existing) Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,durationHours:durationHours,notes:notes,updatedAt:now});
+      if(existing) Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,updatedAt:now});
     } else {
       var ref=fsDb.collection('service_catalog').doc();
-      var doc={name:name,category:category,unitType:unitType,basePrice:basePrice,durationHours:durationHours,notes:notes,active:true,createdAt:now,updatedAt:now};
+      var doc={name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,active:true,createdAt:now,updatedAt:now};
       await ref.set(doc);
       SVC_CATALOG.push(Object.assign({id:ref.id},doc));
     }
@@ -6663,16 +6815,39 @@ function niInvoicePricing(){
 // cent apart on multi-item or MVR-converted invoices, so a preview total
 // was not guaranteed to match what Finalize actually saved. Extracting the
 // math here means the preview and the finalized invoice can never diverge.
+//
+// Catalog tax-treatment upgrade (2026-09-11, Parts I/J/K/L/M/N): each
+// item now carries its OWN priceTaxMode, snapshotted at add-time (never
+// re-read from the live catalog afterward) -- so one invoice can mix a
+// TAX_INCLUDED activity with a TAX_EXCLUDED transfer, each following its
+// own rule (Part L), via calcServiceLineTax(). `i.tax===false` (a fully
+// non-taxable custom line, pre-existing feature, unrelated to priceTaxMode)
+// still bypasses tax entirely regardless of mode, unchanged. `total` is
+// each line's OWN actual amount owed (subtotal itself when included --
+// nothing is ever added on top of an already-final selling price -- or
+// subtotal+tax when excluded); eT sums `total` directly so a mixed
+// invoice's grand total is correct regardless of how many lines are which
+// mode, without depending on eSubtotal+eTax as an intermediate identity.
 function calcInvoiceExtras(items, fx){
   const extras=items.filter(i=>i.desc&&i.unit>=0).map(i=>{
     const unitConverted=+(i.unit*fx).toFixed(4);
     const subtotal=+(i.qty*unitConverted).toFixed(2);
-    const taxAmt=i.tax?+(subtotal*(TAX.svc+TAX.tgst)/100).toFixed(2):0;
-    return{desc:i.desc,qty:i.qty,unit:unitConverted,unitUsd:i.unit,subtotal,tax:i.tax,taxAmt,cat:i.cat,total:+(subtotal+taxAmt).toFixed(2),chargeId:i.chargeId||null};
+    const mode=i.priceTaxMode||'TAX_EXCLUDED';
+    let base=subtotal, svcAmt=0, tgstAmt=0, lineTotal=subtotal;
+    if(i.tax){
+      const decomp=calcServiceLineTax(subtotal, mode);
+      base=decomp.base; svcAmt=decomp.svc; tgstAmt=decomp.tgst;
+      lineTotal = mode==='TAX_INCLUDED' ? subtotal : decomp.final;
+    }
+    // taxAmt = amount actually ADDED on top of subtotal (0 when the price
+    // is already tax-included, or when the line isn't taxed at all) --
+    // kept as its own field so eTax below only ever totals real additions.
+    const taxAmt = (i.tax && mode!=='TAX_INCLUDED') ? +(svcAmt+tgstAmt).toFixed(2) : 0;
+    return{desc:i.desc,qty:i.qty,unit:unitConverted,unitUsd:i.unit,subtotal,tax:i.tax,priceTaxMode:mode,base,svcAmt,tgstAmt,taxAmt,total:+lineTotal.toFixed(2),cat:i.cat,chargeId:i.chargeId||null};
   });
   const eSubtotal=+extras.reduce((s,e)=>s+e.subtotal,0).toFixed(2);
   const eTax=+extras.reduce((s,e)=>s+e.taxAmt,0).toFixed(2);
-  const eT=+(eSubtotal+eTax).toFixed(2);
+  const eT=+extras.reduce((s,e)=>s+e.total,0).toFixed(2);
   return {extras, eSubtotal, eTax, eT};
 }
 // Pure preview -- reads current invoice-builder state (reservation,
@@ -6702,10 +6877,19 @@ function niPrev(){
   let html='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px"><span style="font-size:var(--font-size-xs);font-weight:800;color:#00b4d8;letter-spacing:.03em;text-transform:uppercase">Live preview</span><span style="font-size:var(--font-size-xs);color:#9ca3af">Updates instantly — nothing is saved until Finalize</span></div>';
   html+=includeRoom?pbd(rForInvoice):'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:4px 0">Room charge not included in this invoice</div>';
   if(invItems.length){
+    // Part M: a Tax included line shows its own decomposed Service/TGST as
+    // "Included" (informational, already inside the line's own amount --
+    // never implying anything was added above it); a Tax excluded line
+    // keeps the existing added-on-top wording. Each line's own `total` --
+    // never a shared/flat figure -- is what actually appears on the
+    // invoice for that line (Part L: mixed tax modes, one per item).
     html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
       <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">EXTRA CHARGES${pricing.currency==='MVR'?' (converted to MVR for this invoice)':''}</div>
-      ${invItems.map(i=>`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0"><span style="color:#6b7280">${i.desc||'(unnamed)'} × ${i.qty}</span><span>${cs}${(i.qty*(+(i.unit*fx).toFixed(4))).toFixed(2)}${i.tax?' + tax':''}</span></div>`).join('')}
-      <div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0;color:#6b7280"><span>Extra tax (TGST+Service)</span><span>${cs}${ext.eTax.toFixed(2)}</span></div>
+      ${ext.extras.map(e=>`<div style="padding:2px 0">
+        <div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs)"><span style="color:#6b7280">${esc(e.desc)} × ${e.qty}${e.tax?(e.priceTaxMode==='TAX_INCLUDED'?' <span style=\"color:#0077b6\">(tax included)</span>':''):' <span style=\"color:#9ca3af\">(no tax)</span>'}</span><span>${cs}${e.total.toFixed(2)}</span></div>
+        ${e.tax&&e.priceTaxMode==='TAX_INCLUDED'?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding-left:4px">Included Service Charge ${cs}${e.svcAmt.toFixed(2)} + Included TGST ${cs}${e.tgstAmt.toFixed(2)}</div>`:''}
+      </div>`).join('')}
+      ${ext.eTax>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs);padding:2px 0;color:#6b7280"><span>Tax added on excluded items (TGST+Service)</span><span>${cs}${ext.eTax.toFixed(2)}</span></div>`:''}
     </div>`;
   }
   html+=`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:3px 0;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px"><span style="color:#6b7280">Subtotal</span><span>${cs}${(roomTotal+ext.eT).toFixed(2)}</span></div>`;
@@ -6732,6 +6916,7 @@ function removeInvItem(id){
 function updateInvItem(id,field,val){
   const item=invItems.find(x=>x.id===id);
   if(!item)return;
+  if(field==='priceTaxMode' && !canDiscount()){ toast('⛔ Only Admin/Manager can override price treatment'); return; }
   if(field==='qty'||field==='unit')item[field]=+val||0;
   else if(field==='tax')item[field]=val;
   else item[field]=val;
@@ -6749,12 +6934,25 @@ function renderInvItems(){
   }
   if(empty)empty.style.display='none';
   let rows='';
+  const canOverrideTaxMode=canDiscount();
   invItems.forEach(function(item,idx){
     const subtotal=+(item.qty*item.unit).toFixed(2);
+    const mode=item.priceTaxMode||'TAX_EXCLUDED';
     rows+='<tr style="border-bottom:1px solid #f3f4f6">';
     rows+='<td style="padding:5px 6px">';
     rows+='<input type="text" value="'+item.desc.replace(/"/g,"&quot;")+'" placeholder="Item description" data-idx="'+idx+'" style="width:100%;font-family:inherit;font-size:var(--font-size-sm);padding:4px 8px;border:1px solid #e5e7eb;border-radius:5px" onchange="invItems[+this.dataset.idx].desc=this.value;niPrev()">';
     rows+='<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px">'+item.cat+'</div>';
+    // Part F: per-charge price-treatment override, Admin/Manager only
+    // (Part H) -- Staff sees the same read-only badge the catalog table
+    // shows, matching the catalog's own default without a way to change it.
+    if(canOverrideTaxMode){
+      rows+='<select data-idx="'+idx+'" onchange="invItems[+this.dataset.idx].priceTaxMode=this.value;niPrev()" style="margin-top:3px;font-size:var(--font-size-xs);padding:2px 4px;border:1px solid #e5e7eb;border-radius:5px;font-family:inherit">'
+        +'<option value="TAX_INCLUDED"'+(mode==='TAX_INCLUDED'?' selected':'')+'>Tax included</option>'
+        +'<option value="TAX_EXCLUDED"'+(mode==='TAX_EXCLUDED'?' selected':'')+'>Tax excluded</option>'
+      +'</select>';
+    } else {
+      rows+='<div style="margin-top:3px">'+catalogTaxModeBadge({priceTaxMode:mode})+'</div>';
+    }
     rows+='</td>';
     rows+='<td style="padding:5px 4px;text-align:center"><input type="number" value="'+item.qty+'" min="1" step="1" data-idx="'+idx+'" style="width:45px;font-family:inherit;font-size:var(--font-size-sm);padding:4px 6px;border:1px solid #e5e7eb;border-radius:5px;text-align:center" onchange="invItems[+this.dataset.idx].qty=+this.value||1;renderInvItems();niPrev()"></td>';
     rows+='<td style="padding:5px 4px;text-align:right"><input type="number" value="'+item.unit+'" min="0" step="0.5" data-idx="'+idx+'" style="width:70px;font-family:inherit;font-size:var(--font-size-sm);padding:4px 6px;border:1px solid #e5e7eb;border-radius:5px;text-align:right" onchange="invItems[+this.dataset.idx].unit=+this.value||0;renderInvItems();niPrev()"></td>';
@@ -6880,16 +7078,32 @@ function viewInv(id){
     <table class="ivt"><thead><tr><th>Description</th><th>Dates</th><th style="text-align:right">Nights</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
       ${v.includeRoom!==false?`<tr><td>${v.room} — accommodation${v.priceTaxMode==='TAX_INCLUDED'?' <span style="font-size:var(--font-size-xs);color:#9ca3af">(tax included)</span>':''}</td><td>${fd(v.ci)} → ${fd(v.co)}</td><td class="r">${v.n}</td><td class="r">${ivCs}${v.rate.toFixed(2)}</td><td class="r">${ivCs}${v.base.toFixed(2)}</td></tr>`:''}
-      ${v.extras.map(e=>`
-      <tr>
-        <td>${e.desc}<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">${e.cat||''}</span></td>
-        <td>${fd(v.ci)} – ${fd(v.co)}</td>
-        <td class="r">${e.qty}</td>
-        <td class="r">${ivCs}${(+e.unit||0).toFixed(2)}</td>
-        <td class="r">${ivCs}${(+e.subtotal||e.amt||0).toFixed(2)}</td>
-      </tr>
-      ${e.tax&&e.taxAmt>0?`<tr style="background:#fffbeb"><td style="font-size:var(--font-size-xs);color:#92400e;padding-left:18px">↳ Tax on ${e.desc} (TGST ${v.tax.tgst}% + Service ${v.tax.svc}%)</td><td colspan="3"></td><td class="r" style="color:#92400e">${ivCs}${(+e.taxAmt||0).toFixed(2)}</td></tr>`:''}
-    `).join('')}
+      ${v.extras.map(e=>{
+        // Catalog tax-treatment upgrade (Part M): a Tax included line's
+        // Service/TGST are shown as "Included" -- informational only,
+        // already inside the Amount column above, never implying anything
+        // was added on top of it. An older invoice (finalized before this
+        // task existed, e.priceTaxMode undefined) keeps its original
+        // "↳ Tax on X" added-on-top row exactly as before -- historical
+        // invoices are never reinterpreted under the new wording (Part S).
+        var included = e.priceTaxMode==='TAX_INCLUDED';
+        var taxRow = !e.tax ? '' : included
+          ? '<tr style="background:#f0f9ff"><td style="font-size:var(--font-size-xs);color:#0077b6;padding-left:18px">&#8618; Included Service Charge '+ivCs+(+e.svcAmt||0).toFixed(2)+' + Included TGST '+ivCs+(+e.tgstAmt||0).toFixed(2)+'</td><td colspan="3"></td><td class="r"></td></tr>'
+          : ((+e.taxAmt||0)>0 ? '<tr style="background:#fffbeb"><td style="font-size:var(--font-size-xs);color:#92400e;padding-left:18px">&#8618; Tax on '+e.desc+' (TGST '+v.tax.tgst+'% + Service '+v.tax.svc+'%)</td><td colspan="3"></td><td class="r" style="color:#92400e">'+ivCs+(+e.taxAmt||0).toFixed(2)+'</td></tr>' : '');
+        // Amount column stays the pre-tax subtotal for a Tax excluded line
+        // (unchanged from before -- the "↳ Tax on X" row below it is still
+        // additive, so subtotal+tax reads correctly top-to-bottom). For a
+        // Tax included line, subtotal already EQUALS the final amount, so
+        // showing it here is correct either way -- the "Included" row below
+        // is informational only, never something to add on top.
+        return '<tr>'
+          +'<td>'+e.desc+(included?' <span style="font-size:var(--font-size-xs);color:#9ca3af">(tax included)</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+(e.cat||'')+'</span></td>'
+          +'<td>'+fd(v.ci)+' – '+fd(v.co)+'</td>'
+          +'<td class="r">'+e.qty+'</td>'
+          +'<td class="r">'+ivCs+(+e.unit||0).toFixed(2)+'</td>'
+          +'<td class="r">'+ivCs+(+(e.subtotal!=null?e.subtotal:e.amt)||0).toFixed(2)+'</td>'
+          +'</tr>'+taxRow;
+      }).join('')}
     ${v.disc>0?`<tr style="background:#e0f7fd"><td style="font-weight:600;color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td colspan="3"></td><td class="r" style="color:#0096c7;font-weight:700">-${ivCs}${(+v.disc||0).toFixed(2)}</td></tr>`:''}
     </tbody></table>
     <div class="tn"><strong>Maldives tax breakdown (MIRA):</strong> TGST ${v.tax.tgst}% | Service ${v.tax.svc}% | Green Tax USD ${v.tax.green}/liable tourist/day${v.tax.bed>0?' | Bed $'+v.tax.bed+'/night':''}${v.priceTaxMode==='TAX_INCLUDED'?' — price shown includes service charge + TGST; Green Tax is always shown separately':''}</div>
@@ -8382,7 +8596,7 @@ function showCatItems(catKey){
     h+='<span style="font-size:var(--font-size-xs);color:#9ca3af">No active items in this category yet.</span>';
   }
   items.forEach(function(item){
-    h+='<button onclick="invPickItem(\''+item.id+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+esc(item.name)+(item.durationHours?' <span style="color:#9ca3af">&middot; '+item.durationHours+'h</span>':'')+'<span style="color:#00b4d8;font-weight:700">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</span></button>';
+    h+='<button onclick="invPickItem(\''+item.id+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1px solid #d1d5db;background:#fff;cursor:pointer;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px">'+esc(item.name)+(item.durationHours?' <span style="color:#9ca3af">&middot; '+item.durationHours+'h</span>':'')+'<span style="color:#00b4d8;font-weight:700">$'+Number(item.basePrice).toFixed(2)+'/'+catalogUnitShort(item.unitType)+'</span>'+catalogTaxModeBadge(item)+'</button>';
   });
   if(canManageCatalog()){
     h+='<button onclick="invAddBlank(\''+catKey+'\')" style="padding:5px 11px;font-size:var(--font-size-sm);border-radius:20px;border:1.5px dashed #d1d5db;background:#f9fafb;cursor:pointer;color:#6b7280;font-family:inherit">+ Custom item</button>';
@@ -8394,7 +8608,10 @@ function showCatItems(catKey){
 function invPickItem(itemId){
   const item=SVC_CATALOG.find(function(x){return x.id===itemId;});
   if(!item)return;
-  invItems.push({id:Date.now()+Math.random(),desc:item.name,qty:1,unit:item.basePrice,tax:true,cat:catalogCategoryLabel(item.category),catalogItemId:item.id});
+  // Part F/G/K: snapshot the catalog's own tax treatment onto the line
+  // right away -- editable afterward per-row (Part F's override), but
+  // never re-read from SVC_CATALOG again once added.
+  invItems.push({id:Date.now()+Math.random(),desc:item.name,qty:1,unit:item.basePrice,tax:true,cat:catalogCategoryLabel(item.category),catalogItemId:item.id,priceTaxMode:catalogItemPriceTaxMode(item)});
   renderInvItems();niPrev();
   catPickerOpen=false;
   document.getElementById('cat-picker').style.display='none';
@@ -8408,7 +8625,11 @@ function invPickItem(itemId){
 // again here in case it's ever called directly.
 function invAddBlank(catKey){
   if(!canManageCatalog()){ toast('⛔ Admin/Manager access only'); return; }
-  invItems.push({id:Date.now()+Math.random(),desc:'',qty:1,unit:0,tax:true,cat:catalogCategoryLabel(catKey)});
+  // No catalog item to inherit a tax treatment from -- defaults to
+  // TAX_EXCLUDED (the safe, historical-behavior default) rather than
+  // guessing the entered price is already final; Admin/Manager can flip
+  // it per-row below same as any catalog-sourced line.
+  invItems.push({id:Date.now()+Math.random(),desc:'',qty:1,unit:0,tax:true,cat:catalogCategoryLabel(catKey),priceTaxMode:'TAX_EXCLUDED'});
   renderInvItems();niPrev();
   catPickerOpen=false;
   document.getElementById('cat-picker').style.display='none';
@@ -9256,20 +9477,27 @@ function chargeAmountForGuest(ch,r,guestKey){
   }
   return 0;
 }
-// Financial integrity correction (2026-09-10): every folio charge is
-// always taxable in this app (tax:true on every charge created via
+// Financial integrity correction (2026-09-10), updated by the Catalog
+// Tax-Treatment Upgrade (2026-09-11): every folio charge is always
+// taxable in this app (tax:true on every charge created via
 // folioAddCatalogCharge()/addFolioCharge() -- confirmed, no code path ever
 // sets tax:false), so a charge's tax-inclusive contribution always uses
-// genInv()'s own formula (subtotal * (TAX.svc+TAX.tgst)/100, added to the
-// subtotal) -- reused here, never a second tax formula. Vilu's tax policy
-// itself is unchanged; this only gives OTHER functions (folioSummary(),
-// folioGuestBalance()) a way to estimate what an UNINVOICED charge WOULD
-// cost tax-inclusive, so "Charged" and "Paid" (always tax-inclusive, from
-// real invoices) are computed on the same basis and actually reconcile.
-function chargeTaxInclusiveEstimate(amt){
+// the SAME canonical calcServiceLineTax() every other extra/catalog line
+// uses -- never a second tax formula. A charge snapshots its own
+// priceTaxMode at add-time (Part G); one with none at all (added before
+// this task existed) falls back to TAX_EXCLUDED -- Part S's historical
+// safety, since "tax added on top" is exactly how every charge was
+// actually billed before this feature existed, never retroactively
+// recomputed as if it had been tax-included all along. Vilu's tax policy
+// itself is otherwise unchanged; this only gives OTHER functions
+// (folioSummary(), folioGuestBalance()) a way to estimate what an
+// UNINVOICED charge WOULD cost tax-inclusive, so "Charged" and "Paid"
+// (always tax-inclusive, from real invoices) are computed on the same
+// basis and actually reconcile.
+function chargeTaxInclusiveEstimate(ch){
+  var amt=chargeFinalAmount(ch);
   if(!amt||amt<=0) return 0;
-  var tax=+(amt*(TAX.svc+TAX.tgst)/100).toFixed(2);
-  return +(amt+tax).toFixed(2);
+  return calcServiceLineTax(amt, ch.priceTaxMode||'TAX_EXCLUDED').final;
 }
 // The tax-inclusive counterpart of chargeAmountForGuest(), used ONLY for
 // balance estimation (never for what actually gets billed on an invoice --
@@ -9279,15 +9507,15 @@ function chargeTaxInclusiveEstimate(amt){
 // (not each guest's pre-tax share taxed independently), so they always sum
 // to exactly that total regardless of guest count (Step 3).
 function chargeAmountForGuestTaxInclusive(ch,r,guestKey){
-  if(!guestKey||guestKey==='whole') return chargeTaxInclusiveEstimate(chargeFinalAmount(ch));
+  if(!guestKey||guestKey==='whole') return chargeTaxInclusiveEstimate(ch);
   var payerType=ch.payerType||'shared';
   if(payerType==='shared') return 0;
-  if(payerType==='guest') return ch.payerGuestKey===guestKey?chargeTaxInclusiveEstimate(chargeFinalAmount(ch)):0;
+  if(payerType==='guest') return ch.payerGuestKey===guestKey?chargeTaxInclusiveEstimate(ch):0;
   if(payerType==='split'){
     var labels=reservationGuestLabels(r);
     var idx=labels.findIndex(function(g){return g.key===guestKey;});
     if(idx===-1) return 0;
-    var amounts=splitCentsDeterministic(chargeTaxInclusiveEstimate(chargeFinalAmount(ch)),labels.length);
+    var amounts=splitCentsDeterministic(chargeTaxInclusiveEstimate(ch),labels.length);
     return amounts[idx];
   }
   return 0;
@@ -9307,8 +9535,8 @@ function chargeAmountForGuestTaxInclusive(ch,r,guestKey){
 function chargeUninvoicedTaxInclusiveRemainder(ch,r){
   if(ch.invoiceId) return 0; // whole-room already invoiced it in full
   var payerType=ch.payerType||'shared';
-  if(payerType==='shared') return chargeTaxInclusiveEstimate(chargeFinalAmount(ch));
-  if(payerType==='guest') return (ch.guestInvoiced&&ch.guestInvoiced[ch.payerGuestKey])?0:chargeTaxInclusiveEstimate(chargeFinalAmount(ch));
+  if(payerType==='shared') return chargeTaxInclusiveEstimate(ch);
+  if(payerType==='guest') return (ch.guestInvoiced&&ch.guestInvoiced[ch.payerGuestKey])?0:chargeTaxInclusiveEstimate(ch);
   if(payerType==='split'){
     var labels=reservationGuestLabels(r);
     return +labels.reduce(function(s,g){
@@ -9574,13 +9802,23 @@ function folioOpenChargeEditor(resId,itemId,instanceId){
   if(!item) return;
   var r=RES.find(function(x){return x.id===resId;});
   var defaultQty = item.unitType==='PER_PAX' ? Math.max(1,(r?(r.ad||0)+(r.ch||0):1)) : 1;
-  _fcState[instanceId]={resId:resId,itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:'',payerType:'shared',payerGuestKey:null};
+  // Catalog tax-treatment upgrade (Part F/G): the charge starts at the
+  // catalog item's own tax treatment (with its category fallback);
+  // Admin/Manager may override it per-charge below (Part H), Staff sees
+  // it read-only and uses the catalog default as-is.
+  _fcState[instanceId]={resId:resId,itemId:itemId,qty:defaultQty,discountType:'none',discountValue:0,discountReason:'',overrideActive:false,overridePrice:item.basePrice,overrideReason:'',payerType:'shared',payerGuestKey:null,priceTaxMode:catalogItemPriceTaxMode(item)};
   folioRenderChargeEditor(instanceId);
 }
 function folioSetPayer(instanceId,payerType,guestKey){
   var st=_fcState[instanceId]; if(!st)return;
   st.payerType=payerType;
   st.payerGuestKey=payerType==='guest'?guestKey:null;
+  folioRenderChargeEditor(instanceId);
+}
+function folioSetPriceTaxMode(instanceId,val){
+  var st=_fcState[instanceId]; if(!st)return;
+  if(!canDiscount()){ toast('⛔ Only Admin/Manager can override price treatment'); return; }
+  st.priceTaxMode=val;
   folioRenderChargeEditor(instanceId);
 }
 function folioRenderChargeEditor(instanceId){
@@ -9597,6 +9835,19 @@ function folioRenderChargeEditor(instanceId){
   var canDisc=canDiscount();
   var html='<div style="background:#fff;border:1.5px solid #bae6fd;border-radius:10px;padding:10px;margin-bottom:8px">';
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-weight:700;color:#111827">'+esc(item.name)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">'+catalogCategoryLabel(item.category)+'</div></div>';
+  // Price treatment (Part F: show it clearly; Part H: Admin/Manager may
+  // override per-charge, Staff sees the catalog default read-only).
+  html+='<div style="margin-bottom:8px">';
+  if(canDisc){
+    html+='<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:3px">Price treatment</div>'
+      +'<select onchange="folioSetPriceTaxMode(\''+instanceId+'\',this.value)" style="font-size:var(--font-size-xs);padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;font-family:inherit">'
+        +'<option value="TAX_INCLUDED"'+(st.priceTaxMode==='TAX_INCLUDED'?' selected':'')+'>Tax included</option>'
+        +'<option value="TAX_EXCLUDED"'+(st.priceTaxMode==='TAX_EXCLUDED'?' selected':'')+'>Tax excluded</option>'
+      +'</select>';
+  } else {
+    html+=catalogTaxModeBadge({priceTaxMode:st.priceTaxMode});
+  }
+  html+='</div>';
   html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
     +'<span style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280">'+catalogUnitLabel(item.unitType)+'</span>'
     +'<button type="button" onclick="folioAdjustChargeQty(\''+instanceId+'\',-1)" style="width:26px;height:26px;border-radius:6px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:700">−</button>'
@@ -9648,9 +9899,18 @@ function folioRenderChargeEditor(instanceId){
         +'</div>';
     }
   }
+  // Part F worked example: "Total selling price" is the qty*price (post-
+  // discount) amount before any tax consideration -- for Tax included this
+  // IS what the guest pays; for Tax excluded, Service+TGST are still to be
+  // added at invoicing time, shown here as a second line so staff never
+  // mistake the pre-tax figure for the guest's actual final bill.
+  var lineTax=calcServiceLineTax(final, st.priceTaxMode);
   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:6px;border-top:1px solid #f3f4f6">'
     +(disc>0?'<span style="font-size:var(--font-size-xs);color:#dc2626">Discount: -$'+disc.toFixed(2)+'</span>':'<span></span>')
-    +'<span style="font-weight:800;color:#111827">Total: $'+final.toFixed(2)+'</span></div>';
+    +'<span style="font-weight:800;color:#111827">Total selling price: $'+final.toFixed(2)+'</span></div>';
+  if(st.priceTaxMode!=='TAX_INCLUDED'){
+    html+='<div style="text-align:right;font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px">+ Service '+TAX.svc+'% &amp; TGST '+TAX.tgst+'% at invoicing = $'+lineTax.final.toFixed(2)+' to guest</div>';
+  }
   html+='<div style="display:flex;gap:8px;margin-top:8px">'
     +'<button type="button" onclick="folioAddCatalogCharge(\''+instanceId+'\')" style="flex:1;background:#00b4d8;color:#fff;border:none;padding:7px;border-radius:7px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Add to Folio</button>'
     +'<button type="button" onclick="folioCancelChargeEditor(\''+instanceId+'\')" style="background:#fff;color:#6b7280;border:1.5px solid #e5e7eb;padding:7px 12px;border-radius:7px;font-size:var(--font-size-sm);cursor:pointer;font-family:inherit">Cancel</button>'
@@ -9682,6 +9942,13 @@ function folioAddCatalogCharge(instanceId){
   if((wantsDiscount||st.overrideActive) && !canDiscount()){ toast('⛔ Only Admin/Manager can apply a discount or price override'); return; }
   if(wantsDiscount && !st.discountReason){ toast('Select a discount reason'); return; }
   if(st.overrideActive && !(st.overrideReason||'').trim()){ toast('Enter an override reason'); return; }
+  // Part H: Staff can never commit a priceTaxMode different from the
+  // catalog's own default, even by direct state manipulation -- the same
+  // defense-in-depth double-check this function already applies to
+  // discount/override authority (folioSetPriceTaxMode() already refuses to
+  // set it for non-Admin/Manager, this just re-confirms at commit time).
+  var catalogDefaultMode=catalogItemPriceTaxMode(item);
+  if(st.priceTaxMode!==catalogDefaultMode && !canDiscount()){ toast('⛔ Only Admin/Manager can override price treatment'); return; }
   if(item.unitType==='PER_PAX'){
     var r=RES.find(function(x){return x.id===resId;});
     var guestCount=r?(r.ad||0)+(r.ch||0):0;
@@ -9693,7 +9960,11 @@ function folioAddCatalogCharge(instanceId){
     id:Date.now(), date:tS, desc:item.name, cat:catalogCategoryLabel(item.category),
     catalogItemId:item.id, unitType:item.unitType, price:item.basePrice, baseUnitPrice:item.basePrice,
     pax:st.qty, qty:st.qty, tax:true, addedBy:currentUser?currentUser.name:'Staff', time:now,
-    payerType:st.payerType||'shared', payerGuestKey:st.payerType==='guest'?st.payerGuestKey:null
+    payerType:st.payerType||'shared', payerGuestKey:st.payerType==='guest'?st.payerGuestKey:null,
+    // Catalog tax-treatment upgrade (Part G): snapshotted once, here --
+    // this charge NEVER re-reads the catalog's priceTaxMode again, so a
+    // later master-item change never alters an already-added guest charge.
+    priceTaxMode:st.priceTaxMode||catalogDefaultMode
   };
   if(st.overrideActive && canDiscount()){
     charge.overridePrice=st.overridePrice;

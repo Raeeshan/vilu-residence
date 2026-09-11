@@ -181,12 +181,13 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   const guestCountSrc = extractByStart(PMS, /function reservationGuestCount\(r\)\s*\{/);
   const guestLabelsSrc = extractByStart(PMS, /function reservationGuestLabels\(r\)\s*\{/);
   const splitCentsSrc = extractByStart(PMS, /function splitCentsDeterministic\(totalAmount,n\)\s*\{/);
-  const taxEstSrc = extractByStart(PMS, /function chargeTaxInclusiveEstimate\(amt\)\s*\{/);
+  const calcServiceLineTaxSrc = extractByStart(PMS, /function calcServiceLineTax\(amount, priceTaxMode\)\s*\{/);
+  const taxEstSrc = extractByStart(PMS, /function chargeTaxInclusiveEstimate\(ch\)\s*\{/);
   const guestTaxIncSrc = extractByStart(PMS, /function chargeAmountForGuestTaxInclusive\(ch,r,guestKey\)\s*\{/);
   const remainderSrc = extractByStart(PMS, /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/);
   const box = { TAX: { thirdGuest: 20, childDiscountPercent: 50, svc: 10, tgst: 17, green: 6, bed: 0 } };
   vm.createContext(box);
-  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxGeneralSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
+  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxGeneralSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, calcServiceLineTaxSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
 
   test('FOLIO_CATEGORIES is exactly the 5 non-room categories (Room is never a folio-item category, Payment/Credit is invoice-level, not a folio charge type; Accommodation Extras added alongside the Fixed Price Catalog Integration for catalog items like Extra Bed/Early Check-in)', () => {
     assert.deepEqual(plain(box.FOLIO_CATEGORIES), ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services']);
@@ -204,7 +205,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
     // Category breakdown rows are still the raw, pre-tax display figures --
     // unchanged, informational only (Part 3's original intent).
     assert.equal(sum.food, 20); assert.equal(sum.activities, 144); assert.equal(sum.transfers, 30); assert.equal(sum.other, 15);
-    const extrasTaxInclusive = +[20, 144, 30, 15].reduce((s, a) => s + box.chargeTaxInclusiveEstimate(a), 0).toFixed(2);
+    const extrasTaxInclusive = +[20, 144, 30, 15].reduce((s, a) => s + box.chargeTaxInclusiveEstimate({ price: a, pax: 1 }), 0).toFixed(2);
     assert.equal(sum.chargesTotal, +(sum.room + extrasTaxInclusive).toFixed(2));
     assert.equal(sum.paid, 0);
     assert.equal(sum.balance, sum.chargesTotal);
@@ -217,7 +218,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   });
   test('folioSummary(): paying ONE real invoice in full (its own exact tax-inclusive total, sourced from v.total -- never recomputed) never marks Room or Food paid, and that invoice\'s portion contributes net-zero to the remaining balance (Steps 12-13\'s mandatory example, extended for the Financial integrity correction)', () => {
     box.RES = [{ id: 'R2', rn: 'VR01', ci: '2026-09-10', co: '2026-09-15', ad: 2, ch: 0, rate: 100, src: 'Direct' }]; // 5 nights * 100 = 500 room
-    const invoicedChargeTotal = box.chargeTaxInclusiveEstimate(150); // what a REAL invoice for this $150 charge actually totals, tax-inclusive
+    const invoicedChargeTotal = box.chargeTaxInclusiveEstimate({ price: 150, pax: 1 }); // what a REAL invoice for this $150 charge actually totals, tax-inclusive
     box.FOLIOS = { R2: { charges: [
       { id: 10, cat: 'Trips & Activities', price: 150, qty: 1, invoiceId: 'INV-1001' },
       { id: 11, cat: 'Food & Beverage', price: 50, qty: 1 },
@@ -228,7 +229,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
     assert.equal(sum.activities, 150);
     assert.equal(sum.food, 50);
     assert.equal(sum.paid, invoicedChargeTotal);
-    const expected = +(invoicedChargeTotal + sum.room + box.chargeTaxInclusiveEstimate(50)).toFixed(2);
+    const expected = +(invoicedChargeTotal + sum.room + box.chargeTaxInclusiveEstimate({ price: 50, pax: 1 })).toFixed(2);
     assert.equal(sum.chargesTotal, expected);
     assert.equal(sum.balance, +(expected - invoicedChargeTotal).toFixed(2));
     assert.ok(sum.balance > 0, 'room + food must still show as unpaid balance');
@@ -237,7 +238,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
     box.RES = [{ id: 'R4', rn: 'VR01', ci: '2026-09-10', co: '2026-09-11', ad: 1, ch: 0, rate: 100, src: 'Direct' }];
     box.FOLIOS = { R4: { charges: [{ id: 20, cat: 'Food & Beverage', price: 18, qty: 3, invoiceId: 'INV-2001' }] } };
     const roomTotal = box.calcTax(box.RES[0]).total;
-    const invTotal = +(roomTotal + box.chargeTaxInclusiveEstimate(54)).toFixed(2); // $18 x 3 pax = $54 final
+    const invTotal = +(roomTotal + box.chargeTaxInclusiveEstimate({ price: 18, pax: 3 })).toFixed(2); // $18 x 3 pax = $54 final
     box.INV = [{ id: 'INV-2001', resId: 'R4', status: 'active', includeRoom: true, total: invTotal, paidAmount: invTotal }];
     const sum = box.folioSummary('R4');
     assert.equal(sum.balance, 0);
