@@ -9470,7 +9470,7 @@ async function logExchangeRateAudit(currency, oldRate, newRate, reason){
   try{
     var fbUser = firebase.auth().currentUser;
     await fsDb.collection('tax_settings_audit').doc().set({
-      field:'exchangeRateUsd'+currency, oldValue:oldRate==null?null:oldRate, newValue:newRate==null?null:newRate,
+      field:currencyRateFieldName(currency), oldValue:oldRate==null?null:oldRate, newValue:newRate==null?null:newRate,
       currency:currency, oldRate:oldRate==null?null:oldRate, newRate:newRate==null?null:newRate, reason:reason,
       changedByUid: fbUser?fbUser.uid:null, changedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff',
       changedAt: firebase.firestore.FieldValue.serverTimestamp()
