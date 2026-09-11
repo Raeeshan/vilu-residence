@@ -24,6 +24,14 @@
 //     collection. Approval recomputes availability and creates the real
 //     block inside one Firestore transaction; a scheduled sweep releases
 //     expired holds automatically. See the comment above these exports.
+//   confirmAgencyBookingRequest / rejectAgencyBookingRequest /
+//     requestChangeAgencyBookingRequest  Agency Sales Workflow Phase F --
+//     turns an agency's agency_booking_requests document (a snapshot of a
+//     finalized quote) into a real canonical `reservations` doc, only on
+//     Vilu's server-side confirmation. Confirmation re-rechecks
+//     availability and consumes any linked active hold inside one Firestore
+//     transaction; the old direct agency reservation-create path is
+//     retired once this is proven. See the comment above these exports.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -745,7 +753,14 @@ exports.getAgencyAvailability = onCall({ region: 'us-central1', maxInstances: 10
 // manager) -- `blocks` itself is still public-read (unchanged, see Phase
 // D's own note on why that rule can't be tightened without breaking the
 // public website), so this is the one thing that must never leak into it.
-async function agencyHoldAvailable(tx, roomId, arrivalDate, departureDate) {
+// excludeBlockId (Phase F addition, optional) lets a caller ask "is this
+// room free, ignoring one specific block" -- needed by
+// confirmAgencyBookingRequest below to check availability while about to
+// consume its own linked hold's block, without that same block reading as
+// a false conflict against itself. Every existing call site (Phase E's
+// approveAgencyHoldRequest) omits the argument, so `doc.id !== undefined`
+// is always true there and behavior is unchanged.
+async function agencyHoldAvailable(tx, roomId, arrivalDate, departureDate, excludeBlockId) {
   const availRef = db.collection('room_availability').doc(roomId);
   const availSnap = await tx.get(availRef);
   const bookings = (availSnap.exists && availSnap.data().bookings) || [];
@@ -753,7 +768,7 @@ async function agencyHoldAvailable(tx, roomId, arrivalDate, departureDate) {
   if (resClash) return false;
   const blocksQuery = db.collection('blocks').where('room_id', '==', roomId);
   const blocksSnap = await tx.get(blocksQuery);
-  const blkClash = blocksSnap.docs.some((doc) => overlaps(doc.data().from_date, doc.data().to_date, arrivalDate, departureDate));
+  const blkClash = blocksSnap.docs.some((doc) => doc.id !== excludeBlockId && overlaps(doc.data().from_date, doc.data().to_date, arrivalDate, departureDate));
   return !blkClash;
 }
 
@@ -879,4 +894,215 @@ exports.expireAgencyHoldRequests = onSchedule({ schedule: '*/15 * * * *', timeZo
       // One bad request must never abort the sweep for the rest.
     }
   }
+});
+
+// ── Agency Sales Workflow Phase F: Booking Request → Vilu Confirmation →
+// Canonical Reservation ──────────────────────────────────────────────────
+// A NEW collection, agency_booking_requests, separate from agency_quotes/
+// block_requests/reservations (per explicit instruction) -- an agency
+// submits confirmed guest intent (a direct, rules-gated client write, same
+// shape as Phase E's hold-request submission); only Vilu's confirmation,
+// through confirmAgencyBookingRequest below, ever creates a real
+// reservation. The old direct-create path (submitAgencyBooking() in
+// vilu-agency-portal.html, writing straight to `reservations` with
+// status:'Confirmed') is retired once this flow is proven -- see the
+// firestore.rules comment above reservations' create rule for the cutover.
+//
+// Why confirmation must be a callable and not a client write: exactly the
+// same reasoning as approveAgencyHoldRequest -- confirming creates REAL
+// inventory state and must recheck availability at the moment of
+// confirmation, never trust whatever was true when the quote was finalized
+// or the request was sent. Reject/request-change create no inventory state
+// themselves, but are still callables (not a rules-gated client update) so
+// "agency cannot self-decide her own request" is enforced in one place,
+// the same choice Phase E made for release/reject even though those aren't
+// transactional either.
+exports.confirmAgencyBookingRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('agency_booking_requests').doc(requestId);
+
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(reqRef);
+    if (!snap.exists) throw new HttpsError('not-found', 'Booking request not found.');
+    const bReq = snap.data();
+
+    // Duplicate-confirm protection (Part 29): a second click (or a retried
+    // network call) after the first confirm already succeeded must never
+    // create a second reservation -- hand back the SAME reservationId
+    // instead of erroring or re-running the whole transaction.
+    if (bReq.status === 'CONFIRMED') {
+      return { reservationId: bReq.reservationId, alreadyConfirmed: true };
+    }
+    if (bReq.status !== 'PENDING' && bReq.status !== 'CHANGE_REQUESTED') {
+      throw new HttpsError('failed-precondition', 'Request is not awaiting confirmation (already ' + bReq.status + ').');
+    }
+
+    // Re-validate the linked quote server-side (Part 12/13) -- never trust
+    // the booking request's own snapshot of "this quote is finalized and
+    // mine", even though the client already checked this at submit time.
+    if (!bReq.quoteId) throw new HttpsError('failed-precondition', 'Booking request has no linked quotation.');
+    const quoteSnap = await tx.get(db.collection('agency_quotes').doc(bReq.quoteId));
+    if (!quoteSnap.exists) throw new HttpsError('not-found', 'Linked quotation not found.');
+    const quote = quoteSnap.data();
+    if (quote.agencyId !== bReq.agencyId) throw new HttpsError('failed-precondition', 'Quotation ownership mismatch.');
+    if (quote.status !== 'FINALIZED') throw new HttpsError('failed-precondition', 'Linked quotation is not finalized.');
+
+    // Validate the linked hold, if any (Part 14) -- must still belong to
+    // this same agency/room/dates and still be an active, unexpired
+    // approval. An invalid/expired/foreign/mismatched hold is silently
+    // ignored, not an error: Part 6 says a hold is optional, so
+    // confirmation just falls back to a plain availability recheck for the
+    // room instead of failing the whole confirmation over a stale hold
+    // reference.
+    let hold = null;
+    if (bReq.holdRequestId) {
+      const holdSnap = await tx.get(db.collection('block_requests').doc(bReq.holdRequestId));
+      if (holdSnap.exists) {
+        const h = holdSnap.data();
+        const nowIso = new Date().toISOString();
+        if (h.requestType === 'AGENCY_HOLD' && h.status === 'APPROVED' && h.agencyId === bReq.agencyId
+          && h.roomId === bReq.requestedRoomId && h.arrivalDate === bReq.arrivalDate && h.departureDate === bReq.departureDate
+          && (h.approvedHoldUntil || '') > nowIso) {
+          hold = { ref: holdSnap.ref, data: h };
+        }
+      }
+    }
+
+    // Availability recheck (Part 13) -- never trust that the quote existed,
+    // the hold existed, or availability was checked earlier. Excludes the
+    // linked hold's own block (if validated above) so consuming it doesn't
+    // read as a conflict against itself.
+    const available = await agencyHoldAvailable(tx, bReq.requestedRoomId, bReq.arrivalDate, bReq.departureDate, hold ? hold.data.blockId : undefined);
+    if (!available) {
+      // Do NOT create a reservation, do NOT change status -- the request
+      // stays PENDING/CHANGE_REQUESTED so staff can reject it or ask the
+      // agency to pick another room/date (Part 13: "remain actionable, not
+      // half-confirmed").
+      return { availabilityChanged: true };
+    }
+
+    // ── Create the canonical reservation. This is written inline rather
+    // than via writeReservationTx() (used by publicBooking/OTA ingestion)
+    // because that helper opens its OWN separate transaction -- it can't be
+    // nested inside this one, and hold consumption + reservation creation
+    // must be one critical section (Part 14) so no gap exists between
+    // releasing the hold's block and the room actually becoming occupied.
+    const resId = 'ABK' + Date.now();
+    const newAvailRef = db.collection('room_availability').doc(bReq.requestedRoomId);
+    const newAvailSnap = await tx.get(newAvailRef);
+    const newBookings = ((newAvailSnap.exists && newAvailSnap.data().bookings) || []).filter((b) => b.id !== resId);
+    const clash = newBookings.some((b) => bReq.arrivalDate < b.to && bReq.departureDate > b.from);
+    if (clash) {
+      // Extremely unlikely given agencyHoldAvailable() above ran inside this
+      // same transaction against the same snapshot, but guards against any
+      // future drift between the two checks rather than trusting "already
+      // checked" blindly.
+      return { availabilityChanged: true };
+    }
+    newBookings.push({ id: resId, from: bReq.arrivalDate, to: bReq.departureDate });
+
+    const now = new Date().toISOString();
+    // Price/package snapshot (Part 17/19/20): copied verbatim from the
+    // booking request (itself a snapshot of the finalized quote at send
+    // time) -- never re-derived from the quote or catalog again, so a later
+    // rate/package edit can never alter an already-confirmed reservation.
+    // agencyGuestSellingTotal is stored as its own field, NOT folded into
+    // hotel revenue accounting -- `rate` mirrors it for display continuity
+    // with every other reservation source, but paymentCollector is what
+    // future settlement logic (Phase J, not built here) must key off.
+    const reservationFields = {
+      id: resId, room_id: bReq.requestedRoomId,
+      guest_name: bReq.guestName, guest_email: bReq.guestEmail || '', guest_phone: bReq.guestPhone || '',
+      check_in: bReq.arrivalDate, check_out: bReq.departureDate,
+      adults: bReq.adults, children: bReq.children || 0,
+      rate: bReq.agencyGuestSellingTotal || 0, status: 'Confirmed', source: 'Agency',
+      notes: '[' + (bReq.packageName || 'Agency booking') + ']',
+      agencyId: bReq.agencyId, agencyEmail: bReq.agencyEmail, agencyName: bReq.agencyName,
+      agencyBookingRequestId: requestId, agencyQuoteId: bReq.quoteId || null, agencyQuoteReference: bReq.quoteReference || null,
+      quoteType: bReq.quoteType || null, packageName: bReq.packageName || null, packageSnapshot: bReq.packageSnapshot || null,
+      guestIncludes: bReq.guestIncludes || [], guestActivities: bReq.guestActivities || [],
+      currency: bReq.currency || 'USD',
+      viluNetTotal: bReq.viluNetTotal || 0, agencyGuestSellingTotal: bReq.agencyGuestSellingTotal || 0,
+      agencyEarnings: bReq.agencyEarnings || 0, paymentCollector: bReq.paymentCollector || 'UNDECIDED',
+      created_at: now, updated_at: now, created_via: 'confirmAgencyBookingRequest',
+    };
+    tx.set(db.collection('reservations').doc(resId), reservationFields, { merge: true });
+    tx.set(newAvailRef, { bookings: newBookings }, { merge: true });
+
+    // Consume the linked hold (Part 14): its block must be removed inside
+    // this SAME transaction so it never leaves a leftover conflict against
+    // the reservation just created for the exact same room/dates. Reuses
+    // the exact CANCELLED/releasedAt/releasedBy shape releaseAgencyHoldRequest
+    // already uses for a manual release -- from the hold's own lifecycle
+    // perspective, being consumed by its own booking is just another way it
+    // ended before/at its normal expiry, not a 6th status value.
+    if (hold) {
+      if (hold.data.blockId) tx.delete(db.collection('blocks').doc(hold.data.blockId));
+      tx.set(hold.ref, { status: 'CANCELLED', releasedAt: now, releasedBy: email, consumedByReservationId: resId }, { merge: true });
+    }
+
+    tx.set(reqRef, {
+      status: 'CONFIRMED', confirmedAt: now, confirmedBy: email, reservationId: resId, assignedRoomId: bReq.requestedRoomId,
+    }, { merge: true });
+
+    return { reservationId: resId, roomId: bReq.requestedRoomId };
+  });
+});
+
+exports.rejectAgencyBookingRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  const reason = String((request.data || {}).reason || '').slice(0, 500);
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('agency_booking_requests').doc(requestId);
+  const snap = await reqRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Booking request not found.');
+  const bReq = snap.data();
+  if (bReq.status !== 'PENDING' && bReq.status !== 'CHANGE_REQUESTED') {
+    throw new HttpsError('failed-precondition', 'Request cannot be rejected (already ' + bReq.status + ').');
+  }
+  const now = new Date().toISOString();
+
+  // Part 11: release a linked active hold on rejection -- chosen behavior
+  // is to always release it, since there is no longer a guest booking this
+  // hold could turn into, and no operational reason found to keep the room
+  // withheld from other sales once its one intended booking is rejected.
+  if (bReq.holdRequestId) {
+    const holdRef = db.collection('block_requests').doc(bReq.holdRequestId);
+    const holdSnap = await holdRef.get();
+    if (holdSnap.exists && holdSnap.data().status === 'APPROVED') {
+      const h = holdSnap.data();
+      if (h.blockId) { try { await db.collection('blocks').doc(h.blockId).delete(); } catch (e) { /* already gone -- fine */ } }
+      await holdRef.set({ status: 'CANCELLED', releasedAt: now, releasedBy: email }, { merge: true });
+    }
+  }
+  await reqRef.set({ status: 'REJECTED', rejectionReason: reason, updatedAt: now, rejectedBy: email }, { merge: true });
+  return { status: 'REJECTED' };
+});
+
+exports.requestChangeAgencyBookingRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  const note = String((request.data || {}).note || '').trim().slice(0, 500);
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  if (!note) throw new HttpsError('invalid-argument', 'A message for the agency is required.');
+  const reqRef = db.collection('agency_booking_requests').doc(requestId);
+  const snap = await reqRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Booking request not found.');
+  const bReq = snap.data();
+  if (bReq.status !== 'PENDING') {
+    throw new HttpsError('failed-precondition', 'Request is not pending (already ' + bReq.status + ').');
+  }
+  // Deliberately does NOT touch a linked hold -- the guest may still
+  // complete this exact booking after the agency revises it, so the hold
+  // should keep running its own normal course (stay active until it's
+  // separately confirmed-against, released, or expires), not be released
+  // just because Vilu asked a clarifying question.
+  await reqRef.set({ status: 'CHANGE_REQUESTED', changeRequestNote: note, updatedAt: new Date().toISOString(), changeRequestedBy: email }, { merge: true });
+  return { status: 'CHANGE_REQUESTED' };
 });

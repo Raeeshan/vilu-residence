@@ -32,9 +32,9 @@ section('Case A — agency data isolation is server-enforced, not client-filter-
     const line = RULES.split('\n').find(l => l.includes('isAgency() && resource.data.agencyId'));
     assert.ok(line, 'agency read-isolation clause not found in reservations read rule');
   });
-  test('firestore.rules: reservations create for agencies requires agencyId==auth.uid AND source==Agency', () => {
+  test('firestore.rules: reservations create for agencies was REMOVED entirely by Agency Sales Workflow Phase F -- confirmAgencyBookingRequest() (Admin SDK) is the only path from an agency\'s action to a real reservation now', () => {
     const line = RULES.split('\n').find(l => l.includes('isAgency() && request.resource.data.agencyId'));
-    assert.ok(line && /source == 'Agency'/.test(line), 'agency create branch missing agencyId/source enforcement');
+    assert.equal(line, undefined, 'a direct agency reservations-create branch still exists in firestore.rules');
   });
   test('firestore.rules: reservations update is admin/staff only — agencies cannot update any reservation, including their own', () => {
     const m = RULES.match(/allow update: if request\.resource\.data\.room_id[\s\S]{0,400}?;/);

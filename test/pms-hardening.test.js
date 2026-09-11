@@ -144,10 +144,9 @@ section('Case C — firestore.rules: public reservation creates are Website-sour
     assert.ok(/!\('agencyId' in request\.resource\.data\)/.test(line), 'public branch no longer excludes agencyId');
     assert.ok(/status == 'Pending'/.test(line), "Phase 48 fix missing: public branch must pin status to 'Pending'");
   });
-  test('agency create branch still requires agencyId ownership match and source==Agency', () => {
-    const m = RULES.match(/isAgency\(\) && request\.resource\.data\.agencyId[^)]*\)/);
-    assert.ok(m, 'agency create branch not found');
-    assert.ok(/source == 'Agency'/.test(m[0]), 'agency branch no longer pins source to Agency');
+  test('agency direct-create branch was intentionally REMOVED by Agency Sales Workflow Phase F -- an agency can no longer write reservations/{id} directly at all, only through confirmAgencyBookingRequest() (see agency-booking-requests-rules.test.js\'s Part 26 attack proof)', () => {
+    const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
+    assert.doesNotMatch(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
   });
   test('reservations collection still denies delete entirely', () => {
     assert.ok(/match \/reservations\/\{id\} \{[\s\S]*?allow delete: if false;/.test(RULES), 'reservation delete is no longer denied');

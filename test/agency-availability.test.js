@@ -277,9 +277,9 @@ section('Case N — DO-NOT-TOUCH: booking creation flow, block approval workflow
     assert.match(PMS, /async function approveBlockRequest\(id\)\s*\{/);
     assert.match(PORTAL, /window\.submitBlock=async function\(\)\{/);
   });
-  test('reservations create rule (direct agency create) unchanged -- Phase F territory', () => {
+  test('reservations create rule unchanged as of this phase (Phase F later removed the direct agency-create branch entirely -- see agency-booking-requests-rules.test.js)', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
+    assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
   test('agency_quotes rules unchanged from Phase C (no rules changes needed this phase)', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /room_prices/{roomId}'));

@@ -170,7 +170,10 @@ section('Case G — Part 9/10: approval rechecks availability atomically, real b
     assert.doesNotMatch(branch, /tx\.set|tx\.delete/);
   });
   test('agencyHoldAvailable() reuses overlaps()/room_availability/blocks -- the same canonical sources and formula as getAgencyAvailability (Phase D), not a new one', () => {
-    const src = extractByStart(FUNCTIONS, /async function agencyHoldAvailable\(tx, roomId, arrivalDate, departureDate\)\s*\{/);
+    // Phase F later added an optional 5th excludeBlockId parameter (backward
+    // compatible -- every Phase E call site omits it) -- see
+    // agency-booking-requests-rules.test.js for why.
+    const src = extractByStart(FUNCTIONS, /async function agencyHoldAvailable\(tx, roomId, arrivalDate, departureDate, excludeBlockId\)\s*\{/);
     assert.match(src, /db\.collection\('room_availability'\)\.doc\(roomId\)/);
     assert.match(src, /db\.collection\('blocks'\)\.where\('room_id', '==', roomId\)/);
     assert.match(src, /overlaps\(/);
@@ -358,9 +361,9 @@ section('Case S — Part 25: duplicate request prevention');
 
 section('Case T — DO-NOT-TOUCH: reservation permission, Website Packages, quote pricing, Beds24/OTA');
 {
-  test('reservations create rule (direct agency create) unchanged -- Phase F territory, not touched', () => {
+  test('reservations create rule unchanged as of this phase (Phase F later removed the direct agency-create branch entirely -- see agency-booking-requests-rules.test.js)', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
+    assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
   test('agency_quotes rules unchanged from Phase C/D', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /room_prices/{roomId}'));

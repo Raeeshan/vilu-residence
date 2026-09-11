@@ -899,6 +899,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" onclick="go('inv',this)"><i class="ti ti-file-invoice"></i>Invoices</div>
   <div class="sg">Bookings</div>
   <div class="sl" onclick="go('newbk',this)"><i class="ti ti-plus"></i>New booking</div>
+  <div class="sl" onclick="go('agybk',this)"><i class="ti ti-clipboard-check"></i>Agency Booking Requests</div>
   <div class="sl" onclick="go('blk',this)"><i class="ti ti-lock"></i>Block rooms</div>
   <div class="sg">System</div>
   <div class="sl" onclick="go('pkgs',this)"><i class="ti ti-package"></i>Package manager</div>
@@ -1564,6 +1565,24 @@ body.pms-mode { overflow:hidden; }
         <button class="btn" onclick="clearNB()">Clear</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Agency Sales Workflow Phase F (2026-09-11): agency_booking_requests
+     queue -- an agency's confirmed guest intent, snapshotted from a
+     finalized quote, awaiting Vilu's server-side confirmation before any
+     real reservation exists. Given its own top-level nav item (not tucked
+     inside Package Manager) since it gates real inventory decisions the
+     same way Reservations/Calendar/Dashboard do. Confirm/Request
+     change/Reject all go through Cloud Functions
+     (confirmAgencyBookingRequest/requestChangeAgencyBookingRequest/
+     rejectAgencyBookingRequest in functions-core/index.js), never a direct
+     client write -- see the comment above those exports. -->
+<div class="sec" id="s-agybk">
+  <div class="card">
+    <h3><i class="ti ti-clipboard-check" style="margin-right:6px"></i>Agency Booking Requests</h3>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Confirmed guest bookings sent from the Agency Portal (always linked to a finalized quotation). Confirming creates a real, canonical PMS reservation; rejecting or requesting a change never does.</p>
+    <div id="agency-booking-requests-list"><p style="font-size:var(--font-size-sm);color:#9ca3af">No pending booking requests.</p></div>
   </div>
 </div>
 
@@ -4568,8 +4587,8 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,agybk:drawAgencyBookingRequests,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -8236,6 +8255,98 @@ async function drawActiveAgencyHolds(){
       + '<button class="ab" title="Release hold" style="color:#dc2626" onclick="releaseAgencyHoldRequest(\''+r.id+'\')"><i class="ti ti-lock-open"></i></button>'
       + '</div>';
   }).join('');
+}
+
+// ── Agency Sales Workflow Phase F: Booking Request queue ──
+// Only ever shows PENDING/CHANGE_REQUESTED requests -- once CONFIRMED, the
+// resulting reservation is a normal reservation and shows up in
+// Reservations/Calendar/Dashboard like any other (Part 15); REJECTED/
+// CANCELLED requests are decided and drop out of this actionable queue too.
+async function drawAgencyBookingRequests(){
+  var el = document.getElementById('agency-booking-requests-list');
+  if (!el) return;
+  var reqs = [];
+  try {
+    var snap = await fsDb.collection('agency_booking_requests').where('status','in',['PENDING','CHANGE_REQUESTED']).get();
+    snap.forEach(function(d){ reqs.push(d.data()); });
+    reqs.sort(function(a,b){ return (a.createdAt||'').localeCompare(b.createdAt||''); });
+  } catch(e) { console.error('drawAgencyBookingRequests failed', e); }
+  if (!reqs.length) { el.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">No pending booking requests.</p>'; return; }
+  // Hold status is looked up per-row (small operational queue, same
+  // tradeoff as other admin lists in this app) rather than denormalized
+  // onto the booking request, so it always reflects the hold's REAL live
+  // status (e.g. expired since the request was sent), not a stale copy.
+  var holdSnaps = await Promise.all(reqs.map(function(r){
+    return r.holdRequestId ? fsDb.collection('block_requests').doc(r.holdRequestId).get().catch(function(){ return null; }) : Promise.resolve(null);
+  }));
+  el.innerHTML = reqs.map(function(r, i){
+    var hSnap = holdSnaps[i];
+    var holdLine = '';
+    if (r.holdRequestId) {
+      var h = hSnap && hSnap.exists ? hSnap.data() : null;
+      if (h && h.status === 'APPROVED') holdLine = '<div style="font-size:var(--font-size-xs);color:#7c3aed;margin-top:2px"><i class="ti ti-clock-hour-4"></i> Hold active until '+formatMaldivesDateTime(h.approvedHoldUntil)+'</div>';
+      else holdLine = '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px">Hold no longer active ('+esc((h&&h.status)||'unknown')+')</div>';
+    }
+    var changeNote = r.status==='CHANGE_REQUESTED' ? '<div style="font-size:var(--font-size-xs);color:#92400e;margin-top:2px">Change requested: '+esc(r.changeRequestNote||'')+'</div>' : '';
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap">'
+      + '<div>'
+        + '<div style="font-size:var(--font-size-sm);font-weight:700">'+esc(r.agencyName||r.agencyEmail)+' — '+esc(r.guestName||'(no guest name)')+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+esc(r.roomCategory||'')+' ('+esc(r.requestedRoomId||'?')+') · '+fd(r.arrivalDate)+'–'+fd(r.departureDate)+' · '+(r.nights||0)+' night'+(r.nights===1?'':'s')+' · '+(r.adults||0)+' adult'+((r.adults||0)===1?'':'s')+(r.children?' + '+r.children+' child'+(r.children===1?'':'ren'):'')+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+esc(r.packageName||'')+' · Vilu net '+esc(r.currency||'USD')+' '+(+(r.viluNetTotal||0)).toFixed(2)+' · Guest total '+esc(r.currency||'USD')+' '+(+(r.agencyGuestSellingTotal||0)).toFixed(2)+' · Payment: '+esc(r.paymentCollector||'UNDECIDED')+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px">Quote '+esc(r.quoteReference||r.quoteId||'')+' · Requested '+formatMaldivesDateTime(r.createdAt)+'</div>'
+        + holdLine + changeNote
+      + '</div>'
+      + '<div style="display:flex;gap:6px;flex-shrink:0">'
+      + '<button class="ab" title="Confirm" style="color:#059669" onclick="confirmAgencyBookingRequest(\''+r.id+'\')"><i class="ti ti-check"></i></button>'
+      + '<button class="ab" title="Request change" style="color:#d97706" onclick="requestChangeAgencyBookingRequest(\''+r.id+'\')"><i class="ti ti-message-circle"></i></button>'
+      + '<button class="ab" title="Reject" style="color:#dc2626" onclick="rejectAgencyBookingRequest(\''+r.id+'\')"><i class="ti ti-x"></i></button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function confirmAgencyBookingRequest(id){
+  try {
+    var callable = fsFunctions.httpsCallable('confirmAgencyBookingRequest');
+    var result = await callable({ requestId: id });
+    if (result.data && result.data.availabilityChanged) {
+      toast('⚠️ Availability changed — cannot confirm. Reject or ask the agency to try another room/date.');
+    } else if (result.data && result.data.alreadyConfirmed) {
+      toast('Already confirmed — reservation '+esc(result.data.reservationId||''));
+    } else {
+      toast('✓ Confirmed — reservation '+esc(result.data.reservationId||'')+' created');
+    }
+  } catch(e) {
+    console.error('confirmAgencyBookingRequest failed', e);
+    toast('⚠️ Could not confirm — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencyBookingRequests();
+}
+
+async function rejectAgencyBookingRequest(id){
+  var reason = prompt('Reason for rejecting this booking request (shown to the agency):') || '';
+  try {
+    var callable = fsFunctions.httpsCallable('rejectAgencyBookingRequest');
+    await callable({ requestId: id, reason: reason });
+    toast('Booking request rejected');
+  } catch(e) {
+    console.error('rejectAgencyBookingRequest failed', e);
+    toast('⚠️ Could not reject — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencyBookingRequests();
+}
+
+async function requestChangeAgencyBookingRequest(id){
+  var note = prompt('What needs to change? (shown to the agency)') || '';
+  if (!note.trim()) return;
+  try {
+    var callable = fsFunctions.httpsCallable('requestChangeAgencyBookingRequest');
+    await callable({ requestId: id, note: note });
+    toast('Change requested — agency notified');
+  } catch(e) {
+    console.error('requestChangeAgencyBookingRequest failed', e);
+    toast('⚠️ Could not request change — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencyBookingRequests();
 }
 
 function addBlk(){

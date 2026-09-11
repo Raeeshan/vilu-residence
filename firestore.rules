@@ -53,13 +53,22 @@ service cloud.firestore {
 
     match /reservations/{id} {
       allow read: if isAdmin() || isStaff() || isManagerRole() || (isAgency() && resource.data.agencyId == request.auth.uid);
+      // Agency Sales Workflow Phase F cutover (2026-09-11): the
+      // isAgency()-direct-create branch that used to live here is REMOVED.
+      // An agency can no longer write reservations/{id} directly at all --
+      // the only path from an agency's action to a real reservation is now
+      // confirmAgencyBookingRequest() (functions-core/index.js), which uses
+      // the Admin SDK and bypasses these rules entirely after its own
+      // server-side availability recheck and ownership validation. See
+      // test/agency-booking-requests-rules.test.js's Part 26 attack test
+      // for the proof this specific removal closes the old direct-write
+      // path.
       allow create: if request.resource.data.room_id is string
                     && request.resource.data.check_in is string
                     && request.resource.data.check_out is string
                     && validReservationShape()
                     && (
                       isAdmin() || isStaff() || isManagerRole() ||
-                      (isAgency() && request.resource.data.agencyId == request.auth.uid && request.resource.data.source == 'Agency') ||
                       (request.auth == null && request.resource.data.source == 'Website' && !('agencyId' in request.resource.data) && request.resource.data.status == 'Pending')
                     );
       allow update: if request.resource.data.room_id is string
@@ -412,6 +421,32 @@ service cloud.firestore {
       // than being narrowed further, matching the legacy
       // approveBlockRequest()/rejectBlockRequest() update shape it already
       // covered before this phase.
+      allow update: if isAdmin() || isStaff() || isManagerRole();
+      allow delete: if false;
+    }
+
+    // Agency Sales Workflow Phase F (2026-09-11): a NEW collection, kept
+    // separate from agency_quotes/block_requests/reservations per explicit
+    // instruction. An agency submits confirmed guest intent here as a
+    // direct, rules-gated client write (same shape as block_requests'
+    // AGENCY_HOLD create above) -- this alone never creates a reservation.
+    // The create rule blocks an agency from pre-claiming her own decision
+    // the same way block_requests' create rule does: no self-written
+    // CONFIRMED/REJECTED/CHANGE_REQUESTED status, no fabricated
+    // reservationId/confirmedAt/confirmedBy.
+    match /agency_booking_requests/{id} {
+      allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid
+        && (!('status' in request.resource.data) || request.resource.data.status == 'PENDING')
+        && request.resource.data.get('reservationId', null) == null
+        && request.resource.data.get('confirmedAt', null) == null
+        && request.resource.data.get('confirmedBy', null) == null;
+      allow read: if request.auth != null && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+      // Confirm/reject/request-change all go through Admin-SDK Cloud
+      // Functions (confirmAgencyBookingRequest/rejectAgencyBookingRequest/
+      // requestChangeAgencyBookingRequest in functions-core/index.js),
+      // which bypass this rule entirely -- it stays admin/staff/manager-
+      // broad as the operational backstop, the same shape as
+      // block_requests' own update rule above.
       allow update: if isAdmin() || isStaff() || isManagerRole();
       allow delete: if false;
     }

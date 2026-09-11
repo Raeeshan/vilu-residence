@@ -268,6 +268,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div id="quotes-draft-list" style="margin-bottom:20px"></div>
       <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:10px">Finalized</h3>
       <div id="quotes-finalized-list"></div>
+      <!-- Phase F: booking requests always originate from a finalized quote
+           (Part 4), so this list lives here rather than a separate tab. -->
+      <h3 style="font-size:var(--font-size-md);font-weight:700;margin:20px 0 10px">My Booking Requests</h3>
+      <div id="my-booking-requests-list"></div>
     </div>
 
     <!-- AVAILABILITY TAB — Phase D: both the calendar grid and the search
@@ -389,6 +393,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div id="hold-duration-note" style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px"></div>
       <div id="hold-request-warning" class="al warn hidden" style="margin-bottom:10px"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i><span></span></div>
       <button class="btn-primary" style="width:100%" onclick="submitAgencyHoldRequest()"><i class="ti ti-clock-hour-4"></i> Submit hold request</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING REQUEST MODAL — Phase F. Snapshot pulled from a FINALIZED quote
+     only (Part 4) -- no arbitrary values are entered from scratch here.
+     Submitting this creates ONLY an agency_booking_requests document
+     (status PENDING); it never creates a reservation, room_availability
+     occupancy, folio, invoice, or channel-manager booking (Part 8). Vilu
+     must confirm server-side (confirmAgencyBookingRequest) before any
+     canonical reservation exists. -->
+<div class="modal-bg" id="m-booking-request" onclick="if(event.target===this)closeBookingRequestModal()">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr">
+      <h2>Send Booking Request</h2>
+      <button onclick="closeBookingRequestModal()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="al info" style="margin-bottom:14px"><i class="ti ti-info-circle" style="flex-shrink:0"></i><div>This does not create a reservation. Vilu reviews and confirms the request before any room is booked.</div></div>
+      <div id="bkreq-summary" style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;font-size:var(--font-size-base)"></div>
+      <div class="fg"><label>Guest email (optional)</label><input type="email" id="bkreq-guest-email" placeholder="guest@example.com"></div>
+      <div class="fg"><label>Guest phone (optional)</label><input type="text" id="bkreq-guest-phone" placeholder="+960..."></div>
+      <div class="fg"><label>Room</label>
+        <select id="bkreq-room"></select>
+        <div id="bkreq-room-note" style="font-size:var(--font-size-xs);color:var(--muted);margin-top:4px">Only rooms currently available for these dates are listed.</div>
+      </div>
+      <div id="bkreq-hold-note" style="font-size:var(--font-size-sm);color:#7c3aed;margin-bottom:10px"></div>
+      <div id="bkreq-warning" class="al warn hidden" style="margin-bottom:10px"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i><span></span></div>
+      <button class="btn-primary" style="width:100%" onclick="sendAgencyBookingRequest()"><i class="ti ti-send"></i> Send booking request to Vilu</button>
     </div>
   </div>
 </div>
@@ -1012,7 +1045,7 @@ function showTab(name, el){
   if(el) el.classList.add('on');
   if(name==='packages') drawPackages();
   if(name==='ratecatalog') drawRateCatalog();
-  if(name==='quotations') drawQuotations();
+  if(name==='quotations'){ drawQuotations(); drawMyBookingRequests(); }
   if(name==='mybookings') drawMyBookings();
   if(name==='blockroom'){ drawMyBlocks(); drawMyHolds(); }
   if(name==='availability'){
@@ -1344,8 +1377,21 @@ async function drawPackages(){
           +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">VILU RATE</div><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">$'+agencyPrice+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:8px">'
-          +'<button data-pid="'+pkg.id+'" onclick="openBookingModal(this.dataset.pid)" style="flex:1;background:'+col+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit">Book this package →</button>'
-          +'<button data-pid="'+pkg.id+'" onclick="openQuoteBuilder(this.dataset.pid)" style="flex:1;background:none;color:'+col+';border:1.5px solid '+col+';padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-text"></i> Create quotation</button>'
+          // Phase F cutover (2026-09-11): the old direct-booking button
+          // (openBookingModal -> submitAgencyBooking -> a direct client
+          // write to reservations with status:'Confirmed') is retired now
+          // that the Booking Request workflow is implemented, tested
+          // end-to-end (emulator), and the agency direct-create permission
+          // has been removed from firestore.rules -- that old path could no
+          // longer create a reservation even if reached. Create quotation
+          // -> Guest confirmed / Send booking request (on the resulting
+          // finalized quote card) is now the only booking path, so there is
+          // exactly one, matching the task's explicit "do not leave two
+          // competing booking paths" instruction. openBookingModal()/
+          // submitAgencyBooking()/writeReservation() are left in the file,
+          // unreachable, rather than deleted outright -- see the comment
+          // above submitAgencyBooking() itself.
+          +'<button data-pid="'+pkg.id+'" onclick="openQuoteBuilder(this.dataset.pid)" style="flex:1;background:'+col+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-text"></i> Create quotation</button>'
         +'</div>'
       +'</div>';
     el.appendChild(card);
@@ -1641,12 +1687,18 @@ function renderQuoteCard(q){
   var holdBtn = (!isDraft && q.arrivalDate && q.departureDate)
     ? '<button class="btn-outline" onclick="openHoldRequestModal(\''+arrival+'\',\''+departure+'\',\''+guestName+'\',\''+qid+'\',\''+qid+'\')"><i class="ti ti-clock-hour-4"></i> Request hold</button>'
     : '';
+  // Phase F: only offered once FINALIZED (a DRAFT's price/dates may still
+  // change) and only when it has real dates -- the booking request is a
+  // straight snapshot of this exact quote, never arbitrary values (Part 4).
+  var bookingReqBtn = (!isDraft && q.arrivalDate && q.departureDate)
+    ? '<button class="btn-primary" onclick="openBookingRequestModal(\''+qid+'\')"><i class="ti ti-check"></i> Guest confirmed — Send booking request</button>'
+    : '';
   var actions = isDraft
     ? '<button class="btn-outline" onclick="'+editCall+'">Edit</button>'
       + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Preview</button>'
     : '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">View</button>'
       + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Print</button>'
-      + holdBtn;
+      + holdBtn + bookingReqBtn;
   var typeBadge = isCustom
     ? '<span style="font-size:var(--font-size-xs);font-weight:600;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:20px;padding:1px 8px">Custom Package</span>'
     : '<span style="font-size:var(--font-size-xs);font-weight:600;color:#0f766e;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:20px;padding:1px 8px">Assigned Package</span>';
@@ -2415,6 +2467,223 @@ async function drawMyHolds(){
   }).join('');
 }
 
+// ══════════════════════════════════════════════
+// BOOKING REQUEST — Phase F
+// ══════════════════════════════════════════════
+// Agency -> Guest Confirmed -> Booking Request -> Vilu confirms server-side
+// -> canonical PMS reservation. Sending a booking request writes ONLY an
+// agency_booking_requests document (status PENDING) -- it never touches
+// reservations/room_availability/folios/invoices/channel manager (Part 8). Only
+// confirmAgencyBookingRequest() (a Cloud Function, functions-core/index.js)
+// can turn one into a real reservation, and only after re-rechecking
+// availability server-side -- nothing here is a promise of a room.
+var _bookingReqWorking = null; // { quoteId, quote } currently open in the modal
+var _myBookingRequests = [];   // this agency's own agency_booking_requests, for dedupe + list display
+
+function newBookingRequestId(){
+  return 'ABR-'+Date.now().toString().slice(-6);
+}
+
+async function openBookingRequestModal(quoteId){
+  var warnEl = document.getElementById('bkreq-warning');
+  warnEl.classList.add('hidden');
+  var quote;
+  try {
+    var snap = await fsDb.collection('agency_quotes').doc(quoteId).get();
+    if(!snap.exists || snap.data().status!=='FINALIZED'){ alert('This quotation is no longer available or is not finalized.'); return; }
+    quote = snap.data();
+  } catch(e) {
+    console.error('openBookingRequestModal load failed', e);
+    alert('Could not load this quotation'); return;
+  }
+  _bookingReqWorking = { quoteId: quoteId, quote: quote };
+
+  document.getElementById('bkreq-guest-email').value = '';
+  document.getElementById('bkreq-guest-phone').value = '';
+  var nights = quote.nights || 0;
+  document.getElementById('bkreq-summary').innerHTML =
+    '<div style="font-weight:700;margin-bottom:6px">'+esc(quote.guestName||'')+'</div>'
+    + '<div>'+fd(quote.arrivalDate)+' &rarr; '+fd(quote.departureDate)+' · '+nights+' night'+(nights===1?'':'s')+'</div>'
+    + '<div>'+(quote.adults||0)+' adult'+((quote.adults||0)===1?'':'s')+(quote.children?' · '+quote.children+' child'+(quote.children===1?'':'ren'):'')+'</div>'
+    + '<div>'+esc(quote.packageName||'')+'</div>'
+    + '<div style="margin-top:6px">Guest selling total: <strong>'+esc(quote.currency||'USD')+' '+(+(quote.agencyGuestSellingTotal||0)).toFixed(2)+'</strong></div>'
+    + '<div style="color:var(--muted);font-size:var(--font-size-sm)">Vilu net: USD '+(+(quote.viluNetTotal||0)).toFixed(2)+' · Payment collector: '+esc(quote.paymentCollector||'UNDECIDED')+'</div>';
+
+  // Client-side duplicate guard (Part 28) -- not a hard server guarantee (a
+  // genuine race between two tabs is still technically possible), but this
+  // catches the ordinary case. confirmAgencyBookingRequest's own
+  // idempotency (Part 29) and availability recheck (Part 13) fully bound
+  // the impact of a true race, same precedent as the Phase E hold request's
+  // own client-only dedupe guard.
+  await drawMyBookingRequests();
+  var active = _myBookingRequests.find(function(r){ return r.quoteId===quoteId && (r.status==='PENDING'||r.status==='CONFIRMED'); });
+  if(active){
+    warnEl.classList.remove('hidden');
+    warnEl.querySelector('span').textContent = 'A booking request for this quotation is already '+(active.status==='PENDING'?'pending Vilu confirmation':'confirmed')+'.';
+  }
+
+  // If an active, unexpired approved hold already exists for this exact
+  // quote (Part 5/14), lock the room to that hold's room -- confirmation
+  // can then safely consume it instead of relying on a plain availability
+  // check that would otherwise see the hold's own block as a conflict.
+  await drawMyHolds();
+  var linkedHold = _myHoldRequests.find(function(h){
+    return h.quoteId===quoteId && h.status==='APPROVED' && h.approvedHoldUntil && h.approvedHoldUntil > new Date().toISOString();
+  });
+  var roomSel = document.getElementById('bkreq-room');
+  var roomNoteEl = document.getElementById('bkreq-room-note');
+  var holdNoteEl = document.getElementById('bkreq-hold-note');
+  if(linkedHold){
+    roomSel.innerHTML = '<option value="'+esc(linkedHold.roomId)+'">'+esc((ROOMS_LIST.find(function(r){return r.id===linkedHold.roomId;})||{}).name||linkedHold.roomId)+' — '+esc(linkedHold.roomCategory||'')+'</option>';
+    roomSel.disabled = true;
+    roomNoteEl.textContent = 'Room fixed to your active hold.';
+    holdNoteEl.innerHTML = '<i class="ti ti-clock-hour-4"></i> Temporary hold active until '+formatMaldivesDateTime(linkedHold.approvedHoldUntil);
+  } else {
+    roomSel.disabled = false;
+    roomNoteEl.textContent = 'Only rooms currently available for these dates are listed.';
+    holdNoteEl.textContent = '';
+    roomSel.innerHTML = '<option value="">Checking availability…</option>';
+    try {
+      var callable = fsFunctions.httpsCallable('getAgencyAvailability');
+      var result = await callable({ startDate: quote.arrivalDate, endDate: quote.departureDate });
+      var byCell = {};
+      (result.data.days||[]).forEach(function(d){ byCell[d.roomId+'|'+d.date] = d; });
+      var freeRooms = ROOMS_LIST.filter(function(room){
+        var d = new Date(quote.arrivalDate+'T00:00:00Z'), end = new Date(quote.departureDate+'T00:00:00Z');
+        var free = true;
+        while(d < end){
+          var ds = d.toISOString().slice(0,10);
+          var cell = byCell[room.id+'|'+ds];
+          if(cell && cell.state!=='AVAILABLE'){ free = false; break; }
+          d.setUTCDate(d.getUTCDate()+1);
+        }
+        return free;
+      });
+      roomSel.innerHTML = freeRooms.length
+        ? freeRooms.map(function(r){ return '<option value="'+r.id+'">'+esc(r.name)+' — '+esc(r.type)+'</option>'; }).join('')
+        : '<option value="">No rooms available for these dates</option>';
+    } catch(e) {
+      console.error('openBookingRequestModal availability check failed', e);
+      roomSel.innerHTML = '<option value="">Could not check availability</option>';
+    }
+  }
+
+  document.getElementById('m-booking-request').classList.add('on');
+}
+
+function closeBookingRequestModal(){
+  document.getElementById('m-booking-request').classList.remove('on');
+  _bookingReqWorking = null;
+}
+
+async function sendAgencyBookingRequest(){
+  if(!currentAgency || !_bookingReqWorking) return;
+  var quoteId = _bookingReqWorking.quoteId;
+  var roomId = document.getElementById('bkreq-room').value;
+  var warnEl = document.getElementById('bkreq-warning');
+  warnEl.classList.add('hidden');
+  if(!roomId){ alert('Select a room'); return; }
+
+  // Re-verify the quote is still FINALIZED and still this agency's own
+  // right before writing -- informational only (confirmAgencyBookingRequest
+  // revalidates server-side, for real, at confirmation time), just catches
+  // the obvious case fast rather than writing a request that can never be
+  // confirmed.
+  var freshSnap;
+  try {
+    freshSnap = await fsDb.collection('agency_quotes').doc(quoteId).get();
+  } catch(e) {}
+  if(!freshSnap || !freshSnap.exists || freshSnap.data().status!=='FINALIZED' || freshSnap.data().agencyId!==currentAgency.uid){
+    alert('This quotation is no longer available.'); return;
+  }
+  var quote = freshSnap.data();
+
+  await drawMyBookingRequests();
+  var dup = _myBookingRequests.find(function(r){ return r.quoteId===quoteId && (r.status==='PENDING'||r.status==='CONFIRMED'); });
+  if(dup){
+    warnEl.classList.remove('hidden');
+    warnEl.querySelector('span').textContent = 'A booking request for this quotation is already '+(dup.status==='PENDING'?'pending Vilu confirmation':'confirmed')+'.';
+    return;
+  }
+
+  var linkedHold = _myHoldRequests.find(function(h){
+    return h.quoteId===quoteId && h.roomId===roomId && h.status==='APPROVED' && h.approvedHoldUntil && h.approvedHoldUntil > new Date().toISOString();
+  });
+
+  var isCustom = quote.quoteType === 'CUSTOM_PACKAGE';
+  var agencyEarnings = +((+(quote.agencyGuestSellingTotal||0)) - (+(quote.viluNetTotal||0))).toFixed(2);
+  var now = new Date().toISOString();
+  var reqDoc = {
+    id: newBookingRequestId(),
+    agencyId: currentAgency.uid, agencyEmail: currentAgency.email, agencyName: currentAgency.name||currentAgency.email,
+    quoteId: quoteId, quoteReference: quoteId,
+    guestName: quote.guestName||'', guestEmail: (document.getElementById('bkreq-guest-email').value||'').trim(), guestPhone: (document.getElementById('bkreq-guest-phone').value||'').trim(),
+    arrivalDate: quote.arrivalDate, departureDate: quote.departureDate, nights: quote.nights||0,
+    adults: quote.adults||1, children: quote.children||0,
+    roomCategory: (ROOMS_LIST.find(function(r){return r.id===roomId;})||{}).type||null,
+    requestedRoomId: roomId, assignedRoomId: null,
+    quoteType: quote.quoteType||'ASSIGNED_PACKAGE', packageName: quote.packageName||'',
+    // Internal (Vilu-facing) package detail, immune to later catalog/rate
+    // edits (Part 19) -- never rendered to the guest; Phase G will build its
+    // own guest-safe view from guestIncludes/guestActivities below instead.
+    packageSnapshot: {
+      quoteType: quote.quoteType||'ASSIGNED_PACKAGE', packageId: quote.packageId||null,
+      selectedComponents: isCustom ? (quote.selectedComponents||[]) : null,
+      childDiscountPct: isCustom ? null : (quote.childDiscountPct||0),
+    },
+    guestIncludes: quote.guestIncludes||[], guestActivities: quote.guestActivities||[],
+    currency: quote.currency||'USD',
+    viluNetTotal: +(quote.viluNetTotal||0), agencyGuestSellingTotal: +(quote.agencyGuestSellingTotal||0),
+    agencyEarnings: agencyEarnings, paymentCollector: quote.paymentCollector||'UNDECIDED',
+    holdRequestId: linkedHold ? linkedHold.id : null, holdBlockId: linkedHold ? linkedHold.blockId : null,
+    status: 'PENDING',
+    createdAt: now, updatedAt: now,
+    confirmedAt: null, confirmedBy: null, reservationId: null,
+    rejectionReason: null, changeRequestNote: null,
+  };
+  try {
+    await fsDb.collection('agency_booking_requests').doc(reqDoc.id).set(reqDoc);
+    alert('Booking request sent to Vilu.');
+    closeBookingRequestModal();
+    drawMyBookingRequests();
+  } catch(e) {
+    console.error('sendAgencyBookingRequest failed', e);
+    alert('Could not send booking request — please try again.');
+  }
+}
+
+var BOOKING_REQUEST_STATUS_LABEL = { PENDING:'Pending Vilu confirmation', CONFIRMED:'Confirmed', REJECTED:'Rejected', CHANGE_REQUESTED:'Change requested', CANCELLED:'Cancelled' };
+var BOOKING_REQUEST_STATUS_BADGE = { PENDING:'pending', CONFIRMED:'ok', REJECTED:'wn', CHANGE_REQUESTED:'pending', CANCELLED:'wn' };
+
+async function drawMyBookingRequests(){
+  if(!currentAgency) return;
+  try {
+    var snap = await fsDb.collection('agency_booking_requests').where('agencyId','==',currentAgency.uid).get();
+    _myBookingRequests = snap.docs.map(function(d){ return d.data(); });
+    _myBookingRequests.sort(function(a,b){ return (b.createdAt||'').localeCompare(a.createdAt||''); });
+  } catch(e) {
+    console.error('drawMyBookingRequests failed', e);
+    _myBookingRequests = [];
+  }
+  var el = document.getElementById('my-booking-requests-list');
+  if(!el) return;
+  if(!_myBookingRequests.length){ el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">No booking requests yet.</div>'; return; }
+  el.innerHTML = _myBookingRequests.map(function(r){
+    return '<div class="card" style="margin-bottom:10px">'
+      + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+        + '<div>'
+          + '<div style="font-weight:700">'+esc(r.guestName||'')+' · '+esc(r.quoteReference||r.quoteId||'')+'</div>'
+          + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(r.roomCategory||'')+' · '+fd(r.arrivalDate)+' &rarr; '+fd(r.departureDate)+' · '+esc(r.currency||'USD')+' '+(+(r.agencyGuestSellingTotal||0)).toFixed(2)+'</div>'
+        + '</div>'
+        + '<span class="badge '+(BOOKING_REQUEST_STATUS_BADGE[r.status]||'pending')+'">'+(BOOKING_REQUEST_STATUS_LABEL[r.status]||r.status)+'</span>'
+      + '</div>'
+      + (r.status==='CONFIRMED' ? '<div style="font-size:var(--font-size-sm);color:var(--green);margin-top:6px"><i class="ti ti-check"></i> Reservation '+esc(r.reservationId||'')+'</div>' : '')
+      + (r.status==='REJECTED' && r.rejectionReason ? '<div style="font-size:var(--font-size-sm);color:#b91c1c;margin-top:6px">Reason: '+esc(r.rejectionReason)+'</div>' : '')
+      + (r.status==='CHANGE_REQUESTED' ? '<div style="font-size:var(--font-size-sm);color:#92400e;margin-top:6px">Vilu requested a change: '+esc(r.changeRequestNote||'')+' — open the quotation, revise it, and send a new booking request.</div>' : '')
+    + '</div>';
+  }).join('');
+}
+
 // Set default dates on availability tab
 (function(){
   var today=new Date().toISOString().slice(0,10);
@@ -2517,6 +2786,15 @@ function parseAddOnUnit(unit){
   return {perNight:false, perPerson:false}; // e.g. "/hr" — simple flat one-time addition
 }
 
+// RETIRED (Phase F cutover, 2026-09-11): the only entry point that opened
+// this modal (the old direct-booking button in drawPackages()) was removed
+// once the Booking Request workflow was proven end-to-end -- see the
+// comment there.
+// Left in place, unreachable, rather than deleted, along with
+// submitAgencyBooking()/writeReservation()/the m-bk modal HTML below --
+// firestore.rules' reservations create rule no longer grants agencies a
+// direct-create path at all, so even if something still called this, the
+// write itself would now be denied server-side.
 async function openBookingModal(pid){
   var pkgs = loadPMS_Packages();
   selectedPkg = pkgs.find(function(p){return p.id===pid;});

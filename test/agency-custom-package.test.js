@@ -290,9 +290,9 @@ section('Case I — DO-NOT-TOUCH list preserved (Website Packages, block_request
     assert.match(RULES, /match \/block_requests\/\{id\} \{[\s\S]*?request\.resource\.data\.agencyId == request\.auth\.uid/);
     assert.match(RULES, /match \/blocks\/\{id\} \{\s*\n\s*allow read: if true;\s*\n\s*allow write: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*\n\s*\}/);
   });
-  test('reservations create rule (direct agency create) unchanged -- Phase F territory, not touched', () => {
+  test('reservations create rule unchanged as of this phase (Phase F later removed the direct agency-create branch entirely -- see agency-booking-requests-rules.test.js)', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
+    assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
   test('tax_currency_settings / reservation_documents rules untouched', () => {
     assert.match(RULES, /match \/tax_currency_settings\/\{docId\} \{\s*\n\s*allow read: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);

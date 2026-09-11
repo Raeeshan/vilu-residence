@@ -177,11 +177,11 @@ section('Case F — agency_packages remains Admin-write-only (Phase A did not we
   });
 }
 
-section('Case G — current booking flow (direct agency reservation create) is UNCHANGED -- Phase F territory, not touched here');
+section('Case G — current booking flow (direct agency reservation create) is UNCHANGED as of Phase A (Phase F later removed it entirely -- see agency-booking-requests-rules.test.js)');
 {
-  test('reservations create rule still includes the isAgency() && source==\'Agency\' branch (removing this is explicitly Phase F, not Phase A)', () => {
+  test('reservations create rule unchanged as of this phase (Phase F later removed the isAgency()/source==\'Agency\' direct-create branch entirely)', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
+    assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
   test('submitAgencyBooking() in the portal is untouched -- still writes status:\'Confirmed\' directly (no Phase A behavior change to live bookings)', () => {
     assert.match(PORTAL, /status: 'Confirmed'/);

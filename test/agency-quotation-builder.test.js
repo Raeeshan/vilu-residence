@@ -257,14 +257,14 @@ section('Case G — Quotations UI wiring (Part 1/2/17)');
     assert.match(PORTAL, /onclick="showTab\('quotations',this\)"/);
     assert.match(PORTAL, /id="tab-quotations"/);
   });
-  test('showTab() wires quotations into its tab list and calls drawQuotations()', () => {
+  test('showTab() wires quotations into its tab list and calls drawQuotations() (Phase F later added drawMyBookingRequests() to the same branch)', () => {
     const src = extractByStart(PORTAL, /function showTab\(name, el\)\s*\{/);
     assert.match(src, /\[.*'quotations'.*\]/);
-    assert.match(src, /if\(name==='quotations'\) drawQuotations\(\);/);
+    assert.match(src, /if\(name==='quotations'\)\{ drawQuotations\(\); drawMyBookingRequests\(\); \}/);
   });
-  test('each package card has a "Create quotation" button calling openQuoteBuilder(), separate from "Book this package"', () => {
+  test('each package card has a "Create quotation" button calling openQuoteBuilder() -- the original sibling "Book this package" direct-booking button was removed by Phase F\'s cutover once the Booking Request workflow was proven (see agency-booking-requests.test.js Case P)', () => {
     const src = extractByStart(PORTAL, /async function drawPackages\(\)\s*\{/);
-    assert.match(src, /onclick="openBookingModal\(this\.dataset\.pid\)"/);
+    assert.doesNotMatch(src, /onclick="openBookingModal\(this\.dataset\.pid\)"/);
     assert.match(src, /onclick="openQuoteBuilder\(this\.dataset\.pid\)"/);
     assert.match(src, /Create quotation/);
   });
@@ -324,12 +324,10 @@ section('Case I — FINALIZED lock (Part 13/14) enforced in the builder UI, on t
     assert.match(src, /if\(!_quoteWorking\.guestName \|\| !_quoteWorking\.arrivalDate \|\| !_quoteWorking\.departureDate\)/);
     assert.match(src, /_quoteWorking\.agencyGuestSellingTotal > 0/);
   });
-  test('no further workflow button (hold/booking-request/confirm) exists yet -- Phase B stops at "Quotation finalized."', () => {
+  test('finalizeQuote() itself still just locks and reports "Quotation finalized." -- the later workflow (hold request, Phase E; booking request, Phase F) is reached from the resulting finalized quote card, not added into finalizeQuote() itself', () => {
     const src = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
     assert.match(src, /Quotation finalized\./);
-    assert.doesNotMatch(PORTAL, /Request Hold/);
-    assert.doesNotMatch(PORTAL, /Send Booking Request/);
-    assert.doesNotMatch(PORTAL, /Confirm Reservation/);
+    assert.doesNotMatch(src, /Request Hold|Send Booking Request|Confirm Reservation/);
   });
 }
 
@@ -397,9 +395,9 @@ section('Case M — Website Packages / agency_packages / block_requests / reserv
   test('block_requests rules unchanged as of this phase (Phase E later extended its create rule -- see agency-hold-requests.test.js)', () => {
     assert.match(RULES, /match \/block_requests\/\{id\} \{[\s\S]*?request\.resource\.data\.agencyId == request\.auth\.uid/);
   });
-  test('reservations create rule still includes the (unchanged, Phase F territory) direct-agency-create branch', () => {
+  test('reservations create rule unchanged as of this phase (Phase F later removed the direct agency-create branch entirely -- see agency-booking-requests-rules.test.js)', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
+    assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
   test('agency_quotes rules unchanged from Phase A/B\'s ownership model (Phase B itself needed no new rules -- the quoteType condition visible here was added later, by Phase C, to close a gap Custom Package quotes introduced; see agency-custom-package.test.js)', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId} {'), RULES.indexOf('match /room_prices/{roomId} {'));
