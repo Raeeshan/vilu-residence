@@ -53,12 +53,20 @@ const ntSrc = 'const nt=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);';
 const calcTaxGeneralSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
 const calcTaxSrc = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
 const taxDefaultSrc = extractByStart(PMS, /let TAX=\{tgst:17/).replace(/^let TAX=/, 'var TAX=');
+// Company Exchange Rates upgrade (2026-09-11): calcTax() now resolves its
+// own exchange rate via companyExchangeRate() (never a hardcoded default),
+// so any sandbox loading calcTax() must load this dependency too.
+const companyExchangeRateSrc = extractByStart(PMS, /function companyExchangeRate\(currency\)\s*\{/);
 const sandbox = {};
 vm.createContext(sandbox);
-vm.runInContext([ntSrc, taxDefaultSrc, calcTaxGeneralSrc, calcTaxSrc].join('\n'), sandbox);
+vm.runInContext([ntSrc, taxDefaultSrc, companyExchangeRateSrc, calcTaxGeneralSrc, calcTaxSrc].join('\n'), sandbox);
 const { calcTaxGeneral, calcTax } = sandbox;
 
-const DEFAULT_CFG = { tgst: 17, svc: 10, greenUsd: 6, exchangeRateUsdMvr: 15.42 };
+// Company Exchange Rates upgrade (2026-09-11): calcTaxGeneral()'s taxCfg
+// now takes a currency-agnostic `exchangeRate` (the caller already
+// resolved which currency it's for) instead of the MVR-only
+// `exchangeRateUsdMvr` -- same 15.42 test value, new field name.
+const DEFAULT_CFG = { tgst: 17, svc: 10, greenUsd: 6, exchangeRate: 15.42 };
 
 section('Case A — calcTaxGeneral(): pure engine, currency/guest-status/tax-mode aware');
 {
@@ -174,24 +182,42 @@ section('Case C — USD/MVR billing settings: Firestore rules (Admin/Manager onl
     assert.match(src, /role === 'manager'/);
     assert.doesNotMatch(src, /role === 'staff'/);
   });
-  test('saveTax()/resetTax()/saveMvrSettings() all gate on canEditTaxSettings() before mutating TAX', () => {
-    ['saveTax', 'resetTax', 'saveMvrSettings'].forEach(fn => {
+  test('saveTax()/resetTax()/saveCompanyExchangeRates()/saveInvoiceDefaults() all gate on canEditTaxSettings() before mutating TAX', () => {
+    // Company Exchange Rates upgrade (2026-09-11): saveMvrSettings() split
+    // into a dedicated rate-editing save (saveCompanyExchangeRates(),
+    // async -- it awaits persistTaxSettings()) and a separate invoice-
+    // default-mode save (saveInvoiceDefaults()), per Part K's "keep
+    // government tax and commercial exchange rates conceptually separate".
+    ['saveTax', 'resetTax', 'saveInvoiceDefaults'].forEach(fn => {
       const src = extractByStart(PMS, new RegExp('function ' + fn + '\\(\\)\\s*\\{'));
       assert.match(src, /canEditTaxSettings\(\)/, fn + '() must check canEditTaxSettings()');
     });
+    const asyncSrc = extractByStart(PMS, /async function saveCompanyExchangeRates\(\)\s*\{/);
+    assert.match(asyncSrc, /canEditTaxSettings\(\)/, 'saveCompanyExchangeRates() must check canEditTaxSettings()');
   });
   test('persistTaxSettings() writes one audit entry per CHANGED field only, diffed against the before-snapshot -- not a wall of unchanged-value noise', () => {
-    const src = extractByStart(PMS, /async function persistTaxSettings\(before\)\s*\{/);
+    // Company Exchange Rates upgrade (2026-09-11): now takes an optional
+    // `skipFields` second argument (so saveCompanyExchangeRates() can
+    // suppress the generic per-field entry for the two rate fields it
+    // already logs its own richer audit for) -- the per-field diff itself
+    // is unchanged.
+    const src = extractByStart(PMS, /async function persistTaxSettings\(before, skipFields\)\s*\{/);
     assert.match(src, /if\(before\[field\] !== TAX\[field\]\) logTaxSettingsAudit/);
   });
 }
 
 section('Case D — settings-change effect scope: NEW invoices/bookings only, historical records untouched (Part I/Part W Case 7-8)');
 {
-  test('genInv() snapshots tgstRate/serviceChargeRate/greenTaxRateUsd/exchangeRateUsdMvr onto the invoice -- never re-reads TAX live on reopen', () => {
+  test('genInv() snapshots tgstRate/serviceChargeRate/greenTaxRateUsd/exchangeRate onto the invoice -- never re-reads TAX live on reopen', () => {
+    // Company Exchange Rates upgrade (2026-09-11): the canonical field is
+    // now `exchangeRate` (any non-USD currency, resolved via x.exchangeRate
+    // -- already company-rate-or-override-resolved by calcTax()), not the
+    // MVR-only `exchangeRateUsdMvr` -- that field is still written too,
+    // purely for backward-compatible reading, never as the source of truth.
     const src = extractByStart(PMS, /function genInv\(\)\s*\{/);
     assert.match(src, /tgstRate:TAX\.tgst, serviceChargeRate:TAX\.svc, greenTaxRateUsd:TAX\.green/);
-    assert.match(src, /exchangeRateUsdMvr:pricing\.currency==='MVR'\?\(TAX\.exchangeRateUsdMvr\|\|1\):null/);
+    assert.match(src, /exchangeRate:pricing\.currency!=='USD'\?x\.exchangeRate:null/);
+    assert.match(src, /exchangeRateUsdMvr:pricing\.currency==='MVR'\?x\.exchangeRate:null/);
   });
   test('viewInv() renders a finalized invoice entirely from its own stored v.* fields -- it never calls calcTax()/calcTaxGeneral() again, so a later TAX/exchange-rate change can never alter an old invoice\'s total', () => {
     const src = extractByStart(PMS, /function viewInv\(id\)\s*\{/);
@@ -238,9 +264,9 @@ section('Case F — printed invoice/receipt currency and tax-mode clarity (Part 
     const src = extractByStart(PMS, /function printReceipt\(invId\)\s*\{/);
     assert.match(src, /const rcs=curSym\(v\.currency\)/);
   });
-  test('curSym() returns $ for USD (including undefined/legacy invoices) and "MVR " for MVR -- never a third, invented symbol', () => {
+  test('curSym() returns $ for USD (including undefined/legacy invoices), "MVR " for MVR, and (Company Exchange Rates upgrade, 2026-09-11) € for EUR', () => {
     const src = extractByStart(PMS, /function curSym\(currency\)\s*\{/);
-    assert.match(src, /currency==='MVR'\s*\?\s*'MVR '\s*:\s*'\$'/);
+    assert.match(src, /currency==='MVR'\s*\?\s*'MVR '\s*:\s*currency==='EUR'\s*\?\s*'€'\s*:\s*'\$'/);
   });
 }
 

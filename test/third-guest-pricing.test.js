@@ -46,6 +46,10 @@ const taxDefaultSrc = extractByStart(PMS, /let TAX=\{tgst:17/).replace(/^let TAX
 // be loaded into the sandbox together, or calcTax() throws
 // "calcTaxGeneral is not defined" the moment it's actually called.
 const calcTaxGeneralSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
+// Company Exchange Rates upgrade (2026-09-11): calcTax() now resolves its
+// own rate via companyExchangeRate() -- must load alongside it, same
+// reason as calcTaxGeneral() above.
+const companyExchangeRateSrc = extractByStart(PMS, /function companyExchangeRate\(currency\)\s*\{/);
 const calcTaxSrc = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
 const calcPriceSrc = extractByStart(PMS, /function calcPrice\(rate, ci, co, ad, ch\)\s*\{/);
 const anExtraBedChargeSrc = extractByStart(PMS, /function anExtraBedCharge\(r\)\s*\{/);
@@ -53,7 +57,7 @@ const anExtraBedChargeSrc = extractByStart(PMS, /function anExtraBedCharge\(r\)\
 const sandbox = {};
 vm.createContext(sandbox);
 vm.runInContext(
-  [ntSrc, beNtSrc, taxDefaultSrc, 'var BE_TAX = Object.assign({}, TAX);', calcTaxGeneralSrc, calcTaxSrc, calcPriceSrc, anExtraBedChargeSrc].join('\n'),
+  [ntSrc, beNtSrc, taxDefaultSrc, 'var BE_TAX = Object.assign({}, TAX);', calcTaxGeneralSrc, companyExchangeRateSrc, calcTaxSrc, calcPriceSrc, anExtraBedChargeSrc].join('\n'),
   sandbox
 );
 const { calcTax, calcPrice, anExtraBedCharge, TAX } = sandbox;

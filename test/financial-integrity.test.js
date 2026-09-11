@@ -80,8 +80,11 @@ function buildFullSandbox() {
   vm.runInContext('var ' + ntMatch[0].slice('const '.length), ctx);
   // USD/MVR billing (2026-09-10): calcTax() now delegates to
   // calcTaxGeneral() -- both must be loaded or calcTax() throws the
-  // moment it's actually called.
+  // moment it's actually called. Company Exchange Rates upgrade
+  // (2026-09-11): calcTax() also now calls companyExchangeRate() to
+  // resolve its own rate -- same requirement, one more dependency.
   vm.runInContext(extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/), ctx);
+  vm.runInContext(extractByStart(PMS, /function companyExchangeRate\(currency\)\s*\{/), ctx);
   vm.runInContext(extractByStart(PMS, /function calcTax\(r\)\s*\{/), ctx);
   return ctx;
 }

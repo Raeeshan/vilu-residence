@@ -183,8 +183,14 @@ section('Case B — invDiscountAmount(): live discount clamping + instant "cappe
 
 section('Case C — wiring audit: every enumerated live-preview control actually calls niPrev()');
 {
-  test('ni-currency / ni-taxstatus / ni-taxmode selects call niPrev() on change', () => {
-    assert.match(PMS, /id="ni-currency"\s+onchange="niPrev\(\)"/);
+  test('ni-currency / ni-taxstatus / ni-taxmode selects recalculate the live preview on change', () => {
+    // Company Exchange Rates upgrade (2026-09-11): ni-currency's onchange
+    // became niCurrencyChanged() (it also has to refresh the exchange-rate
+    // row's visibility/content for the new currency) -- assert THAT calls
+    // niPrev(), not that ni-currency calls niPrev() directly.
+    assert.match(PMS, /id="ni-currency"\s+onchange="niCurrencyChanged\(\)"/);
+    const niCurrencyChangedSrc = extractByStart(PMS, /function niCurrencyChanged\(\)\s*\{/);
+    assert.match(niCurrencyChangedSrc, /niPrev\(\);/);
     assert.match(PMS, /id="ni-taxstatus"\s+onchange="niPrev\(\)"/);
     assert.match(PMS, /id="ni-taxmode"\s+onchange="niPrev\(\)"/);
   });

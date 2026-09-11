@@ -48,6 +48,9 @@ const taxSrc = extractByStart(PMS, /let TAX=\{tgst:17/).replace(/^let TAX=/, 'va
 // USD/MVR billing (2026-09-10): calcTax() now delegates to
 // calcTaxGeneral() -- both must be loaded together.
 const calcTaxGeneralSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
+// Company Exchange Rates upgrade (2026-09-11): calcTax() now resolves its
+// own rate via companyExchangeRate() -- must load alongside it.
+const companyExchangeRateSrc = extractByStart(PMS, /function companyExchangeRate\(currency\)\s*\{/);
 const calcTaxSrc = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
 const anExtraBedChargeSrc = extractByStart(PMS, /function anExtraBedCharge\(r\)\s*\{/);
 const anVSrc = [
@@ -84,7 +87,7 @@ const VR = [
 const sandbox = { VR, RES: [], BLK: [] };
 vm.createContext(sandbox);
 vm.runInContext([
-  D2Src, ntSrc, taxSrc, 'var BE_TAX = Object.assign({}, TAX);', calcTaxGeneralSrc, calcTaxSrc, anExtraBedChargeSrc,
+  D2Src, ntSrc, taxSrc, 'var BE_TAX = Object.assign({}, TAX);', calcTaxGeneralSrc, companyExchangeRateSrc, calcTaxSrc, anExtraBedChargeSrc,
   anVSrc, anResTotalSrc, anRevenueSrc, isOccSrc, getMaldivesDateSrc, formatMaldivesDateSrc,
   fcDatesInRangeSrc, fcComputeDataSrc, fcRangeLabelSrc, fcNiceMaxSrc, fdSrc, escSrc,
   fcRenderChartSrc, fcRenderAvailabilityTableSrc,

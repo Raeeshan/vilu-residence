@@ -161,6 +161,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   // USD/MVR billing (2026-09-10): calcTax() now delegates to
   // calcTaxGeneral() -- both must be loaded together.
   const calcTaxGeneralSrc = extractByStart(PMS, /function calcTaxGeneral\(input\)\s*\{/);
+  const companyExchangeRateSrc = extractByStart(PMS, /function companyExchangeRate\(currency\)\s*\{/);
   const calcTaxSrc = extractByStart(PMS, /function calcTax\(r\)\s*\{/);
   const ntMatch = PMS.match(/const nt=\([^)]*\)=>[^;]+;/);
   assert.ok(ntMatch, 'nt() helper not found');
@@ -187,7 +188,7 @@ section('Case D — canonical folio-item categories (Step 3), behavioral folioSu
   const remainderSrc = extractByStart(PMS, /function chargeUninvoicedTaxInclusiveRemainder\(ch,r\)\s*\{/);
   const box = { TAX: { thirdGuest: 20, childDiscountPercent: 50, svc: 10, tgst: 17, green: 6, bed: 0 } };
   vm.createContext(box);
-  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxGeneralSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, calcServiceLineTaxSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
+  vm.runInContext(['var TAX=' + JSON.stringify(box.TAX) + ';', vrSrc, folioCatSrc, ntSrc, calcTaxGeneralSrc, companyExchangeRateSrc, calcTaxSrc, grossSrc, discSrc, finalSrc, guestCountSrc, guestLabelsSrc, splitCentsSrc, calcServiceLineTaxSrc, taxEstSrc, guestTaxIncSrc, remainderSrc, folioSummarySrc].join('\n'), box);
 
   test('FOLIO_CATEGORIES is exactly the 5 non-room categories (Room is never a folio-item category, Payment/Credit is invoice-level, not a folio charge type; Accommodation Extras added alongside the Fixed Price Catalog Integration for catalog items like Extra Bed/Early Check-in)', () => {
     assert.deepEqual(plain(box.FOLIO_CATEGORIES), ['Food & Beverage', 'Trips & Activities', 'Transfers', 'Accommodation Extras', 'Other Services']);

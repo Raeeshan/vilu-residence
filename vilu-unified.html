@@ -1016,7 +1016,7 @@ body.pms-mode { overflow:hidden; }
   <div class="g2">
     <div class="card"><h3>Physical room rates <span onclick="go('price',document.querySelectorAll('.sl')[3])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div id="d-rt"></div></div>
     <div class="card"><h3>Maldives tax rates <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit →</span></h3><div style="display:flex;gap:10px;flex-wrap:wrap" id="d-tax"></div></div>
-    <div class="card"><h3>MVR Billing <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit settings →</span></h3><div id="d-mvr-card"></div></div>
+    <div class="card"><h3>Company Exchange Rates <span onclick="go('cfg',document.querySelectorAll('.sl')[11])" style="font-size:var(--font-size-xs);font-weight:400;color:#00b4d8;cursor:pointer">Edit rates →</span></h3><div id="d-mvr-card"></div></div>
   </div>
   <div class="card" id="d-partners-card" style="display:none"><h3>Partner properties</h3><div id="d-partners"></div></div>
 </div>
@@ -1534,7 +1534,7 @@ body.pms-mode { overflow:hidden; }
       </div>
       <div class="rd-section" style="margin-top:14px">PRICING</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <div class="fg"><label>Currency</label><select id="nb-currency" onchange="nbCurrencyChanged();nbCalc()"><option value="USD">USD</option><option value="MVR">MVR</option></select></div>
+        <div class="fg"><label>Currency</label><select id="nb-currency" onchange="nbCurrencyChanged();nbCalc()"><option value="USD">USD</option><option value="MVR">MVR</option><option value="EUR">EUR</option></select></div>
         <div class="fg"><label>Price entered as</label><select id="nb-taxmode" onchange="nbCalc()"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
         <div class="fg"><label>Guest tax status</label><select id="nb-taxstatus" onchange="nbCalc()"><option value="TOURIST">Tourist</option><option value="MALDIVIAN">Maldivian</option><option value="RESIDENT_PERMIT">Resident permit holder</option></select></div>
       </div>
@@ -1572,7 +1572,7 @@ body.pms-mode { overflow:hidden; }
 <div class="sec" id="s-cfg">
   <div class="g2">
     <div class="card">
-      <h3><i class="ti ti-receipt-tax" style="margin-right:6px"></i>Maldives Tax Settings</h3>
+      <h3><i class="ti ti-receipt-tax" style="margin-right:6px"></i>Government Tax Settings</h3>
       <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Per MIRA. Update when rates change — all new invoices use updated rates instantly.</div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">TGST (Tourism GST)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Effective from <input type="date" id="st-tgst-eff" style="font-family:inherit;font-size:var(--font-size-xs);border:1px solid #d1d5db;border-radius:4px;padding:1px 4px"></div></div><div class="si"><input type="number" id="st-tgst" step="0.1"><span>%</span></div></div>
       <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Green Tax (per person/night, USD)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Tourists only — Maldivians/resident permit holders/under-2 exempt. Effective from <input type="date" id="st-green-eff" style="font-family:inherit;font-size:var(--font-size-xs);border:1px solid #d1d5db;border-radius:4px;padding:1px 4px"></div></div><div class="si"><span>$</span><input type="number" id="st-gt" step="0.5"></div></div>
@@ -1585,14 +1585,28 @@ body.pms-mode { overflow:hidden; }
         <button class="btn sm" id="st-tax-reset-btn" onclick="resetTax()">Reset to defaults</button>
       </div>
     </div>
+    <!-- Company Exchange Rates upgrade (2026-09-11, Part A/K): kept
+         conceptually and visually SEPARATE from government tax settings
+         above -- these are commercial, company-decided numbers, never a
+         market/live-FX-API rate and never mixed into the same ambiguous
+         field as TGST/Green Tax. -->
     <div class="card">
-      <h3><i class="ti ti-currency-dollar" style="margin-right:6px"></i>MVR Billing — Tax &amp; Currency Settings</h3>
-      <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>TGST and Green Tax are the SAME government tax regardless of invoice currency — there is no separate "MVR TGST" rate. Only the default price mode and the display exchange rate are currency-specific.</div></div>
-      <div id="mvr-billing-card"></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">USD → MVR exchange rate</div><div style="font-size:var(--font-size-xs);color:#6b7280">Manually configured — snapshotted onto every finalized MVR invoice, so a later change never alters an old one</div></div><div class="si"><span>MVR</span><input type="number" id="st-fx-rate" step="0.01" min="0.01"></div></div>
+      <h3><i class="ti ti-currency-dollar" style="margin-right:6px"></i>Company Exchange Rates</h3>
+      <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Manually set by the company — never a live FX API, never auto-updated. USD is the base currency; most master prices stay in USD and convert only for MVR/EUR invoices, using whatever rate is configured here at the moment an invoice is finalized.</div></div>
+      <div id="company-fx-card"></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">USD — base currency</div><div style="font-size:var(--font-size-xs);color:#6b7280">Master prices are stored in USD; never rewritten by a rate change</div></div><div class="si"><strong>1.00</strong></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">MVR rate</div><div style="font-size:var(--font-size-xs);color:#6b7280">1 USD = ? MVR — leave blank/0 to mark MVR as not yet configured (blocks MVR invoices)</div></div><div class="si"><span>MVR</span><input type="number" id="st-fx-mvr" step="0.01" min="0"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">EUR rate</div><div style="font-size:var(--font-size-xs);color:#6b7280">1 USD = ? EUR — leave blank/0 to mark EUR as not yet configured (blocks EUR invoices)</div></div><div class="si"><span>EUR</span><input type="number" id="st-fx-eur" step="0.0001" min="0"></div></div>
+      <div class="fg"><label>Reason for this change (required if a rate actually changed)</label><input type="text" id="st-fx-reason" placeholder="e.g. Updated Vilu cash exchange rate"></div>
+      <button class="btn p" id="st-fx-save-btn" onclick="saveCompanyExchangeRates()"><i class="ti ti-device-floppy"></i>Save exchange rates</button>
+    </div>
+    <div class="card">
+      <h3><i class="ti ti-adjustments" style="margin-right:6px"></i>Invoice Defaults</h3>
+      <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>TGST and Green Tax are the SAME government tax regardless of invoice currency — there is no separate "MVR TGST" or "EUR TGST" rate (Part H). Only the DEFAULT price mode is currency-specific, and even that is just a starting point staff can change per invoice.</div></div>
       <div class="fg"><label>Default price mode — USD invoices</label><select id="st-usd-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
       <div class="fg"><label>Default price mode — MVR invoices</label><select id="st-mvr-mode"><option value="TAX_INCLUDED">Tax included</option><option value="TAX_EXCLUDED">Tax excluded</option></select></div>
-      <button class="btn p" id="st-mvr-save-btn" onclick="saveMvrSettings()"><i class="ti ti-device-floppy"></i>Save MVR billing settings</button>
+      <div class="fg"><label>Default price mode — EUR invoices</label><select id="st-eur-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+      <button class="btn p" id="st-mvr-save-btn" onclick="saveInvoiceDefaults()"><i class="ti ti-device-floppy"></i>Save invoice defaults</button>
     </div>
     <div class="card">
       <h3><i class="ti ti-building" style="margin-right:6px"></i>Property Settings</h3>
@@ -2283,9 +2297,24 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
          reservation's own billingCurrency/guestTaxStatus/priceTaxMode
          (set at New Booking time) but staff may override per invoice. -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="fg" style="margin-bottom:0"><label>Invoice currency</label><select id="ni-currency" onchange="niPrev()"><option value="USD">USD</option><option value="MVR">MVR</option></select></div>
+      <div class="fg" style="margin-bottom:0"><label>Invoice currency</label><select id="ni-currency" onchange="niCurrencyChanged()"><option value="USD">USD</option><option value="MVR">MVR</option><option value="EUR">EUR</option></select></div>
       <div class="fg" style="margin-bottom:0"><label>Guest tax status</label><select id="ni-taxstatus" onchange="niPrev()"><option value="TOURIST">Tourist</option><option value="MALDIVIAN">Maldivian</option><option value="RESIDENT_PERMIT">Resident permit</option></select></div>
       <div class="fg" style="margin-bottom:0"><label>Price mode</label><select id="ni-taxmode" onchange="niPrev()"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+    </div>
+
+    <!-- Company Exchange Rates upgrade (2026-09-11, Part F/G): only shown
+         for a non-USD currency. Read-only company rate by default;
+         Admin/Manager can tick "Override for this invoice" for a one-off
+         rate + required reason, snapshotted onto the finalized invoice
+         alongside the company rate at creation time -- the master company
+         rate itself is never touched by an override. -->
+    <div class="fg" id="ni-fx-row" style="display:none">
+      <div id="ni-fx-company" style="font-size:var(--font-size-sm);color:#374151;margin-bottom:4px"></div>
+      <div id="ni-fx-override-toggle"></div>
+      <div id="ni-fx-override-fields" style="display:none;margin-top:6px;gap:8px;flex-wrap:wrap">
+        <input type="number" id="ni-fx-override-rate" step="0.0001" min="0.0001" placeholder="Override rate" style="width:120px" oninput="niPrev()">
+        <input type="text" id="ni-fx-override-reason" placeholder="Reason (required, e.g. Agreed cash rate with guest)" style="flex:1;min-width:220px" oninput="niPrev()">
+      </div>
     </div>
 
     <!-- Room charge toggle (Step 6 fix: one room calculation, always via
@@ -3225,9 +3254,35 @@ const CW=36;let IC=1000;
 // invoice already snapshots its own v.tax copy at creation time (existing
 // pattern, unchanged), which is what actually keeps historical invoices
 // immutable when a rate later changes.
+// Company Exchange Rates upgrade (2026-09-11): exchangeRateUsdMvr/
+// exchangeRateUsdEur are COMPANY decisions, never a live FX API and never
+// a hardcoded system default -- they start at `null` ("not configured")
+// on a genuinely fresh deployment; this file's own JS literal is NOT the
+// source of truth for what the rate actually is (production's real value
+// lives in tax_currency_settings/current, loaded moments later by
+// loadTaxSettingsFromFirestore() -- see that function's own comment). Any
+// code path that would need one of these to compute a non-USD total must
+// treat null as "blocked, show not-configured", never silently fall back
+// to 1 or to the old 15.42 -- see companyExchangeRate() below, the one
+// place this null-check actually lives.
 let TAX={tgst:17,green:6,svc:10,bed:0,thirdGuest:20,childDiscountPercent:50,
-  exchangeRateUsdMvr:15.42, mvrDefaultPriceMode:'TAX_INCLUDED', usdDefaultPriceMode:'TAX_EXCLUDED',
+  exchangeRateUsdMvr:null, exchangeRateUsdEur:null,
+  mvrDefaultPriceMode:'TAX_INCLUDED', usdDefaultPriceMode:'TAX_EXCLUDED', eurDefaultPriceMode:'TAX_EXCLUDED',
   tgstEffectiveFrom:'2025-07-01', greenTaxEffectiveFrom:'2025-01-01'};
+// The ONE place "is this currency's company rate actually configured"
+// is decided -- USD never needs a rate (it IS the base currency, Part D);
+// MVR/EUR return the company's manually-set number, or `null` if it has
+// never been set (or was somehow saved as 0/negative) -- callers must
+// treat `null` as "blocked", never coalesce it to 1 or any other guess.
+function companyExchangeRate(currency){
+  if(!currency || currency==='USD') return 1;
+  if(currency==='MVR') return (TAX.exchangeRateUsdMvr>0) ? TAX.exchangeRateUsdMvr : null;
+  if(currency==='EUR') return (TAX.exchangeRateUsdEur>0) ? TAX.exchangeRateUsdEur : null;
+  return null;
+}
+function currencyRateFieldName(currency){
+  return currency==='EUR' ? 'exchangeRateUsdEur' : currency==='MVR' ? 'exchangeRateUsdMvr' : null;
+}
 let PROP={nm:'Vilu Residence Maamigili',addr:'South Ari Atoll, Maamigili, 00100',ph:'+960 9903339',em:'Viluresidence@gmail.com',gst:'MVT-2025-00001',bk:''};
 
 // type must exactly match the room category name as listed on the
@@ -4134,13 +4189,24 @@ function aLog(d,m){SL.unshift({t:'Just now',d,m});}
 //   to base+service+TGST only.
 // - Green Tax is the only component ever currency-converted: it is a
 //   USD-denominated statutory obligation (greenUsd) regardless of invoice
-//   currency; for an MVR invoice it is additionally converted for display/
-//   totaling (green) using the invoice's own snapshotted exchange rate.
-//   base/service/TGST are computed natively in whatever currency the rate
-//   was quoted in -- they never cross currencies.
+//   currency; for an MVR/EUR invoice it is additionally converted for
+//   display/totaling (green) using the invoice's own snapshotted exchange
+//   rate. base/service/TGST are computed natively in whatever currency the
+//   rate was quoted in -- they never cross currencies.
 // - Bed tax (TAX.bed) is unchanged/out of scope: it defaults to 0 in this
 //   PMS and is left as a simple same-currency add-on, not part of the new
 //   currency-conversion or tax-inclusive reverse-calculation logic.
+// Company Exchange Rates upgrade (2026-09-11): `input.taxCfg.exchangeRate`
+// replaces the old MVR-only `exchangeRateUsdMvr` field -- the caller
+// resolves it (company rate, or an Admin/Manager's one-invoice override)
+// via companyExchangeRate()/an override value and passes the number in;
+// this function itself never guesses a default. If the invoice currency
+// needs a rate (non-USD) and none was given, Green Tax/total come back
+// `null` rather than a number computed with a fabricated rate=1 -- Part B
+// forbids silently calculating with an assumed rate. base/svc/tgst are
+// still returned (they never cross currencies, so they're always knowable)
+// so the caller can still show the room's own-currency breakdown while
+// flagging the missing rate for the parts that genuinely need it.
 function calcTaxGeneral(input){
   var tgstRate=input.taxCfg.tgst/100, svcRate=input.taxCfg.svc/100;
   var gp=(input.adults||0)+(input.children||0); // infants already excluded by the caller, same as the existing Green Tax exemption
@@ -4148,7 +4214,9 @@ function calcTaxGeneral(input){
   var greenExempt = input.guestTaxStatus!=='TOURIST';
   var greenExemptReason = input.guestTaxStatus==='MALDIVIAN' ? 'Maldivian' : (input.guestTaxStatus==='RESIDENT_PERMIT' ? 'Resident permit holder' : null);
   var greenUsd = +((input.taxCfg.greenUsd||0) * greenLiableGuests * input.nights).toFixed(2);
-  var green = input.currency==='MVR' ? +(greenUsd * (input.taxCfg.exchangeRateUsdMvr||1)).toFixed(2) : greenUsd;
+  var needsRate = input.currency && input.currency!=='USD';
+  var rate = input.taxCfg.exchangeRate;
+  var exchangeRateConfigured = !needsRate || (rate!=null && rate>0);
 
   var roomAndSupplement = +(input.quotedRate*input.nights + (input.thirdGuestSupplement||0)).toFixed(2);
   var base, svc, tgst;
@@ -4169,8 +4237,12 @@ function calcTaxGeneral(input){
     svc = +(base*svcRate).toFixed(2);
     tgst = +((base+svc)*tgstRate).toFixed(2);
   }
+  if(!exchangeRateConfigured){
+    return {base:base, svc:svc, tgst:tgst, green:null, greenUsd:greenUsd, greenExempt:greenExempt, greenExemptReason:greenExemptReason, total:null, currency:input.currency, exchangeRate:null, exchangeRateConfigured:false};
+  }
+  var green = needsRate ? +(greenUsd*rate).toFixed(2) : greenUsd;
   var total = +(base+svc+tgst+green).toFixed(2);
-  return {base:base, svc:svc, tgst:tgst, green:green, greenUsd:greenUsd, greenExempt:greenExempt, greenExemptReason:greenExemptReason, total:total, currency:input.currency};
+  return {base:base, svc:svc, tgst:tgst, green:green, greenUsd:greenUsd, greenExempt:greenExempt, greenExemptReason:greenExemptReason, total:total, currency:input.currency, exchangeRate: needsRate?rate:1, exchangeRateConfigured:true};
 }
 function calcTax(r){
   const n=nt(r.ci,r.co);
@@ -4229,14 +4301,25 @@ function calcTax(r){
   const guestTaxStatus = r.guestTaxStatus || 'TOURIST';
   const priceTaxMode = r.priceTaxMode || 'TAX_EXCLUDED';
   const quotedRate = r.quotedRate!=null ? r.quotedRate : r.rate;
+  // Company Exchange Rates upgrade (2026-09-11): r.exchangeRateOverride
+  // (set only by genInv()/niPrev() for an Admin/Manager's one-invoice
+  // override, Part F) wins if present; otherwise the company's own
+  // manually-configured rate (companyExchangeRate(), never a hardcoded
+  // guess). A reservation/invoice with neither, on a non-USD currency,
+  // genuinely has no rate -- calcTaxGeneral() returns total:null rather
+  // than silently computing with an assumed 1 or 15.42.
+  const exchangeRate = r.exchangeRateOverride!=null ? r.exchangeRateOverride : companyExchangeRate(currency);
   const g = calcTaxGeneral({
     quotedRate:quotedRate, nights:n, adults:ad, children:ch,
     thirdGuestSupplement:thirdGuest, currency:currency,
     guestTaxStatus:guestTaxStatus, priceTaxMode:priceTaxMode,
-    taxCfg:{tgst:TAX.tgst, svc:TAX.svc, greenUsd:TAX.green, exchangeRateUsdMvr:TAX.exchangeRateUsdMvr||1}
+    taxCfg:{tgst:TAX.tgst, svc:TAX.svc, greenUsd:TAX.green, exchangeRate:exchangeRate}
   });
   const bed=+(TAX.bed*n).toFixed(2);
-  return{n,base:g.base,svc:g.svc,tgst:g.tgst,green:g.green,greenUsd:g.greenUsd,greenExempt:g.greenExempt,greenExemptReason:g.greenExemptReason,bed,gp,thirdGuest,thirdGuestIsChild,inf:r.inf||0,currency:currency,guestTaxStatus:guestTaxStatus,priceTaxMode:priceTaxMode,total:+(g.base+g.svc+g.tgst+g.green+bed).toFixed(2)};
+  if(!g.exchangeRateConfigured){
+    return{n,base:g.base,svc:g.svc,tgst:g.tgst,green:null,greenUsd:g.greenUsd,greenExempt:g.greenExempt,greenExemptReason:g.greenExemptReason,bed,gp,thirdGuest,thirdGuestIsChild,inf:r.inf||0,currency:currency,guestTaxStatus:guestTaxStatus,priceTaxMode:priceTaxMode,total:null,exchangeRateConfigured:false,exchangeRate:null};
+  }
+  return{n,base:g.base,svc:g.svc,tgst:g.tgst,green:g.green,greenUsd:g.greenUsd,greenExempt:g.greenExempt,greenExemptReason:g.greenExemptReason,bed,gp,thirdGuest,thirdGuestIsChild,inf:r.inf||0,currency:currency,guestTaxStatus:guestTaxStatus,priceTaxMode:priceTaxMode,total:+(g.base+g.svc+g.tgst+g.green+bed).toFixed(2),exchangeRateConfigured:true,exchangeRate:g.exchangeRate};
 }
 
 // Step 9 (2026-09-09 channel-aware payment pass): renders the channel-aware
@@ -4268,11 +4351,20 @@ function otaPaymentBlock(r){
 // ASCII glyph in common use here), '$' for USD, matching every existing
 // USD display in this file exactly for a reservation with no
 // billingCurrency set.
-function curSym(currency){ return currency==='MVR' ? 'MVR ' : '$'; }
+// Company Exchange Rates upgrade (2026-09-11): EUR joins USD/MVR. '€' for
+// EUR, 'MVR ' for MVR (unchanged), '$' for USD/anything else (legacy
+// invoices with no currency field at all -- unchanged fallback).
+function curSym(currency){ return currency==='MVR' ? 'MVR ' : currency==='EUR' ? '€' : '$'; }
+function currencyNotConfiguredHTML(currency){
+  return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN</div>
+<div style="padding:8px 10px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;color:#92400e;font-size:var(--font-size-sm)"><i class="ti ti-alert-triangle" style="margin-right:5px"></i>Exchange rate not configured for ${currency} — an Admin/Manager must set the company USD → ${currency} rate in Settings &amp; Taxes before this can be priced or invoiced.</div>`;
+}
 function pbd(r){
   const x=calcTax(r);
+  if(!x.exchangeRateConfigured) return currencyNotConfiguredHTML(x.currency);
   const cs=curSym(x.currency);
   const inclusive=x.priceTaxMode==='TAX_INCLUDED';
+  const nonUsd = x.currency && x.currency!=='USD';
   // Tax-included pricing (Part J/M): the quoted per-night rate already IS
   // the final commercial amount -- shown as one "Quoted inclusive amount"
   // line, with base/service/TGST reverse-calculated and shown as an
@@ -4281,8 +4373,8 @@ function pbd(r){
   const roomLineAmt = +(x.n*r.rate).toFixed(2);
   const greenLine = x.greenExempt
     ? `<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax</span><span style="color:#059669">Exempt — ${x.greenExemptReason}</span></div>`
-    : `<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax (USD ${TAX.green} × ${x.gp} persons × ${x.n} nights${x.inf>0?' — '+x.inf+' infant exempt':''})</span><span>${cs}${x.green.toFixed(2)}${x.currency==='MVR'?' <span style="color:#9ca3af">(USD '+x.greenUsd.toFixed(2)+' × '+(TAX.exchangeRateUsdMvr||1)+')</span>':''}</span></div>`;
-  return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN${x.currency==='MVR'?' (MVR)':''}</div>
+    : `<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Green Tax (USD ${TAX.green} × ${x.gp} persons × ${x.n} nights${x.inf>0?' — '+x.inf+' infant exempt':''})</span><span>${cs}${x.green.toFixed(2)}${nonUsd?' <span style="color:#9ca3af">(USD '+x.greenUsd.toFixed(2)+' × '+x.exchangeRate+')</span>':''}</span></div>`;
+  return `<div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:6px">PRICE BREAKDOWN${nonUsd?' ('+x.currency+')':''}</div>
 <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">${roomLineLabel}</span><span>${cs}${roomLineAmt.toFixed(2)}</span></div>
 ${x.thirdGuest>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">3rd guest supplement${x.thirdGuestIsChild?' (child, '+TAX.childDiscountPercent+'% off)':''} × ${x.n} nights</span><span>${cs}${x.thirdGuest.toFixed(2)}</span></div>`:''}
 ${inclusive?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:2px 0 4px">Included in the above: Base ${cs}${x.base.toFixed(2)} + Service ${cs}${x.svc.toFixed(2)} + TGST ${cs}${x.tgst.toFixed(2)}</div>`:`
@@ -4291,7 +4383,7 @@ ${inclusive?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:2px
 ${greenLine}
 ${TAX.bed>0?`<div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);padding:2px 0"><span style="color:#6b7280">Bed tax</span><span>${cs}${x.bed.toFixed(2)}</span></div>`:''}
 ${(r.extraBeds||0)>0?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:2px 0">🛏️ Extra bed requested — no separate charge, already included in the 3rd guest supplement above</div>`:''}
-<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total${x.currency==='MVR'?' (MVR)':' (incl. all taxes)'}</span><span style="color:#00b4d8">${cs}${x.total.toFixed(2)}</span></div>`;
+<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:7px;margin-top:5px;font-size:var(--font-size-base)"><span>Total${nonUsd?' ('+x.currency+')':' (incl. all taxes)'}</span><span style="color:#00b4d8">${cs}${x.total.toFixed(2)}</span></div>`;
 }
 
 function isOcc(rn,from,to,excl){
@@ -4606,10 +4698,11 @@ function drawDash(){
     <div style="background:#e8f5f2;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">TGST</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#00b4d8">${TAX.tgst}%</div></div>
     <div style="background:#fef3c7;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">Green Tax</div><div style="font-size:var(--font-size-lg);font-weight:700;color:#92400e">$${TAX.green}/pp/night</div></div>
     <div style="background:#f3f4f6;border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:2px">Service</div><div style="font-size:var(--font-size-lg);font-weight:700">${TAX.svc}%</div></div>`;
-  // USD/MVR billing (Part V) -- reuses the SAME mvrBillingCardHTML() the
-  // Settings page renders, so the Dashboard and Settings never show two
-  // independently-drifting summaries of the same TAX object.
-  if(document.getElementById('d-mvr-card')) document.getElementById('d-mvr-card').innerHTML=mvrBillingCardHTML();
+  // Company Exchange Rates upgrade (2026-09-11) -- reuses the SAME
+  // companyExchangeRatesCardHTML() the Settings page renders, so the
+  // Dashboard and Settings never show two independently-drifting
+  // summaries of the same TAX object.
+  if(document.getElementById('d-mvr-card')) document.getElementById('d-mvr-card').innerHTML=companyExchangeRatesCardHTML();
   var partners=RES.filter(r=>r.prop!=='vilu'&&isBlockingStatus(r.st)&&r.st!=='Checked out');
   var pCard=document.getElementById('d-partners-card');
   if(partners.length){
@@ -6712,6 +6805,11 @@ function openIM(resId, opts){
   niPayChanged();
   if(document.getElementById('ni-disc'))document.getElementById('ni-disc').value='';
   if(document.getElementById('ni-disctype'))document.getElementById('ni-disctype').value='fixed';
+  // Company Exchange Rates upgrade (2026-09-11): a fresh invoice never
+  // inherits a previous one's rate override -- always starts on the
+  // company rate, Admin/Manager must deliberately re-tick it each time.
+  if(document.getElementById('ni-fx-override-rate'))document.getElementById('ni-fx-override-rate').value='';
+  if(document.getElementById('ni-fx-override-reason'))document.getElementById('ni-fx-override-reason').value='';
   invPayerScope = (opts && opts.payerScope) || 'whole';
   // Room accommodation defaults to Shared/Whole-room only (Step 15) -- a
   // guest-specific invoice never includes it, and the checkbox itself is
@@ -6746,6 +6844,7 @@ function openIM(resId, opts){
   // exactly the double-charge the 2026-09-09 pricing fix removes.
   renderInvItems();
   renderCatButtons();
+  niFxRowRender();
   niPrev();
   document.getElementById('m-inv').classList.add('on');
   if(invItems.length) toast('✓ '+invItems.length+' item'+(invItems.length>1?'s':'')+' loaded');
@@ -6799,12 +6898,57 @@ function niPayChanged(){
 // status/price mode (from the Create Invoice selects) override the
 // reservation's own values for THIS invoice only -- the reservation
 // record itself is never rewritten by generating an invoice.
+// Company Exchange Rates upgrade (2026-09-11, Part F): also resolves this
+// ONE prospective invoice's exchange rate -- the company's own rate,
+// UNLESS an Admin/Manager has ticked "Override for this invoice" with a
+// valid rate and reason (Staff never sees the toggle at all -- see
+// niFxRowRender()). `exchangeRateOverride` is `null` whenever no genuine
+// override is in effect, so calcTax()/niPrev()/genInv() all fall through
+// to companyExchangeRate() exactly as if this field didn't exist.
 function niInvoicePricing(){
+  var currency = (document.getElementById('ni-currency')||{}).value || 'USD';
+  var overrideActive = document.getElementById('ni-fx-override-check') && document.getElementById('ni-fx-override-check').checked && canEditTaxSettings();
+  var overrideRateEl = document.getElementById('ni-fx-override-rate');
+  var overrideReasonEl = document.getElementById('ni-fx-override-reason');
+  var overrideRate = overrideActive && overrideRateEl ? +overrideRateEl.value || 0 : 0;
+  var overrideReason = overrideActive && overrideReasonEl ? (overrideReasonEl.value||'').trim() : '';
+  var overrideValid = overrideActive && overrideRate>0 && !!overrideReason;
   return {
-    currency: (document.getElementById('ni-currency')||{}).value || 'USD',
+    currency: currency,
     guestTaxStatus: (document.getElementById('ni-taxstatus')||{}).value || 'TOURIST',
-    priceTaxMode: (document.getElementById('ni-taxmode')||{}).value || 'TAX_EXCLUDED'
+    priceTaxMode: (document.getElementById('ni-taxmode')||{}).value || 'TAX_EXCLUDED',
+    exchangeRateOverride: overrideValid ? overrideRate : null,
+    overrideReason: overrideValid ? overrideReason : null
   };
+}
+// Renders the company-rate line + (Admin/Manager only) the per-invoice
+// override toggle -- hidden entirely for USD (Part D: USD never needs a
+// rate). Re-run on every currency change and on open.
+function niFxRowRender(){
+  var row=document.getElementById('ni-fx-row');
+  if(!row) return;
+  var currency=(document.getElementById('ni-currency')||{}).value||'USD';
+  if(currency==='USD'){ row.style.display='none'; return; }
+  row.style.display='block';
+  var companyRate=companyExchangeRate(currency);
+  var companyEl=document.getElementById('ni-fx-company');
+  companyEl.innerHTML = companyRate!=null
+    ? 'Company rate: <strong>1 USD = '+companyRate+' '+currency+'</strong>'
+    : '<span style="color:#b91c1c"><i class="ti ti-alert-triangle"></i> Exchange rate not configured for '+currency+' — an Admin/Manager must set it in Settings &amp; Taxes before this invoice can be finalized.</span>';
+  var toggleEl=document.getElementById('ni-fx-override-toggle');
+  var canOverride=canEditTaxSettings();
+  toggleEl.innerHTML = canOverride
+    ? '<label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:#6b7280;cursor:pointer;margin-top:4px"><input type="checkbox" id="ni-fx-override-check" onchange="niToggleFxOverride(this.checked)"> Override rate for this invoice only (does not change the company rate)</label>'
+    : '';
+}
+function niToggleFxOverride(checked){
+  var fields=document.getElementById('ni-fx-override-fields');
+  if(fields) fields.style.display = checked ? 'flex' : 'none';
+  niPrev();
+}
+function niCurrencyChanged(){
+  niFxRowRender();
+  niPrev();
 }
 // Live-preview calculator (Create Invoice real-time recalculation,
 // 2026-09-11): ONE canonical extras calculation, reused byte-for-byte by
@@ -6861,20 +7005,32 @@ function niPrev(){
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   if(!r){document.getElementById('ni-prev').innerHTML='';return;}
   const pricing=niInvoicePricing();
-  const rForInvoice=Object.assign({},r,{billingCurrency:pricing.currency,guestTaxStatus:pricing.guestTaxStatus,priceTaxMode:pricing.priceTaxMode});
+  const rForInvoice=Object.assign({},r,{billingCurrency:pricing.currency,guestTaxStatus:pricing.guestTaxStatus,priceTaxMode:pricing.priceTaxMode,exchangeRateOverride:pricing.exchangeRateOverride});
   const x=calcTax(rForInvoice);
   const cs=curSym(pricing.currency);
+  let html='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px"><span style="font-size:var(--font-size-xs);font-weight:800;color:#00b4d8;letter-spacing:.03em;text-transform:uppercase">Live preview</span><span style="font-size:var(--font-size-xs);color:#9ca3af">Updates instantly — nothing is saved until Finalize</span></div>';
+  // Company Exchange Rates upgrade (2026-09-11, Part B): a non-USD invoice
+  // with no configured company rate (and no valid override) is BLOCKED --
+  // never silently priced at rate=1 or any other guess. includeRoom=false
+  // with no extras yet still needs this check since the currency itself,
+  // not the room, is what's unpriceable.
+  if(pricing.currency!=='USD' && !x.exchangeRateConfigured){
+    html+=currencyNotConfiguredHTML(pricing.currency);
+    document.getElementById('ni-prev').innerHTML=html;
+    return;
+  }
   // Extra/catalog items are priced in USD by the Fixed Price Catalog
-  // (unchanged, out of scope -- Part H). For an MVR invoice they're
-  // converted for THIS invoice's display/total only, using the same
-  // snapshotted exchange rate as Green Tax -- the catalog's own stored
-  // USD basePrice is never touched.
-  const fx = pricing.currency==='MVR' ? (TAX.exchangeRateUsdMvr||1) : 1;
+  // (unchanged, out of scope -- Part H). For a non-USD invoice they're
+  // converted for THIS invoice's display/total only, using the EXACT SAME
+  // resolved rate (company or this invoice's own override) calcTax() just
+  // used for Green Tax -- room and extras can never use two different
+  // rates on the same invoice. The catalog's own stored USD basePrice is
+  // never touched.
+  const fx = x.exchangeRate;
   const ext=calcInvoiceExtras(invItems, fx);
   const roomTotal=includeRoom?x.total:0;
   const d=invDiscountAmount(roomTotal, ext.eT);
   const total=+(roomTotal+ext.eT-d.amount).toFixed(2);
-  let html='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px"><span style="font-size:var(--font-size-xs);font-weight:800;color:#00b4d8;letter-spacing:.03em;text-transform:uppercase">Live preview</span><span style="font-size:var(--font-size-xs);color:#9ca3af">Updates instantly — nothing is saved until Finalize</span></div>';
   html+=includeRoom?pbd(rForInvoice):'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:4px 0">Room charge not included in this invoice</div>';
   if(invItems.length){
     // Part M: a Tax included line shows its own decomposed Service/TGST as
@@ -6884,7 +7040,7 @@ function niPrev(){
     // never a shared/flat figure -- is what actually appears on the
     // invoice for that line (Part L: mixed tax modes, one per item).
     html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
-      <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">EXTRA CHARGES${pricing.currency==='MVR'?' (converted to MVR for this invoice)':''}</div>
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;margin-bottom:4px">EXTRA CHARGES${pricing.currency!=='USD'?' (converted to '+pricing.currency+' for this invoice)':''}</div>
       ${ext.extras.map(e=>`<div style="padding:2px 0">
         <div style="display:flex;justify-content:space-between;font-size:var(--font-size-xs)"><span style="color:#6b7280">${esc(e.desc)} × ${e.qty}${e.tax?(e.priceTaxMode==='TAX_INCLUDED'?' <span style=\"color:#0077b6\">(tax included)</span>':''):' <span style=\"color:#9ca3af\">(no tax)</span>'}</span><span>${cs}${e.total.toFixed(2)}</span></div>
         ${e.tax&&e.priceTaxMode==='TAX_INCLUDED'?`<div style="font-size:var(--font-size-xs);color:#9ca3af;padding-left:4px">Included Service Charge ${cs}${e.svcAmt.toFixed(2)} + Included TGST ${cs}${e.tgstAmt.toFixed(2)}</div>`:''}
@@ -6971,18 +7127,25 @@ function genInv(){
   const includeRoom=document.getElementById('ni-include-room')?document.getElementById('ni-include-room').checked:true;
   // USD/MVR billing (2026-09-10): this invoice's own currency/guest tax
   // status/price mode -- from the Create Invoice selects, defaulting to
-  // (but not necessarily equal to) the reservation's own values. `fx`
-  // converts the Fixed Price Catalog's USD-priced extras for THIS
-  // invoice's display/total only -- the catalog itself is never touched.
+  // (but not necessarily equal to) the reservation's own values.
   const pricing=niInvoicePricing();
-  const rForInvoice=Object.assign({},r,{billingCurrency:pricing.currency,guestTaxStatus:pricing.guestTaxStatus,priceTaxMode:pricing.priceTaxMode});
-  const fx = pricing.currency==='MVR' ? (TAX.exchangeRateUsdMvr||1) : 1;
+  const rForInvoice=Object.assign({},r,{billingCurrency:pricing.currency,guestTaxStatus:pricing.guestTaxStatus,priceTaxMode:pricing.priceTaxMode,exchangeRateOverride:pricing.exchangeRateOverride});
+  const x=calcTax(rForInvoice);
+  // Company Exchange Rates upgrade (2026-09-11, Part B): a non-USD invoice
+  // with no configured company rate (and no valid Admin/Manager override)
+  // can NEVER be finalized -- refuse here, same check niPrev() already
+  // showed live, rather than silently computing with a guessed rate.
+  if(pricing.currency!=='USD' && !x.exchangeRateConfigured){ toast('⛔ Exchange rate not configured for '+pricing.currency+' — set it in Settings & Taxes first'); return; }
+  // `fx` converts the Fixed Price Catalog's USD-priced extras for THIS
+  // invoice's display/total only -- the catalog itself is never touched.
+  // The EXACT SAME resolved rate calcTax() just used for Green Tax (never
+  // recomputed separately, so room and extras can never disagree).
+  const fx = x.exchangeRate;
   // Same calcInvoiceExtras() the live preview (niPrev()) just showed --
   // Finalize never runs a second, possibly-different formula (Step 17: the
   // saved invoice must match exactly what was on screen before this click).
   const ext=calcInvoiceExtras(invItems, fx);
   const extras=ext.extras;
-  const x=calcTax(rForInvoice);
   const eSubtotal=ext.eSubtotal;
   const eTax=ext.eTax;
   const eT=ext.eT;
@@ -7016,8 +7179,28 @@ function genInv(){
     currency:pricing.currency, guestTaxStatus:pricing.guestTaxStatus, priceTaxMode:pricing.priceTaxMode,
     tgstRate:TAX.tgst, serviceChargeRate:TAX.svc, greenTaxRateUsd:TAX.green,
     greenTaxUsd:includeRoom?x.greenUsd:0, greenTaxExempt:x.greenExempt, greenTaxExemptReason:x.greenExemptReason||null,
-    exchangeRateUsdMvr:pricing.currency==='MVR'?(TAX.exchangeRateUsdMvr||1):null,
+    // Company Exchange Rates upgrade (2026-09-11, Part E/F): the invoice's
+    // OWN currency, base currency (always USD, Part D), and the rate
+    // actually used -- frozen here forever, independent of whatever the
+    // company rate changes to tomorrow (Part N). exchangeRateUsdMvr is
+    // kept too, purely for backward-compatible reading by anything still
+    // looking for that exact field name on an MVR invoice -- never the
+    // canonical source going forward (that's `exchangeRate`).
+    invoiceCurrency:pricing.currency, baseCurrency:'USD',
+    exchangeRate:pricing.currency!=='USD'?x.exchangeRate:null,
+    exchangeRateUsdMvr:pricing.currency==='MVR'?x.exchangeRate:null,
+    exchangeRateSource: pricing.exchangeRateOverride!=null ? 'INVOICE_OVERRIDE' : 'COMPANY_MANUAL',
     exchangeRateSnapshotAt:tS,
+    // Part F: only present when an Admin/Manager actually overrode the
+    // company rate for this one invoice -- the master company rate itself
+    // is never touched (companyExchangeRate() is read, never written, by
+    // any of this).
+    companyRateAtCreation: pricing.currency!=='USD' ? companyExchangeRate(pricing.currency) : null,
+    invoiceExchangeRate: pricing.currency!=='USD' ? x.exchangeRate : null,
+    overrideUsed: pricing.exchangeRateOverride!=null,
+    overrideReason: pricing.exchangeRateOverride!=null ? pricing.overrideReason : null,
+    overrideBy: pricing.exchangeRateOverride!=null ? paidByName : null,
+    overrideAt: pricing.exchangeRateOverride!=null ? tS : null,
     paymentMethod:(initialPay==='Fully paid'||initialPay==='Pending payment')?(paymentMethod||null):null,
     paymentRef:(initialPay==='Fully paid'||initialPay==='Pending payment')?(paymentRef||null):null,
     paidAt:initialPay==='Fully paid'?tS:null, paidBy:initialPay==='Fully paid'?paidByName:null,
@@ -7061,11 +7244,17 @@ function viewInv(id){
   const v=INV.find(x=>x.id===id);if(!v)return;
   const sc=v.status==='void'?'up':v.pay==='Fully paid'?'pd':v.pay==='Partially paid'?'pp':v.pay==='Pending payment'?'pg':'up';
   const ivCs=curSym(v.currency); // USD/MVR billing (2026-09-10) -- curSym('USD') for an old invoice with no v.currency, same $ prefix as always
+  // Company Exchange Rates upgrade (2026-09-11): reads exchangeRate first
+  // (the current field name), falling back to the old exchangeRateUsdMvr
+  // for an invoice finalized before this task existed -- Part O, never
+  // reinterpreted, just read under whichever name it was actually saved as.
+  const ivRate = v.exchangeRate!=null ? v.exchangeRate : v.exchangeRateUsdMvr;
   document.getElementById('det-ttl').textContent='Invoice #'+v.num+(v.status==='void'?' (VOID)':'');
   document.getElementById('det-body').innerHTML=`<div class="ivp">
     <div class="ivh"><div style="display:flex;align-items:center;gap:14px"><img class="logo-img" src="data:image/jpeg;base64,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" alt="Vilu Residence" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;border-radius:50%"><div><h2 style="color:#00b4d8;font-size:var(--font-size-2xl)">${PROP.nm}</h2><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:1px">@maamigili</p><p style="font-size:var(--font-size-xs);color:#6b7280;margin-top:4px;line-height:1.8">${PROP.addr}<br>Tel: ${PROP.ph} · ${PROP.em}<br>GST Reg: ${PROP.gst}</p></div></div>
     <div class="ivm"><div class="ivn">Invoice #${v.num}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${fdf(v.issued)}</div>${v.payerScope&&v.payerScope!=='whole'?`<div style="font-size:var(--font-size-xs);font-weight:700;color:#7c3aed;background:#f5f3ff;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">${esc(v.payerLabel||v.payerScope)}</div>`:''}
     <div style="font-size:var(--font-size-xs);font-weight:700;color:#0096c7;background:#e0f7fd;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">${v.currency||'USD'}${v.priceTaxMode?(v.priceTaxMode==='TAX_INCLUDED'?' · Price includes service charge + TGST':' · Tax excluded'):''}</div>
+    ${v.currency&&v.currency!=='USD'&&ivRate!=null?`<div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:6px">Exchange rate used: 1 USD = ${ivRate} ${v.currency}${v.overrideUsed?' <span style="color:#b45309">(invoice-specific override'+(v.overrideReason?': '+esc(v.overrideReason):'')+')</span>':' (company rate)'}</div>`:''}
     <div class="ivs ${sc}">${v.pay}</div></div></div>
     <div class="igg">
       <div class="igf"><label>Bill to</label><span>${esc(v.guest)}</span></div>
@@ -7114,7 +7303,7 @@ function viewInv(id){
       ${v.disc>0?`<tr><td style="color:#0096c7">Invoice discount${v.discType==='percent'?' ('+v.discValue+'%)':''}</td><td style="text-align:right;color:#0096c7">-${ivCs}${(+v.disc||0).toFixed(2)}</td></tr>`:''}
       <tr><td style="color:#6b7280">Service (${v.tax.svc}%)</td><td style="text-align:right">${ivCs}${v.svc.toFixed(2)}</td></tr>
       <tr><td style="color:#6b7280">TGST (${v.tax.tgst}%)</td><td style="text-align:right">${ivCs}${v.tgst.toFixed(2)}</td></tr>
-      <tr><td style="color:#6b7280">Green Tax${v.greenTaxExempt?'':' (USD '+v.tax.green+'×'+v.gp+' persons×'+v.n+' nights'+(v.inf>0?' — '+v.inf+' infant exempt':'')+')'}</td><td style="text-align:right${v.greenTaxExempt?';color:#059669':''}">${v.greenTaxExempt?'Exempt — '+esc(v.greenTaxExemptReason||''):ivCs+v.green.toFixed(2)+(v.currency==='MVR'?' <span style="font-size:var(--font-size-xs);color:#9ca3af">(USD '+(+v.greenTaxUsd||0).toFixed(2)+' × '+(v.exchangeRateUsdMvr||1)+')</span>':'')}</td></tr>
+      <tr><td style="color:#6b7280">Green Tax${v.greenTaxExempt?'':' (USD '+v.tax.green+'×'+v.gp+' persons×'+v.n+' nights'+(v.inf>0?' — '+v.inf+' infant exempt':'')+')'}</td><td style="text-align:right${v.greenTaxExempt?';color:#059669':''}">${v.greenTaxExempt?'Exempt — '+esc(v.greenTaxExemptReason||''):ivCs+v.green.toFixed(2)+(v.currency&&v.currency!=='USD'?' <span style="font-size:var(--font-size-xs);color:#9ca3af">(USD '+(+v.greenTaxUsd||0).toFixed(2)+' × '+(ivRate||1)+')</span>':'')}</td></tr>
       ${v.tax.bed>0?`<tr><td style="color:#6b7280">Bed tax</td><td style="text-align:right">${ivCs}${v.bed.toFixed(2)}</td></tr>`:''}
       <tr class="gd"><td>Grand total (${v.currency||'USD'})</td><td style="text-align:right">${ivCs}${v.total.toFixed(2)}</td></tr>
       ${(v.paidAmount||0)>0?`<tr><td style="color:#059669">Paid</td><td style="text-align:right;color:#059669">-${ivCs}${(v.paidAmount||0).toFixed(2)}</td></tr>
@@ -7518,7 +7707,7 @@ async function initNB(){
 function nbCurrencyChanged(){
   var cur=document.getElementById('nb-currency').value;
   var modeEl=document.getElementById('nb-taxmode');
-  if(modeEl) modeEl.value = cur==='MVR' ? (TAX.mvrDefaultPriceMode||'TAX_INCLUDED') : (TAX.usdDefaultPriceMode||'TAX_EXCLUDED');
+  if(modeEl) modeEl.value = cur==='MVR' ? (TAX.mvrDefaultPriceMode||'TAX_INCLUDED') : cur==='EUR' ? (TAX.eurDefaultPriceMode||'TAX_EXCLUDED') : (TAX.usdDefaultPriceMode||'TAX_EXCLUDED');
 }
 function nbPricingFields(){
   return {
@@ -7536,15 +7725,21 @@ function nbCalc(){
   const ad=+document.getElementById('nb-ad').value||1,ch=+document.getElementById('nb-ch').value||0,inf=+document.getElementById('nb-inf').value||0;
   const pricing=nbPricingFields();
   const cs=curSym(pricing.billingCurrency);
-  let grandTotal=0,html='';
+  // Company Exchange Rates upgrade (2026-09-11, Part B): `x.total` is
+  // `null` for a non-USD currency with no configured rate -- `grandTotal
+  // += null` would silently coerce to +0 and show a wrong (too-low) grand
+  // total for the OTHER, actually-priced rooms, so track "any room
+  // unpriceable" explicitly and suppress the grand-total line entirely
+  // rather than ever display a number quietly missing a room's cost.
+  let grandTotal=0,html='',allConfigured=true;
   nbSelectedRooms.forEach(function(r){
     const rate=pricing.rateOverride!=null?pricing.rateOverride:r.rate;
     const resLike={ci,co,rate,ad,ch,inf,billingCurrency:pricing.billingCurrency,priceTaxMode:pricing.priceTaxMode,guestTaxStatus:pricing.guestTaxStatus};
     const x=calcTax(resLike);
-    grandTotal+=x.total;
+    if(x.exchangeRateConfigured===false){ allConfigured=false; } else { grandTotal+=x.total; }
     html+='<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb"><div style="font-weight:700;font-size:var(--font-size-sm);margin-bottom:4px">'+r.nm+'</div>'+pbd(resLike)+'</div>';
   });
-  if(nbSelectedRooms.length>1){
+  if(nbSelectedRooms.length>1 && allConfigured){
     html+='<div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--font-size-md);padding-top:6px"><span>Grand total ('+nbSelectedRooms.length+' rooms)</span><span style="color:#00b4d8">'+cs+grandTotal.toFixed(2)+'</span></div>';
   }
   pr.innerHTML=html;
@@ -7790,46 +7985,56 @@ function drawCfg(){
   document.getElementById('st-cd').value=TAX.childDiscountPercent;
   document.getElementById('st-tgst-eff').value=TAX.tgstEffectiveFrom||'';
   document.getElementById('st-green-eff').value=TAX.greenTaxEffectiveFrom||'';
-  document.getElementById('st-fx-rate').value=TAX.exchangeRateUsdMvr;
+  // Company Exchange Rates upgrade (2026-09-11): blank (not 0) when
+  // genuinely unconfigured -- an empty field reads as "not yet set", never
+  // as if 0 or some other number were a real company decision.
+  document.getElementById('st-fx-mvr').value=TAX.exchangeRateUsdMvr>0?TAX.exchangeRateUsdMvr:'';
+  document.getElementById('st-fx-eur').value=TAX.exchangeRateUsdEur>0?TAX.exchangeRateUsdEur:'';
+  document.getElementById('st-fx-reason').value='';
   document.getElementById('st-usd-mode').value=TAX.usdDefaultPriceMode||'TAX_EXCLUDED';
   document.getElementById('st-mvr-mode').value=TAX.mvrDefaultPriceMode||'TAX_INCLUDED';
+  document.getElementById('st-eur-mode').value=TAX.eurDefaultPriceMode||'TAX_EXCLUDED';
   document.getElementById('st-nm').value=PROP.nm;document.getElementById('st-addr').value=PROP.addr;
   document.getElementById('st-ph').value=PROP.ph;document.getElementById('st-em').value=PROP.em;
   document.getElementById('st-gst').value=PROP.gst;document.getElementById('st-bk').value=PROP.bk;
   // Staff can see every tax/currency field but not edit or save any of
-  // them (Part Q) -- inputs go read-only and both Save buttons disable,
+  // them (Part M) -- inputs go read-only and both Save buttons disable,
   // rather than hiding the whole card (an Admin/Manager glancing at this
   // page from a Staff-reported screenshot still needs to see the real
   // values).
   var editable=canEditTaxSettings();
-  ['st-tgst','st-gt','st-sc','st-bt','st-3g','st-cd','st-tgst-eff','st-green-eff','st-fx-rate','st-usd-mode','st-mvr-mode'].forEach(function(id){
+  ['st-tgst','st-gt','st-sc','st-bt','st-3g','st-cd','st-tgst-eff','st-green-eff','st-fx-mvr','st-fx-eur','st-fx-reason','st-usd-mode','st-mvr-mode','st-eur-mode'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.disabled=!editable;
   });
-  ['st-tax-save-btn','st-tax-reset-btn','st-mvr-save-btn'].forEach(function(id){
+  ['st-tax-save-btn','st-tax-reset-btn','st-fx-save-btn','st-mvr-save-btn'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.disabled=!editable;
   });
   drawTaxSum();
-  drawMvrBillingCard();
+  drawCompanyExchangeRatesCard();
   loadCancellationOverrideCodeField();
 }
-// Compact, read-only summary of the same TAX object the edit form above
-// writes to -- shown on this page (per Part H's example layout) and
-// reused verbatim on the Dashboard (Part V, drawDashMvrCard()) so there
-// is one rendering of "the current MVR billing state", not two that could
-// drift apart.
-function mvrBillingCardHTML(){
+// Compact, read-only summary of the company's exchange rates -- shown on
+// this page and reused verbatim on the Dashboard (drawDash()) so there is
+// one rendering of "the current company rate state", not two that could
+// drift apart. Never mixes in TGST/Green Tax (Part J/K: exchange rates and
+// government tax are conceptually separate, shown in their own cards).
+function companyExchangeRatesCardHTML(){
   var updated = TAX.updatedAt ? formatMaldivesDateTime(TAX.updatedAt.toDate?TAX.updatedAt.toDate():new Date(TAX.updatedAt)) : 'Not yet saved to server';
+  var mvrRate = TAX.exchangeRateUsdMvr>0 ? (+TAX.exchangeRateUsdMvr) : null;
+  var eurRate = TAX.exchangeRateUsdEur>0 ? (+TAX.exchangeRateUsdEur) : null;
   return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:var(--font-size-sm);margin-bottom:12px">'
-    +'<div><span style="color:#6b7280">USD → MVR rate</span><br><strong>'+(+TAX.exchangeRateUsdMvr).toFixed(2)+'</strong></div>'
-    +'<div><span style="color:#6b7280">Default MVR pricing</span><br><strong>'+(TAX.mvrDefaultPriceMode==='TAX_INCLUDED'?'Tax included':'Tax excluded')+'</strong></div>'
-    +'<div><span style="color:#6b7280">Government tax</span><br><strong>TGST '+TAX.tgst+'%</strong></div>'
-    +'<div><span style="color:#6b7280">Green Tax</span><br><strong>USD '+TAX.green+' / liable tourist / day</strong></div>'
-    +'<div style="grid-column:1/-1"><span style="color:#6b7280">Last updated</span><br>'+esc(updated)+'</div>'
+    +'<div><span style="color:#6b7280">USD</span><br><strong>Base currency</strong></div>'
+    +'<div></div>'
+    +'<div><span style="color:#6b7280">MVR</span><br><strong>'+(mvrRate!=null?'1 USD = '+mvrRate+' MVR':'<span style="color:#b91c1c">Not configured</span>')+'</strong></div>'
+    +'<div><span style="color:#6b7280">EUR</span><br><strong>'+(eurRate!=null?'1 USD = '+eurRate+' EUR':'<span style="color:#b91c1c">Not configured</span>')+'</strong></div>'
+    +'<div style="grid-column:1/-1"><span style="color:#6b7280">Last updated</span><br>'+esc(updated)+(TAX.updatedByName?' by '+esc(TAX.updatedByName):'')+'</div>'
     +'</div>';
 }
-function drawMvrBillingCard(){
-  var el=document.getElementById('mvr-billing-card');
-  if(el) el.innerHTML=mvrBillingCardHTML();
+function drawCompanyExchangeRatesCard(){
+  ['company-fx-card','d-mvr-card'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.innerHTML=companyExchangeRatesCardHTML();
+  });
 }
 
 // ── TRANSPORTATION ── editable fields for the website's "Getting Here"
@@ -7974,22 +8179,53 @@ function resetTax(){
   syncSettingsToBookingEngine();
   persistTaxSettings(before);
 }
-// USD/MVR currency settings (2026-09-10): exchange rate + per-currency
-// default price mode. Same Admin/Manager gate, same persistTaxSettings()
-// write path (one settings document, one audit trail -- not a second
-// parallel settings system), separate save button since these are
-// genuinely different fields from the government tax rates above.
-function saveMvrSettings(){
+// Company Exchange Rates upgrade (2026-09-11, Part A/K/L): editing the
+// company's MVR/EUR rates is its OWN save action, conceptually and
+// visually separate from government tax rates (saveTax()) and from
+// invoice-default price modes (saveInvoiceDefaults() below) -- Part K's
+// "keep government tax and commercial exchange rates conceptually
+// separate". A genuine rate CHANGE requires a reason and gets its own
+// richer audit entry (logExchangeRateAudit()) instead of the generic
+// per-field diff persistTaxSettings() normally logs (that generic path is
+// explicitly skipped for these two fields via the skipFields argument, so
+// one change never produces two differently-shaped audit rows). Blank/0
+// deliberately means "not configured" -- never silently treated as some
+// other number.
+async function saveCompanyExchangeRates(){
   if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
   var before=Object.assign({},TAX);
-  var rateEl=document.getElementById('st-fx-rate');
-  var rate=+((rateEl&&rateEl.value)||0);
-  if(!rate||rate<=0){ toast('Enter a valid USD → MVR exchange rate'); return; }
-  TAX.exchangeRateUsdMvr=rate;
+  var mvrEl=document.getElementById('st-fx-mvr'), eurEl=document.getElementById('st-fx-eur'), reasonEl=document.getElementById('st-fx-reason');
+  var newMvr = (mvrEl && mvrEl.value!=='') ? +mvrEl.value : null;
+  var newEur = (eurEl && eurEl.value!=='') ? +eurEl.value : null;
+  if(newMvr!=null && newMvr<=0){ toast('MVR rate must be a positive number (or blank to mark it not configured)'); return; }
+  if(newEur!=null && newEur<=0){ toast('EUR rate must be a positive number (or blank to mark it not configured)'); return; }
+  var reason=(reasonEl&&reasonEl.value||'').trim();
+  var mvrChanged = (before.exchangeRateUsdMvr||null) !== newMvr;
+  var eurChanged = (before.exchangeRateUsdEur||null) !== newEur;
+  if((mvrChanged||eurChanged) && !reason){ toast('Enter a reason for this exchange-rate change'); return; }
+  TAX.exchangeRateUsdMvr=newMvr;
+  TAX.exchangeRateUsdEur=newEur;
+  drawCompanyExchangeRatesCard();
+  toast('✓ Exchange rates saved');
+  localStorage.setItem('vilu_tax',JSON.stringify(TAX));
+  syncSettingsToBookingEngine();
+  await persistTaxSettings(before, ['exchangeRateUsdMvr','exchangeRateUsdEur']);
+  if(mvrChanged) logExchangeRateAudit('MVR', before.exchangeRateUsdMvr||null, newMvr, reason);
+  if(eurChanged) logExchangeRateAudit('EUR', before.exchangeRateUsdEur||null, newEur, reason);
+}
+// Per-currency DEFAULT price mode only (Part K's "Invoice Defaults" card)
+// -- never the rate itself (that's saveCompanyExchangeRates() above).
+// These are just starting points; staff can still change the mode per
+// invoice, so a generic diff-based audit entry (persistTaxSettings()'s
+// normal path) is proportionate -- no dedicated reason requirement like a
+// real exchange-rate change gets.
+function saveInvoiceDefaults(){
+  if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
+  var before=Object.assign({},TAX);
   var mvrModeEl=document.getElementById('st-mvr-mode'); if(mvrModeEl) TAX.mvrDefaultPriceMode=mvrModeEl.value;
   var usdModeEl=document.getElementById('st-usd-mode'); if(usdModeEl) TAX.usdDefaultPriceMode=usdModeEl.value;
-  drawMvrBillingCard();
-  toast('✓ MVR billing settings saved');
+  var eurModeEl=document.getElementById('st-eur-mode'); if(eurModeEl) TAX.eurDefaultPriceMode=eurModeEl.value;
+  toast('✓ Invoice defaults saved');
   localStorage.setItem('vilu_tax',JSON.stringify(TAX));
   syncSettingsToBookingEngine();
   persistTaxSettings(before);
@@ -9223,24 +9459,49 @@ async function logTaxSettingsAudit(field, oldValue, newValue){
     });
   } catch(e){ console.error('logTaxSettingsAudit failed', e); }
 }
+// Company Exchange Rates upgrade (2026-09-11, Part L): a dedicated,
+// richer audit shape for an actual rate change -- currency/oldRate/
+// newRate/reason, alongside the generic field/oldValue/newValue every
+// other tax_settings_audit entry already carries (so firestore.rules'
+// existing `field is string` check still passes unchanged, and every
+// entry in this ONE append-only collection is still readable the same
+// generic way, just with extra detail on this specific kind of change).
+async function logExchangeRateAudit(currency, oldRate, newRate, reason){
+  try{
+    var fbUser = firebase.auth().currentUser;
+    await fsDb.collection('tax_settings_audit').doc().set({
+      field:'exchangeRateUsd'+currency, oldValue:oldRate==null?null:oldRate, newValue:newRate==null?null:newRate,
+      currency:currency, oldRate:oldRate==null?null:oldRate, newRate:newRate==null?null:newRate, reason:reason,
+      changedByUid: fbUser?fbUser.uid:null, changedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff',
+      changedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e){ console.error('logExchangeRateAudit failed', e); }
+}
 // Persists the full current TAX object to Firestore (merge) plus one
 // audit entry per changed field, diffed against `before`. Shared by
-// saveTax() (government tax fields) and saveMvrSettings() (currency/
-// default-mode fields) so there is one write path, not two.
-async function persistTaxSettings(before){
+// saveTax() (government tax fields) and saveInvoiceDefaults() (per-
+// currency default price modes) so there is one write path, not two.
+// `skipFields` (Company Exchange Rates upgrade, 2026-09-11) lets
+// saveCompanyExchangeRates() suppress the generic per-field entry for
+// exchangeRateUsdMvr/exchangeRateUsdEur, since it already logs its own
+// richer currency/oldRate/newRate/reason entry for those two specifically
+// -- one change, one audit row, never two differently-shaped ones.
+async function persistTaxSettings(before, skipFields){
+  skipFields = skipFields || [];
   try{
     await fsDb.collection('tax_currency_settings').doc('current').set(
       Object.assign({}, TAX, {updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedByName:(currentUser&&(currentUser.name||currentUser.username))||'Staff'}),
       {merge:true}
     );
     Object.keys(TAX).forEach(function(field){
+      if(skipFields.indexOf(field)!==-1) return;
       if(before[field] !== TAX[field]) logTaxSettingsAudit(field, before[field], TAX[field]);
     });
     // Local-clock stand-in for the server timestamp so "Last updated" is
     // accurate immediately, not just after the next reload re-fetches the
     // real Firestore-resolved value.
     TAX.updatedAt = new Date();
-    if(document.getElementById('mvr-billing-card')) drawMvrBillingCard();
+    drawCompanyExchangeRatesCard();
   } catch(e){ console.error('persistTaxSettings failed', e); toast('⚠ Could not save to server (saved locally only)'); }
 }
 async function loadInvoicesFromFirestore(){
