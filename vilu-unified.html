@@ -38,6 +38,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .btn.sm{padding:4px 9px;font-size:var(--font-size-xs)}
 .card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px}
 .card h3{font-size:var(--font-size-base);font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.card summary::-webkit-details-marker{display:none}
+.card[open] summary .ti-chevron-right{transform:rotate(90deg)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
@@ -1570,68 +1572,102 @@ body.pms-mode { overflow:hidden; }
 </div>
 
 <div class="sec" id="s-cfg">
+  <!-- Settings & Taxes UX simplification (2026-09-11): a normal Admin/
+       Manager should understand this page within 10 seconds. Primary view
+       = Tax Settings / Company Exchange Rates / Invoice Defaults only.
+       Every other field below still exists with its EXACT same id and is
+       still read/written by the EXACT same drawCfg()/saveTax()/
+       saveCompanyExchangeRates()/saveInvoiceDefaults()/saveProp() calls as
+       before -- this task only moves WHERE things are visually shown
+       (into collapsible sections and a compact one-line summary), never what the
+       inputs are, what they save, or what values they hold. No calculation
+       logic changed. -->
+  <div class="card" style="padding:10px 16px;margin-bottom:14px">
+    <div id="tax-sum" style="font-size:var(--font-size-sm);color:#374151;font-weight:600"></div>
+  </div>
+
   <div class="g2">
     <div class="card">
-      <h3><i class="ti ti-receipt-tax" style="margin-right:6px"></i>Government Tax Settings</h3>
-      <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Per MIRA. Update when rates change — all new invoices use updated rates instantly.</div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">TGST (Tourism GST)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Effective from <input type="date" id="st-tgst-eff" style="font-family:inherit;font-size:var(--font-size-xs);border:1px solid #d1d5db;border-radius:4px;padding:1px 4px"></div></div><div class="si"><input type="number" id="st-tgst" step="0.1"><span>%</span></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Green Tax (per person/night, USD)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Tourists only — Maldivians/resident permit holders/under-2 exempt. Effective from <input type="date" id="st-green-eff" style="font-family:inherit;font-size:var(--font-size-xs);border:1px solid #d1d5db;border-radius:4px;padding:1px 4px"></div></div><div class="si"><span>$</span><input type="number" id="st-gt" step="0.5"></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Service Charge</div><div style="font-size:var(--font-size-xs);color:#6b7280">Applied before TGST</div></div><div class="si"><input type="number" id="st-sc" step="0.5"><span>%</span></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Bed Tax (per room/night)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Set 0 if not applicable</div></div><div class="si"><span>$</span><input type="number" id="st-bt" step="0.5"></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">3rd Guest Supplement (per night, adult)</div><div style="font-size:var(--font-size-xs);color:#6b7280">Direct/PMS only — covers the 3rd guest, no separate extra-bed charge. Agency/B2B rate is a separate, still-pending decision.</div></div><div class="si"><span>$</span><input type="number" id="st-3g" step="0.5"></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Child Discount on 3rd Guest (age 2–11)</div><div style="font-size:var(--font-size-xs);color:#6b7280">% off the 3rd-guest supplement when the marginal guest is a child. Infants under 2 already pay $0 (excluded from the guest count).</div></div><div class="si"><input type="number" id="st-cd" step="1"><span>%</span></div></div>
+      <h3>Tax Settings <span title="Per MIRA. Applies to all new invoices instantly." style="cursor:help;color:#9ca3af;font-weight:400"><i class="ti ti-info-circle"></i></span></h3>
+      <div class="sr2"><div style="font-size:var(--font-size-base);font-weight:500">TGST</div><div class="si"><input type="number" id="st-tgst" step="0.1" style="width:70px"><span>%</span></div></div>
+      <div class="sr2"><div style="font-size:var(--font-size-base);font-weight:500">Green Tax</div><div class="si"><span>$</span><input type="number" id="st-gt" step="0.5" style="width:70px"><span style="color:#9ca3af;font-size:var(--font-size-xs)">/ person / night</span></div></div>
+      <div class="sr2"><div style="font-size:var(--font-size-base);font-weight:500">Service Charge</div><div class="si"><input type="number" id="st-sc" step="0.5" style="width:70px"><span>%</span></div></div>
+      <button class="btn p" id="st-tax-save-btn" onclick="saveTax()" style="margin-top:8px"><i class="ti ti-device-floppy"></i>Save tax settings</button>
+    </div>
+
+    <div class="card">
+      <h3>Company Exchange Rates</h3>
+      <div class="sr2"><div style="font-size:var(--font-size-base);font-weight:500">USD</div><div class="si" style="color:#6b7280">Base currency</div></div>
+      <div class="sr2"><div style="font-size:var(--font-size-base);font-weight:500">MVR</div><div class="si">1 USD = <input type="number" id="st-fx-mvr" step="0.01" min="0" style="width:80px"> MVR</div></div>
+      <div class="sr2"><div style="font-size:var(--font-size-base);font-weight:500">EUR</div><div class="si">1 USD = <input type="number" id="st-fx-eur" step="0.0001" min="0" style="width:80px"> EUR</div></div>
+      <div class="fg" style="margin-top:8px"><label>Reason for change <span style="color:#9ca3af;font-weight:400">(only needed if a rate actually changed)</span></label><input type="text" id="st-fx-reason" placeholder="e.g. Updated Vilu cash exchange rate"></div>
+      <button class="btn p" id="st-fx-save-btn" onclick="saveCompanyExchangeRates()"><i class="ti ti-device-floppy"></i>Save rates</button>
+      <div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:8px">Rates are set manually by Vilu and apply to new invoices only.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Invoice Defaults</h3>
+    <div class="g2" style="margin-bottom:0">
+      <div class="fg"><label>USD</label><select id="st-usd-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+      <div class="fg"><label>MVR</label><select id="st-mvr-mode"><option value="TAX_INCLUDED">Tax included</option><option value="TAX_EXCLUDED">Tax excluded</option></select></div>
+      <div class="fg"><label>EUR</label><select id="st-eur-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
+    </div>
+    <button class="btn p" id="st-mvr-save-btn" onclick="saveInvoiceDefaults()"><i class="ti ti-device-floppy"></i>Save invoice defaults</button>
+    <div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:8px">These are defaults only. They can still be changed while creating an invoice.</div>
+  </div>
+
+  <!-- ADVANCED SETTINGS: same fields/ids/save button as before, just
+       tucked away since they're rarely touched day-to-day. Collapsed by
+       default (native <details>, no new JS needed). -->
+  <details class="card">
+    <summary style="cursor:pointer;font-weight:600;font-size:var(--font-size-base);list-style:none;display:flex;align-items:center;gap:6px"><i class="ti ti-chevron-right" style="transition:transform .15s"></i>Advanced Settings</summary>
+    <div style="margin-top:14px">
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">TGST effective from</div></div><div class="si"><input type="date" id="st-tgst-eff"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Green Tax effective from</div></div><div class="si"><input type="date" id="st-green-eff"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Bed Tax</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per room/night — set 0 if not applicable</div></div><div class="si"><span>$</span><input type="number" id="st-bt" step="0.5" style="width:70px"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">3rd Guest Supplement</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per night, adult — direct/PMS only</div></div><div class="si"><span>$</span><input type="number" id="st-3g" step="0.5" style="width:70px"></div></div>
+      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">Child Discount on 3rd Guest</div><div style="font-size:var(--font-size-xs);color:#6b7280">Age 2–11, % off. Infants under 2 already pay $0.</div></div><div class="si"><input type="number" id="st-cd" step="1" style="width:70px"><span>%</span></div></div>
       <div style="display:flex;gap:8px;margin-top:14px">
-        <button class="btn p" id="st-tax-save-btn" onclick="saveTax()"><i class="ti ti-device-floppy"></i>Save tax settings</button>
+        <button class="btn p" id="st-tax-save-btn-adv" onclick="saveTax()"><i class="ti ti-device-floppy"></i>Save tax settings</button>
         <button class="btn sm" id="st-tax-reset-btn" onclick="resetTax()">Reset to defaults</button>
       </div>
     </div>
-    <!-- Company Exchange Rates upgrade (2026-09-11, Part A/K): kept
-         conceptually and visually SEPARATE from government tax settings
-         above -- these are commercial, company-decided numbers, never a
-         market/live-FX-API rate and never mixed into the same ambiguous
-         field as TGST/Green Tax. -->
-    <div class="card">
-      <h3><i class="ti ti-currency-dollar" style="margin-right:6px"></i>Company Exchange Rates</h3>
-      <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Manually set by the company — never a live FX API, never auto-updated. USD is the base currency; most master prices stay in USD and convert only for MVR/EUR invoices, using whatever rate is configured here at the moment an invoice is finalized.</div></div>
-      <div id="company-fx-card"></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">USD — base currency</div><div style="font-size:var(--font-size-xs);color:#6b7280">Master prices are stored in USD; never rewritten by a rate change</div></div><div class="si"><strong>1.00</strong></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">MVR rate</div><div style="font-size:var(--font-size-xs);color:#6b7280">1 USD = ? MVR — leave blank/0 to mark MVR as not yet configured (blocks MVR invoices)</div></div><div class="si"><span>MVR</span><input type="number" id="st-fx-mvr" step="0.01" min="0"></div></div>
-      <div class="sr2"><div><div style="font-size:var(--font-size-base);font-weight:500">EUR rate</div><div style="font-size:var(--font-size-xs);color:#6b7280">1 USD = ? EUR — leave blank/0 to mark EUR as not yet configured (blocks EUR invoices)</div></div><div class="si"><span>EUR</span><input type="number" id="st-fx-eur" step="0.0001" min="0"></div></div>
-      <div class="fg"><label>Reason for this change (required if a rate actually changed)</label><input type="text" id="st-fx-reason" placeholder="e.g. Updated Vilu cash exchange rate"></div>
-      <button class="btn p" id="st-fx-save-btn" onclick="saveCompanyExchangeRates()"><i class="ti ti-device-floppy"></i>Save exchange rates</button>
+  </details>
+
+  <!-- OTHER SETTINGS: Property Settings, Data Integrity, Cancellation
+       Override Code -- unrelated to daily tax/pricing work, so grouped
+       here rather than competing for attention above. Same fields/ids/
+       functions as before. -->
+  <details class="card">
+    <summary style="cursor:pointer;font-weight:600;font-size:var(--font-size-base);list-style:none;display:flex;align-items:center;gap:6px"><i class="ti ti-chevron-right" style="transition:transform .15s"></i>Other Settings</summary>
+    <div style="margin-top:14px" class="g2">
+      <div class="card" style="margin-bottom:0">
+        <h3><i class="ti ti-building" style="margin-right:6px"></i>Property Settings</h3>
+        <div class="fg"><label>Property name</label><input type="text" id="st-nm" value="Vilu Residence Maamigili"></div>
+        <div class="fg"><label>Address</label><input type="text" id="st-addr" value="South Ari Atoll, Maamigili, 00100"></div>
+        <div class="fg"><label>Phone</label><input type="text" id="st-ph" value="+960 9903339"></div>
+        <div class="fg"><label>Email</label><input type="text" id="st-em" value="info@viluresidence.mv"></div>
+        <div class="fg"><label>GST Reg No.</label><input type="text" id="st-gst" value="MVT-2025-00001"></div>
+        <div class="fg"><label>Bank / payment details <span style="color:#9ca3af;font-weight:400">(optional)</span></label><textarea id="st-bk" placeholder="Leave blank to hide from invoices"></textarea></div>
+        <button class="btn p" onclick="saveProp()"><i class="ti ti-device-floppy"></i>Save property settings</button>
+      </div>
+      <div>
+        <div class="card">
+          <h3><i class="ti ti-refresh-alert" style="margin-right:6px"></i>Data Integrity</h3>
+          <div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:10px">Recomputes every room's availability lock from reservations and repairs any drift. Runs automatically every 24h — use this to run it immediately.</div>
+          <button class="btn p" onclick="runReconciliationNow()"><i class="ti ti-refresh"></i>Run reconciliation now</button>
+          <div id="recon-result" style="margin-top:10px;font-size:var(--font-size-sm);color:#6b7280"></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <h3><i class="ti ti-shield-lock" style="margin-right:6px"></i>Cancellation Override Code</h3>
+          <div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:10px">Staff cannot cancel a reservation without this code.</div>
+          <div class="fg"><label>Override code</label><input type="text" id="st-cancel-code" placeholder="Set a code staff will enter to cancel a booking"></div>
+          <button class="btn p" onclick="saveCancellationOverrideCode()"><i class="ti ti-device-floppy"></i>Save override code</button>
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <h3><i class="ti ti-adjustments" style="margin-right:6px"></i>Invoice Defaults</h3>
-      <div class="al am"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>TGST and Green Tax are the SAME government tax regardless of invoice currency — there is no separate "MVR TGST" or "EUR TGST" rate (Part H). Only the DEFAULT price mode is currency-specific, and even that is just a starting point staff can change per invoice.</div></div>
-      <div class="fg"><label>Default price mode — USD invoices</label><select id="st-usd-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
-      <div class="fg"><label>Default price mode — MVR invoices</label><select id="st-mvr-mode"><option value="TAX_INCLUDED">Tax included</option><option value="TAX_EXCLUDED">Tax excluded</option></select></div>
-      <div class="fg"><label>Default price mode — EUR invoices</label><select id="st-eur-mode"><option value="TAX_EXCLUDED">Tax excluded</option><option value="TAX_INCLUDED">Tax included</option></select></div>
-      <button class="btn p" id="st-mvr-save-btn" onclick="saveInvoiceDefaults()"><i class="ti ti-device-floppy"></i>Save invoice defaults</button>
-    </div>
-    <div class="card">
-      <h3><i class="ti ti-building" style="margin-right:6px"></i>Property Settings</h3>
-      <div class="fg"><label>Property name</label><input type="text" id="st-nm" value="Vilu Residence Maamigili"></div>
-      <div class="fg"><label>Address</label><input type="text" id="st-addr" value="South Ari Atoll, Maamigili, 00100"></div>
-      <div class="fg"><label>Phone</label><input type="text" id="st-ph" value="+960 9903339"></div>
-      <div class="fg"><label>Email</label><input type="text" id="st-em" value="info@viluresidence.mv"></div>
-      <div class="fg"><label>GST Reg No.</label><input type="text" id="st-gst" value="MVT-2025-00001"></div>
-      <div class="fg"><label>Bank / payment details <span style="color:#9ca3af;font-weight:400">(optional)</span></label><textarea id="st-bk" placeholder="Leave blank to hide from invoices"></textarea></div>
-      <button class="btn p" onclick="saveProp()"><i class="ti ti-device-floppy"></i>Save property settings</button>
-    </div>
-  </div>
-  <div class="card"><h3>Current tax summary</h3><div id="tax-sum"></div></div>
-  <div class="card">
-    <h3><i class="ti ti-refresh-alert" style="margin-right:6px"></i>Data Integrity</h3>
-    <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Recomputes every room's availability lock from the reservations collection (the source of truth) and repairs any drift. Runs automatically once every 24h on load — use this to run it immediately.</div></div>
-    <button class="btn p" onclick="runReconciliationNow()"><i class="ti ti-refresh"></i>Run reconciliation now</button>
-    <div id="recon-result" style="margin-top:10px;font-size:var(--font-size-sm);color:#6b7280"></div>
-  </div>
-  <div class="card">
-    <h3><i class="ti ti-shield-lock" style="margin-right:6px"></i>Cancellation Override Code</h3>
-    <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>Staff cannot cancel a reservation without this code. Share it only with staff you trust to cancel bookings, and change it any time here.</div></div>
-    <div class="fg"><label>Override code</label><input type="text" id="st-cancel-code" placeholder="Set a code staff will enter to cancel a booking"></div>
-    <button class="btn p" onclick="saveCancellationOverrideCode()"><i class="ti ti-device-floppy"></i>Save override code</button>
-  </div>
+  </details>
 </div>
 
 <div class="sec" id="s-transport">
@@ -8006,7 +8042,7 @@ function drawCfg(){
   ['st-tgst','st-gt','st-sc','st-bt','st-3g','st-cd','st-tgst-eff','st-green-eff','st-fx-mvr','st-fx-eur','st-fx-reason','st-usd-mode','st-mvr-mode','st-eur-mode'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.disabled=!editable;
   });
-  ['st-tax-save-btn','st-tax-reset-btn','st-fx-save-btn','st-mvr-save-btn'].forEach(function(id){
+  ['st-tax-save-btn','st-tax-save-btn-adv','st-tax-reset-btn','st-fx-save-btn','st-mvr-save-btn'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.disabled=!editable;
   });
   drawTaxSum();
@@ -8137,27 +8173,12 @@ async function saveTransportGeneral(){
     toast('⚠️ Could not save — please try again');
   }
 }
+// Settings & Taxes UX simplification (2026-09-11, "Current Tax Summary"):
+// option B from the task -- one compact line instead of 5 large cards plus
+// a permanent worked example. Same TAX values, just far less space.
 function drawTaxSum(){
   const el=document.getElementById('tax-sum');if(!el)return;
-  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
-    <div style="background:#e8f5f2;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">TGST</div><div style="font-size:var(--font-size-2xl);font-weight:700;color:#00b4d8">${TAX.tgst}%</div><div style="font-size:var(--font-size-xs);color:#6b7280">From July 2025</div></div>
-    <div style="background:#fef3c7;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Green Tax</div><div style="font-size:var(--font-size-2xl);font-weight:700;color:#92400e">$${TAX.green}</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per person/night</div></div>
-    <div style="background:#f3f4f6;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Service</div><div style="font-size:var(--font-size-2xl);font-weight:700">${TAX.svc}%</div><div style="font-size:var(--font-size-xs);color:#6b7280">Before TGST</div></div>
-    <div style="background:#f3f4f6;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">Bed Tax</div><div style="font-size:var(--font-size-2xl);font-weight:700">$${TAX.bed}</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per room/night</div></div>
-    <div style="background:#e0f7fa;border-radius:8px;padding:10px 12px"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600;margin-bottom:3px">3rd Guest</div><div style="font-size:var(--font-size-2xl);font-weight:700;color:#0096c7">$${TAX.thirdGuest}</div><div style="font-size:var(--font-size-xs);color:#6b7280">Per night, direct/PMS only</div></div>
-  </div>
-  <div style="padding:10px 14px;background:#fffbeb;border-radius:8px;font-size:var(--font-size-sm);color:#92400e;border:1px solid #fde68a">
-    ${(function(){
-      const n=3,rate=80,ad=2,ch=1,gp=ad+ch;
-      const tg=+(Math.min(1,Math.max(0,gp-2))*TAX.thirdGuest*n).toFixed(2);
-      const base=+(n*rate+tg).toFixed(2);
-      const svc=+(base*TAX.svc/100).toFixed(2);
-      const tgst=+((base+svc)*TAX.tgst/100).toFixed(2);
-      const green=+(TAX.green*gp*n).toFixed(2);
-      const total=+(base+svc+tgst+green).toFixed(2);
-      return `<strong>Example:</strong> 2 adults, 1 child, 1 infant, 3 nights, $80/night &rarr; Room $${(n*rate).toFixed(2)} + 3rd guest $${tg.toFixed(2)} (2 adults + 1 child = 3 guests) + Service $${svc.toFixed(2)} + TGST $${tgst.toFixed(2)} + Green $${green.toFixed(2)} (infant exempt) = <strong>$${total.toFixed(2)}</strong>`;
-    })()}
-  </div>`;
+  el.innerHTML=`TGST ${TAX.tgst}% &nbsp;|&nbsp; Green Tax $${TAX.green}/pp/night &nbsp;|&nbsp; Service ${TAX.svc}%`;
 }
 function saveTax(){
   if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
