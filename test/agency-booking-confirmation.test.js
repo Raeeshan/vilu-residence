@@ -155,9 +155,9 @@ section('Case I — Part 13/14/15: server-side ownership validation and allowlis
     assert.match(fn, /if \(bReq\.agencyId !== request\.auth\.uid\) throw new HttpsError\('permission-denied', 'Not your booking request\.'\)/);
     assert.match(fn, /if \(res\.agencyId !== request\.auth\.uid\) throw new HttpsError\('permission-denied', 'Not your reservation\.'\)/);
   });
-  test('firestore.rules was NOT widened to grant broader reservation/booking-request read access for this feature', () => {
+  test('firestore.rules was NOT widened to grant broader reservation/booking-request read access for this feature (Phase I later TIGHTENED reservations\' own read rule further still -- see agency-security-rules.test.js)', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /allow read: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| \(isAgency\(\) && resource\.data\.agencyId == request\.auth\.uid\);/);
+    assert.doesNotMatch(resBlock, /isAgency\(\) && resource\.data\.agencyId == request\.auth\.uid/);
     const bookingReqBlock = RULES.slice(RULES.indexOf('match /agency_booking_requests/{id} {'), RULES.indexOf('match /packages/{packageId}'));
     assert.match(bookingReqBlock, /allow read: if request\.auth != null && \(isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| resource\.data\.agencyId == request\.auth\.uid\);/);
   });

@@ -45,6 +45,12 @@
 //     quotes only (agencyId always request.auth.uid, never client-supplied).
 //     Direct/OTA/other-agency records are never fetched in the first place.
 //     See the comment above that export.
+//   getMyAgencyBookings  Agency Sales Workflow Phase I security fix -- a
+//     safe-projection list of an agency's own reservations, replacing the
+//     direct client read Phase H used to make (rules now deny it). Never
+//     returns internal_note/notes/viluNetTotal/agencyEarnings/
+//     paymentCollector or any other internal PMS field. See the comment
+//     above that export.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -543,7 +549,19 @@ exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 
   const guestName = String(d.guestName || '').slice(0, 160).trim();
   const arrivalDate = /^\d{4}-\d{2}-\d{2}$/.test(d.arrivalDate) ? d.arrivalDate : '';
   const departureDate = /^\d{4}-\d{2}-\d{2}$/.test(d.departureDate) ? d.departureDate : '';
-  const agencyGuestSellingTotal = Math.max(0, Number(d.agencyGuestSellingTotal) || 0);
+  // Phase I hardening (I-6/I-30): unlike adults/children just above (which
+  // are safe already -- Math.min(20,...) correctly caps an Infinity input,
+  // and NaN is falsy so `|| 1`/`|| 0` catches it), this field had no upper
+  // bound: `Number(Infinity) || 0` evaluates to Infinity (truthy), so
+  // Math.max(0, Infinity) let a non-finite value straight through to a
+  // Firestore write, which would reject it with an opaque low-level error
+  // instead of a clean one. Explicit Number.isFinite check + a generous but
+  // real upper bound closes that.
+  const rawSellingTotal = Number(d.agencyGuestSellingTotal);
+  if (d.agencyGuestSellingTotal != null && d.agencyGuestSellingTotal !== '' && !Number.isFinite(rawSellingTotal)) {
+    throw new HttpsError('invalid-argument', 'Guest selling total must be a valid number.');
+  }
+  const agencyGuestSellingTotal = Math.max(0, Math.min(500000, Number.isFinite(rawSellingTotal) ? rawSellingTotal : 0));
   const packageName = String(d.packageName || '').slice(0, 160).trim() || 'Custom Maldives Package';
   const guestDescription = String(d.guestDescription || '').slice(0, 500).trim();
   const guestMessage = String(d.guestMessage || '').slice(0, 500).trim();
@@ -1274,4 +1292,42 @@ exports.searchAgencyGuests = onCall({ region: 'us-central1', maxInstances: 10 },
   });
 
   return { results: results.slice(0, AGENCY_SEARCH_MAX_RESULTS) };
+});
+
+// ── Agency Sales Workflow Phase I: own-reservation-list projection ──────
+// I-17 audit finding, fixed here: `reservations` is ONE shared schema
+// across Direct/OTA/Agency sources, and PMS staff write fields onto it
+// (internal_note -- explicitly staff-only by design, see
+// reservation_note_history's own noteType gating -- and notes, which can
+// carry Cloudbeds-imported internal notes, balance-due figures, guest
+// address, and appended staff-note blocks) that were never meant for the
+// owning agency to see. Firestore rules can only allow or deny a WHOLE
+// document, never redact individual fields -- so as long as
+// firestore.rules granted an agency a direct read of her own reservation
+// (agencyId==auth.uid), every one of those fields was downloaded to her
+// browser the moment Phase H's My Bookings list or the Phase D calendar's
+// own-booking lookup ran a plain client query, even though neither ever
+// rendered them. This callable is the fix, the same shape as
+// getAgencyBookingConfirmationData/searchAgencyGuests: an explicit safe
+// projection, nothing else. firestore.rules' reservations read rule is
+// tightened in the same commit to remove the agency's direct-read branch
+// entirely -- this callable is now the ONLY path an agency's own
+// reservation data can reach the browser through.
+exports.getMyAgencyBookings = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const agencyId = request.auth.uid; // never trusted from the client
+
+  const snap = await db.collection('reservations').where('agencyId', '==', agencyId).get();
+  const reservations = snap.docs.map((doc) => {
+    const r = doc.data();
+    return {
+      id: doc.id, room_id: r.room_id || null,
+      guest_name: r.guest_name || '', check_in: r.check_in || null, check_out: r.check_out || null,
+      adults: r.adults || 0, children: r.children || 0, status: r.status || '',
+      agencyBookingRequestId: r.agencyBookingRequestId || null,
+      packageName: r.packageName || '', agencyGuestSellingTotal: r.agencyGuestSellingTotal || 0, currency: r.currency || 'USD',
+    };
+  });
+  return { reservations };
 });

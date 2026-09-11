@@ -28,9 +28,11 @@ const FUNCTIONS = fs.existsSync('functions-core/index.js') ? read('functions-cor
 
 section('Case A — agency data isolation is server-enforced, not client-filter-only');
 {
-  test('firestore.rules: reservations read requires agencyId==auth.uid for the agency branch', () => {
+  test('firestore.rules: reservations no longer grants an agency ANY direct read at all (Phase I, I-17) -- isolation now lives entirely server-side in getMyAgencyBookings()/getAgencyBookingConfirmationData(), which check agencyId==auth.uid themselves and return only a safe projection', () => {
     const line = RULES.split('\n').find(l => l.includes('isAgency() && resource.data.agencyId'));
-    assert.ok(line, 'agency read-isolation clause not found in reservations read rule');
+    assert.equal(line, undefined, 'a direct agency read branch still exists in firestore.rules for reservations');
+    assert.match(FUNCTIONS, /exports\.getMyAgencyBookings = onCall/);
+    assert.match(FUNCTIONS, /const agencyId = request\.auth\.uid;/);
   });
   test('firestore.rules: reservations create for agencies was REMOVED entirely by Agency Sales Workflow Phase F -- confirmAgencyBookingRequest() (Admin SDK) is the only path from an agency\'s action to a real reservation now', () => {
     const line = RULES.split('\n').find(l => l.includes('isAgency() && request.resource.data.agencyId'));
@@ -133,8 +135,8 @@ section('Case F — reservations cannot be hard-deleted by anyone, including age
 
 section('Case G — public cannot read reservations or agency package/pricing data');
 {
-  test('firestore.rules: reservations read requires admin/staff/matching-agency — never public', () => {
-    const m = RULES.match(/match \/reservations\/\{id\} \{\s*allow read: if ([^;]+);/);
+  test('firestore.rules: reservations read requires admin/staff/manager — never public, never an unauthenticated branch (Phase I, I-17, later removed the matching-agency branch too -- see agency-security-rules.test.js)', () => {
+    const m = RULES.match(/match \/reservations\/\{id\} \{[\s\S]*?allow read: if ([^;]+);/);
     assert.ok(m, 'reservations read rule not found');
     assert.ok(!/request\.auth == null/.test(m[1]), 'reservations read rule now permits an unauthenticated branch');
   });

@@ -52,7 +52,25 @@ service cloud.firestore {
     }
 
     match /reservations/{id} {
-      allow read: if isAdmin() || isStaff() || isManagerRole() || (isAgency() && resource.data.agencyId == request.auth.uid);
+      // Agency Sales Workflow Phase I security fix (I-17, 2026-09-11): the
+      // isAgency()-own-reservation READ branch that used to live here is
+      // REMOVED. reservations is one shared schema across Direct/OTA/Agency
+      // sources -- PMS staff write internal_note (explicitly staff-only,
+      // see reservation_note_history's own noteType gating) and notes
+      // (which can carry Cloudbeds-imported internal notes, balance-due
+      // figures, guest address, appended staff-note blocks) onto the SAME
+      // document an agency's own reservation lives on. Firestore rules can
+      // only allow or deny a WHOLE document, never redact individual
+      // fields, so granting agencyId==auth.uid a direct read meant every
+      // one of those fields reached the agency's browser the moment Phase
+      // H's My Bookings list or the calendar's own-booking lookup ran a
+      // plain client query -- neither ever rendered them, but both
+      // downloaded them. getMyAgencyBookings() (functions-core/index.js,
+      // Phase I) is the safe replacement -- an explicit projection with
+      // none of those fields -- and is now the ONLY path an agency's own
+      // reservation data can reach the browser through. See
+      // test/agency-security-rules.test.js's I-17 test for the proof.
+      allow read: if isAdmin() || isStaff() || isManagerRole();
       // Agency Sales Workflow Phase F cutover (2026-09-11): the
       // isAgency()-direct-create branch that used to live here is REMOVED.
       // An agency can no longer write reservations/{id} directly at all --

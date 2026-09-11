@@ -48,10 +48,11 @@ section('Case A — Part 1/3: localStorage retired as the source of truth');
 
 section('Case B — Part 2: canonical sources, scoped server-side, no client-side global fetch');
 {
-  test('confirmed bookings come from reservations scoped by agencyId==currentAgency.uid', () => {
+  test('confirmed bookings come from an agencyId-scoped source -- direct client read as of Phase H, then hardened to the getMyAgencyBookings() callable by Phase I (I-17: the raw reservation doc also carries internal_note/notes/viluNetTotal, which rules cannot redact field-by-field) -- never an unscoped fetch', () => {
     const fn = extractByStart(PORTAL, /async function drawMyBookings\(\)\s*\{/);
-    assert.match(fn, /fsDb\.collection\('reservations'\)\.where\('agencyId','==',currentAgency\.uid\)\.get\(\)/);
+    assert.match(fn, /fsFunctions\.httpsCallable\('getMyAgencyBookings'\)/);
     assert.doesNotMatch(fn, /fsDb\.collection\('reservations'\)\.get\(\)/);
+    assert.doesNotMatch(fn, /fsDb\.collection\('reservations'\)\.where/);
   });
   test('pending/change/rejected booking business comes from agency_booking_requests scoped by agencyId==currentAgency.uid', () => {
     const fn = extractByStart(PORTAL, /async function drawMyBookings\(\)\s*\{/);
@@ -209,14 +210,16 @@ section('Case J — Part 16: Maldives date semantics for Upcoming/Current/Past, 
 
 section('Case K — Part 21: Calendar integration, one shared detail component');
 {
-  test('openOwnBookingSummary() (the Phase D calendar click handler) routes into the shared openBookingDetail() when a booking request id is resolvable', () => {
+  test('openOwnBookingSummary() (the Phase D calendar click handler) routes into the shared openBookingDetail() when a booking request id is resolvable -- looked up via getMyAgencyBookings() (Phase I: no more direct reservation doc read) rather than snap.data()', () => {
     const fn = extractByStart(PORTAL, /async function openOwnBookingSummary\(reservationId\)\s*\{/);
-    assert.match(fn, /openBookingDetail\(snap\.data\(\)\.agencyBookingRequestId\)/);
+    assert.match(fn, /fsFunctions\.httpsCallable\('getMyAgencyBookings'\)/);
+    assert.match(fn, /openBookingDetail\(match\.agencyBookingRequestId\)/);
+    assert.doesNotMatch(fn, /fsDb\.collection\('reservations'\)\.doc/);
   });
   test('the fallback thin m-own-booking modal is only reached when no agencyBookingRequestId exists', () => {
     const fn = extractByStart(PORTAL, /async function openOwnBookingSummary\(reservationId\)\s*\{/);
     const beforeFallback = fn.slice(0, fn.indexOf("m-own-booking"));
-    assert.match(beforeFallback, /if\(snap\.exists && snap\.data\(\)\.agencyBookingRequestId\)/);
+    assert.match(beforeFallback, /if\(match && match\.agencyBookingRequestId\)/);
   });
 }
 
@@ -250,9 +253,7 @@ section('Case M — Part 27/28: financial display restraint, future-readiness wi
 
 section('Case N — Part 29: firestore.rules not broadened');
 {
-  test('reservations/agency_booking_requests/agency_quotes read rules are byte-identical to their pre-Phase-H shape (already agency-own-scoped, reused as-is)', () => {
-    const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
-    assert.match(resBlock, /allow read: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| \(isAgency\(\) && resource\.data\.agencyId == request\.auth\.uid\);/);
+  test('agency_booking_requests/agency_quotes read rules are byte-identical to their pre-Phase-H shape (already agency-own-scoped, reused as-is) -- reservations\' own read rule was later tightened FURTHER by Phase I (I-17), not broadened, see agency-security-rules.test.js', () => {
     const reqBlock = RULES.slice(RULES.indexOf('match /agency_booking_requests/{id} {'), RULES.indexOf('match /packages/{packageId}'));
     assert.match(reqBlock, /allow read: if request\.auth != null && \(isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| resource\.data\.agencyId == request\.auth\.uid\);/);
   });

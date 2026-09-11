@@ -1236,16 +1236,19 @@ async function openOwnBookingSummary(reservationId){
   if(!r) return;
   // Phase H (Part 21): prefer routing into the shared Booking Detail
   // component whenever this reservation has a resolvable
-  // agencyBookingRequestId -- a direct read of the agency's OWN
-  // reservation doc, already permitted by firestore.rules (isAgency() &&
-  // resource.data.agencyId==request.auth.uid), not a rules change. Falls
+  // agencyBookingRequestId. Phase I (I-17): looked up via
+  // getMyAgencyBookings() -- the safe projection callable -- rather than a
+  // direct doc read; firestore.rules no longer grants an agency a direct
+  // reservations read at all (that raw document also carries internal_note/
+  // notes/viluNetTotal, which rules cannot redact field-by-field). Falls
   // through to this modal's own thinner display only for a reservation
   // that predates Phase F (no linked booking request for
   // getAgencyBookingConfirmationData() to look up).
   try {
-    var snap = await fsDb.collection('reservations').doc(reservationId).get();
-    if(snap.exists && snap.data().agencyBookingRequestId){
-      openBookingDetail(snap.data().agencyBookingRequestId);
+    var result = await fsFunctions.httpsCallable('getMyAgencyBookings')({});
+    var match = (result.data.reservations||[]).find(function(x){ return x.id===reservationId; });
+    if(match && match.agencyBookingRequestId){
+      openBookingDetail(match.agencyBookingRequestId);
       return;
     }
   } catch(e) { console.error('openOwnBookingSummary lookup failed', e); }
@@ -2208,12 +2211,19 @@ async function drawMyBookings(){
   if(!currentAgency) return;
   var listEl = document.getElementById('my-bookings-list');
   listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  // Phase I security fix (I-17): reservations no longer carries an
+  // agency-readable branch in firestore.rules -- the raw document also
+  // holds internal_note/notes/viluNetTotal etc, which Firestore rules
+  // cannot redact field-by-field. getMyAgencyBookings() is the safe
+  // replacement, an explicit projection with none of that. agency_booking_
+  // requests still reads directly -- that schema never carried any
+  // internal-only field, so its existing agency-own rule stays as-is.
   try {
     var results = await Promise.all([
-      fsDb.collection('reservations').where('agencyId','==',currentAgency.uid).get(),
+      fsFunctions.httpsCallable('getMyAgencyBookings')({}),
       fsDb.collection('agency_booking_requests').where('agencyId','==',currentAgency.uid).get(),
     ]);
-    _mbReservations = results[0].docs.map(function(d){ return d.data(); });
+    _mbReservations = results[0].data.reservations || [];
     var confirmedRequestIds = {};
     _mbReservations.forEach(function(r){ if(r.agencyBookingRequestId) confirmedRequestIds[r.agencyBookingRequestId]=true; });
     _mbRequests = results[1].docs.map(function(d){ return d.data(); }).filter(function(r){ return !confirmedRequestIds[r.id]; });
