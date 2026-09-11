@@ -246,8 +246,9 @@ section('Case M — Part 27/28: financial display restraint, future-readiness wi
       assert.doesNotMatch(fn, /amount due|commission payable|paid commission|vilu owes|agency owes/i);
     });
   });
-  test('no settlement/payout/commission-payment UI was built this phase', () => {
-    assert.doesNotMatch(PORTAL.slice(PORTAL.indexOf('// MY BOOKINGS — Phase H')), /settlement|payout/i);
+  test('no settlement/payout/commission-payment UI was built as PART OF Phase H itself (Phase J later legitimately added its own separate Earnings & Settlements tab, see agency-settlements.test.js)', () => {
+    const phaseHOnly = PORTAL.slice(PORTAL.indexOf('// MY BOOKINGS — Phase H'), PORTAL.indexOf('// EARNINGS & SETTLEMENTS — Phase J'));
+    assert.doesNotMatch(phaseHOnly, /settlement|payout/i);
   });
 }
 
@@ -265,9 +266,13 @@ section('Case O — DO-NOT-TOUCH: confirmation logic, holds, availability, catal
     assert.match(FUNCS, /exports\.getAgencyBookingConfirmationData = onCall\(/);
     assert.match(FUNCS, /exports\.confirmAgencyBookingRequest = onCall\(/);
   });
-  test('no Phase H code references Beds24/Cloudbeds/OTA collections, settlement, or the document vault', () => {
-    const phaseHFuncs = FUNCS.slice(FUNCS.indexOf('exports.searchAgencyGuests = onCall('));
-    assert.doesNotMatch(phaseHFuncs, /beds24|Beds24|ota_pushes|otaWebhook|settlements|reservation_documents/);
+  test('no Phase H code references Beds24/Cloudbeds/OTA collections or the document vault (settlement is checked separately -- Phase I/J later legitimately touched reservations/added settlements, see agency-security-audit-rules.test.js / agency-settlements.test.js)', () => {
+    // Bounded to end where Phase I's own first new export begins, not run
+    // to end-of-file -- otherwise this slice would also swallow Phase I's
+    // and Phase J's later, unrelated code and false-positive against
+    // THEIR content instead of checking only what Phase H itself added.
+    const phaseHFuncs = FUNCS.slice(FUNCS.indexOf('exports.searchAgencyGuests = onCall('), FUNCS.indexOf('exports.getMyAgencyBookings = onCall('));
+    assert.doesNotMatch(phaseHFuncs, /beds24|Beds24|ota_pushes|otaWebhook|reservation_documents/);
   });
   test('the Website tab\'s own card renderer in vilu-unified.html is unchanged', () => {
     const PMS = fs.readFileSync('vilu-unified.html', 'utf8');

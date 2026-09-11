@@ -51,6 +51,18 @@
 //     returns internal_note/notes/viluNetTotal/agencyEarnings/
 //     paymentCollector or any other internal PMS field. See the comment
 //     above that export.
+//   settlementEligibilityOnReservation / markAgencySettlementPaymentSent /
+//     confirmAgencySettlementReceived / disputeAgencySettlement /
+//     resolveAgencySettlementDispute / reconcileMissingAgencySettlements
+//     Agency Sales Workflow Phase J -- the Earnings & Settlement Ledger.
+//     One agency_settlements doc per confirmed agency reservation, created
+//     atomically inside confirmAgencyBookingRequest's own transaction from
+//     that reservation's immutable price snapshot. Direction-aware
+//     (HOTEL_TO_AGENCY vs AGENCY_TO_HOTEL) server functions gate every
+//     status transition by who the sender/receiver actually is for that
+//     direction; eligibility (NOT_YET_PAYABLE -> PAYABLE) is driven by the
+//     PMS's own existing 'Checked in' status, never by arrivalDate alone.
+//     See the comment above these exports.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -1063,6 +1075,15 @@ exports.confirmAgencyBookingRequest = onCall({ region: 'us-central1', maxInstanc
     tx.set(db.collection('reservations').doc(resId), reservationFields, { merge: true });
     tx.set(newAvailRef, { bookings: newBookings }, { merge: true });
 
+    // Agency Sales Workflow Phase J (2026-09-11): one settlement record per
+    // confirmed agency reservation, created atomically in the SAME
+    // transaction that creates the reservation itself -- deterministic id
+    // (== resId), so a double-confirm (already guarded above by the
+    // status!=='PENDING'/'CHANGE_REQUESTED' check) can never produce a
+    // second one. See buildAgencySettlementFields()'s own comment for the
+    // HOTEL_TO_AGENCY/AGENCY_TO_HOTEL direction logic.
+    tx.set(db.collection('agency_settlements').doc(resId), buildAgencySettlementFields(reservationFields, resId));
+
     // Consume the linked hold (Part 14): its block must be removed inside
     // this SAME transaction so it never leaves a leftover conflict against
     // the reservation just created for the exact same room/dates. Reuses
@@ -1330,4 +1351,259 @@ exports.getMyAgencyBookings = onCall({ region: 'us-central1', maxInstances: 10 }
     };
   });
   return { reservations };
+});
+
+// ── Agency Sales Workflow Phase J: Agency Earnings & Settlement Ledger ──
+// This is NOT the retired Package Manager Commission field (Phase A) --
+// the commercial model is per-reservation, built entirely from the
+// immutable snapshot every confirmed agency reservation already carries
+// (viluNetTotal/agencyGuestSellingTotal/agencyEarnings/paymentCollector,
+// Phase F). Two directions, never conflated:
+//   HOTEL_TO_AGENCY (paymentCollector=='HOTEL'): the hotel collected the
+//     guest's money, so Vilu owes the agency its earnings (amountDue =
+//     agencyEarnings).
+//   AGENCY_TO_HOTEL (paymentCollector=='AGENCY'): the agency collected the
+//     guest's money, so the agency owes Vilu its net cost (amountDue =
+//     viluNetTotal).
+// paymentCollector=='UNDECIDED' produces a settlement with direction=null,
+// amountDue=null -- it exists (so nothing is silently missing, Part
+// 17/28), but every payment action refuses to run against it until an
+// operational decision is made; this phase does not build a path to
+// retroactively set paymentCollector, since that field is an immutable
+// part of the confirmed booking's own commercial snapshot.
+const AGENCY_SETTLEMENT_STATUSES = ['NOT_YET_PAYABLE', 'PAYABLE', 'PAYMENT_SENT', 'RECEIVED', 'DISPUTED', 'DATA_INCOMPLETE'];
+
+// J-2 audit finding, applied: this codebase's canonical reservation status
+// values (confirmed by grep across vilu-unified.html) are Confirmed/
+// Checked in/Checked out/Cancelled/Pending -- no "No Show" state exists
+// anywhere, so none is invented here. "Checked in" is the real, already-
+// staff-controlled arrival action this phase integrates with (via
+// settlementEligibilityOnReservation below) rather than guessing
+// eligibility from arrivalDate alone -- a Confirmed reservation whose
+// arrival date has simply passed, with no actual check-in, stays
+// NOT_YET_PAYABLE forever, exactly matching J-18's required behavior.
+function isCheckedInStatus(status) { return status === 'Checked in' || status === 'Checked out'; }
+
+// J-4: every amount here is copied verbatim from the reservation doc at
+// creation time -- never re-read from the quote/catalog/exchange rate
+// afterward, so a later rate change can never move an existing
+// settlement's numbers (Part 20).
+function buildAgencySettlementFields(r, reservationId) {
+  const now = new Date().toISOString();
+  const hasCompleteData = (r.paymentCollector === 'HOTEL' || r.paymentCollector === 'AGENCY')
+    && Number.isFinite(r.viluNetTotal) && Number.isFinite(r.agencyGuestSellingTotal) && Number.isFinite(r.agencyEarnings);
+  let direction = null, amountDue = null;
+  if (r.paymentCollector === 'HOTEL') { direction = 'HOTEL_TO_AGENCY'; amountDue = r.agencyEarnings || 0; }
+  else if (r.paymentCollector === 'AGENCY') { direction = 'AGENCY_TO_HOTEL'; amountDue = r.viluNetTotal || 0; }
+  // J-23: a historical/legacy agency reservation missing this snapshot
+  // (never possible through confirmAgencyBookingRequest itself, but
+  // reachable if Admin manually created a source:'Agency' reservation
+  // outside the quote/booking-request flow) gets DATA_INCOMPLETE rather
+  // than a fabricated amount.
+  return {
+    settlementId: reservationId, reservationId,
+    agencyId: r.agencyId || null, agencyEmail: r.agencyEmail || null, agencyName: r.agencyName || null,
+    bookingReference: reservationId, quoteReference: r.agencyQuoteReference || null,
+    guestName: r.guest_name || '', arrivalDate: r.check_in || null, departureDate: r.check_out || null,
+    currency: r.currency || 'USD', paymentCollector: r.paymentCollector || 'UNDECIDED',
+    viluNetTotal: Number.isFinite(r.viluNetTotal) ? r.viluNetTotal : null,
+    agencyGuestSellingTotal: Number.isFinite(r.agencyGuestSellingTotal) ? r.agencyGuestSellingTotal : null,
+    agencyEarnings: Number.isFinite(r.agencyEarnings) ? r.agencyEarnings : null,
+    direction, amountDue,
+    status: hasCompleteData ? 'NOT_YET_PAYABLE' : 'DATA_INCOMPLETE',
+    createdAt: now, updatedAt: now,
+    payableAt: null, paymentSentAt: null, paymentSentBy: null,
+    paymentMethod: null, paymentReference: null, paymentNote: null, paymentInitiatedBy: null,
+    receivedAt: null, receivedConfirmedBy: null, receivedConfirmedByAgency: false,
+    disputedAt: null, disputeReason: null,
+  };
+}
+
+// J-2/J-5/J-18: the automatic eligibility trigger. Reacts to the SAME
+// staff-controlled status field every other reservation-status change
+// already goes through (vilu-unified.html's reservation editor) -- no new
+// UI action was built, per the task's own "integrate with the actual
+// existing arrival/check-in action" preference. Idempotent: re-reads the
+// settlement fresh inside its own transaction and no-ops unless it's still
+// exactly NOT_YET_PAYABLE, so a duplicate trigger delivery (a normal
+// Cloud Functions possibility) or an unrelated field-only edit that
+// happens to re-save 'Checked in' can never re-fire the transition twice
+// or fight a payment workflow already in progress.
+exports.settlementEligibilityOnReservation = onDocumentWritten('reservations/{id}', async (event) => {
+  const before = event.data.before.exists ? event.data.before.data() : null;
+  const after = event.data.after.exists ? event.data.after.data() : null;
+  if (!after || !after.agencyId) return;
+  const justBecameCheckedIn = isCheckedInStatus(after.status) && !(before && isCheckedInStatus(before.status));
+  if (!justBecameCheckedIn) return;
+  const settlementRef = db.collection('agency_settlements').doc(event.params.id);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(settlementRef);
+    if (!snap.exists || snap.data().status !== 'NOT_YET_PAYABLE') return;
+    tx.set(settlementRef, { status: 'PAYABLE', payableAt: new Date().toISOString(), updatedAt: new Date().toISOString() }, { merge: true });
+  });
+});
+
+async function loadSettlementForAction(tx, settlementId) {
+  const ref = db.collection('agency_settlements').doc(settlementId);
+  const snap = await tx.get(ref);
+  if (!snap.exists) throw new HttpsError('not-found', 'Settlement not found.');
+  return { ref, data: snap.data() };
+}
+function requireAgencyOwnerOrThrow(role, settlement, uid) {
+  if (role !== 'agency' || settlement.agencyId !== uid) throw new HttpsError('permission-denied', 'Not your settlement.');
+}
+
+// J-8/J-11: the SENDER records they sent payment. Direction determines who
+// that is -- HOTEL_TO_AGENCY: Vilu (staff-like); AGENCY_TO_HOTEL: the
+// owning agency. paymentInitiatedBy records which, so a later reader never
+// has to re-derive "who was supposed to send this" from direction alone.
+exports.markAgencySettlementPaymentSent = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  const settlementId = String((request.data || {}).settlementId || '');
+  const method = String((request.data || {}).method || '').trim().slice(0, 80);
+  const reference = String((request.data || {}).reference || '').trim().slice(0, 160);
+  const note = String((request.data || {}).note || '').trim().slice(0, 500);
+  if (!settlementId) throw new HttpsError('invalid-argument', 'settlementId required.');
+  if (!method) throw new HttpsError('invalid-argument', 'Payment method is required.');
+
+  return db.runTransaction(async (tx) => {
+    const { ref, data: s } = await loadSettlementForAction(tx, settlementId);
+    if (s.status !== 'PAYABLE') throw new HttpsError('failed-precondition', 'Settlement is not payable (currently ' + s.status + ').');
+    let paymentInitiatedBy;
+    if (s.direction === 'HOTEL_TO_AGENCY') { requireStaffLike(role); paymentInitiatedBy = 'HOTEL'; }
+    else if (s.direction === 'AGENCY_TO_HOTEL') { requireAgencyOwnerOrThrow(role, s, request.auth.uid); paymentInitiatedBy = 'AGENCY'; }
+    else throw new HttpsError('failed-precondition', 'Settlement direction is undecided (paymentCollector was never set) -- cannot mark payment sent.');
+
+    const now = new Date().toISOString();
+    tx.set(ref, {
+      status: 'PAYMENT_SENT', paymentSentAt: now, paymentSentBy: email,
+      paymentMethod: method, paymentReference: reference || null, paymentNote: note || null, paymentInitiatedBy,
+      updatedAt: now,
+    }, { merge: true });
+    tx.set(db.collection('agency_settlement_audit').doc(), {
+      settlementId, reservationId: s.reservationId, agencyId: s.agencyId,
+      fromStatus: 'PAYABLE', toStatus: 'PAYMENT_SENT', actorUid: request.auth.uid, actorRole: role, timestamp: now,
+      paymentMethod: method, paymentReference: reference || null, reason: null,
+    });
+    return { status: 'PAYMENT_SENT' };
+  });
+});
+
+// J-9/J-11: the RECEIVER confirms. Direction-aware mirror of the function
+// above -- HOTEL_TO_AGENCY: the agency confirms receipt; AGENCY_TO_HOTEL:
+// Vilu/staff confirms receipt. receivedConfirmedByAgency (Part 3's own
+// suggested field name) is true only for the former.
+exports.confirmAgencySettlementReceived = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  const settlementId = String((request.data || {}).settlementId || '');
+  if (!settlementId) throw new HttpsError('invalid-argument', 'settlementId required.');
+
+  return db.runTransaction(async (tx) => {
+    const { ref, data: s } = await loadSettlementForAction(tx, settlementId);
+    if (s.status !== 'PAYMENT_SENT') throw new HttpsError('failed-precondition', 'No payment is awaiting confirmation (currently ' + s.status + ').');
+    let receivedConfirmedByAgency = false;
+    if (s.direction === 'HOTEL_TO_AGENCY') { requireAgencyOwnerOrThrow(role, s, request.auth.uid); receivedConfirmedByAgency = true; }
+    else if (s.direction === 'AGENCY_TO_HOTEL') { requireStaffLike(role); }
+    else throw new HttpsError('failed-precondition', 'Settlement direction is undecided.');
+
+    const now = new Date().toISOString();
+    tx.set(ref, { status: 'RECEIVED', receivedAt: now, receivedConfirmedBy: email, receivedConfirmedByAgency, updatedAt: now }, { merge: true });
+    tx.set(db.collection('agency_settlement_audit').doc(), {
+      settlementId, reservationId: s.reservationId, agencyId: s.agencyId,
+      fromStatus: 'PAYMENT_SENT', toStatus: 'RECEIVED', actorUid: request.auth.uid, actorRole: role, timestamp: now,
+      paymentMethod: null, paymentReference: null, reason: null,
+    });
+    return { status: 'RECEIVED' };
+  });
+});
+
+// J-10: only the same party who would otherwise confirm receipt may
+// dispute non-receipt -- prior payment-sent information (method/
+// reference/note) is preserved via merge, never overwritten (Part 10:
+// "Do not delete/rewrite history").
+exports.disputeAgencySettlement = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  const settlementId = String((request.data || {}).settlementId || '');
+  const reason = String((request.data || {}).reason || '').trim().slice(0, 500);
+  if (!settlementId) throw new HttpsError('invalid-argument', 'settlementId required.');
+  if (!reason) throw new HttpsError('invalid-argument', 'A reason is required.');
+
+  return db.runTransaction(async (tx) => {
+    const { ref, data: s } = await loadSettlementForAction(tx, settlementId);
+    if (s.status !== 'PAYMENT_SENT') throw new HttpsError('failed-precondition', 'Only a payment awaiting confirmation can be disputed (currently ' + s.status + ').');
+    if (s.direction === 'HOTEL_TO_AGENCY') requireAgencyOwnerOrThrow(role, s, request.auth.uid);
+    else if (s.direction === 'AGENCY_TO_HOTEL') requireStaffLike(role);
+    else throw new HttpsError('failed-precondition', 'Settlement direction is undecided.');
+
+    const now = new Date().toISOString();
+    tx.set(ref, { status: 'DISPUTED', disputedAt: now, disputeReason: reason, updatedAt: now }, { merge: true });
+    tx.set(db.collection('agency_settlement_audit').doc(), {
+      settlementId, reservationId: s.reservationId, agencyId: s.agencyId,
+      fromStatus: 'PAYMENT_SENT', toStatus: 'DISPUTED', actorUid: request.auth.uid, actorRole: role, timestamp: now,
+      paymentMethod: null, paymentReference: null, reason,
+    });
+    return { status: 'DISPUTED' };
+  });
+});
+
+// J-17: Admin-controlled dispute resolution -- the only path back out of
+// DISPUTED, deliberately narrow (either the payment really was received,
+// or it goes back to awaiting confirmation), never an arbitrary status
+// jump.
+exports.resolveAgencySettlementDispute = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const settlementId = String((request.data || {}).settlementId || '');
+  const resolution = String((request.data || {}).resolution || '');
+  if (!settlementId) throw new HttpsError('invalid-argument', 'settlementId required.');
+  if (resolution !== 'RECEIVED' && resolution !== 'PAYMENT_SENT') throw new HttpsError('invalid-argument', 'resolution must be RECEIVED or PAYMENT_SENT.');
+
+  return db.runTransaction(async (tx) => {
+    const { ref, data: s } = await loadSettlementForAction(tx, settlementId);
+    if (s.status !== 'DISPUTED') throw new HttpsError('failed-precondition', 'Settlement is not disputed (currently ' + s.status + ').');
+    const now = new Date().toISOString();
+    const update = { status: resolution, updatedAt: now };
+    if (resolution === 'RECEIVED') { update.receivedAt = now; update.receivedConfirmedBy = email; update.receivedConfirmedByAgency = false; }
+    tx.set(ref, update, { merge: true });
+    tx.set(db.collection('agency_settlement_audit').doc(), {
+      settlementId, reservationId: s.reservationId, agencyId: s.agencyId,
+      fromStatus: 'DISPUTED', toStatus: resolution, actorUid: request.auth.uid, actorRole: role, timestamp: now,
+      paymentMethod: null, paymentReference: null, reason: 'Dispute resolved by ' + email,
+    });
+    return { status: resolution };
+  });
+});
+
+// J-22/J-23: safe maintenance action for confirmed agency reservations
+// that predate this phase (or were created outside the normal quote ->
+// booking-request -> confirm flow, e.g. an Admin-built direct agency
+// reservation). dryRun (default true) only PREVIEWS what would be
+// created -- never writes -- so Admin can review before the real run.
+// Never modifies an EXISTING settlement's amounts, only creates ones that
+// are genuinely missing (Part 22: "Do not modify amounts on existing
+// settlements").
+exports.reconcileMissingAgencySettlements = onCall({ region: 'us-central1', maxInstances: 5 }, async (request) => {
+  const { role } = await callerRole(request);
+  requireStaffLike(role);
+  const dryRun = (request.data || {}).dryRun !== false;
+
+  const snap = await db.collection('reservations').where('source', '==', 'Agency').get();
+  const missing = [];
+  for (const doc of snap.docs) {
+    const r = doc.data();
+    if (!r.agencyId) continue;
+    if (r.status !== 'Confirmed' && !isCheckedInStatus(r.status)) continue;
+    const settlementSnap = await db.collection('agency_settlements').doc(doc.id).get();
+    if (settlementSnap.exists) continue;
+    missing.push({ reservationId: doc.id, guestName: r.guest_name || '', agencyName: r.agencyName || '', arrivalDate: r.check_in || null });
+    if (!dryRun) {
+      const fields = buildAgencySettlementFields(r, doc.id);
+      if (isCheckedInStatus(r.status) && fields.status === 'NOT_YET_PAYABLE') {
+        fields.status = 'PAYABLE';
+        fields.payableAt = new Date().toISOString();
+      }
+      await db.collection('agency_settlements').doc(doc.id).set(fields);
+    }
+  }
+  return { dryRun, count: missing.length, missing: missing.slice(0, 100) };
 });

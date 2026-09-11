@@ -222,9 +222,13 @@ section('Case N — DO-NOT-TOUCH: confirmation logic, availability, holds, catal
   test('confirmAgencyBookingRequest (Phase F decision logic) is unchanged by this phase', () => {
     assert.match(FUNCS, /exports\.confirmAgencyBookingRequest = onCall\(/);
   });
-  test('no Phase G code references Beds24/Cloudbeds/OTA collections, settlement, or the document vault', () => {
-    const phaseGFuncs = FUNCS.slice(FUNCS.indexOf('exports.getAgencyBookingConfirmationData = onCall('));
-    assert.doesNotMatch(phaseGFuncs, /beds24|Beds24|ota_pushes|otaWebhook|settlements|reservation_documents/);
+  test('no Phase G code references Beds24/Cloudbeds/OTA collections or the document vault (settlement is checked separately -- Phase J later legitimately added it elsewhere, see agency-settlements.test.js)', () => {
+    // Bounded to end where Phase H's own first new export begins, not run
+    // to end-of-file -- otherwise this slice would also swallow Phase H's
+    // and Phase J's later, unrelated code and false-positive against
+    // THEIR content instead of checking only what Phase G itself added.
+    const phaseGFuncs = FUNCS.slice(FUNCS.indexOf('exports.getAgencyBookingConfirmationData = onCall('), FUNCS.indexOf('exports.searchAgencyGuests = onCall('));
+    assert.doesNotMatch(phaseGFuncs, /beds24|Beds24|ota_pushes|otaWebhook|reservation_documents/);
     const phaseGPortal = PORTAL.slice(PORTAL.indexOf('async function openAgencyBookingConfirmation'));
     assert.doesNotMatch(phaseGPortal, /beds24|Beds24|ota_pushes|otaWebhook/);
   });

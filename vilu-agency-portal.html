@@ -233,6 +233,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="tab" onclick="showTab('availability',this)"><i class="ti ti-calendar"></i> Availability</button>
     <button class="tab" onclick="showTab('mybookings',this)"><i class="ti ti-list"></i> My bookings</button>
     <button class="tab" onclick="showTab('blockroom',this)"><i class="ti ti-lock"></i> Block rooms</button>
+    <button class="tab" onclick="showTab('settlements',this)"><i class="ti ti-arrows-exchange"></i> Earnings &amp; Settlements</button>
   </div>
 
   <!-- Main content -->
@@ -379,6 +380,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
 
   </div>
+</div>
+
+<!-- EARNINGS & SETTLEMENTS TAB — Phase J. Read-only except for the two
+     direction-aware payment actions below, both of which only ever call a
+     Cloud Function -- this tab never writes an amount, status, or
+     direction directly. Kept separate from Packages/Quotes/Bookings
+     (Part 6). -->
+<div id="tab-settlements" class="hidden">
+  <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>A settlement becomes payable only after the guest has actually checked in. This is not the same as the Agency Rate Catalog or your quote margins -- it tracks money owed between your agency and Vilu Residence for confirmed bookings.</div></div>
+  <div id="settle-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px"></div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="settle-filters"></div>
+  </div>
+  <div id="settle-list"></div>
 </div>
 
 <!-- HOLD REQUEST MODAL — Phase E. Read-only availability recheck happens
@@ -1075,7 +1090,7 @@ function doSignout(){
 }
 
 function showTab(name, el){
-  ['packages','ratecatalog','quotations','availability','mybookings','blockroom'].forEach(function(t){
+  ['packages','ratecatalog','quotations','availability','mybookings','blockroom','settlements'].forEach(function(t){
     document.getElementById('tab-'+t).className = t===name?'':'hidden';
   });
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
@@ -1085,6 +1100,7 @@ function showTab(name, el){
   if(name==='quotations'){ drawQuotations(); drawMyBookingRequests(); }
   if(name==='mybookings') drawMyBookings();
   if(name==='blockroom'){ drawMyBlocks(); drawMyHolds(); }
+  if(name==='settlements') drawMySettlements();
   if(name==='availability'){
     var today=new Date(); var tom=new Date(today); tom.setDate(tom.getDate()+1);
     document.getElementById('av-ci').value=today.toISOString().slice(0,10);
@@ -2456,6 +2472,160 @@ async function openBookingDetail(requestId){
 }
 function closeBookingDetail(){
   document.getElementById('m-booking-detail').classList.remove('on');
+}
+
+// ══════════════════════════════════════════════
+// EARNINGS & SETTLEMENTS — Phase J
+// ══════════════════════════════════════════════
+// Direction-aware throughout (Part 6/15): HOTEL_TO_AGENCY (Vilu owes this
+// agency) and AGENCY_TO_HOTEL (this agency owes Vilu) are never combined
+// into one misleading "commission" number. Every action below only ever
+// calls a Cloud Function -- amounts/direction/status are always server-
+// derived, this file never writes them directly (Part 16).
+var SETTLE_STATUS_LABEL = { NOT_YET_PAYABLE:'Not yet payable', PAYABLE:'Payable', PAYMENT_SENT:'Payment sent', RECEIVED:'Received', DISPUTED:'Disputed', DATA_INCOMPLETE:'Data incomplete' };
+var SETTLE_STATUS_BADGE = { NOT_YET_PAYABLE:'pending', PAYABLE:'pending', PAYMENT_SENT:'pending', RECEIVED:'ok', DISPUTED:'wn', DATA_INCOMPLETE:'wn' };
+var SETTLE_FILTERS = [
+  { key:'ALL', label:'All' },
+  { key:'PENDING', label:'Pending' },
+  { key:'PAYMENT_SENT', label:'Payment sent' },
+  { key:'RECEIVED', label:'Received' },
+  { key:'DISPUTED', label:'Disputed' },
+];
+var _settleFilter = 'ALL';
+var _settleAll = [];
+
+function renderSettleFilters(){
+  document.getElementById('settle-filters').innerHTML = SETTLE_FILTERS.map(function(f){
+    var on = _settleFilter===f.key;
+    return '<button class="btn-outline" style="font-size:var(--font-size-sm);padding:6px 12px'+(on?';background:var(--green);color:#fff;border-color:var(--green)':'')+'" onclick="setSettleFilter(\''+f.key+'\')">'+esc(f.label)+'</button>';
+  }).join('');
+}
+function setSettleFilter(key){ _settleFilter = key; renderSettleList(); }
+
+async function drawMySettlements(){
+  if(!currentAgency) return;
+  renderSettleFilters();
+  var listEl = document.getElementById('settle-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  try {
+    var snap = await fsDb.collection('agency_settlements').where('agencyId','==',currentAgency.uid).get();
+    _settleAll = snap.docs.map(function(d){ return d.data(); });
+    _settleAll.sort(function(a,b){ return (b.arrivalDate||'').localeCompare(a.arrivalDate||''); });
+  } catch(e) {
+    console.error('drawMySettlements failed', e);
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:#b91c1c">Could not load your settlements.</div>';
+    return;
+  }
+  renderSettleSummary();
+  renderSettleList();
+}
+
+// Part 15: separate subtotals per direction -- never merged into one
+// figure that would misrepresent money owed TO the agency as money owed
+// BY the agency or vice-versa.
+function renderSettleSummary(){
+  var now = new Date(); var thisMonth = now.toISOString().slice(0,7);
+  var h2a = _settleAll.filter(function(s){ return s.direction==='HOTEL_TO_AGENCY'; });
+  var a2h = _settleAll.filter(function(s){ return s.direction==='AGENCY_TO_HOTEL'; });
+  function sumWhere(list, pred){ return list.filter(pred).reduce(function(s,x){ return s+(+(x.amountDue||0)); }, 0); }
+  var tiles = '';
+  if(h2a.length){
+    var curr = (h2a[0]||{}).currency || 'USD';
+    tiles += settleTile('Pending from Vilu', curr, sumWhere(h2a, function(s){ return s.status==='PAYABLE'; }))
+      + settleTile('Payment sent — awaiting your confirmation', curr, sumWhere(h2a, function(s){ return s.status==='PAYMENT_SENT'; }))
+      + settleTile('Received this month', curr, sumWhere(h2a, function(s){ return s.status==='RECEIVED' && (s.receivedAt||'').slice(0,7)===thisMonth; }));
+  }
+  if(a2h.length){
+    var curr2 = (a2h[0]||{}).currency || 'USD';
+    tiles += settleTile('Amount due to Vilu', curr2, sumWhere(a2h, function(s){ return s.status==='PAYABLE'; }))
+      + settleTile('Payment submitted — awaiting Vilu confirmation', curr2, sumWhere(a2h, function(s){ return s.status==='PAYMENT_SENT'; }))
+      + settleTile('Settled this month', curr2, sumWhere(a2h, function(s){ return s.status==='RECEIVED' && (s.receivedAt||'').slice(0,7)===thisMonth; }));
+  }
+  document.getElementById('settle-summary').innerHTML = tiles || '<div class="card" style="text-align:center;padding:14px;color:var(--muted);grid-column:1/-1">No settlements yet.</div>';
+}
+function settleTile(label, currency, amount){
+  return '<div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">'+esc(currency)+' '+amount.toFixed(2)+'</div><div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:2px">'+esc(label)+'</div></div>';
+}
+
+function renderSettleList(){
+  var el = document.getElementById('settle-list');
+  var rows = _settleAll;
+  if(_settleFilter==='PENDING') rows = rows.filter(function(s){ return s.status==='NOT_YET_PAYABLE' || s.status==='PAYABLE'; });
+  else if(_settleFilter!=='ALL') rows = rows.filter(function(s){ return s.status===_settleFilter; });
+  if(!rows.length){ el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">No settlements match.</div>'; return; }
+  el.innerHTML = rows.map(renderSettleRow).join('');
+}
+
+function renderSettleRow(s){
+  var isHotelToAgency = s.direction==='HOTEL_TO_AGENCY';
+  var isAgencyToHotel = s.direction==='AGENCY_TO_HOTEL';
+  var amountLabel = isHotelToAgency ? 'Agency earnings' : isAgencyToHotel ? 'Amount due to Vilu' : 'Amount';
+  var amount = s.amountDue!=null ? esc(s.currency||'USD')+' '+(+s.amountDue).toFixed(2) : '—';
+  var paymentSentInfo = '';
+  var actions = '';
+  if(isHotelToAgency && s.status==='PAYMENT_SENT'){
+    paymentSentInfo = '<div style="font-size:var(--font-size-sm);color:#0096c7;margin-top:6px">Payment sent by Vilu — '+esc(s.paymentMethod||'')+(s.paymentReference?' · Ref '+esc(s.paymentReference):'')+' · '+fd((s.paymentSentAt||'').slice(0,10))+'</div>';
+    actions = '<button class="btn-outline" onclick="confirmSettlementReceivedUI(\''+esc(s.settlementId)+'\')"><i class="ti ti-check"></i> Confirm received</button>'
+      + '<button class="btn-outline" onclick="reportSettlementNotReceivedUI(\''+esc(s.settlementId)+'\')"><i class="ti ti-alert-triangle"></i> Report not received</button>';
+  } else if(isAgencyToHotel && s.status==='PAYABLE'){
+    actions = '<button class="btn-primary" onclick="markSettlementPaymentSentUI(\''+esc(s.settlementId)+'\')"><i class="ti ti-send"></i> Mark payment sent to Vilu</button>';
+  } else if(isAgencyToHotel && s.status==='PAYMENT_SENT'){
+    paymentSentInfo = '<div style="font-size:var(--font-size-sm);color:#0096c7;margin-top:6px">You marked this sent — '+esc(s.paymentMethod||'')+(s.paymentReference?' · Ref '+esc(s.paymentReference):'')+' · awaiting Vilu confirmation</div>';
+  } else if(s.status==='DISPUTED'){
+    paymentSentInfo = '<div style="font-size:var(--font-size-sm);color:#b91c1c;margin-top:6px">Disputed: '+esc(s.disputeReason||'')+'</div>';
+  }
+  return '<div class="card" style="margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+      + '<div>'
+        + '<div style="font-weight:700">'+esc(s.guestName||'')+' · '+esc(s.bookingReference||'')+'</div>'
+        + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+fd(s.arrivalDate)+' &rarr; '+fd(s.departureDate)+'</div>'
+        + '<div style="font-size:var(--font-size-sm);margin-top:2px">'+esc(amountLabel)+': <strong>'+amount+'</strong></div>'
+      + '</div>'
+      + '<span class="badge '+(SETTLE_STATUS_BADGE[s.status]||'pending')+'">'+(SETTLE_STATUS_LABEL[s.status]||s.status)+'</span>'
+    + '</div>'
+    + paymentSentInfo
+    + (actions ? '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+actions+'</div>' : '')
+  + '</div>';
+}
+
+async function confirmSettlementReceivedUI(settlementId){
+  if(!confirm('Confirm you have received this payment from Vilu Residence?')) return;
+  try {
+    var callable = fsFunctions.httpsCallable('confirmAgencySettlementReceived');
+    await callable({ settlementId: settlementId });
+    alert('Marked received. Thank you.');
+  } catch(e) {
+    console.error('confirmAgencySettlementReceived failed', e);
+    alert('Could not confirm received — '+((e && e.message) || 'please try again'));
+  }
+  drawMySettlements();
+}
+async function reportSettlementNotReceivedUI(settlementId){
+  var reason = prompt('Please describe the issue (e.g. payment not received yet, wrong amount):');
+  if(!reason || !reason.trim()) return;
+  try {
+    var callable = fsFunctions.httpsCallable('disputeAgencySettlement');
+    await callable({ settlementId: settlementId, reason: reason.trim() });
+    alert('Reported. Vilu Residence will follow up.');
+  } catch(e) {
+    console.error('disputeAgencySettlement failed', e);
+    alert('Could not report this — '+((e && e.message) || 'please try again'));
+  }
+  drawMySettlements();
+}
+async function markSettlementPaymentSentUI(settlementId){
+  var method = prompt('Payment method used (e.g. Bank transfer):');
+  if(!method || !method.trim()) return;
+  var reference = prompt('Payment reference (optional):') || '';
+  try {
+    var callable = fsFunctions.httpsCallable('markAgencySettlementPaymentSent');
+    await callable({ settlementId: settlementId, method: method.trim(), reference: reference.trim() });
+    alert('Marked as sent. Vilu Residence will confirm receipt.');
+  } catch(e) {
+    console.error('markAgencySettlementPaymentSent failed', e);
+    alert('Could not mark payment sent — '+((e && e.message) || 'please try again'));
+  }
+  drawMySettlements();
 }
 
 // Two separate guest-facing documents. Confirmation never shows a price;

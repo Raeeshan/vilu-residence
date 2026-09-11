@@ -50,11 +50,22 @@ test('functions-core/index.js never calls the Beds24 API directly (no fetch(...b
 });
 
 section('Case B — differential sync reuses the EXISTING reservation/block triggers, not a new competing one');
-test('availabilityOnReservation and availabilityOnBlock are still the only two onDocumentWritten triggers on reservations/{id} and blocks/{id}', () => {
+test('availabilityOnReservation and availabilityOnBlock remain the only Beds24-sync-relevant onDocumentWritten triggers -- no competing/duplicate availability listener was added', () => {
   const reservationTriggers = (CORE.match(/onDocumentWritten\('reservations\/\{[^}]+\}'/g) || []).length;
   const blockTriggers = (CORE.match(/onDocumentWritten\('blocks\/\{[^}]+\}'/g) || []).length;
-  assert.equal(reservationTriggers, 2, 'blockDoubleBooking + availabilityOnReservation, no third listener added');
+  // Agency Sales Workflow Phase J (2026-09-11) added a THIRD reservations/
+  // {id} trigger, settlementEligibilityOnReservation -- unrelated to
+  // Beds24/availability sync entirely (it only flips an agency_settlements
+  // doc's status when a reservation's own status transitions into
+  // 'Checked in'/'Checked out'; it never touches room_availability, never
+  // calls computeAffectedDates/enqueueBeds24Sync). This test's real
+  // concern (per its own original message) was a second COMPETING
+  // availability-sync listener, which Phase J's trigger is not.
+  assert.equal(reservationTriggers, 3, 'blockDoubleBooking + availabilityOnReservation + settlementEligibilityOnReservation (Phase J, unrelated to Beds24 sync)');
   assert.equal(blockTriggers, 1, 'availabilityOnBlock only');
+  const settlementTrigger = CORE.match(/exports\.settlementEligibilityOnReservation[\s\S]*?\n\}\);/);
+  assert.ok(settlementTrigger, 'settlementEligibilityOnReservation not found');
+  assert.doesNotMatch(settlementTrigger[0], /computeAffectedDates|enqueueBeds24Sync|room_availability/, 'the settlement trigger must never touch availability/Beds24 sync');
 });
 test('availabilityOnReservation calls computeAffectedDates and enqueueBeds24Sync (extends the existing handler body, not a separate function)', () => {
   const m = CORE.match(/exports\.availabilityOnReservation[\s\S]*?\n\}\);/);

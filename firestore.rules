@@ -469,6 +469,36 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Agency Sales Workflow Phase J (2026-09-11): one settlement per
+    // confirmed agency reservation. Created ONLY server-side -- inside
+    // confirmAgencyBookingRequest's own transaction (Admin SDK) or by the
+    // reconcileMissingAgencySettlements maintenance callable (also Admin
+    // SDK) -- never by a direct client write, so `allow create: if false`
+    // here is not a gap, it is the whole point: amounts/direction are
+    // computed once from the reservation's own immutable snapshot and
+    // never client-supplied. Every real status transition
+    // (PAYABLE -> PAYMENT_SENT -> RECEIVED, or -> DISPUTED) goes through
+    // its own direction-aware Cloud Function -- update here stays
+    // admin/staff/manager-broad purely as the same operational backstop
+    // every other collection in this file uses, not a client write path
+    // for financial fields.
+    match /agency_settlements/{id} {
+      allow read: if request.auth != null && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+      allow create: if false;
+      allow update: if isAdmin() || isStaff() || isManagerRole();
+      allow delete: if false;
+    }
+
+    // Append-only audit trail for every agency_settlements status change --
+    // written only by the Cloud Functions above (Admin SDK). No client,
+    // including Admin's own UI, may write here directly; an agency may
+    // read only her own settlement's history (transparency into money
+    // that was sent to or by her own agency), never rewrite it.
+    match /agency_settlement_audit/{id} {
+      allow read: if request.auth != null && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+      allow write: if false;
+    }
+
     match /packages/{packageId} {
       allow read: if isAdmin() || isStaff() || isManagerRole()
         || resource.data.get('visibleToAgencies', 'all') == 'all'

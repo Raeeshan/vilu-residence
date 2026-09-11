@@ -897,6 +897,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sg">Finance</div>
   <div class="sl" onclick="go('folios',this)"><i class="ti ti-notebook"></i>Guest folios</div>
   <div class="sl" onclick="go('inv',this)"><i class="ti ti-file-invoice"></i>Invoices</div>
+  <div class="sl" onclick="go('agysettle',this)"><i class="ti ti-arrows-exchange"></i>Agency Settlements</div>
   <div class="sg">Bookings</div>
   <div class="sl" onclick="go('newbk',this)"><i class="ti ti-plus"></i>New booking</div>
   <div class="sl" onclick="go('agybk',this)"><i class="ti ti-clipboard-check"></i>Agency Booking Requests</div>
@@ -1583,6 +1584,28 @@ body.pms-mode { overflow:hidden; }
     <h3><i class="ti ti-clipboard-check" style="margin-right:6px"></i>Agency Booking Requests</h3>
     <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Confirmed guest bookings sent from the Agency Portal (always linked to a finalized quotation). Confirming creates a real, canonical PMS reservation; rejecting or requesting a change never does.</p>
     <div id="agency-booking-requests-list"><p style="font-size:var(--font-size-sm);color:#9ca3af">No pending booking requests.</p></div>
+  </div>
+</div>
+
+<!-- Agency Sales Workflow Phase J (2026-09-11): Agency Earnings &
+     Settlement Ledger. One agency_settlements doc per confirmed agency
+     reservation (created automatically at confirmation, functions-core's
+     confirmAgencyBookingRequest). Two directions, never conflated:
+     HOTEL_TO_AGENCY (Vilu owes the agency its earnings) and
+     AGENCY_TO_HOTEL (the agency owes Vilu its net cost). All amounts are
+     server-derived from the reservation's own immutable price snapshot --
+     this page never lets Admin edit them directly. Given its own
+     top-level nav item near Guest folios/Invoices (Finance group), not
+     tucked inside Package Manager. -->
+<div class="sec" id="s-agysettle">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+      <h3 style="margin:0"><i class="ti ti-arrows-exchange" style="margin-right:6px"></i>Agency Settlements</h3>
+      <button class="btn-outline" style="font-size:var(--font-size-sm)" onclick="previewReconcileAgencySettlements()"><i class="ti ti-refresh"></i> Check for missing settlements</button>
+    </div>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">A settlement becomes PAYABLE only once the guest has actually checked in -- never merely because the arrival date has passed. Amounts are computed once from the confirmed reservation's own snapshot and never re-derived.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="agysettle-filters"></div>
+    <div id="agysettle-list"><p style="font-size:var(--font-size-sm);color:#9ca3af">No settlements.</p></div>
   </div>
 </div>
 
@@ -4587,8 +4610,8 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,agybk:drawAgencyBookingRequests,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',agysettle:'Agency Settlements',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,agybk:drawAgencyBookingRequests,agysettle:drawAgencySettlements,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -8347,6 +8370,130 @@ async function requestChangeAgencyBookingRequest(id){
     toast('⚠️ Could not request change — '+((e && e.message) || 'please try again'));
   }
   drawAgencyBookingRequests();
+}
+
+// ── Agency Sales Workflow Phase J: Agency Settlements queue ──
+// Amounts here are never editable from this UI -- every field is read
+// straight from agency_settlements, which itself is only ever written by
+// the direction-aware Cloud Functions below (Admin SDK) or the atomic
+// creation inside confirmAgencyBookingRequest. This page can only trigger
+// those functions, never set amountDue/viluNetTotal/agencyEarnings/
+// direction/paymentCollector directly (Part 16).
+var AGYSETTLE_STATUS_LABEL = { NOT_YET_PAYABLE:'Not yet payable', PAYABLE:'Payable', PAYMENT_SENT:'Payment sent', RECEIVED:'Received', DISPUTED:'Disputed', DATA_INCOMPLETE:'Data incomplete' };
+var AGYSETTLE_STATUS_BADGE = { NOT_YET_PAYABLE:'pending', PAYABLE:'pending', PAYMENT_SENT:'pending', RECEIVED:'ok', DISPUTED:'wn', DATA_INCOMPLETE:'wn' };
+var AGYSETTLE_FILTERS = [
+  { key:'ALL', label:'All' },
+  { key:'PAYABLE', label:'Payable' },
+  { key:'PAYMENT_SENT', label:'Payment Sent' },
+  { key:'RECEIVED', label:'Received' },
+  { key:'DISPUTED', label:'Disputed' },
+];
+var _agysettleFilter = 'ALL';
+var _agysettleAll = [];
+
+function renderAgysettleFilters(){
+  document.getElementById('agysettle-filters').innerHTML = AGYSETTLE_FILTERS.map(function(f){
+    var on = _agysettleFilter===f.key;
+    return '<button class="btn-outline" style="font-size:var(--font-size-sm);padding:6px 12px'+(on?';background:var(--green);color:#fff;border-color:var(--green)':'')+'" onclick="setAgysettleFilter(\''+f.key+'\')">'+esc(f.label)+'</button>';
+  }).join('');
+}
+function setAgysettleFilter(key){ _agysettleFilter = key; renderAgysettleList(); }
+
+async function drawAgencySettlements(){
+  renderAgysettleFilters();
+  var el = document.getElementById('agysettle-list');
+  el.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">Loading…</p>';
+  try {
+    var snap = await fsDb.collection('agency_settlements').get();
+    _agysettleAll = snap.docs.map(function(d){ return d.data(); });
+    _agysettleAll.sort(function(a,b){ return (a.arrivalDate||'').localeCompare(b.arrivalDate||''); });
+  } catch(e) { console.error('drawAgencySettlements failed', e); _agysettleAll = []; }
+  renderAgysettleList();
+}
+
+function renderAgysettleList(){
+  var el = document.getElementById('agysettle-list');
+  var rows = _agysettleFilter==='ALL' ? _agysettleAll : _agysettleAll.filter(function(s){ return s.status===_agysettleFilter; });
+  if(!rows.length){ el.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">No settlements.</p>'; return; }
+  el.innerHTML = rows.map(renderAgysettleRow).join('');
+}
+
+function renderAgysettleRow(s){
+  var directionLabel = s.direction==='HOTEL_TO_AGENCY' ? 'Vilu owes agency' : s.direction==='AGENCY_TO_HOTEL' ? 'Agency owes Vilu' : 'Undecided (paymentCollector not set)';
+  var amount = s.amountDue!=null ? esc(s.currency||'USD')+' '+(+s.amountDue).toFixed(2) : '—';
+  var actions = '';
+  if(s.status==='PAYABLE' && s.direction==='HOTEL_TO_AGENCY'){
+    actions = '<button class="ab" title="Mark payment sent" style="color:#059669" onclick="markAgencySettlementPaymentSentUI(\''+s.settlementId+'\')"><i class="ti ti-send"></i></button>';
+  } else if(s.status==='PAYMENT_SENT' && s.direction==='AGENCY_TO_HOTEL'){
+    actions = '<button class="ab" title="Confirm received" style="color:#059669" onclick="confirmAgencySettlementReceivedUI(\''+s.settlementId+'\')"><i class="ti ti-check"></i></button>';
+  } else if(s.status==='DISPUTED'){
+    actions = '<button class="ab" title="Resolve as Received" style="color:#059669" onclick="resolveAgencySettlementDisputeUI(\''+s.settlementId+'\',\'RECEIVED\')"><i class="ti ti-check"></i></button>'
+      + '<button class="ab" title="Resolve back to Payment Sent" style="color:#d97706" onclick="resolveAgencySettlementDisputeUI(\''+s.settlementId+'\',\'PAYMENT_SENT\')"><i class="ti ti-rotate"></i></button>';
+  }
+  return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap">'
+    + '<div>'
+      + '<div style="font-size:var(--font-size-sm);font-weight:700">'+esc(s.agencyName||s.agencyEmail||'')+' — '+esc(s.guestName||'')+'</div>'
+      + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+fd(s.arrivalDate)+' · '+esc(s.bookingReference||'')+' · '+esc(directionLabel)+' · '+amount+'</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:6px;align-items:center">'
+      + '<span class="badge '+(AGYSETTLE_STATUS_BADGE[s.status]||'pending')+'">'+(AGYSETTLE_STATUS_LABEL[s.status]||s.status)+'</span>'
+      + actions
+    + '</div></div>';
+}
+
+async function markAgencySettlementPaymentSentUI(settlementId){
+  var method = prompt('Payment method (e.g. Bank transfer, MMK):');
+  if(!method) return;
+  var reference = prompt('Payment reference (optional):') || '';
+  try {
+    var callable = fsFunctions.httpsCallable('markAgencySettlementPaymentSent');
+    await callable({ settlementId: settlementId, method: method, reference: reference });
+    toast('✓ Marked payment sent');
+  } catch(e) {
+    console.error('markAgencySettlementPaymentSent failed', e);
+    toast('⚠️ Could not mark payment sent — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencySettlements();
+}
+async function confirmAgencySettlementReceivedUI(settlementId){
+  try {
+    var callable = fsFunctions.httpsCallable('confirmAgencySettlementReceived');
+    await callable({ settlementId: settlementId });
+    toast('✓ Marked received');
+  } catch(e) {
+    console.error('confirmAgencySettlementReceived failed', e);
+    toast('⚠️ Could not confirm received — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencySettlements();
+}
+async function resolveAgencySettlementDisputeUI(settlementId, resolution){
+  try {
+    var callable = fsFunctions.httpsCallable('resolveAgencySettlementDispute');
+    await callable({ settlementId: settlementId, resolution: resolution });
+    toast('✓ Dispute resolved');
+  } catch(e) {
+    console.error('resolveAgencySettlementDispute failed', e);
+    toast('⚠️ Could not resolve dispute — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencySettlements();
+}
+// Part J-22: dryRun first (default true server-side) so Admin sees exactly
+// what would be created before anything is written -- the second call
+// only fires after explicit confirmation.
+async function previewReconcileAgencySettlements(){
+  try {
+    var callable = fsFunctions.httpsCallable('reconcileMissingAgencySettlements');
+    var result = await callable({ dryRun: true });
+    if(!result.data.count){ alert('No missing settlements found.'); return; }
+    var list = result.data.missing.map(function(m){ return '- '+(m.guestName||'?')+' ('+m.reservationId+', '+(m.agencyName||'?')+', arrival '+(m.arrivalDate||'?')+')'; }).join('\n');
+    if(!confirm('Found '+result.data.count+' confirmed agency reservation(s) missing a settlement record:\n\n'+list+'\n\nCreate them now?')) return;
+    var result2 = await callable({ dryRun: false });
+    alert('Created '+result2.data.count+' settlement record(s).');
+    drawAgencySettlements();
+  } catch(e) {
+    console.error('reconcileMissingAgencySettlements failed', e);
+    toast('⚠️ Could not reconcile — '+((e && e.message) || 'please try again'));
+  }
 }
 
 function addBlk(){
