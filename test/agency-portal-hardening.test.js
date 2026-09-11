@@ -24,6 +24,7 @@ function read(p) { return fs.readFileSync(p, 'utf8'); }
 const AGENCY = read('vilu-agency-portal.html');
 const PMS = read('vilu-unified.html');
 const RULES = read('firestore.rules');
+const FUNCTIONS = fs.existsSync('functions-core/index.js') ? read('functions-core/index.js') : '';
 
 section('Case A — agency data isolation is server-enforced, not client-filter-only');
 {
@@ -40,8 +41,10 @@ section('Case A — agency data isolation is server-enforced, not client-filter-
     assert.ok(m, 'update rule not found');
     assert.ok(!/isAgency/.test(m[0]), 'agency now appears in the reservations update rule — isolation model changed, verify intentionally');
   });
-  test('vilu-agency-portal.html queries reservations filtered by agencyId==currentAgency.uid (not a bulk fetch filtered client-side)', () => {
-    assert.ok(/collection\('reservations'\)\.where\('agencyId','==',currentAgency\.uid\)/.test(AGENCY), 'reservations query no longer filters by agencyId server-side');
+  test('reservations are scoped by agencyId==auth identity, not a client-filtered bulk fetch -- as of Agency Sales Workflow Phase D (2026-09-11) this scoped query moved OFF the client entirely, into functions-core/index.js\'s getAgencyAvailability Cloud Function (Admin SDK, scoped by request.auth.uid, never a client-supplied value) -- the client no longer queries reservations for anyone\'s data, own or otherwise; it only calls that callable. This is a strictly stronger form of the same isolation this test originally checked for, not a regression: see test/agency-availability-rules.test.js for the emulator-proven behavior.', () => {
+    const clientQuery = /collection\('reservations'\)\.where\('agencyId','==',currentAgency\.uid\)/.test(AGENCY);
+    const serverQuery = /db\.collection\('reservations'\)\.where\('agencyId', '==', agencyId\)/.test(FUNCTIONS) && /const agencyId = request\.auth\.uid;/.test(FUNCTIONS);
+    assert.ok(clientQuery || serverQuery, 'agencyId-scoped reservations query not found on either the client or the new server-side callable');
   });
   test('firestore.rules: agency_packages read requires the caller\'s own email match (or admin) — no cross-agency package/pricing read', () => {
     const m = RULES.match(/match \/agency_packages\/\{email\} \{[\s\S]{0,300}?\}/);

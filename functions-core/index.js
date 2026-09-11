@@ -12,6 +12,11 @@
 //     every Custom Package component's Vilu rate server-side (Admin SDK,
 //     bypassing client rules) before writing agency_quotes, so an agency
 //     can never persist a spoofed rate. See the comment above that export.
+//   getAgencyAvailability  Agency Sales Workflow Phase D -- redacted, per-
+//     room-per-date availability + this agency's own reservation
+//     enrichment only, reusing the exact overlap math already used by
+//     writeReservation/hasBlockConflict/isOcc. See the comment above that
+//     export for why blocks.reason can't just be filtered client-side.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -588,4 +593,117 @@ exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 
   };
   await db.collection('agency_quotes').doc(quoteId).set(quote);
   return quote;
+});
+
+// ── getAgencyAvailability: Agency Sales Workflow Phase D ───────────────────
+// Why this needs a callable and not a client-side read: the Admin PMS's own
+// Calendar (fetchRoomIntervals/hasBlockConflict, see the comment trail this
+// phase's audit left) checks room_availability (reservation date ranges,
+// already PII-free) PLUS the `blocks` collection -- but `blocks.reason` can
+// contain "Agency: <name> — <note>" (set by approveBlockRequest() in
+// vilu-unified.html), and `blocks` is `allow read: if true` because the
+// UNAUTHENTICATED public website also needs it for its own live conflict
+// check (vilu-website.html + every /<locale>/index.html mirror -- none of
+// them have a Firebase Auth session to gate on). Tightening that rule would
+// break the public site, so it stays as-is (documented, not fixed, in the
+// Phase D report) -- instead the Agency Portal stops reading `blocks` (or
+// `reservations` beyond its own agencyId-scoped query) directly at all, and
+// gets its availability exclusively through this redacted projection.
+//
+// Reuses the EXACT overlap semantics already used everywhere else in this
+// codebase (writeReservation's transaction check, hasBlockConflict,
+// isOcc, freeRoomsForStay): a half-open interval test, checkIn < end &&
+// checkOut > start -- not a new formula.
+const AGENCY_AVAILABILITY_MAX_DAYS = 90;
+
+function withinRange(date, from, to) {
+  return date >= from && date < to;
+}
+
+exports.getAgencyAvailability = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const d = request.data || {};
+  const startDate = String(d.startDate || '');
+  const endDate = String(d.endDate || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    throw new HttpsError('invalid-argument', 'startDate/endDate must be YYYY-MM-DD.');
+  }
+  if (endDate <= startDate) throw new HttpsError('invalid-argument', 'endDate must be after startDate.');
+  const spanDays = dateRange(startDate, endDate).length;
+  if (spanDays > AGENCY_AVAILABILITY_MAX_DAYS) {
+    throw new HttpsError('invalid-argument', 'Date range too large (max ' + AGENCY_AVAILABILITY_MAX_DAYS + ' days).');
+  }
+
+  // agencyId is ALWAYS request.auth.uid -- never accepted from request.data,
+  // so an agency can never ask "as if" it were a different agency (Part 17/31).
+  const agencyId = request.auth.uid;
+
+  // Same two canonical sources the Admin Calendar's own fetchRoomIntervals()
+  // uses (see this phase's audit): room_availability/{roomId} for
+  // reservation date ranges (already PII-free -- just {id, from, to}), and
+  // a per-room `blocks` query for admin/agency-approved holds. Both reads
+  // use the Admin SDK, so they see the real, complete data regardless of
+  // firestore.rules -- the redaction happens in what THIS function chooses
+  // to return below, not in what it's allowed to read.
+  const roomResults = await Promise.all(PHYSICAL_ROOMS.map(async (room) => {
+    const availSnap = await db.collection('room_availability').doc(room.id).get();
+    const bookings = (availSnap.exists && availSnap.data().bookings) || [];
+    const blockSnap = await db.collection('blocks').where('room_id', '==', room.id).get();
+    const blocks = blockSnap.docs.map((doc) => doc.data());
+    return { room, bookings, blocks };
+  }));
+
+  // Own reservations: fetched once, scoped by the SAME agencyId == uid
+  // condition firestore.rules already enforces for a direct client read of
+  // this agency's own reservations -- fetched here via Admin SDK only so a
+  // single call can return calendar cells AND the enrichment together,
+  // never so agencyId can be spoofed (it's ignored even if the client sent
+  // a `data.agencyId` -- see above).
+  const ownResSnap = await db.collection('reservations').where('agencyId', '==', agencyId).get();
+  const ownReservations = {};
+  ownResSnap.docs.forEach((doc) => {
+    const r = doc.data();
+    if (!isActiveStatus(r.status)) return;
+    if (!overlaps(r.check_in, r.check_out, startDate, endDate)) return;
+    ownReservations[doc.id] = {
+      reservationId: doc.id,
+      guestName: r.guest_name || '',
+      arrivalDate: r.check_in,
+      departureDate: r.check_out,
+      adults: r.adults || 0,
+      children: r.children || 0,
+      status: r.status,
+      bookingReference: doc.id,
+    };
+  });
+
+  const dates = dateRange(startDate, endDate);
+  const days = [];
+  roomResults.forEach(({ room, bookings, blocks }) => {
+    dates.forEach((date) => {
+      const booking = bookings.find((b) => withinRange(date, b.from, b.to));
+      if (booking) {
+        const cell = { roomId: room.id, date, state: 'OCCUPIED' };
+        if (ownReservations[booking.id]) cell.ownReservationId = booking.id;
+        days.push(cell);
+        return;
+      }
+      const block = blocks.find((b) => withinRange(date, (b.from_date || '').slice(0, 10), (b.to_date || '').slice(0, 10)));
+      if (block) {
+        // Deliberately no `reason` field -- that's the exact leak Part 5
+        // exists to close. Agencies (including the one whose own approved
+        // hold this is) only ever see the state, never the reason text.
+        days.push({ roomId: room.id, date, state: 'BLOCKED' });
+        return;
+      }
+      days.push({ roomId: room.id, date, state: 'AVAILABLE' });
+    });
+  });
+
+  return {
+    rooms: PHYSICAL_ROOMS.map((r) => ({ roomId: r.id, category: r.type })),
+    days,
+    ownReservations,
+  };
 });

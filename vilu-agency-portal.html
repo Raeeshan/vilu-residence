@@ -270,34 +270,54 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div id="quotes-finalized-list"></div>
     </div>
 
-    <!-- AVAILABILITY TAB -->
+    <!-- AVAILABILITY TAB — Phase D: both the calendar grid and the search
+         below are driven entirely by getAgencyAvailability() (a redacted
+         server-side projection, see functions-core/index.js) -- this tab
+         never reads reservations/blocks/room_availability directly
+         anymore. Operationally read-only: no drag/resize/move/delete, no
+         manual block creation, no reservation drawer (Part 23). -->
     <div id="tab-availability" class="hidden">
       <div class="card" style="margin-bottom:16px">
+        <h3 style="margin:0 0 4px">Check availability</h3>
+        <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px">Exact Vilu availability for your requested dates — what other agencies/direct guests occupy stays private; only room/category status is shown.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px">
+          <div class="fg" style="margin:0"><label>Check-in</label><input type="date" id="av-ci"></div>
+          <div class="fg" style="margin:0"><label>Check-out</label><input type="date" id="av-co"></div>
+          <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="av-adults" min="1" value="2" style="width:80px"></div>
+          <div class="fg" style="margin:0"><label>Children</label><input type="number" id="av-children" min="0" value="0" style="width:80px"></div>
+          <div class="fg" style="margin:0"><label>Rooms needed</label><input type="number" id="av-rooms" min="1" value="1" style="width:80px"></div>
+          <div class="fg" style="margin:0"><label>Category</label>
+            <select id="av-category">
+              <option value="">All categories</option>
+              <option value="Deluxe Family Room">Deluxe Family Room</option>
+              <option value="Double Room">Double Room</option>
+              <option value="Deluxe Family Room with Open Deck">Deluxe Family Room with Open Deck</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="searchAvailability()"><i class="ti ti-search"></i> Search Availability</button>
+        </div>
+        <div id="av-results"></div>
+      </div>
+      <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          <h3 style="margin:0">Live calendar</h3>
+          <h3 style="margin:0">Availability Calendar</h3>
           <div style="display:flex;gap:8px;align-items:center">
             <button class="btn-outline" onclick="calGridShift(-1)"><i class="ti ti-chevron-left"></i></button>
             <span id="cal-grid-range" style="font-size:var(--font-size-sm);color:var(--muted);font-weight:600"></span>
             <button class="btn-outline" onclick="calGridShift(1)"><i class="ti ti-chevron-right"></i></button>
+            <button class="btn-outline" onclick="calGridSetDays(14)">14d</button>
+            <button class="btn-outline" onclick="calGridSetDays(30)">30d</button>
+            <button class="btn-outline" onclick="calGridToday()"><i class="ti ti-calendar-event"></i> Today</button>
             <button class="btn-outline" onclick="renderAgencyCalendarGrid()"><i class="ti ti-refresh"></i></button>
           </div>
         </div>
         <div style="font-size:var(--font-size-xs);color:var(--muted);margin-bottom:10px">
           <span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border:1px solid #86efac;border-radius:2px;margin-right:4px"></span>Available
           <span style="display:inline-block;width:10px;height:10px;background:#dbeafe;border:1px solid #93c5fd;border-radius:2px;margin:0 4px 0 12px"></span>Your booking
-          <span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:2px;margin:0 4px 0 12px"></span>Booked (other)
+          <span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:2px;margin:0 4px 0 12px"></span>Occupied (other)
           <span style="display:inline-block;width:10px;height:10px;background:#fef3c7;border:1px solid #fde68a;border-radius:2px;margin:0 4px 0 12px"></span>Blocked
         </div>
         <div style="overflow-x:auto"><div id="cal-grid-body"></div></div>
-      </div>
-      <div class="card">
-        <h3>Check availability</h3>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:16px">
-          <div class="fg" style="margin:0"><label>Check-in</label><input type="date" id="av-ci" onchange="checkAvailability()"></div>
-          <div class="fg" style="margin:0"><label>Check-out</label><input type="date" id="av-co" onchange="checkAvailability()"></div>
-          <button class="btn-outline" onclick="checkAvailability()"><i class="ti ti-search"></i> Check</button>
-        </div>
-        <div id="av-results"></div>
       </div>
     </div>
 
@@ -490,6 +510,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="quote-adults" min="1" value="2" oninput="updateQuotePreview()"></div>
           <div class="fg" style="margin:0"><label>Children</label><input type="number" id="quote-children" min="0" value="0" oninput="updateQuotePreview()"></div>
         </div>
+        <!-- Part 20: read-only, never reserves/holds anything, never alters quote state. -->
+        <div style="margin-bottom:12px">
+          <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('quote-arrival').value,document.getElementById('quote-departure').value,'quote-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
+          <div id="quote-availability-result" style="margin-top:6px"></div>
+        </div>
         <div class="fg"><label>Special message to guest <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional, shown on the quotation)</span></label><textarea id="quote-message" rows="2" oninput="updateQuotePreview()" placeholder="Any note for the guest..."></textarea></div>
 
         <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">Pricing — private to your agency</div>
@@ -554,6 +579,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="cp-adults" min="1" value="2" oninput="updateCustomQuotePreview()"></div>
           <div class="fg" style="margin:0"><label>Children</label><input type="number" id="cp-children" min="0" value="0" oninput="updateCustomQuotePreview()"></div>
         </div>
+        <!-- Part 21: read-only, never reserves/holds anything, never alters quote state. -->
+        <div style="margin-bottom:12px">
+          <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('cp-arrival').value,document.getElementById('cp-departure').value,'cp-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
+          <div id="cp-availability-result" style="margin-top:6px"></div>
+        </div>
         <div class="fg"><label>Guest-facing description <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional)</span></label><textarea id="cp-guest-desc" rows="2" oninput="updateCustomQuotePreview()" placeholder="A short description of this package for the guest..."></textarea></div>
         <div class="fg"><label>Special message to guest <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional)</span></label><textarea id="cp-guest-message" rows="2" oninput="updateCustomQuotePreview()" placeholder="Any note for the guest..."></textarea></div>
 
@@ -603,6 +633,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <iframe id="cp-preview-frame" style="width:100%;height:520px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- OWN BOOKING SUMMARY MODAL — Phase D (Part 11). Read-only: no edit/
+     cancel/change controls here (Part 24 -- modification requests are a
+     later phase). Populated entirely from the ownReservations map
+     getAgencyAvailability() already returns -- no extra fetch, and no
+     Admin-only notes/folio/payment data ever reaches this modal. -->
+<div class="modal-bg" id="m-own-booking" onclick="if(event.target===this)closeOwnBookingSummary()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr">
+      <h2>Your booking</h2>
+      <button onclick="closeOwnBookingSummary()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body" id="own-booking-summary-body"></div>
   </div>
 </div>
 
@@ -690,38 +735,34 @@ async function writeReservation(docId, fields, opts) {
   });
 }
 
-// Live availability, read straight from Firestore — replaces the old
-// getAvailability()/isRoomAvailable() which only read a PMS-only localStorage
-// key ('vilu_res') that never exists on a device where the PMS was never
-// opened, so every room silently looked available regardless of real bookings.
-//
-// This also used to read the full `reservations` collection directly — every
-// guest's name, email, phone, ID number, across every agency's and every
-// OTA's bookings — into this browser, even though the UI only ever used it
-// to check availability. room_availability holds the exact same date-range
-// info with zero guest data, so general availability now comes from there;
-// this agency's OWN bookings are fetched separately via a query the
-// Firestore rules only allow when scoped to this agency's own uid.
-var _availCache = { reservations: [], myReservations: [], blocks: [], fetchedAt: 0 };
-async function fetchLiveAvailability() {
+// Agency Sales Workflow Phase D (2026-09-11): availability now comes
+// EXCLUSIVELY from getAgencyAvailability() (functions-core/index.js) --
+// this file no longer reads reservations/blocks/room_availability
+// directly at all. The old version here used to read the full `blocks`
+// collection unfiltered, including block.reason (which can contain
+// "Agency: <name> — <note>" for an approved agency hold -- see
+// approveBlockRequest() in vilu-unified.html), leaking another agency's
+// identity and private notes to this browser. The Cloud Function performs
+// the exact same reads server-side (Admin SDK) and returns only a
+// redacted per-room-per-date state, plus this agency's OWN reservation
+// details (guest name/dates/status) -- never anyone else's.
+var _availCache = { byCell: {}, ownReservations: {}, rangeStart: null, rangeEnd: null, fetchedAt: 0 };
+
+// endDateExclusive matches the half-open-interval convention used
+// everywhere else in this codebase (checkIn <= date < checkOut) -- pass
+// the day AFTER the last date you want included.
+async function fetchLiveAvailability(startDate, endDateExclusive) {
+  if (!currentAgency || !currentAgency.uid) return _availCache;
   try {
-    var roomIds = ROOMS_LIST.map(function(r){ return r.id; });
-    var res = [];
-    for (var i=0;i<roomIds.length;i++) {
-      var snap = await fsDb.collection('room_availability').doc(roomIds[i]).get();
-      var bookings = (snap.exists && snap.data().bookings) || [];
-      bookings.forEach(function(b){ res.push({ id: b.id, rn: roomIds[i], ci: b.from, co: b.to, st: 'Confirmed' }); });
-    }
-    var myRes = [];
-    if (currentAgency && currentAgency.uid) {
-      var mySnap = await fsDb.collection('reservations').where('agencyId','==',currentAgency.uid).get();
-      mySnap.forEach(function(d){ myRes.push(Object.assign({ id: d.id }, d.data())); });
-    }
-    var blks = [];
-    var blkSnap = await fsDb.collection('blocks').get();
-    blkSnap.forEach(function(d){ var b=d.data(); blks.push({ id:d.id, rn:b.room_id, ci:(b.from_date||'').slice(0,10), co:(b.to_date||'').slice(0,10), reason:b.reason||'Blocked' }); });
-    _availCache = { reservations: res, myReservations: myRes, blocks: blks, fetchedAt: Date.now() };
-  } catch(e) {}
+    var callable = fsFunctions.httpsCallable('getAgencyAvailability');
+    var result = await callable({ startDate: startDate, endDate: endDateExclusive });
+    var data = result.data || {};
+    var byCell = {};
+    (data.days || []).forEach(function(d){ byCell[d.roomId + '|' + d.date] = d; });
+    _availCache = { byCell: byCell, ownReservations: data.ownReservations || {}, rangeStart: startDate, rangeEnd: endDateExclusive, fetchedAt: Date.now() };
+  } catch(e) {
+    console.error('fetchLiveAvailability failed', e);
+  }
   return _availCache;
 }
 
@@ -810,7 +851,12 @@ async function enterAgencyPortal(profile){
   document.getElementById('hdr-agency-name').textContent=currentAgency.name||'Agency';
   loadLogo();
   drawPackages();
-  fetchLiveAvailability();
+  // No blind prefetch here anymore (Phase D): fetchLiveAvailability() now
+  // requires an explicit date range (the server validates it), since the
+  // cache is scoped to whatever range was last requested rather than "all
+  // availability forever". Each tab/modal that needs it (Availability,
+  // booking modal, block modal) fetches its own range when it actually
+  // knows one.
 }
 
 async function doAgencyLogin(){
@@ -931,13 +977,13 @@ function showTab(name, el){
     var today=new Date(); var tom=new Date(today); tom.setDate(tom.getDate()+1);
     document.getElementById('av-ci').value=today.toISOString().slice(0,10);
     document.getElementById('av-co').value=tom.toISOString().slice(0,10);
-    checkAvailability();
+    searchAvailability();
     renderAgencyCalendarGrid();
   }
 }
 
-// ── AVAILABILITY ── (see window.getAvailability/window.isRoomAvailable
-// below — the real implementations, reading live Firestore data)
+// ── AVAILABILITY ── (see window.isRoomAvailable further below -- the real
+// implementation, reading the redacted getAgencyAvailability() cache)
 
 // type must exactly match the room category name on the Booking.com
 // channel manager for this property, same source of truth as the PMS's
@@ -962,6 +1008,14 @@ function calGridShift(dir){
   _calGridStart.setDate(_calGridStart.getDate() + dir*_calGridDays);
   renderAgencyCalendarGrid();
 }
+function calGridSetDays(n){
+  _calGridDays = n;
+  renderAgencyCalendarGrid();
+}
+function calGridToday(){
+  _calGridStart = new Date();
+  renderAgencyCalendarGrid();
+}
 
 function ymdStr(d){ return d.toISOString().slice(0,10); }
 
@@ -969,8 +1023,11 @@ function ymdStr(d){ return d.toISOString().slice(0,10); }
 // markup string that is later handed to .innerHTML / document.write.
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
+// Operationally read-only (Part 23): every cell below is either plain text
+// or, for the agency's own booking, a click that opens the safe summary
+// modal -- no drag/resize/move/delete, no manual block creation, no
+// reservation drawer exists anywhere in this file.
 async function renderAgencyCalendarGrid(){
-  await fetchLiveAvailability();
   var body = document.getElementById('cal-grid-body');
   var rangeEl = document.getElementById('cal-grid-range');
   if(!body) return;
@@ -980,10 +1037,10 @@ async function renderAgencyCalendarGrid(){
     var d = new Date(_calGridStart); d.setDate(d.getDate()+i);
     days.push(d);
   }
-  if(rangeEl) rangeEl.textContent = fd(ymdStr(days[0])) + ' → ' + fd(ymdStr(days[days.length-1]));
-
-  var myIds = {};
-  (_availCache.myReservations||[]).forEach(function(r){ myIds[r.id] = r; });
+  var startDate = ymdStr(days[0]);
+  var endDateExclusive = ymdStr(new Date(days[days.length-1].getTime() + 864e5));
+  await fetchLiveAvailability(startDate, endDateExclusive);
+  if(rangeEl) rangeEl.textContent = fd(startDate) + ' → ' + fd(ymdStr(days[days.length-1]));
 
   var html = '<table style="border-collapse:collapse;font-size:var(--font-size-xs);min-width:900px">';
   html += '<tr><th style="text-align:left;padding:6px 10px;position:sticky;left:0;background:#fff">Room</th>';
@@ -996,27 +1053,35 @@ async function renderAgencyCalendarGrid(){
     html += '<tr><td style="padding:6px 10px;font-weight:700;position:sticky;left:0;background:#fff;border-right:1px solid var(--border)"><div>'+room.name+'</div><div style="font-weight:400;font-size:var(--font-size-xs);color:#6b7280">'+room.type+'</div></td>';
     days.forEach(function(d){
       var ds = ymdStr(d);
-      var cellStyle = 'background:#dcfce7;border:1px solid #86efac'; // available
+      var cell = _availCache.byCell[room.id+'|'+ds];
+      var state = cell ? cell.state : 'AVAILABLE';
+      var cellStyle = 'background:#dcfce7;border:1px solid #86efac'; // AVAILABLE
       var title = 'Available';
+      var label = '';
+      var onclick = '';
 
-      var block = (_availCache.blocks||[]).find(function(b){ return b.rn===room.id && ds>=b.ci && ds<b.co; });
-      var occ = (_availCache.reservations||[]).find(function(b){ return b.rn===room.id && ds>=b.ci && ds<b.co; });
-
-      if (occ) {
-        var mine = myIds[occ.id];
+      if (state === 'OCCUPIED') {
+        var mine = cell.ownReservationId ? _availCache.ownReservations[cell.ownReservationId] : null;
         if (mine) {
-          cellStyle = 'background:#dbeafe;border:1px solid #93c5fd';
-          title = esc(mine.guest_name)+' · '+mine.check_in+' → '+mine.check_out;
+          cellStyle = 'background:#dbeafe;border:1px solid #93c5fd;cursor:pointer';
+          title = esc(mine.guestName)+' · '+mine.arrivalDate+' → '+mine.departureDate;
+          label = '★';
+          onclick = ' onclick="openOwnBookingSummary(\''+cell.ownReservationId+'\')"';
         } else {
+          // Deliberately just "Occupied" -- no guest name, no source, no
+          // price, no agency identity (Parts 10/18). The server projection
+          // never even sends us those fields for a booking we don't own.
           cellStyle = 'background:#fee2e2;border:1px solid #fca5a5';
-          title = 'Booked';
+          title = 'Occupied';
         }
-      } else if (block) {
+      } else if (state === 'BLOCKED') {
+        // No reason ever reaches this browser (Part 5/15) -- the Cloud
+        // Function never sends one for a cell this agency doesn't own.
         cellStyle = 'background:#fef3c7;border:1px solid #fde68a';
-        title = 'Blocked'+(block.reason?': '+block.reason:'');
+        title = 'Blocked';
       }
 
-      html += '<td title="'+title.replace(/"/g,'&quot;')+'" style="'+cellStyle+';height:30px;text-align:center;font-size:var(--font-size-xs);color:#374151;cursor:default">'+(occ&&myIds[occ.id]?'★':'')+'</td>';
+      html += '<td title="'+title.replace(/"/g,'&quot;')+'"'+onclick+' style="'+cellStyle+';height:30px;text-align:center;font-size:var(--font-size-xs);color:#374151">'+label+'</td>';
     });
     html += '</tr>';
   });
@@ -1024,27 +1089,132 @@ async function renderAgencyCalendarGrid(){
   body.innerHTML = html;
 }
 
-async function checkAvailability(){
+// ── Own booking summary (Part 11) — read-only. Populated entirely from
+// _availCache.ownReservations (already fetched, no extra round-trip). No
+// edit/cancel/change controls exist here (Part 24 -- later phase).
+function openOwnBookingSummary(reservationId){
+  var r = _availCache.ownReservations[reservationId];
+  if(!r) return;
+  var nights = (r.arrivalDate && r.departureDate) ? Math.round((new Date(r.departureDate)-new Date(r.arrivalDate))/864e5) : 0;
+  var guestsLine = (r.adults||0)+' Adult'+(r.adults===1?'':'s')+(r.children?' · '+r.children+' Child'+(r.children===1?'':'ren'):'');
+  document.getElementById('own-booking-summary-body').innerHTML =
+    '<div class="fg"><label>Guest</label><div style="font-size:var(--font-size-base);font-weight:700">'+esc(r.guestName)+'</div></div>'
+    + '<div class="form-grid" style="margin-bottom:12px">'
+      + '<div class="fg" style="margin:0"><label>Arrival</label><div>'+fd(r.arrivalDate)+'</div></div>'
+      + '<div class="fg" style="margin:0"><label>Departure</label><div>'+fd(r.departureDate)+'</div></div>'
+      + '<div class="fg" style="margin:0"><label>Nights</label><div>'+nights+'</div></div>'
+      + '<div class="fg" style="margin:0"><label>Guests</label><div>'+esc(guestsLine)+'</div></div>'
+    + '</div>'
+    + '<div class="fg" style="margin:0"><label>Status</label><div>'+esc(r.status)+'</div></div>'
+    + '<div class="fg" style="margin:0"><label>Booking reference</label><div>'+esc(r.bookingReference)+'</div></div>';
+  document.getElementById('m-own-booking').classList.add('on');
+}
+function closeOwnBookingSummary(){
+  document.getElementById('m-own-booking').classList.remove('on');
+}
+
+// Exact Vilu availability search (Part 6/7/14). Reuses the SAME
+// getAgencyAvailability() data the calendar uses -- one canonical source,
+// no second overlap formula. "Available for the stay" means every night
+// from check-in up to (not including) check-out is AVAILABLE for that
+// physical room, matching the half-open interval convention used
+// everywhere else (writeReservation, hasBlockConflict, isOcc).
+async function searchAvailability(){
   var ci=document.getElementById('av-ci').value;
   var co=document.getElementById('av-co').value;
+  var adults=+(document.getElementById('av-adults').value||1);
+  var children=+(document.getElementById('av-children').value||0);
+  var roomsNeeded=+(document.getElementById('av-rooms').value||1);
+  var categoryFilter=document.getElementById('av-category').value;
   var el=document.getElementById('av-results');
-  if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Select valid dates to check availability.</p>';return;}
-  await fetchLiveAvailability();
+  if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Select valid dates to search availability.</p>';return;}
+  el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Searching…</p>';
+  await fetchLiveAvailability(ci, co);
   var nights=Math.round((new Date(co)-new Date(ci))/864e5);
-  el.innerHTML='<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:10px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+'</div><div class="avail-grid" id="av-grid"></div>';
-  var grid=document.getElementById('av-grid');
+
+  var freeByRoom = {};
   ROOMS_LIST.forEach(function(room){
-    var avail=isRoomAvailable(room.id,ci,co);
+    var free = true;
+    var d = new Date(ci+'T00:00:00Z');
+    var end = new Date(co+'T00:00:00Z');
+    while(d < end){
+      var ds = d.toISOString().slice(0,10);
+      var cell = _availCache.byCell[room.id+'|'+ds];
+      if(cell && cell.state !== 'AVAILABLE'){ free = false; break; }
+      d.setUTCDate(d.getUTCDate()+1);
+    }
+    freeByRoom[room.id] = free;
+  });
+
+  var byCategory = {};
+  ROOMS_LIST.forEach(function(room){
+    if(categoryFilter && room.type!==categoryFilter) return;
+    if(!byCategory[room.type]) byCategory[room.type] = { total:0, free:0 };
+    byCategory[room.type].total++;
+    if(freeByRoom[room.id]) byCategory[room.type].free++;
+  });
+
+  var minRooms = Math.ceil((adults+children)/AGENCY_MAX_GUESTS_PER_ROOM);
+  var hintLine = (adults||children) ? ('<div style="font-size:var(--font-size-xs);color:var(--muted);margin-bottom:10px">'+(adults||0)+' adult'+(adults===1?'':'s')+(children?' · '+children+' child'+(children===1?'':'ren'):'')+' — suggests at least '+minRooms+' room'+(minRooms>1?'s':'')+' (max '+AGENCY_MAX_GUESTS_PER_ROOM+'/room)</div>') : '';
+
+  var html = '<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:6px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+'</div>'+hintLine;
+  html += '<div class="avail-grid" id="av-grid"></div>';
+  el.innerHTML = html;
+  var grid = document.getElementById('av-grid');
+  Object.keys(byCategory).forEach(function(cat){
+    var c = byCategory[cat];
+    var ok = c.free >= Math.max(1, roomsNeeded);
     var slot=document.createElement('div');
-    slot.className='room-slot'+(avail.available?'':avail.reason&&avail.reason.indexOf('Your')>-1?' mine':' blocked');
-    slot.innerHTML='<div style="font-size:var(--font-size-base);font-weight:700">'+room.name+'</div>'
-      +'<div style="font-size:var(--font-size-xs);color:#6b7280">'+room.type+'</div>'
-      +'<div style="font-size:var(--font-size-xs);margin-top:4px;color:'+(avail.available?'var(--green)':avail.reason&&avail.reason.indexOf('Your')>-1?'#0096c7':'#b91c1c')+'">'+(avail.available?'✓ Available':avail.reason)+'</div>';
+    slot.className='room-slot'+(c.free>0?(ok?'':' mine'):' blocked');
+    slot.innerHTML='<div style="font-size:var(--font-size-base);font-weight:700">'+esc(cat)+'</div>'
+      +'<div style="font-size:var(--font-size-xs);margin-top:4px;color:'+(c.free>0?'var(--green)':'#b91c1c')+'">'+(c.free>0?(c.free+' of '+c.total+' room'+(c.total>1?'s':'')+' available'):'Not available')+'</div>';
     grid.appendChild(slot);
   });
 }
 
 function fd(d){return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+// Read-only "Check availability" for the Quotation Builder / Custom Package
+// Builder (Parts 20/21). Renders a one-line per-category summary into
+// targetElId using the SAME getAgencyAvailability() data as the main
+// Availability tab. Never reserves anything, never touches quote state --
+// it's purely informational, called only on an explicit button click.
+async function checkAvailabilityForDates(arrivalDate, departureDate, targetElId){
+  var el = document.getElementById(targetElId);
+  if(!el) return;
+  if(!arrivalDate || !departureDate || departureDate<=arrivalDate){
+    el.innerHTML = '<span style="color:var(--muted)">Enter valid dates first.</span>';
+    return;
+  }
+  el.innerHTML = '<span style="color:var(--muted)">Checking…</span>';
+  try {
+    var callable = fsFunctions.httpsCallable('getAgencyAvailability');
+    var result = await callable({ startDate: arrivalDate, endDate: departureDate });
+    var byCell = {};
+    (result.data.days||[]).forEach(function(d){ byCell[d.roomId+'|'+d.date] = d; });
+    var byCategory = {};
+    ROOMS_LIST.forEach(function(room){
+      if(!byCategory[room.type]) byCategory[room.type] = { total:0, free:0 };
+      byCategory[room.type].total++;
+      var free = true;
+      var d = new Date(arrivalDate+'T00:00:00Z'), end = new Date(departureDate+'T00:00:00Z');
+      while(d < end){
+        var ds = d.toISOString().slice(0,10);
+        var cell = byCell[room.id+'|'+ds];
+        if(cell && cell.state!=='AVAILABLE'){ free = false; break; }
+        d.setUTCDate(d.getUTCDate()+1);
+      }
+      if(free) byCategory[room.type].free++;
+    });
+    el.innerHTML = Object.keys(byCategory).map(function(cat){
+      var c = byCategory[cat];
+      return '<span style="display:inline-block;margin:2px 8px 2px 0;font-size:var(--font-size-xs);color:'+(c.free>0?'var(--green)':'#b91c1c')+'">'+esc(cat)+': '+(c.free>0?(c.free+' of '+c.total+' available'):'Not available')+'</span>';
+    }).join('');
+  } catch(e) {
+    console.error('checkAvailabilityForDates failed', e);
+    el.innerHTML = '<span style="color:#b91c1c">Could not check availability.</span>';
+  }
+}
 
 // ── PACKAGES ──
 // Each agency now has its own fully independent package set, seeded from
@@ -2255,7 +2425,7 @@ async function bkRefreshRoomTypeOptions(){
   var types = [];
   ROOMS_LIST.forEach(function(r){ if(types.indexOf(r.type)===-1) types.push(r.type); });
   _bkRoomTypeAvailability = {};
-  if(ci && co && co>ci){ await fetchLiveAvailability(); }
+  if(ci && co && co>ci){ await fetchLiveAvailability(ci, co); }
   sel.innerHTML = '<option value="">-- Select room type --</option>';
   types.forEach(function(type){
     var roomsOfType = ROOMS_LIST.filter(function(r){ return r.type===type; });
@@ -2567,7 +2737,7 @@ async function submitAgencyBooking(){
   // per-room transaction below, same loop-of-atomic-writes pattern already
   // used by the PMS's New Booking (submitNB) and the website's multi-room
   // confirmGuestBooking() for reserving several rooms as one linked booking.
-  await fetchLiveAvailability();
+  await fetchLiveAvailability(ci, co);
   var roomsOfType = ROOMS_LIST.filter(function(r){ return r.type===roomType; });
   var availableRooms = roomsOfType.filter(function(r){ return isRoomAvailable(r.id, ci, co).available; });
   if(availableRooms.length < roomCount){
@@ -2760,11 +2930,36 @@ function doSignout(){
 })();
 
 // ── PORTAL FIXES ──
-// Reads the Firestore-backed cache populated by fetchLiveAvailability() —
-// replaces the old localStorage.getItem('vilu_res') read, which only ever
-// had data on a device where the PMS itself had been opened.
-window.getAvailability=function(){return {reservations:_availCache.reservations, blocks:[]};};
-window.isRoomAvailable=function(rn,ci,co,excludeId){var res=getAvailability().reservations;for(var i=0;i<res.length;i++){var r=res[i];if(r.id===excludeId||r.st==='Cancelled'||r.st==='Checked out')continue;if(r.rn!==rn)continue;if(r.ci<co&&r.co>ci)return{available:false,reason:'Booked'};}if(typeof myBlocks!=='undefined'){for(var k=0;k<myBlocks.length;k++){var mb=myBlocks[k];if(mb.rn!==rn)continue;if(mb.ci<co&&mb.co>ci)return{available:false,reason:'Your block',mine:true};}}return{available:true};};
+// isRoomAvailable() now reads _availCache.byCell -- the SAME redacted,
+// server-verified per-room-per-date state the calendar and search use
+// (Phase D). Fixed a real pre-existing bug here: the old version's
+// getAvailability() hardcoded `blocks: []`, so this function never
+// actually consulted real admin/agency-approved blocks at all -- only
+// reservations and this agency's own pending block requests (myBlocks).
+// A room already blocked by Vilu could silently show as "available" here.
+// It's caught today by approveBlockRequest()'s own conflict check before
+// any real block is created, but that's a downstream safety net, not a
+// substitute for accurate availability -- exactly the "exact overlap
+// semantics, do not invent a second formula" requirement this phase set.
+window.isRoomAvailable=function(rn,ci,co,excludeId){
+  var d = new Date(ci+'T00:00:00Z'), end = new Date(co+'T00:00:00Z');
+  while(d < end){
+    var ds = d.toISOString().slice(0,10);
+    var cell = _availCache.byCell[rn+'|'+ds];
+    if(cell && cell.state !== 'AVAILABLE' && cell.ownReservationId !== excludeId){
+      return { available:false, reason: cell.state==='BLOCKED' ? 'Blocked' : 'Booked' };
+    }
+    d.setUTCDate(d.getUTCDate()+1);
+  }
+  if(typeof myBlocks!=='undefined'){
+    for(var k=0;k<myBlocks.length;k++){
+      var mb=myBlocks[k];
+      if(mb.rn!==rn) continue;
+      if(mb.ci<co && mb.co>ci) return { available:false, reason:'Your block', mine:true };
+    }
+  }
+  return { available:true };
+};
 window.submitBlock=async function(){
   if(!currentAgency)return;
   var ci=document.getElementById('blk-ci').value;
@@ -2773,7 +2968,7 @@ window.submitBlock=async function(){
   var numRooms=parseInt(rmEl?rmEl.value:1)||1;
   var note=(document.getElementById('blk-note').value||'').trim();
   if(!ci||!co||co<=ci){alert('Select valid dates');return;}
-  await fetchLiveAvailability();
+  await fetchLiveAvailability(ci, co);
   var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});
   if(!availRooms.length){alert('No rooms available for these dates');return;}
   var toBlock=availRooms.slice(0,Math.min(numRooms,availRooms.length));
@@ -2796,9 +2991,16 @@ window.submitBlock=async function(){
   document.getElementById('blk-ci').value='';document.getElementById('blk-co').value='';if(rmEl)rmEl.value=1;document.getElementById('blk-note').value='';
   if(typeof drawMyBlocks==='function')drawMyBlocks();
 };
-window.checkAvailability=function(){var ci=document.getElementById('av-ci').value;var co=document.getElementById('av-co').value;var el=document.getElementById('av-results');if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Select valid dates.</p>';return;}var nights=Math.round((new Date(co)-new Date(ci))/864e5);var availRooms=ROOMS_LIST.filter(function(r){return isRoomAvailable(r.id,ci,co).available;});var total=ROOMS_LIST.length;el.innerHTML='<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:12px">'+fd(ci)+' \u2192 '+fd(co)+' \u00b7 '+nights+' night'+(nights>1?'s':'')+'</div><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:16px"><div style="font-size:var(--font-size-3xl);font-weight:800;color:#15803d">'+availRooms.length+'<span style="font-size:var(--font-size-md);font-weight:600;margin-left:6px">of '+total+' rooms available</span></div><div style="font-size:var(--font-size-sm);color:#6b7280;margin-top:4px">'+fd(ci)+' \u2192 '+fd(co)+'</div></div>'+(availRooms.length>0?'<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px 20px"><label style="font-size:var(--font-size-sm);font-weight:700;color:#374151;display:block;margin-bottom:10px">HOW MANY ROOMS DO YOU WANT?</label><div style="display:flex;align-items:center;gap:12px"><input type="number" id="av-room-count" min="1" max="'+availRooms.length+'" value="1" style="width:80px;padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:var(--font-size-xl);font-weight:700;text-align:center;font-family:inherit"><span style="font-size:var(--font-size-base);color:#6b7280">rooms (max '+availRooms.length+')</span></div><div style="display:flex;gap:8px;margin-top:14px"><button type="button" onclick="goBlockRooms(\''+ci+'\',\''+co+'\')" style="background:#f59e0b;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Lock Block rooms</button><button type="button" onclick="goBookPackage(\''+ci+'\',\''+co+'\')" style="background:#0096c7;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:var(--font-size-sm);font-weight:700;cursor:pointer;font-family:inherit">Book a package</button></div></div>':'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;color:#b91c1c;font-size:var(--font-size-base);font-weight:600">No rooms available for these dates.</div>');};
-window.goBlockRooms=function(ci,co){var count=parseInt(document.getElementById('av-room-count').value)||1;showTab('blockroom',document.querySelector('.tab'));setTimeout(function(){var a=document.getElementById('blk-ci'),b=document.getElementById('blk-co'),c=document.getElementById('blk-rm');if(a)a.value=ci;if(b)b.value=co;if(c)c.value=count;},300);};
-window.goBookPackage=function(ci,co){var count=parseInt(document.getElementById('av-room-count').value)||1;window._selectedRoomCount=count;showTab('packages',document.querySelector('.tab'));setTimeout(function(){var ex=document.getElementById('pkg-notice');if(ex)ex.remove();var n=document.createElement('div');n.id='pkg-notice';n.style.cssText='background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:var(--font-size-sm);color:#1d4ed8;font-weight:600';n.innerHTML='Booking '+count+' room'+(count>1?'s':'')+' \u00b7 '+fd(ci)+' \u2192 '+fd(co);var p=document.getElementById('pkg-cards');if(p&&p.parentElement)p.parentElement.insertBefore(n,p);},300);};
+// The old window.checkAvailability/goBlockRooms/goBookPackage trio that
+// used to live here (2026-09-11, Phase D) is removed, not left dead: it
+// silently OVERWROTE the earlier checkAvailability() declaration (both were
+// plain top-level `function`/`window.` assignments to the same name, so
+// this one always won at call time regardless of source order) and relied
+// on #av-room-count, an element this tab no longer renders now that
+// searchAvailability() shows per-category counts instead (Part 7's own
+// example output: "Deluxe Family: 2 rooms available", not a single global
+// count + follow-up room-count picker). Its "Lock Block rooms"/"Book a
+// package" quick-links are superseded by picking the category directly.
 window.doSignout=function(){currentAgency=null;try{firebase.auth().signOut();}catch(e){}var ls=document.getElementById('login-screen'),aa=document.getElementById('agency-app'),em=document.getElementById('ag-email'),ps=document.getElementById('ag-pass'),err=document.getElementById('login-err');if(aa){aa.style.display='none';aa.className='app';}if(ls)ls.style.display='';if(em)em.value='';if(ps)ps.value='';if(err){err.textContent='';err.style.display='none';}};
 var _origSubmitAgBk=typeof submitAgencyBooking!=='undefined'?submitAgencyBooking:null;window.submitAgencyBooking=function(){if(_origSubmitAgBk)_origSubmitAgBk();setTimeout(function(){if(!myBookings||!myBookings.length)return;var bk=myBookings[0];try{var q=JSON.parse(localStorage.getItem('vilu_agency_new_bk')||'[]');if(!q.find(function(r){return r.id===bk.id;})){q.push(bk);localStorage.setItem('vilu_agency_new_bk',JSON.stringify(q));}}catch(e){}try{var bc=new BroadcastChannel('vilu_pms');bc.postMessage({type:'NEW_BOOKING',reservation:bk});bc.close();}catch(e){}},500);};
 // Phase 47 security audit (2026-09-06): removed a dead session-restore IIFE
