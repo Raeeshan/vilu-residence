@@ -165,8 +165,8 @@ section('Case E — Manage Agency Packages panel: reuses the existing per-agency
     assert.match(PMS, /fully independent from the master template and every other agency/);
   });
   const listSrc = extractByStart(PMS, /function renderAgencyPkgList\(\)\s*\{/);
-  test('each package row shows nights, agency price (labeled Agency price, never confused with website guest price), and an explicit Assigned\\/Not assigned text label', () => {
-    assert.match(listSrc, /Agency price \$'\+price/);
+  test('each package row shows nights, agency price (labeled Vilu Agency Rate as of the 2026-09-11 Agency Sales Workflow Phase A relabel, never confused with website guest price), and an explicit Assigned\\/Not assigned text label', () => {
+    assert.match(listSrc, /Vilu Agency Rate \$'\+price/);
     assert.match(listSrc, /'Assigned':'Not assigned'/);
   });
   test('label is driven by the real `active` field already read by the Agency Portal -- not a newly invented field', () => {
@@ -194,12 +194,20 @@ section('Case F — Per-agency package editor: BASIC/PRICING/CONTENT/PORTAL grou
   const requiredIds = [
     'agy-pkg-name', 'agy-pkg-emoji', 'agy-pkg-nights', 'agy-pkg-price', 'agy-pkg-childdiscount',
     'agy-pkg-desc', 'agy-pkg-includes', 'agy-pkg-activities', 'agy-pkg-addons',
-    'agy-pkg-guestcharge', 'agy-pkg-commission',
   ];
   requiredIds.forEach(id => {
     test(`#${id} is preserved -- "do not alter field names/storage just for presentation"`, () => {
       assert.match(formHTML, new RegExp(`id="${id}"`));
     });
+  });
+  // agy-pkg-guestcharge/agy-pkg-commission (Margin Ledger) were intentionally
+  // REMOVED by the 2026-09-11 Agency Sales Workflow Phase A task, which
+  // explicitly supersedes this file's original "preserve every id" rule for
+  // just these two -- see test/agency-quotes-phase-a.test.js Case A for the
+  // removal proof.
+  test('#agy-pkg-guestcharge / #agy-pkg-commission (Margin Ledger) are intentionally removed, not preserved -- see agency-quotes-phase-a.test.js', () => {
+    assert.doesNotMatch(formHTML, /id="agy-pkg-guestcharge"/);
+    assert.doesNotMatch(formHTML, /id="agy-pkg-commission"/);
   });
   test('a Status control (BASIC) shows Assigned/Not assigned and can toggle it without leaving the form', () => {
     assert.match(formHTML, /id="agy-pkg-status-label"/);

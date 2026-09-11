@@ -2699,7 +2699,7 @@ Suite</textarea></div>
       </div>
 
       <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">PRICING</div>
-      <div class="fg"><label>Agency price ($/person)</label><input type="number" id="agy-pkg-price" min="0" step="5"></div>
+      <div class="fg"><label>Vilu Agency Rate ($/person) <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">— what Vilu charges this agency, not the guest selling price</span></label><input type="number" id="agy-pkg-price" min="0" step="5"></div>
       <div class="fg"><label>Child Discount (%) <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">— off the adult price, per child. 0 if unset</span></label><input type="number" id="agy-pkg-childdiscount" min="0" max="100" step="5" placeholder="0"></div>
       <div id="agy-pkg-global-notes" style="font-size:var(--font-size-xs);color:#6b7280;background:#f9fafb;border-radius:8px;padding:8px 10px;margin-bottom:4px"></div>
 
@@ -2714,18 +2714,6 @@ Full-Board | 40 | /day"></textarea></div>
 
       <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">PORTAL</div>
       <p style="font-size:var(--font-size-xs);color:#9ca3af;margin:-2px 0 10px">Source: Agency-specific copy — fully independent from the master template and every other agency.</p>
-      <!-- MARGIN LEDGER — this agency's own internal Guest Charge/Commission
-           tracking. Purely informational: never read by pricing, booking
-           totals, or any generated document. Visible only here (this
-           agency's own page in PMS admin) and in that agency's own portal. -->
-      <div style="margin:0 0 16px;padding:14px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:10px">
-        <div style="font-weight:700;font-size:var(--font-size-sm);color:#374151;margin-bottom:2px"><i class="ti ti-notebook" style="margin-right:4px"></i>Margin Ledger</div>
-        <div style="font-size:var(--font-size-xs);color:#9ca3af;margin-bottom:10px">Internal tracking only, for this agency's own reference. Never affects Agency Price, bookings, or any generated document.</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="fg" style="margin:0"><label>Guest Charge</label><input type="number" id="agy-pkg-guestcharge" min="0" step="5" placeholder="0"></div>
-          <div class="fg" style="margin:0"><label>Commission</label><input type="number" id="agy-pkg-commission" min="0" step="5" placeholder="0"></div>
-        </div>
-      </div>
 
       <div style="display:flex;gap:8px">
         <button class="btn p" style="flex:1" onclick="saveAgencyPkgForm()"><i class="ti ti-device-floppy"></i>Save package</button>
@@ -8761,9 +8749,9 @@ function renderAgencyPkgList(){
     var assigned = pkg.active !== false;
     return '<div style="border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       + '<div><div style="font-weight:700;font-size:var(--font-size-base)">'+(pkg.emoji||'📦')+' '+pkg.name+'</div>'
-      + '<div style="font-size:var(--font-size-sm);color:#6b7280">'+pkg.nights+' night'+(pkg.nights>1?'s':'')+' · Agency price $'+price+'/person'+(pkg.childDiscountPct?' · Child discount '+pkg.childDiscountPct+'%':'')+'</div>'
+      + '<div style="font-size:var(--font-size-sm);color:#6b7280">'+pkg.nights+' night'+(pkg.nights>1?'s':'')+' · Vilu Agency Rate $'+price+'/person'+(pkg.childDiscountPct?' · Child discount '+pkg.childDiscountPct+'%':'')+'</div>'
       + '<div style="font-size:var(--font-size-xs);font-weight:700;margin-top:4px;color:'+(assigned?'#059669':'#9ca3af')+'">'+(assigned?'Assigned':'Not assigned')+'</div>'
-      + ((pkg.guestCharge||pkg.commission) ? '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px"><i class="ti ti-notebook" style="margin-right:2px"></i>Margin Ledger — Guest Charge $'+(pkg.guestCharge||0)+' · Commission $'+(pkg.commission||0)+'</div>' : '') + '</div>'
+      + '</div>'
       + '<div style="display:flex;gap:4px;flex-shrink:0">'
       + '<button class="ab" title="'+(assigned?'Mark Not assigned':'Mark Assigned')+'" onclick="toggleAgencyPkgActive(\''+pkg.id+'\')"><i class="ti ti-'+(assigned?'eye-off':'eye')+'"></i></button>'
       + '<button class="ab" title="Edit" onclick="openAgencyPkgForm(\''+pkg.id+'\')"><i class="ti ti-edit"></i></button>'
@@ -8794,6 +8782,25 @@ async function toggleAgencyPkgActive(pid){
   renderAgencyPkgList();
 }
 
+// ══════════════════════════════════════════════
+// AGENCY QUOTES — Phase A foundation only (2026-09-11)
+// ══════════════════════════════════════════════
+// agency_quotes/{quoteId} is agency-owned (create/read/update their own,
+// enforced in firestore.rules -- see the `agency_quotes` match block).
+// No Agency Quotes admin page exists yet (Phase B/C); this is a read-only
+// helper so that future page can fetch without re-deriving the query.
+// Nothing in the current UI calls this.
+async function fetchAgencyQuotes(agencyId){
+  if(!agencyId) return [];
+  try {
+    var snap = await fsDb.collection('agency_quotes').where('agencyId','==',agencyId).get();
+    return snap.docs.map(function(d){ return d.data(); });
+  } catch(e) {
+    console.error('fetchAgencyQuotes failed', e);
+    return [];
+  }
+}
+
 function openAgencyPkgForm(pid){
   _agyPkgEditId = pid;
   var pkg = pid ? _agyPkgWorking.find(function(p){return p.id===pid;}) : null;
@@ -8806,8 +8813,6 @@ function openAgencyPkgForm(pid){
   document.getElementById('agy-pkg-includes').value = pkg ? (pkg.includes||[]).join('\n') : '';
   document.getElementById('agy-pkg-activities').value = pkg ? (pkg.activities||[]).join('\n') : '';
   document.getElementById('agy-pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
-  document.getElementById('agy-pkg-guestcharge').value = pkg ? (pkg.guestCharge||'') : '';
-  document.getElementById('agy-pkg-commission').value = pkg ? (pkg.commission||'') : '';
   renderAgencyPkgStatusLabel(pkg);
   var toggleBtn = document.getElementById('agy-pkg-status-toggle-btn');
   if(toggleBtn) toggleBtn.style.display = pkg ? '' : 'none';
@@ -8877,8 +8882,17 @@ async function saveAgencyPkgForm(){
   // already had -- previously this always forced active:true on every save,
   // silently re-assigning a package that had been marked Not assigned. New
   // packages still default to Assigned.
+  //
+  // Margin Ledger removal (2026-09-11): guestCharge/commission are no longer
+  // read from (removed) form inputs or written by this function. Building
+  // `pkg` from Object.assign({}, existingPkg, {...}) rather than a bare
+  // object literal means any guestCharge/commission already stored on an
+  // OLDER package survives untouched as inert legacy data on every future
+  // edit, instead of silently disappearing the next time someone changes
+  // that package's name or price -- "do not delete, do not migrate" applies
+  // to every save, not just the first one after this change shipped.
   var existingPkg = _agyPkgEditId ? _agyPkgWorking.find(function(p){return p.id===_agyPkgEditId;}) : null;
-  var pkg = {
+  var pkg = Object.assign({}, existingPkg, {
     id: _agyPkgEditId || ('AGYPKG'+Date.now()),
     name: name,
     emoji: (document.getElementById('agy-pkg-emoji').value||'📦').trim(),
@@ -8890,12 +8904,10 @@ async function saveAgencyPkgForm(){
     includes: includes,
     activities: activities,
     addOns: addOns,
-    guestCharge: +(document.getElementById('agy-pkg-guestcharge').value||0),
-    commission: +(document.getElementById('agy-pkg-commission').value||0),
     color: '#00b4d8',
     active: existingPkg ? !!existingPkg.active : true,
     channel: 'agency'
-  };
+  });
   if(_agyPkgEditId){
     var idx = _agyPkgWorking.findIndex(function(p){return p.id===_agyPkgEditId;});
     if(idx>-1) _agyPkgWorking[idx] = pkg;

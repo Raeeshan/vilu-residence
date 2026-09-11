@@ -4,6 +4,7 @@
     "build:i18n": "node build-i18n-pages.js"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "cheerio": "^1.2.0"
   }
 }

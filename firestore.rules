@@ -383,6 +383,35 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Agency Sales Workflow Phase A (2026-09-11): each agency's own private
+    // quotes -- Vilu's net cost stays private to that agency, the agency
+    // sets its own guest selling total (see agency_quotes model in
+    // vilu-agency-portal.html's createDraftAgencyQuote()). Keyed by agencyId
+    // (the Firebase Auth uid), matching the existing reservations/
+    // block_requests convention -- NOT by email like agency_packages above.
+    // No quote is ever created/read by anything but its own owning agency
+    // or Admin/Staff/Manager; there is no broad-collection read anywhere.
+    match /agency_quotes/{quoteId} {
+      allow create: if request.auth != null
+        && request.resource.data.agencyId == request.auth.uid;
+
+      allow read: if request.auth != null
+        && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+
+      // Owning agency may update its own quote only while it is still
+      // DRAFT, and can never change which agency owns it. Once FINALIZED,
+      // only Admin/Staff/Manager can touch it -- Phase A's deliberately
+      // simple immutability gate; no versioning/history yet (Part 6: "do
+      // not over-engineer versioning yet").
+      allow update: if isAdmin() || isStaff() || isManagerRole()
+        || (request.auth != null
+            && resource.data.agencyId == request.auth.uid
+            && request.resource.data.agencyId == resource.data.agencyId
+            && resource.data.status == 'DRAFT');
+
+      allow delete: if false;
+    }
+
     match /room_prices/{roomId} {
       allow read: if true;
       allow write: if isAdmin() || isStaff() || isManagerRole();
