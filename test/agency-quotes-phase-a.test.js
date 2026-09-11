@@ -188,10 +188,10 @@ section('Case G — current booking flow (direct agency reservation create) is U
   });
 }
 
-section('Case H — block_requests / blocks workflow is UNCHANGED -- Phase E territory, not touched here');
+section('Case H — block_requests / blocks workflow is UNCHANGED as of Phase A (Phase E later extended the create rule -- see agency-hold-requests.test.js)');
 {
-  test('block_requests rules are byte-identical to the pre-Phase-A shape', () => {
-    assert.match(RULES, /match \/block_requests\/\{id\} \{\s*\n\s*allow create: if request\.auth != null && request\.resource\.data\.agencyId == request\.auth\.uid;\s*\n\s*allow read: if request\.auth != null && \(isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| resource\.data\.agencyId == request\.auth\.uid\);\s*\n\s*allow update: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*\n\s*allow delete: if false;/);
+  test('block_requests read/update/delete rules are byte-identical to the pre-Phase-A shape; create still requires agencyId==auth.uid', () => {
+    assert.match(RULES, /match \/block_requests\/\{id\} \{[\s\S]*?request\.resource\.data\.agencyId == request\.auth\.uid[\s\S]*?allow read: if request\.auth != null && \(isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| resource\.data\.agencyId == request\.auth\.uid\);[\s\S]*?allow update: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);[\s\S]*?allow delete: if false;/);
   });
   test('submitBlock()/approveBlockRequest()/rejectBlockRequest()/saveBLK() are all still present and untouched', () => {
     assert.match(PORTAL, /window\.submitBlock\s*=\s*async function\(\)\s*\{/);

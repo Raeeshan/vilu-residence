@@ -394,8 +394,8 @@ section('Case M — Website Packages / agency_packages / block_requests / reserv
   test('agency_packages rules unchanged (admin write-only)', () => {
     assert.match(RULES, /match \/agency_packages\/\{email\} \{\s*\n\s*allow read: if request\.auth != null &&\s*\n\s*\(request\.auth\.token\.email\.lower\(\) == email \|\| isAdmin\(\)\);\s*\n\s*allow write: if isAdmin\(\);/);
   });
-  test('block_requests rules unchanged', () => {
-    assert.match(RULES, /match \/block_requests\/\{id\} \{\s*\n\s*allow create: if request\.auth != null && request\.resource\.data\.agencyId == request\.auth\.uid;/);
+  test('block_requests rules unchanged as of this phase (Phase E later extended its create rule -- see agency-hold-requests.test.js)', () => {
+    assert.match(RULES, /match \/block_requests\/\{id\} \{[\s\S]*?request\.resource\.data\.agencyId == request\.auth\.uid/);
   });
   test('reservations create rule still includes the (unchanged, Phase F territory) direct-agency-create branch', () => {
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));

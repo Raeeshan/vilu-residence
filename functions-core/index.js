@@ -17,6 +17,13 @@
 //     enrichment only, reusing the exact overlap math already used by
 //     writeReservation/hasBlockConflict/isOcc. See the comment above that
 //     export for why blocks.reason can't just be filtered client-side.
+//   approveAgencyHoldRequest / rejectAgencyHoldRequest /
+//     releaseAgencyHoldRequest / expireAgencyHoldRequests  Agency Sales
+//     Workflow Phase E -- temporary room hold requests, reusing
+//     block_requests (requestType:'AGENCY_HOLD') rather than a new
+//     collection. Approval recomputes availability and creates the real
+//     block inside one Firestore transaction; a scheduled sweep releases
+//     expired holds automatically. See the comment above these exports.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -706,4 +713,170 @@ exports.getAgencyAvailability = onCall({ region: 'us-central1', maxInstances: 10
     days,
     ownReservations,
   };
+});
+
+// ── Agency Sales Workflow Phase E: Temporary Room Hold ──────────────────
+// Reuses block_requests (no separate dedicated hold-request collection was
+// created) with requestType:'AGENCY_HOLD' -- a different,
+// single-room shape from the pre-existing legacy multi-room group-block
+// request (created by submitBlock() in vilu-agency-portal.html, lowercase
+// status, no requestType). The two coexist in the same collection and are
+// never cross-processed: approveBlockRequest()/rejectBlockRequest() (in
+// vilu-unified.html, unchanged by this phase) only ever query
+// status=='pending' (lowercase); these new functions only ever query/act
+// on requestType=='AGENCY_HOLD' with UPPERCASE status values.
+//
+// Why approval/rejection/release are callables and not a client write:
+// approving a hold creates REAL inventory state (a `blocks` doc) and must
+// recheck availability at the moment of approval, not trust whatever was
+// true when the agency first asked -- and the block-creation + block_
+// request-status-update must not be two independently-failable client
+// writes (that's exactly the non-atomicity the legacy approveBlockRequest()
+// already has, which this phase deliberately does better for, without
+// touching the legacy path itself). Every read AND write below happens
+// inside one Firestore transaction, so "recheck availability, then act" can
+// never race against another approval (or a reservation landing in the
+// same room) between the check and the write.
+//
+// Block reason privacy (Part 11): the real `blocks` doc created on
+// approval always gets the generic reason 'Agency Hold' -- never the
+// agency name, guest name, quote reference, or note. Those stay only in
+// block_requests, which is read-access-scoped (own agency or admin/staff/
+// manager) -- `blocks` itself is still public-read (unchanged, see Phase
+// D's own note on why that rule can't be tightened without breaking the
+// public website), so this is the one thing that must never leak into it.
+async function agencyHoldAvailable(tx, roomId, arrivalDate, departureDate) {
+  const availRef = db.collection('room_availability').doc(roomId);
+  const availSnap = await tx.get(availRef);
+  const bookings = (availSnap.exists && availSnap.data().bookings) || [];
+  const resClash = bookings.some((b) => overlaps(b.from, b.to, arrivalDate, departureDate));
+  if (resClash) return false;
+  const blocksQuery = db.collection('blocks').where('room_id', '==', roomId);
+  const blocksSnap = await tx.get(blocksQuery);
+  const blkClash = blocksSnap.docs.some((doc) => overlaps(doc.data().from_date, doc.data().to_date, arrivalDate, departureDate));
+  return !blkClash;
+}
+
+function requireStaffLike(role) {
+  if (role !== 'admin' && role !== 'staff' && role !== 'manager') {
+    throw new HttpsError('permission-denied', 'Admin/Staff/Manager access only.');
+  }
+}
+
+exports.approveAgencyHoldRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('block_requests').doc(requestId);
+
+  const settingsSnap = await db.collection('website_content').doc('agency_booking_settings').get();
+  const defaultHoldHours = (settingsSnap.exists && Number(settingsSnap.data().defaultHoldHours)) || 24;
+
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(reqRef);
+    if (!snap.exists) throw new HttpsError('not-found', 'Hold request not found.');
+    const req = snap.data();
+    if (req.requestType !== 'AGENCY_HOLD') throw new HttpsError('failed-precondition', 'Not an agency hold request.');
+    if (req.status !== 'PENDING') throw new HttpsError('failed-precondition', 'Request is not pending (already ' + req.status + ').');
+
+    const available = await agencyHoldAvailable(tx, req.roomId, req.arrivalDate, req.departureDate);
+    if (!available) {
+      // Do NOT create a block, do NOT change status -- the request stays
+      // PENDING so staff can reject it and ask the agency to resubmit
+      // (Part 9). Nothing is written here at all.
+      return { availabilityChanged: true };
+    }
+
+    const now = new Date();
+    const approvedHoldUntil = new Date(now.getTime() + defaultHoldHours * 3600 * 1000).toISOString();
+    const blockId = 'BL' + Date.now() + '-' + req.roomId;
+    tx.set(db.collection('blocks').doc(blockId), {
+      id: blockId, room_id: req.roomId, from_date: req.arrivalDate, to_date: req.departureDate, reason: 'Agency Hold',
+    });
+    tx.set(reqRef, {
+      status: 'APPROVED', approvedAt: now.toISOString(), approvedBy: email,
+      approvedHoldUntil, blockId,
+    }, { merge: true });
+    return { approvedHoldUntil, blockId, roomId: req.roomId };
+  });
+});
+
+exports.rejectAgencyHoldRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('block_requests').doc(requestId);
+  const snap = await reqRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Hold request not found.');
+  const req = snap.data();
+  if (req.requestType !== 'AGENCY_HOLD') throw new HttpsError('failed-precondition', 'Not an agency hold request.');
+  if (req.status !== 'PENDING') throw new HttpsError('failed-precondition', 'Request is not pending (already ' + req.status + ').');
+  await reqRef.set({ status: 'REJECTED', approvedAt: new Date().toISOString(), approvedBy: email }, { merge: true });
+  return { status: 'REJECTED' };
+});
+
+// Admin/Manager manually ending an APPROVED hold early (Part 14). Chose
+// CANCELLED over inventing a 6th "RELEASED" status -- Part 3's own status
+// enum only lists PENDING/APPROVED/REJECTED/EXPIRED/CANCELLED, and
+// CANCELLED already reads naturally as "ended before its normal course"
+// for either an early manual release or (potentially, later) an agency-
+// initiated cancellation. Deleting the block is idempotent -- if it's
+// already gone for any reason, that's treated as success, not an error.
+exports.releaseAgencyHoldRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('block_requests').doc(requestId);
+  const snap = await reqRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Hold request not found.');
+  const req = snap.data();
+  if (req.requestType !== 'AGENCY_HOLD') throw new HttpsError('failed-precondition', 'Not an agency hold request.');
+  if (req.status !== 'APPROVED') throw new HttpsError('failed-precondition', 'Request is not an active approved hold.');
+  if (req.blockId) {
+    try { await db.collection('blocks').doc(req.blockId).delete(); } catch (e) { /* already gone -- fine */ }
+  }
+  await reqRef.set({ status: 'CANCELLED', releasedAt: new Date().toISOString(), releasedBy: email }, { merge: true });
+  return { status: 'CANCELLED' };
+});
+
+// Scheduled sweep, same pattern/timezone convention as nightlyReconcile
+// above. Every 15 minutes rather than once nightly -- holds are only
+// 1-168 hours long (see the admin-configurable defaultHoldHours setting),
+// so a nightly-only sweep would leave an expired hold blocking real
+// inventory for up to a day. Two equality filters (requestType, status)
+// keep this a plain, automatically-indexed query -- the approvedHoldUntil
+// comparison is done in memory across the (small, single-property) result
+// set rather than as a third Firestore filter, avoiding any need for a
+// manually-deployed composite index.
+//
+// Idempotency (Part 27 — "function runs twice, block removed once safely,
+// no error/duplicate side effects"): each request is handled in its own
+// transaction that re-reads the request fresh and no-ops if it's no longer
+// APPROVED (already handled by this same sweep, a concurrent run, or a
+// manual release) -- and one request's failure is caught and skipped so it
+// never aborts the sweep for the rest.
+exports.expireAgencyHoldRequests = onSchedule({ schedule: '*/15 * * * *', timeZone: 'Indian/Maldives' }, async () => {
+  const nowIso = new Date().toISOString();
+  const snap = await db.collection('block_requests')
+    .where('requestType', '==', 'AGENCY_HOLD')
+    .where('status', '==', 'APPROVED')
+    .get();
+  const due = snap.docs.filter((doc) => (doc.data().approvedHoldUntil || '') <= nowIso);
+  for (const doc of due) {
+    const reqRef = doc.ref;
+    try {
+      await db.runTransaction(async (tx) => {
+        const freshSnap = await tx.get(reqRef);
+        if (!freshSnap.exists || freshSnap.data().status !== 'APPROVED') return; // already handled
+        const req = freshSnap.data();
+        if (req.blockId) tx.delete(db.collection('blocks').doc(req.blockId));
+        tx.set(reqRef, { status: 'EXPIRED', expiredAt: new Date().toISOString() }, { merge: true });
+      });
+    } catch (e) {
+      // One bad request must never abort the sweep for the rest.
+    }
+  }
 });

@@ -286,8 +286,8 @@ section('Case H — Phase B (assigned-package) is completely unaffected by Phase
 
 section('Case I — DO-NOT-TOUCH list preserved (Website Packages, block_requests, blocks, availability, reservations, tax settings, document vault)');
 {
-  test('block_requests / blocks rules unchanged', () => {
-    assert.match(RULES, /match \/block_requests\/\{id\} \{\s*\n\s*allow create: if request\.auth != null && request\.resource\.data\.agencyId == request\.auth\.uid;/);
+  test('block_requests / blocks rules unchanged as of this phase (Phase E later extended block_requests\' create rule -- see agency-hold-requests.test.js)', () => {
+    assert.match(RULES, /match \/block_requests\/\{id\} \{[\s\S]*?request\.resource\.data\.agencyId == request\.auth\.uid/);
     assert.match(RULES, /match \/blocks\/\{id\} \{\s*\n\s*allow read: if true;\s*\n\s*allow write: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);\s*\n\s*\}/);
   });
   test('reservations create rule (direct agency create) unchanged -- Phase F territory, not touched', () => {

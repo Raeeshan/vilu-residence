@@ -1585,6 +1585,24 @@ body.pms-mode { overflow:hidden; }
     <h3>Pending block requests (from agencies)</h3>
     <div id="block-requests-list"><p style="font-size:var(--font-size-sm);color:#9ca3af">No pending requests.</p></div>
   </div>
+  <!-- Agency Sales Workflow Phase E: a distinct queue for the NEW
+       single-room AGENCY_HOLD request type (requestType:'AGENCY_HOLD',
+       uppercase status) -- reuses block_requests but is a different shape
+       from the legacy multi-room group-block requests above, so it's kept
+       visually/functionally separate rather than merged into the same
+       list. Approve/Reject go through Cloud Functions
+       (approveAgencyHoldRequest/rejectAgencyHoldRequest), not a direct
+       client write -- see the comment above those exports. -->
+  <div class="card">
+    <h3><i class="ti ti-clock-hour-4" style="margin-right:6px"></i>Agency Hold Requests</h3>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Temporary room holds requested from the Agency Portal (quotation-linked or availability-linked). Approving creates a real, time-limited inventory block; it never creates a reservation.</p>
+    <div id="agency-hold-requests-list"><p style="font-size:var(--font-size-sm);color:#9ca3af">No pending hold requests.</p></div>
+  </div>
+  <div class="card">
+    <h3><i class="ti ti-lock-open" style="margin-right:6px"></i>Active Agency Holds</h3>
+    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Approved holds not yet expired. Release ends the hold immediately (Part 14) -- the hold's own scheduled expiry (see functions-core/index.js's expireAgencyHoldRequests) handles the normal case automatically.</p>
+    <div id="agency-active-holds-list"><p style="font-size:var(--font-size-sm);color:#9ca3af">No active holds.</p></div>
+  </div>
 </div>
 
 <div class="sec" id="s-cfg">
@@ -2060,9 +2078,14 @@ body.pms-mode { overflow:hidden; }
         <h3 style="margin:0"><i class="ti ti-settings" style="margin-right:6px"></i>Agency Booking Rules</h3>
         <span class="pkg-web-badge" style="color:#6b7280;background:#f9fafb;border-color:#e5e7eb">GLOBAL DEFAULT</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
         <div class="fg" style="margin:0"><label>Domestic flight surcharge (USD/person/one-way)</label><input type="number" id="agy-flight-surcharge" min="0" step="5" placeholder="110"></div>
         <div class="fg" style="margin:0"><label>Default additional night rate (USD/person/night)</label><input type="number" id="agy-extra-night-rate" min="0" step="5" placeholder="40"></div>
+        <!-- Agency Sales Workflow Phase E: how long an APPROVED temporary
+             room hold stays valid before auto-expiry (expireAgencyHoldRequests
+             in functions-core/index.js). Agencies never choose this -- the
+             hold-request form only ever displays it, read-only. -->
+        <div class="fg" style="margin:0"><label>Default hold duration (hours)</label><input type="number" id="agy-hold-hours" min="1" max="168" step="1" placeholder="24"></div>
       </div>
       <button class="btn p" onclick="saveAgencyBookingSettings()"><i class="ti ti-device-floppy"></i>Save</button>
       <span id="agy-settings-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
@@ -8040,6 +8063,8 @@ function drawBlk(){
   if(!document.getElementById('bl-to2').value)document.getElementById('bl-to2').value=D(3);
   drawBlkLst();
   drawBlockRequests();
+  drawAgencyHoldRequests();
+  drawActiveAgencyHolds();
 }
 
 // ── AGENCY BLOCK REQUESTS (pending approval) ──
@@ -8110,6 +8135,109 @@ async function rejectBlockRequest(id){
     toast('⚠️ Could not reject — please try again');
   }
 }
+
+// ── AGENCY HOLD REQUESTS (Phase E — separate queue/shape from the legacy
+// multi-room block requests above; requestType:'AGENCY_HOLD', uppercase
+// status). Approve/Reject/Release all go through Cloud Functions -- see
+// the comments on those exports in functions-core/index.js for why
+// (availability must be rechecked atomically at approval time, and the
+// real `blocks` write + block_request status update must not be two
+// separate, independently-failable client writes). This function only
+// ever reads and renders; it never writes block_requests/blocks itself. -->
+async function drawAgencyHoldRequests(){
+  var el = document.getElementById('agency-hold-requests-list');
+  if (!el) return;
+  var reqs = [];
+  try {
+    var snap = await fsDb.collection('block_requests').where('requestType','==','AGENCY_HOLD').where('status','==','PENDING').get();
+    snap.forEach(function(d){ reqs.push(d.data()); });
+    reqs.sort(function(a,b){ return (a.createdAt||'').localeCompare(b.createdAt||''); });
+  } catch(e) { console.error('drawAgencyHoldRequests failed', e); }
+  if (!reqs.length) { el.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">No pending hold requests.</p>'; return; }
+  el.innerHTML = reqs.map(function(r){
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap">'
+      + '<div>'
+        + '<div style="font-size:var(--font-size-sm);font-weight:700">'+esc(r.agencyName||r.agencyEmail)+' — '+esc(r.guestName||'(no guest name)')+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+esc(rNm(r.roomId)||r.roomId||r.roomCategory||'')+' · '+fd(r.arrivalDate)+'–'+fd(r.departureDate)+' · requested '+(r.requestedHoldHours||'?')+'h hold'+(r.quoteReference?' · Quote '+esc(r.quoteReference):'')+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px">Requested '+formatMaldivesDateTime(r.createdAt)+'</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px">'
+      + '<button class="ab" title="Approve" style="color:#059669" onclick="approveAgencyHoldRequest(\''+r.id+'\')"><i class="ti ti-check"></i></button>'
+      + '<button class="ab" title="Reject" style="color:#dc2626" onclick="rejectAgencyHoldRequest(\''+r.id+'\')"><i class="ti ti-x"></i></button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function approveAgencyHoldRequest(id){
+  try {
+    var callable = fsFunctions.httpsCallable('approveAgencyHoldRequest');
+    var result = await callable({ requestId: id });
+    if (result.data && result.data.availabilityChanged) {
+      toast('⚠️ Availability changed — cannot approve. Reject and ask the agency to resubmit.');
+    } else {
+      toast('✓ Hold approved — room '+esc(result.data.roomId||'')+' held until '+formatMaldivesDateTime(result.data.approvedHoldUntil));
+    }
+  } catch(e) {
+    console.error('approveAgencyHoldRequest failed', e);
+    toast('⚠️ Could not approve — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencyHoldRequests();
+  drawActiveAgencyHolds();
+}
+
+async function rejectAgencyHoldRequest(id){
+  try {
+    var callable = fsFunctions.httpsCallable('rejectAgencyHoldRequest');
+    await callable({ requestId: id });
+    toast('Hold request rejected');
+  } catch(e) {
+    console.error('rejectAgencyHoldRequest failed', e);
+    toast('⚠️ Could not reject — '+((e && e.message) || 'please try again'));
+  }
+  drawAgencyHoldRequests();
+}
+
+// Admin/Manager may end an APPROVED hold early (Part 14) -- releases the
+// real block and marks the request CANCELLED (chosen from Part 3's own
+// status enum rather than inventing a 6th "RELEASED" value). Not reachable
+// from the pending-queue list above (that only ever shows PENDING
+// requests) -- exposed instead from wherever an approved hold is later
+// listed for operational review, e.g. a future admin "active holds" view;
+// wired here as a standalone callable-invoker other admin UI can call.
+async function releaseAgencyHoldRequest(id){
+  try {
+    var callable = fsFunctions.httpsCallable('releaseAgencyHoldRequest');
+    await callable({ requestId: id });
+    toast('✓ Hold released');
+  } catch(e) {
+    console.error('releaseAgencyHoldRequest failed', e);
+    toast('⚠️ Could not release — '+((e && e.message) || 'please try again'));
+  }
+  drawActiveAgencyHolds();
+}
+
+async function drawActiveAgencyHolds(){
+  var el = document.getElementById('agency-active-holds-list');
+  if (!el) return;
+  var reqs = [];
+  try {
+    var snap = await fsDb.collection('block_requests').where('requestType','==','AGENCY_HOLD').where('status','==','APPROVED').get();
+    snap.forEach(function(d){ reqs.push(d.data()); });
+    reqs.sort(function(a,b){ return (a.approvedHoldUntil||'').localeCompare(b.approvedHoldUntil||''); });
+  } catch(e) { console.error('drawActiveAgencyHolds failed', e); }
+  if (!reqs.length) { el.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">No active holds.</p>'; return; }
+  el.innerHTML = reqs.map(function(r){
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap">'
+      + '<div>'
+        + '<div style="font-size:var(--font-size-sm);font-weight:700">'+esc(r.agencyName||r.agencyEmail)+' — '+esc(r.guestName||'(no guest name)')+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+esc(rNm(r.roomId)||r.roomId||'')+' · '+fd(r.arrivalDate)+'–'+fd(r.departureDate)+'</div>'
+        + '<div style="font-size:var(--font-size-xs);color:#0096c7;margin-top:2px">Held until '+formatMaldivesDateTime(r.approvedHoldUntil)+'</div>'
+      + '</div>'
+      + '<button class="ab" title="Release hold" style="color:#dc2626" onclick="releaseAgencyHoldRequest(\''+r.id+'\')"><i class="ti ti-lock-open"></i></button>'
+      + '</div>';
+  }).join('');
+}
+
 function addBlk(){
   const rn=document.getElementById('bl-r').value,from=document.getElementById('bl-f').value,to=document.getElementById('bl-to2').value;
   const cf=document.getElementById('bl-cf');cf.style.display='none';
@@ -12087,26 +12215,29 @@ function showMasterPkgTemplate(){
 // flow (transfer substitution + extra-night pricing) — stored once, not
 // hardcoded per package, since every agency package uses the same rates.
 async function loadAgencyBookingSettings(){
-  var flightEl = document.getElementById('agy-flight-surcharge'), nightEl = document.getElementById('agy-extra-night-rate');
+  var flightEl = document.getElementById('agy-flight-surcharge'), nightEl = document.getElementById('agy-extra-night-rate'), holdEl = document.getElementById('agy-hold-hours');
   if(!flightEl) return;
   try {
     var snap = await fsDb.collection('website_content').doc('agency_booking_settings').get();
     var data = (snap.exists && snap.data()) || {};
     flightEl.value = data.flightSurcharge!=null ? data.flightSurcharge : 155;
     nightEl.value = data.extraNightRate!=null ? data.extraNightRate : 40;
+    if(holdEl) holdEl.value = data.defaultHoldHours!=null ? data.defaultHoldHours : 24;
   } catch(e) {
     console.error('loadAgencyBookingSettings failed', e);
     flightEl.value = 155; nightEl.value = 40;
+    if(holdEl) holdEl.value = 24;
   }
 }
 
 async function saveAgencyBookingSettings(){
   var flightSurcharge = +(document.getElementById('agy-flight-surcharge').value||155);
   var extraNightRate = +(document.getElementById('agy-extra-night-rate').value||40);
+  var defaultHoldHours = Math.max(1, Math.min(168, +(document.getElementById('agy-hold-hours').value||24)));
   var statusEl = document.getElementById('agy-settings-status');
   if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
   try {
-    await fsDb.collection('website_content').doc('agency_booking_settings').set({ flightSurcharge: flightSurcharge, extraNightRate: extraNightRate }, { merge: true });
+    await fsDb.collection('website_content').doc('agency_booking_settings').set({ flightSurcharge: flightSurcharge, extraNightRate: extraNightRate, defaultHoldHours: defaultHoldHours }, { merge: true });
     if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
     toast('✓ Agency booking settings saved');
   } catch(e) {

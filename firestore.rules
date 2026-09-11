@@ -383,8 +383,35 @@ service cloud.firestore {
     // fully server-only (not even admin/staff read) since it has no UI use.
     match /rate_limits/{id} { allow read, write: if false; }
     match /block_requests/{id} {
-      allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid;
+      // Agency Sales Workflow Phase E (2026-09-11): this collection is
+      // reused (not duplicated) for the new AGENCY_HOLD request type
+      // alongside the pre-existing legacy multi-room group-block request
+      // shape (created by submitBlock() in vilu-agency-portal.html, status
+      // lowercase 'pending'/'approved'/'rejected', no requestType field).
+      // The one addition here closes a real gap: without it, an agency's
+      // own create call -- otherwise unrestricted in field shape -- could
+      // self-write a request that already claims status:'APPROVED' plus a
+      // fabricated blockId/approvedAt/approvedBy/approvedHoldUntil. That
+      // could never manufacture a REAL block (blocks stays admin/staff/
+      // manager write-only, untouched), but it could spoof this agency's
+      // own "My Holds" UI into showing a fake approval. The condition below
+      // is written to also accept the legacy shape unchanged (no
+      // requestType, lowercase 'pending', these five fields absent) so
+      // backward compatibility holds.
+      allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid
+        && (!('status' in request.resource.data) || request.resource.data.status in ['pending', 'PENDING'])
+        && request.resource.data.get('blockId', null) == null
+        && request.resource.data.get('approvedAt', null) == null
+        && request.resource.data.get('approvedBy', null) == null
+        && request.resource.data.get('approvedHoldUntil', null) == null;
       allow read: if request.auth != null && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+      // Approval/rejection/release all go through Admin-SDK Cloud Functions
+      // (approveAgencyHoldRequest/rejectAgencyHoldRequest/
+      // releaseAgencyHoldRequest in functions-core/index.js), which bypass
+      // this rule entirely -- it stays admin/staff/manager-broad rather
+      // than being narrowed further, matching the legacy
+      // approveBlockRequest()/rejectBlockRequest() update shape it already
+      // covered before this phase.
       allow update: if isAdmin() || isStaff() || isManagerRole();
       allow delete: if false;
     }

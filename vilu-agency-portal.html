@@ -316,6 +316,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <span style="display:inline-block;width:10px;height:10px;background:#dbeafe;border:1px solid #93c5fd;border-radius:2px;margin:0 4px 0 12px"></span>Your booking
           <span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:2px;margin:0 4px 0 12px"></span>Occupied (other)
           <span style="display:inline-block;width:10px;height:10px;background:#fef3c7;border:1px solid #fde68a;border-radius:2px;margin:0 4px 0 12px"></span>Blocked
+          <span style="display:inline-block;width:10px;height:10px;background:#ede9fe;border:1px solid #c4b5fd;border-radius:2px;margin:0 4px 0 12px"></span>Your hold
         </div>
         <div style="overflow-x:auto"><div id="cal-grid-body"></div></div>
       </div>
@@ -346,8 +347,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="btn-primary" onclick="submitBlock()"><i class="ti ti-lock"></i> Request block</button>
       </div>
       <div id="my-blocks-list" style="margin-top:16px"></div>
+
+      <!-- Agency Sales Workflow Phase E: MY HOLDS -- a distinct list from
+           "My block requests" above (different shape: single room,
+           quote-linkable, expiring). Requests are created from a
+           FINALIZED quote or from Check Availability, not from this tab
+           directly -- see the Quotations tab and the Availability tab's
+           Search Availability results. -->
+      <div class="card" style="margin-top:16px">
+        <h3 style="margin:0 0 4px">My Holds</h3>
+        <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:10px">Temporary room holds you've requested — start one from a finalized quotation or from Check Availability.</p>
+        <div id="my-holds-list"></div>
+      </div>
     </div>
 
+  </div>
+</div>
+
+<!-- HOLD REQUEST MODAL — Phase E. Read-only availability recheck happens
+     right before submit (getAgencyAvailability), then a direct, rules-
+     scoped create -- see submitAgencyHoldRequest(). Submitting this never
+     creates a reservation, folio, invoice, or guest document (Part 18). -->
+<div class="modal-bg" id="m-hold-request" onclick="if(event.target===this)closeHoldRequestModal()">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-hdr">
+      <h2>Request Temporary Room Hold</h2>
+      <button onclick="closeHoldRequestModal()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="al info" style="margin-bottom:14px"><i class="ti ti-info-circle" style="flex-shrink:0"></i><div>This does not create a booking. Vilu must approve before any room is actually held, and an approved hold expires automatically if not confirmed.</div></div>
+      <div class="fg"><label>Guest name</label><input type="text" id="hold-guest-name" placeholder="John Smith"></div>
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="fg" style="margin:0"><label>Arrival date</label><input type="date" id="hold-arrival" disabled></div>
+        <div class="fg" style="margin:0"><label>Departure date</label><input type="date" id="hold-departure" disabled></div>
+      </div>
+      <div class="fg"><label>Room</label>
+        <select id="hold-room"></select>
+        <div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:4px">Only rooms currently available for these dates are listed.</div>
+      </div>
+      <div id="hold-quote-link" style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:10px"></div>
+      <div id="hold-duration-note" style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px"></div>
+      <div id="hold-request-warning" class="al warn hidden" style="margin-bottom:10px"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i><span></span></div>
+      <button class="btn-primary" style="width:100%" onclick="submitAgencyHoldRequest()"><i class="ti ti-clock-hour-4"></i> Submit hold request</button>
+    </div>
   </div>
 </div>
 
@@ -972,13 +1014,15 @@ function showTab(name, el){
   if(name==='ratecatalog') drawRateCatalog();
   if(name==='quotations') drawQuotations();
   if(name==='mybookings') drawMyBookings();
-  if(name==='blockroom') drawMyBlocks();
+  if(name==='blockroom'){ drawMyBlocks(); drawMyHolds(); }
   if(name==='availability'){
     var today=new Date(); var tom=new Date(today); tom.setDate(tom.getDate()+1);
     document.getElementById('av-ci').value=today.toISOString().slice(0,10);
     document.getElementById('av-co').value=tom.toISOString().slice(0,10);
+    // _myHoldRequests must be populated before the calendar renders so it
+    // can tell "your hold" apart from someone else's block (Part 17).
+    drawMyHolds().then(renderAgencyCalendarGrid);
     searchAvailability();
-    renderAgencyCalendarGrid();
   }
 }
 
@@ -1022,6 +1066,16 @@ function ymdStr(d){ return d.toISOString().slice(0,10); }
 // HTML-escape guest-controlled strings before they are interpolated into any
 // markup string that is later handed to .innerHTML / document.write.
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+// Same format as formatMaldivesDateTime() in vilu-unified.html (Part
+// 16/24 -- "12 Sep 2026 18:00 Maldives time", Indian/Maldives display
+// consistently, never the browser's own local timezone).
+function formatMaldivesDateTime(isoOrDate){
+  if(!isoOrDate) return '';
+  var d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+  if(isNaN(d)) return String(isoOrDate);
+  return new Intl.DateTimeFormat('en-GB',{timeZone:'Indian/Maldives',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)+' Maldives time';
+}
 
 // Operationally read-only (Part 23): every cell below is either plain text
 // or, for the agency's own booking, a click that opens the safe summary
@@ -1077,8 +1131,23 @@ async function renderAgencyCalendarGrid(){
       } else if (state === 'BLOCKED') {
         // No reason ever reaches this browser (Part 5/15) -- the Cloud
         // Function never sends one for a cell this agency doesn't own.
-        cellStyle = 'background:#fef3c7;border:1px solid #fde68a';
-        title = 'Blocked';
+        // Phase E: cross-referenced entirely CLIENT-SIDE against this
+        // agency's own already-fetched _myHoldRequests (Part 17) -- never
+        // by asking the server "whose block is this" (that would need the
+        // Cloud Function to expose more than a bare BLOCKED state, which
+        // would then also have to answer that question for every OTHER
+        // agency's hold, reopening the exact leak Phase D closed).
+        var myHold = _myHoldRequests.find(function(h){
+          return h.status==='APPROVED' && h.roomId===room.id && ds>=h.arrivalDate && ds<h.departureDate;
+        });
+        if (myHold) {
+          cellStyle = 'background:#ede9fe;border:1px solid #c4b5fd';
+          title = 'Your hold — held until '+formatMaldivesDateTime(myHold.approvedHoldUntil);
+          label = '⏳';
+        } else {
+          cellStyle = 'background:#fef3c7;border:1px solid #fde68a';
+          title = 'Blocked';
+        }
       }
 
       html += '<td title="'+title.replace(/"/g,'&quot;')+'"'+onclick+' style="'+cellStyle+';height:30px;text-align:center;font-size:var(--font-size-xs);color:#374151">'+label+'</td>';
@@ -1157,8 +1226,11 @@ async function searchAvailability(){
   var minRooms = Math.ceil((adults+children)/AGENCY_MAX_GUESTS_PER_ROOM);
   var hintLine = (adults||children) ? ('<div style="font-size:var(--font-size-xs);color:var(--muted);margin-bottom:10px">'+(adults||0)+' adult'+(adults===1?'':'s')+(children?' · '+children+' child'+(children===1?'':'ren'):'')+' — suggests at least '+minRooms+' room'+(minRooms>1?'s':'')+' (max '+AGENCY_MAX_GUESTS_PER_ROOM+'/room)</div>') : '';
 
+  var anyFree = Object.keys(byCategory).some(function(cat){ return byCategory[cat].free>0; });
   var html = '<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:6px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+'</div>'+hintLine;
   html += '<div class="avail-grid" id="av-grid"></div>';
+  // Part 5: request a hold straight from a search result, no quote required.
+  if(anyFree) html += '<button class="btn-outline" style="margin-top:10px" onclick="openHoldRequestModal(\''+ci+'\',\''+co+'\',\'\',null,null)"><i class="ti ti-clock-hour-4"></i> Request temporary hold for these dates</button>';
   el.innerHTML = html;
   var grid = document.getElementById('av-grid');
   Object.keys(byCategory).forEach(function(cat){
@@ -1561,11 +1633,20 @@ function renderQuoteCard(q){
   var pid = (q.packageId||'').replace(/'/g,"\\'");
   var qid = (q.quoteId||'').replace(/'/g,"\\'");
   var editCall = isCustom ? "openCustomPackageBuilder('"+qid+"')" : "openQuoteBuilder('"+pid+"','"+qid+"')";
+  var arrival = (q.arrivalDate||'').replace(/'/g,"\\'");
+  var departure = (q.departureDate||'').replace(/'/g,"\\'");
+  var guestName = (q.guestName||'').replace(/'/g,"\\'");
+  // Part 4: only offered once the quote is FINALIZED (a DRAFT's dates/guest
+  // may still change) and only when it has real dates to hold.
+  var holdBtn = (!isDraft && q.arrivalDate && q.departureDate)
+    ? '<button class="btn-outline" onclick="openHoldRequestModal(\''+arrival+'\',\''+departure+'\',\''+guestName+'\',\''+qid+'\',\''+qid+'\')"><i class="ti ti-clock-hour-4"></i> Request hold</button>'
+    : '';
   var actions = isDraft
     ? '<button class="btn-outline" onclick="'+editCall+'">Edit</button>'
       + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Preview</button>'
     : '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">View</button>'
-      + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Print</button>';
+      + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Print</button>'
+      + holdBtn;
   var typeBadge = isCustom
     ? '<span style="font-size:var(--font-size-xs);font-weight:600;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:20px;padding:1px 8px">Custom Package</span>'
     : '<span style="font-size:var(--font-size-xs);font-weight:600;color:#0f766e;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:20px;padding:1px 8px">Assigned Package</span>';
@@ -2160,7 +2241,11 @@ async function drawMyBlocks(){
   var reqs=[];
   try{
     var snap=await fsDb.collection('block_requests').where('agencyId','==',currentAgency.uid).get();
-    snap.forEach(function(d){ reqs.push(d.data()); });
+    // Phase E: this collection now also holds the new, differently-shaped
+    // AGENCY_HOLD requests (single roomId/arrivalDate/departureDate, not
+    // rooms[]/ci/co) -- excluded here (rendered by drawMyHolds() instead)
+    // so they never show up blank/garbled in this legacy-shape table.
+    snap.forEach(function(d){ var r=d.data(); if(r.requestType!=='AGENCY_HOLD') reqs.push(r); });
     reqs.sort(function(a,b){ return (b.createdAt||'').localeCompare(a.createdAt||''); });
   }catch(e){}
   if(!reqs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">No block requests yet.</div>';return;}
@@ -2171,6 +2256,163 @@ async function drawMyBlocks(){
   });
   h+='</tbody></table>';
   el.innerHTML=h;
+}
+
+// ══════════════════════════════════════════════
+// TEMPORARY ROOM HOLD REQUEST — Phase E
+// ══════════════════════════════════════════════
+// Reuses block_requests (requestType:'AGENCY_HOLD'), NOT a new collection.
+// A hold request is only ever a PENDING document until Vilu approves it
+// server-side (approveAgencyHoldRequest, functions-core/index.js) -- this
+// file never creates a `blocks` doc, never touches reservations/folios/
+// invoices, and never mutates a finalized quote's commercial snapshot.
+var _holdWorking = null; // {quoteId, quoteReference, guestName, arrivalDate, departureDate}
+var _myHoldRequests = []; // this agency's own AGENCY_HOLD requests, for calendar cross-reference + dedupe
+
+async function openHoldRequestModal(arrivalDate, departureDate, guestName, quoteId, quoteReference){
+  if(!arrivalDate || !departureDate || departureDate<=arrivalDate){ alert('Select valid dates first'); return; }
+  _holdWorking = { quoteId: quoteId||null, quoteReference: quoteReference||null, guestName: guestName||'', arrivalDate: arrivalDate, departureDate: departureDate };
+  document.getElementById('hold-guest-name').value = guestName||'';
+  document.getElementById('hold-arrival').value = arrivalDate;
+  document.getElementById('hold-departure').value = departureDate;
+  document.getElementById('hold-quote-link').textContent = quoteReference ? ('Linked to quotation '+quoteReference) : 'Not linked to a quotation';
+  document.getElementById('hold-request-warning').classList.add('hidden');
+
+  var settings = await loadAgyBookingSettings();
+  document.getElementById('hold-duration-note').textContent = 'If approved, the room is held for '+settings.defaultHoldHours+' hours (Vilu-controlled default).';
+
+  var roomSel = document.getElementById('hold-room');
+  roomSel.innerHTML = '<option value="">Checking availability…</option>';
+  try {
+    var callable = fsFunctions.httpsCallable('getAgencyAvailability');
+    var result = await callable({ startDate: arrivalDate, endDate: departureDate });
+    var byCell = {};
+    (result.data.days||[]).forEach(function(d){ byCell[d.roomId+'|'+d.date] = d; });
+    var freeRooms = ROOMS_LIST.filter(function(room){
+      var d = new Date(arrivalDate+'T00:00:00Z'), end = new Date(departureDate+'T00:00:00Z');
+      var free = true;
+      while(d < end){
+        var ds = d.toISOString().slice(0,10);
+        var cell = byCell[room.id+'|'+ds];
+        if(cell && cell.state!=='AVAILABLE'){ free = false; break; }
+        d.setUTCDate(d.getUTCDate()+1);
+      }
+      return free;
+    });
+    roomSel.innerHTML = freeRooms.length
+      ? freeRooms.map(function(r){ return '<option value="'+r.id+'">'+esc(r.name)+' — '+esc(r.type)+'</option>'; }).join('')
+      : '<option value="">No rooms available for these dates</option>';
+  } catch(e) {
+    console.error('openHoldRequestModal availability check failed', e);
+    roomSel.innerHTML = '<option value="">Could not check availability</option>';
+  }
+  document.getElementById('m-hold-request').classList.add('on');
+}
+
+function closeHoldRequestModal(){
+  document.getElementById('m-hold-request').classList.remove('on');
+  _holdWorking = null;
+}
+
+function newHoldRequestId(){
+  return 'BR-'+Date.now().toString().slice(-6);
+}
+
+async function submitAgencyHoldRequest(){
+  if(!currentAgency || !_holdWorking) return;
+  var guestName = (document.getElementById('hold-guest-name').value||'').trim();
+  var roomId = document.getElementById('hold-room').value;
+  var warnEl = document.getElementById('hold-request-warning');
+  warnEl.classList.add('hidden');
+  if(!guestName){ alert('Enter the guest name'); return; }
+  if(!roomId){ alert('Select a room'); return; }
+
+  // Client-side duplicate guard (Part 25) -- not a server guarantee (a
+  // genuine race between two tabs is still possible), but catches the
+  // ordinary accidental-double-submit case without relying only on a
+  // disabled button. Server-side, availability is rechecked again anyway
+  // at approval time, so a true duplicate can never double-hold a room.
+  var dup = _myHoldRequests.find(function(r){
+    return r.roomId===roomId && r.arrivalDate===_holdWorking.arrivalDate && r.departureDate===_holdWorking.departureDate
+      && (r.status==='PENDING' || r.status==='APPROVED');
+  });
+  if(dup){
+    warnEl.classList.remove('hidden');
+    warnEl.querySelector('span').textContent = 'You already have a '+dup.status.toLowerCase()+' hold request for this room and these dates.';
+    return;
+  }
+
+  // Recheck live availability immediately before submitting (Part 4/14) --
+  // informational only, the real gate is the server-side recheck inside
+  // approveAgencyHoldRequest's own transaction at approval time.
+  try {
+    var callable = fsFunctions.httpsCallable('getAgencyAvailability');
+    var result = await callable({ startDate: _holdWorking.arrivalDate, endDate: _holdWorking.departureDate });
+    var stillFree = (result.data.days||[]).every(function(d){ return !(d.roomId===roomId) || d.state==='AVAILABLE'; });
+    if(!stillFree){
+      warnEl.classList.remove('hidden');
+      warnEl.querySelector('span').textContent = 'This room is no longer available for these dates. Choose another room.';
+      return;
+    }
+  } catch(e) {
+    console.error('submitAgencyHoldRequest availability recheck failed', e);
+  }
+
+  var now = new Date().toISOString();
+  var reqDoc = {
+    id: newHoldRequestId(),
+    requestType: 'AGENCY_HOLD',
+    agencyId: currentAgency.uid, agencyEmail: currentAgency.email, agencyName: currentAgency.name||currentAgency.email,
+    quoteId: _holdWorking.quoteId, quoteReference: _holdWorking.quoteReference,
+    guestName: guestName,
+    roomId: roomId, roomCategory: (ROOMS_LIST.find(function(r){return r.id===roomId;})||{}).type||null,
+    arrivalDate: _holdWorking.arrivalDate, departureDate: _holdWorking.departureDate,
+    requestedHoldHours: (await loadAgyBookingSettings()).defaultHoldHours,
+    requestedHoldUntil: null, // informational only if ever shown -- server computes the real approvedHoldUntil at approval time
+    status: 'PENDING',
+    approvedAt: null, approvedBy: null, approvedHoldUntil: null, blockId: null,
+    createdAt: now, updatedAt: now,
+  };
+  try {
+    await fsDb.collection('block_requests').doc(reqDoc.id).set(reqDoc);
+    alert('Hold request sent for Vilu approval.');
+    closeHoldRequestModal();
+    drawMyHolds();
+  } catch(e) {
+    console.error('submitAgencyHoldRequest failed', e);
+    alert('Could not submit hold request — please try again.');
+  }
+}
+
+var HOLD_STATUS_LABEL = { PENDING:'Pending approval', APPROVED:'Approved', REJECTED:'Rejected', EXPIRED:'Expired', CANCELLED:'Released' };
+var HOLD_STATUS_BADGE = { PENDING:'pending', APPROVED:'ok', REJECTED:'wn', EXPIRED:'wn', CANCELLED:'wn' };
+
+async function drawMyHolds(){
+  var el = document.getElementById('my-holds-list');
+  if(!el || !currentAgency) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  try {
+    var snap = await fsDb.collection('block_requests').where('agencyId','==',currentAgency.uid).where('requestType','==','AGENCY_HOLD').get();
+    _myHoldRequests = snap.docs.map(function(d){ return d.data(); });
+    _myHoldRequests.sort(function(a,b){ return (b.createdAt||'').localeCompare(a.createdAt||''); });
+  } catch(e) {
+    console.error('drawMyHolds failed', e);
+    _myHoldRequests = [];
+  }
+  if(!_myHoldRequests.length){ el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">No hold requests yet.</div>'; return; }
+  el.innerHTML = _myHoldRequests.map(function(r){
+    var roomLabel = (ROOMS_LIST.find(function(x){return x.id===r.roomId;})||{}).name || r.roomId;
+    return '<div class="card" style="margin-bottom:10px">'
+      + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+        + '<div>'
+          + '<div style="font-weight:700">'+esc(r.guestName||'')+'</div>'
+          + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(roomLabel)+' · '+fd(r.arrivalDate)+' → '+fd(r.departureDate)+(r.quoteReference?' · Quote '+esc(r.quoteReference):'')+'</div>'
+        + '</div>'
+        + '<span class="badge '+(HOLD_STATUS_BADGE[r.status]||'pending')+'">'+(HOLD_STATUS_LABEL[r.status]||r.status)+'</span>'
+      + '</div>'
+      + (r.status==='APPROVED' ? '<div style="font-size:var(--font-size-sm);color:#0096c7;margin-top:6px"><i class="ti ti-clock-hour-4"></i> Room held until '+formatMaldivesDateTime(r.approvedHoldUntil)+'</div>' : '')
+    + '</div>';
+  }).join('');
 }
 
 // Set default dates on availability tab
@@ -2237,10 +2479,10 @@ async function loadAgyBookingSettings(){
   try {
     var snap = await fsDb.collection('website_content').doc('agency_booking_settings').get();
     var data = (snap.exists && snap.data()) || {};
-    _agyBookingSettings = { flightSurcharge: data.flightSurcharge!=null?data.flightSurcharge:155, extraNightRate: data.extraNightRate!=null?data.extraNightRate:40 };
+    _agyBookingSettings = { flightSurcharge: data.flightSurcharge!=null?data.flightSurcharge:155, extraNightRate: data.extraNightRate!=null?data.extraNightRate:40, defaultHoldHours: data.defaultHoldHours!=null?data.defaultHoldHours:24 };
   } catch(e) {
     console.error('loadAgyBookingSettings failed', e);
-    _agyBookingSettings = { flightSurcharge: 155, extraNightRate: 40 };
+    _agyBookingSettings = { flightSurcharge: 155, extraNightRate: 40, defaultHoldHours: 24 };
   }
   return _agyBookingSettings;
 }
