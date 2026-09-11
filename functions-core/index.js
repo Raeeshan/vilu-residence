@@ -32,6 +32,14 @@
 //     availability and consumes any linked active hold inside one Firestore
 //     transaction; the old direct agency reservation-create path is
 //     retired once this is proven. See the comment above these exports.
+//   getAgencyBookingConfirmationData  Agency Sales Workflow Phase G -- the
+//     hard server-side allowlist behind the guest-safe printable Booking
+//     Confirmation. Verifies the caller owns the booking request AND its
+//     linked reservation, that the request is CONFIRMED, and that the
+//     reservation is still actually Confirmed (not since cancelled) before
+//     returning ONLY guest-safe fields -- never viluNetTotal, agencyEarnings,
+//     paymentCollector, component rates, or any internal note. See the
+//     comment above that export.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -1105,4 +1113,89 @@ exports.requestChangeAgencyBookingRequest = onCall({ region: 'us-central1', maxI
   // just because Vilu asked a clarifying question.
   await reqRef.set({ status: 'CHANGE_REQUESTED', changeRequestNote: note, updatedAt: new Date().toISOString(), changeRequestedBy: email }, { merge: true });
   return { status: 'CHANGE_REQUESTED' };
+});
+
+// ── Agency Sales Workflow Phase G: printable guest-safe Booking
+// Confirmation ─────────────────────────────────────────────────────────
+// Read-only. This is the hard server-side allowlist Part 15 asks for --
+// defense in depth beyond the print renderer itself: even if a future
+// change to the client template accidentally tried to render an internal
+// field, that field was never sent to the browser in the first place.
+//
+// Source of truth (Part 1): agency_booking_requests.status must be
+// CONFIRMED AND its linked reservations/{reservationId} doc must still
+// have status:'Confirmed' -- not just trusting the booking request's own
+// (possibly stale) CONFIRMED flag. Audited the current cancellation
+// architecture (Part 19) before writing this: this codebase's canonical
+// cancel path is Admin/Staff editing a reservation's own `status` field to
+// 'Cancelled' directly (see vilu-unified.html's reservation-detail editor)
+// -- nothing in Phase F links a later cancellation back onto
+// agency_booking_requests, and Phase G is explicitly told not to invent
+// that sync. So this function re-reads the live reservation status on
+// every call instead: a since-cancelled reservation is refused here even
+// though its booking request doc still literally says CONFIRMED, without
+// adding any new cancellation feature.
+//
+// guestMessage is the one field pulled from the finalized quote rather
+// than the booking request snapshot -- Phase F's booking request schema
+// doesn't carry it, but the quote's own guestMessage is the SAME dedicated
+// guest-facing note field Phase B's buildGuestQuotationHTML() already
+// treats as guest-safe, and a FINALIZED quote is locked (agency_quotes'
+// own update rule refuses agency edits once FINALIZED), so reading it here
+// is exactly as immutable as reading the booking request snapshot itself
+// (Part 7). No other quote field is read.
+function agencyBookingConfirmationPayload(bReq, reservationId) {
+  return {
+    bookingReference: reservationId,
+    quoteReference: bReq.quoteReference || null,
+    guestName: bReq.guestName || '',
+    arrivalDate: bReq.arrivalDate || '',
+    departureDate: bReq.departureDate || '',
+    nights: bReq.nights || 0,
+    adults: bReq.adults || 0,
+    children: bReq.children || 0,
+    roomCategory: bReq.roomCategory || '',
+    packageName: bReq.packageName || '',
+    guestIncludes: Array.isArray(bReq.guestIncludes) ? bReq.guestIncludes : [],
+    guestActivities: Array.isArray(bReq.guestActivities) ? bReq.guestActivities : [],
+    guestMessage: '', // filled in by the caller from the linked quote, if any
+    currency: bReq.currency || 'USD',
+    agencyGuestSellingTotal: bReq.agencyGuestSellingTotal || 0,
+    agencyName: bReq.agencyName || '',
+    agencyEmail: bReq.agencyEmail || '',
+  };
+}
+
+exports.getAgencyBookingConfirmationData = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const requestId = String((request.data || {}).requestId || '');
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+
+  const reqSnap = await db.collection('agency_booking_requests').doc(requestId).get();
+  if (!reqSnap.exists) throw new HttpsError('not-found', 'Booking request not found.');
+  const bReq = reqSnap.data();
+  if (bReq.agencyId !== request.auth.uid) throw new HttpsError('permission-denied', 'Not your booking request.');
+  if (bReq.status !== 'CONFIRMED' || !bReq.reservationId) {
+    throw new HttpsError('failed-precondition', 'This booking request is not confirmed.');
+  }
+
+  const resSnap = await db.collection('reservations').doc(bReq.reservationId).get();
+  if (!resSnap.exists) throw new HttpsError('not-found', 'The confirmed reservation could not be found.');
+  const res = resSnap.data();
+  if (res.agencyId !== request.auth.uid) throw new HttpsError('permission-denied', 'Not your reservation.');
+  if (res.status !== 'Confirmed') {
+    throw new HttpsError('failed-precondition', 'This reservation is no longer confirmed.');
+  }
+
+  const payload = agencyBookingConfirmationPayload(bReq, bReq.reservationId);
+  if (bReq.quoteId) {
+    try {
+      const quoteSnap = await db.collection('agency_quotes').doc(bReq.quoteId).get();
+      if (quoteSnap.exists && quoteSnap.data().agencyId === request.auth.uid) {
+        payload.guestMessage = String(quoteSnap.data().guestMessage || '');
+      }
+    } catch (e) { /* guestMessage is optional -- confirmation still renders without it */ }
+  }
+  return payload;
 });

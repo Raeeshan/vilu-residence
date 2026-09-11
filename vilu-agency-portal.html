@@ -2677,11 +2677,112 @@ async function drawMyBookingRequests(){
         + '</div>'
         + '<span class="badge '+(BOOKING_REQUEST_STATUS_BADGE[r.status]||'pending')+'">'+(BOOKING_REQUEST_STATUS_LABEL[r.status]||r.status)+'</span>'
       + '</div>'
-      + (r.status==='CONFIRMED' ? '<div style="font-size:var(--font-size-sm);color:var(--green);margin-top:6px"><i class="ti ti-check"></i> Reservation '+esc(r.reservationId||'')+'</div>' : '')
+      + (r.status==='CONFIRMED' ? (
+          '<div style="font-size:var(--font-size-sm);color:var(--green);margin-top:6px"><i class="ti ti-check"></i> Reservation '+esc(r.reservationId||'')+'</div>'
+          // Phase G: only ever offered for CONFIRMED -- never PENDING/
+          // CHANGE_REQUESTED/REJECTED (Part 2). Both buttons call the exact
+          // same function/template (Part 12) -- same established pattern
+          // already used by printQuotation() for Draft/Finalized quotes
+          // (View/Print/Preview all open the identical rendered document).
+          + '<div style="display:flex;gap:6px;margin-top:8px">'
+            + '<button class="btn-outline" onclick="openAgencyBookingConfirmation(\''+esc(r.id)+'\')"><i class="ti ti-eye"></i> Preview confirmation</button>'
+            + '<button class="btn-outline" onclick="openAgencyBookingConfirmation(\''+esc(r.id)+'\')"><i class="ti ti-printer"></i> Print / Save PDF</button>'
+          + '</div>'
+        ) : '')
       + (r.status==='REJECTED' && r.rejectionReason ? '<div style="font-size:var(--font-size-sm);color:#b91c1c;margin-top:6px">Reason: '+esc(r.rejectionReason)+'</div>' : '')
       + (r.status==='CHANGE_REQUESTED' ? '<div style="font-size:var(--font-size-sm);color:#92400e;margin-top:6px">Vilu requested a change: '+esc(r.changeRequestNote||'')+' — open the quotation, revise it, and send a new booking request.</div>' : '')
     + '</div>';
   }).join('');
+}
+
+// ══════════════════════════════════════════════
+// BOOKING CONFIRMATION — Phase G
+// ══════════════════════════════════════════════
+// Read-only. getAgencyBookingConfirmationData() (functions-core/index.js)
+// is the hard server-side allowlist -- it verifies ownership of both the
+// booking request AND its linked reservation, that the request is
+// CONFIRMED, and that the live reservation is still actually Confirmed
+// (not since cancelled), then returns ONLY guest-safe fields. This
+// renderer never receives, and could not accidentally render, anything
+// else -- viluNetTotal/agencyEarnings/paymentCollector/component rates/
+// internal notes never leave the server.
+//
+// Every value from the callable is treated as pre-sanitized: guestIncludes/
+// guestActivities were already stripped of embedded "$NN" price text by
+// sanitizeGuestLabel() back when the source quote was created/finalized
+// (Phase B/C) -- this function does not re-sanitize them, it only escapes
+// for HTML via esc(), same as every other guest-facing renderer in this
+// file.
+//
+// TRANSFER/MEALS sections from the task's suggested content list are
+// intentionally omitted: audited the Quotation Builder (Phase B/C) and
+// confirmed neither a finalized quote nor a Phase F booking request
+// captures a structured transfer type or meal plan anywhere -- only free-
+// text guestIncludes/guestActivities labels. Inventing that data here
+// would mean fabricating booking details never actually confirmed with the
+// guest. If a transfer or board plan was part of the sold package, it
+// already appears as its own line under INCLUSIONS/ACTIVITIES. Terms are
+// also omitted per the task's own fallback instruction (Part 22) -- the
+// only existing terms store, website_content/packages_terms, is written
+// for the Website Package Manager's own public listings, not audited as
+// intentionally guest-safe for an agency booking confirmation.
+function buildAgencyBookingConfirmationHTML(safe){
+  function fmtDate(d){
+    if(!d) return '(not set)';
+    var parts = d.split('-');
+    if(parts.length!==3) return d;
+    var dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    return dt.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+  }
+  var guestLine = safe.adults+' Adult'+(safe.adults===1?'':'s')+(safe.children?' · '+safe.children+' Child'+(safe.children===1?'':'ren'):'');
+  var includesHtml = (safe.guestIncludes||[]).filter(Boolean).map(function(i){ return '<li>'+esc(i)+'</li>'; }).join('');
+  var activitiesHtml = (safe.guestActivities||[]).filter(Boolean).map(function(i){ return '<li>'+esc(i)+'</li>'; }).join('');
+
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Booking Confirmation '+esc(safe.bookingReference)+'</title><style>'
+    + '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;padding:30px;color:#111827}'
+    + 'h1{font-size:22px;margin-bottom:2px}h2{font-size:13px;color:#6b7280;font-weight:700;margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase}'
+    + '.property{font-size:12px;color:#6b7280;margin-bottom:18px}'
+    + '.ref{font-size:12px;color:#6b7280;margin-bottom:20px}'
+    + 'table{width:100%;border-collapse:collapse;margin:10px 0 18px}td,th{padding:7px 10px;border:1px solid #e5e7eb;text-align:left;font-size:13px;vertical-align:top}th{width:150px;color:#374151}'
+    + '.section-label{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}'
+    + 'ul{margin:0 0 18px 20px}li{font-size:13px;padding:2px 0}'
+    + '.total{background:#f0fdfa;border:2px solid #00b4d8;border-radius:8px;padding:16px;text-align:center;margin-top:10px}'
+    + '.total .amt{font-size:26px;font-weight:800;color:#0f766e}'
+    + '.status{display:inline-block;background:#dcfce7;color:#166534;font-weight:700;font-size:12px;letter-spacing:.05em;padding:4px 12px;border-radius:20px;margin-top:14px}'
+    + '.msg{background:#f9fafb;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:18px}'
+    + '@media print{@page{margin:15mm}.no-print{display:none}}'
+    + '</style></head><body>'
+    + '<h1>'+esc(safe.agencyName)+'</h1><h2>Booking Confirmation</h2>'
+    + '<div class="property">Vilu Residence &middot; Maamigili, South Ari Atoll, Maldives</div>'
+    + '<div class="ref">Booking Reference: '+esc(safe.bookingReference)+(safe.quoteReference?' &middot; Quotation Reference: '+esc(safe.quoteReference):'')+'</div>'
+    + '<table>'
+      + '<tr><th>Guest</th><td>'+esc(safe.guestName)+'</td></tr>'
+      + '<tr><th>Travel dates</th><td>'+esc(fmtDate(safe.arrivalDate))+' &ndash; '+esc(fmtDate(safe.departureDate))+'</td></tr>'
+      + '<tr><th>Nights</th><td>'+safe.nights+'</td></tr>'
+      + '<tr><th>Guests</th><td>'+esc(guestLine)+'</td></tr>'
+      + '<tr><th>Accommodation</th><td>Vilu Residence Maamigili'+(safe.roomCategory?' — '+esc(safe.roomCategory):'')+'</td></tr>'
+      + '<tr><th>Package</th><td>'+esc(safe.packageName)+'</td></tr>'
+    + '</table>'
+    + (includesHtml ? '<div class="section-label">Inclusions</div><ul>'+includesHtml+'</ul>' : '')
+    + (activitiesHtml ? '<div class="section-label">Activities</div><ul>'+activitiesHtml+'</ul>' : '')
+    + (safe.guestMessage ? '<div class="section-label">Special notes</div><div class="msg">'+esc(safe.guestMessage)+'</div>' : '')
+    + '<div class="total"><div class="section-label">Agreed total package price</div><div class="amt">'+esc(safe.currency)+' '+(+(safe.agencyGuestSellingTotal||0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div>'
+    + '<div style="text-align:center"><span class="status">BOOKING STATUS: CONFIRMED</span></div>'
+    + '</body></html>';
+}
+
+async function openAgencyBookingConfirmation(requestId){
+  try {
+    var callable = fsFunctions.httpsCallable('getAgencyBookingConfirmationData');
+    var result = await callable({ requestId: requestId });
+    var win = window.open('', '_blank');
+    if(!win){ alert('Allow pop-ups to view/print the confirmation'); return; }
+    win.document.write(buildAgencyBookingConfirmationHTML(result.data));
+    win.document.close();
+  } catch(e) {
+    console.error('openAgencyBookingConfirmation failed', e);
+    alert('Could not load this confirmation — '+((e && e.message) || 'please try again'));
+  }
 }
 
 // Set default dates on availability tab
