@@ -326,10 +326,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
 
-    <!-- MY BOOKINGS TAB -->
+    <!-- MY BOOKINGS TAB -- Phase H: canonical, device-independent view of
+         this agency's own business (reservations + agency_booking_requests,
+         server/rules-scoped by agencyId). The old localStorage-backed
+         myBookings mirror below is no longer the source of truth for
+         anything -- see drawMyBookings()'s own comment. -->
     <div id="tab-mybookings" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <h3 style="font-size:var(--font-size-md);font-weight:700">My bookings</h3>
+        <h3 style="font-size:var(--font-size-md);font-weight:700">My Bookings</h3>
+      </div>
+      <div id="mb-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="mb-filters"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label>Search guest name or reference</label><input type="text" id="mb-search" placeholder="e.g. John, VQ-..., ABK..." oninput="_mbSearchDebounced()"></div>
+          <div class="fg" style="margin:0"><label>Arrival from</label><input type="date" id="mb-date-from" onchange="drawMyBookings()"></div>
+          <div class="fg" style="margin:0"><label>Arrival to</label><input type="date" id="mb-date-to" onchange="drawMyBookings()"></div>
+        </div>
       </div>
       <div id="my-bookings-list"></div>
     </div>
@@ -711,11 +724,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- OWN BOOKING SUMMARY MODAL — Phase D (Part 11). Read-only: no edit/
-     cancel/change controls here (Part 24 -- modification requests are a
-     later phase). Populated entirely from the ownReservations map
-     getAgencyAvailability() already returns -- no extra fetch, and no
-     Admin-only notes/folio/payment data ever reaches this modal. -->
+<!-- BOOKING DETAIL MODAL — Phase H (Part 8/21). The ONE shared safe detail
+     component: opened from My Bookings' confirmed rows AND from the Phase D
+     calendar's own-reservation click (openOwnBookingSummary() routes here
+     whenever it can resolve an agencyBookingRequestId -- see that
+     function). Populated by re-using getAgencyBookingConfirmationData()
+     (Phase G) -- the exact same server-side allowlist the printable
+     confirmation itself uses, so this view can never show anything the
+     confirmation couldn't already show. Read-only: no edit/cancel/change
+     controls (Part 23 -- modification requests are a later phase). -->
+<div class="modal-bg" id="m-booking-detail" onclick="if(event.target===this)closeBookingDetail()">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-hdr">
+      <h2>Booking detail</h2>
+      <button onclick="closeBookingDetail()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body" id="booking-detail-body"></div>
+  </div>
+</div>
+
+<!-- OWN BOOKING SUMMARY MODAL — Phase D (Part 11). FALLBACK ONLY as of
+     Phase H: openOwnBookingSummary() now prefers routing into the shared
+     m-booking-detail modal above (Part 21 -- "do not create two separate
+     own-booking modals with inconsistent data"), and only falls back to
+     this thinner view for a reservation with no resolvable
+     agencyBookingRequestId (e.g. one that predates the Phase F Booking
+     Request workflow). Read-only: no edit/cancel/change controls here.
+     Populated entirely from the ownReservations map getAgencyAvailability()
+     already returns -- no extra fetch, and no Admin-only notes/folio/
+     payment data ever reaches this modal. -->
 <div class="modal-bg" id="m-own-booking" onclick="if(event.target===this)closeOwnBookingSummary()">
   <div class="modal" style="max-width:420px">
     <div class="modal-hdr">
@@ -1194,9 +1231,25 @@ async function renderAgencyCalendarGrid(){
 // ── Own booking summary (Part 11) — read-only. Populated entirely from
 // _availCache.ownReservations (already fetched, no extra round-trip). No
 // edit/cancel/change controls exist here (Part 24 -- later phase).
-function openOwnBookingSummary(reservationId){
+async function openOwnBookingSummary(reservationId){
   var r = _availCache.ownReservations[reservationId];
   if(!r) return;
+  // Phase H (Part 21): prefer routing into the shared Booking Detail
+  // component whenever this reservation has a resolvable
+  // agencyBookingRequestId -- a direct read of the agency's OWN
+  // reservation doc, already permitted by firestore.rules (isAgency() &&
+  // resource.data.agencyId==request.auth.uid), not a rules change. Falls
+  // through to this modal's own thinner display only for a reservation
+  // that predates Phase F (no linked booking request for
+  // getAgencyBookingConfirmationData() to look up).
+  try {
+    var snap = await fsDb.collection('reservations').doc(reservationId).get();
+    if(snap.exists && snap.data().agencyBookingRequestId){
+      openBookingDetail(snap.data().agencyBookingRequestId);
+      return;
+    }
+  } catch(e) { console.error('openOwnBookingSummary lookup failed', e); }
+
   var nights = (r.arrivalDate && r.departureDate) ? Math.round((new Date(r.departureDate)-new Date(r.arrivalDate))/864e5) : 0;
   var guestsLine = (r.adults||0)+' Adult'+(r.adults===1?'':'s')+(r.children?' · '+r.children+' Child'+(r.children===1?'':'ren'):'');
   document.getElementById('own-booking-summary-body').innerHTML =
@@ -2096,28 +2149,303 @@ async function submitCustomQuote(status){
 
 
 
-function drawMyBookings(){
-  var el=document.getElementById('my-bookings-list');
-  if(!myBookings.length){
-    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:var(--font-size-display);margin-bottom:12px">📋</div><p>No bookings yet.</p></div>';
+// ══════════════════════════════════════════════
+// MY BOOKINGS — Phase H
+// ══════════════════════════════════════════════
+// Part 1 audit finding: the OLD drawMyBookings() above rendered purely
+// from the `myBookings` in-memory array (populated once at login from
+// localStorage key 'vilu_agency_bk_'+email -- see the IIFE near this
+// file's top). That array's only writer was the OLD direct-booking flow
+// (submitAgencyBooking(), retired by Phase F's cutover) -- so as of Phase
+// F it can never receive a new entry again, is entirely browser-specific
+// (an agency logging in from a second device sees nothing), and reflects
+// none of the real Booking Request -> Vilu-confirmed reservation flow
+// Phases F/G actually built. It is retired as the source of truth here.
+// `myBookings`/`generateBookingConfirmation()`/`generateAgencyInvoice()`
+// are left in the file, unreachable (same "mark retired, don't delete"
+// precedent as Phase F's openBookingModal()) -- nothing below calls them.
+//
+// Canonical sources (Part 2): confirmed bookings come straight from
+// `reservations` scoped by agencyId (already permitted by firestore.rules
+// -- isAgency() && resource.data.agencyId==request.auth.uid -- no rule
+// change needed, Part 29); not-yet-confirmed business comes from
+// `agency_booking_requests`, same scoping, reused verbatim from Phase F.
+// A booking request already CONFIRMED (i.e. its reservation now exists) is
+// excluded from the request list so it is never counted/shown twice
+// (Part 12/17).
+var MB_RES_STATUS_LABEL = { 'Confirmed':'Confirmed', 'Checked in':'Checked In', 'Checked out':'Checked Out', 'Cancelled':'Cancelled' };
+var MB_FILTERS = [
+  { key:'ALL', label:'All' },
+  { key:'UPCOMING', label:'Upcoming' },
+  { key:'CURRENT', label:'Current' },
+  { key:'PENDING', label:'Pending' },
+  { key:'CONFIRMED', label:'Confirmed' },
+  { key:'PAST', label:'Past' },
+  { key:'CANCELLED', label:'Cancelled/Rejected' },
+];
+var _mbFilter = 'ALL';
+var _mbReservations = [];
+var _mbRequests = [];
+var _mbSearchResults = null; // non-null while a search is active
+var _mbSearchDebounceTimer = null;
+
+// Maldives date semantics (Part 16), not the browser's local timezone --
+// same Intl.DateTimeFormat({timeZone:'Indian/Maldives'}) approach
+// formatMaldivesDateTime() already uses, just date-only (en-CA formats as
+// YYYY-MM-DD, matching this codebase's date-string convention throughout).
+function maldivesToday(){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Indian/Maldives'}).format(new Date());
+}
+// Half-open convention, same as every overlap check elsewhere in this
+// codebase: departure day itself counts as free/PAST, not CURRENT.
+function classifyBookingDates(arrivalDate, departureDate, today){
+  if(departureDate && departureDate<=today) return 'PAST';
+  if(arrivalDate && arrivalDate<=today && (!departureDate || departureDate>today)) return 'CURRENT';
+  return 'UPCOMING';
+}
+
+async function drawMyBookings(){
+  if(!currentAgency) return;
+  var listEl = document.getElementById('my-bookings-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  try {
+    var results = await Promise.all([
+      fsDb.collection('reservations').where('agencyId','==',currentAgency.uid).get(),
+      fsDb.collection('agency_booking_requests').where('agencyId','==',currentAgency.uid).get(),
+    ]);
+    _mbReservations = results[0].docs.map(function(d){ return d.data(); });
+    var confirmedRequestIds = {};
+    _mbReservations.forEach(function(r){ if(r.agencyBookingRequestId) confirmedRequestIds[r.agencyBookingRequestId]=true; });
+    _mbRequests = results[1].docs.map(function(d){ return d.data(); }).filter(function(r){ return !confirmedRequestIds[r.id]; });
+  } catch(e) {
+    console.error('drawMyBookings failed', e);
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:#b91c1c">Could not load your bookings.</div>';
     return;
   }
-  var h='<table class="tb"><thead><tr><th>Ref</th><th>Guest</th><th>Package</th><th>Room</th><th>Dates</th><th>Total</th><th>Status</th><th>Documents</th></tr></thead><tbody>';
-  myBookings.forEach(function(bk){
-    var nights=Math.round((new Date(bk.co)-new Date(bk.ci))/864e5);
-    h+='<tr>';
-    h+='<td style="font-weight:700;color:var(--green)">'+bk.id+'</td>';
-    h+='<td>'+esc(bk.fn)+' '+esc(bk.ln)+'</td>';
-    h+='<td style="font-size:var(--font-size-sm)">'+bk.packageName+'</td>';
-    h+='<td style="font-size:var(--font-size-sm)">'+bk.rn+'</td>';
-    h+='<td style="font-size:var(--font-size-sm)">'+fd(bk.ci)+' → '+fd(bk.co)+'<br><span style="color:var(--muted)">'+nights+' nights</span></td>';
-    h+='<td style="font-weight:700;color:var(--green)">$'+(bk.total||bk.netRate||bk.rackTotal||0)+'</td>';
-    h+='<td><span class="badge '+(bk.st==='Confirmed'?'ok':'pending')+'">'+bk.st+'</span></td>';
-    h+='<td><div style="display:flex;gap:4px"><button class="btn-outline" style="font-size:var(--font-size-xs);padding:4px 8px" onclick="generateBookingConfirmation(\''+bk.id+'\')">Confirmation</button><button class="btn-outline" style="font-size:var(--font-size-xs);padding:4px 8px" onclick="generateAgencyInvoice(\''+bk.id+'\')">Invoice</button></div></td>';
-    h+='</tr>';
+  renderMyBookings();
+}
+
+function renderMbSummaryTile(label, count){
+  return '<div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:var(--font-size-2xl);font-weight:800;color:var(--green)">'+count+'</div><div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:2px">'+esc(label)+'</div></div>';
+}
+function renderMbFilters(){
+  document.getElementById('mb-filters').innerHTML = MB_FILTERS.map(function(f){
+    var on = _mbFilter===f.key && !_mbSearchResults;
+    return '<button class="btn-outline" style="font-size:var(--font-size-sm);padding:6px 12px'+(on?';background:var(--green);color:#fff;border-color:var(--green)':'')+'" onclick="setMbFilter(\''+f.key+'\')">'+esc(f.label)+'</button>';
+  }).join('');
+}
+function setMbFilter(key){
+  _mbFilter = key;
+  var searchEl = document.getElementById('mb-search');
+  if(searchEl) searchEl.value = '';
+  _mbSearchResults = null;
+  renderMyBookings();
+}
+
+function renderMyBookings(){
+  renderMbFilters();
+  var listEl = document.getElementById('my-bookings-list');
+
+  if(_mbSearchResults){
+    document.getElementById('mb-summary').innerHTML = '';
+    listEl.innerHTML = _mbSearchResults.length
+      ? _mbSearchResults.map(renderMbSearchRow).join('')
+      : '<div style="text-align:center;padding:30px;color:var(--muted)">No matches in your own bookings.</div>';
+    return;
+  }
+
+  var today = maldivesToday();
+  // Summary tiles always reflect the FULL dataset (Part 17: accurate
+  // counts, no double-counting a confirmed reservation as also "pending")
+  // -- clicking a filter narrows the LIST below, never the counts above.
+  var counts = { total:0, upcoming:0, current:0, pending:0, confirmed:0, past:0 };
+  _mbReservations.forEach(function(r){
+    if(r.status==='Cancelled') return;
+    counts.total++; counts.confirmed++;
+    var bucket = classifyBookingDates(r.check_in, r.check_out, today);
+    if(bucket==='UPCOMING') counts.upcoming++; else if(bucket==='CURRENT') counts.current++; else counts.past++;
   });
-  h+='</tbody></table>';
-  el.innerHTML=h;
+  _mbRequests.forEach(function(r){ if(r.status==='PENDING'||r.status==='CHANGE_REQUESTED'){ counts.total++; counts.pending++; } });
+  document.getElementById('mb-summary').innerHTML =
+    renderMbSummaryTile('Total bookings', counts.total)
+    + renderMbSummaryTile('Upcoming', counts.upcoming)
+    + renderMbSummaryTile('Current', counts.current)
+    + renderMbSummaryTile('Pending', counts.pending)
+    + renderMbSummaryTile('Confirmed', counts.confirmed)
+    + renderMbSummaryTile('Past', counts.past);
+
+  var entries = _mbReservations.map(function(r){
+    return { kind:'RESERVATION', data:r, bucket: r.status==='Cancelled' ? 'CANCELLED' : classifyBookingDates(r.check_in, r.check_out, today), arrivalDate:r.check_in };
+  }).concat(_mbRequests.map(function(r){
+    return { kind:'REQUEST', data:r, bucket: (r.status==='REJECTED') ? 'CANCELLED' : 'PENDING', arrivalDate:r.arrivalDate };
+  }));
+
+  var dateFrom = document.getElementById('mb-date-from').value;
+  var dateTo = document.getElementById('mb-date-to').value;
+  if(dateFrom) entries = entries.filter(function(e){ return !e.arrivalDate || e.arrivalDate>=dateFrom; });
+  if(dateTo) entries = entries.filter(function(e){ return !e.arrivalDate || e.arrivalDate<=dateTo; });
+  if(_mbFilter!=='ALL') entries = entries.filter(function(e){ return e.bucket===_mbFilter; });
+  entries.sort(function(a,b){ return (b.arrivalDate||'').localeCompare(a.arrivalDate||''); });
+
+  listEl.innerHTML = entries.length ? entries.map(renderMbRow).join('') : '<div style="text-align:center;padding:30px;color:var(--muted)">No bookings match.</div>';
+}
+
+// Part 6: confirmed-booking row. Room category is looked up from the
+// static ROOMS_LIST (the reservation doc itself only stores room_id) --
+// same lookup pattern used throughout this file, not a new data source.
+// Clicking opens the shared Booking Detail modal (Part 8/20) when this
+// reservation has a resolvable agencyBookingRequestId (every reservation
+// created through Phase F does); a reservation with none (predates Phase
+// F) is shown but not clickable into the detail view, since there is no
+// booking request for getAgencyBookingConfirmationData() to look up.
+function renderMbRow(e){
+  if(e.kind==='RESERVATION'){
+    var r = e.data;
+    var nights = (r.check_in && r.check_out) ? Math.round((new Date(r.check_out)-new Date(r.check_in))/864e5) : 0;
+    var roomCategory = (ROOMS_LIST.find(function(x){ return x.id===r.room_id; })||{}).type || '';
+    var statusLabel = MB_RES_STATUS_LABEL[r.status] || r.status;
+    var statusBadge = r.status==='Cancelled' ? 'wn' : 'ok';
+    var clickable = !!r.agencyBookingRequestId;
+    return '<div class="card" style="margin-bottom:10px'+(clickable?';cursor:pointer':'')+'"'+(clickable?' onclick="openBookingDetail(\''+esc(r.agencyBookingRequestId)+'\')"':'')+'>'
+      + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+        + '<div>'
+          + '<div style="font-weight:700">'+esc(r.guest_name||'')+' · '+esc(r.id)+'</div>'
+          + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(r.packageName||'')+(roomCategory?' · '+esc(roomCategory):'')+' · '+fd(r.check_in)+' &rarr; '+fd(r.check_out)+' · '+nights+' night'+(nights===1?'':'s')+' · '+(r.adults||0)+' adult'+((r.adults||0)===1?'':'s')+(r.children?' + '+r.children+' child'+(r.children===1?'':'ren'):'')+'</div>'
+          + (r.agencyGuestSellingTotal ? '<div style="font-size:var(--font-size-sm);margin-top:2px">'+esc(r.currency||'USD')+' '+(+(r.agencyGuestSellingTotal||0)).toFixed(2)+'</div>' : '')
+        + '</div>'
+        + '<span class="badge '+statusBadge+'">'+esc(statusLabel)+'</span>'
+      + '</div>'
+    + '</div>';
+  }
+  // Part 7: not-yet-confirmed booking request row -- deliberately reuses
+  // the exact same status labels/badges Phase F's drawMyBookingRequests()
+  // already uses, so the same status never reads differently in two
+  // places in this portal.
+  var q = e.data;
+  return '<div class="card" style="margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+      + '<div>'
+        + '<div style="font-weight:700">'+esc(q.guestName||'')+' · '+esc(q.quoteReference||q.id)+'</div>'
+        + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(q.packageName||'')+' · '+fd(q.arrivalDate)+' &rarr; '+fd(q.departureDate)+'</div>'
+      + '</div>'
+      + '<span class="badge '+(BOOKING_REQUEST_STATUS_BADGE[q.status]||'pending')+'">'+(BOOKING_REQUEST_STATUS_LABEL[q.status]||q.status)+'</span>'
+    + '</div>'
+  + '</div>';
+}
+
+// Part 10/11/25/26: server-side scoped search (searchAgencyGuests,
+// functions-core/index.js) -- this client code never reads a wider
+// collection and filters locally; it only ever receives back what the
+// server already decided this agency is allowed to see.
+function _mbSearchDebounced(){
+  clearTimeout(_mbSearchDebounceTimer);
+  _mbSearchDebounceTimer = setTimeout(searchMyBookings, 350);
+}
+async function searchMyBookings(){
+  var q = (document.getElementById('mb-search').value||'').trim();
+  if(q.length<2){ _mbSearchResults = null; renderMyBookings(); return; }
+  try {
+    var callable = fsFunctions.httpsCallable('searchAgencyGuests');
+    var result = await callable({ query: q });
+    _mbSearchResults = result.data.results || [];
+  } catch(e) {
+    console.error('searchMyBookings failed', e);
+    _mbSearchResults = [];
+  }
+  renderMyBookings();
+}
+// Part 12: each result clearly identifies what it is (confirmed booking /
+// pending request / quotation) -- never a bare, ambiguous name+date row.
+var MB_SEARCH_TYPE_LABEL = { RESERVATION:'Confirmed Booking', QUOTE:'Quotation' };
+function renderMbSearchRow(r){
+  var typeLabel = r.type==='BOOKING_REQUEST' ? (BOOKING_REQUEST_STATUS_LABEL[r.status]||'Booking Request') : (MB_SEARCH_TYPE_LABEL[r.type]||r.type);
+  var clickable = r.type==='RESERVATION' && !!r.requestId;
+  return '<div class="card" style="margin-bottom:10px'+(clickable?';cursor:pointer':'')+'"'+(clickable?' onclick="openBookingDetail(\''+esc(r.requestId)+'\')"':'')+'>'
+    + '<div>'
+      + '<div style="font-weight:700">'+esc(r.guestName||'')+'</div>'
+      + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(typeLabel)+' · '+esc(r.reference||'')+(r.arrivalDate?' · '+fd(r.arrivalDate)+' &rarr; '+fd(r.departureDate||''):'')+'</div>'
+    + '</div>'
+  + '</div>';
+}
+
+// Part 8/9/20: the ONE shared safe Booking Detail component. Reuses
+// getAgencyBookingConfirmationData() (Phase G) as its ENTIRE data source
+// -- the exact same server-side allowlist behind the printable
+// confirmation, so this view structurally cannot show anything the
+// confirmation itself couldn't already show (no viluNetTotal,
+// agencyEarnings, paymentCollector, component rates, or internal notes).
+async function openBookingDetail(requestId){
+  if(!requestId) return;
+  var bodyEl = document.getElementById('booking-detail-body');
+  bodyEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  document.getElementById('m-booking-detail').classList.add('on');
+
+  var safe;
+  try {
+    var callable = fsFunctions.httpsCallable('getAgencyBookingConfirmationData');
+    var result = await callable({ requestId: requestId });
+    safe = result.data;
+  } catch(e) {
+    console.error('openBookingDetail failed', e);
+    // Part 15 audit finding: getAgencyBookingConfirmationData (Phase G,
+    // not touched here) requires the live reservation status to be
+    // EXACTLY 'Confirmed' -- a reservation later marked 'Checked in' /
+    // 'Checked out' by front desk is refused too, not just a cancelled
+    // one. Given honestly rather than silently swallowed.
+    var msg = (e && e.message && /no longer confirmed/i.test(e.message))
+      ? 'This booking’s status has since changed at the property, so its confirmation view isn’t available here — contact Vilu Residence directly.'
+      : 'Could not load this booking.';
+    bodyEl.innerHTML = '<div style="text-align:center;padding:20px;color:#b91c1c">'+esc(msg)+'</div>';
+    return;
+  }
+
+  var nights = safe.nights||0;
+  var guestsLine = (safe.adults||0)+' Adult'+(safe.adults===1?'':'s')+(safe.children?' · '+safe.children+' Child'+(safe.children===1?'':'ren'):'');
+  var includesHtml = (safe.guestIncludes||[]).filter(Boolean).map(function(i){ return '<li>'+esc(i)+'</li>'; }).join('');
+  var activitiesHtml = (safe.guestActivities||[]).filter(Boolean).map(function(i){ return '<li>'+esc(i)+'</li>'; }).join('');
+
+  // Part 19: safe operational text only, never the raw public block
+  // reason -- one small extra read of this agency's OWN booking request
+  // doc (already rules-permitted, same as everywhere else in this file),
+  // purely to check the boolean presence of holdRequestId.
+  var holdNote = '';
+  try {
+    var reqSnap = await fsDb.collection('agency_booking_requests').doc(requestId).get();
+    if(reqSnap.exists && reqSnap.data().holdRequestId){
+      holdNote = '<div style="font-size:var(--font-size-sm);color:#7c3aed;margin-top:6px"><i class="ti ti-clock-hour-4"></i> Temporary hold used</div>';
+    }
+  } catch(e) { /* purely cosmetic -- detail view still renders without it */ }
+
+  bodyEl.innerHTML =
+    '<div class="fg"><label>Guest</label><div style="font-size:var(--font-size-base);font-weight:700">'+esc(safe.guestName)+'</div></div>'
+    + '<div class="form-grid" style="margin-bottom:12px">'
+      + '<div class="fg" style="margin:0"><label>Arrival</label><div>'+fd(safe.arrivalDate)+'</div></div>'
+      + '<div class="fg" style="margin:0"><label>Departure</label><div>'+fd(safe.departureDate)+'</div></div>'
+      + '<div class="fg" style="margin:0"><label>Nights</label><div>'+nights+'</div></div>'
+      + '<div class="fg" style="margin:0"><label>Guests</label><div>'+esc(guestsLine)+'</div></div>'
+    + '</div>'
+    + '<div class="fg" style="margin:0"><label>Room / category</label><div>'+esc(safe.roomCategory||'—')+'</div></div>'
+    + '<div class="fg"><label>Package</label><div>'+esc(safe.packageName||'—')+'</div></div>'
+    + (includesHtml ? '<div class="fg"><label>Inclusions</label><ul style="margin:4px 0 0 18px;font-size:var(--font-size-sm)">'+includesHtml+'</ul></div>' : '')
+    + (activitiesHtml ? '<div class="fg"><label>Activities</label><ul style="margin:4px 0 0 18px;font-size:var(--font-size-sm)">'+activitiesHtml+'</ul></div>' : '')
+    + '<div class="form-grid" style="margin:12px 0">'
+      + '<div class="fg" style="margin:0"><label>Booking reference</label><div>'+esc(safe.bookingReference)+'</div></div>'
+      + (safe.quoteReference ? '<div class="fg" style="margin:0"><label>Quote reference</label><div>'+esc(safe.quoteReference)+'</div></div>' : '')
+    + '</div>'
+    + '<div class="fg" style="margin:0"><label>Status</label><div><span class="badge ok">Confirmed</span></div></div>'
+    + holdNote
+    + '<div class="fg" style="margin-top:10px"><label>Agreed guest selling total</label><div style="font-size:var(--font-size-lg);font-weight:800;color:var(--green)">'+esc(safe.currency)+' '+(+(safe.agencyGuestSellingTotal||0)).toFixed(2)+'</div></div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'
+      + '<button class="btn-outline" onclick="openAgencyBookingConfirmation(\''+esc(requestId)+'\')"><i class="ti ti-eye"></i> View confirmation</button>'
+      + '<button class="btn-outline" onclick="openAgencyBookingConfirmation(\''+esc(requestId)+'\')"><i class="ti ti-printer"></i> Print confirmation</button>'
+      + (safe.quoteReference ? '<button class="btn-outline" onclick="printQuotation(\''+esc(safe.quoteReference)+'\')"><i class="ti ti-file-text"></i> View originating quotation</button>' : '')
+    + '</div>'
+    // Part 23: no editing/cancellation workflow this phase -- passive text
+    // only.
+    + '<div style="font-size:var(--font-size-xs);color:var(--muted);margin-top:12px">To change dates, room, guest count, or cancel this booking, contact Vilu Residence directly.</div>';
+}
+function closeBookingDetail(){
+  document.getElementById('m-booking-detail').classList.remove('on');
 }
 
 // Two separate guest-facing documents. Confirmation never shows a price;

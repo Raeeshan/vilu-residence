@@ -40,6 +40,11 @@
 //     returning ONLY guest-safe fields -- never viluNetTotal, agencyEarnings,
 //     paymentCollector, component rates, or any internal note. See the
 //     comment above that export.
+//   searchAgencyGuests  Agency Sales Workflow Phase H -- bounded, in-memory
+//     substring search across an agency's OWN reservations/booking-requests/
+//     quotes only (agencyId always request.auth.uid, never client-supplied).
+//     Direct/OTA/other-agency records are never fetched in the first place.
+//     See the comment above that export.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -1198,4 +1203,75 @@ exports.getAgencyBookingConfirmationData = onCall({ region: 'us-central1', maxIn
     } catch (e) { /* guestMessage is optional -- confirmation still renders without it */ }
   }
   return payload;
+});
+
+// ── Agency Sales Workflow Phase H: own-guest search ─────────────────────
+// Firestore has no substring-search primitive, and this property's scale
+// (six rooms) doesn't justify an external search service -- the task
+// explicitly rules that out. The accepted tradeoff here is bounded
+// server-side retrieval of THIS agency's own records (never the whole
+// collection, never a client-supplied agencyId -- always
+// request.auth.uid, same trust boundary as every other Phase C-G
+// callable) followed by in-memory case-insensitive substring matching.
+// Direct/OTA/other-agency guests are never fetched in the first place --
+// there is no "search everything then filter" step to get wrong.
+const AGENCY_SEARCH_MAX_PER_SOURCE = 200;
+const AGENCY_SEARCH_MAX_RESULTS = 50;
+
+function normalizeForSearch(s) {
+  return String(s || '').toLowerCase().trim();
+}
+
+exports.searchAgencyGuests = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const agencyId = request.auth.uid; // never trusted from the client
+  const query = normalizeForSearch((request.data || {}).query);
+  if (query.length < 2) return { results: [] };
+
+  const [resSnap, reqSnap, quoteSnap] = await Promise.all([
+    db.collection('reservations').where('agencyId', '==', agencyId).limit(AGENCY_SEARCH_MAX_PER_SOURCE).get(),
+    db.collection('agency_booking_requests').where('agencyId', '==', agencyId).limit(AGENCY_SEARCH_MAX_PER_SOURCE).get(),
+    db.collection('agency_quotes').where('agencyId', '==', agencyId).limit(AGENCY_SEARCH_MAX_PER_SOURCE).get(),
+  ]);
+
+  // Part 12/17: a confirmed reservation already represents that booking --
+  // its own booking request, and the quote it came from, must not also
+  // surface as separate results for the same real trip.
+  const supersededRequestIds = new Set();
+  const supersededQuoteIds = new Set(reqSnap.docs.map((d) => d.data().quoteId).filter(Boolean));
+
+  const results = [];
+  resSnap.docs.forEach((doc) => {
+    const r = doc.data();
+    const hay = normalizeForSearch(r.guest_name) + ' ' + normalizeForSearch(doc.id) + ' ' + normalizeForSearch(r.agencyQuoteReference);
+    if (r.agencyBookingRequestId) supersededRequestIds.add(r.agencyBookingRequestId);
+    if (!hay.includes(query)) return;
+    results.push({
+      type: 'RESERVATION', guestName: r.guest_name || '', reference: doc.id, requestId: r.agencyBookingRequestId || null,
+      quoteReference: r.agencyQuoteReference || null, arrivalDate: r.check_in || null, departureDate: r.check_out || null, status: r.status || '',
+    });
+  });
+  reqSnap.docs.forEach((doc) => {
+    if (supersededRequestIds.has(doc.id)) return;
+    const r = doc.data();
+    const hay = normalizeForSearch(r.guestName) + ' ' + normalizeForSearch(doc.id) + ' ' + normalizeForSearch(r.quoteReference);
+    if (!hay.includes(query)) return;
+    results.push({
+      type: 'BOOKING_REQUEST', guestName: r.guestName || '', reference: doc.id, requestId: doc.id,
+      quoteReference: r.quoteReference || null, arrivalDate: r.arrivalDate || null, departureDate: r.departureDate || null, status: r.status || '',
+    });
+  });
+  quoteSnap.docs.forEach((doc) => {
+    if (supersededQuoteIds.has(doc.id)) return;
+    const q = doc.data();
+    const hay = normalizeForSearch(q.guestName) + ' ' + normalizeForSearch(doc.id);
+    if (!hay.includes(query)) return;
+    results.push({
+      type: 'QUOTE', guestName: q.guestName || '', reference: doc.id, requestId: null,
+      quoteReference: doc.id, arrivalDate: q.arrivalDate || null, departureDate: q.departureDate || null, status: q.status || '',
+    });
+  });
+
+  return { results: results.slice(0, AGENCY_SEARCH_MAX_RESULTS) };
 });
