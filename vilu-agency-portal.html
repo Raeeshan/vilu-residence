@@ -228,6 +228,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab on" onclick="showTab('packages',this)"><i class="ti ti-package"></i> Packages</button>
+    <button class="tab" onclick="showTab('quotations',this)"><i class="ti ti-file-text"></i> Quotations</button>
     <button class="tab" onclick="showTab('availability',this)"><i class="ti ti-calendar"></i> Availability</button>
     <button class="tab" onclick="showTab('mybookings',this)"><i class="ti ti-list"></i> My bookings</button>
     <button class="tab" onclick="showTab('blockroom',this)"><i class="ti ti-lock"></i> Block rooms</button>
@@ -240,6 +241,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div id="tab-packages">
       <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>All package prices are <strong>tax-inclusive</strong>. Your agency rate is shown on each package. Select a package to make a booking.</div></div>
       <div class="pkg-grid" id="pkg-cards"></div>
+    </div>
+
+    <!-- QUOTATIONS TAB — Phase B: a quote is only a sales document (guest
+         name/dates/package/selling price). It never creates a reservation,
+         block request, or touches availability -- those are later phases. -->
+    <div id="tab-quotations" class="hidden">
+      <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>Start a quotation from a package on the Packages tab. Vilu's net cost stays private to you — you set the guest's final selling price.</div></div>
+      <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:10px">Draft</h3>
+      <div id="quotes-draft-list" style="margin-bottom:20px"></div>
+      <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:10px">Finalized</h3>
+      <div id="quotes-finalized-list"></div>
     </div>
 
     <!-- AVAILABILITY TAB -->
@@ -432,6 +444,71 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="background:#b8eef8;border:2px dashed var(--green);border-radius:10px;padding:14px;font-size:var(--font-size-2xl);font-weight:800;color:var(--green);letter-spacing:.1em;margin-bottom:16px" id="success-ref">AG-000000</div>
       <div id="success-details" style="font-size:var(--font-size-base);color:var(--muted);margin-bottom:20px;line-height:1.8"></div>
       <button class="btn-outline" onclick="document.getElementById('m-success').classList.remove('on');showTab('mybookings',null)">View my bookings</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTATION BUILDER MODAL — Phase B. A quote is a sales document only:
+     saving/finalizing it never creates a reservation, block request, or
+     touches availability. Vilu's net cost (private) and the agency's own
+     guest selling price are both visible here to the agency; only the
+     guest selling total ever reaches the printable document on the right
+     (buildGuestQuotationHTML() enforces that with an explicit allowlist,
+     not by trusting this form to never render something it shouldn't). -->
+<div class="modal-bg" id="m-quote" onclick="if(event.target===this)closeQuoteBuilder()">
+  <div class="modal" style="max-width:920px;width:95vw">
+    <div class="modal-hdr">
+      <h2 id="quote-modal-title">New quotation</h2>
+      <button onclick="closeQuoteBuilder()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+      <div>
+        <div id="quote-locked-note" class="al warn" style="display:none;margin-bottom:12px"><i class="ti ti-lock" style="flex-shrink:0"></i><div>This quotation is finalized. Commercial details are locked and can no longer be edited here.</div></div>
+
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Guest details</div>
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="fg" style="margin:0"><label>Guest name</label><input type="text" id="quote-guest-name" oninput="updateQuotePreview()" placeholder="John Smith"></div>
+          <div class="fg" style="margin:0"></div>
+          <div class="fg" style="margin:0"><label>Arrival date</label><input type="date" id="quote-arrival" onchange="updateQuotePreview()"></div>
+          <div class="fg" style="margin:0"><label>Departure date</label><input type="date" id="quote-departure" onchange="updateQuotePreview()"></div>
+          <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="quote-adults" min="1" value="2" oninput="updateQuotePreview()"></div>
+          <div class="fg" style="margin:0"><label>Children</label><input type="number" id="quote-children" min="0" value="0" oninput="updateQuotePreview()"></div>
+        </div>
+        <div class="fg"><label>Special message to guest <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional, shown on the quotation)</span></label><textarea id="quote-message" rows="2" oninput="updateQuotePreview()" placeholder="Any note for the guest..."></textarea></div>
+
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">Pricing — private to your agency</div>
+        <div style="background:#f9fafb;border:1.5px dashed var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);color:var(--muted)">Vilu net cost (private)</div>
+          <div id="quote-vilu-net" style="font-size:var(--font-size-lg);font-weight:800;color:#374151">USD 0.00</div>
+        </div>
+        <div class="form-grid" style="margin-bottom:4px">
+          <div class="fg" style="margin:0"><label>Currency</label>
+            <select id="quote-currency" onchange="updateQuoteCurrencyFields();updateQuotePreview()">
+              <option value="USD">USD</option>
+              <option value="MVR">MVR</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+          <div class="fg" style="margin:0"><label>Guest selling price</label><input type="number" id="quote-selling-price" min="0" step="5" oninput="updateQuotePreview()" placeholder="0"></div>
+        </div>
+        <div class="fg" id="quote-exchange-rate-wrap" style="display:none">
+          <label>Exchange rate <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(your own reference only — the guest total above is the agreed amount you enter, not auto-converted)</span></label>
+          <input type="number" id="quote-exchange-rate" min="0" step="0.01" oninput="updateQuotePreview()" placeholder="e.g. 15.42">
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);color:var(--muted);margin-bottom:16px">
+          <span>Your margin</span><strong id="quote-margin">—</strong>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn-outline" style="flex:1" id="quote-save-btn" onclick="saveQuoteDraft()"><i class="ti ti-device-floppy"></i> Save draft</button>
+          <button class="btn-primary" style="flex:1" id="quote-finalize-btn" onclick="finalizeQuote()"><i class="ti ti-check"></i> Finalize quotation</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Guest sees (live preview)</div>
+        <iframe id="quote-preview-frame" style="width:100%;height:520px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
+      </div>
     </div>
   </div>
 </div>
@@ -741,12 +818,13 @@ function doSignout(){
 }
 
 function showTab(name, el){
-  ['packages','availability','mybookings','blockroom'].forEach(function(t){
+  ['packages','quotations','availability','mybookings','blockroom'].forEach(function(t){
     document.getElementById('tab-'+t).className = t===name?'':'hidden';
   });
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   if(el) el.classList.add('on');
   if(name==='packages') drawPackages();
+  if(name==='quotations') drawQuotations();
   if(name==='mybookings') drawMyBookings();
   if(name==='blockroom') drawMyBlocks();
   if(name==='availability'){
@@ -923,7 +1001,10 @@ async function drawPackages(){
         +'<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">'
           +'<div style="font-size:var(--font-size-xs);color:var(--muted);font-weight:700">VILU RATE</div><div style="font-size:var(--font-size-xl);font-weight:800;color:var(--green)">$'+agencyPrice+'</div>'
         +'</div>'
-        +'<button data-pid="'+pkg.id+'" onclick="openBookingModal(this.dataset.pid)" style="width:100%;background:'+col+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit">Book this package →</button>'
+        +'<div style="display:flex;gap:8px">'
+          +'<button data-pid="'+pkg.id+'" onclick="openBookingModal(this.dataset.pid)" style="flex:1;background:'+col+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit">Book this package →</button>'
+          +'<button data-pid="'+pkg.id+'" onclick="openQuoteBuilder(this.dataset.pid)" style="flex:1;background:none;color:'+col+';border:1.5px solid '+col+';padding:10px;border-radius:8px;font-size:var(--font-size-base);font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-file-text"></i> Create quotation</button>'
+        +'</div>'
       +'</div>';
     el.appendChild(card);
   });
@@ -977,6 +1058,345 @@ async function createDraftAgencyQuote(fields){
   }, fields || {}, { agencyId: currentAgency.uid, quoteId: quoteId });
   await fsDb.collection('agency_quotes').doc(quoteId).set(quote);
   return quote;
+}
+
+// ══════════════════════════════════════════════
+// QUOTATION BUILDER — Phase B
+// ══════════════════════════════════════════════
+// A quote is ONLY a sales document. Nothing in this section ever writes to
+// reservations, block_requests, blocks, or room_availability -- creating or
+// finalizing a quote has zero effect on inventory. Draft is written on the
+// first "Save draft"/"Finalize", not the moment the builder opens, so
+// opening-then-closing without entering anything never litters Firestore
+// with an empty quote.
+var _quoteWorking = null; // the quote object currently open in the builder
+var _quotePkg = null;     // the assigned package this quote is based on
+
+// Strips a trailing " — $NN" price suffix from a package content label
+// before it is copied into a quote's guest-facing snapshot. Existing
+// activity labels are admin free text that may legitimately embed a price
+// (the admin form's own placeholder is literally "Whale Shark Snorkeling —
+// $72") -- this never touches the stored package data, only the copy saved
+// onto the quote.
+function sanitizeGuestLabel(label){
+  return String(label||'').replace(/\s*[-–—]\s*\$\d+(?:\.\d+)?\s*$/, '').trim();
+}
+
+// Vilu net cost for a quote -- reuses the SAME pricing semantics
+// updateBkSummary() already uses for a real booking (audited, not guessed):
+// the package's agencyPricePerRoom/pricePerRoom is a fixed PER-PERSON price
+// for the whole package (never multiplied by nights), children ride at that
+// same rate minus the package's own Child Discount %, and nights beyond the
+// package's own fixed duration are priced separately per adult at the
+// global extra-night rate. Room type/transfer/board/custom extras are a
+// BOOKING's concern, not a package-level quote's (Phase B's quote form only
+// collects guest name/dates/adults/children), so they're intentionally
+// excluded here.
+function calcQuoteViluNet(pkg, adults, children, childDiscountPct, arrivalDate, departureDate, agyBookingSettings){
+  var basePerPerson = pkg.agencyPricePerRoom || pkg.pricePerRoom || 0;
+  var childPerPerson = basePerPerson * (1 - (childDiscountPct||0)/100);
+  var baseTotal = basePerPerson*(adults||0) + childPerPerson*(children||0);
+  var baseNights = pkg.nights||0;
+  var totalNights = baseNights;
+  if(arrivalDate && departureDate){
+    var n = Math.round((new Date(departureDate)-new Date(arrivalDate))/864e5);
+    if(n>0) totalNights = n;
+  }
+  var extraNights = Math.max(0, totalNights - baseNights);
+  var extraNightsCost = extraNights * ((agyBookingSettings&&agyBookingSettings.extraNightRate)||0) * (adults||0);
+  return { baseTotal: baseTotal, baseNights: baseNights, totalNights: totalNights, extraNights: extraNights, extraNightsCost: extraNightsCost, total: baseTotal + extraNightsCost };
+}
+
+async function openQuoteBuilder(pid, existingQuoteId){
+  var pkgs = loadPMS_Packages();
+  _quotePkg = pkgs.find(function(p){ return p.id===pid; });
+  if(!_quotePkg){ alert('Package not found'); return; }
+
+  if(existingQuoteId){
+    try {
+      var snap = await fsDb.collection('agency_quotes').doc(existingQuoteId).get();
+      if(!snap.exists){ alert('Quotation not found'); return; }
+      _quoteWorking = snap.data();
+    } catch(e) {
+      console.error('openQuoteBuilder load failed', e);
+      alert('Could not load this quotation');
+      return;
+    }
+  } else {
+    var now = new Date().toISOString();
+    _quoteWorking = {
+      quoteId: newAgencyQuoteId(),
+      agencyId: currentAgency.uid, agencyEmail: currentAgency.email,
+      agencyName: currentAgency.name || currentAgency.company || currentAgency.email,
+      guestName: '', arrivalDate: '', departureDate: '', adults: 2, children: 0,
+      currency: 'USD', quoteType: 'ASSIGNED_PACKAGE',
+      packageId: _quotePkg.id, packageName: _quotePkg.name, nights: _quotePkg.nights||0,
+      childDiscountPct: _quotePkg.childDiscountPct||0,
+      guestMessage: '',
+      // Guest-facing snapshot, sanitized once here -- the builder never
+      // re-derives these from _quotePkg again, so if Vilu edits this
+      // package's activities/includes later, an already-open or already-
+      // saved quote's guest content stays exactly as it was (Part 19).
+      guestIncludes: (_quotePkg.includes||[]).map(sanitizeGuestLabel),
+      guestActivities: (_quotePkg.activities||[]).map(sanitizeGuestLabel),
+      selectedComponents: [],
+      viluNetTotal: 0, agencyGuestSellingTotal: 0,
+      exchangeRate: 1, exchangeRateSource: null, exchangeRateSnapshotAt: null,
+      status: 'DRAFT', createdAt: now, updatedAt: now
+    };
+  }
+
+  var locked = _quoteWorking.status === 'FINALIZED';
+  document.getElementById('quote-modal-title').textContent = (existingQuoteId ? 'Quotation — ' : 'New quotation — ') + (_quoteWorking.packageName||_quotePkg.name);
+  document.getElementById('quote-guest-name').value = _quoteWorking.guestName||'';
+  document.getElementById('quote-arrival').value = _quoteWorking.arrivalDate||'';
+  document.getElementById('quote-departure').value = _quoteWorking.departureDate||'';
+  document.getElementById('quote-adults').value = _quoteWorking.adults||2;
+  document.getElementById('quote-children').value = _quoteWorking.children||0;
+  document.getElementById('quote-message').value = _quoteWorking.guestMessage||'';
+  document.getElementById('quote-currency').value = _quoteWorking.currency||'USD';
+  document.getElementById('quote-selling-price').value = _quoteWorking.agencyGuestSellingTotal||'';
+  document.getElementById('quote-exchange-rate').value = (_quoteWorking.exchangeRateSource==='agency-entered') ? _quoteWorking.exchangeRate : '';
+  ['quote-guest-name','quote-arrival','quote-departure','quote-adults','quote-children','quote-message','quote-selling-price','quote-currency','quote-exchange-rate'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.disabled = locked;
+  });
+  document.getElementById('quote-locked-note').style.display = locked ? '' : 'none';
+  document.getElementById('quote-save-btn').style.display = locked ? 'none' : '';
+  document.getElementById('quote-finalize-btn').style.display = locked ? 'none' : '';
+
+  updateQuoteCurrencyFields();
+  await updateQuotePreview();
+  document.getElementById('m-quote').classList.add('on');
+}
+
+function updateQuoteCurrencyFields(){
+  var isUsd = document.getElementById('quote-currency').value === 'USD';
+  var wrap = document.getElementById('quote-exchange-rate-wrap');
+  if(wrap) wrap.style.display = isUsd ? 'none' : '';
+}
+
+function closeQuoteBuilder(){
+  document.getElementById('m-quote').classList.remove('on');
+  _quoteWorking = null; _quotePkg = null;
+}
+
+// Recomputes Vilu net (private) + margin (private, display-only, never
+// persisted as its own field -- it's always just agencyGuestSellingTotal
+// minus viluNetTotal) and refreshes the guest-facing preview on every
+// keystroke. Does NOT write to Firestore -- only "Save draft"/"Finalize" do.
+async function updateQuotePreview(){
+  if(!_quoteWorking || !_quotePkg) return;
+  if(_quoteWorking.status === 'FINALIZED'){
+    var frameLocked = document.getElementById('quote-preview-frame');
+    if(frameLocked) frameLocked.srcdoc = buildGuestQuotationHTML(_quoteWorking);
+    return;
+  }
+  _quoteWorking.guestName = document.getElementById('quote-guest-name').value.trim();
+  _quoteWorking.arrivalDate = document.getElementById('quote-arrival').value;
+  _quoteWorking.departureDate = document.getElementById('quote-departure').value;
+  _quoteWorking.adults = +(document.getElementById('quote-adults').value||1);
+  _quoteWorking.children = +(document.getElementById('quote-children').value||0);
+  _quoteWorking.guestMessage = document.getElementById('quote-message').value.trim();
+  _quoteWorking.currency = document.getElementById('quote-currency').value;
+  _quoteWorking.agencyGuestSellingTotal = +(document.getElementById('quote-selling-price').value||0);
+  var rateInput = +(document.getElementById('quote-exchange-rate').value||0);
+  var isUsd = _quoteWorking.currency === 'USD';
+  _quoteWorking.exchangeRate = isUsd ? 1 : (rateInput>0 ? rateInput : 1);
+  _quoteWorking.exchangeRateSource = (!isUsd && rateInput>0) ? 'agency-entered' : null;
+  _quoteWorking.exchangeRateSnapshotAt = (!isUsd && rateInput>0) ? new Date().toISOString() : null;
+
+  var settings = await loadAgyBookingSettings();
+  var net = calcQuoteViluNet(_quotePkg, _quoteWorking.adults, _quoteWorking.children, _quoteWorking.childDiscountPct, _quoteWorking.arrivalDate, _quoteWorking.departureDate, settings);
+  _quoteWorking.viluNetTotal = net.total;
+  _quoteWorking.nights = net.totalNights;
+
+  var netEl = document.getElementById('quote-vilu-net');
+  if(netEl) netEl.textContent = 'USD '+net.total.toFixed(2)+(net.extraNights ? ' (incl. '+net.extraNights+' extra night'+(net.extraNights>1?'s':'')+')' : '');
+  var margin = _quoteWorking.agencyGuestSellingTotal - net.total;
+  var marginPct = net.total>0 ? (margin/net.total*100) : 0;
+  var marginEl = document.getElementById('quote-margin');
+  if(marginEl) marginEl.textContent = _quoteWorking.agencyGuestSellingTotal>0 ? (_quoteWorking.currency+' '+margin.toFixed(2)+' ('+marginPct.toFixed(1)+'%)') : '—';
+
+  var frame = document.getElementById('quote-preview-frame');
+  if(frame) frame.srcdoc = buildGuestQuotationHTML(_quoteWorking);
+}
+
+async function saveQuoteDraft(){
+  if(!_quoteWorking) return;
+  if(!_quoteWorking.guestName){ alert('Enter the guest name'); return; }
+  if(!_quoteWorking.arrivalDate || !_quoteWorking.departureDate){ alert('Enter arrival and departure dates'); return; }
+  _quoteWorking.updatedAt = new Date().toISOString();
+  try {
+    await fsDb.collection('agency_quotes').doc(_quoteWorking.quoteId).set(_quoteWorking);
+    alert('Draft saved');
+    closeQuoteBuilder();
+    drawQuotations();
+  } catch(e) {
+    console.error('saveQuoteDraft failed', e);
+    alert('Could not save — please try again');
+  }
+}
+
+async function finalizeQuote(){
+  if(!_quoteWorking) return;
+  if(!_quoteWorking.guestName || !_quoteWorking.arrivalDate || !_quoteWorking.departureDate){
+    alert('Fill in the guest name and travel dates before finalizing'); return;
+  }
+  if(!(_quoteWorking.agencyGuestSellingTotal > 0)){
+    alert('Enter a guest selling price before finalizing'); return;
+  }
+  if(!confirm('Finalize this quotation?\n\nAfter finalization, the commercial details will be locked.')) return;
+  var now = new Date().toISOString();
+  _quoteWorking.status = 'FINALIZED';
+  _quoteWorking.finalizedAt = now;
+  _quoteWorking.updatedAt = now;
+  try {
+    await fsDb.collection('agency_quotes').doc(_quoteWorking.quoteId).set(_quoteWorking);
+    alert('Quotation finalized.');
+    closeQuoteBuilder();
+    drawQuotations();
+  } catch(e) {
+    console.error('finalizeQuote failed', e);
+    alert('Could not finalize — please try again');
+  }
+}
+
+// ── Draft/Finalized list ──
+// Queried with .where('agencyId','==',currentAgency.uid) -- Agency A never
+// fetches all quotes and filters client-side; the query itself is scoped,
+// matching what the server rules already enforce (belt and braces).
+async function drawQuotations(){
+  var draftEl = document.getElementById('quotes-draft-list');
+  var finalEl = document.getElementById('quotes-finalized-list');
+  if(!draftEl || !finalEl || !currentAgency) return;
+  draftEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  finalEl.innerHTML = '';
+  try {
+    var snap = await fsDb.collection('agency_quotes').where('agencyId','==',currentAgency.uid).get();
+    var quotes = snap.docs.map(function(d){ return d.data(); });
+    quotes.sort(function(a,b){ return (b.updatedAt||'').localeCompare(a.updatedAt||''); });
+    var drafts = quotes.filter(function(q){ return q.status==='DRAFT'; });
+    var finals = quotes.filter(function(q){ return q.status==='FINALIZED'; });
+    draftEl.innerHTML = drafts.length ? drafts.map(renderQuoteCard).join('') : '<div style="text-align:center;padding:20px;color:var(--muted)">No draft quotations yet.</div>';
+    finalEl.innerHTML = finals.length ? finals.map(renderQuoteCard).join('') : '<div style="text-align:center;padding:20px;color:var(--muted)">No finalized quotations yet.</div>';
+  } catch(e) {
+    console.error('drawQuotations failed', e);
+    draftEl.innerHTML = '<div style="text-align:center;padding:20px;color:#b91c1c">Could not load quotations.</div>';
+  }
+}
+
+function renderQuoteCard(q){
+  var isDraft = q.status === 'DRAFT';
+  var pid = (q.packageId||'').replace(/'/g,"\\'");
+  var qid = (q.quoteId||'').replace(/'/g,"\\'");
+  var actions = isDraft
+    ? '<button class="btn-outline" onclick="openQuoteBuilder(\''+pid+'\',\''+qid+'\')">Edit</button>'
+      + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Preview</button>'
+    : '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">View</button>'
+      + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Print</button>';
+  return '<div class="card" style="margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">'
+    + '<div>'
+      + '<div style="font-weight:700">'+esc(q.quoteId)+' — '+esc(q.guestName||'(no guest name yet)')+'</div>'
+      + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(q.packageName||'')+' · '+esc(q.arrivalDate||'?')+' → '+esc(q.departureDate||'?')+'</div>'
+      + '<div style="font-size:var(--font-size-sm)">'+esc(q.currency||'USD')+' '+(+(q.agencyGuestSellingTotal||0)).toFixed(2)
+        + ' · '+(isDraft?'<span style="color:#d97706;font-weight:700">DRAFT</span>':'<span style="color:#059669;font-weight:700">FINALIZED</span>')
+        + ' · created '+esc((q.createdAt||'').slice(0,10))+'</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:6px;flex-shrink:0">'+actions+'</div>'
+  + '</div>';
+}
+
+// ── Guest-safe printable quotation ──
+//
+// STRUCTURAL PRIVACY GUARANTEE: the incoming `quote` is read exactly once,
+// into `safe` below, picking only fields that are safe to show a guest.
+// Every line after that touches `safe.*` only -- the original `quote`
+// object is discarded immediately, so a field this allowlist omits
+// (viluNetTotal, exchangeRate, selectedComponents, childDiscountPct, raw
+// package data, agencyEmail, etc.) can never leak into the rendered HTML,
+// no matter what else gets added to the quote schema in a later phase.
+function buildGuestQuotationHTML(quote){
+  var safe = {
+    quoteId: String(quote.quoteId||''),
+    agencyName: String(quote.agencyName||''),
+    guestName: String(quote.guestName||''),
+    arrivalDate: String(quote.arrivalDate||''),
+    departureDate: String(quote.departureDate||''),
+    nights: +(quote.nights||0),
+    adults: +(quote.adults||0),
+    children: +(quote.children||0),
+    packageName: String(quote.packageName||''),
+    includes: (quote.guestIncludes||[]).map(String),
+    activities: (quote.guestActivities||[]).map(String),
+    guestMessage: String(quote.guestMessage||''),
+    currency: String(quote.currency||'USD'),
+    total: +(quote.agencyGuestSellingTotal||0),
+    status: String(quote.status||'DRAFT'),
+  };
+  quote = null; // the outer reference is never touched again below this line.
+
+  function fmtDate(d){
+    if(!d) return '(not set)';
+    var parts = d.split('-');
+    if(parts.length!==3) return d;
+    var dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    return dt.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+  }
+  var guestLine = safe.adults+' Adult'+(safe.adults===1?'':'s')+(safe.children?' · '+safe.children+' Child'+(safe.children===1?'':'ren'):'');
+  var inclusionsHtml = safe.includes.concat(safe.activities).filter(Boolean).map(function(i){ return '<li>'+esc(i)+'</li>'; }).join('');
+
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Quotation '+esc(safe.quoteId)+'</title><style>'
+    + '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;padding:30px;color:#111827}'
+    + 'h1{font-size:22px;margin-bottom:2px}h2{font-size:13px;color:#6b7280;font-weight:700;margin-bottom:18px;letter-spacing:.08em;text-transform:uppercase}'
+    + '.ref{font-size:12px;color:#6b7280;margin-bottom:20px}'
+    + 'table{width:100%;border-collapse:collapse;margin:10px 0 18px}td,th{padding:7px 10px;border:1px solid #e5e7eb;text-align:left;font-size:13px;vertical-align:top}th{width:150px;color:#374151}'
+    + '.section-label{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}'
+    + 'ul{margin:0 0 18px 20px}li{font-size:13px;padding:2px 0}'
+    + '.total{background:#f0fdfa;border:2px solid #00b4d8;border-radius:8px;padding:16px;text-align:center;margin-top:10px}'
+    + '.total .amt{font-size:26px;font-weight:800;color:#0f766e}'
+    + '.msg{background:#f9fafb;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:18px}'
+    + (safe.status==='DRAFT' ? '.draftwm{position:fixed;top:38%;left:0;right:0;text-align:center;font-size:64px;color:rgba(0,0,0,.06);transform:rotate(-20deg);pointer-events:none;font-weight:800}' : '')
+    + '@media print{@page{margin:15mm}.no-print{display:none}}'
+    + '</style></head><body>'
+    + (safe.status==='DRAFT' ? '<div class="draftwm">DRAFT</div>' : '')
+    + '<h1>'+esc(safe.agencyName)+'</h1><h2>Quotation</h2>'
+    + '<div class="ref">Quotation Reference: '+esc(safe.quoteId)+'</div>'
+    + '<table>'
+      + '<tr><th>Guest</th><td>'+esc(safe.guestName)+'</td></tr>'
+      + '<tr><th>Travel dates</th><td>'+esc(fmtDate(safe.arrivalDate))+' &ndash; '+esc(fmtDate(safe.departureDate))+'</td></tr>'
+      + '<tr><th>Nights</th><td>'+safe.nights+'</td></tr>'
+      + '<tr><th>Guests</th><td>'+esc(guestLine)+'</td></tr>'
+      + '<tr><th>Accommodation</th><td>Vilu Residence Maamigili</td></tr>'
+      + '<tr><th>Package</th><td>'+esc(safe.packageName)+'</td></tr>'
+    + '</table>'
+    + (inclusionsHtml ? '<div class="section-label">Included</div><ul>'+inclusionsHtml+'</ul>' : '')
+    + (safe.guestMessage ? '<div class="section-label">Special notes</div><div class="msg">'+esc(safe.guestMessage)+'</div>' : '')
+    + '<div class="total"><div class="section-label">Total package price</div><div class="amt">'+esc(safe.currency)+' '+safe.total.toFixed(2)+'</div></div>'
+    + (safe.status==='DRAFT' ? '<p style="margin-top:16px;font-size:11px;color:#9ca3af;text-align:center">This is a draft quotation and is subject to change.</p>' : '')
+    + '<button class="no-print" onclick="window.print()" style="margin-top:24px;background:#00b4d8;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">🖨️ Print / Save as PDF</button>'
+    + '</body></html>';
+}
+
+// Opens the guest-safe document for a quote in a new tab -- used for both
+// "Preview" (draft) and "View"/"Print" (finalized) list actions, and can
+// also be called for the quote currently open in the builder.
+async function printQuotation(quoteId){
+  var quote = (_quoteWorking && _quoteWorking.quoteId===quoteId) ? _quoteWorking : null;
+  if(!quote){
+    try {
+      var snap = await fsDb.collection('agency_quotes').doc(quoteId).get();
+      if(!snap.exists){ alert('Quotation not found'); return; }
+      quote = snap.data();
+    } catch(e) {
+      console.error('printQuotation load failed', e);
+      alert('Could not load this quotation');
+      return;
+    }
+  }
+  var win = window.open('', '_blank');
+  if(!win){ alert('Allow pop-ups to print'); return; }
+  win.document.write(buildGuestQuotationHTML(quote));
+  win.document.close();
 }
 
 // ── BOOKING MODAL ──

@@ -127,6 +127,11 @@ function baseQuote(overrides) {
       baseQuote({ quoteId: 'VQ-B-DRAFT', agencyId: AGENCY_B_UID, agencyEmail: 'agencyb@example.com', status: 'DRAFT', agencyGuestSellingTotal: 999 })
     ));
   });
+  await test('Agency A CANNOT finalize Agency B\'s quote (Phase B Part 22: finalizing is just an update, still blocked by ownership)', async () => {
+    await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-B-DRAFT').set(
+      baseQuote({ quoteId: 'VQ-B-DRAFT', agencyId: AGENCY_B_UID, agencyEmail: 'agencyb@example.com', status: 'FINALIZED' })
+    ));
+  });
 
   section('agencyId immutability');
   await test('Agency A CANNOT reassign her own quote to a different agencyId', async () => {
