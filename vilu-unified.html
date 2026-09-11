@@ -2033,19 +2033,38 @@ body.pms-mode { overflow:hidden; }
     <button class="tab" id="pkg-tab-agency" onclick="pkgSwitchTab('agency')"><i class="ti ti-building-store"></i> Agency Packages</button>
   </div>
   <div id="pkg-tab-desc" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">Guest-facing content and retail pricing — this is exactly what website visitors see.</div>
-  <div class="card" style="margin-bottom:14px;display:none" id="agency-booking-settings-card">
-    <h3><i class="ti ti-settings" style="margin-right:6px"></i>Agency booking settings</h3>
-    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Applies to every agency package's booking flow — editable here, never hardcoded.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div class="fg" style="margin:0"><label>Domestic flight surcharge ($/person, one-way)</label><input type="number" id="agy-flight-surcharge" min="0" step="5" placeholder="155"></div>
-      <div class="fg" style="margin:0"><label>Additional night rate ($/person/night)</label><input type="number" id="agy-extra-night-rate" min="0" step="5" placeholder="40"></div>
+  <!-- Agency Packages UI reorg (2026-09-11): "Agency booking settings" used
+       to be one large always-technical card mixing a global setting with a
+       maintenance action. Split into a compact Agency Booking Rules card
+       (same #agy-flight-surcharge/#agy-extra-night-rate ids, same
+       saveAgencyBookingSettings()) plus a collapsed Advanced/Maintenance
+       section for the backfill action -- ids/fields/Firestore doc
+       (website_content/agency_booking_settings) all unchanged, this is
+       presentation only. Both settings are confirmed GLOBAL (one shared
+       doc, read by every agency's booking flow) -- labeled as such so
+       staff never think editing this affects only one agency; no
+       per-agency override field exists anywhere in the schema today. -->
+  <div id="agency-booking-settings-card" style="display:none">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <h3 style="margin:0"><i class="ti ti-settings" style="margin-right:6px"></i>Agency Booking Rules</h3>
+        <span class="pkg-web-badge" style="color:#6b7280;background:#f9fafb;border-color:#e5e7eb">GLOBAL DEFAULT</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="fg" style="margin:0"><label>Domestic flight surcharge (USD/person/one-way)</label><input type="number" id="agy-flight-surcharge" min="0" step="5" placeholder="110"></div>
+        <div class="fg" style="margin:0"><label>Default additional night rate (USD/person/night)</label><input type="number" id="agy-extra-night-rate" min="0" step="5" placeholder="40"></div>
+      </div>
+      <button class="btn p" onclick="saveAgencyBookingSettings()"><i class="ti ti-device-floppy"></i>Save</button>
+      <span id="agy-settings-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+      <p style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:10px">Default values used in agency quotations/bookings. Individual agency overrides can be added later.</p>
     </div>
-    <button class="btn p" onclick="saveAgencyBookingSettings()"><i class="ti ti-device-floppy"></i>Save settings</button>
-    <span id="agy-settings-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f3f4f6">
-      <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:8px">Each agency now has its own independent package set (edit one from that agency's row in User Management). Existing agencies from before this feature can be given one now:</p>
-      <button class="btn" onclick="backfillAgencyPackages()"><i class="ti ti-refresh"></i>Backfill missing agency package sets</button>
-    </div>
+    <details class="card" style="margin-bottom:14px">
+      <summary style="cursor:pointer;font-weight:600;font-size:var(--font-size-base);list-style:none;display:flex;align-items:center;gap:6px"><i class="ti ti-chevron-right" style="transition:transform .15s"></i>Advanced / Maintenance</summary>
+      <div style="margin-top:12px">
+        <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:8px">Every agency has its own independent package set, seeded automatically when the account is created. This repairs any older agency account that is somehow still missing one.</p>
+        <button class="btn" onclick="confirmBackfillAgencyPackages()"><i class="ti ti-refresh"></i>Backfill missing agency package sets</button>
+      </div>
+    </details>
   </div>
   <!-- Website Package Manager reorganization (2026-09-11): the three
        website-content editors below used to be permanently-open, always
@@ -2646,7 +2665,7 @@ Suite</textarea></div>
 <div class="mbg" id="m-agency-pkgs" onclick="if(event.target===this)closeAgencyPkgManager()">
   <div class="mdl" style="width:640px;max-height:85vh;overflow-y:auto">
     <div class="mhd">
-      <h3><i class="ti ti-building-store" style="color:#00b4d8;margin-right:6px"></i>Packages — <span id="agy-pkg-agency-name"></span></h3>
+      <h3><i class="ti ti-building-store" style="color:#00b4d8;margin-right:6px"></i>Agency Package Set — <span id="agy-pkg-agency-name"></span></h3>
       <button class="ab" onclick="closeAgencyPkgManager()"><i class="ti ti-x"></i></button>
     </div>
     <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:14px">
@@ -2661,14 +2680,30 @@ Suite</textarea></div>
       <div id="agy-pkg-list" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
+    <!-- Agency Packages UI reorg (2026-09-11): grouped into BASIC/PRICING/
+         CONTENT/PORTAL for readability only -- every input id, every field
+         saveAgencyPkgForm() reads, is unchanged from before this reorg. -->
     <div id="agy-pkg-form-view" style="display:none">
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin-bottom:8px">BASIC</div>
       <div class="fg"><label>Package name</label><input type="text" id="agy-pkg-name" placeholder="e.g. 5 Nights Adventure Break"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="fg"><label>Emoji</label><input type="text" id="agy-pkg-emoji" placeholder="📦" maxlength="4"></div>
         <div class="fg"><label>Nights</label><input type="number" id="agy-pkg-nights" min="1" value="1"></div>
       </div>
+      <div class="fg">
+        <label>Status</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="agy-pkg-status-label" style="font-size:var(--font-size-sm);font-weight:700"></span>
+          <button type="button" class="btn" id="agy-pkg-status-toggle-btn" onclick="toggleAgencyPkgActiveInForm()">Toggle</button>
+        </div>
+      </div>
+
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">PRICING</div>
       <div class="fg"><label>Agency price ($/person)</label><input type="number" id="agy-pkg-price" min="0" step="5"></div>
       <div class="fg"><label>Child Discount (%) <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">— off the adult price, per child. 0 if unset</span></label><input type="number" id="agy-pkg-childdiscount" min="0" max="100" step="5" placeholder="0"></div>
+      <div id="agy-pkg-global-notes" style="font-size:var(--font-size-xs);color:#6b7280;background:#f9fafb;border-radius:8px;padding:8px 10px;margin-bottom:4px"></div>
+
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">CONTENT</div>
       <div class="fg"><label>Description</label><input type="text" id="agy-pkg-desc" placeholder="Short one-line hook"></div>
       <div class="fg"><label>Includes (one per line)</label><textarea id="agy-pkg-includes" rows="4" placeholder="Round-trip speedboat transfer
 5 nights accommodation (Standard Room)
@@ -2677,11 +2712,13 @@ Daily breakfast"></textarea></div>
       <div class="fg"><label>Add-ons (one per line: Name | Price | Unit)</label><textarea id="agy-pkg-addons" rows="3" placeholder="Half-Board | 25 | /day
 Full-Board | 40 | /day"></textarea></div>
 
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">PORTAL</div>
+      <p style="font-size:var(--font-size-xs);color:#9ca3af;margin:-2px 0 10px">Source: Agency-specific copy — fully independent from the master template and every other agency.</p>
       <!-- MARGIN LEDGER — this agency's own internal Guest Charge/Commission
            tracking. Purely informational: never read by pricing, booking
            totals, or any generated document. Visible only here (this
            agency's own page in PMS admin) and in that agency's own portal. -->
-      <div style="margin:16px 0;padding:14px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:10px">
+      <div style="margin:0 0 16px;padding:14px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:10px">
         <div style="font-weight:700;font-size:var(--font-size-sm);color:#374151;margin-bottom:2px"><i class="ti ti-notebook" style="margin-right:4px"></i>Margin Ledger</div>
         <div style="font-size:var(--font-size-xs);color:#9ca3af;margin-bottom:10px">Internal tracking only, for this agency's own reference. Never affects Agency Price, bookings, or any generated document.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -8721,15 +8758,40 @@ function renderAgencyPkgList(){
   }
   el.innerHTML = _agyPkgWorking.map(function(pkg){
     var price = pkg.agencyPricePerRoom || pkg.pricePerRoom || 0;
+    var assigned = pkg.active !== false;
     return '<div style="border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       + '<div><div style="font-weight:700;font-size:var(--font-size-base)">'+(pkg.emoji||'📦')+' '+pkg.name+'</div>'
-      + '<div style="font-size:var(--font-size-sm);color:#6b7280">$'+price+'/person · '+pkg.nights+' night'+(pkg.nights>1?'s':'')+(pkg.childDiscountPct?' · Child discount '+pkg.childDiscountPct+'%':'')+'</div>'
+      + '<div style="font-size:var(--font-size-sm);color:#6b7280">'+pkg.nights+' night'+(pkg.nights>1?'s':'')+' · Agency price $'+price+'/person'+(pkg.childDiscountPct?' · Child discount '+pkg.childDiscountPct+'%':'')+'</div>'
+      + '<div style="font-size:var(--font-size-xs);font-weight:700;margin-top:4px;color:'+(assigned?'#059669':'#9ca3af')+'">'+(assigned?'Assigned':'Not assigned')+'</div>'
       + ((pkg.guestCharge||pkg.commission) ? '<div style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:2px"><i class="ti ti-notebook" style="margin-right:2px"></i>Margin Ledger — Guest Charge $'+(pkg.guestCharge||0)+' · Commission $'+(pkg.commission||0)+'</div>' : '') + '</div>'
       + '<div style="display:flex;gap:4px;flex-shrink:0">'
+      + '<button class="ab" title="'+(assigned?'Mark Not assigned':'Mark Assigned')+'" onclick="toggleAgencyPkgActive(\''+pkg.id+'\')"><i class="ti ti-'+(assigned?'eye-off':'eye')+'"></i></button>'
       + '<button class="ab" title="Edit" onclick="openAgencyPkgForm(\''+pkg.id+'\')"><i class="ti ti-edit"></i></button>'
       + '<button class="ab" title="Delete" style="color:#b91c1c" onclick="deleteAgencyPkg(\''+pkg.id+'\')"><i class="ti ti-trash"></i></button>'
       + '</div></div>';
   }).join('');
+}
+
+// Flips this one package's Assigned/Not assigned state (the same `active`
+// field the Agency Portal already filters on -- fetchPackagesFromFirestore()
+// + drawPackages() only ever shows packages where active is truthy). Wiring
+// this up was the missing piece: saveAgencyPkgForm() previously had no way
+// to leave a package saved-but-hidden, only "exists" (always active:true)
+// or "deleted". No new field, no schema change, no portal-side change.
+async function toggleAgencyPkgActive(pid){
+  var idx = _agyPkgWorking.findIndex(function(p){ return p.id===pid; });
+  if(idx===-1) return;
+  var next = !(_agyPkgWorking[idx].active !== false);
+  _agyPkgWorking[idx].active = next;
+  try {
+    await fsDb.collection('agency_packages').doc(_agyPkgEmail).set({ email: _agyPkgEmail, packages: _agyPkgWorking }, { merge: true });
+    toast(next ? '✓ Marked Assigned' : '✓ Marked Not assigned');
+  } catch(e) {
+    console.error('toggleAgencyPkgActive failed', e);
+    _agyPkgWorking[idx].active = !next;
+    toast('⚠️ Could not update — please try again');
+  }
+  renderAgencyPkgList();
 }
 
 function openAgencyPkgForm(pid){
@@ -8746,8 +8808,52 @@ function openAgencyPkgForm(pid){
   document.getElementById('agy-pkg-addons').value = pkg ? (pkg.addOns||[]).map(function(a){return a.name+' | '+a.price+' | '+a.unit;}).join('\n') : '';
   document.getElementById('agy-pkg-guestcharge').value = pkg ? (pkg.guestCharge||'') : '';
   document.getElementById('agy-pkg-commission').value = pkg ? (pkg.commission||'') : '';
+  renderAgencyPkgStatusLabel(pkg);
+  var toggleBtn = document.getElementById('agy-pkg-status-toggle-btn');
+  if(toggleBtn) toggleBtn.style.display = pkg ? '' : 'none';
+  loadAgencyPkgGlobalNotes();
   document.getElementById('agy-pkg-list-view').style.display = 'none';
   document.getElementById('agy-pkg-form-view').style.display = '';
+}
+
+function renderAgencyPkgStatusLabel(pkg){
+  var label = document.getElementById('agy-pkg-status-label');
+  if(!label) return;
+  if(!pkg){ label.textContent = 'New package — Assigned once saved'; label.style.color = '#6b7280'; return; }
+  var assigned = pkg.active !== false;
+  label.textContent = assigned ? 'Assigned' : 'Not assigned';
+  label.style.color = assigned ? '#059669' : '#9ca3af';
+}
+
+// Toggles the currently-open package's Assigned state without leaving the
+// form -- same toggleAgencyPkgActive() write path the list view's toggle
+// uses, just also refreshing this form's own status label afterward.
+async function toggleAgencyPkgActiveInForm(){
+  if(!_agyPkgEditId) return;
+  await toggleAgencyPkgActive(_agyPkgEditId);
+  var pkg = _agyPkgWorking.find(function(p){return p.id===_agyPkgEditId;});
+  renderAgencyPkgStatusLabel(pkg);
+}
+
+// Read-only informational line -- Additional Night Rate and Domestic Flight
+// Surcharge are confirmed GLOBAL (one shared website_content/agency_booking_
+// settings doc, see Agency Booking Rules card), never per-package or
+// per-agency. Shown here so no one editing a single package's price
+// mistakes these for something they can override per-package.
+async function loadAgencyPkgGlobalNotes(){
+  var el = document.getElementById('agy-pkg-global-notes');
+  if(!el) return;
+  el.textContent = 'Loading global rates…';
+  try {
+    var snap = await fsDb.collection('website_content').doc('agency_booking_settings').get();
+    var data = (snap.exists && snap.data()) || {};
+    var extraNight = data.extraNightRate!=null ? data.extraNightRate : 40;
+    var flight = data.flightSurcharge!=null ? data.flightSurcharge : 110;
+    el.innerHTML = 'Additional night rate: $'+extraNight+' / person / night — <strong>Global default</strong><br>Domestic flight surcharge: $'+flight+' / person / one-way — <strong>Global default</strong>';
+  } catch(e) {
+    console.error('loadAgencyPkgGlobalNotes failed', e);
+    el.textContent = 'Global rates unavailable right now.';
+  }
 }
 
 function closeAgencyPkgForm(){
@@ -8767,6 +8873,11 @@ async function saveAgencyPkgForm(){
     var parts = line.split('|').map(function(s){return s.trim();});
     return { name: parts[0]||'', price: +(parts[1]||0), unit: parts[2]||'' };
   }).filter(function(a){return a.name;});
+  // Preserve whatever "Assigned"/"Not assigned" (active) state this package
+  // already had -- previously this always forced active:true on every save,
+  // silently re-assigning a package that had been marked Not assigned. New
+  // packages still default to Assigned.
+  var existingPkg = _agyPkgEditId ? _agyPkgWorking.find(function(p){return p.id===_agyPkgEditId;}) : null;
   var pkg = {
     id: _agyPkgEditId || ('AGYPKG'+Date.now()),
     name: name,
@@ -8782,7 +8893,7 @@ async function saveAgencyPkgForm(){
     guestCharge: +(document.getElementById('agy-pkg-guestcharge').value||0),
     commission: +(document.getElementById('agy-pkg-commission').value||0),
     color: '#00b4d8',
-    active: true,
+    active: existingPkg ? !!existingPkg.active : true,
     channel: 'agency'
   };
   if(_agyPkgEditId){
@@ -11859,6 +11970,16 @@ async function backfillAgencyPackages(){
   return created;
 }
 
+// Admin-only maintenance action, now tucked in Advanced/Maintenance
+// (2026-09-11 reorg) instead of a prominent main-page button -- requires
+// an explicit confirmation since it writes to Firestore, even though the
+// underlying backfillAgencyPackages() itself never overwrites an existing
+// agency's package set (force=false).
+function confirmBackfillAgencyPackages(){
+  if(!currentUser||currentUser.role!=="admin"){toast("⛔ Admin access only");return;}
+  showConfirm({title:'Backfill missing agency package sets?',msg:'Checks every agency account and creates a package set (copied from the master template) for any that are still missing one. Agencies that already have a package set are left untouched.',icon:'↺',btnLabel:'Yes, backfill',btnColor:'#00b4d8',onYes:function(){ backfillAgencyPackages(); }});
+}
+
 // ══════════════════════════════════════════════
 // PACKAGE MANAGER - PMS SIDE
 // ══════════════════════════════════════════════
@@ -12143,28 +12264,107 @@ document.addEventListener('click', function(){
 // opens its own isolated package set (m-agency-pkgs); clicking the master
 // template switches to the existing card-grid editor for the 8 packages
 // used only to seed brand-new agencies.
-function drawAgencyPkgDirectory(){
+// Agency Packages UI reorg (2026-09-11): the directory used to be a flat
+// list of clickable rows mixing the Master Template in with real agency
+// accounts. Split into a collapsed Master Template entry point + a proper
+// Agency Accounts list (search/filter/sort, one compact card per agency)
+// -- same underlying data (USERS role==='agency', agency_packages/{email}
+// doc), same openAgencyPkgManager()/showMasterPkgTemplate() entry points,
+// nothing about how packages are stored, filtered, or served to the
+// portal changes here.
+var _agyDirCache = [];
+var _agyDirSearch = '';
+var _agyDirFilter = 'all';
+
+// "Assigned packages" and portal-access readiness are read fresh here (not
+// derived from USERS alone) so this list never shows stale counts if a
+// package was added/removed elsewhere in the same session. Split from
+// rendering (matching drawPkgs()/renderPkgList()) so typing in the search
+// box never re-hits Firestore.
+async function drawAgencyPkgDirectory(){
   var el = document.getElementById('pkg-list');
   if(!el) return;
   el.style.display = 'block';
   var agencies = USERS.filter(function(u){ return u.role === 'agency'; });
-  var rowStyle = 'cursor:pointer;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;transition:border-color .15s';
-  var html = '<div onclick="showMasterPkgTemplate()" style="'+rowStyle+';background:#f9fafb">'
-    + '<div><div style="font-weight:800;font-size:var(--font-size-base)">📋 Master Template</div>'
-    + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">Used only to seed a brand-new agency\'s package set — editing this never changes any existing agency</div></div>'
-    + '<i class="ti ti-chevron-right" style="color:#9ca3af;font-size:var(--font-size-lg)"></i></div>';
-  if(!agencies.length){
-    html += '<div style="text-align:center;padding:30px;color:#9ca3af">No agency accounts yet. Add one from User Management.</div>';
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af">Loading agencies…</div>';
+  try {
+    var counts = await Promise.all(agencies.map(function(a){
+      return fsDb.collection('agency_packages').doc((a.email||'').toLowerCase()).get()
+        .then(function(snap){ return (snap.exists && snap.data().packages && snap.data().packages.length) || 0; })
+        .catch(function(){ return null; });
+    }));
+    _agyDirCache = agencies.map(function(a,i){
+      return { email: a.email, name: a.name, uid: a.uid||null, pkgCount: counts[i] };
+    });
+  } catch(e) {
+    console.error('drawAgencyPkgDirectory failed', e);
+    _agyDirCache = agencies.map(function(a){ return { email: a.email, name: a.name, uid: a.uid||null, pkgCount: null }; });
+  }
+  renderAgencyDirectoryList();
+}
+
+function agyDirSetSearch(q){ _agyDirSearch = (q||'').trim().toLowerCase(); renderAgencyDirectoryList(); }
+function agyDirSetFilter(f){
+  _agyDirFilter = f;
+  document.querySelectorAll('#agy-dir-filter-pills .an-pill').forEach(function(b){ b.classList.toggle('on', b.dataset.filter===f); });
+  renderAgencyDirectoryList();
+}
+
+function renderAgencyDirectoryList(){
+  var el = document.getElementById('pkg-list');
+  if(!el) return;
+
+  var masterHTML = '<details class="card" style="margin-bottom:14px">'
+    + '<summary style="cursor:pointer;font-weight:600;font-size:var(--font-size-base);list-style:none;display:flex;align-items:center;gap:6px"><i class="ti ti-chevron-right" style="transition:transform .15s"></i>📋 Master Template <span style="font-weight:400;color:#6b7280;font-size:var(--font-size-sm)">— used only when creating a new agency</span></summary>'
+    + '<div style="margin-top:12px">'
+      + '<button class="btn p" onclick="showMasterPkgTemplate()"><i class="ti ti-arrow-right"></i>Manage template</button>'
+      + '<p style="font-size:var(--font-size-xs);color:#9ca3af;margin-top:8px"><i class="ti ti-alert-triangle" style="margin-right:3px"></i>Changes here do not update existing agencies.</p>'
+    + '</div>'
+    + '</details>';
+
+  var toolbarHTML = '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:14px">'
+    + '<div style="display:flex;gap:6px" id="agy-dir-filter-pills">'
+      + '<button class="an-pill'+(_agyDirFilter==='all'?' on':'')+'" data-filter="all" onclick="agyDirSetFilter(\'all\')">All</button>'
+      + '<button class="an-pill'+(_agyDirFilter==='ready'?' on':'')+'" data-filter="ready" onclick="agyDirSetFilter(\'ready\')">Portal ready</button>'
+      + '<button class="an-pill'+(_agyDirFilter==='pending'?' on':'')+'" data-filter="pending" onclick="agyDirSetFilter(\'pending\')">Not yet activated</button>'
+    + '</div>'
+    + '<div style="font-size:var(--font-size-sm);color:#6b7280">Sorted by name</div>'
+    + '<input type="text" id="agy-dir-search-input" placeholder="Search agency…" value="'+esc(_agyDirSearch)+'" oninput="agyDirSetSearch(this.value)" style="flex:1;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px">'
+    + '</div>';
+
+  var list = _agyDirCache.filter(function(a){
+    var ready = !!a.uid;
+    if(_agyDirFilter==='ready' && !ready) return false;
+    if(_agyDirFilter==='pending' && ready) return false;
+    if(_agyDirSearch && (a.name||'').toLowerCase().indexOf(_agyDirSearch)===-1 && (a.email||'').toLowerCase().indexOf(_agyDirSearch)===-1) return false;
+    return true;
+  }).sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+
+  var cardsHTML;
+  if(!_agyDirCache.length){
+    cardsHTML = '<div style="text-align:center;padding:30px;color:#9ca3af">No agency accounts yet. Add one from User Management.</div>';
+  } else if(!list.length){
+    cardsHTML = '<div style="text-align:center;padding:30px;color:#9ca3af">No agencies match this filter/search.</div>';
   } else {
-    html += agencies.map(function(a){
+    cardsHTML = list.map(function(a){
       var email = (a.email||'').replace(/'/g,"\\'");
-      return '<div onclick="openAgencyPkgManager(\''+email+'\')" style="'+rowStyle+'">'
-        + '<div><div style="font-weight:800;font-size:var(--font-size-base)">🏢 '+a.name+'</div>'
-        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+a.email+'</div></div>'
-        + '<i class="ti ti-chevron-right" style="color:#9ca3af;font-size:var(--font-size-lg)"></i></div>';
+      var ready = !!a.uid;
+      var countLabel = a.pkgCount==null ? 'Assigned packages: —' : ('Assigned packages: '+a.pkgCount);
+      return '<div style="border:1.5px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">'
+        + '<div style="min-width:200px">'
+          + '<div style="font-weight:800;font-size:var(--font-size-base)">🏢 '+esc(a.name)+'</div>'
+          + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">'+esc(a.email)+'</div>'
+          + '<div style="font-size:var(--font-size-xs);color:#374151;margin-top:6px">'+countLabel+' · <span style="color:'+(ready?'#059669':'#92400e')+'">'+(ready?'Portal access: Ready':'Portal access: Pending first login')+'</span></div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+          + '<span style="font-size:var(--font-size-xs);color:#9ca3af">Portal access configured</span>'
+          + '<button class="btn p" onclick="openAgencyPkgManager(\''+email+'\')"><i class="ti ti-package"></i>Manage packages</button>'
+        + '</div>'
+      + '</div>';
     }).join('');
   }
-  el.innerHTML = html;
+
+  el.innerHTML = masterHTML + toolbarHTML + '<div>' + cardsHTML + '</div>';
 }
 
 async function loadPkgTerms(){
