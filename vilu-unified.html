@@ -40,6 +40,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;color:#111827;font-siz
 .card h3{font-size:var(--font-size-base);font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .card summary::-webkit-details-marker{display:none}
 .card[open] summary .ti-chevron-right{transform:rotate(90deg)}
+.pkg-content-item{border:1px solid #f3f4f6;border-radius:8px;padding:10px 12px}
+.pkg-content-item summary{cursor:pointer;font-size:var(--font-size-sm);font-weight:600;list-style:none;display:flex;align-items:center}
+.pkg-content-item summary::-webkit-details-marker{display:none}
+.pkg-web-badge{margin-left:8px;font-size:var(--font-size-xs);font-weight:600;color:#0f766e;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:20px;padding:1px 9px}
+.pkg-form-section{font-size:var(--font-size-xs);font-weight:700;letter-spacing:.04em;color:#9ca3af;margin:16px 0 8px;padding-top:12px;border-top:1px solid #f3f4f6}
+.pkg-form-section:first-of-type{margin-top:0;padding-top:0;border-top:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
@@ -2041,32 +2047,79 @@ body.pms-mode { overflow:hidden; }
       <button class="btn" onclick="backfillAgencyPackages()"><i class="ti ti-refresh"></i>Backfill missing agency package sets</button>
     </div>
   </div>
-  <div class="card" style="margin-bottom:14px">
-    <h3><i class="ti ti-file-text" style="margin-right:6px"></i>Package terms</h3>
-    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">Shared across every package on the website (one line per term).</p>
-    <div class="fg"><textarea id="pkg-terms" rows="3" placeholder="Applicable only for direct bookings
+  <!-- Website Package Manager reorganization (2026-09-11): the three
+       website-content editors below used to be permanently-open, always
+       visible cards -- pure vertical clutter for something edited rarely.
+       Same fields, same ids, same savePkgTerms()/savePkgTripNotes() calls,
+       same Firestore doc/fields (website_content/packages_terms,
+       website_content/packages_trip_notes) -- just collapsed by default,
+       inside one "Website Content Settings" summary. Hidden entirely on
+       the Agency tab (pkgSwitchTab()) since none of this is agency
+       content. Connection badges are stated only because Phase 1's
+       read-only audit actually traced each one to a live, runtime
+       Firestore read on the public homepage (vilu-website.html's
+       loadHolidayPackages()/loadHpTerms()) -- never guessed. -->
+  <details class="card" id="pkg-content-settings" style="margin-bottom:14px">
+    <summary style="cursor:pointer;font-weight:600;font-size:var(--font-size-base);list-style:none;display:flex;align-items:center;gap:6px"><i class="ti ti-chevron-right" style="transition:transform .15s"></i>Website Content Settings</summary>
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+      <details class="pkg-content-item">
+        <summary><i class="ti ti-file-text" style="margin-right:6px;color:#6b7280"></i>Package Terms <span class="pkg-web-badge">Website-linked · live data</span></summary>
+        <div style="margin-top:10px">
+          <p style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">Shared across every package on the website (one line per term).</p>
+          <div class="fg"><textarea id="pkg-terms" rows="3" placeholder="Applicable only for direct bookings
 Cash payments appreciated
 Free for infants 0–1.99yrs
 All taxes included"></textarea></div>
-    <button class="btn p" onclick="savePkgTerms()"><i class="ti ti-device-floppy"></i>Save terms</button>
-    <span id="pkg-terms-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
-  </div>
-  <div class="card" style="margin-bottom:14px">
-    <h3><i class="ti ti-info-circle" style="margin-right:6px"></i>Trip notes ("Good to Know" — collapsed by default on each package card)</h3>
-    <p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px">General notes show on every package. Activity-specific notes only show on a package if that exact activity appears in its Activities list — no need to pick which packages get which note, it's worked out automatically from each package's own Activities.</p>
-    <div class="fg">
-      <label>General notes (one per line, shown on every package)</label>
-      <textarea id="pkg-notes-general" rows="5" placeholder="Please time your international flight with our speedboat transfer schedule in mind..."></textarea>
+          <button class="btn p" onclick="savePkgTerms()"><i class="ti ti-device-floppy"></i>Save terms</button>
+          <span id="pkg-terms-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+        </div>
+      </details>
+      <details class="pkg-content-item">
+        <summary><i class="ti ti-info-circle" style="margin-right:6px;color:#6b7280"></i>General Trip Notes <span class="pkg-web-badge">Website-linked · live data</span></summary>
+        <div style="margin-top:10px">
+          <p style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">Shown on every package's "Good to Know" (collapsed by default there too), one per line.</p>
+          <div class="fg"><textarea id="pkg-notes-general" rows="5" placeholder="Please time your international flight with our speedboat transfer schedule in mind..."></textarea></div>
+          <button class="btn p" onclick="savePkgTripNotes()"><i class="ti ti-device-floppy"></i>Save trip notes</button>
+          <span id="pkg-notes-status-1" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+        </div>
+      </details>
+      <details class="pkg-content-item">
+        <summary><i class="ti ti-list-details" style="margin-right:6px;color:#6b7280"></i>Activity-Specific Notes <span class="pkg-web-badge">Website-linked · live data</span></summary>
+        <div style="margin-top:10px">
+          <p style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">Shows only on a package if that exact activity appears in its own Activities list — matched automatically, nothing to assign manually. One per line: Activity Name | Note text.</p>
+          <div class="fg"><textarea id="pkg-notes-activity" rows="5" placeholder="Sandbank Trip | Lunch is included during the Sandbank Trip.
+Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely time to spot dolphins."></textarea></div>
+          <button class="btn p" onclick="savePkgTripNotes()"><i class="ti ti-device-floppy"></i>Save trip notes</button>
+          <span id="pkg-notes-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+        </div>
+      </details>
     </div>
-    <div class="fg">
-      <label>Activity-specific notes (one per line: Activity Name | Note text)</label>
-      <textarea id="pkg-notes-activity" rows="5" placeholder="Sandbank Trip | Lunch is included during the Sandbank Trip.
-Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely time to spot dolphins."></textarea>
+  </details>
+
+  <!-- Package list toolbar (Website Packages only) -- filter/sort/search
+       operate ONLY on the admin's own view of the already-fetched
+       PACKAGES array; they never write anything, never touch Firestore,
+       and never change the array's own order (which the website doesn't
+       even read -- it computes its own display order by nights, see
+       pkgOrderNote below). -->
+  <div id="pkg-list-toolbar" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:14px">
+    <div style="display:flex;gap:6px" id="pkg-filter-pills">
+      <button class="an-pill on" data-filter="all" onclick="pkgSetFilter('all')">All</button>
+      <button class="an-pill" data-filter="active" onclick="pkgSetFilter('active')">Active</button>
+      <button class="an-pill" data-filter="disabled" onclick="pkgSetFilter('disabled')">Disabled</button>
     </div>
-    <button class="btn p" onclick="savePkgTripNotes()"><i class="ti ti-device-floppy"></i>Save trip notes</button>
-    <span id="pkg-notes-status" style="margin-left:10px;font-size:var(--font-size-sm)"></span>
+    <div style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm);color:#6b7280">
+      <span>Sort:</span>
+      <select id="pkg-sort-select" onchange="pkgSetSort(this.value)" style="font-family:inherit;font-size:var(--font-size-sm);padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px">
+        <option value="custom">Custom order</option>
+        <option value="nights">Nights</option>
+        <option value="price">Price</option>
+      </select>
+    </div>
+    <input type="text" id="pkg-search-input" placeholder="Search package…" oninput="pkgSetSearch(this.value)" style="flex:1;min-width:160px;font-family:inherit;font-size:var(--font-size-sm);padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px">
   </div>
-  <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
+  <div style="font-size:var(--font-size-xs);color:#9ca3af;margin:-8px 0 12px" id="pkg-order-note">This sort only changes what you see here — the website decides its own display order independently (currently: shortest stay first).</div>
+  <div id="pkg-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
 </div>
 
 <div class="sec" id="s-ops" style="padding:20px"><div id="ops-content"><div style="text-align:center;padding:40px;color:#6b7280">Loading operations...</div></div></div>
@@ -2750,19 +2803,25 @@ Full-Board | 40 | /day"></textarea></div>
       <h3 id="pkg-modal-title">New package</h3>
       <button class="ab" onclick="document.getElementById('m-pkg').classList.remove('on')"><i class="ti ti-x"></i></button>
     </div>
+    <!-- Website Package Manager reorganization (2026-09-11, Part G): same
+         fields/ids/savePkg() as before -- only visual section headers
+         added, no schema change. There is no separate "full description"
+         field in the current data model (just one `description`), so
+         CONTENT groups the one field that exists rather than inventing a
+         second. -->
+    <div class="pkg-form-section">BASIC</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="fg" style="margin:0"><label>Package name *</label><input type="text" id="pkg-name" placeholder="e.g. Half Board Package"></div>
       <div class="fg" style="margin:0"><label>Emoji / icon</label><input type="text" id="pkg-emoji" placeholder="🏖️" style="font-size:var(--font-size-xl)"></div>
     </div>
-    <div class="fg"><label>Description</label><textarea id="pkg-desc" rows="2" placeholder="What's included, taxes note..."></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="fg" style="margin:0"><label>Guest price ($) *</label><input type="number" id="pkg-price" min="0" step="5" placeholder="0.00"></div>
       <div class="fg" style="margin:0"><label>Agency price ($)</label><input type="number" id="pkg-agency-price" min="0" step="5" placeholder="Same as guest price if blank"></div>
       <div class="fg" style="margin:0"><label>Fixed nights *</label><input type="number" id="pkg-nights" min="1" value="3" placeholder="e.g. 3"></div>
     </div>
     <div style="font-size:var(--font-size-xs);color:#6b7280;margin:-6px 0 12px">Both are per person for the WHOLE package (not per night), tax-inclusive. Agency price is what partnered agencies are invoiced — leave blank to default to the guest price.</div>
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:8px">
-      <div class="fg" style="margin:0"><label>Badge (optional)</label><input type="text" id="pkg-badge" placeholder="e.g. Most Popular, Best Value — leave blank for none"></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="fg" style="margin:0"><label>Badge / tag (optional)</label><input type="text" id="pkg-badge" placeholder="e.g. Most Popular, Best Value — leave blank for none"></div>
       <div class="fg" style="margin:0"><label>Badge color</label>
         <select id="pkg-badge-style">
           <option value="gold">Gold</option>
@@ -2770,12 +2829,11 @@ Full-Board | 40 | /day"></textarea></div>
         </select>
       </div>
     </div>
-    <div class="fg" style="margin:0 0 12px">
-      <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer">
-        <input type="checkbox" id="pkg-exclude-ladder" style="width:auto">
-        Specialty package — exclude from per-night savings % comparison and "what you gain" tier notes, and always sort last
-      </label>
-    </div>
+
+    <div class="pkg-form-section">CONTENT</div>
+    <div class="fg"><label>Description</label><textarea id="pkg-desc" rows="2" placeholder="What's included, taxes note..."></textarea></div>
+
+    <div class="pkg-form-section">INCLUSIONS</div>
     <div class="fg">
       <label>What's included (one per line)</label>
       <textarea id="pkg-includes" rows="5" placeholder="Accommodation
@@ -2795,6 +2853,15 @@ Turtle Snorkeling"></textarea>
 Full-Board | 40 | /day
 Photography | 25 | /hr"></textarea>
     </div>
+
+    <div class="pkg-form-section">WEBSITE</div>
+    <div class="fg" style="margin:0 0 12px">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer">
+        <input type="checkbox" id="pkg-exclude-ladder" style="width:auto">
+        Specialty package — exclude from per-night savings % comparison and "what you gain" tier notes, and always sort last
+      </label>
+    </div>
+
     <div class="al bl" style="margin-bottom:12px"><i class="ti ti-info-circle" style="font-size:var(--font-size-md);flex-shrink:0"></i><div>All package prices are <strong>tax-inclusive</strong>.</div></div>
     <div style="display:flex;gap:8px">
       <button class="btn p" style="flex:1" onclick="savePkg()"><i class="ti ti-device-floppy"></i>Save package</button>
@@ -11823,9 +11890,35 @@ function pkgSwitchTab(tab){
     : 'Each agency has its own independent package set. Pick an agency below to edit theirs, or open the master template used only when creating a new agency.';
   var settingsCard = document.getElementById('agency-booking-settings-card');
   if(settingsCard) settingsCard.style.display = tab==='agency' ? '' : 'none';
+  // Website Package Manager reorganization (2026-09-11): Website Content
+  // Settings (terms/trip notes) and the filter/sort/search toolbar are
+  // website-specific -- hidden entirely on the Agency tab so the two stay
+  // visually and operationally separate, per "Do NOT mix them".
+  var contentSettings = document.getElementById('pkg-content-settings');
+  if(contentSettings) contentSettings.style.display = tab==='agency' ? 'none' : '';
+  var listToolbar = document.getElementById('pkg-list-toolbar');
+  if(listToolbar) listToolbar.style.display = tab==='agency' ? 'none' : '';
+  var orderNote = document.getElementById('pkg-order-note');
+  if(orderNote) orderNote.style.display = tab==='agency' ? 'none' : '';
   if(tab==='agency') loadAgencyBookingSettings();
   drawPkgs();
 }
+
+// Admin-view-only filter/sort/search state (Website Packages tab). Never
+// persisted, never written anywhere, never touches PACKAGES' own order or
+// Firestore -- purely which of the already-fetched packages this ONE
+// browser renders and in what order, exactly like sorting an email inbox
+// view doesn't reorder anyone else's inbox.
+var _pkgFilter = 'all';
+var _pkgSort = 'custom';
+var _pkgSearch = '';
+function pkgSetFilter(f){
+  _pkgFilter = f;
+  document.querySelectorAll('#pkg-filter-pills .an-pill').forEach(function(b){ b.classList.toggle('on', b.dataset.filter===f); });
+  renderPkgList();
+}
+function pkgSetSort(s){ _pkgSort = s; renderPkgList(); }
+function pkgSetSearch(q){ _pkgSearch = (q||'').trim().toLowerCase(); renderPkgList(); }
 
 function showAgencyPkgDirectory(){
   _agencyPkgView = 'directory';
@@ -11891,7 +11984,18 @@ async function drawPkgs(){
     console.error('drawPkgs Firestore fetch failed, falling back to local cache', e);
     PACKAGES = loadPackages();
   }
+  renderPkgList();
+}
 
+// Website Package Manager reorganization (2026-09-11): the actual DOM
+// render, split out of drawPkgs() so the admin-view filter/sort/search
+// controls (pkgSetFilter/pkgSetSort/pkgSetSearch) can re-render instantly
+// from the already-fetched PACKAGES without re-hitting Firestore on every
+// keystroke. drawPkgs() itself (tab switch, save, toggle, delete) still
+// refetches first, exactly as before -- only the render step moved.
+function renderPkgList(){
+  var el = document.getElementById('pkg-list');
+  if(!el) return;
   var toolbarNew = document.getElementById('pkg-toolbar-new-btns');
   if(_pkgViewTab === 'agency' && _agencyPkgView === 'directory'){
     if(toolbarNew) toolbarNew.style.display = 'none';
@@ -11910,52 +12014,129 @@ async function drawPkgs(){
   var backBtn = isAgencyTab
     ? '<div style="grid-column:1/-1;margin-bottom:2px"><button class="btn" onclick="showAgencyPkgDirectory()"><i class="ti ti-arrow-left"></i>Back to agencies</button></div>'
     : '';
-  if(!tabPackages.length){
-    el.innerHTML = backBtn+'<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first '+(isAgencyTab?'agency':'website')+' package</p></div>';
-    return;
-  }
-  el.innerHTML = backBtn;
-  tabPackages.forEach(function(pkg){
-    var agencyPrice = pkg.agencyPricePerRoom || pkg.pricePerRoom;
-    var priceFooter = isAgencyTab
-      ? ('<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
+
+  // Agency Packages tab (master template view): UNCHANGED -- this task is
+  // Website Packages only, per the task's own "Agency Packages will be
+  // redesigned separately afterward".
+  if(isAgencyTab){
+    if(!tabPackages.length){
+      el.innerHTML = backBtn+'<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first agency package</p></div>';
+      return;
+    }
+    el.innerHTML = backBtn;
+    tabPackages.forEach(function(pkg){
+      var agencyPrice = pkg.agencyPricePerRoom || pkg.pricePerRoom;
+      var priceFooter = '<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
           '<div style="display:flex;justify-content:space-between;margin-bottom:6px">' +
             '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">AGENCY PRICE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#00b4d8">$'+agencyPrice+'</div></div>' +
           '</div>' +
           '<div style="font-size:var(--font-size-xs);color:#6b7280">Master template — copied into every new agency\'s own package set at creation. To edit one agency\'s own packages, go back to the agency list.</div>' +
-        '</div>')
-      : ('<div style="padding:10px 0;border-top:1px solid #f3f4f6">' +
-          '<div><div style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:700">GUEST PRICE</div><div style="font-size:var(--font-size-lg);font-weight:800;color:#111827">$'+pkg.pricePerRoom+'</div></div>' +
-        '</div>');
-    var card = document.createElement('div');
-    card.style.cssText = 'background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;border-top:4px solid '+(pkg.color||'#00b4d8');
-    card.innerHTML =
-      '<div style="padding:14px 16px">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-          '<div style="display:flex;align-items:center;gap:8px">' +
-            '<span style="font-size:var(--font-size-3xl)">'+(pkg.emoji||'📦')+'</span>' +
-            '<div>' +
-              '<div style="font-size:var(--font-size-md);font-weight:800">'+pkg.name+'</div>' +
-              '<div style="font-size:var(--font-size-xs);color:#6b7280">Fixed '+pkg.nights+' night'+(pkg.nights>1?'s':'')+'</div>' +
+        '</div>';
+      var card = document.createElement('div');
+      card.style.cssText = 'background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;border-top:4px solid '+(pkg.color||'#00b4d8');
+      card.innerHTML =
+        '<div style="padding:14px 16px">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+            '<div style="display:flex;align-items:center;gap:8px">' +
+              '<span style="font-size:var(--font-size-3xl)">'+(pkg.emoji||'📦')+'</span>' +
+              '<div>' +
+                '<div style="font-size:var(--font-size-md);font-weight:800">'+pkg.name+'</div>' +
+                '<div style="font-size:var(--font-size-xs);color:#6b7280">Fixed '+pkg.nights+' night'+(pkg.nights>1?'s':'')+'</div>' +
+              '</div>' +
             '</div>' +
+            '<span style="font-size:var(--font-size-xs);font-weight:700;padding:3px 10px;border-radius:20px;background:'+(pkg.active?'#b8eef8':'#f3f4f6')+';color:'+(pkg.active?'#0096c7':'#6b7280')+'">'+(pkg.active?'Active':'Inactive')+'</span>' +
           '</div>' +
-          '<span style="font-size:var(--font-size-xs);font-weight:700;padding:3px 10px;border-radius:20px;background:'+(pkg.active?'#b8eef8':'#f3f4f6')+';color:'+(pkg.active?'#0096c7':'#6b7280')+'">'+(pkg.active?'Active':'Inactive')+'</span>' +
+          (pkg.badge?'<span style="display:inline-block;font-size:var(--font-size-xs);font-weight:700;padding:3px 10px;border-radius:20px;background:#ccfbf1;color:#0d9488;margin-bottom:8px">'+pkg.badge+'</span>':'')+
+          (pkg.description?'<p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px;line-height:1.5">'+pkg.description+'</p>':'')+
+          '<div style="margin-bottom:12px">' +
+            (pkg.includes||[]).map(function(inc){ return '<div style="font-size:var(--font-size-xs);color:#374151;padding:2px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:#00b4d8;font-size:var(--font-size-xs)"></i>'+inc+'</div>'; }).join('') +
+          '</div>' +
+          priceFooter +
+          '<div style="display:flex;gap:6px;margin-top:10px">' +
+            '<button data-pid="'+pkg.id+'" onclick="openPkgForm(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-weight:600;font-family:inherit"><i class="ti ti-edit"></i> Edit</button>' +
+            '<button data-pid="'+pkg.id+'" onclick="togglePkg(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-weight:600;font-family:inherit">'+(pkg.active?'<i class="ti ti-eye-off"></i> Disable':'<i class="ti ti-eye"></i> Enable')+'</button>' +
+            '<button data-pid="'+pkg.id+'" onclick="deletePkg(this.dataset.pid)" style="background:none;border:1px solid #fca5a5;color:#b91c1c;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-family:inherit"><i class="ti ti-trash"></i></button>' +
+          '</div>' +
+        '</div>';
+      el.appendChild(card);
+    });
+    return;
+  }
+
+  // WEBSITE PACKAGES — redesigned compact cards (Part D/E). Admin-view
+  // filter/sort/search applied here ONLY, on a local copy -- tabPackages
+  // itself (and PACKAGES, and Firestore) are never reordered or mutated by
+  // any of this.
+  var visible = tabPackages.filter(function(pkg){
+    if(_pkgFilter==='active' && !pkg.active) return false;
+    if(_pkgFilter==='disabled' && pkg.active) return false;
+    if(_pkgSearch && (pkg.name||'').toLowerCase().indexOf(_pkgSearch)===-1) return false;
+    return true;
+  });
+  if(_pkgSort==='nights') visible = visible.slice().sort(function(a,b){ return (a.nights||0)-(b.nights||0); });
+  else if(_pkgSort==='price') visible = visible.slice().sort(function(a,b){ return (a.pricePerRoom||0)-(b.pricePerRoom||0); });
+  // 'custom' = whatever order Firestore/PACKAGES already returned them in —
+  // no reorder applied (Part F: never invent a website order system here).
+
+  if(!tabPackages.length){
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af"><div style="font-size:var(--font-size-display);margin-bottom:12px">📦</div><p style="font-size:var(--font-size-md);font-weight:600">No packages yet</p><p style="font-size:var(--font-size-sm);margin-top:6px">Click "New package" to create your first website package</p></div>';
+    return;
+  }
+  if(!visible.length){
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">No packages match this filter/search.</div>';
+    return;
+  }
+  el.innerHTML = '';
+  visible.forEach(function(pkg){
+    var includesShown = (pkg.includes||[]).slice(0,3);
+    var moreIncludes = (pkg.includes||[]).length - includesShown.length;
+    var card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;border-top:4px solid '+(pkg.color||'#00b4d8')+';display:flex;flex-direction:column';
+    card.innerHTML =
+      '<div style="padding:14px 16px;display:flex;flex-direction:column;flex:1">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">' +
+          '<div style="display:flex;align-items:center;gap:8px;min-width:0">' +
+            '<span style="font-size:var(--font-size-2xl);flex-shrink:0">'+(pkg.emoji||'📦')+'</span>' +
+            '<div style="font-size:var(--font-size-base);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(pkg.name)+'">'+esc(pkg.name)+'</div>' +
+          '</div>' +
+          '<span style="flex-shrink:0;font-size:var(--font-size-xs);font-weight:700;padding:2px 9px;border-radius:20px;background:'+(pkg.active?'#b8eef8':'#f3f4f6')+';color:'+(pkg.active?'#0096c7':'#6b7280')+'">'+(pkg.active?'Active':'Disabled')+'</span>' +
         '</div>' +
-        (pkg.badge?'<span style="display:inline-block;font-size:var(--font-size-xs);font-weight:700;padding:3px 10px;border-radius:20px;background:#ccfbf1;color:#0d9488;margin-bottom:8px">'+pkg.badge+'</span>':'')+
-        (pkg.description?'<p style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px;line-height:1.5">'+pkg.description+'</p>':'')+
-        '<div style="margin-bottom:12px">' +
-          (pkg.includes||[]).map(function(inc){ return '<div style="font-size:var(--font-size-xs);color:#374151;padding:2px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:#00b4d8;font-size:var(--font-size-xs)"></i>'+inc+'</div>'; }).join('') +
-        '</div>' +
-        priceFooter +
-        '<div style="display:flex;gap:6px;margin-top:10px">' +
-          '<button data-pid="'+pkg.id+'" onclick="openPkgForm(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-weight:600;font-family:inherit"><i class="ti ti-edit"></i> Edit</button>' +
-          '<button data-pid="'+pkg.id+'" onclick="togglePkg(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-weight:600;font-family:inherit">'+(pkg.active?'<i class="ti ti-eye-off"></i> Disable':'<i class="ti ti-eye"></i> Enable')+'</button>' +
-          '<button data-pid="'+pkg.id+'" onclick="deletePkg(this.dataset.pid)" style="background:none;border:1px solid #fca5a5;color:#b91c1c;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:var(--font-size-sm);font-family:inherit"><i class="ti ti-trash"></i></button>' +
+        (pkg.badge?'<span style="display:inline-block;font-size:var(--font-size-xs);font-weight:700;padding:2px 9px;border-radius:20px;background:#ccfbf1;color:#0d9488;margin-bottom:6px;align-self:flex-start">'+esc(pkg.badge)+'</span>':'')+
+        '<div style="font-size:var(--font-size-sm);font-weight:700;color:#111827;margin-bottom:8px">'+pkg.nights+' night'+(pkg.nights>1?'s':'')+' &middot; $'+pkg.pricePerRoom+' / person</div>' +
+        (pkg.description?'<p style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(pkg.description)+'</p>':'')+
+        (includesShown.length?(
+          '<div style="margin-bottom:10px">' +
+            includesShown.map(function(inc){ return '<div style="font-size:var(--font-size-xs);color:#374151;padding:1px 0;display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="color:#00b4d8;font-size:var(--font-size-xs);flex-shrink:0"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(inc)+'</span></div>'; }).join('') +
+            (moreIncludes>0?'<div style="font-size:var(--font-size-xs);color:#9ca3af;padding:1px 0">+'+moreIncludes+' more — see Edit</div>':'') +
+          '</div>'
+        ):'')+
+        '<div style="flex:1"></div>' +
+        '<div style="display:flex;gap:6px;margin-top:8px;position:relative">' +
+          '<button data-pid="'+pkg.id+'" onclick="openPkgForm(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-xs);font-weight:600;font-family:inherit"><i class="ti ti-edit"></i> Edit</button>' +
+          '<button data-pid="'+pkg.id+'" onclick="togglePkg(this.dataset.pid)" style="flex:1;background:none;border:1px solid #e5e7eb;padding:7px;border-radius:7px;cursor:pointer;font-size:var(--font-size-xs);font-weight:600;font-family:inherit">'+(pkg.active?'Disable':'Enable')+'</button>' +
+          '<button data-pid="'+pkg.id+'" onclick="pkgToggleMenu(this.dataset.pid,event)" style="background:none;border:1px solid #e5e7eb;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:var(--font-size-xs);font-family:inherit">⋯</button>' +
+          '<div id="pkg-menu-'+pkg.id+'" style="display:none;position:absolute;right:0;bottom:38px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 6px 16px rgba(0,0,0,.1);z-index:5;min-width:140px">' +
+            '<button data-pid="'+pkg.id+'" onclick="deletePkg(this.dataset.pid)" style="width:100%;text-align:left;background:none;border:none;padding:9px 12px;cursor:pointer;font-size:var(--font-size-xs);color:#b91c1c;font-family:inherit"><i class="ti ti-trash"></i> Delete package</button>' +
+          '</div>' +
         '</div>' +
       '</div>';
     el.appendChild(card);
   });
 }
+// Simple single-open overflow menu (Part D's "⋯") -- Delete lives here,
+// away from the primary Edit/Disable actions, matching "prefer Disable
+// over Delete" (Part H). Closes any other open menu first.
+function pkgToggleMenu(pid, evt){
+  if(evt) evt.stopPropagation();
+  document.querySelectorAll('[id^="pkg-menu-"]').forEach(function(m){
+    if(m.id !== 'pkg-menu-'+pid) m.style.display = 'none';
+  });
+  var menu = document.getElementById('pkg-menu-'+pid);
+  if(menu) menu.style.display = menu.style.display==='none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(){
+  document.querySelectorAll('[id^="pkg-menu-"]').forEach(function(m){ m.style.display = 'none'; });
+});
 
 // Agency Packages tab's top-level view: a directory of every agency plus
 // the master template — not a shared package list. Clicking an agency
@@ -12035,15 +12216,22 @@ async function savePkgTripNotes(){
     var note = line.slice(idx+1).trim();
     return activity && note ? { activity: activity, note: note } : null;
   }).filter(Boolean);
-  var statusEl = document.getElementById('pkg-notes-status');
-  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = '#6b7280'; }
+  // Website Package Manager reorganization (2026-09-11): General Trip
+  // Notes and Activity-Specific Notes are now two separate collapsible
+  // panels, each with its own "Save trip notes" button (still the SAME
+  // save call, saving both fields together, exactly as before -- neither
+  // panel's data can be saved without the other's current value, so both
+  // status spans reflect the one shared outcome regardless of which
+  // button was actually clicked or which panel is currently open).
+  var statusEls = ['pkg-notes-status-1','pkg-notes-status'].map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  statusEls.forEach(function(el){ el.textContent = 'Saving…'; el.style.color = '#6b7280'; });
   try {
     await fsDb.collection('website_content').doc('packages_trip_notes').set({ general: general, activityNotes: activityNotes }, { merge: true });
-    if(statusEl){ statusEl.textContent = '✓ Saved'; statusEl.style.color = '#059669'; }
+    statusEls.forEach(function(el){ el.textContent = '✓ Saved'; el.style.color = '#059669'; });
     toast('✓ Trip notes saved');
   } catch(e) {
     console.error('savePkgTripNotes failed', e);
-    if(statusEl){ statusEl.textContent = '⚠️ Could not save — try again'; statusEl.style.color = '#dc2626'; }
+    statusEls.forEach(function(el){ el.textContent = '⚠️ Could not save — try again'; el.style.color = '#dc2626'; });
     toast('⚠️ Could not save — please try again');
   }
 }
