@@ -1459,6 +1459,16 @@ body.pms-mode { overflow:hidden; }
     </div>
     <div class="fg"><label>Duration (hours, optional)</label><input type="number" id="cim-dur" min="0" step="0.5" placeholder="e.g. 2"></div>
     <div class="fg"><label>Notes (optional)</label><input type="text" id="cim-notes" placeholder="e.g. Min 2 guests, equipment included"></div>
+    <!-- Agency Sales Workflow Phase C: nothing is agency-visible by default
+         (see firestore.rules' service_catalog read clause) -- this is the
+         one control that approves an item for the Agency Portal's Rate
+         Catalog / Custom Package Builder. -->
+    <div class="fg">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="cim-visible-agencies" style="width:auto">
+        Visible to agencies (Rate Catalog / Custom Package Builder)
+      </label>
+    </div>
     <button class="btn p" style="width:100%" onclick="saveCatalogItem()"><i class="ti ti-device-floppy"></i> Save item</button>
   </div>
 </div>
@@ -4120,7 +4130,7 @@ function drawServiceCatalog(){
     items.forEach(function(item){
       var inactive = item.active===false;
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;opacity:'+(inactive?'0.5':'1')+'">'
-        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+(item.durationHours?item.durationHours+'h &middot; ':'')+'$/'+catalogUnitShort(item.unitType)+'</span><div style="margin-top:3px">'+catalogTaxModeBadge(item)+'</div></div>'
+        + '<div style="font-size:var(--font-size-base);font-weight:600;color:#374151">'+esc(item.name)+(inactive?' <span style="font-size:var(--font-size-xs);color:#dc2626;font-weight:700">INACTIVE</span>':'')+'<span style="font-size:var(--font-size-xs);color:#9ca3af;margin-left:6px">'+(item.durationHours?item.durationHours+'h &middot; ':'')+'$/'+catalogUnitShort(item.unitType)+'</span><div style="margin-top:3px">'+catalogTaxModeBadge(item)+(item.visibleToAgencies==='all'?' <span style="font-size:var(--font-size-xs);font-weight:600;color:#0f766e;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:20px;padding:1px 8px">🏢 Agency-visible</span>':'')+'</div></div>'
         + '<div style="display:flex;align-items:center;gap:8px">'
         + '<span style="color:#6b7280;font-size:var(--font-size-sm)">$</span>'
         + '<span style="width:70px;text-align:right;font-size:var(--font-size-base);font-weight:700;color:#111827">'+Number(item.basePrice).toFixed(2)+'</span>'
@@ -4167,6 +4177,7 @@ function openAddCatalogItem(){
   cimUpdateTaxModeHint();
   document.getElementById('cim-dur').value='';
   document.getElementById('cim-notes').value='';
+  document.getElementById('cim-visible-agencies').checked=false;
   document.getElementById('m-catitem').classList.add('on');
 }
 function openEditCatalogItem(id){
@@ -4183,6 +4194,7 @@ function openEditCatalogItem(id){
   cimUpdateTaxModeHint();
   document.getElementById('cim-dur').value=item.durationHours||'';
   document.getElementById('cim-notes').value=item.notes||'';
+  document.getElementById('cim-visible-agencies').checked=(item.visibleToAgencies==='all');
   document.getElementById('m-catitem').classList.add('on');
 }
 async function saveCatalogItem(){
@@ -4195,17 +4207,25 @@ async function saveCatalogItem(){
   var durRaw=(document.getElementById('cim-dur').value||'').trim();
   var durationHours=durRaw===''?null:+durRaw;
   var notes=(document.getElementById('cim-notes').value||'').trim();
+  // Agency Sales Workflow Phase C: 'all' or omitted -- omitted (not simply
+  // false) so firestore.rules' service_catalog read clause's `resource.data
+  // .visibleToAgencies == 'all'` check has nothing to match, matching how
+  // packages/{packageId} treats an absent field. No per-specific-agency
+  // list control in this admin UI yet (not asked for) -- the rule already
+  // supports a list, this toggle just doesn't expose it.
+  var visibleToAgencies = document.getElementById('cim-visible-agencies').checked ? 'all' : firebase.firestore.FieldValue.delete();
   if(!name){ toast('Enter an item name'); return; }
   if(basePrice<0){ toast('Price cannot be negative'); return; }
   var now=Date.now();
   try {
     if(_catalogEditingId){
-      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,updatedAt:now}, {merge:true});
+      await fsDb.collection('service_catalog').doc(_catalogEditingId).set({name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,updatedAt:now,visibleToAgencies:visibleToAgencies}, {merge:true});
       var existing=SVC_CATALOG.find(function(x){return x.id===_catalogEditingId;});
-      if(existing) Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,updatedAt:now});
+      if(existing){ Object.assign(existing,{name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,updatedAt:now}); if(document.getElementById('cim-visible-agencies').checked) existing.visibleToAgencies='all'; else delete existing.visibleToAgencies; }
     } else {
       var ref=fsDb.collection('service_catalog').doc();
       var doc={name:name,category:category,unitType:unitType,basePrice:basePrice,priceTaxMode:priceTaxMode,durationHours:durationHours,notes:notes,active:true,createdAt:now,updatedAt:now};
+      if(document.getElementById('cim-visible-agencies').checked) doc.visibleToAgencies='all';
       await ref.set(doc);
       SVC_CATALOG.push(Object.assign({id:ref.id},doc));
     }

@@ -8,6 +8,10 @@
 //     role-checked read/write for the Reservation Document Vault (passports,
 //     IDs, visas, etc.) -- see the comment above those exports for why they
 //     exist instead of a direct Storage-rules read/write.
+//   submitAgencyCustomQuote  Agency Sales Workflow Phase C -- re-verifies
+//     every Custom Package component's Vilu rate server-side (Admin SDK,
+//     bypassing client rules) before writing agency_quotes, so an agency
+//     can never persist a spoofed rate. See the comment above that export.
 //
 // Split out of the original single-codebase functions/index.js so this
 // codebase never declares or evaluates an OTA secret (BEDS24_REFRESH_TOKEN,
@@ -398,4 +402,190 @@ exports.uploadReservationDocument = onCall({ region: 'us-central1', maxInstances
     uploadedAt: FieldValue.serverTimestamp(), status: 'active',
   });
   return { docId: docRef.id };
+});
+
+// ── submitAgencyCustomQuote: Agency Sales Workflow Phase C ─────────────────
+// Why this needs a callable and not just firestore.rules: a Custom Package
+// quote's selectedComponents is a variable-length array, each entry drawn
+// from a different canonical source (service_catalog / agency_packages /
+// the global booking-settings doc). Firestore security rules have no loop
+// construct that can fetch a different reference document per array element
+// and validate each one's rate -- rules can gate a single document read
+// (that's how service_catalog's new agency-visibility clause below works)
+// but not "for each of N components, look up its real rate and compare".
+// So an agency client could otherwise write agency_quotes directly with a
+// spoofed viluUnitRate (e.g. claiming an $85 activity costs $1), corrupting
+// the very numbers Phase J's future settlement will rely on. This function
+// is the trust boundary instead: it re-reads every component's rate from
+// its canonical source with the Admin SDK (which bypasses client rules and
+// is therefore authoritative), computes viluNetTotal/agencyEarnings itself,
+// and only THEN writes agency_quotes -- the client never gets to persist a
+// rate it supplied. agencyGuestSellingTotal is the one number NOT
+// re-derived here: it's the agency's own commercial decision, not a Vilu
+// rate, so there's nothing to validate it against.
+const AGENCY_QUOTE_CURRENCIES = ['USD', 'MVR', 'EUR'];
+const AGENCY_QUOTE_PAYMENT_COLLECTORS = ['HOTEL', 'AGENCY', 'UNDECIDED'];
+const AGENCY_QUOTE_MAX_COMPONENTS = 40;
+
+// Same regex as sanitizeGuestLabel() in vilu-agency-portal.html -- kept in
+// sync deliberately (see that function's own comment) since both strip the
+// same admin-authored "Name — $NN" price-in-label convention before a name
+// ever reaches a guest-facing document.
+function sanitizeGuestLabel(label) {
+  return String(label || '').replace(/\s*[-–—]\s*\$\d+(?:\.\d+)?\s*$/, '').trim();
+}
+
+function newAgencyQuoteId(email) {
+  const codePart = String(email || 'agency').split('@')[0].toUpperCase().replace(/[^A-Z0-9]/g, '') || 'AGENCY';
+  return 'VQ-' + codePart + '-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-6);
+}
+
+// Resolves one selectedComponents entry against its canonical source,
+// returning the SERVER-VERIFIED {name, category, unit, viluUnitRate} --
+// nothing from the client's own copy of these fields is trusted or used.
+async function resolveAgencyQuoteComponent(entry, agencyEmailLower) {
+  const sourceType = String((entry || {}).sourceType || '');
+  const sourceId = String((entry || {}).sourceId || '');
+  const quantity = Number((entry || {}).quantity);
+  if (!sourceId) throw new HttpsError('invalid-argument', 'Each component needs a sourceId.');
+  if (!(quantity > 0) || !Number.isFinite(quantity) || quantity > 999) {
+    throw new HttpsError('invalid-argument', 'Component quantity must be a positive number.');
+  }
+
+  if (sourceType === 'catalog') {
+    const snap = await db.collection('service_catalog').doc(sourceId).get();
+    if (!snap.exists) throw new HttpsError('not-found', 'Catalog item not found: ' + sourceId);
+    const item = snap.data();
+    if (item.active === false) throw new HttpsError('failed-precondition', 'Catalog item is no longer active: ' + sourceId);
+    const visible = item.visibleToAgencies;
+    const approved = visible === 'all' || (Array.isArray(visible) && visible.indexOf(agencyEmailLower) !== -1);
+    if (!approved) throw new HttpsError('permission-denied', 'This catalog item is not approved for your agency.');
+    return {
+      sourceType, sourceId, name: String(item.name || ''), category: String(item.category || 'OTHER_SERVICE'),
+      unit: String(item.unitType || 'PER_ITEM'), viluUnitRate: Number(item.basePrice) || 0, quantity,
+    };
+  }
+
+  if (sourceType === 'agency_package') {
+    const snap = await db.collection('agency_packages').doc(agencyEmailLower).get();
+    const packages = (snap.exists && snap.data().packages) || [];
+    const pkg = packages.find((p) => p.id === sourceId);
+    if (!pkg) throw new HttpsError('not-found', 'Package not found in your own agency package set: ' + sourceId);
+    if (pkg.active === false) throw new HttpsError('failed-precondition', 'This package is currently Not assigned.');
+    return {
+      sourceType, sourceId, name: String(pkg.name || ''), category: 'ACCOMMODATION_BASE',
+      unit: 'PER_PERSON', viluUnitRate: Number(pkg.agencyPricePerRoom || pkg.pricePerRoom) || 0, quantity,
+    };
+  }
+
+  if (sourceType === 'global_setting') {
+    if (sourceId !== 'extraNightRate' && sourceId !== 'flightSurcharge') {
+      throw new HttpsError('invalid-argument', 'Unknown global setting: ' + sourceId);
+    }
+    const snap = await db.collection('website_content').doc('agency_booking_settings').get();
+    const data = (snap.exists && snap.data()) || {};
+    const rate = sourceId === 'extraNightRate' ? (data.extraNightRate != null ? data.extraNightRate : 40) : (data.flightSurcharge != null ? data.flightSurcharge : 110);
+    return {
+      sourceType, sourceId,
+      name: sourceId === 'extraNightRate' ? 'Additional Night' : 'Domestic Flight',
+      category: 'TRANSPORT_ACCOMMODATION', unit: sourceId === 'extraNightRate' ? 'PER_PERSON_PER_NIGHT' : 'PER_PERSON_ONE_WAY',
+      viluUnitRate: Number(rate) || 0, quantity,
+    };
+  }
+
+  throw new HttpsError('invalid-argument', 'Unknown component sourceType: ' + sourceType);
+}
+
+exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { email, role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const agencyEmailLower = email.toLowerCase();
+  const d = request.data || {};
+
+  const status = d.status === 'FINALIZED' ? 'FINALIZED' : 'DRAFT';
+  const currency = AGENCY_QUOTE_CURRENCIES.includes(d.currency) ? d.currency : 'USD';
+  const paymentCollector = AGENCY_QUOTE_PAYMENT_COLLECTORS.includes(d.paymentCollector) ? d.paymentCollector : 'UNDECIDED';
+  const adults = Math.max(1, Math.min(20, Math.round(Number(d.adults) || 1)));
+  const children = Math.max(0, Math.min(20, Math.round(Number(d.children) || 0)));
+  const guestName = String(d.guestName || '').slice(0, 160).trim();
+  const arrivalDate = /^\d{4}-\d{2}-\d{2}$/.test(d.arrivalDate) ? d.arrivalDate : '';
+  const departureDate = /^\d{4}-\d{2}-\d{2}$/.test(d.departureDate) ? d.departureDate : '';
+  const agencyGuestSellingTotal = Math.max(0, Number(d.agencyGuestSellingTotal) || 0);
+  const packageName = String(d.packageName || '').slice(0, 160).trim() || 'Custom Maldives Package';
+  const guestDescription = String(d.guestDescription || '').slice(0, 500).trim();
+  const guestMessage = String(d.guestMessage || '').slice(0, 500).trim();
+
+  const selectedComponentsInput = Array.isArray(d.selectedComponents) ? d.selectedComponents : [];
+  if (!selectedComponentsInput.length) throw new HttpsError('invalid-argument', 'Select at least one component.');
+  if (selectedComponentsInput.length > AGENCY_QUOTE_MAX_COMPONENTS) throw new HttpsError('invalid-argument', 'Too many components.');
+  if (status === 'FINALIZED' && !(agencyGuestSellingTotal > 0)) throw new HttpsError('invalid-argument', 'Enter a guest selling price before finalizing.');
+  if (status === 'FINALIZED' && (!guestName || !arrivalDate || !departureDate)) throw new HttpsError('invalid-argument', 'Guest name and travel dates are required before finalizing.');
+
+  const resolvedComponents = [];
+  for (const entry of selectedComponentsInput) {
+    resolvedComponents.push(await resolveAgencyQuoteComponent(entry, agencyEmailLower));
+  }
+  const componentsWithTotals = resolvedComponents.map((c) => Object.assign({}, c, { viluLineTotal: +(c.viluUnitRate * c.quantity).toFixed(2) }));
+  const viluNetTotal = +componentsWithTotals.reduce((sum, c) => sum + c.viluLineTotal, 0).toFixed(2);
+  const agencyEarnings = +(agencyGuestSellingTotal - viluNetTotal).toFixed(2);
+
+  // Guest-facing snapshot: name only, never the rate/quantity/line total --
+  // the SAME structural allowlist discipline as buildGuestQuotationHTML() on
+  // the client, just applied here to what gets INTO the quote in the first
+  // place. Trips & Activities go to guestActivities, everything else to
+  // guestIncludes, matching how an assigned-package quote already splits
+  // includes vs. activities.
+  const guestIncludes = [];
+  const guestActivities = [];
+  componentsWithTotals.forEach((c) => {
+    const label = sanitizeGuestLabel(c.name);
+    if (!label) return;
+    if (c.category === 'TRIPS_ACTIVITIES') guestActivities.push(label); else guestIncludes.push(label);
+  });
+
+  let nights = 0;
+  if (arrivalDate && departureDate) {
+    const n = Math.round((new Date(departureDate) - new Date(arrivalDate)) / 864e5);
+    if (n > 0) nights = n;
+  }
+
+  const now = new Date().toISOString();
+  let quoteId = String(d.quoteId || '').trim();
+  let createdAt = now;
+  if (quoteId) {
+    const existingSnap = await db.collection('agency_quotes').doc(quoteId).get();
+    if (existingSnap.exists) {
+      const existing = existingSnap.data();
+      if (existing.agencyId !== request.auth.uid) throw new HttpsError('permission-denied', 'Not your quotation.');
+      if (existing.status !== 'DRAFT') throw new HttpsError('failed-precondition', 'This quotation is finalized and can no longer be edited.');
+      createdAt = existing.createdAt || now;
+    } else {
+      // A client-supplied id for a brand-new quote (first save) is fine --
+      // it was generated by the SAME newAgencyQuoteId() format client-side;
+      // the security boundary is the agencyId write below, not the id.
+    }
+  } else {
+    quoteId = newAgencyQuoteId(email);
+  }
+
+  // Look up the agency's display name the same way enterAgencyPortal() does
+  // client-side (users/{email}.name, falling back to the email) -- never
+  // trusted from the client request.
+  const userSnap = await db.collection('users').doc(agencyEmailLower).get();
+  const agencyName = (userSnap.exists && (userSnap.data().name || userSnap.data().company)) || email;
+
+  const quote = {
+    quoteId, agencyId: request.auth.uid, agencyEmail: email, agencyName,
+    guestName, arrivalDate, departureDate, adults, children, nights,
+    currency, quoteType: 'CUSTOM_PACKAGE',
+    packageId: null, packageName, guestDescription,
+    guestIncludes, guestActivities, guestMessage,
+    selectedComponents: componentsWithTotals,
+    viluNetTotal, agencyGuestSellingTotal, agencyEarnings, paymentCollector,
+    exchangeRate: 1, exchangeRateSource: null, exchangeRateSnapshotAt: null,
+    status, createdAt, updatedAt: now,
+    finalizedAt: status === 'FINALIZED' ? now : null,
+  };
+  await db.collection('agency_quotes').doc(quoteId).set(quote);
+  return quote;
 });

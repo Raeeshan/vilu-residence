@@ -401,9 +401,9 @@ section('Case M — Website Packages / agency_packages / block_requests / reserv
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
     assert.match(resBlock, /isAgency\(\) && request\.resource\.data\.agencyId == request\.auth\.uid && request\.resource\.data\.source == 'Agency'/);
   });
-  test('agency_quotes rules unchanged from Phase A (Phase B needed no new rules)', () => {
+  test('agency_quotes rules unchanged from Phase A/B\'s ownership model (Phase B itself needed no new rules -- the quoteType condition visible here was added later, by Phase C, to close a gap Custom Package quotes introduced; see agency-custom-package.test.js)', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId} {'), RULES.indexOf('match /room_prices/{roomId} {'));
-    assert.match(rulesBlock, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid;/);
+    assert.match(rulesBlock, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid/);
     assert.match(rulesBlock, /allow delete: if false;/);
   });
   test('the Website tab\'s own card renderer in vilu-unified.html is unchanged', () => {

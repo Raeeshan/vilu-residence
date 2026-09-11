@@ -182,7 +182,13 @@ section('Case D — Firestore rules: role-level AND collection-level enforcement
     const block = RULES.slice(idx, RULES.indexOf('\n    }', idx));
     assert.match(block, /allow read:.*isStaff\(\)/);
     assert.match(block, /allow create, update:.*\(isAdmin\(\) \|\| isManagerRole\(\)\)/);
-    assert.doesNotMatch(block.split('allow read:')[1].split('\n')[0], /\bisStaff\(\)\s*\|\|\s*isManagerRole\(\)\s*$/); // read line intentionally broad, not the assertion under test
+    // Agency Sales Workflow Phase C (2026-09-11) legitimately extended this
+    // same read rule with an additional OR-clause so an authenticated
+    // agency can read a single item explicitly approved for agencies (see
+    // agency-custom-package.test.js Case A for the full proof) -- Admin/
+    // Staff/Manager access above is unchanged, this just confirms the
+    // extension is really there and isn't accidentally missing.
+    assert.match(block, /resource\.data\.visibleToAgencies == 'all'/);
   });
   test('service_catalog never allows a hard delete at the rules level — Part 5\'s "no hard delete" is enforced server-side, not just by omitting a delete button', () => {
     const idx = RULES.indexOf('match /service_catalog/{itemId}');

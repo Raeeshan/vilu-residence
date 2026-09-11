@@ -190,13 +190,34 @@ service cloud.firestore {
     // /reservations above. Deactivation is a normal field update
     // (active:false), which stays allowed.
     match /service_catalog/{itemId} {
-      allow read: if isAdmin() || isStaff() || isManagerRole();
+      // Agency Sales Workflow Phase C (2026-09-11): an authenticated agency
+      // may read ONE item at a time, only if it's active and explicitly
+      // approved for agencies -- same shape as packages/{packageId}'s
+      // existing (previously unused) visibleToAgencies clause below, now
+      // actually put to use. Nothing is agency-visible by default: an item
+      // with no visibleToAgencies field falls through to 'all'-not-matched
+      // (resource.data.get() has no default here on purpose -- unlike
+      // packages, where the historical default was 'all' for backward
+      // compatibility with packages written before this field existed,
+      // every service_catalog item predates agency visibility entirely, so
+      // defaulting to 'all' here would silently expose the whole catalog).
+      // This is a single-document read rule, not an array-validation
+      // problem, so it's safe to enforce here directly -- the thing rules
+      // genuinely can't do (verify a whole selectedComponents[] array's
+      // rates against their sources) is why submitAgencyCustomQuote exists
+      // as a Cloud Function instead.
+      allow read: if isAdmin() || isStaff() || isManagerRole()
+        || (request.auth != null && resource.data.active == true
+            && (resource.data.visibleToAgencies == 'all'
+                || (resource.data.visibleToAgencies is list
+                    && request.auth.token.email.lower() in resource.data.visibleToAgencies)));
       // priceTaxMode (Catalog Tax-Treatment Upgrade, 2026-09-11): optional
       // and backward-compatible -- an item written before this field
       // existed, or one this rule doesn't touch on update, simply has no
       // value and falls back client-side (catalogItemPriceTaxMode()).
       // Validated only when present, so it can never be set to anything
-      // other than the two real values.
+      // other than the two real values. visibleToAgencies (Phase C) is the
+      // same kind of optional, validated-only-when-present field.
       allow create, update: if (isAdmin() || isManagerRole())
         && request.resource.data.name is string
         && request.resource.data.category in ['TRIPS_ACTIVITIES','FOOD_BEVERAGE','TRANSFER','OTHER_SERVICE','ACCOMMODATION_EXTRA']
@@ -206,7 +227,10 @@ service cloud.firestore {
         && request.resource.data.active is bool
         && (!('priceTaxMode' in request.resource.data)
             || request.resource.data.priceTaxMode == null
-            || request.resource.data.priceTaxMode in ['TAX_INCLUDED','TAX_EXCLUDED']);
+            || request.resource.data.priceTaxMode in ['TAX_INCLUDED','TAX_EXCLUDED'])
+        && (!('visibleToAgencies' in request.resource.data)
+            || request.resource.data.visibleToAgencies == 'all'
+            || request.resource.data.visibleToAgencies is list);
       allow delete: if false;
     }
 
@@ -392,8 +416,23 @@ service cloud.firestore {
     // No quote is ever created/read by anything but its own owning agency
     // or Admin/Staff/Manager; there is no broad-collection read anywhere.
     match /agency_quotes/{quoteId} {
+      // Agency Sales Workflow Phase C (2026-09-11): a CUSTOM_PACKAGE quote's
+      // selectedComponents rates can only be verified server-side (rules
+      // have no loop to fetch-and-check each array entry against its
+      // source doc -- see submitAgencyCustomQuote's own comment in
+      // functions-core/index.js for the full reasoning). That Cloud
+      // Function uses the Admin SDK, which bypasses these rules entirely,
+      // so restricting the CLIENT'S direct create/update to
+      // quoteType=='ASSIGNED_PACKAGE' only closes the one path an agency
+      // could otherwise use to bypass server validation (writing a
+      // CUSTOM_PACKAGE doc directly with a spoofed rate) -- it does not
+      // affect the Cloud Function's own writes, and does not change
+      // ASSIGNED_PACKAGE quotes (Phase B), which never needed server
+      // verification since their rate is the agency's own already-owned
+      // agency_packages data.
       allow create: if request.auth != null
-        && request.resource.data.agencyId == request.auth.uid;
+        && request.resource.data.agencyId == request.auth.uid
+        && request.resource.data.quoteType == 'ASSIGNED_PACKAGE';
 
       allow read: if request.auth != null
         && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
@@ -402,12 +441,16 @@ service cloud.firestore {
       // DRAFT, and can never change which agency owns it. Once FINALIZED,
       // only Admin/Staff/Manager can touch it -- Phase A's deliberately
       // simple immutability gate; no versioning/history yet (Part 6: "do
-      // not over-engineer versioning yet").
+      // not over-engineer versioning yet"). Same quoteType=='ASSIGNED_PACKAGE'
+      // restriction as create above -- a CUSTOM_PACKAGE quote can only ever
+      // be updated through submitAgencyCustomQuote (Admin SDK) or by
+      // Admin/Staff/Manager.
       allow update: if isAdmin() || isStaff() || isManagerRole()
         || (request.auth != null
             && resource.data.agencyId == request.auth.uid
             && request.resource.data.agencyId == resource.data.agencyId
-            && resource.data.status == 'DRAFT');
+            && resource.data.status == 'DRAFT'
+            && resource.data.quoteType == 'ASSIGNED_PACKAGE');
 
       allow delete: if false;
     }

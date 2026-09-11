@@ -127,7 +127,12 @@ section('Case D — agency_quotes: schema/rules foundation exists (behavioral pr
   });
   const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId} {'), RULES.indexOf('match /room_prices/{roomId} {'));
   test('create requires request.resource.data.agencyId == request.auth.uid', () => {
-    assert.match(rulesBlock, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid;/);
+    // A later Phase C task appended "&& quoteType == 'ASSIGNED_PACKAGE'" to
+    // this same condition (Custom Package quotes must go through a Cloud
+    // Function instead, see agency-custom-package.test.js) -- Phase A's own
+    // agencyId ownership check is still exactly here, just no longer the
+    // last line.
+    assert.match(rulesBlock, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid/);
   });
   test('read allows the owning agency (resource.data.agencyId == uid) or Admin\\/Staff\\/Manager -- no broader clause', () => {
     assert.match(rulesBlock, /allow read: if request\.auth != null\s*\n\s*&& \(isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| resource\.data\.agencyId == request\.auth\.uid\);/);

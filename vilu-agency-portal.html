@@ -228,6 +228,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab on" onclick="showTab('packages',this)"><i class="ti ti-package"></i> Packages</button>
+    <button class="tab" onclick="showTab('ratecatalog',this)"><i class="ti ti-list-details"></i> Rate Catalog</button>
     <button class="tab" onclick="showTab('quotations',this)"><i class="ti ti-file-text"></i> Quotations</button>
     <button class="tab" onclick="showTab('availability',this)"><i class="ti ti-calendar"></i> Availability</button>
     <button class="tab" onclick="showTab('mybookings',this)"><i class="ti ti-list"></i> My bookings</button>
@@ -243,11 +244,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="pkg-grid" id="pkg-cards"></div>
     </div>
 
-    <!-- QUOTATIONS TAB — Phase B: a quote is only a sales document (guest
+    <!-- RATE CATALOG TAB — Phase C: private reference view only (no
+         selection/quantity here -- that happens in the Custom Package
+         Builder). Only items Vilu has explicitly approved for agencies
+         appear at all; nothing is agency-visible by default (see
+         firestore.rules' service_catalog read clause and Part 1's audit). -->
+    <div id="tab-ratecatalog" class="hidden">
+      <div class="al warn"><i class="ti ti-lock" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div><strong>Private to your agency.</strong> These are Vilu's net rates — what Vilu charges you, never the guest selling price. They must never appear on a guest-facing quotation.</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <h3 style="font-size:var(--font-size-md);font-weight:700;margin:0">Vilu Rate Catalog</h3>
+        <button class="btn-primary" onclick="openCustomPackageBuilder()"><i class="ti ti-stack-2"></i> Create Custom Package</button>
+      </div>
+      <div id="rate-catalog-grid" style="display:grid;gap:14px"></div>
+    </div>
+
+    <!-- QUOTATIONS TAB — Phase B/C: a quote is only a sales document (guest
          name/dates/package/selling price). It never creates a reservation,
          block request, or touches availability -- those are later phases. -->
     <div id="tab-quotations" class="hidden">
-      <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>Start a quotation from a package on the Packages tab. Vilu's net cost stays private to you — you set the guest's final selling price.</div></div>
+      <div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0;font-size:var(--font-size-lg)"></i><div>Start a quotation from a package on the Packages tab, or build one from the Vilu Rate Catalog. Vilu's net cost stays private to you — you set the guest's final selling price.</div></div>
+      <div style="margin-bottom:14px"><button class="btn-outline" onclick="openCustomPackageBuilder()"><i class="ti ti-stack-2"></i> Create Custom Package</button></div>
       <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:10px">Draft</h3>
       <div id="quotes-draft-list" style="margin-bottom:20px"></div>
       <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:10px">Finalized</h3>
@@ -513,6 +529,83 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- CUSTOM PACKAGE BUILDER MODAL — Phase C. Only sourceType/sourceId/
+     quantity are ever sent to submitAgencyCustomQuote() -- the Vilu rate
+     shown here is fetched from an already-approved, already-scoped read
+     (loadRateCatalog()) purely for the agency's own live estimate; the
+     PERSISTED rate always comes back from the server, which re-resolves
+     every component itself and ignores whatever this form displayed. -->
+<div class="modal-bg" id="m-custom-quote" onclick="if(event.target===this)closeCustomPackageBuilder()">
+  <div class="modal" style="max-width:980px;width:95vw">
+    <div class="modal-hdr">
+      <h2 id="cp-modal-title">New Custom Package</h2>
+      <button onclick="closeCustomPackageBuilder()" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-2xl);color:var(--muted)">✕</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+      <div>
+        <div id="cp-locked-note" class="al warn" style="display:none;margin-bottom:12px"><i class="ti ti-lock" style="flex-shrink:0"></i><div>This quotation is finalized. Commercial details are locked and can no longer be edited here.</div></div>
+
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Guest details</div>
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="fg" style="margin:0"><label>Guest name</label><input type="text" id="cp-guest-name" placeholder="John Smith"></div>
+          <div class="fg" style="margin:0"><label>Package name (guest-facing)</label><input type="text" id="cp-package-name" placeholder="Custom Maldives Package"></div>
+          <div class="fg" style="margin:0"><label>Arrival date</label><input type="date" id="cp-arrival" onchange="updateCustomQuotePreview()"></div>
+          <div class="fg" style="margin:0"><label>Departure date</label><input type="date" id="cp-departure" onchange="updateCustomQuotePreview()"></div>
+          <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="cp-adults" min="1" value="2" oninput="updateCustomQuotePreview()"></div>
+          <div class="fg" style="margin:0"><label>Children</label><input type="number" id="cp-children" min="0" value="0" oninput="updateCustomQuotePreview()"></div>
+        </div>
+        <div class="fg"><label>Guest-facing description <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional)</span></label><textarea id="cp-guest-desc" rows="2" oninput="updateCustomQuotePreview()" placeholder="A short description of this package for the guest..."></textarea></div>
+        <div class="fg"><label>Special message to guest <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional)</span></label><textarea id="cp-guest-message" rows="2" oninput="updateCustomQuotePreview()" placeholder="Any note for the guest..."></textarea></div>
+
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">Add components — private to your agency</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <select id="cp-component-picker" style="flex:1"></select>
+          <input type="number" id="cp-component-qty" min="1" value="1" style="width:70px">
+          <button class="btn-outline" onclick="addSelectedComponent()"><i class="ti ti-plus"></i></button>
+        </div>
+        <div id="cp-selected-list" style="margin-bottom:10px"></div>
+
+        <div style="background:#f9fafb;border:1.5px dashed var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+          <div style="font-size:var(--font-size-sm);color:var(--muted)">Vilu net total (private, estimated)</div>
+          <div id="cp-vilu-net" style="font-size:var(--font-size-lg);font-weight:800;color:#374151">USD 0.00</div>
+        </div>
+
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="fg" style="margin:0"><label>Currency</label>
+            <select id="cp-currency" onchange="updateCustomQuotePreview()">
+              <option value="USD">USD</option>
+              <option value="MVR">MVR</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+          <div class="fg" style="margin:0"><label>Guest selling price</label><input type="number" id="cp-selling-price" min="0" step="5" oninput="updateCustomQuotePreview()" placeholder="0"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);color:var(--muted);margin-bottom:10px">
+          <span>Estimated Agency Earnings</span><strong id="cp-earnings">—</strong>
+        </div>
+        <div class="fg">
+          <label>Payment collector <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(internal only — never shown to the guest)</span></label>
+          <select id="cp-payment-collector">
+            <option value="UNDECIDED">Undecided</option>
+            <option value="HOTEL">Hotel collects from guest</option>
+            <option value="AGENCY">Agency collects from guest</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-outline" style="flex:1" id="cp-save-btn" onclick="submitCustomQuote('DRAFT')"><i class="ti ti-device-floppy"></i> Save draft</button>
+          <button class="btn-primary" style="flex:1" id="cp-finalize-btn" onclick="submitCustomQuote('FINALIZED')"><i class="ti ti-check"></i> Finalize quotation</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Guest sees (live preview)</div>
+        <iframe id="cp-preview-frame" style="width:100%;height:520px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Margin Ledger modal removed (2026-09-11, Phase A) -- Guest Charge/
      Commission never matched Vilu's real commercial model (Vilu net rate +
      agency markup -> one guest-facing selling total) and the agency-side
@@ -525,6 +618,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-functions-compat.js"></script>
 <script>
 var firebaseConfig = {
   apiKey: "AIzaSyCwcT3i_NhInASxp4icubXmHGpro_t7nKw",
@@ -536,6 +630,11 @@ var firebaseConfig = {
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 var fsDb = firebase.firestore();
+// Agency Sales Workflow Phase C: submitAgencyCustomQuote is the trust
+// boundary for Custom Package rate integrity (see the comment above its
+// export in functions-core/index.js) -- same region as vilu-unified.html's
+// own fsFunctions.
+var fsFunctions = firebase.app().functions('us-central1');
 
 // ── SINGLE ATOMIC RESERVATION WRITE ──
 // Mirrors vilu-unified.html / vilu-website.html exactly — the ONLY function
@@ -818,12 +917,13 @@ function doSignout(){
 }
 
 function showTab(name, el){
-  ['packages','quotations','availability','mybookings','blockroom'].forEach(function(t){
+  ['packages','ratecatalog','quotations','availability','mybookings','blockroom'].forEach(function(t){
     document.getElementById('tab-'+t).className = t===name?'':'hidden';
   });
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   if(el) el.classList.add('on');
   if(name==='packages') drawPackages();
+  if(name==='ratecatalog') drawRateCatalog();
   if(name==='quotations') drawQuotations();
   if(name==='mybookings') drawMyBookings();
   if(name==='blockroom') drawMyBlocks();
@@ -1287,16 +1387,21 @@ async function drawQuotations(){
 
 function renderQuoteCard(q){
   var isDraft = q.status === 'DRAFT';
+  var isCustom = q.quoteType === 'CUSTOM_PACKAGE';
   var pid = (q.packageId||'').replace(/'/g,"\\'");
   var qid = (q.quoteId||'').replace(/'/g,"\\'");
+  var editCall = isCustom ? "openCustomPackageBuilder('"+qid+"')" : "openQuoteBuilder('"+pid+"','"+qid+"')";
   var actions = isDraft
-    ? '<button class="btn-outline" onclick="openQuoteBuilder(\''+pid+'\',\''+qid+'\')">Edit</button>'
+    ? '<button class="btn-outline" onclick="'+editCall+'">Edit</button>'
       + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Preview</button>'
     : '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">View</button>'
       + '<button class="btn-outline" onclick="printQuotation(\''+qid+'\')">Print</button>';
+  var typeBadge = isCustom
+    ? '<span style="font-size:var(--font-size-xs);font-weight:600;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:20px;padding:1px 8px">Custom Package</span>'
+    : '<span style="font-size:var(--font-size-xs);font-weight:600;color:#0f766e;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:20px;padding:1px 8px">Assigned Package</span>';
   return '<div class="card" style="margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">'
     + '<div>'
-      + '<div style="font-weight:700">'+esc(q.quoteId)+' — '+esc(q.guestName||'(no guest name yet)')+'</div>'
+      + '<div style="font-weight:700">'+esc(q.quoteId)+' — '+esc(q.guestName||'(no guest name yet)')+' '+typeBadge+'</div>'
       + '<div style="font-size:var(--font-size-sm);color:var(--muted)">'+esc(q.packageName||'')+' · '+esc(q.arrivalDate||'?')+' → '+esc(q.departureDate||'?')+'</div>'
       + '<div style="font-size:var(--font-size-sm)">'+esc(q.currency||'USD')+' '+(+(q.agencyGuestSellingTotal||0)).toFixed(2)
         + ' · '+(isDraft?'<span style="color:#d97706;font-weight:700">DRAFT</span>':'<span style="color:#059669;font-weight:700">FINALIZED</span>')
@@ -1381,7 +1486,9 @@ function buildGuestQuotationHTML(quote){
 // "Preview" (draft) and "View"/"Print" (finalized) list actions, and can
 // also be called for the quote currently open in the builder.
 async function printQuotation(quoteId){
-  var quote = (_quoteWorking && _quoteWorking.quoteId===quoteId) ? _quoteWorking : null;
+  var quote = (_quoteWorking && _quoteWorking.quoteId===quoteId) ? _quoteWorking
+    : (_customQuoteWorking && _customQuoteWorking.quoteId===quoteId) ? _customQuoteWorking
+    : null;
   if(!quote){
     try {
       var snap = await fsDb.collection('agency_quotes').doc(quoteId).get();
@@ -1397,6 +1504,289 @@ async function printQuotation(quoteId){
   if(!win){ alert('Allow pop-ups to print'); return; }
   win.document.write(buildGuestQuotationHTML(quote));
   win.document.close();
+}
+
+// ══════════════════════════════════════════════
+// CUSTOM PACKAGE BUILDER + VILU RATE CATALOG — Phase C
+// ══════════════════════════════════════════════
+// Same "quotation only, zero inventory effect" rule as Phase B -- nothing
+// here ever touches reservations/block_requests/blocks/room_availability.
+//
+// RATE INTEGRITY: this file never persists a Vilu rate. The catalog data
+// fetched below is used only to render a live, ESTIMATED preview for the
+// agency's own benefit -- the actual save (submitCustomQuote) sends only
+// {sourceType, sourceId, quantity} to the submitAgencyCustomQuote Cloud
+// Function, which re-resolves every rate itself from the canonical source
+// with the Admin SDK and ignores anything else the client sent. An agency
+// spoofing a rate in this browser's memory therefore only fools its own
+// live preview, never what actually gets saved.
+var _rateCatalog = null; // { packages, activities, accommodationExtra, transfer, foodBeverage, other } -- see loadRateCatalog()
+var _customQuoteWorking = null; // quote object as returned by the server (or null before first save)
+var _customSelectedComponents = []; // client-side working list: {sourceType, sourceId, name, category, unit, viluUnitRate, quantity} -- viluUnitRate here is DISPLAY ONLY
+
+var RATE_CATALOG_SECTIONS = [
+  { key: 'packages', label: 'PACKAGES' },
+  { key: 'activities', label: 'ACTIVITIES / EXPERIENCES' },
+  { key: 'accommodationExtra', label: 'ACCOMMODATION / EXTRA NIGHTS' },
+  { key: 'transfer', label: 'TRANSPORT' },
+  { key: 'foodBeverage', label: 'MEALS / ADD-ONS' },
+  { key: 'other', label: 'OTHER' },
+];
+
+function rateCatalogUnitLabel(unit){
+  return { PER_PAX:'/person', PER_TRIP:'/trip', PER_ITEM:'/item', PER_NIGHT:'/night', PER_ROOM:'/room', PER_HOUR:'/hour',
+    PER_PERSON:'/person', PER_PERSON_PER_NIGHT:'/person/night', PER_PERSON_ONE_WAY:'/person/one-way' }[unit] || '';
+}
+
+// Only ever queries what this agency is already authorized to see:
+// agency_packages/{email} (fully agency-owned) and service_catalog rows
+// matching .where('visibleToAgencies','==','all') -- a query Firestore can
+// verify against the rule without needing a per-document check, unlike an
+// unfiltered .get() which the rule would reject outright (see the rule's
+// own comment in firestore.rules for why). The global settings doc is
+// already public-read, unchanged from Phase B.
+async function loadRateCatalog(){
+  var pkgs = loadPMS_Packages().filter(function(p){ return p.active!==false; });
+  var packageRows = pkgs.map(function(p){
+    return { sourceType:'agency_package', sourceId:p.id, name:p.name, category:'ACCOMMODATION_BASE', unit:'PER_PERSON', viluUnitRate:+(p.agencyPricePerRoom||p.pricePerRoom||0) };
+  });
+  var catalogRows = [];
+  try {
+    var snap = await fsDb.collection('service_catalog').where('visibleToAgencies','==','all').where('active','==',true).get();
+    catalogRows = snap.docs.map(function(d){
+      var it = d.data();
+      return { sourceType:'catalog', sourceId:d.id, name:it.name, category:it.category, unit:it.unitType, viluUnitRate:+(it.basePrice)||0 };
+    });
+  } catch(e) { console.error('loadRateCatalog service_catalog failed', e); }
+  var settings = await loadAgyBookingSettings();
+  var extraNightRow = { sourceType:'global_setting', sourceId:'extraNightRate', name:'Additional Night', category:'ACCOMMODATION_EXTRA', unit:'PER_PERSON_PER_NIGHT', viluUnitRate:+(settings.extraNightRate)||0 };
+  var flightRow = { sourceType:'global_setting', sourceId:'flightSurcharge', name:'Domestic Flight', category:'TRANSFER', unit:'PER_PERSON_ONE_WAY', viluUnitRate:+(settings.flightSurcharge)||0 };
+
+  _rateCatalog = {
+    packages: packageRows,
+    activities: catalogRows.filter(function(r){ return r.category==='TRIPS_ACTIVITIES'; }),
+    accommodationExtra: catalogRows.filter(function(r){ return r.category==='ACCOMMODATION_EXTRA'; }).concat([extraNightRow]),
+    transfer: catalogRows.filter(function(r){ return r.category==='TRANSFER'; }).concat([flightRow]),
+    foodBeverage: catalogRows.filter(function(r){ return r.category==='FOOD_BEVERAGE'; }),
+    other: catalogRows.filter(function(r){ return r.category==='OTHER_SERVICE'; }),
+  };
+  return _rateCatalog;
+}
+
+async function drawRateCatalog(){
+  var grid = document.getElementById('rate-catalog-grid');
+  if(!grid) return;
+  grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading…</div>';
+  await loadRateCatalog();
+  var html = '';
+  RATE_CATALOG_SECTIONS.forEach(function(section){
+    var rows = _rateCatalog[section.key] || [];
+    if(!rows.length) return;
+    html += '<div class="card">'
+      + '<div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">'+section.label+'</div>'
+      + rows.map(function(r){
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f3f4f6">'
+            + '<span style="font-size:var(--font-size-base)">'+esc(r.name)+'</span>'
+            + '<strong style="color:var(--green)">USD '+r.viluUnitRate.toFixed(2)+' '+rateCatalogUnitLabel(r.unit)+'</strong>'
+          + '</div>';
+        }).join('')
+      + '</div>';
+  });
+  grid.innerHTML = html || '<div class="al info"><i class="ti ti-info-circle" style="flex-shrink:0"></i><div>No Vilu-approved rates are available to your agency yet. Contact Vilu Residence.</div></div>';
+}
+
+async function openCustomPackageBuilder(existingQuoteId){
+  await loadRateCatalog();
+  if(existingQuoteId){
+    try {
+      var snap = await fsDb.collection('agency_quotes').doc(existingQuoteId).get();
+      if(!snap.exists){ alert('Quotation not found'); return; }
+      _customQuoteWorking = snap.data();
+    } catch(e) {
+      console.error('openCustomPackageBuilder load failed', e);
+      alert('Could not load this quotation');
+      return;
+    }
+    _customSelectedComponents = (_customQuoteWorking.selectedComponents||[]).map(function(c){ return Object.assign({}, c); });
+  } else {
+    _customQuoteWorking = null;
+    _customSelectedComponents = [];
+  }
+
+  var q = _customQuoteWorking || {};
+  var locked = q.status === 'FINALIZED';
+  document.getElementById('cp-modal-title').textContent = existingQuoteId ? 'Custom Package — '+(q.packageName||'') : 'New Custom Package';
+  document.getElementById('cp-guest-name').value = q.guestName||'';
+  document.getElementById('cp-package-name').value = q.packageName||'';
+  document.getElementById('cp-arrival').value = q.arrivalDate||'';
+  document.getElementById('cp-departure').value = q.departureDate||'';
+  document.getElementById('cp-adults').value = q.adults||2;
+  document.getElementById('cp-children').value = q.children||0;
+  document.getElementById('cp-guest-desc').value = q.guestDescription||'';
+  document.getElementById('cp-guest-message').value = q.guestMessage||'';
+  document.getElementById('cp-currency').value = q.currency||'USD';
+  document.getElementById('cp-selling-price').value = q.agencyGuestSellingTotal||'';
+  document.getElementById('cp-payment-collector').value = q.paymentCollector||'UNDECIDED';
+
+  ['cp-guest-name','cp-package-name','cp-arrival','cp-departure','cp-adults','cp-children','cp-guest-desc','cp-guest-message','cp-currency','cp-selling-price','cp-payment-collector','cp-component-picker','cp-component-qty'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.disabled = locked;
+  });
+  document.getElementById('cp-locked-note').style.display = locked ? '' : 'none';
+  document.getElementById('cp-save-btn').style.display = locked ? 'none' : '';
+  document.getElementById('cp-finalize-btn').style.display = locked ? 'none' : '';
+
+  renderComponentPicker();
+  renderSelectedComponents();
+  updateCustomQuotePreview();
+  document.getElementById('m-custom-quote').classList.add('on');
+}
+
+function closeCustomPackageBuilder(){
+  document.getElementById('m-custom-quote').classList.remove('on');
+  _customQuoteWorking = null; _customSelectedComponents = [];
+}
+
+function renderComponentPicker(){
+  var picker = document.getElementById('cp-component-picker');
+  if(!picker || !_rateCatalog) return;
+  var html = '';
+  RATE_CATALOG_SECTIONS.forEach(function(section){
+    var rows = _rateCatalog[section.key] || [];
+    if(!rows.length) return;
+    html += '<optgroup label="'+esc(section.label)+'">'
+      + rows.map(function(r){
+          return '<option value="'+r.sourceType+'|'+r.sourceId+'">'+esc(r.name)+' — USD '+r.viluUnitRate.toFixed(2)+' '+rateCatalogUnitLabel(r.unit)+'</option>';
+        }).join('')
+      + '</optgroup>';
+  });
+  picker.innerHTML = html || '<option value="">No approved components available</option>';
+}
+
+function addSelectedComponent(){
+  var picker = document.getElementById('cp-component-picker');
+  var qty = +(document.getElementById('cp-component-qty').value||1);
+  if(!picker.value || qty<=0) return;
+  var parts = picker.value.split('|');
+  var sourceType = parts[0], sourceId = parts.slice(1).join('|');
+  var all = [].concat(_rateCatalog.packages, _rateCatalog.activities, _rateCatalog.accommodationExtra, _rateCatalog.transfer, _rateCatalog.foodBeverage, _rateCatalog.other);
+  var found = all.find(function(r){ return r.sourceType===sourceType && r.sourceId===sourceId; });
+  if(!found) return;
+  var existing = _customSelectedComponents.find(function(c){ return c.sourceType===sourceType && c.sourceId===sourceId; });
+  if(existing){ existing.quantity += qty; }
+  else { _customSelectedComponents.push(Object.assign({}, found, { quantity: qty })); }
+  renderSelectedComponents();
+  updateCustomQuotePreview();
+}
+
+function removeSelectedComponent(idx){
+  _customSelectedComponents.splice(idx,1);
+  renderSelectedComponents();
+  updateCustomQuotePreview();
+}
+
+function updateSelectedComponentQty(idx, val){
+  var qty = +(val||0);
+  if(qty<=0){ removeSelectedComponent(idx); return; }
+  _customSelectedComponents[idx].quantity = qty;
+  updateCustomQuotePreview();
+}
+
+function renderSelectedComponents(){
+  var el = document.getElementById('cp-selected-list');
+  if(!el) return;
+  if(!_customSelectedComponents.length){
+    el.innerHTML = '<div style="text-align:center;padding:14px;color:var(--muted);font-size:var(--font-size-sm)">No components added yet.</div>';
+    return;
+  }
+  el.innerHTML = _customSelectedComponents.map(function(c,idx){
+    var lineTotal = c.viluUnitRate * c.quantity;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #f3f4f6">'
+      + '<span style="font-size:var(--font-size-sm);flex:1">'+esc(c.name)+'</span>'
+      + '<input type="number" min="1" value="'+c.quantity+'" style="width:56px" onchange="updateSelectedComponentQty('+idx+',this.value)">'
+      + '<span style="font-size:var(--font-size-sm);color:var(--muted);width:80px;text-align:right">USD '+lineTotal.toFixed(2)+'</span>'
+      + '<button onclick="removeSelectedComponent('+idx+')" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-size:var(--font-size-md)"><i class="ti ti-x"></i></button>'
+    + '</div>';
+  }).join('');
+}
+
+// Live, CLIENT-SIDE estimate only -- recomputed from _customSelectedComponents
+// (each entry's viluUnitRate came from an already-authorized catalog read,
+// never from anything user-typed), purely so the agency sees an immediate
+// preview. The authoritative numbers always come back from the server after
+// Save/Finalize (see submitCustomQuote).
+function updateCustomQuotePreview(){
+  var netTotal = _customSelectedComponents.reduce(function(sum,c){ return sum + c.viluUnitRate*c.quantity; }, 0);
+  var sellingPrice = +(document.getElementById('cp-selling-price').value||0);
+  var earnings = sellingPrice - netTotal;
+
+  var netEl = document.getElementById('cp-vilu-net');
+  if(netEl) netEl.textContent = 'USD '+netTotal.toFixed(2);
+  var earnEl = document.getElementById('cp-earnings');
+  if(earnEl) earnEl.textContent = sellingPrice>0 ? (document.getElementById('cp-currency').value+' '+earnings.toFixed(2)) : '—';
+
+  var guestIncludes = [], guestActivities = [];
+  _customSelectedComponents.forEach(function(c){
+    var label = sanitizeGuestLabel(c.name);
+    if(!label) return;
+    if(c.category==='TRIPS_ACTIVITIES') guestActivities.push(label); else guestIncludes.push(label);
+  });
+  var arrivalDate = document.getElementById('cp-arrival').value;
+  var departureDate = document.getElementById('cp-departure').value;
+  var nights = 0;
+  if(arrivalDate && departureDate){
+    var n = Math.round((new Date(departureDate)-new Date(arrivalDate))/864e5);
+    if(n>0) nights = n;
+  }
+  var previewQuote = {
+    quoteId: (_customQuoteWorking && _customQuoteWorking.quoteId) || 'DRAFT',
+    agencyName: (currentAgency && (currentAgency.name||currentAgency.company)) || '',
+    guestName: document.getElementById('cp-guest-name').value.trim(),
+    arrivalDate: arrivalDate, departureDate: departureDate, nights: nights,
+    adults: +(document.getElementById('cp-adults').value||1),
+    children: +(document.getElementById('cp-children').value||0),
+    packageName: document.getElementById('cp-package-name').value.trim() || 'Custom Maldives Package',
+    guestIncludes: guestIncludes, guestActivities: guestActivities,
+    guestMessage: document.getElementById('cp-guest-message').value.trim(),
+    currency: document.getElementById('cp-currency').value,
+    agencyGuestSellingTotal: sellingPrice,
+    status: (_customQuoteWorking && _customQuoteWorking.status) || 'DRAFT',
+  };
+  var frame = document.getElementById('cp-preview-frame');
+  if(frame) frame.srcdoc = buildGuestQuotationHTML(previewQuote);
+}
+
+async function submitCustomQuote(status){
+  if(!_customSelectedComponents.length){ alert('Add at least one component'); return; }
+  if(status==='FINALIZED' && !confirm('Finalize this quotation?\n\nAfter finalization, the commercial details will be locked.')) return;
+  var payload = {
+    quoteId: (_customQuoteWorking && _customQuoteWorking.quoteId) || null,
+    guestName: document.getElementById('cp-guest-name').value.trim(),
+    arrivalDate: document.getElementById('cp-arrival').value,
+    departureDate: document.getElementById('cp-departure').value,
+    adults: +(document.getElementById('cp-adults').value||1),
+    children: +(document.getElementById('cp-children').value||0),
+    currency: document.getElementById('cp-currency').value,
+    packageName: document.getElementById('cp-package-name').value.trim(),
+    guestDescription: document.getElementById('cp-guest-desc').value.trim(),
+    guestMessage: document.getElementById('cp-guest-message').value.trim(),
+    paymentCollector: document.getElementById('cp-payment-collector').value,
+    agencyGuestSellingTotal: +(document.getElementById('cp-selling-price').value||0),
+    status: status,
+    // Only sourceType/sourceId/quantity -- see the section header comment:
+    // no rate is ever sent, the server re-resolves it from the source.
+    selectedComponents: _customSelectedComponents.map(function(c){ return { sourceType:c.sourceType, sourceId:c.sourceId, quantity:c.quantity }; }),
+  };
+  try {
+    var callable = fsFunctions.httpsCallable('submitAgencyCustomQuote');
+    var result = await callable(payload);
+    _customQuoteWorking = result.data;
+    alert(status==='FINALIZED' ? 'Quotation finalized.' : 'Draft saved');
+    closeCustomPackageBuilder();
+    drawQuotations();
+  } catch(e) {
+    console.error('submitCustomQuote failed', e);
+    alert((e && e.message) || 'Could not save — please try again');
+  }
 }
 
 // ── BOOKING MODAL ──
