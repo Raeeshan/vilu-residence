@@ -381,8 +381,11 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
     };
     await db.collection('reservations').doc('LEGACY-RES-1').set(legacyReservation);
 
-    await test('first run creates both Ranfaru Inn and White Sand Inn with fixed, safe fields -- ON_REQUEST, no rate, legacy id preserved', async () => {
-      const r = await callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+    await test('an agency caller is refused -- this is a staff/admin/manager migration action, never an agency-callable one', async () => {
+      await expectCode(callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {}), 'permission-denied');
+    });
+    await test('first run (as staff) creates both Ranfaru Inn and White Sand Inn with fixed, safe fields -- ON_REQUEST, no rate, legacy id preserved', async () => {
+      const r = await callAs(bridgeLegacyWrapped, 'staff-uid', 'staff@example.com', {});
       assert.deepEqual(r.results, [
         { propertyId: 'ha', action: 'created' },
         { propertyId: 'hb', action: 'created' },
@@ -427,7 +430,7 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
       assert.equal(ranfaru.availabilityMode, 'ON_REQUEST');
     });
     await test('running the bridge again is idempotent -- skips both, creates nothing new, no duplicates', async () => {
-      const r = await callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const r = await callAs(bridgeLegacyWrapped, 'staff-uid', 'staff@example.com', {});
       assert.deepEqual(r.results, [
         { propertyId: 'ha', action: 'skipped-already-exists' },
         { propertyId: 'hb', action: 'skipped-already-exists' },
@@ -435,7 +438,7 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
     });
     await test('a real admin edit made after the first bridge run survives a repeat run untouched (idempotency must never clobber a real staff edit)', async () => {
       await db.collection('accommodation_properties').doc('ha').set({ propertyName: 'Ranfaru Inn (real name, staff-confirmed)', availabilityMode: 'MANUAL_INVENTORY' }, { merge: true });
-      await callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      await callAs(bridgeLegacyWrapped, 'staff-uid', 'staff@example.com', {});
       const ha = (await db.collection('accommodation_properties').doc('ha').get()).data();
       assert.equal(ha.propertyName, 'Ranfaru Inn (real name, staff-confirmed)');
       assert.equal(ha.availabilityMode, 'MANUAL_INVENTORY');

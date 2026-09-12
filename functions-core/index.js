@@ -1128,7 +1128,7 @@ const LEGACY_PARTNER_HOTEL_BRIDGE = [
 ];
 exports.bridgeLegacyPartnerHotels = onCall({ region: 'us-central1', maxInstances: 3 }, async (request) => {
   const { role } = await callerRole(request);
-  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  requireStaffLike(role);
   const now = new Date().toISOString();
   const results = [];
   for (const entry of LEGACY_PARTNER_HOTEL_BRIDGE) {
