@@ -1782,7 +1782,15 @@ async function agDrawCal(){
       while(j+1<dsl.length && agBarKey(agCellBucket(rm.id,dsl[j+1]))===key) j++;
       var leftSlant = i>0, rightSlant = j<dsl.length-1;
       var left = i*AG_CAL_COL_W + (leftSlant?AG_CAL_COL_W/2:0);
-      var right = (j+1)*AG_CAL_COL_W - (rightSlant?AG_CAL_COL_W/2:0);
+      // Same-day checkout/check-in fix (2026-09-12): the departure edge must
+      // land at the midpoint of the DEPARTURE day's own column -- the same
+      // point the next stay's arrival-edge formula below lands on for that
+      // identical column -- so back-to-back bars meet exactly, never a full
+      // empty column between them. This mirrors the PMS calendar's own
+      // per-reservation calBarClip() math (rE = departureIndex*W + W/2),
+      // which this per-day-bucket-merge code must reproduce even though it
+      // has no single reservation object to read ci/co from directly.
+      var right = (j+1)*AG_CAL_COL_W + (rightSlant?AG_CAL_COL_W/2:0);
       var w = right-left-2;
       if(w>=4){
         var color = b.kind==='OWN_BOOKING'?'#4fb3e3':b.kind==='OWN_HOLD'?'#c4b5fd':b.kind==='OCCUPIED'?'#f59e0b':'#9aa4b2';
@@ -1832,7 +1840,9 @@ async function agDrawCal(){
         while(j+1<dsl.length && agPartnerCellBucket(p.propertyId, rt.roomTypeId, dsl[j+1]).kind==='BLOCKED') j++;
         var leftSlant=i>0, rightSlant=j<dsl.length-1;
         var left=i*AG_CAL_COL_W+(leftSlant?AG_CAL_COL_W/2:0);
-        var right=(j+1)*AG_CAL_COL_W-(rightSlant?AG_CAL_COL_W/2:0);
+        // Same-day checkout/check-in fix (2026-09-12) -- see the identical
+        // comment on the Vilu bars above; same formula, same reasoning.
+        var right=(j+1)*AG_CAL_COL_W+(rightSlant?AG_CAL_COL_W/2:0);
         var w=right-left-2;
         if(w>=4){
           var bar=document.createElement('div');
