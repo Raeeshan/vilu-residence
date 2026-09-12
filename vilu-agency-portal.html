@@ -192,8 +192,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cb-fixed-rows{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .cb-room-row-lbl{height:var(--cal-row-h);flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px 0 12px;border-bottom:1px solid #e6e9ee;overflow:hidden;background:#fff}
 .cb-room-row-lbl .rn{font-size:var(--font-size-sm);font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cb-section-lbl{height:22px;flex-shrink:0;display:flex;align-items:center;padding:0 10px;background:#f3f5f8;border-bottom:1px solid #dfe3e8}
-.cb-section-lbl span{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.06em}
+.cb-section-lbl{height:22px;flex-shrink:0;display:flex;align-items:center;padding:0 10px;background:#f3f5f8;border-bottom:1px solid #dfe3e8;overflow:hidden}
+.cb-section-lbl span{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .cb-category-lbl{height:var(--cal-cat-h);flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px 0 8px;background:#fff;border-bottom:1px solid #e6e9ee}
 .cb-category-lbl .nm{font-size:var(--font-size-sm);font-weight:700;color:#1f2937;line-height:1.2;overflow:hidden}
 .cb-scroll-area{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch}
@@ -1740,14 +1740,35 @@ async function agDrawCal(){
   // locally only (never authoritative business data, Part 20).
   partnerProps.forEach(function(p){
     var collapsed = !!AG_CAL_COLLAPSED[p.propertyId];
-    fH+='<div class="cb-section-lbl" style="cursor:pointer" onclick="agCalToggleCollapse(\''+p.propertyId+'\')"><span>'+(collapsed?'▸':'▾')+' '+esc(p.propertyName)+(p.availabilityMode==='ON_REQUEST'?' · availability on request':'')+'</span></div>';
+    // Live-calendar fix (2026-09-13): the "· availability on request"
+    // qualifier used to be appended to this SAME 22px section header, which
+    // has no overflow control -- a real property name (e.g. "Ranfaru Inn")
+    // plus that suffix regularly overflowed/wrapped the fixed-height row,
+    // desyncing the fixed column from the timeline grid below it (the
+    // "crushed header" bug). The qualifier now only ever appears on its own
+    // full-width row (see the ON_REQUEST-with-zero-room-types branch below,
+    // and the existing striped bar for ON_REQUEST-with-room-types), never
+    // squeezed into this header.
+    fH+='<div class="cb-section-lbl" style="cursor:pointer" onclick="agCalToggleCollapse(\''+p.propertyId+'\')"><span>'+(collapsed?'▸':'▾')+' '+esc(p.propertyName)+'</span></div>';
     gH+='<div class="cb-section-row"></div>';
     if(collapsed) return;
     var cache = _partnerAvailCache[p.propertyId];
     var roomTypes = cache ? cache.roomTypes : [];
     if(!roomTypes.length){
-      fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted);font-style:italic">No room types configured yet</span></div>';
-      gH+='<div class="cb-booking-row" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
+      if(p.availabilityMode==='ON_REQUEST'){
+        // Property-level ON_REQUEST clean state: a real, common, PERMANENT
+        // state for a property that only ever takes bookings by request
+        // (e.g. a bridged legacy partner with no room-type catalog at all
+        // yet) -- never the same "still being configured" empty state used
+        // below for a MANUAL_INVENTORY property mid-setup. Gets its own
+        // striped "Availability on request" bar (drawn alongside the
+        // existing per-room-type one, same look) instead of a blank cell.
+        fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted)">On request</span></div>';
+        gH+='<div class="cb-booking-row" data-partner-onrequest="'+p.propertyId+'" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
+      } else {
+        fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted);font-style:italic">No room types configured yet</span></div>';
+        gH+='<div class="cb-booking-row" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
+      }
       return;
     }
     roomTypes.forEach(function(rt){
@@ -1820,6 +1841,24 @@ async function agDrawCal(){
   partnerProps.forEach(function(p){
     if(AG_CAL_COLLAPSED[p.propertyId]) return;
     var cache = _partnerAvailCache[p.propertyId]; if(!cache) return;
+    // Property-level ON_REQUEST bar (Part 3, live-calendar fix): the same
+    // striped "Availability on request" treatment as the per-room-type case
+    // below, but for a property with NO configured room types at all --
+    // targets the single data-partner-onrequest row from the fH/gH build
+    // above instead of a per-room-type row (there isn't one).
+    if(!(cache.roomTypes||[]).length){
+      if(cache.property && cache.property.availabilityMode==='ON_REQUEST'){
+        var row=document.querySelector('.cb-booking-row[data-partner-onrequest="'+p.propertyId+'"]'); if(!row) return;
+        var w=dsl.length*AG_CAL_COL_W-2;
+        var bar=document.createElement('div');
+        bar.className='cb-bar';
+        bar.style.cssText='left:1px;width:'+w+'px;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 8px,#b6bcc4 8px,#b6bcc4 16px);color:#1f2937;text-shadow:none';
+        bar.innerHTML='<span>Availability on request — ask Vilu</span>';
+        bar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); alert('Availability on request — Vilu must confirm this property.'); });
+        row.appendChild(bar);
+      }
+      return;
+    }
     (cache.roomTypes||[]).forEach(function(rt){
       var row=document.querySelector('.cb-booking-row[data-partner-room="'+p.propertyId+'|'+rt.roomTypeId+'"]'); if(!row) return;
       if(cache.property && cache.property.availabilityMode==='ON_REQUEST'){
