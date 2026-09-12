@@ -59,57 +59,29 @@ section('Part 5/6: assigned-package partner pricing is server-authoritative, nev
     assert.match(server, /Math\.max\(0, totalNights - \(baseNights \|\| 0\)\)/);
     assert.match(client, /Math\.max\(0, totalNights - baseNights\)/);
   });
-  test('finalizeAgencyAssignedPackageQuote exists, is agency-only, and never trusts the quote doc\'s own accommodation/package fields for pricing -- re-reads agency_packages and re-resolves accommodation server-side', () => {
-    const src = extractByStart(FUNCTIONS, onCallStart('finalizeAgencyAssignedPackageQuote'));
+  // Superseded 2026-09-12 by Agency Quote Security Hardening:
+  // finalizeAgencyAssignedPackageQuote (finalize-only) was folded into the
+  // broader submitAgencyAssignedPackageQuote (handles create/edit/finalize,
+  // the ONLY write path now) -- see test/assigned-package-quote-security-rules.test.js
+  // for the full current behavioral proof (structural + emulator). This
+  // still checks the one thing specific to this file's own scope: the
+  // partner-rate resolution helpers survived the fold unchanged.
+  test('resolveAssignedPackageRate()/calcAssignedPackageViluNet() still exist and are called from the new unified submitAgencyAssignedPackageQuote -- never trusts the quote doc\'s own accommodation/package fields for pricing', () => {
+    const src = extractByStart(FUNCTIONS, onCallStart('submitAgencyAssignedPackageQuote'));
     assert.match(src, /if \(role !== 'agency'\)/);
-    assert.match(src, /quote\.agencyId !== request\.auth\.uid/);
-    assert.match(src, /quote\.quoteType !== 'ASSIGNED_PACKAGE'/);
-    assert.match(src, /quote\.status !== 'DRAFT'/);
     assert.match(src, /db\.collection\('agency_packages'\)\.doc\(agencyEmailLower\)\.get\(\)/);
-    assert.match(src, /resolveAccommodationSelection\(\{/);
+    assert.match(src, /resolveAccommodationSelection\(d\)/);
     assert.match(src, /resolveAssignedPackageRate\(pkg, accommodation\)/);
-    assert.match(src, /if \(!rate\.configured\)/, 'must block finalizing with no configured rate, never a guessed number');
     assert.match(src, /calcAssignedPackageViluNet\(/);
   });
-  test('a Vilu-only quote finalized through this function comes out byte-identical to the existing client formula -- reuses the package\'s own agencyPricePerRoom, no partner lookup involved', () => {
+  test('a Vilu-only quote saved through this function comes out byte-identical to the existing client formula -- reuses the package\'s own agencyPricePerRoom, no partner lookup involved', () => {
     const rateSrc = extractByStart(FUNCTIONS, /function resolveAssignedPackageRate\(pkg, accommodation\)\s*\{/);
     assert.match(rateSrc, /return \{ perPerson: Number\(pkg\.agencyPricePerRoom \|\| pkg\.pricePerRoom\) \|\| 0, currency: 'USD', configured: true \};/);
   });
-  test('the finalized quote snapshots the accommodation exactly like Custom Package quotes do (Part 14) -- accommodationRateSnapshot is the resolved per-person rate, never the client\'s own number', () => {
-    const src = extractByStart(FUNCTIONS, onCallStart('finalizeAgencyAssignedPackageQuote'));
-    assert.match(src, /accommodationRateSnapshot: rate\.perPerson/);
+  test('the saved quote snapshots the accommodation exactly like Custom Package quotes do (Part 14) -- accommodationRateSnapshot is the resolved per-person rate (null when unconfigured), never the client\'s own number', () => {
+    const src = extractByStart(FUNCTIONS, onCallStart('submitAgencyAssignedPackageQuote'));
+    assert.match(src, /accommodationRateSnapshot: rate\.configured \? rate\.perPerson : null/);
     assert.match(src, /accommodationPropertyId: accommodation\.propertyId/);
-  });
-}
-
-section('Part 5: firestore.rules refuses a direct-client finalize with a non-Vilu accommodation, forcing the server path -- Vilu-only finalize is completely unaffected');
-{
-  test('the agency_quotes update rule now requires accommodationPropertyId to be missing/VILU whenever the client writes status:FINALIZED', () => {
-    const block = ruleBlock(RULES, 'match /agency_quotes/{quoteId}');
-    assert.match(block, /request\.resource\.data\.status != 'FINALIZED'\s*\n\s*\|\| !\('accommodationPropertyId' in request\.resource\.data\)\s*\n\s*\|\| request\.resource\.data\.accommodationPropertyId == 'VILU'/);
-  });
-  test('Admin/Staff/Manager can still update ANY assigned-package quote unconditionally (unchanged) -- the new restriction only narrows the AGENCY\'s own direct-write branch', () => {
-    const block = ruleBlock(RULES, 'match /agency_quotes/{quoteId}');
-    assert.match(block, /allow update: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\)\s*\n\s*\|\| \(request\.auth != null/);
-  });
-}
-
-section('Part 5: the Agency Portal client branches to the new Cloud Function only for a partner-property finalize -- Vilu finalize keeps its original direct write');
-{
-  test('finalizeQuote() calls finalizeAgencyAssignedPackageQuote() when accommodationPropertyId is set and not VILU', () => {
-    const src = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
-    assert.match(src, /if\(_quoteWorking\.accommodationPropertyId && _quoteWorking\.accommodationPropertyId !== 'VILU'\)\{/);
-    assert.match(src, /fsFunctions\.httpsCallable\('finalizeAgencyAssignedPackageQuote'\)\(\{ quoteId: _quoteWorking\.quoteId \}\)/);
-  });
-  test('the Vilu-only branch of finalizeQuote() is unchanged -- still a direct fsDb write, reached only after the partner branch returns', () => {
-    const src = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
-    const partnerIdx = src.indexOf('finalizeAgencyAssignedPackageQuote');
-    const directWriteIdx = src.indexOf("fsDb.collection('agency_quotes').doc(_quoteWorking.quoteId).set(_quoteWorking)");
-    assert.ok(partnerIdx > -1 && directWriteIdx > -1 && partnerIdx < directWriteIdx);
-  });
-  test('saveQuoteDraft() is completely untouched -- still the only path for DRAFT saves, no callable involved regardless of accommodation', () => {
-    const src = extractByStart(PORTAL, /async function saveQuoteDraft\(\)\s*\{/);
-    assert.doesNotMatch(src, /fsFunctions/);
   });
 }
 

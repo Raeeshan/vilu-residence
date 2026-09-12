@@ -59,8 +59,8 @@ function baseQuote(overrides) {
       baseQuote({ quoteId: 'VQ-SPOOF-1', quoteType: 'CUSTOM_PACKAGE', viluNetTotal: 1, agencyGuestSellingTotal: 5000 })
     ));
   });
-  await test('Agency A can STILL create an ASSIGNED_PACKAGE quote directly (Phase B behavior unaffected)', async () => {
-    await assertSucceeds(agencyA.firestore().collection('agency_quotes').doc('VQ-ASSIGNED-1').set(
+  await test('Agency A can no longer create an ASSIGNED_PACKAGE quote directly either -- Agency Quote Security Hardening (2026-09-12) closed that carve-out once Assigned Package also moved behind a Cloud Function (submitAgencyAssignedPackageQuote); see agency-quotes-rules.test.js / assigned-package-quote-security-rules.test.js for the full proof', async () => {
+    await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-ASSIGNED-1').set(
       baseQuote({ quoteId: 'VQ-ASSIGNED-1', quoteType: 'ASSIGNED_PACKAGE' })
     ));
   });

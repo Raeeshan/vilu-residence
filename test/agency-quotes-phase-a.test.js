@@ -120,51 +120,41 @@ section('Case C — Legacy guestCharge/commission data is preserved, not deleted
   });
 }
 
-section('Case D — agency_quotes: schema/rules foundation exists (behavioral proof is in agency-quotes-rules.test.js)');
+section('Case D — agency_quotes rules (superseded by Agency Quote Security Hardening, 2026-09-12 -- see agency-quotes-rules.test.js and assigned-package-quote-security-rules.test.js for the current behavioral proof)');
 {
   test('firestore.rules defines match /agency_quotes/{quoteId} with create/read/update/delete', () => {
     assert.match(RULES, /match \/agency_quotes\/\{quoteId\} \{/);
   });
   const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId} {'), RULES.indexOf('match /room_prices/{roomId} {'));
-  test('create requires request.resource.data.agencyId == request.auth.uid', () => {
-    // A later Phase C task appended "&& quoteType == 'ASSIGNED_PACKAGE'" to
-    // this same condition (Custom Package quotes must go through a Cloud
-    // Function instead, see agency-custom-package.test.js) -- Phase A's own
-    // agencyId ownership check is still exactly here, just no longer the
-    // last line.
-    assert.match(rulesBlock, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid/);
+  test('create/update no longer have a direct-agency branch at all -- both ASSIGNED_PACKAGE and CUSTOM_PACKAGE quotes are now created/edited/finalized exclusively through a Cloud Function (Agency Quote Security Hardening superseded Phase A\'s original agencyId-ownership-based direct-write model, proven exploitable: an agency could create a doc pre-FINALIZED with spoofed commercial fields on the very first write)', () => {
+    assert.match(rulesBlock, /allow create: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
+    assert.match(rulesBlock, /allow update: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
+    assert.doesNotMatch(rulesBlock, /request\.resource\.data\.agencyId == request\.auth\.uid/);
   });
-  test('read allows the owning agency (resource.data.agencyId == uid) or Admin\\/Staff\\/Manager -- no broader clause', () => {
+  test('read still allows the owning agency (resource.data.agencyId == uid) or Admin/Staff/Manager -- no broader clause, unaffected by the create/update tightening', () => {
     assert.match(rulesBlock, /allow read: if request\.auth != null\s*\n\s*&& \(isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\) \|\| resource\.data\.agencyId == request\.auth\.uid\);/);
   });
-  test('update requires DRAFT status AND agencyId immutable for a self-service agency update; Admin/Staff/Manager bypass', () => {
-    assert.match(rulesBlock, /resource\.data\.agencyId == request\.auth\.uid\s*\n\s*&& request\.resource\.data\.agencyId == resource\.data\.agencyId\s*\n\s*&& resource\.data\.status == 'DRAFT'/);
-  });
-  test('delete is fully disabled (allow delete: if false) -- matches the block_requests convention of no client deletes', () => {
+  test('delete is fully disabled (allow delete: if false) -- matches the block_requests convention of no client deletes, unaffected', () => {
     assert.match(rulesBlock, /allow delete: if false;/);
   });
-  test('agency_quotes is keyed by agencyId (the Auth uid), not email -- matching reservations/block_requests, explicitly NOT matching agency_packages\' email-keying', () => {
-    assert.match(RULES, /Keyed by agencyId[\s\S]{0,20}\(the Firebase Auth uid\), matching the existing reservations\//);
+  test('agency_quotes is still keyed by agencyId (the Auth uid), not email -- matching reservations/block_requests, explicitly NOT matching agency_packages\' email-keying', () => {
+    assert.match(RULES, /Keyed by agencyId \(the Firebase\s*\n\s*\/\/ Auth uid\), matching the existing reservations\/block_requests/);
   });
 }
 
-section('Case E — agency_quotes helper layer exists but is NOT wired to any UI yet (Phase A = foundation only)');
+section('Case E — agency_quotes write path (superseded: Agency Quote Security Hardening moved BOTH quote types behind a Cloud Function)');
 {
-  test('vilu-agency-portal.html has createDraftAgencyQuote()/newAgencyQuoteId() but nothing calls createDraftAgencyQuote() from an onclick/button yet', () => {
-    assert.match(PORTAL, /async function createDraftAgencyQuote\(fields\)\s*\{/);
+  test('the old createDraftAgencyQuote() direct-client-write helper was removed -- it would now just fail at runtime against the tightened rules, and every write goes through submitAgencyAssignedPackageQuote instead', () => {
+    assert.doesNotMatch(PORTAL, /async function createDraftAgencyQuote/);
+  });
+  test('newAgencyQuoteId() is still present and used to pre-generate a client-side id for a brand-new quote (the security boundary is the server-verified agencyId write, not the id -- same precedent as Custom Package quotes)', () => {
     assert.match(PORTAL, /function newAgencyQuoteId\(\)\s*\{/);
-    assert.doesNotMatch(PORTAL, /onclick="createDraftAgencyQuote/);
   });
-  test('createDraftAgencyQuote() writes to agency_quotes/{quoteId} with agencyId forced to currentAgency.uid (cannot be overridden by a caller-supplied field)', () => {
-    const src = extractByStart(PORTAL, /async function createDraftAgencyQuote\(fields\)\s*\{/);
-    assert.match(src, /fsDb\.collection\('agency_quotes'\)\.doc\(quoteId\)\.set\(quote\)/);
-    assert.match(src, /\{ agencyId: currentAgency\.uid, quoteId: quoteId \}/);
-  });
-  test('vilu-unified.html has a read-only fetchAgencyQuotes() helper, also not wired to any UI page yet', () => {
+  test('vilu-unified.html has a read-only fetchAgencyQuotes() helper, still not wired to any UI page', () => {
     assert.match(PMS, /async function fetchAgencyQuotes\(agencyId\)\s*\{/);
     assert.doesNotMatch(PMS, /onclick="fetchAgencyQuotes/);
   });
-  test('no Agency Quotes admin page/section was added (Phase A is foundation only, not Phase B/C)', () => {
+  test('no Agency Quotes admin page/section exists in the PMS', () => {
     assert.doesNotMatch(PMS, /id="s-agency-quotes"/);
     assert.doesNotMatch(PMS, />Agency Quotes</);
   });

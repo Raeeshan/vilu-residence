@@ -2151,40 +2151,20 @@ function loadPMS_Packages(){
 // not deleted, not migrated, just no longer read or written by this app.
 
 // ══════════════════════════════════════════════
-// AGENCY QUOTES — Phase A foundation only
+// AGENCY QUOTES
 // ══════════════════════════════════════════════
 // agency_quotes/{quoteId}: Vilu net cost stays private to this agency;
-// the agency decides its own guest selling total. This is ONLY the secure
-// data-model/helper foundation for Phase B's Quotation Builder -- no UI
-// calls createDraftAgencyQuote() yet, no button exists for it, and no
-// "Save quotation" flow is wired up. Firestore rules (agency_quotes match
-// block) are what actually enforce ownership; this helper just keeps the
-// default-field shape in one place so Phase B doesn't have to re-derive it.
+// the agency decides its own guest selling total. Agency Quote Security
+// Hardening: every quote (ASSIGNED_PACKAGE and CUSTOM_PACKAGE alike) is now
+// created/edited/finalized exclusively through a Cloud Function
+// (submitAgencyAssignedPackageQuote / submitAgencyCustomQuote) -- firestore
+// rules refuse a direct client create/update entirely, so the OLD
+// createDraftAgencyQuote() helper (a direct client .set(), never actually
+// called by any UI) was removed rather than left as a dead trap that would
+// now just fail at runtime.
 function newAgencyQuoteId(){
   var codePart = (currentAgency && currentAgency.email ? currentAgency.email.split('@')[0] : 'agency').toUpperCase().replace(/[^A-Z0-9]/g,'');
   return 'VQ-'+codePart+'-'+new Date().getFullYear()+'-'+Date.now().toString().slice(-6);
-}
-async function createDraftAgencyQuote(fields){
-  if(!currentAgency || !currentAgency.uid) throw new Error('Not signed in');
-  var now = new Date().toISOString();
-  var quoteId = newAgencyQuoteId();
-  var quote = Object.assign({
-    quoteId: quoteId,
-    agencyId: currentAgency.uid,
-    agencyEmail: currentAgency.email,
-    agencyName: currentAgency.name || currentAgency.company || currentAgency.email,
-    guestName: '', arrivalDate: '', departureDate: '', adults: 1, children: 0,
-    currency: 'USD',
-    quoteType: 'ASSIGNED_PACKAGE',
-    packageId: null, packageName: '',
-    selectedComponents: [],
-    viluNetTotal: 0, agencyGuestSellingTotal: 0,
-    exchangeRate: 1, exchangeRateSource: null, exchangeRateSnapshotAt: null,
-    status: 'DRAFT',
-    createdAt: now, updatedAt: now
-  }, fields || {}, { agencyId: currentAgency.uid, quoteId: quoteId });
-  await fsDb.collection('agency_quotes').doc(quoteId).set(quote);
-  return quote;
 }
 
 // ══════════════════════════════════════════════
@@ -2540,62 +2520,61 @@ async function updateQuotePreview(){
 }
 
 async function saveQuoteDraft(){
-  if(!_quoteWorking) return;
-  if(!_quoteWorking.guestName){ alert('Enter the guest name'); return; }
-  if(!_quoteWorking.arrivalDate || !_quoteWorking.departureDate){ alert('Enter arrival and departure dates'); return; }
-  _quoteWorking.updatedAt = new Date().toISOString();
-  try {
-    await fsDb.collection('agency_quotes').doc(_quoteWorking.quoteId).set(_quoteWorking);
-    alert('Draft saved');
-    closeQuoteBuilder();
-    drawQuotations();
-  } catch(e) {
-    console.error('saveQuoteDraft failed', e);
-    alert('Could not save — please try again');
-  }
+  return submitAssignedPackageQuote('DRAFT');
 }
 
 async function finalizeQuote(){
   if(!_quoteWorking) return;
-  if(!_quoteWorking.guestName || !_quoteWorking.arrivalDate || !_quoteWorking.departureDate){
+  if(!document.getElementById('quote-guest-name').value.trim() || !document.getElementById('quote-arrival').value || !document.getElementById('quote-departure').value){
     alert('Fill in the guest name and travel dates before finalizing'); return;
   }
-  if(!(_quoteWorking.agencyGuestSellingTotal > 0)){
+  if(!(+(document.getElementById('quote-selling-price').value||0) > 0)){
     alert('Enter a guest selling price before finalizing'); return;
   }
   if(!confirm('Finalize this quotation?\n\nAfter finalization, the commercial details will be locked.')) return;
-  // Calendar-fix follow-up (Part 5): a partner-property accommodation must
-  // have its Vilu net resolved server-side, from an admin-approved rate --
-  // never the client's own calcQuoteViluNet() result, which only knows the
-  // package's Vilu rate. firestore.rules refuses a direct client write that
-  // finalizes with a non-Vilu accommodationPropertyId (see that rule's
-  // comment), so this branch is required, not optional, for that case; a
-  // Vilu-only quote keeps the exact same direct-write path as before.
-  if(_quoteWorking.accommodationPropertyId && _quoteWorking.accommodationPropertyId !== 'VILU'){
-    try {
-      var result = await fsFunctions.httpsCallable('finalizeAgencyAssignedPackageQuote')({ quoteId: _quoteWorking.quoteId });
-      _quoteWorking = result.data;
-      alert('Quotation finalized.');
-      closeQuoteBuilder();
-      drawQuotations();
-    } catch(e) {
-      console.error('finalizeAgencyAssignedPackageQuote failed', e);
-      alert((e && e.message) || 'Could not finalize — please try again');
-    }
-    return;
-  }
-  var now = new Date().toISOString();
-  _quoteWorking.status = 'FINALIZED';
-  _quoteWorking.finalizedAt = now;
-  _quoteWorking.updatedAt = now;
+  return submitAssignedPackageQuote('FINALIZED');
+}
+
+// Agency Quote Security Hardening: the ONLY write path for an assigned-
+// package quote now -- mirrors submitCustomQuote(status)'s exact shape.
+// Only fields the agency is actually allowed to choose are sent (never a
+// rate, never viluNetTotal/agencyEarnings, never status FINALIZED trusted
+// as-is); the server (submitAgencyAssignedPackageQuote in functions-core/
+// index.js) re-reads the agency's own package, re-resolves the
+// accommodation, and computes every commercial field itself, every save.
+// Neither this function nor anything else writes agency_quotes directly
+// anymore -- firestore.rules refuses that write entirely for an agency.
+async function submitAssignedPackageQuote(status){
+  if(!_quoteWorking || !_quotePkg) return;
+  var payload = {
+    quoteId: _quoteWorking.quoteId,
+    packageId: _quotePkg.id,
+    guestName: document.getElementById('quote-guest-name').value.trim(),
+    arrivalDate: document.getElementById('quote-arrival').value,
+    departureDate: document.getElementById('quote-departure').value,
+    adults: +(document.getElementById('quote-adults').value||1),
+    children: +(document.getElementById('quote-children').value||0),
+    currency: document.getElementById('quote-currency').value,
+    guestMessage: document.getElementById('quote-message').value.trim(),
+    agencyGuestSellingTotal: +(document.getElementById('quote-selling-price').value||0),
+    exchangeRate: +(document.getElementById('quote-exchange-rate').value||0),
+    status: status,
+    // Only the IDs are sent -- the server re-verifies active/
+    // visibleToAgencies and re-resolves the rate itself; nothing about the
+    // accommodation's name/rate is ever trusted from this client payload
+    // (same discipline as Custom Package quotes).
+    accommodationPropertyId: _quoteAccommodation.propertyId,
+    accommodationRoomTypeId: _quoteAccommodation.roomTypeId,
+  };
   try {
-    await fsDb.collection('agency_quotes').doc(_quoteWorking.quoteId).set(_quoteWorking);
-    alert('Quotation finalized.');
+    var result = await fsFunctions.httpsCallable('submitAgencyAssignedPackageQuote')(payload);
+    _quoteWorking = result.data;
+    alert(status==='FINALIZED' ? 'Quotation finalized.' : 'Draft saved');
     closeQuoteBuilder();
     drawQuotations();
   } catch(e) {
-    console.error('finalizeQuote failed', e);
-    alert('Could not finalize — please try again');
+    console.error('submitAgencyAssignedPackageQuote failed', e);
+    alert((e && e.message) || 'Could not save — please try again');
   }
 }
 

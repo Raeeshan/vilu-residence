@@ -254,9 +254,11 @@ section('Case K — Part 20/21: quote/custom-package availability integration is
     assert.match(PORTAL, /onclick="checkAvailabilityForDates\(document\.getElementById\('quote-arrival'\)/);
     assert.match(PORTAL, /onclick="checkAvailabilityForDates\(document\.getElementById\('cp-arrival'\)/);
   });
-  test('neither Quote Builder nor Custom Package Builder\'s save/finalize functions were touched by this phase -- still exactly the Phase B/C write paths', () => {
+  test('both Quote Builder and Custom Package Builder save/finalize exclusively through a server callable -- Agency Quote Security Hardening moved Assigned Package off its old direct fsDb write, matching Custom Package\'s pre-existing architecture', () => {
     const saveSrc = extractByStart(PORTAL, /async function saveQuoteDraft\(\)\s*\{/);
-    assert.match(saveSrc, /fsDb\.collection\('agency_quotes'\)\.doc\(_quoteWorking\.quoteId\)\.set\(_quoteWorking\)/);
+    assert.doesNotMatch(saveSrc, /fsDb\.collection\('agency_quotes'\)/, 'must no longer write agency_quotes directly');
+    const submitSrc = extractByStart(PORTAL, /async function submitAssignedPackageQuote\(status\)\s*\{/);
+    assert.match(submitSrc, /fsFunctions\.httpsCallable\('submitAgencyAssignedPackageQuote'\)/);
     const customSrc = extractByStart(PORTAL, /async function submitCustomQuote\(status\)\s*\{/);
     assert.match(customSrc, /fsFunctions\.httpsCallable\('submitAgencyCustomQuote'\)/);
   });
@@ -346,9 +348,10 @@ section('Case N — DO-NOT-TOUCH: booking creation flow, block approval workflow
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
     assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
-  test('agency_quotes rules unchanged from Phase C (no rules changes needed this phase)', () => {
+  test('agency_quotes rules now deny direct agency create/update entirely (Agency Quote Security Hardening) -- both quote types go exclusively through a Cloud Function', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /room_prices/{roomId}'));
-    assert.match(rulesBlock, /request\.resource\.data\.quoteType == 'ASSIGNED_PACKAGE'/);
+    assert.match(rulesBlock, /allow create: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
+    assert.match(rulesBlock, /allow update: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
   });
   test('the Website tab\'s own card renderer in vilu-unified.html is unchanged', () => {
     const src = extractByStart(PMS, /function renderPkgList\(\)\s*\{/);

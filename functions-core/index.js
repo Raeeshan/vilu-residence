@@ -51,13 +51,15 @@
 //     returns internal_note/notes/viluNetTotal/agencyEarnings/
 //     paymentCollector or any other internal PMS field. See the comment
 //     above that export.
-//   finalizeAgencyAssignedPackageQuote  Calendar-fix follow-up -- the one
-//     case an Assigned Package quote's FINALIZE can no longer go straight
-//     through the client: a non-Vilu accommodation. Re-resolves the
-//     agency's own package + an admin-approved partner-property rate
-//     override server-side and blocks finalizing with no configured rate.
-//     A Vilu-only finalize is unaffected (still the existing direct write).
-//     See the comment above that export.
+//   submitAgencyAssignedPackageQuote  Agency Quote Security Hardening -- the
+//     ONLY way an Assigned Package quote is now created, edited, or
+//     finalized (direct client writes to agency_quotes are refused by
+//     firestore.rules for this quoteType entirely). Re-resolves the
+//     agency's own package + accommodation + any admin-approved partner-
+//     property rate override server-side, every save, and blocks
+//     finalizing with no configured rate. A Vilu-only quote's total is
+//     byte-identical to the old client formula. See the comment above that
+//     export.
 //   settlementEligibilityOnReservation / markAgencySettlementPaymentSent /
 //     confirmAgencySettlementReceived / disputeAgencySettlement /
 //     resolveAgencySettlementDispute / reconcileMissingAgencySettlements
@@ -825,98 +827,145 @@ function resolveAssignedPackageRate(pkg, accommodation) {
   return { perPerson: override.agencyPricePerRoom, currency: override.currency || 'USD', configured: true };
 }
 
-// ── finalizeAgencyAssignedPackageQuote: calendar-fix follow-up task ────────
-// Assigned Package quotes (Phase B) have always been created/saved as a
-// direct client write straight to agency_quotes -- that was safe when the
-// only possible accommodation was Vilu itself (the price is the agency's
-// own already-owned agency_packages data, nothing to spoof). Multi-Property
-// Availability (Phase 4) then let a quote's accommodation be a partner
-// property too, but never gave FINALIZE a server-side check for that case
-// -- an agency could finalize a partner-property quote and the client would
-// just keep computing viluNetTotal from the package's Vilu-only rate,
-// completely ignoring which property was actually selected. firestore.rules'
-// agency_quotes update rule now refuses a direct client write that
-// transitions to FINALIZED with a non-Vilu accommodationPropertyId, forcing
-// that one case through here instead -- this function re-resolves
-// everything server-side (the agency's own package doc, the accommodation
-// selection, and -- only for a partner property -- the admin-approved
-// partnerRates override) and blocks finalizing with no configured rate,
-// the same "never a guessed number" discipline submitAgencyCustomQuote
-// already applies to Custom Package quotes. A Vilu-only quote computed
-// through here comes out byte-identical to the existing client path (see
-// calcAssignedPackageViluNet's comment) -- this is not a parallel formula,
-// it is the same one, just re-run somewhere the agency cannot see or edit
-// its inputs.
-exports.finalizeAgencyAssignedPackageQuote = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+// ── submitAgencyAssignedPackageQuote: Agency Quote Security Hardening ──────
+// Assigned Package quotes were, until this task, created/edited/finalized
+// via direct client writes straight to agency_quotes -- proven exploitable
+// (not assumed): with the OLD firestore.rules, an agency could create a
+// brand-new doc with status:'FINALIZED' and any viluNetTotal/agencyEarnings/
+// fake packageId/propertyId/roomTypeId it wanted on the very FIRST write (no
+// DRAFT step required at all), and could update its own DRAFT straight to
+// FINALIZED with a spoofed viluNetTotal even for a Vilu-only accommodation
+// (the calendar-fix follow-up task only closed the non-Vilu case). This one
+// callable is now the ONLY way an assigned-package quote is ever created,
+// edited, or finalized -- mirroring submitAgencyCustomQuote's exact shape
+// (same quoteId-optional create-or-update pattern, same DRAFT/FINALIZED
+// status handling): the agency sends only the fields it is actually allowed
+// to choose (guest name/dates/adults/children/currency/guestMessage/
+// agencyGuestSellingTotal/which package/which accommodation), and the server
+// re-reads the agency's own package + resolves the accommodation + computes
+// viluNetTotal/agencyEarnings itself, every single time, whether saving a
+// draft or finalizing. firestore.rules' agency_quotes create/update rules
+// now refuse a direct agency write entirely -- see the comment on that
+// match block. A Vilu-only quote computed through here comes out
+// byte-identical to the old client formula (calcAssignedPackageViluNet's
+// own comment) -- this is not a parallel formula, it is the same one, just
+// run somewhere the agency cannot see or edit its inputs.
+exports.submitAgencyAssignedPackageQuote = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
   const { email, role } = await callerRole(request);
   if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
   const agencyEmailLower = email.toLowerCase();
-  const quoteId = String((request.data || {}).quoteId || '').trim();
-  if (!quoteId) throw new HttpsError('invalid-argument', 'quoteId is required.');
+  const d = request.data || {};
 
-  const quoteRef = db.collection('agency_quotes').doc(quoteId);
-  const quoteSnap = await quoteRef.get();
-  if (!quoteSnap.exists) throw new HttpsError('not-found', 'Quotation not found.');
-  const quote = quoteSnap.data();
-  if (quote.agencyId !== request.auth.uid) throw new HttpsError('permission-denied', 'Not your quotation.');
-  if (quote.quoteType !== 'ASSIGNED_PACKAGE') throw new HttpsError('invalid-argument', 'This function only finalizes assigned-package quotes.');
-  if (quote.status !== 'DRAFT') throw new HttpsError('failed-precondition', 'This quotation is already finalized and can no longer be edited.');
-  if (!quote.guestName || !quote.arrivalDate || !quote.departureDate) {
-    throw new HttpsError('invalid-argument', 'Guest name and travel dates are required before finalizing.');
+  const status = d.status === 'FINALIZED' ? 'FINALIZED' : 'DRAFT';
+  const currency = AGENCY_QUOTE_CURRENCIES.includes(d.currency) ? d.currency : 'USD';
+  const adults = Math.max(1, Math.min(20, Math.round(Number(d.adults) || 1)));
+  const children = Math.max(0, Math.min(20, Math.round(Number(d.children) || 0)));
+  const guestName = String(d.guestName || '').slice(0, 160).trim();
+  const arrivalDate = /^\d{4}-\d{2}-\d{2}$/.test(d.arrivalDate) ? d.arrivalDate : '';
+  const departureDate = /^\d{4}-\d{2}-\d{2}$/.test(d.departureDate) ? d.departureDate : '';
+  const guestMessage = String(d.guestMessage || '').slice(0, 500).trim();
+  const rawSellingTotal = Number(d.agencyGuestSellingTotal);
+  if (d.agencyGuestSellingTotal != null && d.agencyGuestSellingTotal !== '' && !Number.isFinite(rawSellingTotal)) {
+    throw new HttpsError('invalid-argument', 'Guest selling total must be a valid number.');
   }
-  if (!(Number(quote.agencyGuestSellingTotal) > 0)) {
-    throw new HttpsError('invalid-argument', 'Enter a guest selling price before finalizing.');
-  }
+  const agencyGuestSellingTotal = Math.max(0, Math.min(500000, Number.isFinite(rawSellingTotal) ? rawSellingTotal : 0));
+  const rawExchangeRate = Number(d.exchangeRate);
+  const exchangeRateEntered = currency !== 'USD' && Number.isFinite(rawExchangeRate) && rawExchangeRate > 0;
+  const exchangeRate = currency === 'USD' ? 1 : (exchangeRateEntered ? rawExchangeRate : 1);
+
+  if (status === 'FINALIZED' && !(agencyGuestSellingTotal > 0)) throw new HttpsError('invalid-argument', 'Enter a guest selling price before finalizing.');
+  if (status === 'FINALIZED' && (!guestName || !arrivalDate || !departureDate)) throw new HttpsError('invalid-argument', 'Guest name and travel dates are required before finalizing.');
+
+  const packageId = String(d.packageId || '').trim();
+  if (!packageId) throw new HttpsError('invalid-argument', 'A package must be selected.');
 
   // The agency's own package -- the SAME trusted source resolveAgencyQuoteComponent()
   // already reads for a Custom Package's 'agency_package' component; never
-  // trusted from the quote doc's own (agency-writable while DRAFT) fields.
+  // trusted from anything the client itself supplies.
   const pkgSnap = await db.collection('agency_packages').doc(agencyEmailLower).get();
   const packages = (pkgSnap.exists && pkgSnap.data().packages) || [];
-  const pkg = packages.find((p) => p.id === quote.packageId);
+  const pkg = packages.find((p) => p.id === packageId);
   if (!pkg) throw new HttpsError('not-found', 'Package not found in your own agency package set.');
   if (pkg.active === false) throw new HttpsError('failed-precondition', 'This package is currently Not assigned.');
 
-  const accommodation = await resolveAccommodationSelection({
-    accommodationPropertyId: quote.accommodationPropertyId,
-    accommodationRoomTypeId: quote.accommodationRoomTypeId,
-  });
+  const accommodation = await resolveAccommodationSelection(d);
   const rate = resolveAssignedPackageRate(pkg, accommodation);
-  if (!rate.configured) {
+  if (status === 'FINALIZED' && !rate.configured) {
     throw new HttpsError('failed-precondition', 'This accommodation has no approved package rate yet -- ask Vilu to configure it before finalizing.');
   }
 
   const settingsSnap = await db.collection('website_content').doc('agency_booking_settings').get();
   const extraNightRate = (settingsSnap.exists && settingsSnap.data().extraNightRate != null) ? settingsSnap.data().extraNightRate : 40;
 
+  // A DRAFT with no configured rate yet still needs SOME preview number --
+  // 0 is the honest value when there's genuinely nothing trusted to compute
+  // from (never a guess), same as Custom Package's own DRAFT-with-no-
+  // configured-partner-rate behavior; FINALIZE with the same gap is already
+  // blocked just above.
   const net = calcAssignedPackageViluNet(
-    rate.perPerson, pkg.childDiscountPct, pkg.nights,
-    Number(quote.adults) || 0, Number(quote.children) || 0,
-    quote.arrivalDate, quote.departureDate, extraNightRate
+    rate.configured ? rate.perPerson : 0, pkg.childDiscountPct, pkg.nights,
+    adults, children, arrivalDate, departureDate, extraNightRate
   );
 
   const now = new Date().toISOString();
-  const finalized = Object.assign({}, quote, {
-    nights: net.totalNights,
-    viluNetTotal: net.total,
-    agencyEarnings: +(Number(quote.agencyGuestSellingTotal) - net.total).toFixed(2),
-    status: 'FINALIZED',
-    finalizedAt: now,
-    updatedAt: now,
-    // Same "frozen at finalize time" discipline as Custom Package quotes
-    // (Part 14) -- a historical quote must remain stable even if the
-    // property/package is edited later.
+  let quoteId = String(d.quoteId || '').trim();
+  let createdAt = now;
+  let existing = null;
+  if (quoteId) {
+    const existingSnap = await db.collection('agency_quotes').doc(quoteId).get();
+    if (existingSnap.exists) {
+      existing = existingSnap.data();
+      if (existing.agencyId !== request.auth.uid) throw new HttpsError('permission-denied', 'Not your quotation.');
+      if (existing.quoteType !== 'ASSIGNED_PACKAGE') throw new HttpsError('invalid-argument', 'Wrong quote type for this function.');
+      if (existing.status !== 'DRAFT') throw new HttpsError('failed-precondition', 'This quotation is finalized and can no longer be edited.');
+      createdAt = existing.createdAt || now;
+    }
+    // A client-supplied id for a brand-new quote (first save) is fine -- see
+    // submitAgencyCustomQuote's identical comment; the security boundary is
+    // the agencyId write below, not the id.
+  } else {
+    quoteId = newAgencyQuoteId(email);
+  }
+
+  const userSnap = await db.collection('users').doc(agencyEmailLower).get();
+  const agencyName = (userSnap.exists && (userSnap.data().name || userSnap.data().company)) || email;
+
+  // Guest-facing snapshot (Part 19 precedent, preserved from the old client
+  // logic): sanitized ONCE, the first time this quote is ever saved, and
+  // then carried through unchanged on every later edit -- reusing the
+  // EXISTING doc's own guestIncludes/guestActivities rather than
+  // recomputing from the package's current (possibly since-edited)
+  // includes/activities, so if Vilu edits this package's content later, an
+  // already-saved quote's guest-facing text stays exactly as it was.
+  const guestIncludes = existing ? (existing.guestIncludes || []) : (pkg.includes || []).map(sanitizeGuestLabel).filter(Boolean);
+  const guestActivities = existing ? (existing.guestActivities || []) : (pkg.activities || []).map(sanitizeGuestLabel).filter(Boolean);
+
+  const quote = {
+    quoteId, agencyId: request.auth.uid, agencyEmail: email, agencyName,
+    guestName, arrivalDate, departureDate, adults, children, nights: net.totalNights,
+    currency, quoteType: 'ASSIGNED_PACKAGE',
+    packageId, packageName: String(pkg.name || ''), childDiscountPct: pkg.childDiscountPct || 0,
+    guestIncludes, guestActivities, guestMessage,
+    viluNetTotal: net.total, agencyGuestSellingTotal,
+    agencyEarnings: +(agencyGuestSellingTotal - net.total).toFixed(2),
+    exchangeRate, exchangeRateSource: exchangeRateEntered ? 'agency-entered' : null,
+    exchangeRateSnapshotAt: exchangeRateEntered ? now : null,
+    status, createdAt, updatedAt: now,
+    finalizedAt: status === 'FINALIZED' ? now : null,
+    // Frozen at save time (Part 14 precedent from Custom Package quotes) --
+    // reads only what resolveAccommodationSelection() just verified, never
+    // the property/room type's current live name/rate on reopen.
     accommodationPropertyId: accommodation.propertyId,
     accommodationPropertyName: accommodation.propertyName,
     accommodationIsVilu: accommodation.isVilu,
     accommodationRoomTypeId: accommodation.roomTypeId,
     accommodationRoomTypeName: accommodation.roomTypeName,
-    accommodationRateSnapshot: rate.perPerson,
-    accommodationCurrency: rate.currency,
+    accommodationRateSnapshot: rate.configured ? rate.perPerson : null,
+    accommodationCurrency: rate.configured ? rate.currency : null,
     accommodationAvailabilityMode: accommodation.availabilityMode,
-  });
-  await quoteRef.set(finalized);
-  return finalized;
+  };
+  await db.collection('agency_quotes').doc(quoteId).set(quote);
+  return quote;
 });
 
 // ── getAgencyAvailability: Agency Sales Workflow Phase D ───────────────────

@@ -1,11 +1,25 @@
-// Agency Sales Workflow — Phase A: agency_quotes security rules.
+// Agency Sales Workflow — agency_quotes security rules.
 //
 // This is the one place in the whole test suite that runs against a REAL
 // Firestore Rules engine (the Firebase emulator) instead of asserting rule
 // TEXT with regex -- regex proves the string is present, not that Firestore
-// actually evaluates it the way we think. For a brand-new, security-critical
+// actually evaluates it the way we think. For a security-critical
 // collection whose whole point is "Agency A can never touch Agency B's
 // quote," that distinction matters enough to justify the emulator.
+//
+// Agency Quote Security Hardening (2026-09-12) rewrote this file's CREATE/
+// UPDATE section: proven exploitable (not assumed) against the OLD rules,
+// an agency could `.set()` a brand-new ASSIGNED_PACKAGE doc with
+// status:'FINALIZED' and any viluNetTotal/agencyEarnings/packageId/
+// accommodation it wanted on the very FIRST write, and could update its own
+// DRAFT straight to FINALIZED with a spoofed viluNetTotal for a Vilu-only
+// accommodation. Both quote types are now created/edited/finalized
+// EXCLUSIVELY through a Cloud Function (submitAgencyAssignedPackageQuote /
+// submitAgencyCustomQuote, both proven separately in
+// assigned-package-quote-security-rules.test.js and agency-custom-package-rules.test.js)
+// -- this file now proves a direct agency create/update is refused
+// outright, for every case, while read/delete/admin-access remain exactly
+// as they always were.
 //
 // Requires the Firestore emulator (already configured in firebase.json).
 // Run via:
@@ -76,15 +90,23 @@ function baseQuote(overrides) {
     await db.collection('users').doc('agencyb@example.com').set({ email: 'agencyb@example.com', role: 'agency', name: 'Agency B' });
   });
 
-  section('Agency A: create own quote');
-  await test('Agency A can create a quote with agencyId == her own uid', async () => {
-    await assertSucceeds(agencyA.firestore().collection('agency_quotes').doc('VQ-A-1').set(baseQuote({ quoteId: 'VQ-A-1', agencyId: AGENCY_A_UID })));
+  section('Agency Quote Security Hardening: direct agency CREATE is refused entirely -- even a perfectly-owned, DRAFT, non-spoofed quote');
+  await test('Agency A CANNOT create a quote directly, even with her own correct agencyId, DRAFT status, and otherwise-honest fields', async () => {
+    await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-1').set(baseQuote({ quoteId: 'VQ-A-1', agencyId: AGENCY_A_UID })));
   });
   await test('Agency A CANNOT create a quote claiming to belong to Agency B', async () => {
     await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-FAKE').set(baseQuote({ quoteId: 'VQ-A-FAKE', agencyId: AGENCY_B_UID })));
   });
+  await test('Agency A CANNOT create a quote pre-FINALIZED with spoofed commercial fields on the very first write -- the exact gap this hardening closes', async () => {
+    await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-SPOOF').set(baseQuote({
+      quoteId: 'VQ-A-SPOOF', agencyId: AGENCY_A_UID, status: 'FINALIZED', viluNetTotal: 1, agencyEarnings: 9999, agencyGuestSellingTotal: 10000,
+    })));
+  });
   await test('Unauthenticated caller cannot create any quote', async () => {
     await assertFails(anon.firestore().collection('agency_quotes').doc('VQ-ANON').set(baseQuote({ quoteId: 'VQ-ANON', agencyId: AGENCY_A_UID })));
+  });
+  await test('Admin CAN create a quote directly (trusted role, e.g. backoffice support) -- unaffected by the agency-facing tightening', async () => {
+    await assertSucceeds(admin.firestore().collection('agency_quotes').doc('VQ-ADMIN-CREATED').set(baseQuote({ quoteId: 'VQ-ADMIN-CREATED', agencyId: AGENCY_A_UID })));
   });
 
   // Seed a DRAFT and a FINALIZED quote for Agency A, and one for Agency B,
@@ -96,7 +118,7 @@ function baseQuote(overrides) {
     await db.collection('agency_quotes').doc('VQ-B-DRAFT').set(baseQuote({ quoteId: 'VQ-B-DRAFT', agencyId: AGENCY_B_UID, agencyEmail: 'agencyb@example.com', agencyName: 'Agency B', status: 'DRAFT' }));
   });
 
-  section('Read ownership');
+  section('Read ownership (unaffected by the create/update tightening)');
   await test('Agency A can read her own quote', async () => {
     await assertSucceeds(agencyA.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').get());
   });
@@ -116,9 +138,9 @@ function baseQuote(overrides) {
     await assertFails(agencyA.firestore().collection('agency_quotes').get());
   });
 
-  section('DRAFT update behavior');
-  await test('Agency A can update her own DRAFT quote (e.g. change the selling total)', async () => {
-    await assertSucceeds(agencyA.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').set(
+  section('Agency Quote Security Hardening: direct agency UPDATE is refused entirely -- even her own DRAFT, even a legitimate-looking edit');
+  await test('Agency A CANNOT update her own DRAFT quote directly anymore (must go through submitAgencyAssignedPackageQuote / submitAgencyCustomQuote instead)', async () => {
+    await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').set(
       baseQuote({ quoteId: 'VQ-A-DRAFT', agencyId: AGENCY_A_UID, status: 'DRAFT', agencyGuestSellingTotal: 1500 })
     ));
   });
@@ -127,32 +149,36 @@ function baseQuote(overrides) {
       baseQuote({ quoteId: 'VQ-B-DRAFT', agencyId: AGENCY_B_UID, agencyEmail: 'agencyb@example.com', status: 'DRAFT', agencyGuestSellingTotal: 999 })
     ));
   });
-  await test('Agency A CANNOT finalize Agency B\'s quote (Phase B Part 22: finalizing is just an update, still blocked by ownership)', async () => {
+  await test('Agency A CANNOT finalize Agency B\'s quote', async () => {
     await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-B-DRAFT').set(
       baseQuote({ quoteId: 'VQ-B-DRAFT', agencyId: AGENCY_B_UID, agencyEmail: 'agencyb@example.com', status: 'FINALIZED' })
     ));
   });
-
-  section('agencyId immutability');
   await test('Agency A CANNOT reassign her own quote to a different agencyId', async () => {
     await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').set(
       baseQuote({ quoteId: 'VQ-A-DRAFT', agencyId: AGENCY_B_UID, status: 'DRAFT' })
     ));
   });
-
-  section('FINALIZED protection');
+  await test('Agency A CANNOT finalize her own DRAFT quote directly with a spoofed viluNetTotal, even for a Vilu-only accommodation -- the second gap this hardening closes', async () => {
+    await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').set(
+      baseQuote({ quoteId: 'VQ-A-DRAFT', agencyId: AGENCY_A_UID, status: 'FINALIZED', viluNetTotal: 1, agencyEarnings: 9999 })
+    ));
+  });
   await test('Agency A CANNOT rewrite her own FINALIZED quote', async () => {
     await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-FINAL').set(
       baseQuote({ quoteId: 'VQ-A-FINAL', agencyId: AGENCY_A_UID, status: 'FINALIZED', agencyGuestSellingTotal: 5000 })
     ));
   });
-  await test('Admin CAN update a FINALIZED quote (e.g. to move it into a later workflow status)', async () => {
+  await test('Admin CAN update any quote directly, DRAFT or FINALIZED (trusted role, unaffected by the agency-facing tightening)', async () => {
     await assertSucceeds(admin.firestore().collection('agency_quotes').doc('VQ-A-FINAL').set(
       baseQuote({ quoteId: 'VQ-A-FINAL', agencyId: AGENCY_A_UID, status: 'FINALIZED' })
     ));
+    await assertSucceeds(admin.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').set(
+      baseQuote({ quoteId: 'VQ-A-DRAFT', agencyId: AGENCY_A_UID, status: 'DRAFT', agencyGuestSellingTotal: 1500 })
+    ));
   });
 
-  section('Delete is fully disabled');
+  section('Delete is fully disabled (unaffected by the create/update tightening)');
   await test('Agency A cannot delete her own quote', async () => {
     await assertFails(agencyA.firestore().collection('agency_quotes').doc('VQ-A-DRAFT').delete());
   });

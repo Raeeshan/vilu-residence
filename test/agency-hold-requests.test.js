@@ -366,9 +366,9 @@ section('Case T — DO-NOT-TOUCH: reservation permission, Website Packages, quot
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
     assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
-  test('agency_quotes rules unchanged from Phase C/D', () => {
+  test('agency_quotes rules: direct agency create/update is denied entirely (Agency Quote Security Hardening) -- this phase\'s own hold-request flow never wrote agency_quotes anyway, so this only confirms the collection this phase reads alongside is unaffected by that unrelated change', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /room_prices/{roomId}'));
-    assert.match(rulesBlock, /request\.resource\.data\.quoteType == 'ASSIGNED_PACKAGE'/);
+    assert.match(rulesBlock, /allow create: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
   });
   test('the Website tab\'s own card renderer in vilu-unified.html is unchanged', () => {
     const src = extractByStart(PMS, /function renderPkgList\(\)\s*\{/);

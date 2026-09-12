@@ -319,15 +319,17 @@ section('Case I — FINALIZED lock (Part 13/14) enforced in the builder UI, on t
     const src = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
     assert.match(src, /Finalize this quotation\?\\n\\nAfter finalization, the commercial details will be locked\./);
   });
-  test('finalizeQuote() validates guest name, dates, and a positive selling price before allowing finalization', () => {
+  test('finalizeQuote() validates guest name, dates, and a positive selling price before allowing finalization (client-side UX gate; submitAgencyAssignedPackageQuote enforces the same thing authoritatively server-side, Agency Quote Security Hardening)', () => {
     const src = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
-    assert.match(src, /if\(!_quoteWorking\.guestName \|\| !_quoteWorking\.arrivalDate \|\| !_quoteWorking\.departureDate\)/);
-    assert.match(src, /_quoteWorking\.agencyGuestSellingTotal > 0/);
+    assert.match(src, /if\(!document\.getElementById\('quote-guest-name'\)\.value\.trim\(\) \|\| !document\.getElementById\('quote-arrival'\)\.value \|\| !document\.getElementById\('quote-departure'\)\.value\)/);
+    assert.match(src, /quote-selling-price/);
   });
-  test('finalizeQuote() itself still just locks and reports "Quotation finalized." -- the later workflow (hold request, Phase E; booking request, Phase F) is reached from the resulting finalized quote card, not added into finalizeQuote() itself', () => {
+  test('finalizeQuote() itself still just delegates to the shared submit function, which reports "Quotation finalized." -- the later workflow (hold request, Phase E; booking request, Phase F) is reached from the resulting finalized quote card, not added in here', () => {
     const src = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
-    assert.match(src, /Quotation finalized\./);
+    assert.match(src, /return submitAssignedPackageQuote\('FINALIZED'\);/);
     assert.doesNotMatch(src, /Request Hold|Send Booking Request|Confirm Reservation/);
+    const submitSrc = extractByStart(PORTAL, /async function submitAssignedPackageQuote\(status\)\s*\{/);
+    assert.match(submitSrc, /Quotation finalized\./);
   });
 }
 
@@ -338,6 +340,7 @@ section('Case J — NO inventory effect whatsoever (Part 15) -- structurally ver
     extractByStart(PORTAL, /async function updateQuotePreview\(\)\s*\{/),
     extractByStart(PORTAL, /async function saveQuoteDraft\(\)\s*\{/),
     extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/),
+    extractByStart(PORTAL, /async function submitAssignedPackageQuote\(status\)\s*\{/),
     extractByStart(PORTAL, /async function drawQuotations\(\)\s*\{/),
     extractByStart(PORTAL, /function renderQuoteCard\(q\)\s*\{/),
     extractByStart(PORTAL, /async function printQuotation\(quoteId\)\s*\{/),
@@ -350,11 +353,14 @@ section('Case J — NO inventory effect whatsoever (Part 15) -- structurally ver
       assert.doesNotMatch(src, /collection\('room_availability'\)/);
     });
   });
-  test('saveQuoteDraft()/finalizeQuote() write ONLY to agency_quotes/{quoteId}', () => {
+  test('saveQuoteDraft()/finalizeQuote() no longer write agency_quotes directly at all (Agency Quote Security Hardening) -- both delegate to submitAssignedPackageQuote(), which writes ONLY through the submitAgencyAssignedPackageQuote Cloud Function', () => {
     const saveSrc = extractByStart(PORTAL, /async function saveQuoteDraft\(\)\s*\{/);
     const finalizeSrc = extractByStart(PORTAL, /async function finalizeQuote\(\)\s*\{/);
-    assert.match(saveSrc, /fsDb\.collection\('agency_quotes'\)\.doc\(_quoteWorking\.quoteId\)\.set\(_quoteWorking\)/);
-    assert.match(finalizeSrc, /fsDb\.collection\('agency_quotes'\)\.doc\(_quoteWorking\.quoteId\)\.set\(_quoteWorking\)/);
+    assert.doesNotMatch(saveSrc, /fsDb\.collection\('agency_quotes'\)/);
+    assert.doesNotMatch(finalizeSrc, /fsDb\.collection\('agency_quotes'\)/);
+    const submitSrc = extractByStart(PORTAL, /async function submitAssignedPackageQuote\(status\)\s*\{/);
+    assert.match(submitSrc, /fsFunctions\.httpsCallable\('submitAgencyAssignedPackageQuote'\)/);
+    assert.doesNotMatch(submitSrc, /collection\('reservations'\)|collection\('block_requests'\)|collection\('blocks'\)|collection\('room_availability'\)/);
   });
 }
 
@@ -399,9 +405,9 @@ section('Case M — Website Packages / agency_packages / block_requests / reserv
     const resBlock = RULES.slice(RULES.indexOf('match /reservations/{id} {'), RULES.indexOf('match /reservation_price_adjustments/'));
     assert.match(resBlock, /request\.auth == null && request\.resource\.data\.source == 'Website'/);
   });
-  test('agency_quotes rules unchanged from Phase A/B\'s ownership model (Phase B itself needed no new rules -- the quoteType condition visible here was added later, by Phase C, to close a gap Custom Package quotes introduced; see agency-custom-package.test.js)', () => {
+  test('agency_quotes rules: direct agency create/update is now denied entirely (Agency Quote Security Hardening superseded Phase A/B\'s original ownership-based direct-write model once Assigned Package quotes also moved behind a Cloud Function; see agency-quotes-rules.test.js)', () => {
     const rulesBlock = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId} {'), RULES.indexOf('match /room_prices/{roomId} {'));
-    assert.match(rulesBlock, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid/);
+    assert.match(rulesBlock, /allow create: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
     assert.match(rulesBlock, /allow delete: if false;/);
   });
   test('the Website tab\'s own card renderer in vilu-unified.html is unchanged', () => {

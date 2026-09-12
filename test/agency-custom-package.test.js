@@ -144,16 +144,11 @@ section('Case C — Component rate integrity (Part 6/19): client never sends a r
     const src = extractByStart(FUNCTIONS, /async function resolveAgencyQuoteComponent\(entry, agencyEmailLower\)\s*\{/);
     assert.match(src, /db\.collection\('agency_packages'\)\.doc\(agencyEmailLower\)\.get\(\)/);
   });
-  test('THE critical firestore.rules fix: a CUSTOM_PACKAGE quote can only be created/updated by Admin/Staff/Manager or the (Admin-SDK, rules-bypassing) Cloud Function -- direct agency client writes are restricted to ASSIGNED_PACKAGE only', () => {
+  test('THE critical firestore.rules fix: a CUSTOM_PACKAGE quote can only be created/updated by Admin/Staff/Manager or the (Admin-SDK, rules-bypassing) Cloud Function -- Agency Quote Security Hardening later strengthened this from "direct agency writes restricted to ASSIGNED_PACKAGE only" to "direct agency writes denied for EVERY quote type" once ASSIGNED_PACKAGE also moved behind a callable', () => {
     const block = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /agency_quotes/{quoteId}') + 3400);
-    assert.match(block, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid\s*\n\s*&& request\.resource\.data\.quoteType == 'ASSIGNED_PACKAGE';/);
-    // Calendar-fix follow-up added one more clause after the ASSIGNED_PACKAGE
-    // check (blocking a direct-client FINALIZE with a non-Vilu accommodation
-    // -- see finalizeAgencyAssignedPackageQuote's own tests) -- this still
-    // proves the same underlying guarantee this test protects: a
-    // CUSTOM_PACKAGE quote's update remains restricted to
-    // Admin/Staff/Manager or the Cloud Function, never a direct agency write.
-    assert.match(block, /&& resource\.data\.status == 'DRAFT'\s*\n\s*&& resource\.data\.quoteType == 'ASSIGNED_PACKAGE'\s*\n\s*&& \(request\.resource\.data\.status/);
+    assert.match(block, /allow create: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
+    assert.match(block, /allow update: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
+    assert.doesNotMatch(block, /request\.resource\.data\.agencyId == request\.auth\.uid/, 'no direct-agency branch should remain at all');
   });
   test('the Cloud Function uses the Admin SDK (getFirestore from firebase-admin), which is documented to bypass security rules -- confirming the rule restriction above does not also block the function itself', () => {
     assert.match(FUNCTIONS, /const \{ getFirestore, FieldValue \} = require\('firebase-admin\/firestore'\);/);
@@ -282,17 +277,19 @@ section('Case G — NO inventory effect (Part 26) -- structurally verified acros
 
 section('Case H — Phase B (assigned-package) is completely unaffected by Phase C');
 {
-  test('openQuoteBuilder()/saveQuoteDraft()/finalizeQuote() are byte-identical to Phase B -- still direct fsDb writes, no callable involved', () => {
+  test('openQuoteBuilder()/saveQuoteDraft()/finalizeQuote() (Phase B) now save/finalize through submitAgencyAssignedPackageQuote (Agency Quote Security Hardening) -- no direct fsDb write remains for either quote type', () => {
     const saveSrc = extractByStart(PORTAL, /async function saveQuoteDraft\(\)\s*\{/);
-    assert.match(saveSrc, /fsDb\.collection\('agency_quotes'\)\.doc\(_quoteWorking\.quoteId\)\.set\(_quoteWorking\)/);
-    assert.doesNotMatch(saveSrc, /fsFunctions/);
+    assert.doesNotMatch(saveSrc, /fsDb\.collection\('agency_quotes'\)/);
+    const submitSrc = extractByStart(PORTAL, /async function submitAssignedPackageQuote\(status\)\s*\{/);
+    assert.match(submitSrc, /fsFunctions\.httpsCallable\('submitAgencyAssignedPackageQuote'\)/);
   });
-  test('calcQuoteViluNet()/sanitizeGuestLabel()/buildGuestQuotationHTML() (Phase B) are unchanged and still used by the assigned-package flow', () => {
+  test('calcQuoteViluNet() (Phase B, client-side live preview only) and sanitizeGuestLabel()/buildGuestQuotationHTML() are unchanged and still used', () => {
     assert.match(PORTAL, /function calcQuoteViluNet\(pkg, adults, children, childDiscountPct, arrivalDate, departureDate, agyBookingSettings\)\s*\{/);
   });
-  test('agency_quotes rules still permit an ASSIGNED_PACKAGE quote to be directly created/updated by its owning agency, exactly as Phase A/B established', () => {
+  test('agency_quotes rules now deny direct create/update for BOTH quote types -- Agency Quote Security Hardening removed the ASSIGNED_PACKAGE carve-out entirely once it too moved behind a Cloud Function', () => {
     const block = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /agency_quotes/{quoteId}') + 2400);
-    assert.match(block, /request\.resource\.data\.quoteType == 'ASSIGNED_PACKAGE'/);
+    assert.match(block, /allow create: if isAdmin\(\) \|\| isStaff\(\) \|\| isManagerRole\(\);/);
+    assert.doesNotMatch(block, /quoteType == 'ASSIGNED_PACKAGE'/);
   });
 }
 

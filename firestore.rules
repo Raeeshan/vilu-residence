@@ -571,61 +571,37 @@ service cloud.firestore {
 
     // Agency Sales Workflow Phase A (2026-09-11): each agency's own private
     // quotes -- Vilu's net cost stays private to that agency, the agency
-    // sets its own guest selling total (see agency_quotes model in
-    // vilu-agency-portal.html's createDraftAgencyQuote()). Keyed by agencyId
-    // (the Firebase Auth uid), matching the existing reservations/
-    // block_requests convention -- NOT by email like agency_packages above.
-    // No quote is ever created/read by anything but its own owning agency
-    // or Admin/Staff/Manager; there is no broad-collection read anywhere.
+    // sets its own guest selling total. Keyed by agencyId (the Firebase
+    // Auth uid), matching the existing reservations/block_requests
+    // convention -- NOT by email like agency_packages above. No quote is
+    // ever created/read by anything but its own owning agency or
+    // Admin/Staff/Manager; there is no broad-collection read anywhere.
+    //
+    // Agency Quote Security Hardening (2026-09-12): proven exploitable, not
+    // assumed -- against the OLD rules below, an agency could `.set()` a
+    // brand-new ASSIGNED_PACKAGE doc with status:'FINALIZED' and any
+    // viluNetTotal/agencyEarnings/packageId/accommodation it wanted on the
+    // very FIRST write (the old `allow create` never checked status or any
+    // commercial field), and could update its own DRAFT straight to
+    // FINALIZED with a spoofed viluNetTotal for a Vilu-only accommodation
+    // (the calendar-fix follow-up task had only closed the non-Vilu case).
+    // Both quote types are now created/edited/finalized EXCLUSIVELY through
+    // a Cloud Function using the Admin SDK, which bypasses these rules
+    // entirely: submitAgencyAssignedPackageQuote and submitAgencyCustomQuote
+    // (see the comments above those exports in functions-core/index.js).
+    // An agency has no legitimate reason to write this collection directly
+    // anymore, for either quote type, so direct agency create/update is
+    // denied outright -- deliberately not an enumerated field allowlist,
+    // since Firestore rules cannot safely diff an arbitrary nested object
+    // field-by-field and a missed field would silently reopen the exact gap
+    // this closes.
     match /agency_quotes/{quoteId} {
-      // Agency Sales Workflow Phase C (2026-09-11): a CUSTOM_PACKAGE quote's
-      // selectedComponents rates can only be verified server-side (rules
-      // have no loop to fetch-and-check each array entry against its
-      // source doc -- see submitAgencyCustomQuote's own comment in
-      // functions-core/index.js for the full reasoning). That Cloud
-      // Function uses the Admin SDK, which bypasses these rules entirely,
-      // so restricting the CLIENT'S direct create/update to
-      // quoteType=='ASSIGNED_PACKAGE' only closes the one path an agency
-      // could otherwise use to bypass server validation (writing a
-      // CUSTOM_PACKAGE doc directly with a spoofed rate) -- it does not
-      // affect the Cloud Function's own writes, and does not change
-      // ASSIGNED_PACKAGE quotes (Phase B), which never needed server
-      // verification since their rate is the agency's own already-owned
-      // agency_packages data.
-      allow create: if request.auth != null
-        && request.resource.data.agencyId == request.auth.uid
-        && request.resource.data.quoteType == 'ASSIGNED_PACKAGE';
+      allow create: if isAdmin() || isStaff() || isManagerRole();
 
       allow read: if request.auth != null
         && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
 
-      // Owning agency may update its own quote only while it is still
-      // DRAFT, and can never change which agency owns it. Once FINALIZED,
-      // only Admin/Staff/Manager can touch it -- Phase A's deliberately
-      // simple immutability gate; no versioning/history yet (Part 6: "do
-      // not over-engineer versioning yet"). Same quoteType=='ASSIGNED_PACKAGE'
-      // restriction as create above -- a CUSTOM_PACKAGE quote can only ever
-      // be updated through submitAgencyCustomQuote (Admin SDK) or by
-      // Admin/Staff/Manager.
-      //
-      // Calendar-fix follow-up: a direct client write may still finalize an
-      // ASSIGNED_PACKAGE quote (unchanged, zero behavior change) ONLY when
-      // its accommodation is Vilu itself -- the package's own agencyPricePerRoom
-      // is the agency's already-owned data, nothing to spoof. Finalizing
-      // with a partner property requires a trusted Vilu-controlled rate
-      // override that only the server can look up and verify, so that one
-      // transition is refused here and must go through
-      // finalizeAgencyAssignedPackageQuote (Admin SDK, bypasses this rule)
-      // instead -- see the comment above that export.
-      allow update: if isAdmin() || isStaff() || isManagerRole()
-        || (request.auth != null
-            && resource.data.agencyId == request.auth.uid
-            && request.resource.data.agencyId == resource.data.agencyId
-            && resource.data.status == 'DRAFT'
-            && resource.data.quoteType == 'ASSIGNED_PACKAGE'
-            && (request.resource.data.status != 'FINALIZED'
-                || !('accommodationPropertyId' in request.resource.data)
-                || request.resource.data.accommodationPropertyId == 'VILU'));
+      allow update: if isAdmin() || isStaff() || isManagerRole();
 
       allow delete: if false;
     }
