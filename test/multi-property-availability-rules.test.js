@@ -38,6 +38,7 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
   const submitCustomQuoteWrapped = functionsTest.wrap(myFunctions.submitAgencyCustomQuote);
   const confirmAccWrapped = functionsTest.wrap(myFunctions.confirmAccommodationBookingRequest);
   const rejectAccWrapped = functionsTest.wrap(myFunctions.rejectAccommodationBookingRequest);
+  const bridgeLegacyWrapped = functionsTest.wrap(myFunctions.bridgeLegacyPartnerHotels);
 
   function quoteIdWithRateForRules(){ return 'VQ-RULES-TEST'; }
   let _testEnv = null;
@@ -366,6 +367,78 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
       const env = await getTestEnvForRules();
       const agencyDb = env.authenticatedContext(AGENCY_A_UID, { email: AGENCY_A_EMAIL }).firestore();
       await assertFails(agencyDb.collection('accommodation_properties').doc('PARTNER_HIDDEN').get());
+    });
+  }
+
+  section('Legacy partner-hotel bridge (2026-09-12): real historical PH properties bridged into accommodation_properties, without trusting any of PH\'s own placeholder numbers');
+  {
+    // A real (if Cancelled) historical reservation, exactly like the two
+    // found live in production, referencing the legacy PH room-id pattern.
+    // The bridge must never touch this document in any way.
+    const legacyReservation = {
+      id: 'LEGACY-RES-1', room_id: 'ha-R1', status: 'Cancelled', source: 'Direct',
+      check_in: '2026-07-11', check_out: '2026-07-15', guest_name: 'Legacy Guest',
+    };
+    await db.collection('reservations').doc('LEGACY-RES-1').set(legacyReservation);
+
+    await test('first run creates both Ranfaru Inn and White Sand Inn with fixed, safe fields -- ON_REQUEST, no rate, legacy id preserved', async () => {
+      const r = await callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      assert.deepEqual(r.results, [
+        { propertyId: 'ha', action: 'created' },
+        { propertyId: 'hb', action: 'created' },
+      ]);
+      const ha = (await db.collection('accommodation_properties').doc('ha').get()).data();
+      assert.equal(ha.propertyName, 'Ranfaru Inn');
+      assert.equal(ha.availabilityMode, 'ON_REQUEST');
+      assert.equal(ha.active, true);
+      assert.equal(ha.visibleToAgencies, true);
+      assert.equal(ha.legacyPropertyId, 'ha');
+      assert.equal(ha.legacyRoomPrefix, 'ha-R');
+      assert.equal(ha.isVilu, false);
+      const hb = (await db.collection('accommodation_properties').doc('hb').get()).data();
+      assert.equal(hb.propertyName, 'White Sand Inn');
+      assert.equal(hb.legacyRoomPrefix, 'hb-R');
+    });
+    await test('no rate/room-type data was fabricated -- the old $70/night, and the old 10/8 fake rooms, never appear anywhere on the new docs or as a room_types subcollection', async () => {
+      const ha = (await db.collection('accommodation_properties').doc('ha').get()).data();
+      assert.equal(ha.agencyRate, undefined);
+      assert.equal(ha.rate, undefined);
+      const haRoomTypes = await db.collection('accommodation_properties').doc('ha').collection('room_types').get();
+      assert.equal(haRoomTypes.size, 0, 'no room_types docs must be created by the bridge -- staff must enter real ones');
+      const hbRoomTypes = await db.collection('accommodation_properties').doc('hb').collection('room_types').get();
+      assert.equal(hbRoomTypes.size, 0);
+    });
+    await test('getAgencyPropertyRoomTypes for a bridged property returns an empty list, never an invented room type', async () => {
+      const r = await callAs(getRoomTypesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, { propertyId: 'ha' });
+      assert.deepEqual(r.roomTypes, []);
+    });
+    await test('the historical Cancelled reservation referencing ha-R1 is completely untouched by the bridge -- byte-for-byte identical', async () => {
+      const doc = (await db.collection('reservations').doc('LEGACY-RES-1').get()).data();
+      assert.deepEqual(doc, legacyReservation);
+    });
+    await test('both bridged properties now appear live through getAgencyProperties, Vilu still first', async () => {
+      const r = await callAs(getPropertiesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const ids = r.properties.map((p) => p.propertyId);
+      assert.equal(ids[0], 'VILU');
+      assert.ok(ids.includes('ha'));
+      assert.ok(ids.includes('hb'));
+      const ranfaru = r.properties.find((p) => p.propertyId === 'ha');
+      assert.equal(ranfaru.propertyName, 'Ranfaru Inn');
+      assert.equal(ranfaru.availabilityMode, 'ON_REQUEST');
+    });
+    await test('running the bridge again is idempotent -- skips both, creates nothing new, no duplicates', async () => {
+      const r = await callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      assert.deepEqual(r.results, [
+        { propertyId: 'ha', action: 'skipped-already-exists' },
+        { propertyId: 'hb', action: 'skipped-already-exists' },
+      ]);
+    });
+    await test('a real admin edit made after the first bridge run survives a repeat run untouched (idempotency must never clobber a real staff edit)', async () => {
+      await db.collection('accommodation_properties').doc('ha').set({ propertyName: 'Ranfaru Inn (real name, staff-confirmed)', availabilityMode: 'MANUAL_INVENTORY' }, { merge: true });
+      await callAs(bridgeLegacyWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const ha = (await db.collection('accommodation_properties').doc('ha').get()).data();
+      assert.equal(ha.propertyName, 'Ranfaru Inn (real name, staff-confirmed)');
+      assert.equal(ha.availabilityMode, 'MANUAL_INVENTORY');
     });
   }
 

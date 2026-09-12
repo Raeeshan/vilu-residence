@@ -1102,6 +1102,51 @@ exports.getAgencyProperties = onCall({ region: 'us-central1', maxInstances: 10 }
   };
 });
 
+// ONE-TIME LEGACY PARTNER-HOTEL BRIDGE (2026-09-12) -- to be deleted once run
+// in production. Live PMS investigation confirmed two REAL, though both
+// Cancelled, historical reservations reference the legacy hardcoded PH
+// array's room ids ("ha-R1", "hb-R2"), proving "Ranfaru Inn"/"White Sand
+// Inn" are real partner properties with real (if old) business history --
+// not pure decorative test data. This bridges them into the canonical
+// accommodation_properties architecture WITHOUT trusting anything about
+// PH's own placeholder numbers: no $70/night rate, no fabricated 10/8-room
+// inventory, no invented room type -- ON_REQUEST + no room_types docs at
+// all, until Vilu staff enters real current data via the PMS's own Partner
+// Accommodation UI. Every field written below is fixed/hardcoded (never
+// taken from request.data), so this cannot be used to write anything other
+// than these exact two known-safe records. Idempotent: a doc that already
+// exists (e.g. staff has since edited it for real) is never overwritten.
+const LEGACY_PARTNER_HOTEL_BRIDGE = [
+  {
+    propertyId: 'ha', propertyName: 'Ranfaru Inn', propertyType: 'Guesthouse', location: 'Maafushi Island',
+    legacyPropertyId: 'ha', legacyRoomPrefix: 'ha-R', displayOrder: 10,
+  },
+  {
+    propertyId: 'hb', propertyName: 'White Sand Inn', propertyType: 'Guesthouse', location: 'Maafushi Island',
+    legacyPropertyId: 'hb', legacyRoomPrefix: 'hb-R', displayOrder: 20,
+  },
+];
+exports.bridgeLegacyPartnerHotels = onCall({ region: 'us-central1', maxInstances: 3 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const now = new Date().toISOString();
+  const results = [];
+  for (const entry of LEGACY_PARTNER_HOTEL_BRIDGE) {
+    const ref = db.collection('accommodation_properties').doc(entry.propertyId);
+    const existing = await ref.get();
+    if (existing.exists) { results.push({ propertyId: entry.propertyId, action: 'skipped-already-exists' }); continue; }
+    await ref.set({
+      propertyName: entry.propertyName, propertyType: entry.propertyType, location: entry.location,
+      availabilityMode: 'ON_REQUEST', displayOrder: entry.displayOrder, active: true, visibleToAgencies: true, isVilu: false,
+      legacyPropertyId: entry.legacyPropertyId, legacyRoomPrefix: entry.legacyRoomPrefix,
+      notesInternal: 'Bridged from the legacy PH placeholder record (2026-09-12) after confirming real historical reservations reference its room ids. No rate/room-type/availability data was migrated -- configure real current room types, agency rates, and availability mode here before relying on this property for live quoting.',
+      createdAt: now, updatedAt: now,
+    });
+    results.push({ propertyId: entry.propertyId, action: 'created' });
+  }
+  return { results };
+});
+
 // Room types for ONE partner property (Part 11: the accommodation picker
 // only fetches this once a non-Vilu property is actually selected, not for
 // every property up front).
