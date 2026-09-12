@@ -130,11 +130,11 @@ section('Part 3/25: getAgencyAvailability extended with an optional propertyId, 
 
 section('Part 11-14: hotel selection in BOTH quote builders, Vilu default, server-authoritative rate');
 {
-  test('resolveAccommodationSelection() defaults to Vilu, needing no lookup, and rejects an inactive/hidden partner outright', () => {
+  test('resolveAccommodationSelection() defaults to Vilu, needing no lookup, and rejects an inactive/hidden partner outright -- hotel-selection live-bug investigation (2026-09-12) replaced the strict `!== true` check with isFlagOn() so a hand-typed "true"/1 in Firestore is tolerated, never silently hidden, while still rejecting anything actually falsy', () => {
     const src = extractByStart(FUNCTIONS, /async function resolveAccommodationSelection\(d\)\s*\{/);
     assert.match(src, /propertyId === 'VILU'/);
     assert.match(src, /isVilu: true/);
-    assert.match(src, /propSnap\.data\(\)\.active !== true \|\| propSnap\.data\(\)\.visibleToAgencies !== true/);
+    assert.match(src, /!isFlagOn\(propSnap\.data\(\)\.active\) \|\| !isFlagOn\(propSnap\.data\(\)\.visibleToAgencies\)/);
   });
   test('submitAgencyCustomQuote() blocks FINALIZING with no configured partner rate, but never blocks a DRAFT -- "Rate on request", never a fake total', () => {
     const src = extractByStart(FUNCTIONS, onCallStart('submitAgencyCustomQuote'));

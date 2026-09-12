@@ -547,6 +547,23 @@ const AGENCY_QUOTE_MAX_COMPONENTS = 40;
 const ACCOMMODATION_AVAILABILITY_MODES = ['VILU_LIVE', 'MANUAL_INVENTORY', 'ON_REQUEST'];
 const ACCOMMODATION_BOOKING_STATUSES = ['AVAILABILITY_REQUESTED', 'PARTNER_CONFIRMED', 'PARTNER_REJECTED'];
 
+// Hotel-selection live-bug investigation (2026-09-12): the ONLY code path
+// that ever writes accommodation_properties/room_types is the PMS's own
+// Partner Accommodation admin UI, which always sends a real JS boolean
+// (a checkbox's .checked property) for active/visibleToAgencies -- but
+// Vilu staff could always also hand-edit a doc directly in the Firebase
+// console (there is no rule against it, and non-technical staff copying a
+// value in by hand commonly type "true" as a string, or 1, rather than
+// picking the Console's boolean field type). A strict `=== true` check --
+// or worse, a `.where('field','==',true)` QUERY, which is type-strict in
+// Firestore -- would then silently exclude an otherwise fully-configured
+// real property with NO error anywhere, forever. This loose-but-still-safe
+// check accepts true/"true"/1 as "on"; anything else (undefined, false,
+// "false", 0) stays "off" -- never a security loosening (an absent or
+// falsy field is still excluded exactly as before), just tolerant of how
+// the flag actually got typed in.
+function isFlagOn(v) { return v === true || v === 'true' || v === 1; }
+
 // Resolves + validates the agency's chosen accommodation server-side for a
 // quote (Part 11-13). Vilu needs no lookup (it is always offered, always
 // available as a choice). A partner property/room type must be active AND
@@ -561,14 +578,14 @@ async function resolveAccommodationSelection(d) {
     return { propertyId: 'VILU', propertyName: 'Vilu Residence', isVilu: true, roomTypeId: null, roomTypeName: null, rate: null, currency: null, availabilityMode: 'VILU_LIVE' };
   }
   const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
-  if (!propSnap.exists || propSnap.data().active !== true || propSnap.data().visibleToAgencies !== true) {
+  if (!propSnap.exists || !isFlagOn(propSnap.data().active) || !isFlagOn(propSnap.data().visibleToAgencies)) {
     throw new HttpsError('invalid-argument', 'Selected accommodation is not available.');
   }
   const prop = propSnap.data();
   const roomTypeId = String(d.accommodationRoomTypeId || '');
   if (!roomTypeId) throw new HttpsError('invalid-argument', 'Select a room type for this accommodation.');
   const rtSnap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types').doc(roomTypeId).get();
-  if (!rtSnap.exists || rtSnap.data().active !== true || rtSnap.data().visibleToAgencies !== true) {
+  if (!rtSnap.exists || !isFlagOn(rtSnap.data().active) || !isFlagOn(rtSnap.data().visibleToAgencies)) {
     throw new HttpsError('invalid-argument', 'Selected room type is not available.');
   }
   const rt = rtSnap.data();
@@ -1008,14 +1025,19 @@ async function getPartnerPropertyAvailability(propertyId, startDate, endDate) {
   const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
   if (!propSnap.exists) throw new HttpsError('not-found', 'Property not found.');
   const prop = propSnap.data();
-  if (prop.active !== true || prop.visibleToAgencies !== true) {
+  if (!isFlagOn(prop.active) || !isFlagOn(prop.visibleToAgencies)) {
     throw new HttpsError('permission-denied', 'Property not available to agencies.');
   }
   const mode = ACCOMMODATION_AVAILABILITY_MODES.includes(prop.availabilityMode) ? prop.availabilityMode : 'ON_REQUEST';
 
-  const roomTypesSnap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types')
-    .where('active', '==', true).where('visibleToAgencies', '==', true).get();
-  const roomTypes = roomTypesSnap.docs.map((doc) => Object.assign({ roomTypeId: doc.id }, doc.data()));
+  // Loose-flag tolerant (see isFlagOn's own comment): fetch the (always
+  // small) room_types subcollection unfiltered and filter in application
+  // code, rather than a type-strict .where('active','==',true) query that
+  // would silently exclude a hand-typed "true"/1.
+  const roomTypesSnap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types').get();
+  const roomTypes = roomTypesSnap.docs
+    .filter((doc) => isFlagOn(doc.data().active) && isFlagOn(doc.data().visibleToAgencies))
+    .map((doc) => Object.assign({ roomTypeId: doc.id }, doc.data()));
   const dates = dateRange(startDate, endDate);
   const days = [];
 
@@ -1057,9 +1079,15 @@ async function getPartnerPropertyAvailability(propertyId, startDate, endDate) {
 exports.getAgencyProperties = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
   const { role } = await callerRole(request);
   if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
-  const snap = await db.collection('accommodation_properties')
-    .where('active', '==', true).where('visibleToAgencies', '==', true).get();
+  // Loose-flag tolerant (see isFlagOn's own comment above): fetch the
+  // (always small) accommodation_properties collection unfiltered and
+  // filter in application code, rather than a type-strict
+  // .where('active','==',true) query that would silently exclude a real
+  // property whose active/visibleToAgencies was hand-typed as "true"/1
+  // instead of a real boolean.
+  const snap = await db.collection('accommodation_properties').get();
   const partners = snap.docs
+    .filter((doc) => isFlagOn(doc.data().active) && isFlagOn(doc.data().visibleToAgencies))
     .map((doc) => Object.assign({ propertyId: doc.id }, doc.data()))
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
     .map((p) => ({
@@ -1083,13 +1111,13 @@ exports.getAgencyPropertyRoomTypes = onCall({ region: 'us-central1', maxInstance
   const propertyId = String((request.data || {}).propertyId || '');
   if (!propertyId || propertyId === 'VILU') throw new HttpsError('invalid-argument', 'A partner propertyId is required.');
   const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
-  if (!propSnap.exists || propSnap.data().active !== true || propSnap.data().visibleToAgencies !== true) {
+  if (!propSnap.exists || !isFlagOn(propSnap.data().active) || !isFlagOn(propSnap.data().visibleToAgencies)) {
     throw new HttpsError('not-found', 'Property not found.');
   }
-  const snap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types')
-    .where('active', '==', true).where('visibleToAgencies', '==', true).get();
+  // Loose-flag tolerant -- see isFlagOn's own comment above.
+  const snap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types').get();
   return {
-    roomTypes: snap.docs.map((doc) => {
+    roomTypes: snap.docs.filter((doc) => isFlagOn(doc.data().active) && isFlagOn(doc.data().visibleToAgencies)).map((doc) => {
       const rt = doc.data();
       return {
         roomTypeId: doc.id, roomTypeName: String(rt.roomTypeName || doc.id),

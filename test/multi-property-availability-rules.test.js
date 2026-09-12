@@ -100,6 +100,42 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
       assert.ok(!ids.includes('PARTNER_INACTIVE'));
       assert.ok(!ids.includes('PARTNER_HIDDEN'));
     });
+    // Hotel-selection live-bug investigation (2026-09-12): production-shaped
+    // documents can have active/visibleToAgencies typed as a string or
+    // number if Vilu staff ever hand-edited a doc directly in the Firebase
+    // console (the PMS admin UI itself always sends a real boolean, but
+    // nothing stops a direct console edit) -- a strict `.where(...,'==',true)`
+    // query would silently exclude such a property forever, with no error
+    // anywhere. This proves the loose-but-still-safe isFlagOn() tolerance.
+    await seedProperty('PARTNER_STRINGFLAGS', { active: 'true', visibleToAgencies: 'true' });
+    await seedProperty('PARTNER_NUMFLAGS', { active: 1, visibleToAgencies: 1 });
+    // Written directly (not via seedProperty, whose own defaults would
+    // silently re-add `active: true`) so `active` is genuinely absent.
+    await db.collection('accommodation_properties').doc('PARTNER_MISSINGFLAG').set({
+      propertyName: 'Test Partner PARTNER_MISSINGFLAG', propertyType: 'Guesthouse', location: 'Test Island',
+      availabilityMode: 'MANUAL_INVENTORY', displayOrder: 10, visibleToAgencies: true, isVilu: false,
+    });
+    await seedProperty('PARTNER_FALSESTRING', { active: 'false', visibleToAgencies: true }); // must stay excluded
+    await test('a property with active/visibleToAgencies typed as the STRING "true" is still returned, not silently hidden', async () => {
+      const r = await callAs(getPropertiesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const ids = r.properties.map((p) => p.propertyId);
+      assert.ok(ids.includes('PARTNER_STRINGFLAGS'), 'a hand-typed string "true" must not be silently excluded');
+    });
+    await test('a property with active/visibleToAgencies typed as the NUMBER 1 is still returned', async () => {
+      const r = await callAs(getPropertiesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const ids = r.properties.map((p) => p.propertyId);
+      assert.ok(ids.includes('PARTNER_NUMFLAGS'), 'a hand-typed 1 must not be silently excluded');
+    });
+    await test('a property with the active field missing entirely stays excluded (never defaults to visible)', async () => {
+      const r = await callAs(getPropertiesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const ids = r.properties.map((p) => p.propertyId);
+      assert.ok(!ids.includes('PARTNER_MISSINGFLAG'), 'a missing field must never be treated as true -- this is tolerance, not a security loosening');
+    });
+    await test('a property with active explicitly "false" (string) stays excluded -- the tolerance only widens what counts as true, never what counts as false', async () => {
+      const r = await callAs(getPropertiesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
+      const ids = r.properties.map((p) => p.propertyId);
+      assert.ok(!ids.includes('PARTNER_FALSESTRING'));
+    });
     await test('the response never includes notesInternal or any other internal-only field', async () => {
       const r = await callAs(getPropertiesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, {});
       const json = JSON.stringify(r);
@@ -118,7 +154,13 @@ const ADMIN_EMAIL = 'viluresidence@gmail.com';
     await seedRoomType('PARTNER_OK', 'RT_OK', {});
     await seedRoomType('PARTNER_OK', 'RT_INACTIVE', { active: false });
     await seedRoomType('PARTNER_OK', 'RT_NORATE', { agencyRate: null });
+    await seedRoomType('PARTNER_OK', 'RT_STRINGFLAG', { active: 'true', visibleToAgencies: 'true' });
 
+    await test('a room type with active/visibleToAgencies typed as the string "true" is still returned (same tolerance as getAgencyProperties)', async () => {
+      const r = await callAs(getRoomTypesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, { propertyId: 'PARTNER_OK' });
+      const ids = r.roomTypes.map((rt) => rt.roomTypeId);
+      assert.ok(ids.includes('RT_STRINGFLAG'));
+    });
     await test('only active + visible room types are returned', async () => {
       const r = await callAs(getRoomTypesWrapped, AGENCY_A_UID, AGENCY_A_EMAIL, { propertyId: 'PARTNER_OK' });
       const ids = r.roomTypes.map((rt) => rt.roomTypeId);
