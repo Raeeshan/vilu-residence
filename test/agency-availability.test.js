@@ -134,29 +134,40 @@ section('Case E — Part 6/7: Check Availability UI');
   });
 }
 
-section('Case F — Part 9/10/11: Agency Calendar design, redaction, own-booking summary');
+section('Case F — Part 9/10/11: Agency Calendar design (post-completion PMS-mirror redesign), redaction, own-booking summary');
 {
-  test('the calendar renders AVAILABLE/OCCUPIED(other)/OCCUPIED(own)/BLOCKED as distinct visual states, matching the legend', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
-    assert.match(src, /state === 'OCCUPIED'/);
-    assert.match(src, /state === 'BLOCKED'/);
-    assert.match(PORTAL, />Occupied \(other\)/);
+  test('agCellBucket() resolves exactly the 5 safe states (AVAILABLE/OWN_BOOKING/OWN_HOLD/OCCUPIED/BLOCKED) -- never anything more specific for a cell this agency does not own', () => {
+    const src = extractByStart(PORTAL, /function agCellBucket\(roomId, ds\)\s*\{/);
+    assert.match(src, /kind:'OWN_BOOKING'/);
+    assert.match(src, /kind:'OWN_HOLD'/);
+    assert.match(src, /kind:'OCCUPIED'\}/);
+    assert.match(src, /kind:'BLOCKED'\}/);
+    assert.match(src, /kind:'AVAILABLE'\}/);
+    assert.match(PORTAL, />Occupied<\/span>/);
+    assert.match(PORTAL, />Blocked<\/span>/);
   });
-  test('a non-owned OCCUPIED cell shows only "Occupied" -- no guest name, source, or price -- and a BLOCKED cell shows only "Blocked", never a reason', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
-    assert.match(src, /title = 'Occupied';/);
-    assert.match(src, /title = 'Blocked';/);
-    assert.doesNotMatch(src, /block\.reason/);
+  test('a non-owned OCCUPIED/BLOCKED bar shows only a generic alert -- no guest name, source, price, or block reason anywhere in its click handler', () => {
+    const occSrc = extractByStart(PORTAL, /function agShowGenericOccupied\(\)\s*\{/);
+    const blkSrc = extractByStart(PORTAL, /function agShowGenericBlocked\(\)\s*\{/);
+    assert.match(occSrc, /'Occupied/);
+    assert.match(blkSrc, /'Blocked/);
+    assert.doesNotMatch(occSrc + blkSrc, /guestName|reason|price|agencyName/);
   });
-  test('own-booking cells are clickable and open a read-only safe summary (Part 11) -- guest name, arrival, departure, nights, guests, status, reference only', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
-    assert.match(src, /openOwnBookingSummary\(/);
+  test('own-booking bars are clickable and open the existing read-only safe summary (Part 11, unchanged by the redesign) -- guest name, arrival, departure, nights, guests, status, reference only', () => {
+    const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.match(src, /openOwnBookingSummary\(bucket\.id\)/);
     const summarySrc = extractByStart(PORTAL, /function openOwnBookingSummary\(reservationId\)\s*\{/);
     ['Guest', 'Arrival', 'Departure', 'Nights', 'Guests', 'Status', 'Booking reference'].forEach(label => {
       assert.match(summarySrc, new RegExp('<label>' + label));
     });
   });
-  test('the own-booking modal has no edit/cancel/change controls (Part 24 -- read-only in Phase D) -- only closeOwnBookingSummary appears as an onclick target', () => {
+  test('own-hold bars open a read-only info alert built only from THIS agency\'s own already-fetched hold data (_myHoldRequests) -- arrival/departure/held-until only', () => {
+    const src = extractByStart(PORTAL, /function agShowOwnHoldInfo\(hold\)\s*\{/);
+    assert.match(src, /hold\.arrivalDate/);
+    assert.match(src, /hold\.departureDate/);
+    assert.match(src, /hold\.approvedHoldUntil/);
+  });
+  test('the own-booking modal has no edit/cancel/change controls (Part 24 -- read-only in Phase D, untouched by this redesign) -- only closeOwnBookingSummary appears as an onclick target', () => {
     const modalStart = PORTAL.indexOf('id="m-own-booking"');
     const modalEnd = PORTAL.indexOf('<!-- Margin Ledger modal removed', modalStart);
     const modalHTML = PORTAL.slice(modalStart, modalEnd);
@@ -166,20 +177,34 @@ section('Case F — Part 9/10/11: Agency Calendar design, redaction, own-booking
       assert.match(oc, /closeOwnBookingSummary/, `unexpected onclick in the read-only own-booking modal: ${oc}`);
     });
   });
+  test('clicking an AVAILABLE cell only ever fills the existing Check-in/Check-out inputs and reuses searchAvailability() -- never creates/holds/writes anything itself', () => {
+    const src = extractByStart(PORTAL, /function agCellClick\(roomId, ds\)\s*\{/);
+    assert.doesNotMatch(src, /(?:collection|doc)\([^)]*\)[^;]*\.(?:set|update|add|delete)\(/);
+    assert.match(src, /searchAvailability\(\)/);
+  });
 }
 
-section('Case G — Part 12/13: no fabricated pending states, bounded date range with fast-jump controls');
+section('Case G — Part 12/13: no fabricated pending states, bounded date range with fast-jump controls (PMS-style 14/30/60 + Today + weekly Prev/Next)');
 {
-  test('no pending-hold/pending-request calendar state is fabricated -- only AVAILABLE/OCCUPIED/BLOCKED exist anywhere in the render logic', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
-    assert.doesNotMatch(src, /PENDING/);
+  test('no pending-hold/pending-request calendar state is fabricated -- only the 5 safe buckets exist anywhere in the render/bucket logic', () => {
+    const bucketSrc = extractByStart(PORTAL, /function agCellBucket\(roomId, ds\)\s*\{/);
+    const drawSrc = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.doesNotMatch(bucketSrc + drawSrc, /'PENDING'/);
   });
-  test('calGridSetDays(14)/calGridSetDays(30) and calGridToday() exist and are wired to the 14d/30d/Today buttons', () => {
-    assert.match(PORTAL, /function calGridSetDays\(n\)\{/);
-    assert.match(PORTAL, /function calGridToday\(\)\{/);
-    assert.match(PORTAL, /onclick="calGridSetDays\(14\)"/);
-    assert.match(PORTAL, /onclick="calGridSetDays\(30\)"/);
-    assert.match(PORTAL, /onclick="calGridToday\(\)"/);
+  test('agSetCalView(14/30/60) and agCalNavToday()/agCalNav() exist and are wired to the calendar\'s own Today/14-30-60/Prev/Next controls -- same navigation surface the PMS calendar exposes', () => {
+    assert.match(PORTAL, /function agSetCalView\(n\)\{/);
+    assert.match(PORTAL, /function agCalNavToday\(\)\{/);
+    assert.match(PORTAL, /function agCalNav\(dir\)\{/);
+    assert.match(PORTAL, /onclick="agSetCalView\(14\)"/);
+    assert.match(PORTAL, /onclick="agSetCalView\(30\)"/);
+    assert.match(PORTAL, /onclick="agSetCalView\(60\)"/);
+    assert.match(PORTAL, /onclick="agCalNavToday\(\)"/);
+    assert.match(PORTAL, /onclick="agCalNav\(-1\)"/);
+    assert.match(PORTAL, /onclick="agCalNav\(1\)"/);
+  });
+  test('Prev/Next step by exactly 7 days regardless of the 14/30/60 view size, matching the PMS calendar\'s own window.calNav(d) behavior', () => {
+    const src = extractByStart(PORTAL, /function agCalNav\(dir\)\{/);
+    assert.match(src, /agCalD\.setDate\(agCalD\.getDate\(\)\+dir\*7\)/);
   });
 }
 
@@ -235,12 +260,14 @@ section('Case K — Part 20/21: quote/custom-package availability integration is
   });
 }
 
-section('Case L — Part 33: zero inventory writes anywhere in Phase D code');
+section('Case L — Part 33: zero inventory writes anywhere in Phase D code (still true after the PMS-mirror redesign)');
 {
   const phaseDFns = [
     extractByStart(FUNCTIONS, /exports\.getAgencyAvailability = onCall\(\{ region: 'us-central1', maxInstances: 10 \}, async \(request\) => \{/),
     extractByStart(PORTAL, /async function fetchLiveAvailability\(startDate, endDateExclusive\) \{/),
-    extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/),
+    extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/),
+    extractByStart(PORTAL, /function agCellBucket\(roomId, ds\)\s*\{/),
+    extractByStart(PORTAL, /function agCellClick\(roomId, ds\)\s*\{/),
     extractByStart(PORTAL, /async function searchAvailability\(\)\s*\{/),
     extractByStart(PORTAL, /async function checkAvailabilityForDates\(arrivalDate, departureDate, targetElId\)\s*\{/),
     extractByStart(PORTAL, /function openOwnBookingSummary\(reservationId\)\s*\{/),
@@ -252,18 +279,47 @@ section('Case L — Part 33: zero inventory writes anywhere in Phase D code');
   });
 }
 
-section('Case M — Part 28: existing calendar UX preserved, not rewritten wholesale');
+section('Case M — Post-completion hardening: Availability Calendar redesign mirrors the PMS Calendar (vilu-unified.html\'s .cb-*/drawCal() system), no admin-only interaction copied along with it');
 {
-  test('the calendar is still a <table> grid with rooms as rows and dates as columns, same legend color scheme (dcfce7 available / dbeafe own / fee2e2 occupied / fef3c7 blocked)', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
-    assert.match(src, /#dcfce7/);
-    assert.match(src, /#dbeafe/);
-    assert.match(src, /#fee2e2/);
-    assert.match(src, /#fef3c7/);
+  test('the calendar now uses the SAME .cb-* class system as the real PMS Calendar (cb-wrap/cb-topbar/cb-fixed-col/cb-scroll-area/cb-grid/cb-date-header-row/cb-booking-row/cb-cell/cb-bar) -- not a plain <table>', () => {
+    assert.match(PORTAL, /class="cb-wrap"/);
+    assert.match(PORTAL, /class="cb-topbar"/);
+    assert.match(PORTAL, /id="ag-cb-fixed-col"/);
+    assert.match(PORTAL, /id="ag-cb-scroll-area"/);
+    assert.match(PORTAL, /id="ag-cb-grid"/);
+    const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.match(src, /cb-date-header-row/);
+    assert.match(src, /cb-booking-row/);
+    assert.match(src, /cb-cell/);
+    assert.match(src, /cb-bar/);
   });
-  test('calGridShift/ROOMS_LIST/ymdStr/esc/fd helpers are unchanged in shape, still used by the new renderer', () => {
-    assert.match(PORTAL, /function calGridShift\(dir\)\{/);
+  test('bars use flat, non-per-guest colors for the two states the agency does not own (Occupied #f59e0b, Blocked #9aa4b2), and distinct colors for its own two states (own booking #4fb3e3, own hold #c4b5fd) -- matching the footer legend', () => {
+    const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.match(src, /#4fb3e3/);
+    assert.match(src, /#c4b5fd/);
+    assert.match(src, /#f59e0b/);
+    assert.match(src, /#9aa4b2/);
+    assert.match(PORTAL, /background:#4fb3e3"><\/i>Your booking/);
+    assert.match(PORTAL, /background:#c4b5fd"><\/i>Your hold/);
+    assert.match(PORTAL, /background:#f59e0b"><\/i>Occupied/);
+    assert.match(PORTAL, /background:#9aa4b2"><\/i>Blocked/);
+  });
+  test('consecutive same-state days merge into ONE continuous bar (agBarKey groups by kind, and additionally by reservation/hold id for the two "own" kinds) -- mirrors the PMS calendar\'s real per-stay bars instead of one colored cell per day', () => {
+    const src = extractByStart(PORTAL, /function agBarKey\(b\)\s*\{/);
+    assert.match(src, /b\.kind\+\(b\.id\?/);
+  });
+  test('ROOMS_LIST/ymdStr/esc/fd helpers are unchanged in shape, still used by the new renderer -- and fetchLiveAvailability remains the ONLY data source (unchanged Cloud Function contract)', () => {
     assert.match(PORTAL, /function ymdStr\(d\)\{ return d\.toISOString\(\)\.slice\(0,10\); \}/);
+    assert.match(PORTAL, /var ROOMS_LIST = \[/);
+    const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.match(src, /fetchLiveAvailability\(startDate, endDateExclusive\)/);
+  });
+  test('no admin-only PMS interaction was copied along with the visual design: no drag-select-to-book, no reservation move/resize, no manual block creation, no cross-reservation search box anywhere in the portal', () => {
+    assert.doesNotMatch(PORTAL, /draggable="true"|dragstart|calSearchMatches|cb-search/);
+  });
+  test('the pan-to-scroll drag is scoped to the date header only (pure UI, same interaction the PMS calendar offers) and never fires on a bar (a bar\'s own click must still work)', () => {
+    const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.match(src, /header\.onmousedown=function\(e\)\{\s*\n\s*if\(e\.target\.closest\('\.cb-bar'\)\) return;/);
   });
 }
 

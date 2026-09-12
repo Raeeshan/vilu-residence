@@ -244,17 +244,18 @@ section('Case K — Part 15/16: My Holds UI, approved-hold display');
   });
 }
 
-section('Case L — Part 17/28: calendar integration, no privacy regression');
+section('Case L — Part 17/28: calendar integration, no privacy regression (post-completion PMS-mirror redesign: same guarantees, now inside agCellBucket())');
 {
   test('own approved holds are matched CLIENT-SIDE against the already-fetched _myHoldRequests, never by asking the server "whose block is this"', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
+    const src = extractByStart(PORTAL, /function agCellBucket\(roomId, ds\)\s*\{/);
     assert.match(src, /_myHoldRequests\.find\(function\(h\)\{/);
-    assert.match(src, /h\.status==='APPROVED' && h\.roomId===room\.id/);
+    assert.match(src, /h\.status==='APPROVED' && h\.roomId===roomId/);
   });
-  test('a non-owned BLOCKED cell still shows only "Blocked", never a reason, never who it belongs to', () => {
-    const src = extractByStart(PORTAL, /async function renderAgencyCalendarGrid\(\)\s*\{/);
-    assert.match(src, /title = 'Blocked';/);
-    assert.doesNotMatch(src, /block\.reason|myHold\.agencyName/);
+  test('a non-owned BLOCKED bar still shows only "Blocked", never a reason, never who it belongs to', () => {
+    const bucketSrc = extractByStart(PORTAL, /function agCellBucket\(roomId, ds\)\s*\{/);
+    const blkSrc = extractByStart(PORTAL, /function agShowGenericBlocked\(\)\s*\{/);
+    assert.match(blkSrc, /'Blocked/);
+    assert.doesNotMatch(bucketSrc, /block\.reason|myHold\.agencyName/);
   });
 }
 
