@@ -2283,12 +2283,59 @@ async function renderAccommodationRoomType(prefix, propertyId){
   }
   var currentRt = roomTypes.some(function(rt){ return rt.roomTypeId===state.roomTypeId; }) ? state.roomTypeId : roomTypes[0].roomTypeId;
   state.roomTypeId = currentRt;
+  // Part 8 (calendar-fix follow-up): "Property / Room type / Availability
+  // status / Rate status" -- the rate status is already the option label's
+  // own "Rate on request" fallback; #<prefix>-acc-availability-status
+  // (filled by accCheckAvailabilityStatus(), called right after this) is
+  // the live Available/Unavailable/On Request line.
   wrap.innerHTML = '<div class="fg" style="margin:8px 0 0"><label>Room type</label><select onchange="accRoomTypeChanged(\''+prefix+'\',this.value)">'
     + roomTypes.map(function(rt){
         var rateLabel = rt.agencyRate!=null ? (rt.currency||'USD')+' '+rt.agencyRate+'/night' : 'Rate on request';
         return '<option value="'+esc(rt.roomTypeId)+'"'+(rt.roomTypeId===currentRt?' selected':'')+'>'+esc(rt.roomTypeName)+' — '+rateLabel+'</option>';
       }).join('')
-    + '</select></div>';
+    + '</select></div>'
+    + '<div id="'+prefix+'-acc-availability-status" style="font-size:var(--font-size-sm);margin-top:6px"></div>';
+  accCheckAvailabilityStatus(prefix);
+}
+// Part 8 (calendar-fix follow-up): a live Available/Unavailable/On Request
+// line next to the accommodation picker, using the SAME getAgencyAvailability
+// data source the main calendar/searchAvailability already read -- never a
+// second lookup path. Vilu has its own separate "Check availability" button
+// already (checkAvailabilityForDates), so this only ever runs for a
+// selected PARTNER property. Never exposes anything beyond this one status
+// word -- no internal rate, no other guest's data.
+async function accCheckAvailabilityStatus(prefix){
+  var state = accState(prefix);
+  var el = document.getElementById(prefix+'-acc-availability-status');
+  if(!el) return;
+  if(!state.propertyId || state.propertyId==='VILU' || !state.roomTypeId){ el.innerHTML=''; return; }
+  var prop = (AG_PROPERTIES||[]).find(function(p){ return p.propertyId===state.propertyId; });
+  if(prop && prop.availabilityMode==='ON_REQUEST'){
+    el.innerHTML = '<span style="color:#92400e;font-weight:600">On Request — Vilu must confirm</span>';
+    return;
+  }
+  var arrivalEl = document.getElementById(prefix+'-arrival'), departureEl = document.getElementById(prefix+'-departure');
+  var arrival = arrivalEl ? arrivalEl.value : '', departure = departureEl ? departureEl.value : '';
+  if(!arrival || !departure || departure<=arrival){ el.innerHTML=''; return; }
+  el.innerHTML = '<span style="color:var(--muted)">Checking availability…</span>';
+  try {
+    var result = await fsFunctions.httpsCallable('getAgencyAvailability')({ propertyId: state.propertyId, startDate: arrival, endDate: departure });
+    var byCell = {};
+    (result.data.days||[]).forEach(function(d){ byCell[d.roomTypeId+'|'+d.date] = d; });
+    var d = new Date(arrival+'T00:00:00Z'), end = new Date(departure+'T00:00:00Z'), free = true;
+    while(d < end){
+      var ds = d.toISOString().slice(0,10);
+      var cell = byCell[state.roomTypeId+'|'+ds];
+      if(cell && cell.state!=='AVAILABLE'){ free = false; break; }
+      d.setUTCDate(d.getUTCDate()+1);
+    }
+    el.innerHTML = free
+      ? '<span style="color:var(--green);font-weight:600">Available for these dates</span>'
+      : '<span style="color:#b91c1c;font-weight:600">Not available for these dates</span>';
+  } catch(e) {
+    console.error('accCheckAvailabilityStatus failed', e);
+    el.innerHTML = '<span style="color:#b91c1c">Could not check availability</span>';
+  }
 }
 function accPropertyChanged(prefix, propertyId){
   renderAccommodationRoomType(prefix, propertyId).then(function(){
@@ -2479,6 +2526,7 @@ async function updateQuotePreview(){
   _quoteWorking.accommodationRoomTypeName = accSel.roomTypeName;
   _quoteWorking.accommodationRateSnapshot = accSel.rate;
   _quoteWorking.accommodationCurrency = accSel.currency;
+  accCheckAvailabilityStatus('quote');
 
   var netEl = document.getElementById('quote-vilu-net');
   if(netEl) netEl.textContent = 'USD '+net.total.toFixed(2)+(net.extraNights ? ' (incl. '+net.extraNights+' extra night'+(net.extraNights>1?'s':'')+')' : '');
@@ -2516,6 +2564,26 @@ async function finalizeQuote(){
     alert('Enter a guest selling price before finalizing'); return;
   }
   if(!confirm('Finalize this quotation?\n\nAfter finalization, the commercial details will be locked.')) return;
+  // Calendar-fix follow-up (Part 5): a partner-property accommodation must
+  // have its Vilu net resolved server-side, from an admin-approved rate --
+  // never the client's own calcQuoteViluNet() result, which only knows the
+  // package's Vilu rate. firestore.rules refuses a direct client write that
+  // finalizes with a non-Vilu accommodationPropertyId (see that rule's
+  // comment), so this branch is required, not optional, for that case; a
+  // Vilu-only quote keeps the exact same direct-write path as before.
+  if(_quoteWorking.accommodationPropertyId && _quoteWorking.accommodationPropertyId !== 'VILU'){
+    try {
+      var result = await fsFunctions.httpsCallable('finalizeAgencyAssignedPackageQuote')({ quoteId: _quoteWorking.quoteId });
+      _quoteWorking = result.data;
+      alert('Quotation finalized.');
+      closeQuoteBuilder();
+      drawQuotations();
+    } catch(e) {
+      console.error('finalizeAgencyAssignedPackageQuote failed', e);
+      alert((e && e.message) || 'Could not finalize — please try again');
+    }
+    return;
+  }
   var now = new Date().toISOString();
   _quoteWorking.status = 'FINALIZED';
   _quoteWorking.finalizedAt = now;
@@ -2931,6 +2999,7 @@ function updateCustomQuotePreview(){
   // must remain authoritative").
   var accSel = accSelectionSummary('cp');
   var accommodationTotal = (!accSel.isVilu && accSel.rate!=null && nights>0) ? +(accSel.rate*nights).toFixed(2) : 0;
+  accCheckAvailabilityStatus('cp');
   var netTotal = componentsNetTotal + accommodationTotal;
   var sellingPrice = +(document.getElementById('cp-selling-price').value||0);
   var earnings = sellingPrice - netTotal;

@@ -145,9 +145,15 @@ section('Case C — Component rate integrity (Part 6/19): client never sends a r
     assert.match(src, /db\.collection\('agency_packages'\)\.doc\(agencyEmailLower\)\.get\(\)/);
   });
   test('THE critical firestore.rules fix: a CUSTOM_PACKAGE quote can only be created/updated by Admin/Staff/Manager or the (Admin-SDK, rules-bypassing) Cloud Function -- direct agency client writes are restricted to ASSIGNED_PACKAGE only', () => {
-    const block = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /agency_quotes/{quoteId}') + 2400);
+    const block = RULES.slice(RULES.indexOf('match /agency_quotes/{quoteId}'), RULES.indexOf('match /agency_quotes/{quoteId}') + 3400);
     assert.match(block, /allow create: if request\.auth != null\s*\n\s*&& request\.resource\.data\.agencyId == request\.auth\.uid\s*\n\s*&& request\.resource\.data\.quoteType == 'ASSIGNED_PACKAGE';/);
-    assert.match(block, /&& resource\.data\.status == 'DRAFT'\s*\n\s*&& resource\.data\.quoteType == 'ASSIGNED_PACKAGE'\);/);
+    // Calendar-fix follow-up added one more clause after the ASSIGNED_PACKAGE
+    // check (blocking a direct-client FINALIZE with a non-Vilu accommodation
+    // -- see finalizeAgencyAssignedPackageQuote's own tests) -- this still
+    // proves the same underlying guarantee this test protects: a
+    // CUSTOM_PACKAGE quote's update remains restricted to
+    // Admin/Staff/Manager or the Cloud Function, never a direct agency write.
+    assert.match(block, /&& resource\.data\.status == 'DRAFT'\s*\n\s*&& resource\.data\.quoteType == 'ASSIGNED_PACKAGE'\s*\n\s*&& \(request\.resource\.data\.status/);
   });
   test('the Cloud Function uses the Admin SDK (getFirestore from firebase-admin), which is documented to bypass security rules -- confirming the rule restriction above does not also block the function itself', () => {
     assert.match(FUNCTIONS, /const \{ getFirestore, FieldValue \} = require\('firebase-admin\/firestore'\);/);

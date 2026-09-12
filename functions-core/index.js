@@ -51,6 +51,13 @@
 //     returns internal_note/notes/viluNetTotal/agencyEarnings/
 //     paymentCollector or any other internal PMS field. See the comment
 //     above that export.
+//   finalizeAgencyAssignedPackageQuote  Calendar-fix follow-up -- the one
+//     case an Assigned Package quote's FINALIZE can no longer go straight
+//     through the client: a non-Vilu accommodation. Re-resolves the
+//     agency's own package + an admin-approved partner-property rate
+//     override server-side and blocks finalizing with no configured rate.
+//     A Vilu-only finalize is unaffected (still the existing direct write).
+//     See the comment above that export.
 //   settlementEligibilityOnReservation / markAgencySettlementPaymentSent /
 //     confirmAgencySettlementReceived / disputeAgencySettlement /
 //     resolveAgencySettlementDispute / reconcileMissingAgencySettlements
@@ -772,6 +779,144 @@ exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 
   };
   await db.collection('agency_quotes').doc(quoteId).set(quote);
   return quote;
+});
+
+// Same per-person/extra-nights formula as calcQuoteViluNet() in
+// vilu-agency-portal.html (Phase B) -- kept byte-for-byte equivalent so a
+// Vilu-only assigned-package quote's total is IDENTICAL whether computed
+// here or by the client during editing. The only new thing this adds is
+// *which* basePerPerson number feeds the formula: the package's own
+// agencyPricePerRoom for Vilu, or an admin-approved partner override for a
+// partner property (see resolveAssignedPackageRate below) -- never a
+// client-supplied number either way.
+function calcAssignedPackageViluNet(basePerPerson, childDiscountPct, baseNights, adults, children, arrivalDate, departureDate, extraNightRate) {
+  const childPerPerson = basePerPerson * (1 - (childDiscountPct || 0) / 100);
+  const baseTotal = basePerPerson * (adults || 0) + childPerPerson * (children || 0);
+  let totalNights = baseNights || 0;
+  if (arrivalDate && departureDate) {
+    const n = Math.round((new Date(departureDate) - new Date(arrivalDate)) / 864e5);
+    if (n > 0) totalNights = n;
+  }
+  const extraNights = Math.max(0, totalNights - (baseNights || 0));
+  const extraNightsCost = extraNights * (extraNightRate || 0) * (adults || 0);
+  return { baseNights: baseNights || 0, totalNights, extraNights, total: +(baseTotal + extraNightsCost).toFixed(2) };
+}
+
+// Calendar-fix follow-up task (Part 5/6): "the server must use a trusted
+// Vilu-controlled package/property/room rate -- do NOT blindly reuse the
+// Vilu Residence package rate." A package's own agencyPricePerRoom is a
+// Vilu-only figure (it prices Vilu's own rooms/meals/transport bundle);
+// swapping in a partner property must never silently reuse that number.
+// Instead each package may carry an admin-set `partnerRates[propertyId] =
+// { agencyPricePerRoom, currency }` override (edited alongside the
+// package's own Vilu rate in the PMS's per-agency package editor) -- the
+// SAME per-person unit the Vilu path already uses, just scoped to one
+// partner property. No override configured => null => "Rate on request",
+// exactly like a partner room type's unset agencyRate already means for
+// Custom Package quotes (resolveAccommodationSelection above).
+function resolveAssignedPackageRate(pkg, accommodation) {
+  if (accommodation.isVilu) {
+    return { perPerson: Number(pkg.agencyPricePerRoom || pkg.pricePerRoom) || 0, currency: 'USD', configured: true };
+  }
+  const override = pkg.partnerRates && pkg.partnerRates[accommodation.propertyId];
+  if (!override || typeof override.agencyPricePerRoom !== 'number' || !Number.isFinite(override.agencyPricePerRoom)) {
+    return { perPerson: null, currency: null, configured: false };
+  }
+  return { perPerson: override.agencyPricePerRoom, currency: override.currency || 'USD', configured: true };
+}
+
+// ── finalizeAgencyAssignedPackageQuote: calendar-fix follow-up task ────────
+// Assigned Package quotes (Phase B) have always been created/saved as a
+// direct client write straight to agency_quotes -- that was safe when the
+// only possible accommodation was Vilu itself (the price is the agency's
+// own already-owned agency_packages data, nothing to spoof). Multi-Property
+// Availability (Phase 4) then let a quote's accommodation be a partner
+// property too, but never gave FINALIZE a server-side check for that case
+// -- an agency could finalize a partner-property quote and the client would
+// just keep computing viluNetTotal from the package's Vilu-only rate,
+// completely ignoring which property was actually selected. firestore.rules'
+// agency_quotes update rule now refuses a direct client write that
+// transitions to FINALIZED with a non-Vilu accommodationPropertyId, forcing
+// that one case through here instead -- this function re-resolves
+// everything server-side (the agency's own package doc, the accommodation
+// selection, and -- only for a partner property -- the admin-approved
+// partnerRates override) and blocks finalizing with no configured rate,
+// the same "never a guessed number" discipline submitAgencyCustomQuote
+// already applies to Custom Package quotes. A Vilu-only quote computed
+// through here comes out byte-identical to the existing client path (see
+// calcAssignedPackageViluNet's comment) -- this is not a parallel formula,
+// it is the same one, just re-run somewhere the agency cannot see or edit
+// its inputs.
+exports.finalizeAgencyAssignedPackageQuote = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { email, role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const agencyEmailLower = email.toLowerCase();
+  const quoteId = String((request.data || {}).quoteId || '').trim();
+  if (!quoteId) throw new HttpsError('invalid-argument', 'quoteId is required.');
+
+  const quoteRef = db.collection('agency_quotes').doc(quoteId);
+  const quoteSnap = await quoteRef.get();
+  if (!quoteSnap.exists) throw new HttpsError('not-found', 'Quotation not found.');
+  const quote = quoteSnap.data();
+  if (quote.agencyId !== request.auth.uid) throw new HttpsError('permission-denied', 'Not your quotation.');
+  if (quote.quoteType !== 'ASSIGNED_PACKAGE') throw new HttpsError('invalid-argument', 'This function only finalizes assigned-package quotes.');
+  if (quote.status !== 'DRAFT') throw new HttpsError('failed-precondition', 'This quotation is already finalized and can no longer be edited.');
+  if (!quote.guestName || !quote.arrivalDate || !quote.departureDate) {
+    throw new HttpsError('invalid-argument', 'Guest name and travel dates are required before finalizing.');
+  }
+  if (!(Number(quote.agencyGuestSellingTotal) > 0)) {
+    throw new HttpsError('invalid-argument', 'Enter a guest selling price before finalizing.');
+  }
+
+  // The agency's own package -- the SAME trusted source resolveAgencyQuoteComponent()
+  // already reads for a Custom Package's 'agency_package' component; never
+  // trusted from the quote doc's own (agency-writable while DRAFT) fields.
+  const pkgSnap = await db.collection('agency_packages').doc(agencyEmailLower).get();
+  const packages = (pkgSnap.exists && pkgSnap.data().packages) || [];
+  const pkg = packages.find((p) => p.id === quote.packageId);
+  if (!pkg) throw new HttpsError('not-found', 'Package not found in your own agency package set.');
+  if (pkg.active === false) throw new HttpsError('failed-precondition', 'This package is currently Not assigned.');
+
+  const accommodation = await resolveAccommodationSelection({
+    accommodationPropertyId: quote.accommodationPropertyId,
+    accommodationRoomTypeId: quote.accommodationRoomTypeId,
+  });
+  const rate = resolveAssignedPackageRate(pkg, accommodation);
+  if (!rate.configured) {
+    throw new HttpsError('failed-precondition', 'This accommodation has no approved package rate yet -- ask Vilu to configure it before finalizing.');
+  }
+
+  const settingsSnap = await db.collection('website_content').doc('agency_booking_settings').get();
+  const extraNightRate = (settingsSnap.exists && settingsSnap.data().extraNightRate != null) ? settingsSnap.data().extraNightRate : 40;
+
+  const net = calcAssignedPackageViluNet(
+    rate.perPerson, pkg.childDiscountPct, pkg.nights,
+    Number(quote.adults) || 0, Number(quote.children) || 0,
+    quote.arrivalDate, quote.departureDate, extraNightRate
+  );
+
+  const now = new Date().toISOString();
+  const finalized = Object.assign({}, quote, {
+    nights: net.totalNights,
+    viluNetTotal: net.total,
+    agencyEarnings: +(Number(quote.agencyGuestSellingTotal) - net.total).toFixed(2),
+    status: 'FINALIZED',
+    finalizedAt: now,
+    updatedAt: now,
+    // Same "frozen at finalize time" discipline as Custom Package quotes
+    // (Part 14) -- a historical quote must remain stable even if the
+    // property/package is edited later.
+    accommodationPropertyId: accommodation.propertyId,
+    accommodationPropertyName: accommodation.propertyName,
+    accommodationIsVilu: accommodation.isVilu,
+    accommodationRoomTypeId: accommodation.roomTypeId,
+    accommodationRoomTypeName: accommodation.roomTypeName,
+    accommodationRateSnapshot: rate.perPerson,
+    accommodationCurrency: rate.currency,
+    accommodationAvailabilityMode: accommodation.availabilityMode,
+  });
+  await quoteRef.set(finalized);
+  return finalized;
 });
 
 // ── getAgencyAvailability: Agency Sales Workflow Phase D ───────────────────

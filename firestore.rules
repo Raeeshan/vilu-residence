@@ -607,12 +607,25 @@ service cloud.firestore {
       // restriction as create above -- a CUSTOM_PACKAGE quote can only ever
       // be updated through submitAgencyCustomQuote (Admin SDK) or by
       // Admin/Staff/Manager.
+      //
+      // Calendar-fix follow-up: a direct client write may still finalize an
+      // ASSIGNED_PACKAGE quote (unchanged, zero behavior change) ONLY when
+      // its accommodation is Vilu itself -- the package's own agencyPricePerRoom
+      // is the agency's already-owned data, nothing to spoof. Finalizing
+      // with a partner property requires a trusted Vilu-controlled rate
+      // override that only the server can look up and verify, so that one
+      // transition is refused here and must go through
+      // finalizeAgencyAssignedPackageQuote (Admin SDK, bypasses this rule)
+      // instead -- see the comment above that export.
       allow update: if isAdmin() || isStaff() || isManagerRole()
         || (request.auth != null
             && resource.data.agencyId == request.auth.uid
             && request.resource.data.agencyId == resource.data.agencyId
             && resource.data.status == 'DRAFT'
-            && resource.data.quoteType == 'ASSIGNED_PACKAGE');
+            && resource.data.quoteType == 'ASSIGNED_PACKAGE'
+            && (request.resource.data.status != 'FINALIZED'
+                || !('accommodationPropertyId' in request.resource.data)
+                || request.resource.data.accommodationPropertyId == 'VILU'));
 
       allow delete: if false;
     }

@@ -53,7 +53,14 @@ function onCallStart(name) {
 section('Part 1 audit: no invented partner-hotel data anywhere in this feature');
 {
   test('the pre-existing PH array (hardcoded "Ranfaru Inn"/"White Sand Inn" demo data) is left completely untouched and is never read by any new function', () => {
-    assert.match(PMS, /let PH=\[\s*\n\s*\{id:'ha',nm:'Ranfaru Inn'/, 'PH must still exist unchanged -- drawCal() still renders it');
+    // The array itself and its lookup helpers (getHR/getR/rNm/phNm/phBx)
+    // stay -- so any reservation that already references a PH room, if one
+    // exists, still renders correctly wherever it's displayed (calendar-fix
+    // follow-up task, Part 10). What DID change in that same task: PH is no
+    // longer RENDERED as decorative rows on the real PMS Calendar, and is no
+    // longer OFFERED as a property choice in New Booking -- see
+    // assigned-package-partner-pricing.test.js's "legacy PH system" section.
+    assert.match(PMS, /let PH=\[\s*\n\s*\{id:'ha',nm:'Ranfaru Inn'/, 'PH array itself must still exist unchanged');
     const newFns = [
       extractByStart(PMS, /async function drawHtls\(\)\s*\{/),
       extractByStart(PMS, /async function saveAccProp\(\)\s*\{/),

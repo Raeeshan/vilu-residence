@@ -1769,13 +1769,16 @@ body.pms-mode { overflow:hidden; }
 <!-- Multi-Property Availability (Part 21/22): this REPLACES the old
      Partner Hotels page's content -- that page only ever managed the
      in-memory `PH` array (PH.push()/PH=PH.filter(...), never persisted to
-     Firestore, wiped on every reload; still used, unmodified, by the real
-     Calendar's own decorative partner-hotel rows below, drawCal()'s own
-     PH.forEach() -- left completely untouched, Part 26). `PH`'s "Ranfaru
-     Inn"/"White Sand Inn" were never real, admin-entered partner data (Part
-     1 audit finding) -- this panel is the new, actually-persistent,
-     agency-visible accommodation catalog instead, starting empty until
-     real properties are entered here (Part 29: never pre-seeded). -->
+     Firestore, wiped on every reload). `PH`'s "Ranfaru Inn"/"White Sand Inn"
+     were never real, admin-entered partner data (Part 1 audit finding) --
+     this panel is the new, actually-persistent, agency-visible
+     accommodation catalog instead, starting empty until real properties are
+     entered here (Part 29: never pre-seeded). Calendar-fix follow-up (Part
+     10): the real PMS Calendar's own PH.forEach() decorative rows and the
+     "New Booking" screen's PH property options are both retired now too --
+     getR()/getHR()/phNm()/phBx() are the only PH-reading code left, kept
+     only so any reservation that already references a PH room (if one
+     exists) still renders correctly wherever it's looked up. -->
 <div class="sec" id="s-htls">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div><h2 style="font-size:var(--font-size-lg);font-weight:700">Partner Accommodation</h2><p style="font-size:var(--font-size-sm);color:#6b7280;margin-top:3px">Vilu Residence is always the primary property. Add and manage partner properties agencies can select and check availability for.</p></div>
@@ -2653,6 +2656,14 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
     <div class="mhd"><h3><i class="ti ti-calendar-off" style="color:#00b4d8;margin-right:6px"></i>Manual availability</h3><button class="ab" onclick="document.getElementById('m-ahavail').classList.remove('on')"><i class="ti ti-x"></i></button></div>
     <input type="hidden" id="ahavail-propid"><input type="hidden" id="ahavail-rtid">
     <div id="ahavail-label" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px"></div>
+    <!-- Calendar-fix follow-up (Part 4): a practical staff workflow needs to
+         SEE what's already blocked before changing it -- this was a
+         write-only modal before (no way to view current state without
+         leaving the PMS and checking Firestore directly). Read-only,
+         populated by openAccManualAvailability() from the same
+         manual_availability/data doc setAccManualAvailability() writes. -->
+    <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin-bottom:4px">CURRENTLY BLOCKED</div>
+    <div id="ahavail-current" style="font-size:var(--font-size-sm);margin-bottom:12px;max-height:120px;overflow-y:auto"></div>
     <div class="fg"><label>From date</label><input type="date" id="ahavail-from"></div>
     <div class="fg"><label>To date (exclusive)</label><input type="date" id="ahavail-to"></div>
     <div style="display:flex;gap:8px;margin-top:6px">
@@ -2836,6 +2847,18 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
       <div class="fg"><label>Vilu Agency Rate ($/person) <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">— what Vilu charges this agency, not the guest selling price</span></label><input type="number" id="agy-pkg-price" min="0" step="5"></div>
       <div class="fg"><label>Child Discount (%) <span style="font-size:var(--font-size-xs);color:#9ca3af;font-weight:400">— off the adult price, per child. 0 if unset</span></label><input type="number" id="agy-pkg-childdiscount" min="0" max="100" step="5" placeholder="0"></div>
       <div id="agy-pkg-global-notes" style="font-size:var(--font-size-xs);color:#6b7280;background:#f9fafb;border-radius:8px;padding:8px 10px;margin-bottom:4px"></div>
+
+      <!-- Calendar-fix follow-up (Part 5/6): "the server must use a trusted
+           Vilu-controlled package/property/room rate -- do NOT blindly reuse
+           the Vilu Residence package rate" for a partner property. Each
+           active partner property gets its own optional per-person override
+           here; blank = "Rate on request" and blocks finalizing this
+           package's quote against that property (never a guessed number,
+           never the Vilu rate above reused silently). Saved as
+           pkg.partnerRates[propertyId] = {agencyPricePerRoom, currency}. -->
+      <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">PARTNER PROPERTY RATES</div>
+      <p style="font-size:var(--font-size-xs);color:#9ca3af;margin:-2px 0 10px">If an agency books this package at a partner property instead of Vilu, this is the approved net rate used -- never the Vilu rate above.</p>
+      <div id="agy-pkg-partner-rates"></div>
 
       <div style="font-size:var(--font-size-xs);font-weight:700;color:#9ca3af;letter-spacing:.04em;margin:18px 0 8px">CONTENT</div>
       <div class="fg"><label>Description</label><input type="text" id="agy-pkg-desc" placeholder="Short one-line hook"></div>
@@ -5800,11 +5823,13 @@ function drawCal(){
     // mistaken for a public sell price.
     grp.rooms.forEach(function(rm){fH+='<div class="cb-room-row-lbl vilu-room" title="'+rm.type+' · $'+rm.rate+'/night (internal default)"><span class="rn">'+rm.nm+'</span></div>';});
   });
-  PH.forEach(function(h){
-    var hrs=getHR().filter(function(r){return r.prop===h.id;});
-    fH+='<div class="cb-section-lbl" style="background:'+h.color+'22"><span style="color:'+h.color+'">'+h.nm+'</span></div>';
-    hrs.forEach(function(rm){fH+='<div class="cb-room-row-lbl partner-room" style="border-left-color:'+h.color+'" title="'+h.nm+'"><span class="rn">'+rm.nm+'</span><span class="rt">'+h.nm+'</span></div>';});
-  });
+  // Calendar-fix follow-up (Part 10): the PH-based decorative partner-hotel
+  // rows are retired -- they were always synthetic ("Ranfaru Inn"/"White
+  // Sand Inn", $70/night flat, Part 1 audit), never real Firestore data,
+  // and drew on the REAL PMS calendar every time it was opened. getHR()/
+  // getR()/rNm() are untouched (Part 26: any pre-existing reservation that
+  // references a PH room, if one exists, still renders correctly wherever
+  // it's looked up -- only these always-on decorative section rows go).
   document.getElementById('cb-fixed-rows').innerHTML=fH;
   var gH='<div class="cb-date-header-row">';
   var pM=-1;
@@ -5859,12 +5884,9 @@ function drawCal(){
     gH+='<div class="cb-category-row">'+cc+'</div>';
     grp.rooms.forEach(function(rm){gH+=mR(rm,false,null);});
   });
-  PH.forEach(function(h){
-    var hrs=getHR().filter(function(r){return r.prop===h.id;});
-    var col=h.color;
-    gH+='<div class="cb-section-row" style="background:'+col+'22"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px;background:'+col+'22;border-bottom:1px solid '+col+'44"></div></div>';
-    hrs.forEach(function(rm){gH+=mR(rm,true,col);});
-  });
+  // Calendar-fix follow-up (Part 10): matching fixed-column removal above --
+  // the PH decorative grid rows are retired for the same reason (never real
+  // data, always-on on the real PMS calendar).
   document.getElementById('cb-grid').innerHTML=gH;
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
   if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;calOnScroll(sa);};
@@ -8000,7 +8022,19 @@ function nbApplySuggestedDates(ci,co){
 
 async function initNB(){
   const ps=document.getElementById('nb-prop');
-  ps.innerHTML='<option value="vilu">Vilu Residence (own rooms)</option>'+PH.map(h=>`<option value="${h.id}">${h.nm} (partner)</option>`).join('');
+  // Calendar-fix follow-up (Part 10): the PH array's "Ranfaru Inn"/"White
+  // Sand Inn" options are retired from New Booking -- they were never real,
+  // admin-entered partner data (Part 1 audit), just a hardcoded flat
+  // $70/night demo fixture, yet this dropdown let staff actually create a
+  // REAL reservation against them. The Firestore-backed Partner
+  // Accommodation system (accommodation_properties) is the only live
+  // partner-property source now; a partner-property BOOKING still goes
+  // through the Agency Portal's accommodation_booking_requests flow, not a
+  // PMS-side "New Booking" against a fake in-memory hotel. getR()/getHR()/
+  // phNm()/phBx() are left untouched so any reservation that already
+  // references a PH room (if one exists) still renders correctly wherever
+  // it's displayed -- only the ability to CREATE a new one here is removed.
+  ps.innerHTML='<option value="vilu">Vilu Residence (own rooms)</option>';
   if(!document.getElementById('nb-ci').value)document.getElementById('nb-ci').value=D(1);
   if(!document.getElementById('nb-co').value)document.getElementById('nb-co').value=D(2);
   nbSelectedRooms=[];
@@ -9067,6 +9101,35 @@ function openAccManualAvailability(propertyId, roomTypeId, roomTypeName){
   document.getElementById('ahavail-from').value = '';
   document.getElementById('ahavail-to').value = '';
   document.getElementById('m-ahavail').classList.add('on');
+  renderAccManualAvailabilityCurrent(propertyId, roomTypeId);
+}
+// Merges consecutive blocked dates into ranges for a compact read-only
+// summary -- the same merge-adjacent-days idea the Availability Calendar's
+// own bars use, just as plain text here since this is a simple list, not a
+// grid.
+async function renderAccManualAvailabilityCurrent(propertyId, roomTypeId){
+  var el = document.getElementById('ahavail-current');
+  if(!el) return;
+  el.innerHTML = 'Loading…';
+  try {
+    var snap = await fsDb.collection('accommodation_properties').doc(propertyId).collection('room_types').doc(roomTypeId)
+      .collection('manual_availability').doc('data').get();
+    var blocked = (snap.exists && snap.data().blockedDates) || {};
+    var dates = Object.keys(blocked).filter(function(d){ return blocked[d]; }).sort();
+    if(!dates.length){ el.innerHTML = '<span style="color:#9ca3af">Nothing blocked — every date is available.</span>'; return; }
+    var ranges = [];
+    dates.forEach(function(ds){
+      var last = ranges[ranges.length-1];
+      var prevDay = last ? new Date(new Date(last.end+'T00:00:00Z').getTime()+86400000).toISOString().slice(0,10) : null;
+      if(last && ds===prevDay){ last.end = ds; } else { ranges.push({start:ds, end:ds}); }
+    });
+    el.innerHTML = ranges.map(function(r){
+      return '<div style="padding:3px 0">'+fd(r.start)+(r.end!==r.start?' → '+fd(r.end):'')+'</div>';
+    }).join('');
+  } catch(e) {
+    console.error('renderAccManualAvailabilityCurrent failed', e);
+    el.innerHTML = '<span style="color:#b91c1c">Could not load current availability.</span>';
+  }
 }
 // "Keep it practical" (Part 22): one {date: true} map per room type, set
 // via one merged .set() covering the whole picked range -- never a
@@ -9087,8 +9150,14 @@ async function setAccManualAvailability(available){
   try {
     await fsDb.collection('accommodation_properties').doc(propertyId).collection('room_types').doc(roomTypeId)
       .collection('manual_availability').doc('data').set(upd, {merge:true});
-    document.getElementById('m-ahavail').classList.remove('on');
     toast(available ? '✓ Marked available' : '✓ Marked unavailable');
+    // Stays open (Part 4: "a practical staff workflow") -- clears the
+    // from/to fields and refreshes the read-only summary above so staff can
+    // immediately see the effect and keep adjusting more ranges in one
+    // sitting, rather than reopening this modal after every single change.
+    document.getElementById('ahavail-from').value = '';
+    document.getElementById('ahavail-to').value = '';
+    renderAccManualAvailabilityCurrent(propertyId, roomTypeId);
   } catch(e) {
     console.error('setAccManualAvailability failed', e);
     toast('⚠️ Could not save — please try again');
@@ -9510,8 +9579,54 @@ function openAgencyPkgForm(pid){
   var toggleBtn = document.getElementById('agy-pkg-status-toggle-btn');
   if(toggleBtn) toggleBtn.style.display = pkg ? '' : 'none';
   loadAgencyPkgGlobalNotes();
+  renderAgencyPkgPartnerRates(pkg);
   document.getElementById('agy-pkg-list-view').style.display = 'none';
   document.getElementById('agy-pkg-form-view').style.display = '';
+}
+
+// Calendar-fix follow-up (Part 5/6): one optional per-person rate input per
+// ACTIVE partner property (accommodation_properties, the same real,
+// Firestore-backed catalog the Agency Portal calendar/quote picker already
+// reads -- never PH). Pre-filled from pkg.partnerRates[propertyId] when
+// editing; blank stays blank ("Rate on request"). Vilu itself is never
+// listed here -- its rate is the "Vilu Agency Rate" field above.
+async function renderAgencyPkgPartnerRates(pkg){
+  var el = document.getElementById('agy-pkg-partner-rates');
+  if(!el) return;
+  el.innerHTML = '<div style="font-size:var(--font-size-sm);color:#9ca3af">Loading partner properties…</div>';
+  await loadAccProperties();
+  var partners = ACC_PROPERTIES.filter(function(p){ return p.active; });
+  if(!partners.length){
+    el.innerHTML = '<div style="font-size:var(--font-size-sm);color:#9ca3af;padding:6px 0">No active partner properties yet -- add one under Partner Accommodation first.</div>';
+    return;
+  }
+  var rates = (pkg && pkg.partnerRates) || {};
+  el.innerHTML = partners.map(function(p){
+    var override = rates[p.id];
+    var rate = override && typeof override.agencyPricePerRoom==='number' ? override.agencyPricePerRoom : '';
+    var curr = (override && override.currency) || 'USD';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      + '<div style="flex:1;font-size:var(--font-size-sm);font-weight:600">'+esc(p.propertyName)+'</div>'
+      + '<input type="number" min="0" step="5" placeholder="Rate on request" data-partner-rate="'+p.id+'" value="'+rate+'" style="width:130px">'
+      + '<select data-partner-curr="'+p.id+'" style="width:80px">'
+        + ['USD','MVR','EUR'].map(function(c){ return '<option value="'+c+'"'+(c===curr?' selected':'')+'>'+c+'</option>'; }).join('')
+      + '</select>'
+    + '</div>';
+  }).join('');
+}
+// Reads the partner-rate inputs back into a partnerRates map -- omits any
+// property left blank entirely (never coerced to 0), so an unconfigured
+// property stays "Rate on request" rather than becoming a free stay.
+function collectAgencyPkgPartnerRates(){
+  var out = {};
+  document.querySelectorAll('#agy-pkg-partner-rates [data-partner-rate]').forEach(function(input){
+    var propertyId = input.dataset.partnerRate;
+    var raw = input.value;
+    if(raw==='' || isNaN(+raw)) return;
+    var currSel = document.querySelector('#agy-pkg-partner-rates [data-partner-curr="'+propertyId+'"]');
+    out[propertyId] = { agencyPricePerRoom: +raw, currency: currSel ? currSel.value : 'USD' };
+  });
+  return out;
 }
 
 function renderAgencyPkgStatusLabel(pkg){
@@ -9599,7 +9714,8 @@ async function saveAgencyPkgForm(){
     addOns: addOns,
     color: '#00b4d8',
     active: existingPkg ? !!existingPkg.active : true,
-    channel: 'agency'
+    channel: 'agency',
+    partnerRates: collectAgencyPkgPartnerRates(),
   });
   if(_agyPkgEditId){
     var idx = _agyPkgWorking.findIndex(function(p){return p.id===_agyPkgEditId;});
