@@ -77,6 +77,7 @@
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onRequest, onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const logger = require('firebase-functions/logger');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
@@ -347,13 +348,50 @@ exports.beds24OverrideChangeSync = onDocumentWritten('ota_room_type_overrides/{r
 // ever trusting a remembered "last known Beds24 state": every date is
 // recomputed fresh at push time by the worker, then range-compressed, so
 // this stays cheap even though it touches the whole horizon nightly.
+// Observability (Post-completion hardening, item 4): a Cloud Scheduler
+// cold start ("Starting new instance") only proves the container booted,
+// never that the reconciliation logic inside actually ran to completion --
+// this function previously logged nothing at all, so a silent failure
+// (an uncaught rejection, syncAvailability throwing) was indistinguishable
+// from a successful night in Cloud Functions logs. These three structured
+// log lines (never guest-identifying -- room-type-level counts only, no
+// reservation ids/guest names/emails) let `firebase functions:log --only
+// nightlyReconcile` answer "did last night's run actually finish, and what
+// did it do" directly, without needing separate Firestore access to read
+// the ota_pushes audit trail syncAvailability() already writes per room
+// type.
 exports.nightlyReconcile = onSchedule({ schedule: '30 3 * * *', timeZone: 'Indian/Maldives' }, async () => {
-  const rooms = await roomsDocs();
-  await syncAvailability({ store, roomsDocs: rooms, trigger: 'nightly', days: FULL_HORIZON_DAYS });
-  const today = maldivesNow().date;
-  const affectedDates = {};
-  for (const code of Object.keys(BEDS24_ROOM_MAP)) affectedDates[code] = dateRange(today, addDays(today, 365));
-  await enqueueBeds24Sync('nightly', affectedDates);
+  const startedAt = new Date().toISOString();
+  const t0 = Date.now();
+  logger.info('nightlyReconcile.start', { startedAt });
+  try {
+    const rooms = await roomsDocs();
+    const result = await syncAvailability({ store, roomsDocs: rooms, trigger: 'nightly', days: FULL_HORIZON_DAYS });
+    const today = maldivesNow().date;
+    const affectedDates = {};
+    for (const code of Object.keys(BEDS24_ROOM_MAP)) affectedDates[code] = dateRange(today, addDays(today, 365));
+    await enqueueBeds24Sync('nightly', affectedDates);
+    const roomTypesChecked = Object.keys((result.payload && result.payload.room_types) || {}).length;
+    const differencesFound = (result.changed || []).reduce((sum, c) => sum + (c.dates || 0), 0);
+    logger.info('nightlyReconcile.complete', {
+      startedAt,
+      completedAt: new Date().toISOString(),
+      durationMs: Date.now() - t0,
+      recordsChecked: roomTypesChecked,
+      differencesFound,
+      changesApplied: (result.changed || []).length,
+      pushResult: result.pushResult,
+      roomTypeErrors: (result.errors || []).length,
+    });
+  } catch (e) {
+    logger.error('nightlyReconcile.failed', {
+      startedAt,
+      failedAt: new Date().toISOString(),
+      durationMs: Date.now() - t0,
+      error: (e && e.message) || String(e),
+    });
+    throw e;
+  }
 });
 
 // ── Reservation Document Vault: authenticated read/write (security

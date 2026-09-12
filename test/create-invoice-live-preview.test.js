@@ -196,7 +196,11 @@ section('Case C — wiring audit: every enumerated live-preview control actually
   });
 
   test('invoice discount type/value call niPrev() live -- value on every keystroke (oninput), not just on blur', () => {
-    assert.match(PMS, /id="ni-disctype"\s+onchange="niPrev\(\)"/);
+    // Post-completion hardening (item 1) added niDiscLabelRewrite() to the
+    // same onchange -- so the "$/MVR/€ Fixed" label re-renders the instant
+    // staff flips between Fixed and Percentage -- but niPrev() itself must
+    // still fire on every change exactly as before.
+    assert.match(PMS, /id="ni-disctype"\s+onchange="niDiscLabelRewrite\(\);niPrev\(\)"/);
     assert.match(PMS, /id="ni-disc"[^>]*oninput="niPrev\(\)"/);
   });
 

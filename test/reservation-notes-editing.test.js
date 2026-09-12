@@ -182,5 +182,55 @@ section('Case F — Maldives time on every note-edit timestamp');
   });
 }
 
+section('Case G — Post-completion hardening, item 2: Guest Notes display stays clean for OTA-managed reservations too (parseImportedNote() widened beyond "Cloudbeds #")');
+{
+  const vm = require('node:vm');
+  const parseImportedNoteSrc = extractByStart(PMS, /function parseImportedNote\(raw\)\{/);
+  const upsertNoteBlockSrc = extractByStart(PMS, /function upsertNoteBlock\(rawNotes,label,newText\)\{/);
+  function sandbox() {
+    const ctx = {};
+    vm.createContext(ctx);
+    vm.runInContext([parseImportedNoteSrc, upsertNoteBlockSrc].join('\n'), ctx);
+    return ctx;
+  }
+
+  test('a Cloudbeds-imported note still parses exactly as before (header captured, [Staff note] found) -- this fix never changes existing Cloudbeds behavior', () => {
+    const ctx = sandbox();
+    const raw = "Cloudbeds #123 booked 2026-01-01\n\n[Staff note] VIP guest\n\n[Cloudbeds internal note] balance due 200";
+    const r = vm.runInContext(`parseImportedNote(${JSON.stringify(raw)})`, ctx);
+    assert.ok(r);
+    assert.match(r.header, /^Cloudbeds #123/);
+    assert.strictEqual(r.staff.text, 'VIP guest');
+  });
+
+  test('an OTA-managed reservation\'s notes (functions/lib/ingest.js\'s buildFields() shape: no bare header, every block already [Label] text) now ALSO parses, header empty, staff block isolated', () => {
+    const ctx = sandbox();
+    const raw = '[mock] external id N1 · revision 1\n\n[Special requests] quiet room\n\n[Staff note] Vegetarian breakfast requested';
+    const r = vm.runInContext(`parseImportedNote(${JSON.stringify(raw)})`, ctx);
+    assert.ok(r, 'a note containing a [Staff note] block must now parse even without a Cloudbeds header');
+    assert.strictEqual(r.header, '', 'an OTA note has no bare Cloudbeds-style header line');
+    assert.strictEqual(r.staff.text, 'Vegetarian breakfast requested', 'Guest Notes must show ONLY the staff text, never the raw channel blob');
+  });
+
+  test('plain text with no [Staff note] block anywhere and no Cloudbeds header still returns null (unchanged: a brand-new, never-synced reservation\'s note stays a plain editable string)', () => {
+    const ctx = sandbox();
+    const r = vm.runInContext(`parseImportedNote(${JSON.stringify('Just a plain note, never touched by OTA or Cloudbeds')})`, ctx);
+    assert.strictEqual(r, null);
+  });
+
+  test('upsertNoteBlock() on an OTA-shaped note (empty header) never introduces a stray leading blank block', () => {
+    const ctx = sandbox();
+    const raw = '[mock] external id N1 · revision 1\n\n[Staff note] old text';
+    const updated = vm.runInContext(`upsertNoteBlock(${JSON.stringify(raw)}, 'Staff note', 'new text')`, ctx);
+    assert.ok(!updated.startsWith('\n\n'), 'must not leave a leading blank block when there is no Cloudbeds header to keep');
+    assert.match(updated, /\[Staff note\] new text/);
+  });
+
+  test('Source Details subtitle only claims "imported from Cloudbeds" when there really is a Cloudbeds header -- an OTA-managed reservation gets a channel-neutral label instead', () => {
+    const src = extractByStart(PMS, /function renderNotesHTML\(r,taId\)\{/);
+    assert.match(src, /parsed\.header\?'imported from Cloudbeds':'synced from channel manager'/);
+  });
+}
+
 console.log(`\n${passed}/${passed + failed} reservation-notes-editing assertions passed`);
 if (failed) { console.log('\nFAILED'); process.exit(1); } else { console.log('\nALL TESTS PASSED'); }

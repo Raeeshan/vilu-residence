@@ -22,6 +22,41 @@ function docIdFor(cm, externalId, unitIndex) {
 function revisionOf(v) { return v === undefined || v === null ? '' : String(v); }
 function newerOrEqual(stored, incoming) { return revisionOf(stored) >= revisionOf(incoming); } // ISO timestamps / numeric strings compare lexically
 
+// Guest-note preservation (Post-completion hardening, item 2): buildFields()
+// used to reconstruct `notes` wholesale from channel data on every event,
+// silently discarding any staff-typed Guest Note in between syncs -- the
+// same class of bug already fixed for loadResFromSupabase() (Supabase
+// merges remote-over-local), just in this separate, still-live pipeline.
+// Notes are stored as \n\n-separated blocks, each optionally `[Label] text`
+// (the same convention vilu-unified.html's parseImportedNote()/
+// upsertNoteBlock() already use for Cloudbeds-imported notes) -- a block
+// whose label isn't one THIS function itself would generate for this
+// channel is never authored by ingestion, so it must be staff content and
+// is always carried forward untouched, re-tagged as [Staff note] so it
+// stays in one predictable place across repeated syncs (never duplicated,
+// since each run re-extracts and re-emits the same preserved text).
+const STAFF_NOTE_LABEL = 'Staff note';
+function splitNoteBlocks(raw) { return String(raw || '').split(/\n\n+/).map((b) => b.trim()).filter(Boolean); }
+function noteBlockLabel(block) { const m = /^\[([^\]]+)\]\s*/.exec(block); return m ? m[1] : null; }
+function noteBlockText(block) { const m = /^\[([^\]]+)\]\s*([\s\S]*)$/.exec(block); return m ? m[2].trim() : block; }
+function systemNoteLabels(cm) { return new Set([cm, 'Special requests', 'Channel notes', 'Meal plan', 'Arrival', 'Child ages']); }
+
+// Returns whatever staff-authored Guest Note text already exists on the
+// stored reservation, regardless of whether it's already tagged
+// `[Staff note]` (e.g. from a prior run of this same preservation logic)
+// or was left as plain/untagged text (a staff member typing directly into
+// Guest Notes, or a pre-existing Cloudbeds-style import) -- never invents
+// or guesses content, only ever extracts what's actually there.
+function extractStaffNote(existingNotes, cm) {
+  const blocks = splitNoteBlocks(existingNotes);
+  if (!blocks.length) return '';
+  const staffBlock = blocks.find((b) => noteBlockLabel(b) === STAFF_NOTE_LABEL);
+  if (staffBlock) return noteBlockText(staffBlock).trim();
+  const systemLabels = systemNoteLabels(cm);
+  const foreign = blocks.filter((b) => !systemLabels.has(noteBlockLabel(b)));
+  return foreign.map((b) => noteBlockText(b)).join('\n\n').trim();
+}
+
 function mapStatus(cmStatus) {
   const s = String(cmStatus || '').toLowerCase();
   if (/cancel|no_show|noshow|black|declin/.test(s)) return 'Cancelled';
@@ -52,7 +87,7 @@ function describeOtaPayment(cm, payment) {
 // normalizeOtaPayment() for how they resolve into the canonical channel-
 // aware payment structure below. Omitting them is always safe: it simply
 // yields payment_model:'unknown', never a guessed amount.
-function buildFields(booking, unit, unitIndex, cm, roomId, nowIso) {
+function buildFields(booking, unit, unitIndex, cm, roomId, nowIso, ex) {
   const g = booking.guest || {};
   const c = booking.commercial || {};
   const payment = normalizeOtaPayment({ commercial: c });
@@ -64,6 +99,8 @@ function buildFields(booking, unit, unitIndex, cm, roomId, nowIso) {
   if (booking.meal_plan) noteParts.push('[Meal plan] ' + booking.meal_plan);
   if (booking.arrival_info) noteParts.push('[Arrival] ' + booking.arrival_info);
   if (unit.child_ages && unit.child_ages.length) noteParts.push('[Child ages] ' + unit.child_ages.join(', '));
+  const staffNote = extractStaffNote(ex && ex.notes, cm);
+  if (staffNote) noteParts.push('[' + STAFF_NOTE_LABEL + '] ' + staffNote);
   return {
     id: docIdFor(cm, booking.external_id, unitIndex),
     room_id: roomId,
@@ -198,7 +235,7 @@ async function ingestEvent({ store, adapter, roomsDocs, event, now }) {
     const candidates = unchanged ? [ex.room_id] : freeRoomsForStay({ roomTypes, type: unit.room_type, checkIn: unit.check_in, checkOut: unit.check_out, reservations, blocks, excludeReservationIds: [docIds[i]], preferred: ex && ex.room_id });
     let done = false, lastErr = null;
     for (const room of candidates) {
-      const fields = buildFields(booking, unit, i, cm, room, nowIso);
+      const fields = buildFields(booking, unit, i, cm, room, nowIso, ex);
       if (ex && ex.created_at) fields.created_at = ex.created_at;
       try {
         await writeReservationTx(store, docIds[i], fields, { oldRoomId: ex && ex.room_id });
@@ -231,4 +268,4 @@ async function ingestEvent({ store, adapter, roomsDocs, event, now }) {
   return { result, event_id: eventId, docs: written.map((w) => w.id), written, conflicts };
 }
 
-module.exports = { ingestEvent, docIdFor, mapStatus, buildFields, newerOrEqual, describeOtaPayment };
+module.exports = { ingestEvent, docIdFor, mapStatus, buildFields, newerOrEqual, describeOtaPayment, extractStaffNote, STAFF_NOTE_LABEL };
