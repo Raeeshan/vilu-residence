@@ -909,7 +909,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" id="sl-bin" style="display:none" onclick="openBin()"><i class="ti ti-trash"></i>Deleted items</div>
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
   <div class="sl" id="sl-transport" style="display:none" onclick="go('transport',this)"><i class="ti ti-anchor"></i>Transportation</div>
-  <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner hotels</div>
+  <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner Accommodation</div>
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
   <div class="sg">Owner</div>
   <div class="sl" id="sl-analytics" style="display:none" onclick="go('analytics',this)"><i class="ti ti-chart-histogram"></i>Owner analytics</div>
@@ -1766,12 +1766,28 @@ body.pms-mode { overflow:hidden; }
   </div>
 </div>
 
+<!-- Multi-Property Availability (Part 21/22): this REPLACES the old
+     Partner Hotels page's content -- that page only ever managed the
+     in-memory `PH` array (PH.push()/PH=PH.filter(...), never persisted to
+     Firestore, wiped on every reload; still used, unmodified, by the real
+     Calendar's own decorative partner-hotel rows below, drawCal()'s own
+     PH.forEach() -- left completely untouched, Part 26). `PH`'s "Ranfaru
+     Inn"/"White Sand Inn" were never real, admin-entered partner data (Part
+     1 audit finding) -- this panel is the new, actually-persistent,
+     agency-visible accommodation catalog instead, starting empty until
+     real properties are entered here (Part 29: never pre-seeded). -->
 <div class="sec" id="s-htls">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div><h2 style="font-size:var(--font-size-lg);font-weight:700">Partner Hotels</h2><p style="font-size:var(--font-size-sm);color:#6b7280;margin-top:3px">Overflow hotels. OTA bookings cannot be assigned here.</p></div>
-    <button class="btn p" onclick="openAH()"><i class="ti ti-plus"></i>Add hotel</button>
+    <div><h2 style="font-size:var(--font-size-lg);font-weight:700">Partner Accommodation</h2><p style="font-size:var(--font-size-sm);color:#6b7280;margin-top:3px">Vilu Residence is always the primary property. Add and manage partner properties agencies can select and check availability for.</p></div>
+    <button class="btn p" onclick="openAddAccProp()"><i class="ti ti-plus"></i>Add property</button>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px" id="ht-grid"></div>
+  <div class="card" style="margin-bottom:14px;background:#f0fdfa;border-color:#99f6e4">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:34px;height:34px;border-radius:8px;background:#00778e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">V</div>
+      <div><div style="font-weight:700">Vilu Residence — Primary Property</div><div style="font-size:var(--font-size-xs);color:#6b7280">Maamigili, South Ari Atoll · Live PMS inventory (Rooms 101-106) · always shown first to agencies, never disabled here</div></div>
+    </div>
+  </div>
+  <div id="accprop-list" style="display:flex;flex-direction:column;gap:14px"></div>
 </div>
 
 
@@ -2588,19 +2604,61 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
   </div>
 </div>
 
+<!-- Multi-Property Availability (Part 2/21): replaces the old "Add partner
+     hotel" modal (which only pushed to the non-persistent PH array). -->
 <div class="mbg" id="m-ah" onclick="if(event.target===this)this.classList.remove('on')">
-  <div class="mdl" style="width:440px">
-    <div class="mhd"><h3><i class="ti ti-building-community" style="color:#00b4d8;margin-right:6px"></i>Add partner hotel</h3><button class="ab" onclick="document.getElementById('m-ah').classList.remove('on')"><i class="ti ti-x"></i></button></div>
-    <div class="fg"><label>Hotel name</label><input type="text" id="ah-nm" placeholder="Coral Beach Inn"></div>
-    <div class="fg"><label>Address</label><input type="text" id="ah-addr" placeholder="Maafushi Island, Maldives"></div>
-    <div class="fg"><label>Number of room slots</label><input type="number" id="ah-rm" value="5" min="1" max="50"></div>
-    <div class="fg"><label>Room names (one per line)</label><textarea id="ah-ty">Standard Room
-Deluxe Room
-Sea View Room
-Family Room
-Suite</textarea></div>
-    <div class="fg"><label>Color</label><select id="ah-cl"><option value="#8b5cf6">Purple</option><option value="#06b6d4">Cyan</option><option value="#10b981">Green</option><option value="#ec4899">Pink</option><option value="#ef4444">Red</option><option value="#f59e0b">Amber</option></select></div>
-    <button class="btn p" style="width:100%;margin-top:6px" onclick="addHotel()"><i class="ti ti-plus"></i>Add hotel</button>
+  <div class="mdl" style="width:460px">
+    <div class="mhd"><h3><i class="ti ti-building-community" style="color:#00b4d8;margin-right:6px"></i><span id="ah-modal-title">Add partner property</span></h3><button class="ab" onclick="document.getElementById('m-ah').classList.remove('on')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="ah-propid">
+    <div class="fg"><label>Property name</label><input type="text" id="ah-nm" placeholder="Real property name"></div>
+    <div class="fg"><label>Property type</label><input type="text" id="ah-type" placeholder="e.g. Guesthouse, Resort"></div>
+    <div class="fg"><label>Location</label><input type="text" id="ah-addr" placeholder="e.g. Maafushi Island, Maldives"></div>
+    <div class="fg"><label>Availability mode</label>
+      <select id="ah-availmode">
+        <option value="MANUAL_INVENTORY">Manual inventory (Vilu staff marks dates unavailable)</option>
+        <option value="ON_REQUEST">On request (always shows "Availability on request")</option>
+      </select>
+    </div>
+    <div class="fg"><label>Display order</label><input type="number" id="ah-order" value="10" step="10"></div>
+    <div style="display:flex;gap:16px;margin:8px 0 12px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm)"><input type="checkbox" id="ah-active" checked> Active</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm)"><input type="checkbox" id="ah-visible"> Visible to agencies</label>
+    </div>
+    <div class="fg"><label>Internal notes <span style="font-size:var(--font-size-xs);color:#9ca3af">(never shown to agencies)</span></label><textarea id="ah-notes" placeholder="Contract terms, contact person, commission agreement..."></textarea></div>
+    <button class="btn p" style="width:100%;margin-top:6px" onclick="saveAccProp()"><i class="ti ti-device-floppy"></i>Save property</button>
+  </div>
+</div>
+
+<!-- Room type add/edit -->
+<div class="mbg" id="m-ahrt" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:400px">
+    <div class="mhd"><h3><i class="ti ti-bed" style="color:#00b4d8;margin-right:6px"></i>Room type</h3><button class="ab" onclick="document.getElementById('m-ahrt').classList.remove('on')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="ahrt-propid"><input type="hidden" id="ahrt-rtid">
+    <div class="fg"><label>Room type name</label><input type="text" id="ahrt-nm" placeholder="e.g. Standard Double"></div>
+    <div class="fg"><label>Capacity (guests)</label><input type="number" id="ahrt-cap" value="2" min="1"></div>
+    <div class="fg"><label>Approved agency rate (per night)</label><input type="number" id="ahrt-rate" min="0" step="0.01" placeholder="Leave blank for Rate on request"></div>
+    <div class="fg"><label>Currency</label><select id="ahrt-curr"><option value="USD">USD</option><option value="MVR">MVR</option><option value="EUR">EUR</option></select></div>
+    <div style="display:flex;gap:16px;margin:8px 0 12px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm)"><input type="checkbox" id="ahrt-active" checked> Active</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm)"><input type="checkbox" id="ahrt-visible" checked> Visible to agencies</label>
+    </div>
+    <button class="btn p" style="width:100%;margin-top:6px" onclick="saveAccRoomType()"><i class="ti ti-device-floppy"></i>Save room type</button>
+  </div>
+</div>
+
+<!-- Manual availability (Part 22): "keep it practical" -- one date range,
+     blocked or reopened, per click. Not a second PMS. -->
+<div class="mbg" id="m-ahavail" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:400px">
+    <div class="mhd"><h3><i class="ti ti-calendar-off" style="color:#00b4d8;margin-right:6px"></i>Manual availability</h3><button class="ab" onclick="document.getElementById('m-ahavail').classList.remove('on')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="ahavail-propid"><input type="hidden" id="ahavail-rtid">
+    <div id="ahavail-label" style="font-size:var(--font-size-sm);color:#6b7280;margin-bottom:10px"></div>
+    <div class="fg"><label>From date</label><input type="date" id="ahavail-from"></div>
+    <div class="fg"><label>To date (exclusive)</label><input type="date" id="ahavail-to"></div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn p" style="flex:1" onclick="setAccManualAvailability(false)"><i class="ti ti-lock"></i>Mark unavailable</button>
+      <button class="btn" style="flex:1" onclick="setAccManualAvailability(true)"><i class="ti ti-lock-open"></i>Mark available</button>
+    </div>
   </div>
 </div>
 
@@ -4623,7 +4681,7 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',agysettle:'Agency Settlements',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner hotels',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',agysettle:'Agency Settlements',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner Accommodation',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
 const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,agybk:drawAgencyBookingRequests,agysettle:drawAgencySettlements,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
@@ -8798,50 +8856,243 @@ function saveProp(){
 }
 
 // PARTNER HOTELS
-function drawHtls(){
-  if(!currentUser || currentUser.role !== 'admin'){
+// ═══════════════════════════════════════════════
+// PARTNER ACCOMMODATION (Multi-Property Availability, Part 21/22)
+// ═══════════════════════════════════════════════
+// Real, Firestore-persistent property/room-type/manual-availability
+// management -- replaces the old PH-array-only "Partner hotels" page
+// (never persisted, see the s-htls section's own comment). Admin/Staff/
+// Manager only, matching accommodation_properties' own firestore.rules.
+// Nothing here is ever pre-seeded with invented names/rates (Part 1/2/29)
+// -- this list starts empty until real data is entered.
+var ACC_PROPERTIES = [];
+var ACC_ROOM_TYPES_CACHE = {}; // propertyId -> [{id, ...}]
+var ACC_EXPANDED = {}; // propertyId -> bool, session-only UI state
+
+function accStaffLike(){ return currentUser && (currentUser.role==='admin'||currentUser.role==='staff'||currentUser.role==='manager'); }
+
+async function loadAccProperties(){
+  try {
+    var snap = await fsDb.collection('accommodation_properties').get();
+    ACC_PROPERTIES = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
+      .sort(function(a,b){ return (a.displayOrder||0)-(b.displayOrder||0); });
+  } catch(e) {
+    console.error('loadAccProperties failed', e);
+    ACC_PROPERTIES = [];
+  }
+}
+async function loadAccRoomTypes(propertyId){
+  try {
+    var snap = await fsDb.collection('accommodation_properties').doc(propertyId).collection('room_types').get();
+    ACC_ROOM_TYPES_CACHE[propertyId] = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+  } catch(e) {
+    console.error('loadAccRoomTypes failed', e);
+    ACC_ROOM_TYPES_CACHE[propertyId] = [];
+  }
+  return ACC_ROOM_TYPES_CACHE[propertyId];
+}
+
+async function drawHtls(){
+  if(!accStaffLike()){
     document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
     document.getElementById('s-dash').classList.add('on');
     document.getElementById('ptitle').textContent='Dashboard';
     drawDash();
-    toast('⛔ Admin access only');
+    toast('⛔ Admin/Staff/Manager access only');
     return;
   }
-  document.getElementById('ht-grid').innerHTML=PH.length?PH.map(h=>`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:34px;height:34px;border-radius:8px;background:${h.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:var(--font-size-md);font-weight:700">${h.nm[0]}</div>
-        <div><div style="font-size:var(--font-size-md);font-weight:700">${h.nm}</div><div style="font-size:var(--font-size-xs);color:#6b7280">${h.addr||'Maldives'}</div></div>
-      </div>
-      <button class="ab" style="color:#b91c1c" onclick="removeHtl('${h.id}')"><i class="ti ti-trash"></i></button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-      <div style="background:#f9fafb;border-radius:6px;padding:8px;text-align:center"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600">Room slots</div><div style="font-size:var(--font-size-xl);font-weight:700">${h.rooms.length}</div></div>
-      <div style="background:#f9fafb;border-radius:6px;padding:8px;text-align:center"><div style="font-size:var(--font-size-xs);color:#6b7280;font-weight:600">Active bookings</div><div style="font-size:var(--font-size-xl);font-weight:700">${RES.filter(r=>r.prop===h.id&&r.st!=='Cancelled'&&r.st!=='Checked out').length}</div></div>
-    </div>
-    <div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:8px">${h.rooms.slice(0,6).join(', ')}${h.rooms.length>6?' +'+( h.rooms.length-6)+' more':''}</div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap">
-      <span style="font-size:var(--font-size-xs);background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:12px;border:1px solid #fde68a">Manual overflow only</span>
-      <span style="font-size:var(--font-size-xs);background:#f3f4f6;color:#374151;padding:2px 7px;border-radius:12px">No OTA sync</span>
-    </div>
-  </div>`).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No partner hotels yet. Click + Add hotel.</p>';
+  var listEl = document.getElementById('accprop-list');
+  listEl.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">Loading…</p>';
+  await loadAccProperties();
+  if(!ACC_PROPERTIES.length){
+    listEl.innerHTML = '<p style="font-size:var(--font-size-sm);color:#9ca3af">No partner properties yet. Click + Add property.</p>';
+    return;
+  }
+  var rows = await Promise.all(ACC_PROPERTIES.map(renderAccPropCard));
+  listEl.innerHTML = rows.join('');
 }
-function openAH(){document.getElementById('m-ah').classList.add('on');}
-function addHotel(){
-  const nm=(document.getElementById('ah-nm').value||'').trim();if(!nm){toast('Enter hotel name');return;}
-  const n=+document.getElementById('ah-rm').value||5;
-  const types=(document.getElementById('ah-ty').value||'').split('\n').map(x=>x.trim()).filter(Boolean);
-  const color=document.getElementById('ah-cl').value;
-  const id='h'+Date.now().toString(36).slice(-5);
-  const rooms=Array.from({length:n},(_,i)=>types[i%types.length]||'Room '+(i+1));
-  PH.push({id,nm,addr:document.getElementById('ah-addr').value,color,rooms});
-  document.getElementById('m-ah').classList.remove('on');
-  toast('✓ '+nm+' added with '+rooms.length+' room slots');drawHtls();
-  const ps=document.getElementById('nb-prop');if(ps)ps.add(new Option(nm+' (partner)',id));
+
+async function renderAccPropCard(p){
+  var expanded = !!ACC_EXPANDED[p.id];
+  var modeLabel = p.availabilityMode==='ON_REQUEST' ? 'On request' : 'Manual inventory';
+  var statusBadges = ''
+    + '<span style="font-size:var(--font-size-xs);padding:2px 8px;border-radius:12px;'+(p.active?'background:#d1fae5;color:#047857':'background:#f3f4f6;color:#6b7280')+'">'+(p.active?'Active':'Inactive')+'</span>'
+    + '<span style="font-size:var(--font-size-xs);padding:2px 8px;border-radius:12px;'+(p.visibleToAgencies?'background:#e0f7fd;color:#00778e':'background:#fef3c7;color:#92400e')+'">'+(p.visibleToAgencies?'Visible to agencies':'Hidden from agencies')+'</span>'
+    + '<span style="font-size:var(--font-size-xs);padding:2px 8px;border-radius:12px;background:#f3f4f6;color:#374151">'+esc(modeLabel)+'</span>';
+  var roomTypesHtml = '';
+  if(expanded){
+    var rts = await loadAccRoomTypes(p.id);
+    roomTypesHtml = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:var(--font-size-xs);font-weight:700;color:#6b7280;text-transform:uppercase">Room types</div><button class="btn" style="padding:4px 10px" onclick="openAddAccRoomType(\''+p.id+'\')"><i class="ti ti-plus"></i>Add room type</button></div>'
+      + (rts.length ? rts.map(function(rt){
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f9fafb;border-radius:8px;margin-bottom:6px">'
+            + '<div><div style="font-weight:600">'+esc(rt.roomTypeName||rt.id)+'</div><div style="font-size:var(--font-size-xs);color:#6b7280">Capacity '+(rt.capacity||'?')+' · '+(typeof rt.agencyRate==='number'?(rt.currency||'USD')+' '+rt.agencyRate+'/night':'Rate on request')+' · '+(rt.active?'Active':'Inactive')+' · '+(rt.visibleToAgencies?'Visible':'Hidden')+'</div></div>'
+            + '<div style="display:flex;gap:4px">'
+              + (p.availabilityMode==='MANUAL_INVENTORY' ? '<button class="ab" title="Manual availability" onclick="openAccManualAvailability(\''+p.id+'\',\''+rt.id+'\',\''+esc(rt.roomTypeName||rt.id).replace(/'/g,"\\'")+'\')"><i class="ti ti-calendar-off"></i></button>' : '')
+              + '<button class="ab" title="Edit" onclick="openEditAccRoomType(\''+p.id+'\',\''+rt.id+'\')"><i class="ti ti-edit"></i></button>'
+            + '</div>'
+          + '</div>';
+        }).join('') : '<div style="font-size:var(--font-size-sm);color:#9ca3af">No room types yet.</div>')
+      + '</div>';
+  }
+  return '<div class="card">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+      + '<div style="flex:1;cursor:pointer" onclick="toggleAccPropExpand(\''+p.id+'\')">'
+        + '<div style="display:flex;align-items:center;gap:8px"><i class="ti '+(expanded?'ti-chevron-down':'ti-chevron-right')+'"></i><div style="font-weight:700;font-size:var(--font-size-md)">'+esc(p.propertyName||p.id)+'</div></div>'
+        + '<div style="font-size:var(--font-size-xs);color:#6b7280;margin:2px 0 6px 22px">'+esc(p.propertyType||'')+(p.location?' · '+esc(p.location):'')+'</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:22px">'+statusBadges+'</div>'
+      + '</div>'
+      + '<button class="btn" style="padding:5px 10px" onclick="openEditAccProp(\''+p.id+'\')"><i class="ti ti-edit"></i>Edit</button>'
+    + '</div>'
+    + roomTypesHtml
+  + '</div>';
 }
-function removeHtl(id){
-  if(!confirm('Remove this partner hotel? Existing bookings will remain.'))return;
-  PH=PH.filter(h=>h.id!==id);toast('Hotel removed');drawHtls();
+function toggleAccPropExpand(id){ ACC_EXPANDED[id] = !ACC_EXPANDED[id]; drawHtls(); }
+
+function openAddAccProp(){
+  document.getElementById('ah-modal-title').textContent = 'Add partner property';
+  document.getElementById('ah-propid').value = '';
+  document.getElementById('ah-nm').value = '';
+  document.getElementById('ah-type').value = '';
+  document.getElementById('ah-addr').value = '';
+  document.getElementById('ah-availmode').value = 'MANUAL_INVENTORY';
+  document.getElementById('ah-order').value = (ACC_PROPERTIES.length+1)*10;
+  document.getElementById('ah-active').checked = true;
+  document.getElementById('ah-visible').checked = false;
+  document.getElementById('ah-notes').value = '';
+  document.getElementById('m-ah').classList.add('on');
+}
+function openEditAccProp(id){
+  var p = ACC_PROPERTIES.find(function(x){ return x.id===id; }); if(!p) return;
+  document.getElementById('ah-modal-title').textContent = 'Edit partner property';
+  document.getElementById('ah-propid').value = id;
+  document.getElementById('ah-nm').value = p.propertyName||'';
+  document.getElementById('ah-type').value = p.propertyType||'';
+  document.getElementById('ah-addr').value = p.location||'';
+  document.getElementById('ah-availmode').value = p.availabilityMode==='ON_REQUEST'?'ON_REQUEST':'MANUAL_INVENTORY';
+  document.getElementById('ah-order').value = p.displayOrder||10;
+  document.getElementById('ah-active').checked = p.active!==false;
+  document.getElementById('ah-visible').checked = !!p.visibleToAgencies;
+  document.getElementById('ah-notes').value = p.notesInternal||'';
+  document.getElementById('m-ah').classList.add('on');
+}
+async function saveAccProp(){
+  var nm = (document.getElementById('ah-nm').value||'').trim();
+  if(!nm){ toast('Enter the property name'); return; }
+  var id = document.getElementById('ah-propid').value || ('ACC'+Date.now().toString(36).toUpperCase());
+  var now = new Date().toISOString();
+  var doc = {
+    propertyName: nm,
+    propertyType: (document.getElementById('ah-type').value||'').trim(),
+    location: (document.getElementById('ah-addr').value||'').trim(),
+    availabilityMode: document.getElementById('ah-availmode').value==='ON_REQUEST'?'ON_REQUEST':'MANUAL_INVENTORY',
+    displayOrder: +(document.getElementById('ah-order').value||10),
+    active: document.getElementById('ah-active').checked,
+    visibleToAgencies: document.getElementById('ah-visible').checked,
+    notesInternal: (document.getElementById('ah-notes').value||'').trim(),
+    isVilu: false,
+    updatedAt: now,
+  };
+  try {
+    var ref = fsDb.collection('accommodation_properties').doc(id);
+    var existing = await ref.get();
+    if(!existing.exists) doc.createdAt = now;
+    await ref.set(doc, {merge:true});
+    document.getElementById('m-ah').classList.remove('on');
+    toast('✓ '+nm+' saved');
+    drawHtls();
+  } catch(e) {
+    console.error('saveAccProp failed', e);
+    toast('⚠️ Could not save — please try again');
+  }
+}
+
+function openAddAccRoomType(propertyId){
+  document.getElementById('ahrt-propid').value = propertyId;
+  document.getElementById('ahrt-rtid').value = '';
+  document.getElementById('ahrt-nm').value = '';
+  document.getElementById('ahrt-cap').value = 2;
+  document.getElementById('ahrt-rate').value = '';
+  document.getElementById('ahrt-curr').value = 'USD';
+  document.getElementById('ahrt-active').checked = true;
+  document.getElementById('ahrt-visible').checked = true;
+  document.getElementById('m-ahrt').classList.add('on');
+}
+async function openEditAccRoomType(propertyId, roomTypeId){
+  var rts = ACC_ROOM_TYPES_CACHE[propertyId] || await loadAccRoomTypes(propertyId);
+  var rt = rts.find(function(x){ return x.id===roomTypeId; }); if(!rt) return;
+  document.getElementById('ahrt-propid').value = propertyId;
+  document.getElementById('ahrt-rtid').value = roomTypeId;
+  document.getElementById('ahrt-nm').value = rt.roomTypeName||'';
+  document.getElementById('ahrt-cap').value = rt.capacity||2;
+  document.getElementById('ahrt-rate').value = typeof rt.agencyRate==='number' ? rt.agencyRate : '';
+  document.getElementById('ahrt-curr').value = rt.currency||'USD';
+  document.getElementById('ahrt-active').checked = rt.active!==false;
+  document.getElementById('ahrt-visible').checked = rt.visibleToAgencies!==false;
+  document.getElementById('m-ahrt').classList.add('on');
+}
+async function saveAccRoomType(){
+  var propertyId = document.getElementById('ahrt-propid').value;
+  if(!propertyId) return;
+  var nm = (document.getElementById('ahrt-nm').value||'').trim();
+  if(!nm){ toast('Enter the room type name'); return; }
+  var rateRaw = document.getElementById('ahrt-rate').value;
+  var id = document.getElementById('ahrt-rtid').value || ('RT'+Date.now().toString(36).toUpperCase());
+  var doc = {
+    roomTypeName: nm,
+    capacity: +(document.getElementById('ahrt-cap').value||2),
+    // Blank = "Rate on request" (Part 13) -- never a guessed number.
+    agencyRate: rateRaw!=='' && !isNaN(+rateRaw) ? +rateRaw : null,
+    currency: document.getElementById('ahrt-curr').value,
+    active: document.getElementById('ahrt-active').checked,
+    visibleToAgencies: document.getElementById('ahrt-visible').checked,
+    updatedAt: new Date().toISOString(),
+  };
+  try {
+    await fsDb.collection('accommodation_properties').doc(propertyId).collection('room_types').doc(id).set(doc, {merge:true});
+    document.getElementById('m-ahrt').classList.remove('on');
+    toast('✓ Room type saved');
+    delete ACC_ROOM_TYPES_CACHE[propertyId];
+    drawHtls();
+  } catch(e) {
+    console.error('saveAccRoomType failed', e);
+    toast('⚠️ Could not save — please try again');
+  }
+}
+
+function openAccManualAvailability(propertyId, roomTypeId, roomTypeName){
+  document.getElementById('ahavail-propid').value = propertyId;
+  document.getElementById('ahavail-rtid').value = roomTypeId;
+  document.getElementById('ahavail-label').textContent = roomTypeName;
+  document.getElementById('ahavail-from').value = '';
+  document.getElementById('ahavail-to').value = '';
+  document.getElementById('m-ahavail').classList.add('on');
+}
+// "Keep it practical" (Part 22): one {date: true} map per room type, set
+// via one merged .set() covering the whole picked range -- never a
+// second PMS's worth of per-date documents.
+async function setAccManualAvailability(available){
+  var propertyId = document.getElementById('ahavail-propid').value;
+  var roomTypeId = document.getElementById('ahavail-rtid').value;
+  var from = document.getElementById('ahavail-from').value;
+  var to = document.getElementById('ahavail-to').value;
+  if(!from || !to || to<=from){ toast('Select a valid date range'); return; }
+  var upd = {};
+  var d = new Date(from+'T00:00:00Z'), end = new Date(to+'T00:00:00Z');
+  while(d < end){
+    var ds = d.toISOString().slice(0,10);
+    upd['blockedDates.'+ds] = available ? firebase.firestore.FieldValue.delete() : true;
+    d.setUTCDate(d.getUTCDate()+1);
+  }
+  try {
+    await fsDb.collection('accommodation_properties').doc(propertyId).collection('room_types').doc(roomTypeId)
+      .collection('manual_availability').doc('data').set(upd, {merge:true});
+    document.getElementById('m-ahavail').classList.remove('on');
+    toast(available ? '✓ Marked available' : '✓ Marked unavailable');
+  } catch(e) {
+    console.error('setAccManualAvailability failed', e);
+    toast('⚠️ Could not save — please try again');
+  }
 }
 
 

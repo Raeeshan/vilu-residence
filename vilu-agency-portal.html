@@ -396,6 +396,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
               <button onclick="agSetCalView(30)" id="ag-cbv-30">30 days</button>
               <button onclick="agSetCalView(60)" id="ag-cbv-60">60 days</button>
             </div>
+            <!-- Multi-Property Availability (Part 19): Vilu Residence stays
+                 first/most-prominent regardless of this filter -- "All
+                 properties" (default) stacks Vilu's full section above
+                 every partner section, never the other way round. -->
+            <div class="fg" style="margin:0"><select id="ag-cb-property-filter" onchange="agCalPropertyFilterChanged(this.value)" style="height:26px;font-size:var(--font-size-xs);border:1px solid #c9d3de;border-radius:6px;padding:0 6px;font-family:inherit"><option value="ALL">All properties</option></select></div>
+            <!-- Part 8: date jump -- same bounded windowed loading as
+                 Prev/Next/Today, just an arbitrary anchor instead of ±7d. -->
+            <div class="fg" style="margin:0;display:flex;gap:4px;align-items:center">
+              <input type="date" id="ag-cb-jump-date" style="height:26px;font-size:var(--font-size-xs);border:1px solid #c9d3de;border-radius:6px;padding:0 6px;font-family:inherit">
+              <button class="btn-outline" style="padding:4px 8px;height:26px" onclick="agCalJumpToDate()">Jump</button>
+            </div>
             <div class="cb-actions">
               <span class="cb-loading" id="ag-cb-loading"><i class="spin"></i>Loading…</span>
               <button class="btn-outline" style="padding:5px 10px" onclick="agCalRefresh()" title="Refresh"><i class="ti ti-refresh"></i></button>
@@ -417,6 +428,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#c4b5fd"></i>Your hold</span>
             <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#f59e0b"></i>Occupied</span>
             <span class="cb-legend-item"><i class="cb-legend-dot" style="background:#9aa4b2"></i>Blocked</span>
+            <span class="cb-legend-item"><i class="cb-legend-dot" style="background:repeating-linear-gradient(45deg,#e5e7eb,#e5e7eb 3px,#f3f4f6 3px,#f3f4f6 6px)"></i>On request</span>
           </div>
         </div>
       </div>
@@ -538,10 +550,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div id="bkreq-summary" style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;font-size:var(--font-size-base)"></div>
       <div class="fg"><label>Guest email (optional)</label><input type="email" id="bkreq-guest-email" placeholder="guest@example.com"></div>
       <div class="fg"><label>Guest phone (optional)</label><input type="text" id="bkreq-guest-phone" placeholder="+960..."></div>
-      <div class="fg"><label>Room</label>
+      <!-- Multi-Property Availability (Part 16): hidden entirely for a
+           partner-property quote -- there is no Vilu physical room to pick
+           (Part 23: Vilu inventory stays separate from partner
+           accommodation). -->
+      <div class="fg" id="bkreq-room-wrap"><label>Room</label>
         <select id="bkreq-room"></select>
         <div id="bkreq-room-note" style="font-size:var(--font-size-xs);color:var(--muted);margin-top:4px">Only rooms currently available for these dates are listed.</div>
       </div>
+      <div id="bkreq-partner-note" class="al info hidden" style="margin-bottom:10px"><i class="ti ti-building" style="flex-shrink:0"></i><div></div></div>
       <div id="bkreq-hold-note" style="font-size:var(--font-size-sm);color:#7c3aed;margin-bottom:10px"></div>
       <div id="bkreq-warning" class="al warn hidden" style="margin-bottom:10px"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i><span></span></div>
       <button class="btn-primary" style="width:100%" onclick="sendAgencyBookingRequest()"><i class="ti ti-send"></i> Send booking request to Vilu</button>
@@ -713,6 +730,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('quote-arrival').value,document.getElementById('quote-departure').value,'quote-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
           <div id="quote-availability-result" style="margin-top:6px"></div>
         </div>
+
+        <!-- Multi-Property Availability (Part 11/19/21): Vilu Residence is
+             pre-selected and marked PRIMARY; partner properties (if any are
+             active + approved for agencies) appear below it. Selecting one
+             only ever writes to _quoteAccommodation client-side -- the
+             server (submitAgencyCustomQuote) re-verifies everything again
+             at save time for the Custom Package flow; an Assigned Package
+             quote is a direct client write same as today, so this is
+             informational/snapshot only there (Part 13: assigned-package
+             pricing is unaffected by accommodation choice in this pass). -->
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Accommodation</div>
+        <div id="quote-acc-picker" style="margin-bottom:14px"></div>
+
         <div class="fg"><label>Special message to guest <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional, shown on the quotation)</span></label><textarea id="quote-message" rows="2" oninput="updateQuotePreview()" placeholder="Any note for the guest..."></textarea></div>
 
         <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">Pricing — private to your agency</div>
@@ -782,6 +812,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('cp-arrival').value,document.getElementById('cp-departure').value,'cp-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
           <div id="cp-availability-result" style="margin-top:6px"></div>
         </div>
+
+        <!-- Multi-Property Availability (Part 11/13): a partner room cost is
+             a real, separate, server-verified line added into viluNetTotal
+             by submitAgencyCustomQuote() -- see resolveAccommodationSelection()
+             there. Finalizing is blocked server-side if a partner property
+             with no approved rate is selected. -->
+        <div style="font-size:var(--font-size-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Accommodation</div>
+        <div id="cp-acc-picker" style="margin-bottom:14px"></div>
+
         <div class="fg"><label>Guest-facing description <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional)</span></label><textarea id="cp-guest-desc" rows="2" oninput="updateCustomQuotePreview()" placeholder="A short description of this package for the guest..."></textarea></div>
         <div class="fg"><label>Special message to guest <span style="font-size:var(--font-size-xs);color:var(--muted);font-weight:400">(optional)</span></label><textarea id="cp-guest-message" rows="2" oninput="updateCustomQuotePreview()" placeholder="Any note for the guest..."></textarea></div>
 
@@ -1378,23 +1417,104 @@ function agCellBucket(roomId, ds){
 // here anyway -- the safe data never distinguishes them further.
 function agBarKey(b){ return b.kind+(b.id?('|'+b.id):''); }
 
+// ── Multi-Property Availability (Part 4/19/20/25): partner sections ──
+// A partner property's calendar section uses the SAME visual language as
+// Vilu's (section label, category-less single room-type rows here since a
+// partner property has no VR-style physical-room/category split, cells,
+// merged bars) but a DIFFERENT, much smaller data source: no per-guest
+// enrichment exists for a partner room at all (Part 10) -- only
+// AVAILABLE/BLOCKED/ON_REQUEST, exactly what getAgencyAvailability({propertyId})
+// returns for a non-Vilu propertyId.
+var AG_CAL_PROPERTY_FILTER = 'ALL';
+var AG_CAL_COLLAPSED = {}; // propertyId -> true (collapsed); Vilu is never in here
+(function loadAgCalCollapsedPref(){
+  try {
+    var raw = localStorage.getItem('vilu_agency_cal_collapsed');
+    if(raw) AG_CAL_COLLAPSED = JSON.parse(raw) || {};
+  } catch(e) { AG_CAL_COLLAPSED = {}; }
+})();
+function saveAgCalCollapsedPref(){
+  try { localStorage.setItem('vilu_agency_cal_collapsed', JSON.stringify(AG_CAL_COLLAPSED)); } catch(e) {}
+}
+function agCalToggleCollapse(propertyId){
+  AG_CAL_COLLAPSED[propertyId] = !AG_CAL_COLLAPSED[propertyId];
+  saveAgCalCollapsedPref();
+  agDrawCal();
+}
+function agCalPropertyFilterChanged(v){ AG_CAL_PROPERTY_FILTER = v; agDrawCal(); }
+function agCalJumpToDate(){
+  var v = document.getElementById('ag-cb-jump-date').value;
+  if(!v) return;
+  agCalD = new Date(v+'T12:00');
+  agDrawCal();
+}
+async function agCalPopulatePropertyFilter(){
+  var sel = document.getElementById('ag-cb-property-filter');
+  if(!sel || sel.dataset.populated) return;
+  var props = await loadAgencyProperties();
+  if(props.length<=1) return; // Vilu only -- no partner properties configured yet, filter stays "All properties"==Vilu-only
+  sel.innerHTML = '<option value="ALL">All properties</option>' + props.map(function(p){
+    return '<option value="'+esc(p.propertyId)+'">'+esc(p.propertyName)+'</option>';
+  }).join('');
+  sel.value = AG_CAL_PROPERTY_FILTER;
+  sel.dataset.populated = '1';
+}
+
+var _partnerAvailCache = {}; // propertyId -> {byCell, roomTypes, property, coveredStart, coveredEnd}
+async function fetchLivePartnerAvailability(propertyId, startDate, endDateExclusive){
+  var cache = _partnerAvailCache[propertyId] || (_partnerAvailCache[propertyId] = { byCell:{}, roomTypes:[], property:null, coveredStart:null, coveredEnd:null });
+  if(cache.coveredStart!=null && startDate>=cache.coveredStart && endDateExclusive<=cache.coveredEnd) return cache;
+  var fetchStart=startDate, fetchEnd=endDateExclusive, merge=false;
+  if(cache.coveredStart!=null){
+    var touches = startDate<=cache.coveredEnd && endDateExclusive>=cache.coveredStart;
+    var unionStart = startDate<cache.coveredStart?startDate:cache.coveredStart;
+    var unionEnd = endDateExclusive>cache.coveredEnd?endDateExclusive:cache.coveredEnd;
+    var unionDays = Math.round((new Date(unionEnd)-new Date(unionStart))/864e5);
+    if(touches && unionDays<=90){ fetchStart=unionStart; fetchEnd=unionEnd; merge=true; }
+  }
+  var loadingEl = document.getElementById('ag-cb-loading'); if(loadingEl) loadingEl.classList.add('on');
+  try {
+    var callable = fsFunctions.httpsCallable('getAgencyAvailability');
+    var result = await callable({ propertyId: propertyId, startDate: fetchStart, endDate: fetchEnd });
+    var data = result.data || {};
+    var byCell = merge ? cache.byCell : {};
+    (data.days||[]).forEach(function(d){ byCell[d.roomTypeId+'|'+d.date] = d; });
+    cache.byCell = byCell; cache.roomTypes = data.roomTypes||cache.roomTypes; cache.property = data.property||cache.property;
+    cache.coveredStart = fetchStart; cache.coveredEnd = fetchEnd;
+  } catch(e) {
+    console.error('fetchLivePartnerAvailability failed for '+propertyId, e);
+  } finally {
+    if(loadingEl) loadingEl.classList.remove('on');
+  }
+  return cache;
+}
+function agPartnerCellBucket(propertyId, roomTypeId, ds){
+  var cache = _partnerAvailCache[propertyId];
+  var cell = cache ? cache.byCell[roomTypeId+'|'+ds] : null;
+  var state = cell ? cell.state : 'AVAILABLE';
+  return { kind: state }; // AVAILABLE | BLOCKED | ON_REQUEST -- never an own/other split (Part 10)
+}
+
 async function agDrawCal(){
   var days=[]; for(var i=0;i<agCalDays;i++) days.push(agAddDays(agCalD,i));
   var today = tS;
   var startDate = ymdStr(days[0]);
   var endDateExclusive = ymdStr(agAddDays(days[days.length-1],1));
-  await fetchLiveAvailability(startDate, endDateExclusive);
+  var dsl = days.map(ymdStr);
+
+  await agCalPopulatePropertyFilter();
+  var allProps = await loadAgencyProperties();
+  var showVilu = AG_CAL_PROPERTY_FILTER==='ALL' || AG_CAL_PROPERTY_FILTER==='VILU';
+  var partnerProps = allProps.filter(function(p){ return !p.isVilu && (AG_CAL_PROPERTY_FILTER==='ALL' || AG_CAL_PROPERTY_FILTER===p.propertyId); });
+
+  if(showVilu) await fetchLiveAvailability(startDate, endDateExclusive);
+  for(var pi=0; pi<partnerProps.length; pi++){
+    if(!AG_CAL_COLLAPSED[partnerProps[pi].propertyId]) await fetchLivePartnerAvailability(partnerProps[pi].propertyId, startDate, endDateExclusive);
+  }
   agCalUpdateLabel();
 
   var vrGroups = agGroupByType(ROOMS_LIST);
-  var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
-  vrGroups.forEach(function(grp){
-    fH+='<div class="cb-category-lbl"><span class="nm">'+esc(grp.type)+'</span></div>';
-    grp.rooms.forEach(function(rm){ fH+='<div class="cb-room-row-lbl"><span class="rn">'+esc(rm.name)+'</span></div>'; });
-  });
-  document.getElementById('ag-cb-fixed-rows').innerHTML=fH;
-
-  var gH='<div class="cb-date-header-row" id="ag-cb-date-header">';
+  var fH='', gH='<div class="cb-date-header-row" id="ag-cb-date-header">';
   var pM=-1;
   days.forEach(function(d){
     var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
@@ -1404,36 +1524,75 @@ async function agDrawCal(){
     pM=d.getMonth();
   });
   gH+='</div>';
-  // Matches the fixed column's own .cb-section-lbl ("Vilu Residence", 22px)
-  // -- without this spacer every row below drifts out of alignment with
-  // its fixed-column label by exactly 22px.
-  gH+='<div class="cb-section-row"></div>';
 
-  vrGroups.forEach(function(grp){
-    var cc='';
-    days.forEach(function(d){
-      var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
-      var cl=(iT?'today-cell':'')+(iW?' weekend':'');
-      var free=grp.rooms.filter(function(rm){ return agCellBucket(rm.id,ds).kind==='AVAILABLE'; }).length;
-      cc+='<div class="cb-cat-cell '+cl+'"><b>'+free+' free</b></div>';
+  if(showVilu){
+    // Vilu Residence -- PRIMARY property, always shown first, never
+    // collapsible (Part 2/20: "Vilu Residence should be expanded by
+    // default" -- here it's simply never collapsed at all, since it's the
+    // one property this agency always needs to see).
+    fH+='<div class="cb-section-lbl"><span>⭐ Vilu Residence — Primary Property</span></div>';
+    vrGroups.forEach(function(grp){
+      fH+='<div class="cb-category-lbl"><span class="nm">'+esc(grp.type)+'</span></div>';
+      grp.rooms.forEach(function(rm){ fH+='<div class="cb-room-row-lbl"><span class="rn">'+esc(rm.name)+'</span></div>'; });
     });
-    gH+='<div class="cb-category-row">'+cc+'</div>';
-    grp.rooms.forEach(function(rm){
-      gH+='<div class="cb-booking-row" data-room="'+rm.id+'" style="position:relative">';
+    // Matches the fixed column's own .cb-section-lbl (22px) -- without this
+    // spacer every row below drifts out of alignment with its fixed-column
+    // label by exactly 22px.
+    gH+='<div class="cb-section-row"></div>';
+    vrGroups.forEach(function(grp){
+      var cc='';
       days.forEach(function(d){
         var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
         var cl=(iT?'today-cell':'')+(iW?' weekend':'');
-        gH+='<div class="cb-cell '+cl+'" data-room="'+rm.id+'" data-d="'+ds+'"></div>';
+        var free=grp.rooms.filter(function(rm){ return agCellBucket(rm.id,ds).kind==='AVAILABLE'; }).length;
+        cc+='<div class="cb-cat-cell '+cl+'"><b>'+free+' free</b></div>';
+      });
+      gH+='<div class="cb-category-row">'+cc+'</div>';
+      grp.rooms.forEach(function(rm){
+        gH+='<div class="cb-booking-row" data-room="'+rm.id+'" style="position:relative">';
+        days.forEach(function(d){
+          var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
+          var cl=(iT?'today-cell':'')+(iW?' weekend':'');
+          gH+='<div class="cb-cell '+cl+'" data-room="'+rm.id+'" data-d="'+ds+'"></div>';
+        });
+        gH+='</div>';
+      });
+    });
+  }
+
+  // Partner property sections (Part 4/20) -- visually secondary (muted
+  // section label, no "PRIMARY" styling), collapsed state persisted
+  // locally only (never authoritative business data, Part 20).
+  partnerProps.forEach(function(p){
+    var collapsed = !!AG_CAL_COLLAPSED[p.propertyId];
+    fH+='<div class="cb-section-lbl" style="cursor:pointer" onclick="agCalToggleCollapse(\''+p.propertyId+'\')"><span>'+(collapsed?'▸':'▾')+' '+esc(p.propertyName)+(p.availabilityMode==='ON_REQUEST'?' · availability on request':'')+'</span></div>';
+    gH+='<div class="cb-section-row"></div>';
+    if(collapsed) return;
+    var cache = _partnerAvailCache[p.propertyId];
+    var roomTypes = cache ? cache.roomTypes : [];
+    if(!roomTypes.length){
+      fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted);font-style:italic">No room types configured yet</span></div>';
+      gH+='<div class="cb-booking-row" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
+      return;
+    }
+    roomTypes.forEach(function(rt){
+      fH+='<div class="cb-room-row-lbl"><span class="rn">'+esc(rt.roomTypeName)+'</span></div>';
+      gH+='<div class="cb-booking-row" data-partner-room="'+p.propertyId+'|'+rt.roomTypeId+'" style="position:relative">';
+      days.forEach(function(d){
+        var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
+        var cl=(iT?'today-cell':'')+(iW?' weekend':'');
+        gH+='<div class="cb-cell '+cl+'" style="cursor:default"></div>';
       });
       gH+='</div>';
     });
   });
+
+  document.getElementById('ag-cb-fixed-rows').innerHTML=fH;
   document.getElementById('ag-cb-grid').innerHTML=gH;
 
   // Bars: merge consecutive same-bucket days into one continuous bar,
   // positioned/clipped exactly like the PMS calendar's own bars.
-  var dsl=days.map(ymdStr);
-  ROOMS_LIST.forEach(function(rm){
+  if(showVilu) ROOMS_LIST.forEach(function(rm){
     var row=document.querySelector('.cb-booking-row[data-room="'+rm.id+'"]'); if(!row) return;
     var i=0;
     while(i<dsl.length){
@@ -1466,10 +1625,53 @@ async function agDrawCal(){
     }
   });
 
-  // Available-cell two-click date picker (Part 5) -- wired after bars, so
-  // a bar's own click (which stops propagation) always wins over the cell
-  // beneath it.
-  document.querySelectorAll('#ag-cb-grid .cb-cell').forEach(function(cell){
+  // Partner bars: BLOCKED merges like Vilu's; ON_REQUEST is a single
+  // "Availability on request" bar spanning the whole visible window (Part
+  // 3/18: never a fake green AVAILABLE state for a property with no real
+  // inventory feed).
+  partnerProps.forEach(function(p){
+    if(AG_CAL_COLLAPSED[p.propertyId]) return;
+    var cache = _partnerAvailCache[p.propertyId]; if(!cache) return;
+    (cache.roomTypes||[]).forEach(function(rt){
+      var row=document.querySelector('.cb-booking-row[data-partner-room="'+p.propertyId+'|'+rt.roomTypeId+'"]'); if(!row) return;
+      if(cache.property && cache.property.availabilityMode==='ON_REQUEST'){
+        var w=dsl.length*AG_CAL_COL_W-2;
+        var bar=document.createElement('div');
+        bar.className='cb-bar';
+        bar.style.cssText='left:1px;width:'+w+'px;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 8px,#b6bcc4 8px,#b6bcc4 16px);color:#1f2937;text-shadow:none';
+        bar.innerHTML='<span>Availability on request — ask Vilu</span>';
+        row.appendChild(bar);
+        return;
+      }
+      var i=0;
+      while(i<dsl.length){
+        var b=agPartnerCellBucket(p.propertyId, rt.roomTypeId, dsl[i]);
+        if(b.kind!=='BLOCKED'){ i++; continue; }
+        var j=i;
+        while(j+1<dsl.length && agPartnerCellBucket(p.propertyId, rt.roomTypeId, dsl[j+1]).kind==='BLOCKED') j++;
+        var leftSlant=i>0, rightSlant=j<dsl.length-1;
+        var left=i*AG_CAL_COL_W+(leftSlant?AG_CAL_COL_W/2:0);
+        var right=(j+1)*AG_CAL_COL_W-(rightSlant?AG_CAL_COL_W/2:0);
+        var w=right-left-2;
+        if(w>=4){
+          var bar=document.createElement('div');
+          bar.className='cb-bar';
+          bar.style.cssText='left:'+left+'px;width:'+w+'px;background:#9aa4b2';
+          bar.style.clipPath=agCalBarClip(w,20,leftSlant,rightSlant);
+          bar.innerHTML='<span>Blocked</span>';
+          bar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); agShowGenericBlocked(); });
+          row.appendChild(bar);
+        }
+        i=j+1;
+      }
+    });
+  });
+
+  // Available-cell two-click date picker (Part 5) -- Vilu cells only (see
+  // this function's own header comment on why partner cells stay
+  // non-interactive in this pass) -- wired after bars, so a bar's own
+  // click (which stops propagation) always wins over the cell beneath it.
+  document.querySelectorAll('#ag-cb-grid .cb-cell[data-room]').forEach(function(cell){
     cell.addEventListener('click', function(){ agCellClick(cell.dataset.room, cell.dataset.d); });
   });
 
@@ -1792,6 +1994,128 @@ async function createDraftAgencyQuote(fields){
 // first "Save draft"/"Finalize", not the moment the builder opens, so
 // opening-then-closing without entering anything never litters Firestore
 // with an empty quote.
+// ── Multi-Property Availability: Accommodation picker (Part 11/19/21) ──
+// Shared by both quote builders (prefix 'quote'/'cp' picks the container
+// id and which small state object to read/write). Vilu Residence is
+// synthesized server-side by getAgencyProperties() and always sorted
+// first (Part 1 audit: the only pre-existing "partner hotel" concept in
+// this codebase, `PH` in vilu-unified.html, is a hardcoded demo array with
+// invented names/rates -- never read here, never treated as real partner
+// data, per this task's own "do not invent" instruction). A partner
+// property/room type is offered only once Vilu staff has actually entered
+// it via the new PMS admin UI (Part 21) -- until then this list is Vilu-only.
+var AG_PROPERTIES = null;
+var _accRoomTypesCache = {};
+var _quoteAccommodation = { propertyId: 'VILU', roomTypeId: null };
+var _cpAccommodation = { propertyId: 'VILU', roomTypeId: null };
+
+async function loadAgencyProperties(){
+  if (AG_PROPERTIES) return AG_PROPERTIES;
+  try {
+    var result = await fsFunctions.httpsCallable('getAgencyProperties')({});
+    AG_PROPERTIES = (result.data && result.data.properties && result.data.properties.length) ? result.data.properties
+      : [{ propertyId:'VILU', propertyName:'Vilu Residence', propertyType:'Guesthouse', isVilu:true, location:'Maamigili, South Ari Atoll', availabilityMode:'VILU_LIVE' }];
+  } catch(e) {
+    console.error('loadAgencyProperties failed', e);
+    AG_PROPERTIES = [{ propertyId:'VILU', propertyName:'Vilu Residence', propertyType:'Guesthouse', isVilu:true, location:'Maamigili, South Ari Atoll', availabilityMode:'VILU_LIVE' }];
+  }
+  return AG_PROPERTIES;
+}
+async function loadAgencyPropertyRoomTypes(propertyId){
+  if (_accRoomTypesCache[propertyId]) return _accRoomTypesCache[propertyId];
+  try {
+    var result = await fsFunctions.httpsCallable('getAgencyPropertyRoomTypes')({ propertyId: propertyId });
+    _accRoomTypesCache[propertyId] = (result.data && result.data.roomTypes) || [];
+  } catch(e) {
+    console.error('loadAgencyPropertyRoomTypes failed', e);
+    _accRoomTypesCache[propertyId] = [];
+  }
+  return _accRoomTypesCache[propertyId];
+}
+function accState(prefix){ return prefix==='quote' ? _quoteAccommodation : _cpAccommodation; }
+
+// Renders the property radio list + (for a partner) its room-type select
+// into #<prefix>-acc-picker. `onChange` is called after every selection so
+// the caller can refresh its own live preview/total.
+async function renderAccommodationPicker(prefix, onChange){
+  var containerId = prefix+'-acc-picker';
+  var el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = '<div style="font-size:var(--font-size-sm);color:var(--muted)">Loading accommodation options…</div>';
+  window['_acc_'+prefix+'_onChange'] = onChange;
+  var props = await loadAgencyProperties();
+  var state = accState(prefix);
+  var selected = state.propertyId || 'VILU';
+  if(!props.some(function(p){ return p.propertyId===selected; })) selected = 'VILU';
+  var html = props.map(function(p){
+    var checked = p.propertyId===selected;
+    return '<label style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1.5px solid '+(checked?'#00b4d8':'var(--border)')+';border-radius:8px;margin-bottom:6px;cursor:pointer;background:'+(checked?'#f0fdfa':'#fff')+'">'
+      + '<input type="radio" name="'+prefix+'-acc-property" value="'+esc(p.propertyId)+'" '+(checked?'checked':'')+' onchange="accPropertyChanged(\''+prefix+'\',this.value)" style="margin-top:2px">'
+      + '<div style="flex:1">'
+        + '<div style="font-weight:700">'+esc(p.propertyName)+(p.isVilu?' <span style="font-size:var(--font-size-xs);font-weight:700;color:#00778e;background:#e0f7fd;padding:1px 8px;border-radius:10px;margin-left:4px">PRIMARY</span>':'')+'</div>'
+        + (p.location?'<div style="font-size:var(--font-size-xs);color:var(--muted)">'+esc(p.location)+'</div>':'')
+        + (!p.isVilu && p.availabilityMode==='ON_REQUEST' ? '<div style="font-size:var(--font-size-xs);font-weight:600;color:#92400e;margin-top:2px">Availability on request</div>' : '')
+      + '</div>'
+    + '</label>';
+  }).join('');
+  html += '<div id="'+containerId+'-roomtype"></div>';
+  el.innerHTML = html;
+  await renderAccommodationRoomType(prefix, selected);
+}
+async function renderAccommodationRoomType(prefix, propertyId){
+  var state = accState(prefix);
+  state.propertyId = propertyId;
+  var wrap = document.getElementById(prefix+'-acc-picker-roomtype');
+  if(!wrap) return;
+  if(propertyId==='VILU'){
+    state.roomTypeId = null;
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = '<div style="font-size:var(--font-size-sm);color:var(--muted);margin-top:6px">Loading room types…</div>';
+  var roomTypes = await loadAgencyPropertyRoomTypes(propertyId);
+  if(!roomTypes.length){
+    wrap.innerHTML = '<div class="al warn" style="margin-top:8px;margin-bottom:0">No approved room types configured for this property yet.</div>';
+    state.roomTypeId = null;
+    return;
+  }
+  var currentRt = roomTypes.some(function(rt){ return rt.roomTypeId===state.roomTypeId; }) ? state.roomTypeId : roomTypes[0].roomTypeId;
+  state.roomTypeId = currentRt;
+  wrap.innerHTML = '<div class="fg" style="margin:8px 0 0"><label>Room type</label><select onchange="accRoomTypeChanged(\''+prefix+'\',this.value)">'
+    + roomTypes.map(function(rt){
+        var rateLabel = rt.agencyRate!=null ? (rt.currency||'USD')+' '+rt.agencyRate+'/night' : 'Rate on request';
+        return '<option value="'+esc(rt.roomTypeId)+'"'+(rt.roomTypeId===currentRt?' selected':'')+'>'+esc(rt.roomTypeName)+' — '+rateLabel+'</option>';
+      }).join('')
+    + '</select></div>';
+}
+function accPropertyChanged(prefix, propertyId){
+  renderAccommodationRoomType(prefix, propertyId).then(function(){
+    var cb = window['_acc_'+prefix+'_onChange'];
+    if(cb) cb();
+  });
+}
+function accRoomTypeChanged(prefix, roomTypeId){
+  accState(prefix).roomTypeId = roomTypeId;
+  var cb = window['_acc_'+prefix+'_onChange'];
+  if(cb) cb();
+}
+// Looks up the CURRENTLY selected accommodation's display facts (name, room
+// type name, rate) for building live previews/summaries -- read-only,
+// never writes anything. Falls back gracefully before AG_PROPERTIES has
+// loaded yet.
+function accSelectionSummary(prefix){
+  var state = accState(prefix);
+  if(state.propertyId==='VILU' || !state.propertyId){
+    return { propertyId:'VILU', propertyName:'Vilu Residence', isVilu:true, roomTypeName:null, rate:null, currency:null };
+  }
+  var prop = (AG_PROPERTIES||[]).find(function(p){ return p.propertyId===state.propertyId; });
+  var rt = (_accRoomTypesCache[state.propertyId]||[]).find(function(r){ return r.roomTypeId===state.roomTypeId; });
+  return {
+    propertyId: state.propertyId, propertyName: prop ? prop.propertyName : state.propertyId, isVilu: false,
+    roomTypeName: rt ? rt.roomTypeName : null, rate: rt ? rt.agencyRate : null, currency: rt ? rt.currency : null,
+  };
+}
+
 var _quoteWorking = null; // the quote object currently open in the builder
 var _quotePkg = null;     // the assigned package this quote is based on
 
@@ -1887,6 +2211,12 @@ async function openQuoteBuilder(pid, existingQuoteId){
   document.getElementById('quote-save-btn').style.display = locked ? 'none' : '';
   document.getElementById('quote-finalize-btn').style.display = locked ? 'none' : '';
 
+  _quoteAccommodation = {
+    propertyId: _quoteWorking.accommodationPropertyId || 'VILU',
+    roomTypeId: _quoteWorking.accommodationRoomTypeId || null,
+  };
+  await renderAccommodationPicker('quote', updateQuotePreview);
+
   updateQuoteCurrencyFields();
   await updateQuotePreview();
   document.getElementById('m-quote').classList.add('on');
@@ -1932,6 +2262,21 @@ async function updateQuotePreview(){
   var net = calcQuoteViluNet(_quotePkg, _quoteWorking.adults, _quoteWorking.children, _quoteWorking.childDiscountPct, _quoteWorking.arrivalDate, _quoteWorking.departureDate, settings);
   _quoteWorking.viluNetTotal = net.total;
   _quoteWorking.nights = net.totalNights;
+
+  // Multi-Property Availability (Part 13/14): an Assigned Package's own
+  // Vilu net total is unaffected by accommodation choice (that price is
+  // the package's own fixed configuration, not room-rate-driven) -- the
+  // accommodation section here only records WHERE the guest stays and, for
+  // a partner property, surfaces its approved rate/"Rate on request" for
+  // the agency's own reference while they set their guest selling price.
+  var accSel = accSelectionSummary('quote');
+  _quoteWorking.accommodationPropertyId = accSel.propertyId;
+  _quoteWorking.accommodationPropertyName = accSel.propertyName;
+  _quoteWorking.accommodationIsVilu = accSel.isVilu;
+  _quoteWorking.accommodationRoomTypeId = _quoteAccommodation.roomTypeId;
+  _quoteWorking.accommodationRoomTypeName = accSel.roomTypeName;
+  _quoteWorking.accommodationRateSnapshot = accSel.rate;
+  _quoteWorking.accommodationCurrency = accSel.currency;
 
   var netEl = document.getElementById('quote-vilu-net');
   if(netEl) netEl.textContent = 'USD '+net.total.toFixed(2)+(net.extraNights ? ' (incl. '+net.extraNights+' extra night'+(net.extraNights>1?'s':'')+')' : '');
@@ -2075,6 +2420,15 @@ function buildGuestQuotationHTML(quote){
     currency: String(quote.currency||'USD'),
     total: +(quote.agencyGuestSellingTotal||0),
     status: String(quote.status||'DRAFT'),
+    // Multi-Property Availability (Part 15): property/room-type NAME only --
+    // never accommodationRateSnapshot/availabilityMode/propertyId, and
+    // never a partner's internal notes (this allowlist never even reads
+    // them from `quote` in the first place). A quote created before this
+    // feature existed has no accommodationPropertyName at all, so it falls
+    // through to the same "Vilu Residence Maamigili" text every guest
+    // quotation has always shown.
+    accommodationPropertyName: quote.accommodationIsVilu === false ? String(quote.accommodationPropertyName||'') : '',
+    accommodationRoomTypeName: quote.accommodationIsVilu === false ? String(quote.accommodationRoomTypeName||'') : '',
   };
   quote = null; // the outer reference is never touched again below this line.
 
@@ -2109,7 +2463,7 @@ function buildGuestQuotationHTML(quote){
       + '<tr><th>Travel dates</th><td>'+esc(fmtDate(safe.arrivalDate))+' &ndash; '+esc(fmtDate(safe.departureDate))+'</td></tr>'
       + '<tr><th>Nights</th><td>'+safe.nights+'</td></tr>'
       + '<tr><th>Guests</th><td>'+esc(guestLine)+'</td></tr>'
-      + '<tr><th>Accommodation</th><td>Vilu Residence Maamigili</td></tr>'
+      + '<tr><th>Accommodation</th><td>'+(safe.accommodationPropertyName ? esc(safe.accommodationPropertyName)+(safe.accommodationRoomTypeName?' — '+esc(safe.accommodationRoomTypeName):'') : 'Vilu Residence Maamigili')+'</td></tr>'
       + '<tr><th>Package</th><td>'+esc(safe.packageName)+'</td></tr>'
     + '</table>'
     + (inclusionsHtml ? '<div class="section-label">Included</div><ul>'+inclusionsHtml+'</ul>' : '')
@@ -2273,6 +2627,12 @@ async function openCustomPackageBuilder(existingQuoteId){
   document.getElementById('cp-save-btn').style.display = locked ? 'none' : '';
   document.getElementById('cp-finalize-btn').style.display = locked ? 'none' : '';
 
+  _cpAccommodation = {
+    propertyId: q.accommodationPropertyId || 'VILU',
+    roomTypeId: q.accommodationRoomTypeId || null,
+  };
+  await renderAccommodationPicker('cp', updateCustomQuotePreview);
+
   renderComponentPicker();
   renderSelectedComponents();
   updateCustomQuotePreview();
@@ -2353,12 +2713,29 @@ function renderSelectedComponents(){
 // preview. The authoritative numbers always come back from the server after
 // Save/Finalize (see submitCustomQuote).
 function updateCustomQuotePreview(){
-  var netTotal = _customSelectedComponents.reduce(function(sum,c){ return sum + c.viluUnitRate*c.quantity; }, 0);
+  var componentsNetTotal = _customSelectedComponents.reduce(function(sum,c){ return sum + c.viluUnitRate*c.quantity; }, 0);
+  var arrivalDate = document.getElementById('cp-arrival').value;
+  var departureDate = document.getElementById('cp-departure').value;
+  var nights = 0;
+  if(arrivalDate && departureDate){
+    var n = Math.round((new Date(departureDate)-new Date(arrivalDate))/864e5);
+    if(n>0) nights = n;
+  }
+  // Multi-Property Availability (Part 11/13): a partner room cost is a
+  // REAL, separate line -- estimated here only for the agency's own live
+  // preview (rate * nights); submitAgencyCustomQuote() re-resolves this
+  // exact same rate from the room type's own agencyRate server-side and
+  // is the only number that is ever actually persisted (Part 13: "server
+  // must remain authoritative").
+  var accSel = accSelectionSummary('cp');
+  var accommodationTotal = (!accSel.isVilu && accSel.rate!=null && nights>0) ? +(accSel.rate*nights).toFixed(2) : 0;
+  var netTotal = componentsNetTotal + accommodationTotal;
   var sellingPrice = +(document.getElementById('cp-selling-price').value||0);
   var earnings = sellingPrice - netTotal;
 
   var netEl = document.getElementById('cp-vilu-net');
-  if(netEl) netEl.textContent = 'USD '+netTotal.toFixed(2);
+  if(netEl) netEl.textContent = 'USD '+netTotal.toFixed(2)+(accommodationTotal>0?' (incl. '+esc(accSel.propertyName)+' '+(accSel.currency||'USD')+' '+accommodationTotal.toFixed(2)+')':'')
+    + (!accSel.isVilu && accSel.rate==null ? ' — accommodation rate on request, cannot finalize yet' : '');
   var earnEl = document.getElementById('cp-earnings');
   if(earnEl) earnEl.textContent = sellingPrice>0 ? (document.getElementById('cp-currency').value+' '+earnings.toFixed(2)) : '—';
 
@@ -2368,13 +2745,6 @@ function updateCustomQuotePreview(){
     if(!label) return;
     if(c.category==='TRIPS_ACTIVITIES') guestActivities.push(label); else guestIncludes.push(label);
   });
-  var arrivalDate = document.getElementById('cp-arrival').value;
-  var departureDate = document.getElementById('cp-departure').value;
-  var nights = 0;
-  if(arrivalDate && departureDate){
-    var n = Math.round((new Date(departureDate)-new Date(arrivalDate))/864e5);
-    if(n>0) nights = n;
-  }
   var previewQuote = {
     quoteId: (_customQuoteWorking && _customQuoteWorking.quoteId) || 'DRAFT',
     agencyName: (currentAgency && (currentAgency.name||currentAgency.company)) || '',
@@ -2388,6 +2758,7 @@ function updateCustomQuotePreview(){
     currency: document.getElementById('cp-currency').value,
     agencyGuestSellingTotal: sellingPrice,
     status: (_customQuoteWorking && _customQuoteWorking.status) || 'DRAFT',
+    accommodationIsVilu: accSel.isVilu, accommodationPropertyName: accSel.propertyName, accommodationRoomTypeName: accSel.roomTypeName,
   };
   var frame = document.getElementById('cp-preview-frame');
   if(frame) frame.srcdoc = buildGuestQuotationHTML(previewQuote);
@@ -2413,6 +2784,13 @@ async function submitCustomQuote(status){
     // Only sourceType/sourceId/quantity -- see the section header comment:
     // no rate is ever sent, the server re-resolves it from the source.
     selectedComponents: _customSelectedComponents.map(function(c){ return { sourceType:c.sourceType, sourceId:c.sourceId, quantity:c.quantity }; }),
+    // Multi-Property Availability (Part 11-13): only the IDs are sent --
+    // the server (resolveAccommodationSelection() in functions-core/
+    // index.js) re-verifies active/visibleToAgencies and re-resolves the
+    // rate itself; nothing about the accommodation's name/rate is ever
+    // trusted from this client payload.
+    accommodationPropertyId: _cpAccommodation.propertyId,
+    accommodationRoomTypeId: _cpAccommodation.roomTypeId,
   };
   try {
     var callable = fsFunctions.httpsCallable('submitAgencyCustomQuote');
@@ -3293,6 +3671,29 @@ async function openBookingRequestModal(quoteId){
     warnEl.querySelector('span').textContent = 'A booking request for this quotation is already '+(active.status==='PENDING'?'pending Vilu confirmation':'confirmed')+'.';
   }
 
+  // Multi-Property Availability (Part 16): a partner-property quote has no
+  // Vilu room to pick at all -- skip the whole room-availability section
+  // and show a read-only summary of the accommodation instead. Whatever
+  // this quote's OWN finalized snapshot says (Part 14) is what's shown,
+  // never today's live property/rate data.
+  var isPartnerAccommodation = quote.accommodationIsVilu === false;
+  document.getElementById('bkreq-room-wrap').style.display = isPartnerAccommodation ? 'none' : '';
+  var partnerNoteEl = document.getElementById('bkreq-partner-note');
+  if(isPartnerAccommodation){
+    partnerNoteEl.classList.remove('hidden');
+    partnerNoteEl.querySelector('div').innerHTML = '<strong>'+esc(quote.accommodationPropertyName||'')+'</strong>'
+      + (quote.accommodationRoomTypeName?' — '+esc(quote.accommodationRoomTypeName):'')
+      + '<br>Vilu will confirm this accommodation with the partner property directly -- this is not a Vilu Residence room.';
+  } else {
+    partnerNoteEl.classList.add('hidden');
+  }
+  _bookingReqWorking.isPartner = isPartnerAccommodation;
+  if(isPartnerAccommodation){
+    document.getElementById('bkreq-hold-note').textContent = '';
+    document.getElementById('m-booking-request').classList.add('on');
+    return;
+  }
+
   // If an active, unexpired approved hold already exists for this exact
   // quote (Part 5/14), lock the room to that hold's room -- confirmation
   // can then safely consume it instead of relying on a plain availability
@@ -3350,9 +3751,20 @@ function closeBookingRequestModal(){
 async function sendAgencyBookingRequest(){
   if(!currentAgency || !_bookingReqWorking) return;
   var quoteId = _bookingReqWorking.quoteId;
-  var roomId = document.getElementById('bkreq-room').value;
   var warnEl = document.getElementById('bkreq-warning');
   warnEl.classList.add('hidden');
+
+  // Multi-Property Availability (Part 16): a partner-property quote never
+  // touches agency_booking_requests/reservations at all -- it creates its
+  // own accommodation_booking_requests record instead, with no roomId
+  // (there is no Vilu physical room involved) and status
+  // AVAILABILITY_REQUESTED, which only Vilu staff can move to
+  // PARTNER_CONFIRMED/PARTNER_REJECTED (Part 17).
+  if(_bookingReqWorking.isPartner){
+    return sendAccommodationBookingRequest();
+  }
+
+  var roomId = document.getElementById('bkreq-room').value;
   if(!roomId){ alert('Select a room'); return; }
 
   // Re-verify the quote is still FINALIZED and still this agency's own
@@ -3420,6 +3832,51 @@ async function sendAgencyBookingRequest(){
   } catch(e) {
     console.error('sendAgencyBookingRequest failed', e);
     alert('Could not send booking request — please try again.');
+  }
+}
+
+// Multi-Property Availability (Part 16/17): the partner-property twin of
+// sendAgencyBookingRequest() above -- same guest/dates/pricing snapshot
+// discipline, but writes accommodation_booking_requests (rules-gated
+// direct client write, same shape as agency_booking_requests' own create
+// rule) instead of agency_booking_requests, and never assigns a Vilu room.
+async function sendAccommodationBookingRequest(){
+  var quoteId = _bookingReqWorking.quoteId;
+  var freshSnap;
+  try {
+    freshSnap = await fsDb.collection('agency_quotes').doc(quoteId).get();
+  } catch(e) {}
+  if(!freshSnap || !freshSnap.exists || freshSnap.data().status!=='FINALIZED' || freshSnap.data().agencyId!==currentAgency.uid){
+    alert('This quotation is no longer available.'); return;
+  }
+  var quote = freshSnap.data();
+  var now = new Date().toISOString();
+  var reqDoc = {
+    id: newBookingRequestId(),
+    agencyId: currentAgency.uid, agencyEmail: currentAgency.email, agencyName: currentAgency.name||currentAgency.email,
+    quoteId: quoteId, quoteReference: quoteId,
+    guestName: quote.guestName||'', guestEmail: (document.getElementById('bkreq-guest-email').value||'').trim(), guestPhone: (document.getElementById('bkreq-guest-phone').value||'').trim(),
+    arrivalDate: quote.arrivalDate, departureDate: quote.departureDate, nights: quote.nights||0,
+    adults: quote.adults||1, children: quote.children||0,
+    propertyId: quote.accommodationPropertyId||null, propertyName: quote.accommodationPropertyName||null,
+    roomTypeId: quote.accommodationRoomTypeId||null, roomTypeName: quote.accommodationRoomTypeName||null,
+    accommodationRateSnapshot: quote.accommodationRateSnapshot!=null ? quote.accommodationRateSnapshot : null,
+    accommodationCurrency: quote.accommodationCurrency||null,
+    availabilityMode: quote.accommodationAvailabilityMode||'ON_REQUEST',
+    currency: quote.currency||'USD',
+    agencyGuestSellingTotal: +(quote.agencyGuestSellingTotal||0),
+    status: 'AVAILABILITY_REQUESTED',
+    createdAt: now, updatedAt: now,
+    confirmedAt: null, confirmedBy: null, rejectedAt: null, rejectedBy: null, rejectionReason: null,
+  };
+  try {
+    await fsDb.collection('accommodation_booking_requests').doc(reqDoc.id).set(reqDoc);
+    alert('Accommodation request sent to Vilu.');
+    closeBookingRequestModal();
+    drawMyBookingRequests();
+  } catch(e) {
+    console.error('sendAccommodationBookingRequest failed', e);
+    alert('Could not send accommodation request — please try again.');
   }
 }
 

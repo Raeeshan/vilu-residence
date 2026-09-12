@@ -499,6 +499,58 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── Multi-Property Availability (Part 2/21/24) ──────────────────────
+    // Vilu Residence itself is never a doc here (see functions-core/
+    // index.js's own comment on why) -- only partner properties live in
+    // this collection. notesInternal and any future internal-only field
+    // stay admin/staff/manager-only at the WHOLE-DOCUMENT level (same
+    // limitation as reservations/blocks -- rules cannot redact individual
+    // fields), so an agency's direct read is deliberately narrow: active +
+    // visibleToAgencies only, and even then the agency-facing app reads
+    // through getAgencyProperties()/getAgencyPropertyRoomTypes() (Admin
+    // SDK, explicit field allowlist) rather than this rule directly, so
+    // notesInternal never actually reaches an agency client either way --
+    // this rule is the operational backstop, not the only safeguard.
+    match /accommodation_properties/{propertyId} {
+      allow read: if isAdmin() || isStaff() || isManagerRole()
+        || (request.auth != null && resource.data.active == true && resource.data.visibleToAgencies == true);
+      allow write: if isAdmin() || isStaff() || isManagerRole();
+
+      match /room_types/{roomTypeId} {
+        allow read: if isAdmin() || isStaff() || isManagerRole()
+          || (request.auth != null && resource.data.active == true && resource.data.visibleToAgencies == true);
+        allow write: if isAdmin() || isStaff() || isManagerRole();
+
+        // One doc holding a {date: true} map of blocked dates for this
+        // room type (Part 22: "keep it practical", not a second PMS) --
+        // admin/staff/manager entered and read only; agencies never read
+        // this directly (getAgencyAvailability's Admin-SDK path reads it
+        // instead, returning only AVAILABLE/BLOCKED/ON_REQUEST per date,
+        // Part 3/10).
+        match /manual_availability/{docId} {
+          allow read, write: if isAdmin() || isStaff() || isManagerRole();
+        }
+      }
+    }
+
+    // Multi-Property Availability (Part 16/17): an agency's own request for
+    // a partner-property stay -- never a reservations doc (Part 23), never
+    // self-confirmable (Part 17: confirm/reject go through the Admin-SDK
+    // callables above, which bypass this rule; update here is the same
+    // admin/staff/manager operational backstop every other collection in
+    // this file uses).
+    match /accommodation_booking_requests/{id} {
+      allow create: if request.auth != null && request.resource.data.agencyId == request.auth.uid
+        && request.resource.data.status == 'AVAILABILITY_REQUESTED'
+        && request.resource.data.get('confirmedAt', null) == null
+        && request.resource.data.get('confirmedBy', null) == null
+        && request.resource.data.get('rejectedAt', null) == null
+        && request.resource.data.get('rejectedBy', null) == null;
+      allow read: if request.auth != null && (isAdmin() || isStaff() || isManagerRole() || resource.data.agencyId == request.auth.uid);
+      allow update: if isAdmin() || isStaff() || isManagerRole();
+      allow delete: if false;
+    }
+
     match /packages/{packageId} {
       allow read: if isAdmin() || isStaff() || isManagerRole()
         || resource.data.get('visibleToAgencies', 'all') == 'all'

@@ -170,7 +170,13 @@ section('Case D — Vilu net total / agencyEarnings / paymentCollector (Parts 7/
 {
   test('viluNetTotal is the sum of resolved (server-verified) line totals, never a client-supplied number', () => {
     const src = extractByStart(FUNCTIONS, /exports\.submitAgencyCustomQuote = onCall\(\{ region: 'us-central1', maxInstances: 10 \}, async \(request\) => \{/);
-    assert.match(src, /const viluNetTotal = \+componentsWithTotals\.reduce\(\(sum, c\) => sum \+ c\.viluLineTotal, 0\)\.toFixed\(2\);/);
+    // Multi-Property Availability (post-Phase-C task) split this into
+    // componentsNetTotal (exactly this same reduce, unchanged) plus a
+    // separate, equally server-verified accommodationTotal (never a
+    // client-supplied number either -- see resolveAccommodationSelection())
+    // -- viluNetTotal is now their sum, never anything client-supplied.
+    assert.match(src, /const componentsNetTotal = \+componentsWithTotals\.reduce\(\(sum, c\) => sum \+ c\.viluLineTotal, 0\)\.toFixed\(2\);/);
+    assert.match(src, /const viluNetTotal = \+\(componentsNetTotal \+ accommodationTotal\)\.toFixed\(2\);/);
     assert.doesNotMatch(src, /viluNetTotal = d\.viluNetTotal/);
   });
   test('agencyEarnings = agencyGuestSellingTotal - viluNetTotal, computed server-side, never labeled "commission"', () => {

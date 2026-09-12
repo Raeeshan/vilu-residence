@@ -516,6 +516,63 @@ const AGENCY_QUOTE_CURRENCIES = ['USD', 'MVR', 'EUR'];
 const AGENCY_QUOTE_PAYMENT_COLLECTORS = ['HOTEL', 'AGENCY', 'UNDECIDED'];
 const AGENCY_QUOTE_MAX_COMPONENTS = 40;
 
+// ── Multi-Property Availability (Part 1-14) ──────────────────────────────
+// Audit finding: the ONLY pre-existing "partner hotel" concept anywhere in
+// this codebase is `PH` in vilu-unified.html -- a hardcoded, non-Firestore
+// JS array ("Ranfaru Inn"/"White Sand Inn", flat $70/night, decorative rows
+// on the PMS Calendar only). No property records, room/rate data,
+// availability, package eligibility, or agency-facing rules exist for it
+// anywhere. Per this task's own instruction ("do not invent partner hotel
+// names/rates"), that array is left completely untouched here and is NEVER
+// read by anything below -- it is not treated as real partner data. This is
+// the clean, new, Vilu-admin-managed structure instead (Part 2):
+//   accommodation_properties/{propertyId}                  (admin-managed)
+//   accommodation_properties/{propertyId}/room_types/{id}   (admin-managed)
+//   .../room_types/{id}/manual_availability/data            (admin-managed, MANUAL_INVENTORY only)
+// Vilu Residence itself is NEVER a Firestore doc here -- it is synthesized
+// (id 'VILU') everywhere below, since duplicating the real PMS's own
+// canonical room/category data into a second collection would create two
+// sources of truth (Part 23), which this task explicitly forbids. No
+// partner property is ever pre-seeded; the admin UI starts empty until Vilu
+// staff enters real data (Part 29).
+const ACCOMMODATION_AVAILABILITY_MODES = ['VILU_LIVE', 'MANUAL_INVENTORY', 'ON_REQUEST'];
+const ACCOMMODATION_BOOKING_STATUSES = ['AVAILABILITY_REQUESTED', 'PARTNER_CONFIRMED', 'PARTNER_REJECTED'];
+
+// Resolves + validates the agency's chosen accommodation server-side for a
+// quote (Part 11-13). Vilu needs no lookup (it is always offered, always
+// available as a choice). A partner property/room type must be active AND
+// visibleToAgencies, or it is rejected outright -- never silently
+// downgraded to "make something up". `rate` is null when no agencyRate has
+// been configured yet; callers must treat that as "Rate on request" and
+// block finalizing a real total against it (Part 13), never compute
+// against a guessed number.
+async function resolveAccommodationSelection(d) {
+  const propertyId = String(d.accommodationPropertyId || 'VILU') || 'VILU';
+  if (propertyId === 'VILU') {
+    return { propertyId: 'VILU', propertyName: 'Vilu Residence', isVilu: true, roomTypeId: null, roomTypeName: null, rate: null, currency: null, availabilityMode: 'VILU_LIVE' };
+  }
+  const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
+  if (!propSnap.exists || propSnap.data().active !== true || propSnap.data().visibleToAgencies !== true) {
+    throw new HttpsError('invalid-argument', 'Selected accommodation is not available.');
+  }
+  const prop = propSnap.data();
+  const roomTypeId = String(d.accommodationRoomTypeId || '');
+  if (!roomTypeId) throw new HttpsError('invalid-argument', 'Select a room type for this accommodation.');
+  const rtSnap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types').doc(roomTypeId).get();
+  if (!rtSnap.exists || rtSnap.data().active !== true || rtSnap.data().visibleToAgencies !== true) {
+    throw new HttpsError('invalid-argument', 'Selected room type is not available.');
+  }
+  const rt = rtSnap.data();
+  const mode = ACCOMMODATION_AVAILABILITY_MODES.includes(prop.availabilityMode) ? prop.availabilityMode : 'ON_REQUEST';
+  return {
+    propertyId, propertyName: String(prop.propertyName || propertyId), isVilu: false,
+    roomTypeId, roomTypeName: String(rt.roomTypeName || roomTypeId),
+    rate: typeof rt.agencyRate === 'number' && Number.isFinite(rt.agencyRate) ? rt.agencyRate : null,
+    currency: rt.currency || null,
+    availabilityMode: mode,
+  };
+}
+
 // Same regex as sanitizeGuestLabel() in vilu-agency-portal.html -- kept in
 // sync deliberately (see that function's own comment) since both strip the
 // same admin-authored "Name — $NN" price-in-label convention before a name
@@ -627,8 +684,7 @@ exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 
     resolvedComponents.push(await resolveAgencyQuoteComponent(entry, agencyEmailLower));
   }
   const componentsWithTotals = resolvedComponents.map((c) => Object.assign({}, c, { viluLineTotal: +(c.viluUnitRate * c.quantity).toFixed(2) }));
-  const viluNetTotal = +componentsWithTotals.reduce((sum, c) => sum + c.viluLineTotal, 0).toFixed(2);
-  const agencyEarnings = +(agencyGuestSellingTotal - viluNetTotal).toFixed(2);
+  const componentsNetTotal = +componentsWithTotals.reduce((sum, c) => sum + c.viluLineTotal, 0).toFixed(2);
 
   // Guest-facing snapshot: name only, never the rate/quantity/line total --
   // the SAME structural allowlist discipline as buildGuestQuotationHTML() on
@@ -649,6 +705,20 @@ exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 
     const n = Math.round((new Date(departureDate) - new Date(arrivalDate)) / 864e5);
     if (n > 0) nights = n;
   }
+
+  // Multi-Property Availability (Part 11-13): Vilu needs no extra line here
+  // (its own accommodation is already whichever agency_package component
+  // the builder added, unchanged). A partner property's room cost is a
+  // SEPARATE line, resolved only from that room type's own admin-configured
+  // agencyRate -- never guessed, never left for the client to supply.
+  const accommodation = await resolveAccommodationSelection(d);
+  if (!accommodation.isVilu && accommodation.rate == null && status === 'FINALIZED') {
+    throw new HttpsError('failed-precondition', 'This accommodation has no approved rate yet -- ask Vilu to configure it before finalizing.');
+  }
+  const accommodationTotal = (!accommodation.isVilu && accommodation.rate != null && nights > 0)
+    ? +(accommodation.rate * nights).toFixed(2) : 0;
+  const viluNetTotal = +(componentsNetTotal + accommodationTotal).toFixed(2);
+  const agencyEarnings = +(agencyGuestSellingTotal - viluNetTotal).toFixed(2);
 
   const now = new Date().toISOString();
   let quoteId = String(d.quoteId || '').trim();
@@ -686,6 +756,19 @@ exports.submitAgencyCustomQuote = onCall({ region: 'us-central1', maxInstances: 
     exchangeRate: 1, exchangeRateSource: null, exchangeRateSnapshotAt: null,
     status, createdAt, updatedAt: now,
     finalizedAt: status === 'FINALIZED' ? now : null,
+    // Multi-Property Availability (Part 14): frozen at finalize time --
+    // reads only what resolveAccommodationSelection() just verified, never
+    // the property/room type's current live name/rate on reopen (Part 14:
+    // "historical quote must remain stable").
+    accommodationPropertyId: accommodation.propertyId,
+    accommodationPropertyName: accommodation.propertyName,
+    accommodationIsVilu: accommodation.isVilu,
+    accommodationRoomTypeId: accommodation.roomTypeId,
+    accommodationRoomTypeName: accommodation.roomTypeName,
+    accommodationRateSnapshot: accommodation.rate,
+    accommodationCurrency: accommodation.currency,
+    accommodationAvailabilityMode: accommodation.availabilityMode,
+    accommodationTotal,
   };
   await db.collection('agency_quotes').doc(quoteId).set(quote);
   return quote;
@@ -716,6 +799,114 @@ function withinRange(date, from, to) {
   return date >= from && date < to;
 }
 
+// Multi-Property Availability (Part 3/4/25): partner properties never have
+// real physical-room inventory in this codebase -- Vilu's own 6 rooms stay
+// the only PMS-canonical inventory (Part 23). A partner property's
+// "availability" is whatever Vilu staff entered manually (see the
+// Partner Accommodation admin UI in vilu-unified.html), or, for an
+// ON_REQUEST property, an explicit "must ask Vilu" marker per date --
+// NEVER a fabricated AVAILABLE/green state. No guest/agency identity is
+// ever tracked here (Part 10/17): a partner "booking" only ever exists as
+// an accommodation_booking_requests record, never a room-availability
+// grid entry, so there is no own/other distinction to make for partner
+// cells at all.
+async function getPartnerPropertyAvailability(propertyId, startDate, endDate) {
+  const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
+  if (!propSnap.exists) throw new HttpsError('not-found', 'Property not found.');
+  const prop = propSnap.data();
+  if (prop.active !== true || prop.visibleToAgencies !== true) {
+    throw new HttpsError('permission-denied', 'Property not available to agencies.');
+  }
+  const mode = ACCOMMODATION_AVAILABILITY_MODES.includes(prop.availabilityMode) ? prop.availabilityMode : 'ON_REQUEST';
+
+  const roomTypesSnap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types')
+    .where('active', '==', true).where('visibleToAgencies', '==', true).get();
+  const roomTypes = roomTypesSnap.docs.map((doc) => Object.assign({ roomTypeId: doc.id }, doc.data()));
+  const dates = dateRange(startDate, endDate);
+  const days = [];
+
+  for (const rt of roomTypes) {
+    let blockedDates = {};
+    if (mode === 'MANUAL_INVENTORY') {
+      const availSnap = await db.collection('accommodation_properties').doc(propertyId)
+        .collection('room_types').doc(rt.roomTypeId).collection('manual_availability').doc('data').get();
+      blockedDates = (availSnap.exists && availSnap.data().blockedDates) || {};
+    }
+    dates.forEach((date) => {
+      if (mode === 'ON_REQUEST') { days.push({ roomTypeId: rt.roomTypeId, date, state: 'ON_REQUEST' }); return; }
+      days.push({ roomTypeId: rt.roomTypeId, date, state: blockedDates[date] ? 'BLOCKED' : 'AVAILABLE' });
+    });
+  }
+
+  return {
+    property: { propertyId, propertyName: String(prop.propertyName || propertyId), isVilu: false, availabilityMode: mode },
+    roomTypes: roomTypes.map((rt) => ({
+      roomTypeId: rt.roomTypeId, roomTypeName: String(rt.roomTypeName || rt.roomTypeId),
+      capacity: typeof rt.capacity === 'number' ? rt.capacity : null,
+      agencyRate: typeof rt.agencyRate === 'number' && Number.isFinite(rt.agencyRate) ? rt.agencyRate : null,
+      currency: rt.currency || null,
+    })),
+    days,
+    ownReservations: {},
+  };
+}
+
+// Multi-Property Availability (Part 1/11/19): the agency-safe property list
+// backing the Calendar's property filter and the Accommodation picker in
+// both quote builders. Vilu Residence is synthesized here (never a
+// Firestore doc -- it is this app's own root identity, already canonical
+// everywhere else in this codebase) and always sorted first, ahead of any
+// partner's own displayOrder. A partner property is included ONLY when
+// active && visibleToAgencies -- an inactive or not-yet-approved property
+// (and its notesInternal/internal contact fields, which are never even
+// selected below) never reaches this response at all.
+exports.getAgencyProperties = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const snap = await db.collection('accommodation_properties')
+    .where('active', '==', true).where('visibleToAgencies', '==', true).get();
+  const partners = snap.docs
+    .map((doc) => Object.assign({ propertyId: doc.id }, doc.data()))
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+    .map((p) => ({
+      propertyId: p.propertyId, propertyName: String(p.propertyName || p.propertyId), propertyType: String(p.propertyType || ''),
+      isVilu: false, location: String(p.location || ''),
+      availabilityMode: ACCOMMODATION_AVAILABILITY_MODES.includes(p.availabilityMode) ? p.availabilityMode : 'ON_REQUEST',
+    }));
+  return {
+    properties: [
+      { propertyId: 'VILU', propertyName: 'Vilu Residence', propertyType: 'Guesthouse', isVilu: true, location: 'Maamigili, South Ari Atoll', availabilityMode: 'VILU_LIVE' },
+    ].concat(partners),
+  };
+});
+
+// Room types for ONE partner property (Part 11: the accommodation picker
+// only fetches this once a non-Vilu property is actually selected, not for
+// every property up front).
+exports.getAgencyPropertyRoomTypes = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
+  const propertyId = String((request.data || {}).propertyId || '');
+  if (!propertyId || propertyId === 'VILU') throw new HttpsError('invalid-argument', 'A partner propertyId is required.');
+  const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
+  if (!propSnap.exists || propSnap.data().active !== true || propSnap.data().visibleToAgencies !== true) {
+    throw new HttpsError('not-found', 'Property not found.');
+  }
+  const snap = await db.collection('accommodation_properties').doc(propertyId).collection('room_types')
+    .where('active', '==', true).where('visibleToAgencies', '==', true).get();
+  return {
+    roomTypes: snap.docs.map((doc) => {
+      const rt = doc.data();
+      return {
+        roomTypeId: doc.id, roomTypeName: String(rt.roomTypeName || doc.id),
+        capacity: typeof rt.capacity === 'number' ? rt.capacity : null,
+        agencyRate: typeof rt.agencyRate === 'number' && Number.isFinite(rt.agencyRate) ? rt.agencyRate : null,
+        currency: rt.currency || null,
+      };
+    }),
+  };
+});
+
 exports.getAgencyAvailability = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
   const { role } = await callerRole(request);
   if (role !== 'agency') throw new HttpsError('permission-denied', 'Agency access only.');
@@ -729,6 +920,16 @@ exports.getAgencyAvailability = onCall({ region: 'us-central1', maxInstances: 10
   const spanDays = dateRange(startDate, endDate).length;
   if (spanDays > AGENCY_AVAILABILITY_MAX_DAYS) {
     throw new HttpsError('invalid-argument', 'Date range too large (max ' + AGENCY_AVAILABILITY_MAX_DAYS + ' days).');
+  }
+
+  // Multi-Property Availability (Part 4/19/25): propertyId is optional and
+  // defaults to Vilu, so every existing caller (before this task) is
+  // completely unaffected -- the branch below is the ONLY new code path;
+  // everything from here down this function is byte-for-byte the original
+  // Vilu-only implementation.
+  const propertyId = String(d.propertyId || 'VILU') || 'VILU';
+  if (propertyId !== 'VILU') {
+    return getPartnerPropertyAvailability(propertyId, startDate, endDate);
   }
 
   // agencyId is ALWAYS request.auth.uid -- never accepted from request.data,
@@ -1247,6 +1448,46 @@ function agencyBookingConfirmationPayload(bReq, reservationId) {
     agencyEmail: bReq.agencyEmail || '',
   };
 }
+
+// ── Multi-Property Availability (Part 16/17): partner accommodation
+// booking confirmation ──────────────────────────────────────────────────
+// A partner-property booking is NEVER written into `reservations` -- that
+// collection is Vilu's own physical-room inventory (Part 23), and there is
+// no VR01-VR06-shaped room to assign a partner stay into. This is a
+// separate, deliberately much simpler request/confirm record: the agency
+// creates it directly (rules-gated client write, same shape as
+// agency_booking_requests' own create rule), and only Vilu staff can move
+// it to PARTNER_CONFIRMED/PARTNER_REJECTED -- an agency has no way to
+// verify a partner's real-world confirmation itself, so it must never be
+// able to self-confirm (Part 17).
+exports.confirmAccommodationBookingRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('accommodation_booking_requests').doc(requestId);
+  const snap = await reqRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Booking request not found.');
+  if (snap.data().status !== 'AVAILABILITY_REQUESTED') throw new HttpsError('failed-precondition', 'Request is not pending.');
+  const now = new Date().toISOString();
+  await reqRef.set({ status: 'PARTNER_CONFIRMED', confirmedAt: now, confirmedBy: email }, { merge: true });
+  return { status: 'PARTNER_CONFIRMED' };
+});
+
+exports.rejectAccommodationBookingRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const requestId = String((request.data || {}).requestId || '');
+  const reason = String((request.data || {}).reason || '').slice(0, 500);
+  if (!requestId) throw new HttpsError('invalid-argument', 'requestId required.');
+  const reqRef = db.collection('accommodation_booking_requests').doc(requestId);
+  const snap = await reqRef.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Booking request not found.');
+  if (snap.data().status !== 'AVAILABILITY_REQUESTED') throw new HttpsError('failed-precondition', 'Request is not pending.');
+  const now = new Date().toISOString();
+  await reqRef.set({ status: 'PARTNER_REJECTED', rejectionReason: reason, rejectedAt: now, rejectedBy: email }, { merge: true });
+  return { status: 'PARTNER_REJECTED' };
+});
 
 exports.getAgencyBookingConfirmationData = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
   const { role } = await callerRole(request);
