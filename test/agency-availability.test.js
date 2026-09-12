@@ -202,9 +202,11 @@ section('Case G — Part 12/13: no fabricated pending states, bounded date range
     assert.match(PORTAL, /onclick="agCalNav\(-1\)"/);
     assert.match(PORTAL, /onclick="agCalNav\(1\)"/);
   });
-  test('Prev/Next step by exactly 7 days regardless of the 14/30/60 view size, matching the PMS calendar\'s own window.calNav(d) behavior', () => {
+  test('Prev/Next step by exactly 7 days regardless of the 14/30/60 view size, matching the PMS calendar\'s own window.calNav(d) behavior -- reading the anchor back from the current scroll position first (agCalVisibleStart), same as the PMS\'s own calVisibleStart(), so a step always starts from what is actually on screen', () => {
     const src = extractByStart(PORTAL, /function agCalNav\(dir\)\{/);
+    assert.match(src, /agCalD=agCalVisibleStart\(\);/);
     assert.match(src, /agCalD\.setDate\(agCalD\.getDate\(\)\+dir\*7\)/);
+    assert.match(src, /agCalReanchor\(\);/);
   });
 }
 
@@ -317,9 +319,16 @@ section('Case M — Post-completion hardening: Availability Calendar redesign mi
   test('no admin-only PMS interaction was copied along with the visual design: no drag-select-to-book, no reservation move/resize, no manual block creation, no cross-reservation search box anywhere in the portal', () => {
     assert.doesNotMatch(PORTAL, /draggable="true"|dragstart|calSearchMatches|cb-search/);
   });
-  test('the pan-to-scroll drag is scoped to the date header only (pure UI, same interaction the PMS calendar offers) and never fires on a bar (a bar\'s own click must still work)', () => {
+  test('real click-drag/pan (calendar-fix task) works from anywhere on the scroll area -- background, date header, and category rows alike, not just the header -- and never fires on a bar (a bar\'s own click must still work)', () => {
     const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
-    assert.match(src, /header\.onmousedown=function\(e\)\{\s*\n\s*if\(e\.target\.closest\('\.cb-bar'\)\) return;/);
+    assert.match(src, /sa\.onmousedown=function\(e\)\{\s*\n\s*if\(e\.target\.closest\('\.cb-bar'\)\) return;/);
+  });
+  test('panning the loaded window near either edge triggers a real windowed data fetch (agCalOnScroll -> agCalExtend), not just a scrollbar move within a fixed pre-rendered block', () => {
+    const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
+    assert.match(src, /sa\.onscroll=function\(\)\{ fr\.scrollTop=sa\.scrollTop; agCalOnScroll\(sa\); \};/);
+    const extendSrc = extractByStart(PORTAL, /function agCalOnScroll\(sa\)\{/);
+    assert.match(extendSrc, /agCalExtend\(-1\)/);
+    assert.match(extendSrc, /agCalExtend\(1\)/);
   });
 }
 

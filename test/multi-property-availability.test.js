@@ -207,11 +207,16 @@ section('Part 16/17: booking request preserves the accommodation snapshot; partn
   });
 }
 
-section('Part 19/20: calendar property filter + collapse/expand, Vilu always first and never collapsible');
+section('Part 19/20: calendar property tabs + collapse/expand, Vilu always first and never collapsible');
 {
-  test('the property filter dropdown exists and defaults to "All properties"', () => {
-    assert.match(PORTAL, /id="ag-cb-property-filter"/);
-    assert.match(PORTAL, /<option value="ALL">All properties<\/option>/);
+  test('property tabs are a VISIBLE row, never hidden inside only a dropdown -- Vilu first with a PRIMARY pill, an "All Properties" tab, defaults to "ALL"', () => {
+    assert.match(PORTAL, /id="ag-cb-prop-tabs"/);
+    assert.doesNotMatch(PORTAL, /id="ag-cb-property-filter"/, 'the old dropdown must be fully removed, not left alongside the new tabs');
+    assert.match(PORTAL, /var AG_CAL_PROPERTY_FILTER = 'ALL';/);
+    const src = extractByStart(PORTAL, /function agCalRenderPropertyTabs\(allProps\)\{/);
+    assert.match(src, /propertyName:'Vilu Residence'/);
+    assert.match(src, /PRIMARY<\/span>/);
+    assert.match(src, /All Properties<\/button>/);
   });
   test('agDrawCal() always renders the Vilu section before any partner section, and Vilu has no collapse control at all', () => {
     const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
@@ -228,15 +233,16 @@ section('Part 19/20: calendar property filter + collapse/expand, Vilu always fir
 
 section('Part 6/7/8: click-drag pan, past/future navigation, date jump -- all bounded, windowed loading preserved');
 {
-  test('the date-jump control exists and calls agCalJumpToDate(), which re-anchors agCalD and redraws through the SAME windowed fetch path', () => {
+  test('the date-jump control exists and calls agCalJumpToDate(), which re-anchors agCalD and redraws through the SAME windowed fetch path as Today/Prev/Next (agCalReanchor)', () => {
     assert.match(PORTAL, /id="ag-cb-jump-date"/);
     assert.match(PORTAL, /onclick="agCalJumpToDate\(\)"/);
     const src = extractByStart(PORTAL, /function agCalJumpToDate\(\)\s*\{/);
     assert.match(src, /agCalD = new Date\(v\+'T12:00'\);/);
-    assert.match(src, /agDrawCal\(\);/);
+    assert.match(src, /agCalReanchor\(\);/);
   });
-  test('Prev/Next (past AND future navigation) still step by exactly 7 days -- unchanged from the prior calendar redesign, not rebuilt', () => {
+  test('Prev/Next (past AND future navigation) still step by exactly 7 days, now from the currently visible position (agCalVisibleStart) rather than a stale anchor -- required so a real pan/scroll before pressing Next continues from where the user actually is', () => {
     const src = extractByStart(PORTAL, /function agCalNav\(dir\)\{/);
+    assert.match(src, /agCalD=agCalVisibleStart\(\);/);
     assert.match(src, /agCalD\.setDate\(agCalD\.getDate\(\)\+dir\*7\)/);
   });
   test('fetchLivePartnerAvailability() caps any single request at 90 days and reuses cached cells the same way fetchLiveAvailability() already does (no unbounded/duplicate requests)', () => {
@@ -244,9 +250,16 @@ section('Part 6/7/8: click-drag pan, past/future navigation, date jump -- all bo
     assert.match(src, /unionDays<=90/);
     assert.match(src, /if\(cache\.coveredStart!=null && startDate>=cache\.coveredStart && endDateExclusive<=cache\.coveredEnd\) return cache;/);
   });
-  test('pan-to-scroll drag (click-and-drag the viewport, not a reservation) is unchanged from the prior redesign -- still scoped to the date header, still skips bars', () => {
+  test('real click-drag/pan (calendar-fix task) covers the WHOLE scroll area, not just the date header -- background, category rows, and empty cells all pan -- and still skips bars entirely so a bar\'s own click keeps working', () => {
     const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
-    assert.match(src, /header\.onmousedown=function\(e\)\{\s*\n\s*if\(e\.target\.closest\('\.cb-bar'\)\) return;/);
+    assert.match(src, /sa\.onmousedown=function\(e\)\{\s*\n\s*if\(e\.target\.closest\('\.cb-bar'\)\) return;/);
+  });
+  test('the rolling timeline window (agCalTL) actually grows and fetches new data as the user pans near either edge -- not a fixed-size pre-rendered block (the exact gap this phase was reopened to fix)', () => {
+    assert.match(PORTAL, /const AG_CAL_CHUNK=10, AG_CAL_LEAD=10, AG_CAL_TRAIL=10, AG_CAL_MAX_DAYS=90, AG_CAL_EDGE_COLS=4;/);
+    const syncSrc = extractByStart(PORTAL, /function agCalTimelineSync\(\)\{/);
+    assert.match(syncSrc, /agCalTL\.start=agAddDays\(agCalD,-AG_CAL_LEAD\);/);
+    const extendSrc = extractByStart(PORTAL, /async function agCalExtend\(dir\)\{/);
+    assert.match(extendSrc, /await agDrawCal\(\);/, 'extending the window must actually re-fetch server data for the newly exposed days, not just re-render already-cached DOM');
   });
 }
 

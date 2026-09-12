@@ -229,6 +229,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cb-legend-dot{width:14px;height:9px;display:inline-block;flex-shrink:0;clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)}
 .cb-scroll-area.cb-panning,.cb-scroll-area.cb-panning *{cursor:grabbing!important;user-select:none}
 @media (max-width:700px){.cb-wrap{--cal-left-w:104px}.cb-room-row-lbl .rn{font-size:var(--font-size-xs)}}
+
+/* Property tabs (Part 2/9 of the calendar-fix task): a VISIBLE row of
+   clickable property tabs above the topbar -- not hidden inside a
+   dropdown. Vilu Residence is always first and carries its own PRIMARY
+   pill; the active tab is unmistakably highlighted, matching the same
+   blue-pill language the PMS calendar's own .cb-range already uses. */
+.cb-prop-tabs{display:flex;gap:6px;align-items:center;height:44px;padding:0 12px;border-bottom:1px solid #dfe3e8;background:#f8fafc;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.cb-prop-tabs::-webkit-scrollbar{height:6px}
+.cb-prop-tab{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;border-radius:15px;border:1.5px solid #c9d3de;background:#fff;color:#374151;font-size:var(--font-size-sm);font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.cb-prop-tab:hover{border-color:#1f6fd0}
+.cb-prop-tab.on{background:#1f6fd0;border-color:#1f6fd0;color:#fff}
+.cb-prop-tab .primary-pill{font-size:9px;font-weight:800;letter-spacing:.04em;background:rgba(255,255,255,.25);padding:1px 6px;border-radius:8px}
+.cb-prop-tab:not(.on) .primary-pill{background:#e0f7fd;color:#00778e}
+.cb-prop-tab.all{border-style:dashed}
+/* Real click-drag pan cursor states (Part 4 of the calendar-fix task) --
+   applied to the whole scroll area's background, not just the header, so
+   the drag surface is unmistakable and consistent with the PMS's own
+   .cb-cat-cell/.cb-section-cell grab cursor. */
+.cb-scroll-area{cursor:grab}
+.cb-scroll-area.cb-panning{cursor:grabbing}
 </style>
 </head>
 <body>
@@ -383,7 +403,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
              pan-to-scroll drag on the date header. Read-only subset: no
              drag-select-to-book, no reservation move, no block creation, no
              cross-agency reservation search — see renderAgencyCalendarGrid(). -->
-        <div class="cb-wrap" style="margin:16px 20px 20px;height:520px">
+        <div class="cb-wrap" style="margin:16px 20px 20px;height:560px">
+          <!-- Property tabs (calendar-fix task, Part 2/9): a VISIBLE row,
+               not a dropdown. Populated by agCalRenderPropertyTabs() from
+               getAgencyProperties() -- Vilu first & marked PRIMARY, then
+               one tab per active+agency-visible partner property, then
+               "All Properties". Rebuilt only when the property list itself
+               changes; clicking a tab never resets the current date
+               position (Part 8 of the task). -->
+          <div class="cb-prop-tabs" id="ag-cb-prop-tabs"></div>
           <div class="cb-topbar">
             <div class="cb-nav">
               <button onclick="agCalNav(-1)" title="Previous week" aria-label="Previous week">&#8249;</button>
@@ -396,11 +424,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
               <button onclick="agSetCalView(30)" id="ag-cbv-30">30 days</button>
               <button onclick="agSetCalView(60)" id="ag-cbv-60">60 days</button>
             </div>
-            <!-- Multi-Property Availability (Part 19): Vilu Residence stays
-                 first/most-prominent regardless of this filter -- "All
-                 properties" (default) stacks Vilu's full section above
-                 every partner section, never the other way round. -->
-            <div class="fg" style="margin:0"><select id="ag-cb-property-filter" onchange="agCalPropertyFilterChanged(this.value)" style="height:26px;font-size:var(--font-size-xs);border:1px solid #c9d3de;border-radius:6px;padding:0 6px;font-family:inherit"><option value="ALL">All properties</option></select></div>
             <!-- Part 8: date jump -- same bounded windowed loading as
                  Prev/Next/Today, just an arbitrary anchor instead of ±7d. -->
             <div class="fg" style="margin:0;display:flex;gap:4px;align-items:center">
@@ -728,6 +751,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <!-- Part 20: read-only, never reserves/holds anything, never alters quote state. -->
         <div style="margin-bottom:12px">
           <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('quote-arrival').value,document.getElementById('quote-departure').value,'quote-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
+          <button type="button" class="btn-outline" onclick="agCalOpenForAccommodation('quote')" title="Open the full Availability Calendar, focused on this property and these dates"><i class="ti ti-calendar"></i> View on calendar</button>
           <div id="quote-availability-result" style="margin-top:6px"></div>
         </div>
 
@@ -810,6 +834,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <!-- Part 21: read-only, never reserves/holds anything, never alters quote state. -->
         <div style="margin-bottom:12px">
           <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('cp-arrival').value,document.getElementById('cp-departure').value,'cp-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
+          <button type="button" class="btn-outline" onclick="agCalOpenForAccommodation('cp')" title="Open the full Availability Calendar, focused on this property and these dates"><i class="ti ti-calendar"></i> View on calendar</button>
           <div id="cp-availability-result" style="margin-top:6px"></div>
         </div>
 
@@ -1304,17 +1329,99 @@ var ROOMS_LIST = [
 var AG_CAL_COL_W = 64;
 var agCalD = new Date(); agCalD.setHours(12,0,0,0);
 var agCalDays = 14;
-var agCalPanActive=false, agCalPanX=0, agCalPanScroll=0, agCalPanMoved=false;
+var agCalPanActive=false, agCalPanX=0, agCalPanY=0, agCalPanScroll=0, agCalPanScrollY=0, agCalPanMoved=false;
 
 function ymdStr(d){ return d.toISOString().slice(0,10); }
 function agAddDays(d,n){ var x=new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate()+n); return x; }
 const AG_DOW_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const AG_MON_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-// Prev/Next always step by exactly one week, same as the PMS calendar's
+// ── Continuous rolling timeline (calendar-fix task: real pan/window
+// loading, not a fixed pre-rendered block) ── Mirrors vilu-unified.html's
+// own calTL/calExtend/calOnScroll system as closely as the data model
+// allows: the rendered grid is a bounded window of days around the anchor
+// (agCalD) -- AG_CAL_LEAD before it, AG_CAL_TRAIL after the agCalDays view
+// -- and panning/scrolling within AG_CAL_EDGE_COLS columns of either edge
+// grows the window by AG_CAL_CHUNK days. Unlike the PMS (which already
+// holds every reservation in memory and only needs to re-render), extending
+// here also FETCHES the newly-exposed days from the server for whichever
+// propert(y/ies) are visible -- so AG_CAL_MAX_DAYS is capped at the
+// server's own AGENCY_AVAILABILITY_MAX_DAYS (90), not the PMS's 126, since
+// fetchLiveAvailability()/fetchLivePartnerAvailability() silently drop the
+// old covered range once the union would exceed it.
+const AG_CAL_CHUNK=10, AG_CAL_LEAD=10, AG_CAL_TRAIL=10, AG_CAL_MAX_DAYS=90, AG_CAL_EDGE_COLS=4;
+var agCalTL={start:null,count:0,anchorKey:null,days:null}, agCalExtending=false, agCalScrollRaf=null;
+function agCalTimelineSync(){
+  var key=new Date(agCalD).setHours(12,0,0,0);
+  if(agCalTL.anchorKey!==key || agCalTL.days!==agCalDays || !agCalTL.start){
+    agCalTL.start=agAddDays(agCalD,-AG_CAL_LEAD);
+    agCalTL.count=agCalDays+AG_CAL_LEAD+AG_CAL_TRAIL;
+    agCalTL.anchorKey=key; agCalTL.days=agCalDays;
+  }
+}
+function agCalResetScroll(){
+  var sa=document.getElementById('ag-cb-scroll-area');
+  if(sa){ sa.scrollLeft=AG_CAL_LEAD*AG_CAL_COL_W; agCalUpdateLabel(); }
+}
+// Reads the anchor back from the current scroll position -- same trick as
+// the PMS calendar's calVisibleStart(), so Prev/Next/Today always step from
+// what's actually on screen, not a stale in-memory anchor.
+function agCalVisibleStart(){
+  var sa=document.getElementById('ag-cb-scroll-area');
+  return (sa && agCalTL.start) ? agAddDays(agCalTL.start, Math.round(sa.scrollLeft/AG_CAL_COL_W)) : new Date(agCalD);
+}
+// Grows the window by one chunk in the given direction (-1 = earlier,
+// +1 = later), fetches the server data for the now-larger window (bounded,
+// merge-cached -- see fetchLiveAvailability()), trims the far side once
+// AG_CAL_MAX_DAYS is exceeded, redraws, and restores the visual scroll
+// position (also for an in-progress drag-pan) so nothing jumps under the
+// user's cursor.
+async function agCalExtend(dir){
+  if(agCalExtending) return;
+  var sa=document.getElementById('ag-cb-scroll-area'); if(!sa||!agCalTL.start) return;
+  agCalExtending=true;
+  try {
+    var prevLeft=sa.scrollLeft, prevTop=sa.scrollTop, shift=0;
+    if(dir<0){
+      agCalTL.start=agAddDays(agCalTL.start,-AG_CAL_CHUNK); agCalTL.count+=AG_CAL_CHUNK; shift=AG_CAL_CHUNK;
+      if(agCalTL.count>AG_CAL_MAX_DAYS) agCalTL.count=AG_CAL_MAX_DAYS;
+    } else {
+      agCalTL.count+=AG_CAL_CHUNK;
+      if(agCalTL.count>AG_CAL_MAX_DAYS){ var over=agCalTL.count-AG_CAL_MAX_DAYS; agCalTL.start=agAddDays(agCalTL.start,over); agCalTL.count=AG_CAL_MAX_DAYS; shift=-over; }
+    }
+    await agDrawCal();
+    sa.scrollLeft=prevLeft+shift*AG_CAL_COL_W;
+    sa.scrollTop=prevTop;
+    if(agCalPanActive) agCalPanScroll+=shift*AG_CAL_COL_W;
+  } finally { agCalExtending=false; }
+}
+function agCalOnScroll(sa){
+  if(agCalScrollRaf) return;
+  agCalScrollRaf=requestAnimationFrame(function(){
+    agCalScrollRaf=null;
+    agCalUpdateLabel();
+    if(agCalExtending||!agCalTL.start) return;
+    var edge=AG_CAL_EDGE_COLS*AG_CAL_COL_W;
+    if(sa.scrollLeft<edge) agCalExtend(-1);
+    else if(sa.scrollLeft>sa.scrollWidth-sa.clientWidth-edge) agCalExtend(1);
+  });
+}
+// Re-anchors the timeline (Today/Prev/Next/Jump) and redraws through the
+// SAME windowed fetch path as an edge-extension -- a navigation action
+// always actually fetches the newly-anchored window's data, never assumes
+// it's already cached.
+async function agCalReanchor(){
+  agCalTL.anchorKey=null;
+  await agDrawCal();
+  agCalResetScroll();
+  setTimeout(async function(){ await agDrawCal(); agCalResetScroll(); }, 100);
+}
+
+// Prev/Next always step by exactly one week from the currently VISIBLE
+// start (not a stale anchor), same as the PMS calendar's own
 // window.calNav(d) -- regardless of the 14/30/60-day view size.
-function agCalNav(dir){ agCalD.setDate(agCalD.getDate()+dir*7); agDrawCal(); }
-function agCalNavToday(){ agCalD=new Date(); agCalD.setHours(12,0,0,0); agDrawCal(); }
+function agCalNav(dir){ agCalD=agCalVisibleStart(); agCalD.setHours(12,0,0,0); agCalD.setDate(agCalD.getDate()+dir*7); agCalReanchor(); }
+function agCalNavToday(){ agCalD=new Date(); agCalD.setHours(12,0,0,0); agCalReanchor(); }
 function agSetCalView(n){
   agCalDays=n;
   [14,30,60].forEach(function(v){ var b=document.getElementById('ag-cbv-'+v); if(b)b.classList.toggle('on',v===n); });
@@ -1324,11 +1431,15 @@ function agCalRefresh(){
   // Force a fresh read for the currently-visible window (bypasses the
   // covered-range cache -- see fetchLiveAvailability()'s comment).
   _availCoveredStart=null; _availCoveredEnd=null;
+  Object.keys(_partnerAvailCache).forEach(function(pid){ _partnerAvailCache[pid].coveredStart=null; _partnerAvailCache[pid].coveredEnd=null; });
   agDrawCal();
 }
+// Toolbar month label follows the VISIBLE region of the timeline.
 function agCalUpdateLabel(){
-  var lbl=document.getElementById('ag-cb-lbl'); if(!lbl) return;
-  var a=agCalD, b=agAddDays(agCalD,agCalDays-1);
+  var sa=document.getElementById('ag-cb-scroll-area'), lbl=document.getElementById('ag-cb-lbl');
+  if(!sa||!lbl||!agCalTL.start) return;
+  var i0=Math.max(0,Math.floor(sa.scrollLeft/AG_CAL_COL_W)), i1=Math.min(agCalTL.count-1,Math.max(i0,Math.floor((sa.scrollLeft+sa.clientWidth-1)/AG_CAL_COL_W)));
+  var a=agAddDays(agCalTL.start,i0), b=agAddDays(agCalTL.start,i1);
   var m0=AG_MON_NAMES[a.getMonth()].toUpperCase(), m1=AG_MON_NAMES[b.getMonth()].toUpperCase();
   lbl.textContent=(a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear())?m0+' '+a.getFullYear():m0+' '+a.getFullYear()+' – '+m1+' '+b.getFullYear();
 }
@@ -1367,6 +1478,21 @@ function agCellClick(roomId, ds){
   coEl.value=ds;
   _agCalPick=null;
   searchAvailability();
+}
+// Partner-property cell click (Part 13): a MANUAL_INVENTORY property's
+// AVAILABLE cells reuse the exact same two-click picker as Vilu (keyed by
+// "propertyId|roomTypeId" instead of a room id -- agCellClick never
+// actually inspects the key's shape). An ON_REQUEST property never exposes
+// a real AVAILABLE state at all (Part 11/13), so every click there just
+// explains that Vilu must confirm -- never a fake availability signal.
+function agPartnerCellClick(propertyId, roomTypeId, ds){
+  var cache = _partnerAvailCache[propertyId];
+  if(cache && cache.property && cache.property.availabilityMode==='ON_REQUEST'){
+    alert('Availability on request — Vilu must confirm this property.');
+    return;
+  }
+  if(agPartnerCellBucket(propertyId, roomTypeId, ds).kind!=='AVAILABLE') return;
+  agCellClick(propertyId+'|'+roomTypeId, ds);
 }
 
 // HTML-escape guest-controlled strings before they are interpolated into any
@@ -1441,23 +1567,48 @@ function agCalToggleCollapse(propertyId){
   saveAgCalCollapsedPref();
   agDrawCal();
 }
-function agCalPropertyFilterChanged(v){ AG_CAL_PROPERTY_FILTER = v; agDrawCal(); }
+// Switching property tabs (Part 8/9) redraws in place through the plain
+// agDrawCal() fetch path -- it deliberately never calls agCalReanchor(), so
+// the current date position is preserved exactly as the task requires
+// ("switching hotels should stay around Jan 2027 unless Today is clicked").
+function agCalPropertyTabClick(v){ AG_CAL_PROPERTY_FILTER = v; agDrawCal(); }
+// Date jump (Part 8) IS a re-anchor -- same bounded windowed fetch path as
+// Today/Prev/Next, just an arbitrary anchor instead of ±7 days.
 function agCalJumpToDate(){
   var v = document.getElementById('ag-cb-jump-date').value;
   if(!v) return;
   agCalD = new Date(v+'T12:00');
-  agDrawCal();
+  agCalReanchor();
 }
-async function agCalPopulatePropertyFilter(){
-  var sel = document.getElementById('ag-cb-property-filter');
-  if(!sel || sel.dataset.populated) return;
-  var props = await loadAgencyProperties();
-  if(props.length<=1) return; // Vilu only -- no partner properties configured yet, filter stays "All properties"==Vilu-only
-  sel.innerHTML = '<option value="ALL">All properties</option>' + props.map(function(p){
-    return '<option value="'+esc(p.propertyId)+'">'+esc(p.propertyName)+'</option>';
-  }).join('');
-  sel.value = AG_CAL_PROPERTY_FILTER;
-  sel.dataset.populated = '1';
+// Renders a VISIBLE tab row (Part 2/9) -- never a dropdown -- into
+// #ag-cb-prop-tabs: Vilu first with a PRIMARY pill, then one tab per
+// active+agency-visible partner property (in their configured
+// displayOrder, exactly as getAgencyProperties() returns them), then an
+// "All Properties" tab. Rebuilt every redraw (cheap -- a handful of
+// buttons) so a newly (in)active partner property appears without a
+// manual refresh; the active tab is derived from AG_CAL_PROPERTY_FILTER,
+// which this function never itself changes.
+function agCalRenderPropertyTabs(allProps){
+  var wrap = document.getElementById('ag-cb-prop-tabs');
+  if(!wrap) return;
+  var partners = allProps.filter(function(p){ return !p.isVilu; });
+  var tabs = [{ propertyId:'VILU', propertyName:'Vilu Residence', isVilu:true }]
+    .concat(partners)
+    .map(function(p){
+      // With no partner properties configured there is no "All Properties"
+      // tab at all (see below) -- Vilu's own tab reads as active for the
+      // default AG_CAL_PROPERTY_FILTER=='ALL' state so a single-property
+      // agency never sees an unhighlighted tab row.
+      var on = AG_CAL_PROPERTY_FILTER===p.propertyId || (p.isVilu && AG_CAL_PROPERTY_FILTER==='ALL' && !partners.length);
+      return '<button type="button" class="cb-prop-tab'+(on?' on':'')+'" onclick="agCalPropertyTabClick(\''+esc(p.propertyId)+'\')">'
+        + esc(p.propertyName) + (p.isVilu?' <span class="primary-pill">PRIMARY</span>':'')
+        + '</button>';
+    });
+  if(partners.length){
+    var onAll = AG_CAL_PROPERTY_FILTER==='ALL';
+    tabs.push('<button type="button" class="cb-prop-tab all'+(onAll?' on':'')+'" onclick="agCalPropertyTabClick(\'ALL\')">All Properties</button>');
+  }
+  wrap.innerHTML = tabs.join('');
 }
 
 var _partnerAvailCache = {}; // propertyId -> {byCell, roomTypes, property, coveredStart, coveredEnd}
@@ -1496,14 +1647,15 @@ function agPartnerCellBucket(propertyId, roomTypeId, ds){
 }
 
 async function agDrawCal(){
-  var days=[]; for(var i=0;i<agCalDays;i++) days.push(agAddDays(agCalD,i));
+  agCalTimelineSync();
+  var days=[]; for(var i=0;i<agCalTL.count;i++) days.push(agAddDays(agCalTL.start,i));
   var today = tS;
   var startDate = ymdStr(days[0]);
   var endDateExclusive = ymdStr(agAddDays(days[days.length-1],1));
   var dsl = days.map(ymdStr);
 
-  await agCalPopulatePropertyFilter();
   var allProps = await loadAgencyProperties();
+  agCalRenderPropertyTabs(allProps);
   var showVilu = AG_CAL_PROPERTY_FILTER==='ALL' || AG_CAL_PROPERTY_FILTER==='VILU';
   var partnerProps = allProps.filter(function(p){ return !p.isVilu && (AG_CAL_PROPERTY_FILTER==='ALL' || AG_CAL_PROPERTY_FILTER===p.propertyId); });
 
@@ -1581,7 +1733,12 @@ async function agDrawCal(){
       days.forEach(function(d){
         var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
         var cl=(iT?'today-cell':'')+(iW?' weekend':'');
-        gH+='<div class="cb-cell '+cl+'" style="cursor:default"></div>';
+        // AVAILABLE cells (MANUAL_INVENTORY only) are clickable into the
+        // same two-click picker as Vilu (Part 13); a BLOCKED date is
+        // clickable through its own bar instead (drawn below, and it
+        // fully covers the cell); an ON_REQUEST property's cells are
+        // covered by that property's own full-row bar (also below).
+        gH+='<div class="cb-cell '+cl+'" data-partner="'+p.propertyId+'|'+rt.roomTypeId+'" data-d="'+ds+'"></div>';
       });
       gH+='</div>';
     });
@@ -1640,6 +1797,7 @@ async function agDrawCal(){
         bar.className='cb-bar';
         bar.style.cssText='left:1px;width:'+w+'px;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 8px,#b6bcc4 8px,#b6bcc4 16px);color:#1f2937;text-shadow:none';
         bar.innerHTML='<span>Availability on request — ask Vilu</span>';
+        bar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); alert('Availability on request — Vilu must confirm this property.'); });
         row.appendChild(bar);
         return;
       }
@@ -1667,25 +1825,40 @@ async function agDrawCal(){
     });
   });
 
-  // Available-cell two-click date picker (Part 5) -- Vilu cells only (see
-  // this function's own header comment on why partner cells stay
-  // non-interactive in this pass) -- wired after bars, so a bar's own
-  // click (which stops propagation) always wins over the cell beneath it.
+  // Available-cell two-click date picker (Part 5/13) -- Vilu rooms AND
+  // partner MANUAL_INVENTORY/ON_REQUEST room-types alike -- wired after
+  // bars, so a bar's own click (which stops propagation) always wins over
+  // the cell beneath it (a BLOCKED date or an ON_REQUEST property's whole
+  // row is always covered by a bar; only a genuinely AVAILABLE cell's own
+  // click ever actually fires).
   document.querySelectorAll('#ag-cb-grid .cb-cell[data-room]').forEach(function(cell){
     cell.addEventListener('click', function(){ agCellClick(cell.dataset.room, cell.dataset.d); });
   });
+  document.querySelectorAll('#ag-cb-grid .cb-cell[data-partner]').forEach(function(cell){
+    cell.addEventListener('click', function(){
+      var parts = cell.dataset.partner.split('|');
+      agPartnerCellClick(parts[0], parts[1], cell.dataset.d);
+    });
+  });
 
-  // Vertical scroll sync (fixed room labels <-> grid) + pan-to-scroll drag
-  // on the date header/category rows, same interaction as the PMS
-  // calendar's own cb-scroll-area handling -- scoped here to the header row
-  // only, since there is no drag-select-to-book competing for the mousedown.
+  // Vertical scroll sync (fixed room labels <-> grid) + real click-drag/pan
+  // (Part 4 of the calendar-fix task) + edge-triggered window loading
+  // (Part 5/6) -- scoped to the WHOLE scroll area (background, date
+  // header, category rows, and empty cells alike), exactly like the PMS
+  // calendar's own sa.onmousedown: a reservation bar is never a pan
+  // surface (its own click stops propagation before this ever runs), and
+  // since the Agency Portal has no drag-to-book on cells at all, an
+  // ordinary click on a cell is never mistaken for a pan start -- the 4px
+  // dead zone below means a plain click always still reaches the cell's
+  // own click handler.
   var sa=document.getElementById('ag-cb-scroll-area'), fr=document.getElementById('ag-cb-fixed-rows');
-  if(sa && fr) sa.onscroll=function(){ fr.scrollTop=sa.scrollTop; };
-  var header=document.getElementById('ag-cb-date-header');
-  if(header){
-    header.onmousedown=function(e){
+  if(sa && fr) sa.onscroll=function(){ fr.scrollTop=sa.scrollTop; agCalOnScroll(sa); };
+  if(sa){
+    sa.onmousedown=function(e){
       if(e.target.closest('.cb-bar')) return;
-      agCalPanActive=true; agCalPanMoved=false; agCalPanX=e.clientX; agCalPanScroll=sa.scrollLeft;
+      if(e.button!==0 && e.button!==1) return;
+      agCalPanActive=true; agCalPanMoved=false; agCalPanX=e.clientX; agCalPanY=e.clientY;
+      agCalPanScroll=sa.scrollLeft; agCalPanScrollY=sa.scrollTop;
       e.preventDefault();
     };
   }
@@ -1693,10 +1866,12 @@ async function agDrawCal(){
 document.addEventListener('mousemove', function(e){
   if(!agCalPanActive) return;
   var sa=document.getElementById('ag-cb-scroll-area'); if(!sa) return;
-  var dx=e.clientX-agCalPanX;
-  if(!agCalPanMoved && Math.abs(dx)<4) return;
+  var dx=e.clientX-agCalPanX, dy=e.clientY-agCalPanY;
+  // 4px dead zone: a plain click on a pan surface never nudges the grid.
+  if(!agCalPanMoved && Math.abs(dx)<4 && Math.abs(dy)<4) return;
   agCalPanMoved=true; sa.classList.add('cb-panning');
   sa.scrollLeft=agCalPanScroll-dx;
+  sa.scrollTop=agCalPanScrollY-dy;
 });
 document.addEventListener('mouseup', function(){
   if(!agCalPanActive) return;
@@ -1705,9 +1880,14 @@ document.addEventListener('mouseup', function(){
 });
 
 // Entry point kept under its original name -- called from switchTab()'s
-// 'availability' case (drawMyHolds().then(renderAgencyCalendarGrid)) and
-// from the refresh button.
-async function renderAgencyCalendarGrid(){ return agDrawCal(); }
+// 'availability' case (drawMyHolds().then(renderAgencyCalendarGrid)).
+// Resets the scroll position after the first render so the calendar always
+// opens anchored at agCalD with its lead buffer already in place (same as
+// the PMS calendar's own calResetScroll() convention) -- without this, the
+// browser's default scrollLeft of 0 sits inside the edge-detection zone
+// from the very first interaction, triggering a spurious backward window
+// extension before the user has actually panned anywhere.
+async function renderAgencyCalendarGrid(){ await agDrawCal(); agCalResetScroll(); }
 
 // ── Own booking summary (Part 11) — read-only. Populated entirely from
 // _availCache.ownReservations (already fetched, no extra round-trip). No
@@ -1750,6 +1930,28 @@ async function openOwnBookingSummary(reservationId){
 }
 function closeOwnBookingSummary(){
   document.getElementById('m-own-booking').classList.remove('on');
+}
+
+// Part 12: a quote's "Check availability" must be able to open/focus the
+// MAIN calendar on the selected property + these exact dates -- purely
+// additive alongside checkAvailabilityForDates()'s own existing inline
+// mini-check above (untouched). Switches to the Availability tab, sets the
+// property tab to whichever accommodation the quote currently has
+// selected, fills the Check-in/Check-out fields with the quote's own
+// dates, and re-anchors the calendar there -- "making it obvious which
+// property is being checked" via the now-visible active property tab.
+function agCalOpenForAccommodation(prefix){
+  var arrival = document.getElementById(prefix+'-arrival').value;
+  var departure = document.getElementById(prefix+'-departure').value;
+  var propertyId = accState(prefix).propertyId || 'VILU';
+  var tabBtn = document.querySelector('.tab[onclick*="showTab(\'availability\'"]');
+  showTab('availability', tabBtn);
+  AG_CAL_PROPERTY_FILTER = propertyId;
+  document.getElementById('av-ci').value = arrival || '';
+  document.getElementById('av-co').value = departure || '';
+  agCalD = arrival ? new Date(arrival+'T12:00') : new Date();
+  agCalD.setHours(12,0,0,0);
+  agCalReanchor();
 }
 
 // Exact Vilu availability search (Part 6/7/14). Reuses the SAME
