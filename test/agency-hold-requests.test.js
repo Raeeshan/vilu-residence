@@ -89,7 +89,7 @@ section('Case C — Part 4/5: request-from-quote and request-from-availability e
     assert.doesNotMatch(src.match(/var actions = isDraft\s*\?([\s\S]*?):/)[1], /openHoldRequestModal/); // DRAFT branch must not offer it
   });
   test('Search Availability results offer "Request temporary hold" only when something is actually free, with no quote required (quoteId/quoteReference null)', () => {
-    const src = extractByStart(PORTAL, /async function searchAvailability\(\)\s*\{/);
+    const src = extractByStart(PORTAL, /async function searchAvailability\(propertyIdOverride\)\s*\{/);
     assert.match(src, /if\(anyFree\) html \+= '<button[\s\S]*?openHoldRequestModal\(\\''\+ci\+'\\'',\\''\+co\+'\\'',\\''\\',null,null\)/.source.replace(/\\''/g, "\\\\''") === undefined ? /openHoldRequestModal/ : /openHoldRequestModal/);
     assert.match(src, /,null,null\)/);
   });

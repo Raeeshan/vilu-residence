@@ -129,7 +129,7 @@ section('Case E — Part 6/7: Check Availability UI');
     assert.match(tabHTML, /onclick="searchAvailability\(\)"/);
   });
   test('searchAvailability() reports per-category available counts (Part 7\'s exact example shape: "N of M available")', () => {
-    const src = extractByStart(PORTAL, /async function searchAvailability\(\)\s*\{/);
+    const src = extractByStart(PORTAL, /async function searchAvailability\(propertyIdOverride\)\s*\{/);
     assert.match(src, /c\.free\+' of '\+c\.total/);
   });
 }
@@ -177,10 +177,10 @@ section('Case F — Part 9/10/11: Agency Calendar design (post-completion PMS-mi
       assert.match(oc, /closeOwnBookingSummary/, `unexpected onclick in the read-only own-booking modal: ${oc}`);
     });
   });
-  test('clicking an AVAILABLE cell only ever fills the existing Check-in/Check-out inputs and reuses searchAvailability() -- never creates/holds/writes anything itself', () => {
+  test('clicking an AVAILABLE cell only ever fills the existing Check-in/Check-out inputs and reuses searchAvailability() -- never creates/holds/writes anything itself; hotel-selection sync fix (Part 9): the property is resolved from the CELL actually clicked, never assumed, so a partner-hotel date pick searches that hotel, not Vilu', () => {
     const src = extractByStart(PORTAL, /function agCellClick\(roomId, ds\)\s*\{/);
     assert.doesNotMatch(src, /(?:collection|doc)\([^)]*\)[^;]*\.(?:set|update|add|delete)\(/);
-    assert.match(src, /searchAvailability\(\)/);
+    assert.match(src, /searchAvailability\(pipeIdx>-1 \? roomId\.slice\(0,pipeIdx\) : 'VILU'\)/);
   });
 }
 
@@ -214,7 +214,7 @@ section('Case H — Part 14: exact overlap semantics, half-open interval, no inv
 {
   test('getAgencyAvailability\'s per-day cell check and searchAvailability()\'s per-room-free check both use the half-open "date >= from && date < to" convention (withinRange helper / inline range loop), matching writeReservation/hasBlockConflict/isOcc everywhere else', () => {
     assert.match(FUNCTIONS, /function withinRange\(date, from, to\) \{\s*\n\s*return date >= from && date < to;/);
-    const searchSrc = extractByStart(PORTAL, /async function searchAvailability\(\)\s*\{/);
+    const searchSrc = extractByStart(PORTAL, /async function searchAvailability\(propertyIdOverride\)\s*\{/);
     assert.match(searchSrc, /d < end/);
   });
   test('overlaps() in lib/inventory.js (the canonical formula reused server-side for reservation overlap) is untouched', () => {
@@ -248,11 +248,12 @@ section('Case J — Part 17: server authorization, agencyId never trusted from c
 
 section('Case K — Part 20/21: quote/custom-package availability integration is read-only');
 {
-  test('checkAvailabilityForDates() never writes anywhere and is only called from an explicit button, not from any input\'s change/input handler', () => {
-    const src = extractByStart(PORTAL, /async function checkAvailabilityForDates\(arrivalDate, departureDate, targetElId\)\s*\{/);
+  test('hotel-selection sync fix: checkAvailabilityForDates() (the old Vilu-only, calendar-blind inline check) is retired -- both builders\' "Check availability" button now calls agCalOpenForAccommodation(), the ONE calendar-opening path, never writes anywhere', () => {
+    assert.doesNotMatch(PORTAL, /function checkAvailabilityForDates/);
+    assert.match(PORTAL, /onclick="agCalOpenForAccommodation\('quote'\)"/);
+    assert.match(PORTAL, /onclick="agCalOpenForAccommodation\('cp'\)"/);
+    const src = extractByStart(PORTAL, /function agCalOpenForAccommodation\(prefix\)\s*\{/);
     assert.doesNotMatch(src, /\.set\(|\.update\(|\.add\(/);
-    assert.match(PORTAL, /onclick="checkAvailabilityForDates\(document\.getElementById\('quote-arrival'\)/);
-    assert.match(PORTAL, /onclick="checkAvailabilityForDates\(document\.getElementById\('cp-arrival'\)/);
   });
   test('both Quote Builder and Custom Package Builder save/finalize exclusively through a server callable -- Agency Quote Security Hardening moved Assigned Package off its old direct fsDb write, matching Custom Package\'s pre-existing architecture', () => {
     const saveSrc = extractByStart(PORTAL, /async function saveQuoteDraft\(\)\s*\{/);
@@ -272,8 +273,8 @@ section('Case L — Part 33: zero inventory writes anywhere in Phase D code (sti
     extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/),
     extractByStart(PORTAL, /function agCellBucket\(roomId, ds\)\s*\{/),
     extractByStart(PORTAL, /function agCellClick\(roomId, ds\)\s*\{/),
-    extractByStart(PORTAL, /async function searchAvailability\(\)\s*\{/),
-    extractByStart(PORTAL, /async function checkAvailabilityForDates\(arrivalDate, departureDate, targetElId\)\s*\{/),
+    extractByStart(PORTAL, /async function searchAvailability\(propertyIdOverride\)\s*\{/),
+    extractByStart(PORTAL, /function agCalOpenForAccommodation\(prefix\)\s*\{/),
     extractByStart(PORTAL, /function openOwnBookingSummary\(reservationId\)\s*\{/),
   ];
   test('none of these functions ever perform a Firestore write (collection/doc chained into .set/.update/.add/.delete) -- DOM-only calls like classList.add() are not Firestore writes and are expected', () => {

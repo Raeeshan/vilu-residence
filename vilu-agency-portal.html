@@ -249,6 +249,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
    .cb-cat-cell/.cb-section-cell grab cursor. */
 .cb-scroll-area{cursor:grab}
 .cb-scroll-area.cb-panning{cursor:grabbing}
+/* Hotel-selection sync fix (Part 3): the accommodation picker's selected
+   card is driven purely by CSS `:has(input:checked)` -- never a JS-computed
+   inline style baked in at render time, which desynced from the actual
+   checked radio the moment a DIFFERENT card was clicked (the radio's own
+   dot moved, correctly, via native browser behavior; the surrounding card's
+   border/background did not, since nothing ever re-rendered this list
+   afterward). This selector always reflects the true current selection. */
+.acc-option{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;background:#fff}
+.acc-option:has(input:checked){border-color:#00b4d8;background:#f0fdfa}
 </style>
 </head>
 <body>
@@ -373,15 +382,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
          manual block creation, no reservation drawer (Part 23). -->
     <div id="tab-availability" class="hidden">
       <div class="card" style="margin-bottom:16px">
-        <h3 style="margin:0 0 4px">Check availability</h3>
-        <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px">Exact Vilu availability for your requested dates — what other agencies/direct guests occupy stays private; only room/category status is shown.</p>
+        <h3 style="margin:0 0 4px" id="av-search-title">Check availability</h3>
+        <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px" id="av-search-subtitle">Exact Vilu availability for your requested dates — what other agencies/direct guests occupy stays private; only room/category status is shown.</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px">
           <div class="fg" style="margin:0"><label>Check-in</label><input type="date" id="av-ci"></div>
           <div class="fg" style="margin:0"><label>Check-out</label><input type="date" id="av-co"></div>
           <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="av-adults" min="1" value="2" style="width:80px"></div>
           <div class="fg" style="margin:0"><label>Children</label><input type="number" id="av-children" min="0" value="0" style="width:80px"></div>
           <div class="fg" style="margin:0"><label>Rooms needed</label><input type="number" id="av-rooms" min="1" value="1" style="width:80px"></div>
-          <div class="fg" style="margin:0"><label>Category</label>
+          <!-- Hotel-selection sync fix (Part 7): Vilu-only categories --
+               hidden by updateAvSearchUI() whenever a partner property tab
+               is active, since partner properties have no category concept. -->
+          <div class="fg" style="margin:0" id="av-category-wrap"><label>Category</label>
             <select id="av-category">
               <option value="">All categories</option>
               <option value="Deluxe Family Room">Deluxe Family Room</option>
@@ -748,11 +760,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="quote-adults" min="1" value="2" oninput="updateQuotePreview()"></div>
           <div class="fg" style="margin:0"><label>Children</label><input type="number" id="quote-children" min="0" value="0" oninput="updateQuotePreview()"></div>
         </div>
-        <!-- Part 20: read-only, never reserves/holds anything, never alters quote state. -->
+        <!-- Hotel-selection sync fix: ONE button, ONE calendar-opening path
+             (Part 5 of that task) -- opens/focuses the Availability Calendar
+             on whichever accommodation is currently selected above (Vilu or
+             a partner property), never a hardcoded Vilu-only check. Never
+             reserves/holds anything, never alters quote state beyond the
+             calendar's own read-only date fields. -->
         <div style="margin-bottom:12px">
-          <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('quote-arrival').value,document.getElementById('quote-departure').value,'quote-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
-          <button type="button" class="btn-outline" onclick="agCalOpenForAccommodation('quote')" title="Open the full Availability Calendar, focused on this property and these dates"><i class="ti ti-calendar"></i> View on calendar</button>
-          <div id="quote-availability-result" style="margin-top:6px"></div>
+          <button type="button" class="btn-outline" onclick="agCalOpenForAccommodation('quote')"><i class="ti ti-calendar-search"></i> Check availability</button>
         </div>
 
         <!-- Multi-Property Availability (Part 11/19/21): Vilu Residence is
@@ -831,11 +846,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="cp-adults" min="1" value="2" oninput="updateCustomQuotePreview()"></div>
           <div class="fg" style="margin:0"><label>Children</label><input type="number" id="cp-children" min="0" value="0" oninput="updateCustomQuotePreview()"></div>
         </div>
-        <!-- Part 21: read-only, never reserves/holds anything, never alters quote state. -->
+        <!-- Hotel-selection sync fix: ONE button, ONE calendar-opening path
+             -- see the identical comment on the Assigned Package builder's
+             own Check availability button above. -->
         <div style="margin-bottom:12px">
-          <button type="button" class="btn-outline" onclick="checkAvailabilityForDates(document.getElementById('cp-arrival').value,document.getElementById('cp-departure').value,'cp-availability-result')"><i class="ti ti-calendar-search"></i> Check availability</button>
-          <button type="button" class="btn-outline" onclick="agCalOpenForAccommodation('cp')" title="Open the full Availability Calendar, focused on this property and these dates"><i class="ti ti-calendar"></i> View on calendar</button>
-          <div id="cp-availability-result" style="margin-top:6px"></div>
+          <button type="button" class="btn-outline" onclick="agCalOpenForAccommodation('cp')"><i class="ti ti-calendar-search"></i> Check availability</button>
         </div>
 
         <!-- Multi-Property Availability (Part 11/13): a partner room cost is
@@ -1477,7 +1492,14 @@ function agCellClick(roomId, ds){
   }
   coEl.value=ds;
   _agCalPick=null;
-  searchAvailability();
+  // Hotel-selection sync fix (Part 9): resolve the property from the CELL
+  // that was actually clicked (a real Vilu room id has no "|"; a partner
+  // cell's key is always "propertyId|roomTypeId") -- never from
+  // AG_CAL_PROPERTY_FILTER, which can be 'ALL' while both a Vilu and a
+  // partner section are simultaneously visible/clickable. Picking a date on
+  // Partner Hotel A must search Partner Hotel A, never fall back to Vilu.
+  var pipeIdx = roomId.indexOf('|');
+  searchAvailability(pipeIdx>-1 ? roomId.slice(0,pipeIdx) : 'VILU');
 }
 // Partner-property cell click (Part 13): a MANUAL_INVENTORY property's
 // AVAILABLE cells reuse the exact same two-click picker as Vilu (keyed by
@@ -1656,6 +1678,7 @@ async function agDrawCal(){
 
   var allProps = await loadAgencyProperties();
   agCalRenderPropertyTabs(allProps);
+  updateAvSearchUI();
   var showVilu = AG_CAL_PROPERTY_FILTER==='ALL' || AG_CAL_PROPERTY_FILTER==='VILU';
   var partnerProps = allProps.filter(function(p){ return !p.isVilu && (AG_CAL_PROPERTY_FILTER==='ALL' || AG_CAL_PROPERTY_FILTER===p.propertyId); });
 
@@ -1932,14 +1955,17 @@ function closeOwnBookingSummary(){
   document.getElementById('m-own-booking').classList.remove('on');
 }
 
-// Part 12: a quote's "Check availability" must be able to open/focus the
-// MAIN calendar on the selected property + these exact dates -- purely
-// additive alongside checkAvailabilityForDates()'s own existing inline
-// mini-check above (untouched). Switches to the Availability tab, sets the
-// property tab to whichever accommodation the quote currently has
-// selected, fills the Check-in/Check-out fields with the quote's own
-// dates, and re-anchors the calendar there -- "making it obvious which
-// property is being checked" via the now-visible active property tab.
+// Hotel-selection sync fix: THE one and only "Check availability" action for
+// both quote builders (Part 5/6/7/8 of that task) -- opens/focuses the
+// Availability Calendar on whichever accommodation is CURRENTLY selected
+// above (Vilu or a partner property), never defaulting to Vilu unless
+// nothing was actually selected. Switches to the Availability tab, activates
+// that property's own tab (never resetting it back to Vilu/All), fills the
+// Check-in/Check-out fields with the quote's own dates (never today), and
+// runs the same property-aware Search Availability so the hotel's real
+// availability is shown immediately -- not just the calendar's empty grid.
+// This is deliberately the ONLY calendar-opening path -- see this function's
+// own name, reused unchanged, not duplicated elsewhere.
 function agCalOpenForAccommodation(prefix){
   var arrival = document.getElementById(prefix+'-arrival').value;
   var departure = document.getElementById(prefix+'-departure').value;
@@ -1952,26 +1978,93 @@ function agCalOpenForAccommodation(prefix){
   agCalD = arrival ? new Date(arrival+'T12:00') : new Date();
   agCalD.setHours(12,0,0,0);
   agCalReanchor();
+  searchAvailability(propertyId);
 }
 
-// Exact Vilu availability search (Part 6/7/14). Reuses the SAME
-// getAgencyAvailability() data the calendar uses -- one canonical source,
-// no second overlap formula. "Available for the stay" means every night
-// from check-in up to (not including) check-out is AVAILABLE for that
-// physical room, matching the half-open interval convention used
-// everywhere else (writeReservation, hasBlockConflict, isOcc).
-async function searchAvailability(){
+// Hotel-selection sync fix (Part 7): the search title/subtitle and the
+// Vilu-only Category dropdown now reflect whichever property tab is
+// actually active, instead of always reading "Vilu" regardless of
+// selection. Called from agDrawCal() (the single place both a tab click and
+// a Check-availability-triggered reanchor both funnel through), so it never
+// falls out of sync with AG_CAL_PROPERTY_FILTER.
+function updateAvSearchUI(){
+  var titleEl = document.getElementById('av-search-title'), subEl = document.getElementById('av-search-subtitle'), catWrap = document.getElementById('av-category-wrap');
+  if(!titleEl) return;
+  var propertyId = AG_CAL_PROPERTY_FILTER==='ALL' ? 'VILU' : AG_CAL_PROPERTY_FILTER;
+  if(propertyId==='VILU'){
+    titleEl.textContent = 'Check availability';
+    subEl.textContent = 'Exact Vilu availability for your requested dates — what other agencies/direct guests occupy stays private; only room/category status is shown.';
+    if(catWrap) catWrap.style.display = '';
+    return;
+  }
+  var prop = (AG_PROPERTIES||[]).find(function(p){ return p.propertyId===propertyId; });
+  titleEl.textContent = 'Check availability — ' + (prop ? prop.propertyName : propertyId);
+  subEl.textContent = prop && prop.availabilityMode==='ON_REQUEST'
+    ? 'This property\'s availability is on request -- Vilu must confirm before it can be booked.'
+    : 'Availability for ' + (prop ? prop.propertyName : 'this property') + ', as entered by Vilu.';
+  if(catWrap) catWrap.style.display = 'none';
+}
+
+// Availability search (Part 6/7/14), now property-aware -- queries whichever
+// property tab is currently active (AG_CAL_PROPERTY_FILTER), defaulting to
+// Vilu only when no property tab has actually been selected ('ALL'). Reuses
+// the SAME getAgencyAvailability() data the calendar uses -- one canonical
+// source, no second overlap formula. "Available for the stay" means every
+// night from check-in up to (not including) check-out is AVAILABLE,
+// matching the half-open interval convention used everywhere else
+// (writeReservation, hasBlockConflict, isOcc).
+async function searchAvailability(propertyIdOverride){
+  var propertyId = propertyIdOverride || (AG_CAL_PROPERTY_FILTER==='ALL' ? 'VILU' : AG_CAL_PROPERTY_FILTER);
   var ci=document.getElementById('av-ci').value;
   var co=document.getElementById('av-co').value;
   var adults=+(document.getElementById('av-adults').value||1);
   var children=+(document.getElementById('av-children').value||0);
   var roomsNeeded=+(document.getElementById('av-rooms').value||1);
-  var categoryFilter=document.getElementById('av-category').value;
   var el=document.getElementById('av-results');
   if(!ci||!co||co<=ci){el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Select valid dates to search availability.</p>';return;}
   el.innerHTML='<p style="color:var(--muted);font-size:var(--font-size-base)">Searching…</p>';
-  await fetchLiveAvailability(ci, co);
   var nights=Math.round((new Date(co)-new Date(ci))/864e5);
+
+  if(propertyId!=='VILU'){
+    // Part 7: MANUAL_INVENTORY partner properties are searched from their
+    // own manual availability; ON_REQUEST properties never expose a real
+    // AVAILABLE state at all -- never a Vilu inventory fallback either way.
+    var allProps = await loadAgencyProperties();
+    var prop = allProps.find(function(p){ return p.propertyId===propertyId; });
+    if(!prop){ el.innerHTML = '<p style="color:#b91c1c">Property not found.</p>'; return; }
+    if(prop.availabilityMode==='ON_REQUEST'){
+      el.innerHTML = '<div class="al warn">Availability on request — Vilu must confirm this property.</div>';
+      return;
+    }
+    var cache = await fetchLivePartnerAvailability(propertyId, ci, co);
+    var roomTypes = cache.roomTypes || [];
+    var html = '<div style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:6px">'+fd(ci)+' → '+fd(co)+' · '+nights+' night'+(nights>1?'s':'')+' · '+esc(prop.propertyName)+'</div>';
+    if(!roomTypes.length){
+      el.innerHTML = html + '<p style="color:var(--muted)">No approved room types configured for this property yet.</p>';
+      return;
+    }
+    html += '<div class="avail-grid" id="av-grid"></div>';
+    el.innerHTML = html;
+    var grid = document.getElementById('av-grid');
+    roomTypes.forEach(function(rt){
+      var free = true;
+      var d = new Date(ci+'T00:00:00Z'), end = new Date(co+'T00:00:00Z');
+      while(d < end){
+        var ds = d.toISOString().slice(0,10);
+        if(agPartnerCellBucket(propertyId, rt.roomTypeId, ds).kind!=='AVAILABLE'){ free = false; break; }
+        d.setUTCDate(d.getUTCDate()+1);
+      }
+      var slot=document.createElement('div');
+      slot.className='room-slot'+(free?'':' blocked');
+      slot.innerHTML='<div style="font-size:var(--font-size-base);font-weight:700">'+esc(rt.roomTypeName)+'</div>'
+        +'<div style="font-size:var(--font-size-xs);margin-top:4px;color:'+(free?'var(--green)':'#b91c1c')+'">'+(free?'Available':'Not available')+'</div>';
+      grid.appendChild(slot);
+    });
+    return;
+  }
+
+  var categoryFilter=document.getElementById('av-category').value;
+  await fetchLiveAvailability(ci, co);
 
   var freeByRoom = {};
   ROOMS_LIST.forEach(function(room){
@@ -2017,48 +2110,6 @@ async function searchAvailability(){
 }
 
 function fd(d){return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
-
-// Read-only "Check availability" for the Quotation Builder / Custom Package
-// Builder (Parts 20/21). Renders a one-line per-category summary into
-// targetElId using the SAME getAgencyAvailability() data as the main
-// Availability tab. Never reserves anything, never touches quote state --
-// it's purely informational, called only on an explicit button click.
-async function checkAvailabilityForDates(arrivalDate, departureDate, targetElId){
-  var el = document.getElementById(targetElId);
-  if(!el) return;
-  if(!arrivalDate || !departureDate || departureDate<=arrivalDate){
-    el.innerHTML = '<span style="color:var(--muted)">Enter valid dates first.</span>';
-    return;
-  }
-  el.innerHTML = '<span style="color:var(--muted)">Checking…</span>';
-  try {
-    var callable = fsFunctions.httpsCallable('getAgencyAvailability');
-    var result = await callable({ startDate: arrivalDate, endDate: departureDate });
-    var byCell = {};
-    (result.data.days||[]).forEach(function(d){ byCell[d.roomId+'|'+d.date] = d; });
-    var byCategory = {};
-    ROOMS_LIST.forEach(function(room){
-      if(!byCategory[room.type]) byCategory[room.type] = { total:0, free:0 };
-      byCategory[room.type].total++;
-      var free = true;
-      var d = new Date(arrivalDate+'T00:00:00Z'), end = new Date(departureDate+'T00:00:00Z');
-      while(d < end){
-        var ds = d.toISOString().slice(0,10);
-        var cell = byCell[room.id+'|'+ds];
-        if(cell && cell.state!=='AVAILABLE'){ free = false; break; }
-        d.setUTCDate(d.getUTCDate()+1);
-      }
-      if(free) byCategory[room.type].free++;
-    });
-    el.innerHTML = Object.keys(byCategory).map(function(cat){
-      var c = byCategory[cat];
-      return '<span style="display:inline-block;margin:2px 8px 2px 0;font-size:var(--font-size-xs);color:'+(c.free>0?'var(--green)':'#b91c1c')+'">'+esc(cat)+': '+(c.free>0?(c.free+' of '+c.total+' available'):'Not available')+'</span>';
-    }).join('');
-  } catch(e) {
-    console.error('checkAvailabilityForDates failed', e);
-    el.innerHTML = '<span style="color:#b91c1c">Could not check availability.</span>';
-  }
-}
 
 // ── PACKAGES ──
 // Each agency now has its own fully independent package set, seeded from
@@ -2231,7 +2282,17 @@ async function renderAccommodationPicker(prefix, onChange){
   if(!props.some(function(p){ return p.propertyId===selected; })) selected = 'VILU';
   var html = props.map(function(p){
     var checked = p.propertyId===selected;
-    return '<label style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1.5px solid '+(checked?'#00b4d8':'var(--border)')+';border-radius:8px;margin-bottom:6px;cursor:pointer;background:'+(checked?'#f0fdfa':'#fff')+'">'
+    // Hotel-selection sync fix (Part 3): the selected-card border/background
+    // used to be baked into this label's inline style at RENDER time only --
+    // clicking a different radio changed the radio's own dot (native browser
+    // behavior) but never touched this list again, so the card border stayed
+    // stuck on whichever property was selected when the picker last redrew
+    // (confirmed live: after clicking Partner Hotel A, its radio was truly
+    // checked but Vilu's card still looked selected). The .acc-option class
+    // below is styled purely by CSS `:has(input:checked)` instead, so the
+    // correct card is always highlighted regardless of how the radio's own
+    // checked state changed -- no re-render needed, ever.
+    return '<label class="acc-option">'
       + '<input type="radio" name="'+prefix+'-acc-property" value="'+esc(p.propertyId)+'" '+(checked?'checked':'')+' onchange="accPropertyChanged(\''+prefix+'\',this.value)" style="margin-top:2px">'
       + '<div style="flex:1">'
         + '<div style="font-weight:700">'+esc(p.propertyName)+(p.isVilu?' <span style="font-size:var(--font-size-xs);font-weight:700;color:#00778e;background:#e0f7fd;padding:1px 8px;border-radius:10px;margin-left:4px">PRIMARY</span>':'')+'</div>'
@@ -2280,10 +2341,12 @@ async function renderAccommodationRoomType(prefix, propertyId){
 // Part 8 (calendar-fix follow-up): a live Available/Unavailable/On Request
 // line next to the accommodation picker, using the SAME getAgencyAvailability
 // data source the main calendar/searchAvailability already read -- never a
-// second lookup path. Vilu has its own separate "Check availability" button
-// already (checkAvailabilityForDates), so this only ever runs for a
-// selected PARTNER property. Never exposes anything beyond this one status
-// word -- no internal rate, no other guest's data.
+// second lookup path. Vilu's own availability is thoroughly covered by the
+// single "Check availability" button (agCalOpenForAccommodation, which
+// opens the calendar AND runs the same property-aware searchAvailability()),
+// so this inline line only ever runs for a selected PARTNER property. Never
+// exposes anything beyond this one status word -- no internal rate, no
+// other guest's data.
 async function accCheckAvailabilityStatus(prefix){
   var state = accState(prefix);
   var el = document.getElementById(prefix+'-acc-availability-status');
@@ -2381,6 +2444,22 @@ function calcQuoteViluNet(pkg, adults, children, childDiscountPct, arrivalDate, 
   var extraNights = Math.max(0, totalNights - baseNights);
   var extraNightsCost = extraNights * ((agyBookingSettings&&agyBookingSettings.extraNightRate)||0) * (adults||0);
   return { baseTotal: baseTotal, baseNights: baseNights, totalNights: totalNights, extraNights: extraNights, extraNightsCost: extraNightsCost, total: baseTotal + extraNightsCost };
+}
+
+// Hotel-selection sync fix: client-side MIRROR of resolveAssignedPackageRate()
+// in functions-core/index.js -- for the live preview only (the server always
+// re-resolves this authoritatively at save time regardless of what this
+// shows). Before this, updateQuotePreview() always fed calcQuoteViluNet()
+// the package's own agencyPricePerRoom no matter which accommodation was
+// selected, so switching to a partner property with a configured override
+// still showed the stale Vilu-rate total right up until the agency saved --
+// confusing, and exactly the "stale Vilu Net" bug this fix closes.
+function resolveAssignedPackageRatePreview(pkg, accSel){
+  if(!pkg) return { perPerson:0, configured:true };
+  if(accSel.isVilu) return { perPerson: pkg.agencyPricePerRoom || pkg.pricePerRoom || 0, configured:true };
+  var override = pkg.partnerRates && pkg.partnerRates[accSel.propertyId];
+  if(!override || typeof override.agencyPricePerRoom !== 'number') return { perPerson:null, configured:false };
+  return { perPerson: override.agencyPricePerRoom, configured:true };
 }
 
 async function openQuoteBuilder(pid, existingQuoteId){
@@ -2488,17 +2567,23 @@ async function updateQuotePreview(){
   _quoteWorking.exchangeRateSnapshotAt = (!isUsd && rateInput>0) ? new Date().toISOString() : null;
 
   var settings = await loadAgyBookingSettings();
-  var net = calcQuoteViluNet(_quotePkg, _quoteWorking.adults, _quoteWorking.children, _quoteWorking.childDiscountPct, _quoteWorking.arrivalDate, _quoteWorking.departureDate, settings);
+
+  // Multi-Property Availability (Part 13/14) + hotel-selection sync fix:
+  // an Assigned Package's Vilu net is the package's own fixed
+  // configuration when Vilu is selected, but a PARTNER property uses an
+  // admin-approved per-package rate override instead (never the Vilu rate
+  // silently reused, never a guess when none is configured) -- see
+  // resolveAssignedPackageRatePreview()'s own comment. This must be
+  // resolved BEFORE computing net, so switching accommodation immediately
+  // updates the preview instead of showing a stale Vilu-based total.
+  var accSel = accSelectionSummary('quote');
+  var ratePreview = resolveAssignedPackageRatePreview(_quotePkg, accSel);
+  var net = ratePreview.configured
+    ? calcQuoteViluNet(Object.assign({}, _quotePkg, { agencyPricePerRoom: ratePreview.perPerson, pricePerRoom: ratePreview.perPerson }), _quoteWorking.adults, _quoteWorking.children, _quoteWorking.childDiscountPct, _quoteWorking.arrivalDate, _quoteWorking.departureDate, settings)
+    : { total: 0, totalNights: _quotePkg.nights||0, extraNights: 0 };
   _quoteWorking.viluNetTotal = net.total;
   _quoteWorking.nights = net.totalNights;
 
-  // Multi-Property Availability (Part 13/14): an Assigned Package's own
-  // Vilu net total is unaffected by accommodation choice (that price is
-  // the package's own fixed configuration, not room-rate-driven) -- the
-  // accommodation section here only records WHERE the guest stays and, for
-  // a partner property, surfaces its approved rate/"Rate on request" for
-  // the agency's own reference while they set their guest selling price.
-  var accSel = accSelectionSummary('quote');
   _quoteWorking.accommodationPropertyId = accSel.propertyId;
   _quoteWorking.accommodationPropertyName = accSel.propertyName;
   _quoteWorking.accommodationIsVilu = accSel.isVilu;
@@ -2509,7 +2594,9 @@ async function updateQuotePreview(){
   accCheckAvailabilityStatus('quote');
 
   var netEl = document.getElementById('quote-vilu-net');
-  if(netEl) netEl.textContent = 'USD '+net.total.toFixed(2)+(net.extraNights ? ' (incl. '+net.extraNights+' extra night'+(net.extraNights>1?'s':'')+')' : '');
+  if(netEl) netEl.textContent = ratePreview.configured
+    ? ('USD '+net.total.toFixed(2)+(net.extraNights ? ' (incl. '+net.extraNights+' extra night'+(net.extraNights>1?'s':'')+')' : ''))
+    : 'Rate on request — ask Vilu to configure this package for this property';
   var margin = _quoteWorking.agencyGuestSellingTotal - net.total;
   var marginPct = net.total>0 ? (margin/net.total*100) : 0;
   var marginEl = document.getElementById('quote-margin');
@@ -2530,6 +2617,12 @@ async function finalizeQuote(){
   }
   if(!(+(document.getElementById('quote-selling-price').value||0) > 0)){
     alert('Enter a guest selling price before finalizing'); return;
+  }
+  // Hotel-selection sync fix: a friendly client-side heads-up mirroring the
+  // server's own authoritative check (submitAgencyAssignedPackageQuote) --
+  // never a bypass, just avoids a round-trip just to learn the same thing.
+  if(!resolveAssignedPackageRatePreview(_quotePkg, accSelectionSummary('quote')).configured){
+    alert('This package has no approved rate yet for the selected property. Ask Vilu to configure it before finalizing.'); return;
   }
   if(!confirm('Finalize this quotation?\n\nAfter finalization, the commercial details will be locked.')) return;
   return submitAssignedPackageQuote('FINALIZED');
