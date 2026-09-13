@@ -124,12 +124,45 @@ const MANAGER_UID = 'manager-uid', MANAGER_EMAIL = 'manager@example.com';
         agencyName: 'A'.repeat(200), contactPerson: 'Y', phone: '1', country: 'Z', agreedToTerms: true,
       }), 'invalid-argument');
     });
-    await test('an email that is already an approved agency cannot submit a new application', async () => {
-      await seedUser('alreadyagency@example.com', 'agency');
-      const uid = await createAuthUser('alreadyagency@example.com', true);
-      await expectCode(callAs(submitWrapped, uid, 'alreadyagency@example.com', {
-        agencyName: 'X', contactPerson: 'Y', phone: '1', country: 'Z', agreedToTerms: true,
-      }), 'already-exists');
+    // Identity-collision hardening (2026-09-13): the doAgencySignup() retry
+    // path (auth/email-already-in-use -> signInWithEmailAndPassword instead
+    // of creating a new account) means this callable can be reached by an
+    // Auth account that ALREADY belongs to an existing privileged identity.
+    // submitAgencyApplication must refuse for ANY existing users/{email}
+    // doc, not just role==='agency' -- never just an agency-specific check.
+    for (const [existingRole, email] of [
+      ['agency', 'alreadyagency@example.com'],
+      ['admin', 'alreadyadmin@example.com'],
+      ['manager', 'alreadymanager@example.com'],
+      ['staff', 'alreadystaff@example.com'],
+    ]) {
+      await test('an email that already belongs to an existing ' + existingRole + ' user is refused, never disclosing the role', async () => {
+        await seedUser(email, existingRole);
+        const uid = await createAuthUser(email, true);
+        try {
+          await callAs(submitWrapped, uid, email, { agencyName: 'X', contactPerson: 'Y', phone: '1', country: 'Z', agreedToTerms: true });
+          assert.fail('expected already-exists');
+        } catch (e) {
+          assert.equal(e.code, 'already-exists');
+          // The generic message legitimately says "...new agency
+          // application" for every case (describing the action being
+          // attempted, not the pre-existing role) -- so "agency" itself
+          // isn't a disclosure. admin/manager/staff, on the other hand,
+          // must never appear; those words could only get in by leaking
+          // the actual stored role.
+          if (existingRole !== 'agency') {
+            assert.ok(!new RegExp(existingRole, 'i').test(e.message), 'error message discloses the existing role: ' + e.message);
+          }
+        }
+      });
+    }
+    await test('the legitimate retry case remains allowed: Auth account exists, but users/{email} does NOT exist yet (interrupted first signup)', async () => {
+      const uid = await createAuthUser('interruptedsignup@example.com', false);
+      // No users/ doc was ever created for this email -- confirm that precondition.
+      const preCheck = await db.collection('users').doc('interruptedsignup@example.com').get();
+      assert.equal(preCheck.exists, false);
+      const r = await callAs(submitWrapped, uid, 'interruptedsignup@example.com', { agencyName: 'Interrupted Co', contactPerson: 'Y', phone: '1', country: 'Z', agreedToTerms: true });
+      assert.equal(r.status, 'PENDING_APPROVAL');
     });
   }
 
@@ -274,6 +307,35 @@ const MANAGER_UID = 'manager-uid', MANAGER_EMAIL = 'manager@example.com';
     });
     await test('approving an already-approved application is refused (idempotency/double-click protection)', async () => {
       await expectCode(callAs(approveWrapped, MANAGER_UID, MANAGER_EMAIL, { applicationId: realApproveUid, packageIds: [] }), 'failed-precondition');
+    });
+
+    // Identity-collision hardening (2026-09-13): a users/{email} document
+    // could appear AFTER an application was submitted but BEFORE it is
+    // approved (e.g. an unrelated admin action, or a race). The approval
+    // transaction must re-check for this itself and refuse, never merge
+    // into or overwrite whatever already exists there.
+    await test('approval refuses if users/{email} appears after submission but before approval -- transaction-level check, not just a pre-check', async () => {
+      const uid = await createAuthUser('collisionbeforeapprove@example.com', true);
+      await callAs(submitWrapped, uid, 'collisionbeforeapprove@example.com', { agencyName: 'Collision Co', contactPerson: 'K', phone: '1', country: 'Z', agreedToTerms: true });
+      // Simulate an unrelated identity appearing for this exact email
+      // between submission and approval.
+      await seedUser('collisionbeforeapprove@example.com', 'staff', { name: 'Real Staff Member' });
+
+      await expectCode(callAs(approveWrapped, MANAGER_UID, MANAGER_EMAIL, { applicationId: uid, packageIds: ['PKG_A'] }), 'already-exists');
+
+      const userDoc = (await db.collection('users').doc('collisionbeforeapprove@example.com').get()).data();
+      assert.equal(userDoc.role, 'staff', 'the pre-existing staff identity\'s role was overwritten by a refused approval');
+      assert.equal(userDoc.name, 'Real Staff Member', 'the pre-existing staff identity was modified by a refused approval');
+
+      const appDoc = (await db.collection('agency_applications').doc(uid).get()).data();
+      assert.equal(appDoc.status, 'PENDING_APPROVAL', 'a refused approval must leave the application PENDING_APPROVAL, not silently advance it');
+      assert.equal(appDoc.approvedAt, null);
+
+      const pkgDoc = await db.collection('agency_packages').doc('collisionbeforeapprove@example.com').get();
+      assert.equal(pkgDoc.exists, false, 'a refused approval must never create an agency_packages doc');
+
+      const auditSnap = await db.collection('agency_application_audit').where('agencyUid', '==', uid).where('action', '==', 'APPROVED').get();
+      assert.equal(auditSnap.size, 0, 'no audit record may claim this application was APPROVED when the transaction actually threw');
     });
   }
 

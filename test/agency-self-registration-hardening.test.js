@@ -109,9 +109,24 @@ section('functions-core/index.js -- every new callable exists with the correct g
   test('approveAgencyApplication performs its state changes inside one Firestore transaction (atomicity)', () => {
     const fn = extractFn(FUNCTIONS, 'exports.approveAgencyApplication = onCall');
     assert.match(fn, /db\.runTransaction/);
-    assert.match(fn, /tx\.set\(db\.collection\('users'\)/);
+    assert.match(fn, /tx\.set\(userRef,/);
     assert.match(fn, /tx\.set\(db\.collection\('agency_packages'\)/);
     assert.match(fn, /tx\.set\(appRef,/);
+  });
+  test('identity-collision hardening: approveAgencyApplication reads the existing users/{email} doc INSIDE the transaction (not a separate pre-check) and refuses before any write if one already exists', () => {
+    const fn = extractFn(FUNCTIONS, 'exports.approveAgencyApplication = onCall');
+    assert.match(fn, /tx\.get\(userRef\)/);
+    const txBody = extractFn(fn, 'await db.runTransaction');
+    const readIdx = txBody.indexOf('tx.get(userRef)');
+    const throwIdx = txBody.indexOf("existingUserSnap.exists");
+    const firstWriteIdx = txBody.indexOf('tx.set(userRef,');
+    assert.ok(readIdx > -1 && throwIdx > -1 && firstWriteIdx > -1, 'expected read/check/write all present');
+    assert.ok(readIdx < throwIdx && throwIdx < firstWriteIdx, 'the existing-user check must happen after the read and before any write');
+  });
+  test('identity-collision hardening: submitAgencyApplication refuses for ANY existing users/{email} doc, not only role===\'agency\'', () => {
+    const fn = extractFn(FUNCTIONS, 'exports.submitAgencyApplication = onCall');
+    assert.match(fn, /if \(userDoc\.exists\) \{/);
+    assert.ok(!/userDoc\.data\(\)\.role === 'agency'/.test(fn), 'submitAgencyApplication still only checks role===\'agency\' -- must refuse for any existing users/{email} doc regardless of role');
   });
   test('submitAgencyApplication is resumable: a retry while still PENDING_APPROVAL returns success rather than throwing', () => {
     const fn = extractFn(FUNCTIONS, 'exports.submitAgencyApplication = onCall');

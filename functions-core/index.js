@@ -1395,10 +1395,21 @@ exports.submitAgencyApplication = onCall({ region: 'us-central1', maxInstances: 
   const message = str('message', AGENCY_APP_FIELD_LIMITS.message, false);
   if (d.agreedToTerms !== true) throw new HttpsError('invalid-argument', 'You must agree to the agency access terms.');
 
-  // Already an approved agency? No application needed.
+  // Identity-collision hardening (2026-09-13): refuse self-registration for
+  // ANY existing users/{email} document, not just role==='agency'. The
+  // email-already-in-use recovery path in doAgencySignup() (sign in instead
+  // of creating a new Auth account) means this callable can be reached by
+  // an account that ALREADY belongs to an existing admin/manager/staff/
+  // agency identity -- accepting that would let a later approval overwrite
+  // a privileged users/{email} doc with role:'agency'. The legitimate retry
+  // case (a genuinely new applicant whose first submitAgencyApplication
+  // call failed after Auth account creation succeeded) has no users/{email}
+  // doc at all, so this never blocks it. The error message is deliberately
+  // generic -- never reveal to the public applicant which internal role the
+  // email already holds.
   const userDoc = await db.collection('users').doc(emailLower).get();
-  if (userDoc.exists && userDoc.data().role === 'agency') {
-    throw new HttpsError('already-exists', 'This email is already an approved agency account.');
+  if (userDoc.exists) {
+    throw new HttpsError('already-exists', 'This account is already associated with an existing Vilu account and cannot be used for a new agency application.');
   }
 
   const appRef = db.collection('agency_applications').doc(uid);
@@ -1571,12 +1582,27 @@ exports.approveAgencyApplication = onCall({ region: 'us-central1', maxInstances:
   // guard against a double-approve race between two managers.
   const now = FieldValue.serverTimestamp();
   const auditRef = db.collection('agency_application_audit').doc();
+  const userRef = db.collection('users').doc(authEmail);
   await db.runTransaction(async (tx) => {
+    // Both reads happen before any write, as Firestore transactions require.
     const freshAppSnap = await tx.get(appRef);
+    const existingUserSnap = await tx.get(userRef);
     if (!freshAppSnap.exists || freshAppSnap.data().status !== 'PENDING_APPROVAL') {
       throw new HttpsError('failed-precondition', 'Application is no longer pending.');
     }
-    tx.set(db.collection('users').doc(authEmail), {
+    // Identity-collision hardening (2026-09-13): refuse to overwrite ANY
+    // existing users/{email} document -- admin/manager/staff/agency alike.
+    // Checked INSIDE the transaction (not as a separate pre-check) so there
+    // is no race window between check and write: e.g. a document could be
+    // created by an entirely unrelated action between an outside check and
+    // this transaction's own commit. A refusal here leaves the application
+    // untouched (still PENDING_APPROVAL) and creates no agency_packages doc
+    // and no audit record claiming APPROVED -- this whole transaction
+    // throws and nothing it would have written lands.
+    if (existingUserSnap.exists) {
+      throw new HttpsError('already-exists', 'A user account already exists for this email -- refusing to overwrite an existing identity.');
+    }
+    tx.set(userRef, {
       email: authEmail, name: app.agencyName, company: app.agencyName,
       role: 'agency', accountStatus: 'ACTIVE', uid: app.uid, commission: 0,
     }, { merge: true });
