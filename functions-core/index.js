@@ -1037,7 +1037,7 @@ function withinRange(date, from, to) {
 // an accommodation_booking_requests record, never a room-availability
 // grid entry, so there is no own/other distinction to make for partner
 // cells at all.
-async function getPartnerPropertyAvailability(propertyId, startDate, endDate) {
+async function getPartnerPropertyAvailability(propertyId, startDate, endDate, agencyId) {
   const propSnap = await db.collection('accommodation_properties').doc(propertyId).get();
   if (!propSnap.exists) throw new HttpsError('not-found', 'Property not found.');
   const prop = propSnap.data();
@@ -1070,6 +1070,77 @@ async function getPartnerPropertyAvailability(propertyId, startDate, endDate) {
     });
   }
 
+  // Internal PMS manual room slots -- CALENDAR DISPLAY ONLY (2026-09-13).
+  // `manualPmsRoomSlots` is a staff-only PMS operational count; it is
+  // projected here under a deliberately different, narrower name
+  // (`calendarRoomSlotCount`, also returned per-property from
+  // getAgencyProperties()) so the Agency Portal can render Room 1..N rows
+  // that visually mirror the PMS -- it must NEVER be read as confirmed
+  // commercial availability math (that stays exactly `mode` above, which
+  // remains ON_REQUEST regardless of how many slots exist). Room-level
+  // occupancy is sourced the SAME way Vilu's own PHYSICAL_ROOMS branch
+  // above reads it -- room_availability/{roomId} + blocks -- since a
+  // manually-created PMS partner reservation writes to that exact
+  // collection under prefix+N ids. A PMS-created manual booking never
+  // carries an agencyId, so it can never be misattributed as "your
+  // booking" here; only a genuine Agency-Portal-originated reservation
+  // (matched via the same ownReservations query already used for Vilu)
+  // is ever marked as the caller's own.
+  const slotCount = Math.max(0, Math.round(+prop.manualPmsRoomSlots || 0));
+  const legacyPrefix = prop.legacyRoomPrefix || (propertyId + '-R');
+  const roomIds = [];
+  for (let i = 1; i <= slotCount; i++) roomIds.push(legacyPrefix + i);
+
+  const ownReservations = {};
+  const roomDays = [];
+  if (roomIds.length) {
+    const roomResults = await Promise.all(roomIds.map(async (roomId) => {
+      const availSnap = await db.collection('room_availability').doc(roomId).get();
+      const bookings = (availSnap.exists && availSnap.data().bookings) || [];
+      const blockSnap = await db.collection('blocks').where('room_id', '==', roomId).get();
+      const blocks = blockSnap.docs.map((doc) => doc.data());
+      return { roomId, bookings, blocks };
+    }));
+
+    if (agencyId) {
+      // Single-field query (same shape as Vilu's own ownReservations lookup
+      // above) -- no composite index needed. Scoped to this property's
+      // rooms in application code, not in the query itself.
+      const ownResSnap = await db.collection('reservations').where('agencyId', '==', agencyId).get();
+      ownResSnap.docs.forEach((doc) => {
+        const r = doc.data();
+        if (!roomIds.includes(r.room_id)) return;
+        if (!isActiveStatus(r.status)) return;
+        if (!overlaps(r.check_in, r.check_out, startDate, endDate)) return;
+        ownReservations[doc.id] = {
+          reservationId: doc.id, guestName: r.guest_name || '', arrivalDate: r.check_in, departureDate: r.check_out,
+          adults: r.adults || 0, children: r.children || 0, status: r.status, bookingReference: doc.id,
+        };
+      });
+    }
+
+    roomResults.forEach(({ roomId, bookings, blocks }) => {
+      dates.forEach((date) => {
+        const booking = bookings.find((b) => withinRange(date, b.from, b.to));
+        if (booking) {
+          const cell = { roomId, date, state: 'OCCUPIED' };
+          if (ownReservations[booking.id]) cell.ownReservationId = booking.id;
+          roomDays.push(cell);
+          return;
+        }
+        const block = blocks.find((b) => withinRange(date, (b.from_date || '').slice(0, 10), (b.to_date || '').slice(0, 10)));
+        if (block) { roomDays.push({ roomId, date, state: 'BLOCKED' }); return; }
+        // Deliberately its own state, never 'AVAILABLE' -- an empty slot on
+        // an ON_REQUEST property is not confirmed bookable inventory, only
+        // "not currently known to be occupied/blocked". The client must
+        // still show the property-level "Availability on request" notice
+        // and route any booking through Vilu confirmation, never a direct
+        // click-to-book like a Vilu room.
+        roomDays.push({ roomId, date, state: mode === 'ON_REQUEST' ? 'ON_REQUEST_SLOT' : 'AVAILABLE' });
+      });
+    });
+  }
+
   return {
     property: { propertyId, propertyName: String(prop.propertyName || propertyId), isVilu: false, availabilityMode: mode },
     roomTypes: roomTypes.map((rt) => ({
@@ -1079,7 +1150,9 @@ async function getPartnerPropertyAvailability(propertyId, startDate, endDate) {
       currency: rt.currency || null,
     })),
     days,
-    ownReservations: {},
+    rooms: roomIds.map((id, i) => ({ roomId: id, label: 'Room ' + (i + 1) })),
+    roomDays,
+    ownReservations,
   };
 }
 
@@ -1110,6 +1183,13 @@ exports.getAgencyProperties = onCall({ region: 'us-central1', maxInstances: 10 }
       propertyId: p.propertyId, propertyName: String(p.propertyName || p.propertyId), propertyType: String(p.propertyType || ''),
       isVilu: false, location: String(p.location || ''),
       availabilityMode: ACCOMMODATION_AVAILABILITY_MODES.includes(p.availabilityMode) ? p.availabilityMode : 'ON_REQUEST',
+      // Calendar-row-count projection ONLY (2026-09-13) -- deliberately a
+      // different, narrower name than the PMS's own `manualPmsRoomSlots`
+      // field, and deliberately just a count, never a rate/room-id/config
+      // value. Used solely so the Agency Calendar can render the same
+      // number of Room 1..N rows the PMS shows; never confirmed commercial
+      // availability (that stays `availabilityMode`, untouched above).
+      calendarRoomSlotCount: Math.max(0, Math.round(+p.manualPmsRoomSlots || 0)),
     }));
   return {
     properties: [
@@ -1210,14 +1290,14 @@ exports.getAgencyAvailability = onCall({ region: 'us-central1', maxInstances: 10
   // completely unaffected -- the branch below is the ONLY new code path;
   // everything from here down this function is byte-for-byte the original
   // Vilu-only implementation.
-  const propertyId = String(d.propertyId || 'VILU') || 'VILU';
-  if (propertyId !== 'VILU') {
-    return getPartnerPropertyAvailability(propertyId, startDate, endDate);
-  }
-
   // agencyId is ALWAYS request.auth.uid -- never accepted from request.data,
   // so an agency can never ask "as if" it were a different agency (Part 17/31).
   const agencyId = request.auth.uid;
+
+  const propertyId = String(d.propertyId || 'VILU') || 'VILU';
+  if (propertyId !== 'VILU') {
+    return getPartnerPropertyAvailability(propertyId, startDate, endDate, agencyId);
+  }
 
   // Same two canonical sources the Admin Calendar's own fetchRoomIntervals()
   // uses (see this phase's audit): room_availability/{roomId} for

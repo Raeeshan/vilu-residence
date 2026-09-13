@@ -195,18 +195,29 @@ section('No $70 rate anywhere in this feature, ever');
 
 section('Agency Portal / external availability — completely unaffected');
 {
-  test('manualPmsRoomSlots is never read anywhere in vilu-agency-portal.html', () => {
+  // Superseded by test/agency-unified-availability-and-partner-calendar.test.js
+  // (2026-09-13, third follow-up): the user explicitly changed this decision
+  // for CALENDAR DISPLAY -- the Agency Portal now DOES read
+  // manualPmsRoomSlots server-side, but only ever projects it as a narrow,
+  // clamped COUNT under a different name (calendarRoomSlotCount), never the
+  // raw PMS field name or any rate/config value, and never as confirmed
+  // commercial availability math (availabilityMode is untouched). These two
+  // tests now assert THAT boundary instead of zero exposure.
+  test('functions-core/index.js reads manualPmsRoomSlots ONLY to project a clamped calendarRoomSlotCount / room-id list for calendar rendering -- never returned verbatim, never used to change availabilityMode', () => {
+    const getAgencyPropertiesFn = extractByStart(FUNCTIONS_CORE, /exports\.getAgencyProperties = onCall\(\{[^}]*\}, async \(request\) => \{/);
+    assert.match(getAgencyPropertiesFn, /calendarRoomSlotCount:\s*Math\.max\(0,\s*Math\.round\(\+p\.manualPmsRoomSlots \|\| 0\)\)/);
+    assert.doesNotMatch(getAgencyPropertiesFn, /manualPmsRoomSlots:\s*p\.manualPmsRoomSlots/, 'must never pass the raw field through verbatim under its own name');
+  });
+  test('vilu-agency-portal.html never reads the raw manualPmsRoomSlots field name -- only the server\'s own projected calendarRoomSlotCount/rooms/roomDays shape', () => {
     assert.doesNotMatch(AGENCY, /manualPmsRoomSlots/);
   });
-  test('manualPmsRoomSlots is never read anywhere in functions-core/index.js (getAgencyProperties/getAgencyPropertyRoomTypes/getAgencyAvailability all stay untouched)', () => {
-    assert.doesNotMatch(FUNCTIONS_CORE, /manualPmsRoomSlots/);
-  });
-  test('agDrawCal() still renders the ON_REQUEST striped/clean bar exactly as before -- no manual-slot-derived room count leaks into it', () => {
+  test('agDrawCal() still renders the ON_REQUEST striped/clean bar (now independent of room-type/room-slot count, per the calendar-display follow-up) -- no manual-slot-derived room count leaks into confirmed availability', () => {
     assert.match(AGENCY, /data-partner-onrequest="'\+p\.propertyId\+'"/);
   });
-  test('the Agency Portal ON_REQUEST rendering condition (!roomTypes.length) is untouched -- it has no concept of manualPmsRoomSlots at all', () => {
+  test('the Agency Portal ON_REQUEST indicator is gated on availabilityMode alone (isOnRequest), independent of roomTypes/room-slot count -- so it never silently disappears once room-slot rows are added', () => {
     const agCalSrc = extractByStart(AGENCY, /async function agDrawCal\(\)\s*\{/);
-    assert.match(agCalSrc, /if\(!roomTypes\.length\)\{/);
+    assert.match(agCalSrc, /var isOnRequest = p\.availabilityMode==='ON_REQUEST';/);
+    assert.match(agCalSrc, /if\(isOnRequest\)\{/);
   });
 }
 

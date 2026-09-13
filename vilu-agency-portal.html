@@ -192,6 +192,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cb-fixed-rows{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .cb-room-row-lbl{height:var(--cal-row-h);flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px 0 12px;border-bottom:1px solid #e6e9ee;overflow:hidden;background:#fff}
 .cb-room-row-lbl .rn{font-size:var(--font-size-sm);font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Internal PMS room-slot rows (2026-09-13): same accent the PMS calendar
+   uses for these rows, purely visual parity. */
+.cb-room-row-lbl.partner-room{border-left:3px solid #7c3aed;padding-left:9px}
 .cb-section-lbl{height:22px;flex-shrink:0;display:flex;align-items:center;padding:0 10px;background:#f3f5f8;border-bottom:1px solid #dfe3e8;overflow:hidden}
 .cb-section-lbl span{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .cb-category-lbl{height:var(--cal-cat-h);flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px 0 8px;background:#fff;border-bottom:1px solid #e6e9ee}
@@ -437,40 +440,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div id="my-booking-requests-list"></div>
     </div>
 
-    <!-- AVAILABILITY TAB — Phase D: both the calendar grid and the search
-         below are driven entirely by getAgencyAvailability() (a redacted
-         server-side projection, see functions-core/index.js) -- this tab
-         never reads reservations/blocks/room_availability directly
-         anymore. Operationally read-only: no drag/resize/move/delete, no
+    <!-- AVAILABILITY TAB — Phase D, unified (2026-09-13 follow-up): the
+         exact-search panel and the calendar used to be two separate `.card`
+         sections stacked on this one tab, reading as two different
+         availability tools even though both are driven entirely by
+         getAgencyAvailability() (a redacted server-side projection, see
+         functions-core/index.js). Now ONE card: property tabs at the top
+         (shared by both the search and the calendar below), the exact
+         "Check availability" search as a sub-section, then the calendar.
+         No JS logic changed here -- updateAvSearchUI()/searchAvailability()
+         already handle the ON_REQUEST/partner-property cases correctly
+         (never a fabricated numeric count), this is a pure structural
+         merge. Operationally read-only: no drag/resize/move/delete, no
          manual block creation, no reservation drawer (Part 23). -->
     <div id="tab-availability" class="hidden">
-      <div class="card" style="margin-bottom:16px">
-        <h3 style="margin:0 0 4px" id="av-search-title">Check availability</h3>
-        <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px" id="av-search-subtitle">Exact Vilu availability for your requested dates — what other agencies/direct guests occupy stays private; only room/category status is shown.</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px">
-          <div class="fg" style="margin:0"><label>Check-in</label><input type="date" id="av-ci"></div>
-          <div class="fg" style="margin:0"><label>Check-out</label><input type="date" id="av-co"></div>
-          <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="av-adults" min="1" value="2" style="width:80px"></div>
-          <div class="fg" style="margin:0"><label>Children</label><input type="number" id="av-children" min="0" value="0" style="width:80px"></div>
-          <div class="fg" style="margin:0"><label>Rooms needed</label><input type="number" id="av-rooms" min="1" value="1" style="width:80px"></div>
-          <!-- Hotel-selection sync fix (Part 7): Vilu-only categories --
-               hidden by updateAvSearchUI() whenever a partner property tab
-               is active, since partner properties have no category concept. -->
-          <div class="fg" style="margin:0" id="av-category-wrap"><label>Category</label>
-            <select id="av-category">
-              <option value="">All categories</option>
-              <option value="Deluxe Family Room">Deluxe Family Room</option>
-              <option value="Double Room">Double Room</option>
-              <option value="Deluxe Family Room with Open Deck">Deluxe Family Room with Open Deck</option>
-            </select>
-          </div>
-          <button class="btn-primary" onclick="searchAvailability()"><i class="ti ti-search"></i> Search Availability</button>
-        </div>
-        <div id="av-results"></div>
-      </div>
       <div class="card" style="padding:0;overflow:hidden">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:16px 20px 0">
-          <h3 style="margin:0">Availability Calendar</h3>
+        <div style="padding:16px 20px 0">
+          <h3 style="margin:0">Availability</h3>
+        </div>
+        <!-- Property tabs (calendar-fix task, Part 2/9, now shared by the
+             search above and the calendar below): a VISIBLE row, not a
+             dropdown. Populated by agCalRenderPropertyTabs() from
+             getAgencyProperties() -- Vilu first & marked PRIMARY, then one
+             tab per active+agency-visible partner property, then "All
+             Properties". Rebuilt only when the property list itself
+             changes; clicking a tab never resets the current date position
+             (Part 8 of the task), and also re-runs searchAvailability() for
+             the newly-selected property (agCalPropertyTabClick()). -->
+        <div class="cb-prop-tabs" id="ag-cb-prop-tabs" style="margin:0 20px"></div>
+        <div style="padding:14px 20px 0">
+          <h4 style="margin:0 0 4px;font-size:var(--font-size-md)" id="av-search-title">Check availability</h4>
+          <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:14px" id="av-search-subtitle">Exact Vilu availability for your requested dates — what other agencies/direct guests occupy stays private; only room/category status is shown.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px">
+            <div class="fg" style="margin:0"><label>Check-in</label><input type="date" id="av-ci"></div>
+            <div class="fg" style="margin:0"><label>Check-out</label><input type="date" id="av-co"></div>
+            <div class="fg" style="margin:0"><label>Adults</label><input type="number" id="av-adults" min="1" value="2" style="width:80px"></div>
+            <div class="fg" style="margin:0"><label>Children</label><input type="number" id="av-children" min="0" value="0" style="width:80px"></div>
+            <div class="fg" style="margin:0"><label>Rooms needed</label><input type="number" id="av-rooms" min="1" value="1" style="width:80px"></div>
+            <!-- Hotel-selection sync fix (Part 7): Vilu-only categories --
+                 hidden by updateAvSearchUI() whenever a partner property tab
+                 is active, since partner properties have no category concept. -->
+            <div class="fg" style="margin:0" id="av-category-wrap"><label>Category</label>
+              <select id="av-category">
+                <option value="">All categories</option>
+                <option value="Deluxe Family Room">Deluxe Family Room</option>
+                <option value="Double Room">Double Room</option>
+                <option value="Deluxe Family Room with Open Deck">Deluxe Family Room with Open Deck</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="searchAvailability()"><i class="ti ti-search"></i> Search Availability</button>
+          </div>
+          <div id="av-results"></div>
         </div>
         <!-- Mirrors vilu-unified.html's PMS Calendar (.cb-wrap / drawCal()) --
              same topbar/fixed-column/grid structure and .cb-* classes, same
@@ -479,14 +499,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
              drag-select-to-book, no reservation move, no block creation, no
              cross-agency reservation search — see renderAgencyCalendarGrid(). -->
         <div class="cb-wrap" style="margin:16px 20px 20px;height:560px">
-          <!-- Property tabs (calendar-fix task, Part 2/9): a VISIBLE row,
-               not a dropdown. Populated by agCalRenderPropertyTabs() from
-               getAgencyProperties() -- Vilu first & marked PRIMARY, then
-               one tab per active+agency-visible partner property, then
-               "All Properties". Rebuilt only when the property list itself
-               changes; clicking a tab never resets the current date
-               position (Part 8 of the task). -->
-          <div class="cb-prop-tabs" id="ag-cb-prop-tabs"></div>
           <div class="cb-topbar">
             <div class="cb-nav">
               <button onclick="agCalNav(-1)" title="Previous week" aria-label="Previous week">&#8249;</button>
@@ -1183,9 +1195,18 @@ function loadLogo(){
 // file. A legacy account created before this change migrates itself
 // automatically the first time it logs in (see migrateLegacyAgency below).
 
+// Admin login reliability fix (2026-09-13): users/{id} docs are always
+// created/keyed with a lower-cased email (every self-registration/PMS write
+// path lower-cases first -- see e.g. firestore.rules' own
+// request.auth.token.email.lower() convention). This function was the one
+// place still doing a case-SENSITIVE doc lookup on whatever casing
+// firebase.auth() happens to hand back for fbUser.email -- a silent
+// mismatch here returns null (not an error), which both callers then
+// misread as "not set up for agency access" even for a perfectly valid
+// admin/agency account. Lower-casing here, once, fixes every caller.
 async function fetchAgencyProfile(email){
   try {
-    var doc = await fsDb.collection('users').doc(email).get();
+    var doc = await fsDb.collection('users').doc(String(email||'').trim().toLowerCase()).get();
     return doc.exists ? doc.data() : null;
   } catch(e) { return null; }
 }
@@ -1925,9 +1946,9 @@ function agCalRenderPropertyTabs(allProps){
   wrap.innerHTML = tabs.join('');
 }
 
-var _partnerAvailCache = {}; // propertyId -> {byCell, roomTypes, property, coveredStart, coveredEnd}
+var _partnerAvailCache = {}; // propertyId -> {byCell, roomTypes, property, coveredStart, coveredEnd, roomByCell, rooms}
 async function fetchLivePartnerAvailability(propertyId, startDate, endDateExclusive){
-  var cache = _partnerAvailCache[propertyId] || (_partnerAvailCache[propertyId] = { byCell:{}, roomTypes:[], property:null, coveredStart:null, coveredEnd:null });
+  var cache = _partnerAvailCache[propertyId] || (_partnerAvailCache[propertyId] = { byCell:{}, roomTypes:[], property:null, coveredStart:null, coveredEnd:null, roomByCell:{}, rooms:[] });
   if(cache.coveredStart!=null && startDate>=cache.coveredStart && endDateExclusive<=cache.coveredEnd) return cache;
   var fetchStart=startDate, fetchEnd=endDateExclusive, merge=false;
   if(cache.coveredStart!=null){
@@ -1944,7 +1965,15 @@ async function fetchLivePartnerAvailability(propertyId, startDate, endDateExclus
     var data = result.data || {};
     var byCell = merge ? cache.byCell : {};
     (data.days||[]).forEach(function(d){ byCell[d.roomTypeId+'|'+d.date] = d; });
+    // Internal PMS room-slot rows (2026-09-13): `rooms`/`roomDays` are the
+    // NEW room-level projection from getPartnerPropertyAvailability() --
+    // calendar display only, indexed the same way byCell is (by roomId this
+    // time), never treated as confirmed commercial availability (that's
+    // still cache.property.availabilityMode, read separately below).
+    var roomByCell = merge ? cache.roomByCell : {};
+    (data.roomDays||[]).forEach(function(d){ roomByCell[d.roomId+'|'+d.date] = d; });
     cache.byCell = byCell; cache.roomTypes = data.roomTypes||cache.roomTypes; cache.property = data.property||cache.property;
+    cache.roomByCell = roomByCell; cache.rooms = data.rooms||cache.rooms;
     cache.coveredStart = fetchStart; cache.coveredEnd = fetchEnd;
   } catch(e) {
     console.error('fetchLivePartnerAvailability failed for '+propertyId, e);
@@ -1958,6 +1987,19 @@ function agPartnerCellBucket(propertyId, roomTypeId, ds){
   var cell = cache ? cache.byCell[roomTypeId+'|'+ds] : null;
   var state = cell ? cell.state : 'AVAILABLE';
   return { kind: state }; // AVAILABLE | BLOCKED | ON_REQUEST -- never an own/other split (Part 10)
+}
+// Internal PMS room-slot bucket (2026-09-13): mirrors agPartnerCellBucket
+// above, but for an individual Room 1..N slot rather than a room TYPE.
+// OCCUPIED is split into OWN_BOOKING/OCCUPIED using the SAME ownReservations
+// cross-reference the server already computed (never a client-side guess) --
+// a PMS-created manual booking has no agencyId at all, so it can never
+// resolve to OWN_BOOKING here, matching cross-agency privacy by construction.
+function agPartnerRoomCellBucket(propertyId, roomId, ds){
+  var cache = _partnerAvailCache[propertyId];
+  var cell = cache ? cache.roomByCell[roomId+'|'+ds] : null;
+  if(!cell) return { kind:'ON_REQUEST_SLOT', data:null };
+  var kind = cell.state==='OCCUPIED' ? (cell.ownReservationId ? 'OWN_BOOKING' : 'OCCUPIED') : cell.state;
+  return { kind: kind, data: cell };
 }
 
 async function agDrawCal(){
@@ -2046,22 +2088,22 @@ async function agDrawCal(){
     if(collapsed) return;
     var cache = _partnerAvailCache[p.propertyId];
     var roomTypes = cache ? cache.roomTypes : [];
-    if(!roomTypes.length){
-      if(p.availabilityMode==='ON_REQUEST'){
-        // Property-level ON_REQUEST clean state: a real, common, PERMANENT
-        // state for a property that only ever takes bookings by request
-        // (e.g. a bridged legacy partner with no room-type catalog at all
-        // yet) -- never the same "still being configured" empty state used
-        // below for a MANUAL_INVENTORY property mid-setup. Gets its own
-        // striped "Availability on request" bar (drawn alongside the
-        // existing per-room-type one, same look) instead of a blank cell.
-        fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted)">On request</span></div>';
-        gH+='<div class="cb-booking-row" data-partner-onrequest="'+p.propertyId+'" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
-      } else {
-        fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted);font-style:italic">No room types configured yet</span></div>';
-        gH+='<div class="cb-booking-row" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
-      }
-      return;
+    var slotRooms = cache ? (cache.rooms||[]) : [];
+    var isOnRequest = p.availabilityMode==='ON_REQUEST';
+    // Property-level ON_REQUEST indicator (2026-09-13 follow-up): now shown
+    // whenever the property is ON_REQUEST, REGARDLESS of whether room-type
+    // or internal room-slot rows also exist below it -- this is the one
+    // thing that must never look like confirmed commercial availability,
+    // per this task's own "preserve a clear property-level AVAILABILITY ON
+    // REQUEST indicator" requirement, so it can't be silently displaced by
+    // adding the internal room slots.
+    if(isOnRequest){
+      fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted)">Availability on request</span></div>';
+      gH+='<div class="cb-booking-row" data-partner-onrequest="'+p.propertyId+'" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
+    }
+    if(!roomTypes.length && !slotRooms.length && !isOnRequest){
+      fH+='<div class="cb-room-row-lbl"><span class="rn" style="color:var(--muted);font-style:italic">No room types configured yet</span></div>';
+      gH+='<div class="cb-booking-row" style="position:relative"><div class="cb-cell" style="width:'+(dsl.length*AG_CAL_COL_W)+'px;cursor:default"></div></div>';
     }
     roomTypes.forEach(function(rt){
       fH+='<div class="cb-room-row-lbl"><span class="rn">'+esc(rt.roomTypeName)+'</span></div>';
@@ -2075,6 +2117,27 @@ async function agDrawCal(){
         // fully covers the cell); an ON_REQUEST property's cells are
         // covered by that property's own full-row bar (also below).
         gH+='<div class="cb-cell '+cl+'" data-partner="'+p.propertyId+'|'+rt.roomTypeId+'" data-d="'+ds+'"></div>';
+      });
+      gH+='</div>';
+    });
+    // Internal PMS room-slot rows (2026-09-13 follow-up): visually mirrors
+    // the PMS's own Room 1..N rows (same legacy ha-R*/hb-R* ids, same
+    // count, via calendarRoomSlotCount -- see getAgencyProperties()'s own
+    // comment), but deliberately read-only here -- no data-partner/
+    // data-room attribute at all, so neither of the two generic
+    // .cb-cell[data-room]/.cb-cell[data-partner] click-wiring loops below
+    // ever attaches to these cells. An agency can SEE these rows and see
+    // Occupied/Blocked/Your booking on them, but can never click-to-book,
+    // drag, or otherwise write through them -- booking a partner room slot
+    // still only ever happens through quote -> hold -> booking request ->
+    // Vilu approval, exactly as before this feature existed.
+    slotRooms.forEach(function(room){
+      fH+='<div class="cb-room-row-lbl partner-room"><span class="rn">'+esc(room.label)+'</span></div>';
+      gH+='<div class="cb-booking-row" data-partner-room-slot="'+p.propertyId+'|'+room.roomId+'" style="position:relative">';
+      days.forEach(function(d){
+        var ds=ymdStr(d), dw=d.getDay(), iT=ds===today, iW=dw===5;
+        var cl=(iT?'today-cell':'')+(iW?' weekend':'');
+        gH+='<div class="cb-cell '+cl+'"></div>';
       });
       gH+='</div>';
     });
@@ -2133,23 +2196,22 @@ async function agDrawCal(){
   partnerProps.forEach(function(p){
     if(AG_CAL_COLLAPSED[p.propertyId]) return;
     var cache = _partnerAvailCache[p.propertyId]; if(!cache) return;
-    // Property-level ON_REQUEST bar (Part 3, live-calendar fix): the same
-    // striped "Availability on request" treatment as the per-room-type case
-    // below, but for a property with NO configured room types at all --
-    // targets the single data-partner-onrequest row from the fH/gH build
-    // above instead of a per-room-type row (there isn't one).
-    if(!(cache.roomTypes||[]).length){
-      if(cache.property && cache.property.availabilityMode==='ON_REQUEST'){
-        var row=document.querySelector('.cb-booking-row[data-partner-onrequest="'+p.propertyId+'"]'); if(!row) return;
+    // Property-level ON_REQUEST bar (Part 3, live-calendar fix; no longer
+    // gated on "zero room types" as of the internal-room-slots follow-up --
+    // this bar must render whenever the property is ON_REQUEST, even when
+    // room-slot rows also exist below it): targets the single
+    // data-partner-onrequest row from the fH/gH build above.
+    if(cache.property && cache.property.availabilityMode==='ON_REQUEST'){
+      var onreqRow=document.querySelector('.cb-booking-row[data-partner-onrequest="'+p.propertyId+'"]');
+      if(onreqRow){
         var w=dsl.length*AG_CAL_COL_W-2;
         var bar=document.createElement('div');
         bar.className='cb-bar';
         bar.style.cssText='left:1px;width:'+w+'px;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 8px,#b6bcc4 8px,#b6bcc4 16px);color:#1f2937;text-shadow:none';
         bar.innerHTML='<span>Availability on request — ask Vilu</span>';
         bar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); alert('Availability on request — Vilu must confirm this property.'); });
-        row.appendChild(bar);
+        onreqRow.appendChild(bar);
       }
-      return;
     }
     (cache.roomTypes||[]).forEach(function(rt){
       var row=document.querySelector('.cb-booking-row[data-partner-room="'+p.propertyId+'|'+rt.roomTypeId+'"]'); if(!row) return;
@@ -2182,6 +2244,46 @@ async function agDrawCal(){
           bar.style.clipPath=agCalBarClip(w,20,leftSlant,rightSlant);
           bar.innerHTML='<span>Blocked</span>';
           bar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); agShowGenericBlocked(); });
+          row.appendChild(bar);
+        }
+        i=j+1;
+      }
+    });
+    // Internal PMS room-slot bars (2026-09-13 follow-up): OCCUPIED/BLOCKED
+    // merge exactly like the room-type bars above; an unoccupied slot gets
+    // NO bar at all (never a green "Available" claim -- see
+    // agPartnerRoomCellBucket's own comment) -- the property stays visually
+    // governed by the "Availability on request" bar above it. OWN_BOOKING
+    // is only ever reached via the server's own ownReservations
+    // cross-reference (agencyId-scoped query), never a client-side guess,
+    // so cross-agency privacy holds exactly like the Vilu bars.
+    (cache.rooms||[]).forEach(function(room){
+      var row=document.querySelector('.cb-booking-row[data-partner-room-slot="'+p.propertyId+'|'+room.roomId+'"]'); if(!row) return;
+      var i=0;
+      while(i<dsl.length){
+        var b=agPartnerRoomCellBucket(p.propertyId, room.roomId, dsl[i]);
+        if(b.kind!=='BLOCKED' && b.kind!=='OCCUPIED' && b.kind!=='OWN_BOOKING'){ i++; continue; }
+        var key=b.kind, j=i;
+        while(j+1<dsl.length && agPartnerRoomCellBucket(p.propertyId, room.roomId, dsl[j+1]).kind===key) j++;
+        var leftSlant=i>0, rightSlant=j<dsl.length-1;
+        var left=i*AG_CAL_COL_W+(leftSlant?AG_CAL_COL_W/2:0);
+        var right=(j+1)*AG_CAL_COL_W+(rightSlant?AG_CAL_COL_W/2:0);
+        var w=right-left-2;
+        if(w>=4){
+          var color = key==='OWN_BOOKING'?'#4fb3e3':key==='OCCUPIED'?'#f59e0b':'#9aa4b2';
+          var label = key==='OWN_BOOKING'?'★ Your booking':key==='OCCUPIED'?'Occupied':'Blocked';
+          var cellData = b.data;
+          var bar=document.createElement('div');
+          bar.className='cb-bar';
+          bar.style.cssText='left:'+left+'px;width:'+w+'px;background:'+color;
+          bar.style.clipPath=agCalBarClip(w,20,leftSlant,rightSlant);
+          bar.innerHTML='<span>'+label+'</span>';
+          bar.addEventListener('click', (function(kind,data){ return function(e){
+            e.preventDefault(); e.stopPropagation();
+            if(kind==='OWN_BOOKING' && data && data.ownReservationId) openOwnBookingSummary(data.ownReservationId);
+            else if(kind==='OCCUPIED') agShowGenericOccupied();
+            else agShowGenericBlocked();
+          };})(key, cellData));
           row.appendChild(bar);
         }
         i=j+1;

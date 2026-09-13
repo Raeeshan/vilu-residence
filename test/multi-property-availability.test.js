@@ -118,12 +118,25 @@ section('Part 3/25: getAgencyAvailability extended with an optional propertyId, 
     const branchIdx = src.indexOf("propertyId !== 'VILU'");
     assert.ok(capIdx > -1 && branchIdx > -1 && capIdx < branchIdx);
   });
-  test('getPartnerPropertyAvailability() never returns per-guest data -- ownReservations is always {} for a partner property', () => {
-    const src = extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate\)\s*\{/);
-    assert.match(src, /ownReservations: \{\}/);
+  // Superseded by the internal-room-slots follow-up (2026-09-13, see
+  // test/agency-unified-availability-and-partner-calendar.test.js): room-TYPE
+  // days still never carry per-guest data (unchanged, asserted below), but
+  // ownReservations is no longer unconditionally {} -- it's now populated
+  // for internal PMS ROOM-SLOT bookings, strictly scoped by the caller's own
+  // agencyId (never a client-supplied value), so an agency can see its own
+  // partner-room booking. The room-TYPE loop itself still never touches it.
+  test('getPartnerPropertyAvailability() never returns per-guest data on room-TYPE days -- no guest_name/email/phone/notes field ever appears in the roomTypeId-keyed days array', () => {
+    const src = extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate, agencyId\)\s*\{/);
+    const roomTypeLoop = src.slice(src.indexOf('for (const rt of roomTypes)'), src.indexOf('// Internal PMS manual room slots'));
+    assert.doesNotMatch(roomTypeLoop, /guest_name|guest_email|guest_phone|notes/);
+  });
+  test('ownReservations for room slots is built ONLY from the agencyId-scoped reservations query -- never a client-supplied agencyId, and only when agencyId is provided at all', () => {
+    const src = extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate, agencyId\)\s*\{/);
+    assert.match(src, /if \(agencyId\) \{/);
+    assert.match(src, /db\.collection\('reservations'\)\.where\('agencyId', '==', agencyId\)\.get\(\)/);
   });
   test('ON_REQUEST mode never reads manual_availability at all and always returns state: \'ON_REQUEST\' -- never a fabricated AVAILABLE', () => {
-    const src = extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate\)\s*\{/);
+    const src = extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate, agencyId\)\s*\{/);
     assert.match(src, /if \(mode === 'ON_REQUEST'\) \{ days\.push\(\{ roomTypeId: rt\.roomTypeId, date, state: 'ON_REQUEST' \}\); return; \}/);
   });
 }
@@ -282,7 +295,7 @@ section('Part 26: existing completed work is untouched');
   test('Agency Settlements / OTA / Beds24 code is never referenced by any new function in this task', () => {
     const newFns = [
       extractByStart(FUNCTIONS, onCallStart('getAgencyProperties')),
-      extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate\)\s*\{/),
+      extractByStart(FUNCTIONS, /async function getPartnerPropertyAvailability\(propertyId, startDate, endDate, agencyId\)\s*\{/),
       extractByStart(FUNCTIONS, onCallStart('confirmAccommodationBookingRequest')),
     ].join('\n');
     assert.doesNotMatch(newFns, /agency_settlements|beds24|cloudbeds|ota_/i);

@@ -74,9 +74,17 @@ section('Root cause 2 — a property-level ON_REQUEST property with zero room ty
     const partnerBuildIdx = src.indexOf('partnerProps.forEach(function(p){');
     const barsBuildIdx = src.indexOf('// Bars: merge consecutive');
     const buildSrc = src.slice(partnerBuildIdx, barsBuildIdx);
-    assert.match(buildSrc, /if\(p\.availabilityMode===['"]ON_REQUEST['"]\)\{/);
+    // Superseded by the internal-room-slots follow-up (2026-09-13): the
+    // check is now `var isOnRequest = p.availabilityMode==='ON_REQUEST';`
+    // followed by `if(isOnRequest){` (no longer inline), and the label
+    // itself was upgraded from the terse "On request" to "Availability on
+    // request" to match the PMS's own wording -- see
+    // test/agency-unified-availability-and-partner-calendar.test.js for the
+    // full current-behavior proof.
+    assert.match(buildSrc, /var isOnRequest = p\.availabilityMode==='ON_REQUEST';/);
+    assert.match(buildSrc, /if\(isOnRequest\)\{/);
     assert.match(buildSrc, /data-partner-onrequest="'\+p\.propertyId\+'"/);
-    assert.match(buildSrc, />On request</);
+    assert.match(buildSrc, />Availability on request</);
   });
   test('a non-ON_REQUEST property with zero room types keeps the original "No room types configured yet" fallback, unchanged', () => {
     const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
@@ -87,24 +95,32 @@ section('Root cause 2 — a property-level ON_REQUEST property with zero room ty
     const partnerBuildIdx = src.indexOf('partnerProps.forEach(function(p){');
     const barsBuildIdx = src.indexOf('// Bars: merge consecutive');
     const buildSrc = src.slice(partnerBuildIdx, barsBuildIdx);
-    assert.match(buildSrc, /<span class="rn" style="color:var\(--muted\)">On request<\/span>/);
+    // Wording upgraded to "Availability on request" (2026-09-13 follow-up) --
+    // still never the property name repeated.
+    assert.match(buildSrc, /<span class="rn" style="color:var\(--muted\)">Availability on request<\/span>/);
   });
 }
 
 section('Root cause 2 (bars) — the property-level ON_REQUEST row gets the SAME striped "Availability on request" bar as the per-room-type case, targeted at its own row');
 {
-  test('a new zero-room-types check runs BEFORE the per-room-type forEach, and only draws a bar for ON_REQUEST (never for a plain MANUAL_INVENTORY property still being configured)', () => {
+  // Superseded by the internal-room-slots follow-up (2026-09-13, see
+  // test/agency-unified-availability-and-partner-calendar.test.js): the
+  // ON_REQUEST bar check is no longer gated on "zero room types" at all --
+  // it now runs unconditionally whenever the property itself is ON_REQUEST
+  // (so it still shows even once 10/8 room-slot rows exist alongside it),
+  // BEFORE the per-room-type forEach either way.
+  test('the property-level ON_REQUEST bar check runs BEFORE the per-room-type forEach, and only draws a bar for ON_REQUEST (never for a plain MANUAL_INVENTORY property still being configured)', () => {
     const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
     const barsIdx = src.indexOf('// Bars: merge consecutive');
     const barsSrc = src.slice(barsIdx);
-    const zeroRoomTypesIdx = barsSrc.indexOf('if(!(cache.roomTypes||[]).length){');
-    assert.ok(zeroRoomTypesIdx > -1, 'zero-room-types bar branch not found');
+    const onRequestIdx = barsSrc.indexOf("if(cache.property && cache.property.availabilityMode==='ON_REQUEST'){");
+    assert.ok(onRequestIdx > -1, 'property-level ON_REQUEST bar branch not found');
     const perRoomTypeForEachIdx = barsSrc.indexOf('(cache.roomTypes||[]).forEach(function(rt){');
-    assert.ok(zeroRoomTypesIdx < perRoomTypeForEachIdx, 'the zero-room-types check must run before the per-room-type forEach');
-    const zeroBranch = barsSrc.slice(zeroRoomTypesIdx, perRoomTypeForEachIdx);
-    assert.match(zeroBranch, /data-partner-onrequest="'\+p\.propertyId\+'"/);
-    assert.match(zeroBranch, /Availability on request — ask Vilu/);
-    assert.match(zeroBranch, /repeating-linear-gradient/);
+    assert.ok(onRequestIdx < perRoomTypeForEachIdx, 'the property-level ON_REQUEST check must run before the per-room-type forEach');
+    const onRequestBranch = barsSrc.slice(onRequestIdx, perRoomTypeForEachIdx);
+    assert.match(onRequestBranch, /data-partner-onrequest="'\+p\.propertyId\+'"/);
+    assert.match(onRequestBranch, /Availability on request — ask Vilu/);
+    assert.match(onRequestBranch, /repeating-linear-gradient/);
   });
   test('the existing per-room-type ON_REQUEST striped bar is untouched', () => {
     const src = extractByStart(PORTAL, /async function agDrawCal\(\)\s*\{/);
