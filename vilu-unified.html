@@ -2693,6 +2693,7 @@ Dolphin Cruise | Dolphin Cruises typically depart at sunrise — the most likely
       </select>
     </div>
     <div class="fg"><label>Display order</label><input type="number" id="ah-order" value="10" step="10"></div>
+    <div class="fg"><label>Internal PMS manual room slots <span style="font-size:var(--font-size-xs);color:#9ca3af">(staff-only "Room 1..N" rows in the PMS Calendar for manual reservations — NOT public/Agency/OTA availability)</span></label><input type="number" id="ah-manual-slots" value="0" min="0" step="1"></div>
     <div style="display:flex;gap:16px;margin:8px 0 12px">
       <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm)"><input type="checkbox" id="ah-active" checked> Active</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:var(--font-size-sm)"><input type="checkbox" id="ah-visible"> Visible to agencies</label>
@@ -5930,12 +5931,32 @@ function drawCal(){
   // start) against the ACTUAL visible date window, so the row appears only
   // while navigated to dates the legacy reservation actually covers.
   var winStart=lDs(dates[0]),winEndExcl=lDs(calAddDays(dates[dates.length-1],1));
+  // Internal PMS manual room slots (2026-09-13, second follow-up): staff need
+  // to actually SELECT and BOOK a specific partner room (Room 1..N) inside
+  // the PMS itself -- an "Availability on request" placeholder alone can't
+  // be booked against. `manualPmsRoomSlots` is a plain count field on the
+  // canonical accommodation_properties doc (staff-editable in Partner
+  // Accommodation, defaults to 0 for a brand-new property -- never
+  // fabricated here) that generates PERMANENT `prefix+i` rows (ha-R1..ha-R10
+  // etc) using the SAME real, bookable mR() row Vilu's own rooms use --
+  // full drag/click/conflict-check behavior, exactly like a Vilu room. This
+  // is deliberately INTERNAL PMS inventory only: nothing here writes
+  // room_types, touches availabilityMode, or is read by any Agency-Portal
+  // or public-facing code (grep accommodation_properties call sites --
+  // agDrawCal()/getAgencyProperties/getAgencyAvailability never read
+  // manualPmsRoomSlots), so Ranfaru/White Sand stay ON_REQUEST externally
+  // regardless of how many internal slots exist. Once a property has manual
+  // slots, its old date-window-gated legacy compatibility row (still kept
+  // below for a property that never gets manual slots configured) is no
+  // longer needed -- a historical ha-R1/hb-R2 reservation now lands
+  // directly on its own permanent Room 1/Room 2 row, same as any other.
   var partnerSections=(typeof ACC_PROPERTIES!=='undefined'?ACC_PROPERTIES:[]).filter(function(p){return !p.isVilu&&p.active!==false;}).map(function(p){
     var prefix=p.legacyRoomPrefix||(p.id+'-R');
-    var legacyRns=Array.from(new Set(RES.filter(function(r){return r.rn&&r.rn.indexOf(prefix)===0&&r.ci<winEndExcl&&r.co>winStart;}).map(function(r){return r.rn;})))
+    var manualSlots=Math.max(0,+p.manualPmsRoomSlots||0);
+    var legacyRns=manualSlots>0?[]:Array.from(new Set(RES.filter(function(r){return r.rn&&r.rn.indexOf(prefix)===0&&r.ci<winEndExcl&&r.co>winStart;}).map(function(r){return r.rn;})))
       .sort(function(a,b){return (parseInt(a.slice(prefix.length),10)||0)-(parseInt(b.slice(prefix.length),10)||0);});
     var roomTypes=((typeof ACC_ROOM_TYPES_CACHE!=='undefined'&&ACC_ROOM_TYPES_CACHE[p.id])||[]).filter(function(rt){return rt.active!==false;});
-    return {p:p,prefix:prefix,legacyRns:legacyRns,roomTypes:roomTypes};
+    return {p:p,prefix:prefix,manualSlots:manualSlots,legacyRns:legacyRns,roomTypes:roomTypes};
   });
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
   vrGroups.forEach(function(grp){
@@ -5959,17 +5980,21 @@ function drawCal(){
   partnerSections.forEach(function(sec){
     var p=sec.p;
     fH+='<div class="cb-section-lbl"><span>'+esc(p.propertyName||p.id)+'</span></div>';
-    if(!sec.roomTypes.length){
-      var label=p.availabilityMode==='ON_REQUEST'?'Availability on request':'No room types configured yet';
-      fH+='<div class="cb-room-row-lbl partner-room"><span class="rn" style="color:#8a94a6;font-style:italic">'+esc(label)+'</span></div>';
-    }
     sec.roomTypes.forEach(function(rt){
       fH+='<div class="cb-room-row-lbl partner-room"><span class="rn">'+esc(rt.roomTypeName||rt.id)+'</span><span class="rt">'+(typeof rt.agencyRate==='number'?(rt.currency||'USD')+' '+rt.agencyRate:'Rate on request')+'</span></div>';
     });
-    sec.legacyRns.forEach(function(rn){
-      var rlabel=(getR(rn)||{}).nm||rn;
-      fH+='<div class="cb-room-row-lbl partner-room" title="Historical reservation only — not current bookable inventory"><span class="rn">'+esc(rlabel)+'</span><span class="rt" style="color:#b45309">Historical</span></div>';
-    });
+    if(sec.manualSlots>0){
+      for(var mi=1;mi<=sec.manualSlots;mi++){
+        fH+='<div class="cb-room-row-lbl partner-room" title="Internal PMS room slot — staff booking only, never public/Agency inventory"><span class="rn">Room '+mi+'</span></div>';
+      }
+    } else if(!sec.roomTypes.length){
+      var label=p.availabilityMode==='ON_REQUEST'?'Availability on request':'No room types configured yet';
+      fH+='<div class="cb-room-row-lbl partner-room"><span class="rn" style="color:#8a94a6;font-style:italic">'+esc(label)+'</span></div>';
+      sec.legacyRns.forEach(function(rn){
+        var rlabel=(getR(rn)||{}).nm||rn;
+        fH+='<div class="cb-room-row-lbl partner-room" title="Historical reservation only — not current bookable inventory"><span class="rn">'+esc(rlabel)+'</span><span class="rt" style="color:#b45309">Historical</span></div>';
+      });
+    }
   });
   document.getElementById('cb-fixed-rows').innerHTML=fH;
   var gH='<div class="cb-date-header-row">';
@@ -6046,9 +6071,17 @@ function drawCal(){
   // data, always-on on the real PMS calendar).
   partnerSections.forEach(function(sec){
     gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px"></div></div>';
-    if(!sec.roomTypes.length) gH+=mRStatic('__onreq_'+sec.p.id);
     sec.roomTypes.forEach(function(rt){ gH+=mRStatic(sec.p.id+'::'+rt.id); });
-    sec.legacyRns.forEach(function(rn){ gH+=mRStatic(rn); });
+    if(sec.manualSlots>0){
+      // Real, bookable rows -- the SAME mR() builder Vilu's own rooms use,
+      // so click-to-book, drag-select, drag-to-move and conflict-checking
+      // (isOcc()/writeReservation()'s transaction, both already keyed
+      // generically by room id, never VR-only) all work identically here.
+      for(var mi=1;mi<=sec.manualSlots;mi++){ gH+=mR({n:sec.prefix+mi,nm:'Room '+mi},false,null); }
+    } else if(!sec.roomTypes.length){
+      gH+=mRStatic('__onreq_'+sec.p.id);
+      sec.legacyRns.forEach(function(rn){ gH+=mRStatic(rn); });
+    }
   });
   document.getElementById('cb-grid').innerHTML=gH;
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
@@ -6087,14 +6120,16 @@ function drawCal(){
       if(w<4)return;
       var bar=document.createElement('div');
       var isBlk=res.isBlock||res.src==='Agency Block';
-      // Legacy partner-room compatibility guard (2026-09-13): a reservation
-      // whose rn is a bridged legacy id (ha-R*/hb-R*) must never be
-      // draggable -- its compatibility row has no other bookable rooms to
-      // legitimately move it to, and dragging it elsewhere would silently
-      // rewrite a historical reservation's rn, which is explicitly
-      // forbidden. Everything else about it (color, click-to-view) stays
-      // identical to a normal reservation.
-      var isHistPartner=partnerSections.some(function(sec){return res.rn&&res.rn.indexOf(sec.prefix)===0;});
+      // Legacy-compatibility drag guard (2026-09-13, narrowed in the manual-
+      // slots follow-up): only applies to a partner property that still has
+      // ZERO manual PMS room slots configured -- there, a legacy-prefixed
+      // reservation sits on the temporary mRStatic() compatibility row
+      // (read-only by construction, no .cb-cell at all) and must never be
+      // dragged. Once a property HAS manual slots, its rooms are real,
+      // permanent, mR()-based rows -- a reservation there (new or old) is
+      // draggable/editable exactly like a Vilu room, per this task's own
+      // "allow normal PMS reservation management behavior" requirement.
+      var isHistPartner=partnerSections.some(function(sec){return sec.manualSlots===0&&res.rn&&res.rn.indexOf(sec.prefix)===0;});
       bar.className='cb-bar'+(((!isBlk&&res.st==='Pending')||(isBlk&&res.blockSt!=='Confirmed'))?' cb-bar-light':'');
       bar.style.cssText='left:'+left+'px;width:'+w+'px;background:'+(isBlk?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):resBarColor(res));
       bar.style.clipPath=calBarClip(w,CAL_BAR_H,sV,cI>=0);
@@ -8145,7 +8180,7 @@ async function nbRenderRooms(){
   const myGen=++_nbRefreshGen;
   const prop=document.getElementById('nb-prop').value;
   const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
-  const candidates = prop==='vilu' ? VR : getHR().filter(r=>r.prop===prop);
+  const candidates = prop==='vilu' ? VR : getHR().filter(r=>r.prop===prop).slice(0,partnerManualSlotCount(prop));
   _dateWatchLast.nb=ci+'|'+co+'|'+prop;
   const tb=document.getElementById('nb-avail-tb');
   if(!ci||!co||co<=ci){
@@ -8160,14 +8195,19 @@ async function nbRenderRooms(){
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="3" style="color:#9ca3af;font-size:var(--font-size-sm);padding:8px">'+(available.length?'All available rooms added':'No rooms available for these dates')+'</td></tr>';
   } else {
-    tb.innerHTML=rows.map(r=>'<tr><td>'+r.nm+(r.type?' · '+r.type:'')+'</td><td>$'+r.rate+'/night</td><td style="text-align:right"><button class="btn sm" onclick="nbAddRoom(\''+r.n+'\')">Add</button></td></tr>').join('');
+    tb.innerHTML=rows.map(r=>'<tr><td>'+r.nm+(r.type?' · '+r.type:'')+'</td><td>'+(r.rate!=null?('$'+r.rate+'/night'):'<span style="color:#d97706;font-style:italic">enter rate manually</span>')+'</td><td style="text-align:right"><button class="btn sm" onclick="nbAddRoom(\''+r.n+'\')">Add</button></td></tr>').join('');
   }
   nbRenderSelectedList();
 }
 function nbAddRoom(rn){
   const rm=getR(rn);if(!rm)return;
   const ci=document.getElementById('nb-ci').value,co=document.getElementById('nb-co').value;
-  const rate=isVR(rn)?getDateRangeRate(rn,ci,co):rm.rate;
+  // Internal PMS manual room slots: a partner room NEVER defaults to its old
+  // PH $70/night fixture rate -- rate starts blank (null) and must be
+  // entered manually via the existing "Room rate / night override" field
+  // (nbPricingFields().rateOverride), enforced at submit time in
+  // submitNB(). isVR() rooms are completely unaffected.
+  const rate=isVR(rn)?getDateRangeRate(rn,ci,co):null;
   nbSelectedRooms.push({n:rn,nm:rm.nm,type:rm.type,rate});
   nbRenderRooms();
 }
@@ -8180,7 +8220,7 @@ function nbRenderSelectedList(){
   if(!nbSelectedRooms.length){
     list.innerHTML='<div style="font-size:var(--font-size-sm);color:#9ca3af">No rooms selected yet</div>';
   } else {
-    list.innerHTML=nbSelectedRooms.map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:6px;padding:6px 10px;font-size:var(--font-size-sm)"><span>'+r.nm+(r.type?' · '+r.type:'')+' — $'+r.rate+'/night</span><button class="btn sm" onclick="nbRemoveRoom(\''+r.n+'\')" aria-label="Remove"><i class="ti ti-x"></i></button></div>').join('');
+    list.innerHTML=nbSelectedRooms.map(r=>'<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:6px;padding:6px 10px;font-size:var(--font-size-sm)"><span>'+r.nm+(r.type?' · '+r.type:'')+' — '+(r.rate!=null?('$'+r.rate+'/night'):'<span style="color:#d97706">rate not set — enter override below</span>')+'</span><button class="btn sm" onclick="nbRemoveRoom(\''+r.n+'\')" aria-label="Remove"><i class="ti ti-x"></i></button></div>').join('');
   }
   nbCalc();
 }
@@ -8225,24 +8265,42 @@ function nbApplySuggestedDates(ci,co){
 
 async function initNB(){
   const ps=document.getElementById('nb-prop');
-  // Calendar-fix follow-up (Part 10): the PH array's "Ranfaru Inn"/"White
-  // Sand Inn" options are retired from New Booking -- they were never real,
-  // admin-entered partner data (Part 1 audit), just a hardcoded flat
-  // $70/night demo fixture, yet this dropdown let staff actually create a
-  // REAL reservation against them. The Firestore-backed Partner
-  // Accommodation system (accommodation_properties) is the only live
-  // partner-property source now; a partner-property BOOKING still goes
-  // through the Agency Portal's accommodation_booking_requests flow, not a
-  // PMS-side "New Booking" against a fake in-memory hotel. getR()/getHR()/
-  // phNm()/phBx() are left untouched so any reservation that already
-  // references a PH room (if one exists) still renders correctly wherever
-  // it's displayed -- only the ability to CREATE a new one here is removed.
+  // Calendar-fix follow-up (Part 10, 2026-09-12): the PH array's "Ranfaru
+  // Inn"/"White Sand Inn" options were retired from New Booking -- they
+  // were never real, admin-entered partner data, just a hardcoded flat
+  // $70/night demo fixture.
+  //
+  // Internal PMS manual room slots (2026-09-13, second follow-up): a
+  // partner property with manualPmsRoomSlots>0 configured in Partner
+  // Accommodation is now offered here again -- but the option itself, the
+  // room list (nbRenderRooms()), and the room count all come from the
+  // REAL canonical accommodation_properties doc, never PH. Room ids are
+  // still the legacy prefix+N shape (ha-R1..ha-R10) purely so a historical
+  // reservation and a brand-new manual one land on the exact same
+  // permanent calendar row -- this is explicitly INTERNAL PMS operational
+  // inventory (staff manually choosing a room and manually entering a
+  // rate), never a public/Agency/OTA booking path; nothing here writes
+  // room_types or touches availabilityMode, so Ranfaru/White Sand stay
+  // ON_REQUEST externally regardless of how many manual reservations get
+  // created this way.
   ps.innerHTML='<option value="vilu">Vilu Residence (own rooms)</option>';
+  await loadAccProperties();
+  ACC_PROPERTIES.filter(function(p){return !p.isVilu&&p.active!==false&&(+p.manualPmsRoomSlots||0)>0;}).forEach(function(p){
+    ps.innerHTML+='<option value="'+p.id+'">'+esc(p.propertyName||p.id)+' (internal PMS room)</option>';
+  });
   if(!document.getElementById('nb-ci').value)document.getElementById('nb-ci').value=D(1);
   if(!document.getElementById('nb-co').value)document.getElementById('nb-co').value=D(2);
   nbSelectedRooms=[];
   await nbRenderRooms();
   nbCheckSuggestion(document.getElementById('nb-ci').value,document.getElementById('nb-co').value);
+}
+// Internal PMS manual room slots: how many prefix+N rooms (ha-R1..ha-R10
+// etc) a partner property currently exposes for STAFF-ONLY manual booking
+// in the PMS. Reads the same canonical accommodation_properties field
+// drawCal() uses -- one source of truth, never a second config system.
+function partnerManualSlotCount(propId){
+  var p=(typeof ACC_PROPERTIES!=='undefined'?ACC_PROPERTIES:[]).find(function(x){return x.id===propId;});
+  return p?Math.max(0,+p.manualPmsRoomSlots||0):0;
 }
 // USD/MVR billing (2026-09-10): defaults the price-mode select to the
 // owner's configured per-currency default (TAX.usdDefaultPriceMode/
@@ -8278,6 +8336,16 @@ function nbCalc(){
   let grandTotal=0,html='',allConfigured=true;
   nbSelectedRooms.forEach(function(r){
     const rate=pricing.rateOverride!=null?pricing.rateOverride:r.rate;
+    // Internal PMS manual room slots: a partner room with no rate entered
+    // yet (rate===null) has nothing to compute -- show a plain prompt
+    // instead of running calcTax() with a null/NaN rate, and exclude it
+    // from the grand total the same way a missing exchange rate already
+    // does (allConfigured=false suppresses that line entirely).
+    if(rate==null){
+      allConfigured=false;
+      html+='<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb"><div style="font-weight:700;font-size:var(--font-size-sm);margin-bottom:4px">'+r.nm+'</div><div style="color:#d97706;font-size:var(--font-size-sm)">Enter a room rate above to see pricing.</div></div>';
+      return;
+    }
     const resLike={ci,co,rate,ad,ch,inf,billingCurrency:pricing.billingCurrency,priceTaxMode:pricing.priceTaxMode,guestTaxStatus:pricing.guestTaxStatus};
     const x=calcTax(resLike);
     if(x.exchangeRateConfigured===false){ allConfigured=false; } else { grandTotal+=x.total; }
@@ -8299,6 +8367,15 @@ async function submitNB(){
   if(!nbSelectedRooms.length){toast('Add at least one room');return;}
   if(!ci||!co||co<=ci){toast('Invalid dates');return;}
   if(prop!=='vilu'&&['Booking.com','Airbnb','Agoda','Expedia','Google Hotels'].includes(src)){toast('⚠️ OTA bookings cannot go to partner hotels');return;}
+  const pricing=nbPricingFields();
+  // Internal PMS manual room slots: never let a partner-room booking save
+  // with no rate at all (that would silently write rate:0 via
+  // resToFirestoreFields()'s own `r.rate||0` fallback) -- block submission
+  // and point staff at the override field instead of guessing $70 or $0.
+  if(nbSelectedRooms.some(function(r){return r.rate==null;})&&pricing.rateOverride==null){
+    toast('⚠️ Enter a room rate — partner-hotel rooms have no default price');
+    return;
+  }
 
   const btns=document.querySelectorAll('button[onclick="submitNB()"]');
   btns.forEach(function(b){b.disabled=true;});
@@ -8307,7 +8384,6 @@ async function submitNB(){
   // guarantee per room — each room's write is independent, so rooms run
   // sequentially and a failure on one doesn't affect the others.
   const succeeded=[],failed=[];
-  const pricing=nbPricingFields();
   for(let i=0;i<nbSelectedRooms.length;i++){
     const room=nbSelectedRooms[i];
     const id='BK'+String(Date.now()).slice(-5)+'-'+i;
@@ -9194,6 +9270,7 @@ function openAddAccProp(){
   document.getElementById('ah-addr').value = '';
   document.getElementById('ah-availmode').value = 'MANUAL_INVENTORY';
   document.getElementById('ah-order').value = (ACC_PROPERTIES.length+1)*10;
+  document.getElementById('ah-manual-slots').value = 0;
   document.getElementById('ah-active').checked = true;
   document.getElementById('ah-visible').checked = false;
   document.getElementById('ah-notes').value = '';
@@ -9208,6 +9285,7 @@ function openEditAccProp(id){
   document.getElementById('ah-addr').value = p.location||'';
   document.getElementById('ah-availmode').value = p.availabilityMode==='ON_REQUEST'?'ON_REQUEST':'MANUAL_INVENTORY';
   document.getElementById('ah-order').value = p.displayOrder||10;
+  document.getElementById('ah-manual-slots').value = +p.manualPmsRoomSlots||0;
   document.getElementById('ah-active').checked = p.active!==false;
   document.getElementById('ah-visible').checked = !!p.visibleToAgencies;
   document.getElementById('ah-notes').value = p.notesInternal||'';
@@ -9224,6 +9302,12 @@ async function saveAccProp(){
     location: (document.getElementById('ah-addr').value||'').trim(),
     availabilityMode: document.getElementById('ah-availmode').value==='ON_REQUEST'?'ON_REQUEST':'MANUAL_INVENTORY',
     displayOrder: +(document.getElementById('ah-order').value||10),
+    // Internal PMS manual room slots (2026-09-13): staff-only "Room 1..N"
+    // rows in the PMS Calendar for manual reservation management -- never
+    // read by any Agency/OTA/public-facing code (see drawCal()'s own
+    // comment). Clamped to a non-negative integer, defaults to 0 (no rows)
+    // for a brand-new property -- never a fabricated non-zero default.
+    manualPmsRoomSlots: Math.max(0,Math.round(+document.getElementById('ah-manual-slots').value||0)),
     active: document.getElementById('ah-active').checked,
     visibleToAgencies: document.getElementById('ah-visible').checked,
     notesInternal: (document.getElementById('ah-notes').value||'').trim(),
@@ -15824,7 +15908,10 @@ async function getAvailableRoomsWithRates(candidateRooms, ci, co, excludeId) {
       var occupied = bookings.some(function(b){ return b.id!==excludeId && ci<b.to && co>b.from; });
       if (occupied) return null;
       if (await hasBlockConflict(rm.n, ci, co)) return null;
-      var rate = isVR(rm.n) ? getDateRangeRate(rm.n, ci, co) : rm.rate;
+      // Internal PMS manual room slots: a partner room never surfaces its old
+      // PH $70/night fixture rate here either -- blank/null, entered
+      // manually (see nbAddRoom()'s matching comment).
+      var rate = isVR(rm.n) ? getDateRangeRate(rm.n, ci, co) : null;
       return { n: rm.n, nm: rm.nm, type: rm.type, rate: rate };
     } catch(e) { return null; }
   }));

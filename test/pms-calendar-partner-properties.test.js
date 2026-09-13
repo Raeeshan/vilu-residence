@@ -71,9 +71,9 @@ section('Zero-room-type ON_REQUEST rendering — clean section, no fabricated in
   test('a partner with zero active room types renders "Availability on request" when ON_REQUEST, or "No room types configured yet" otherwise -- never a fabricated room row', () => {
     assert.match(fHBuildSrc, /p\.availabilityMode===['"]ON_REQUEST['"]\?['"]Availability on request['"]:['"]No room types configured yet['"]/);
   });
-  test('the zero-room-type case is driven by roomTypes.length, so it disappears automatically (no duplicate section) once real room types are configured', () => {
-    assert.match(fHBuildSrc, /if\(!sec\.roomTypes\.length\)\{/);
-    assert.match(gHBuildSrc, /if\(!sec\.roomTypes\.length\)\s*gH\+=mRStatic\('__onreq_'\+sec\.p\.id\);/);
+  test('the zero-room-type/zero-manual-slots case is driven by roomTypes.length and manualSlots, so it disappears automatically (no duplicate section) once either is configured', () => {
+    assert.match(fHBuildSrc, /\}\s*else if\(!sec\.roomTypes\.length\)\{/);
+    assert.match(gHBuildSrc, /\}\s*else if\(!sec\.roomTypes\.length\)\{\s*gH\+=mRStatic\('__onreq_'\+sec\.p\.id\);/);
   });
   test('exactly one cb-section-lbl is emitted per partner property regardless of how many room types/legacy rows it has (no duplicate property sections)', () => {
     const forEachBody = extractByStart(fHBuildSrc, /partnerSections\.forEach\(function\(sec\)\{/);
@@ -117,8 +117,8 @@ section('Legacy ha-R*/hb-R* historical compatibility — visible, never rewritte
     // The ORIGINAL, unrelated Vilu/general bar loop still excludes Cancelled -- unchanged.
     assert.match(barsSrc, /RES\.filter\(function\(r\)\{return r\.st!==['"]Cancelled['"];\}\)\.forEach\(function\(res\)\{/);
   });
-  test('a historical partner reservation bar is never draggable and never sets the drag flag, even if a future one is not Cancelled', () => {
-    assert.match(barsSrc, /var isHistPartner\s*=\s*partnerSections\.some\(function\(sec\)\{return res\.rn&&res\.rn\.indexOf\(sec\.prefix\)===0;\}\);/);
+  test('a reservation on a partner property with ZERO manual slots (still using the fallback compatibility row) is never draggable', () => {
+    assert.match(barsSrc, /var isHistPartner\s*=\s*partnerSections\.some\(function\(sec\)\{return sec\.manualSlots===0&&res\.rn&&res\.rn\.indexOf\(sec\.prefix\)===0;\}\);/);
     assert.match(barsSrc, /if\(!\(res\.isBlock\|\|res\.src===['"]Agency Block['"]\|\|isHistPartner\)\)\{\s*bar\.setAttribute\('draggable','true'\);/);
     assert.match(barsSrc, /if\(!\(res\.isBlock\|\|res\.src===['"]Agency Block['"]\|\|isHistPartner\)\)\{bDrg=true;sOn=false;\}/);
   });
