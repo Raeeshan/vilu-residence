@@ -1312,10 +1312,29 @@ async function doAgencyLogin(){
   err.style.display='block';
 }
 
+// Race-condition fix (2026-09-13): the email doAgencySignup() is currently
+// (or has already finished) deciding the screen for, so this listener
+// stands down ONLY for auth-state events about that SPECIFIC email --
+// never a blanket "ignore everything" flag, which would also wrongly
+// suppress a legitimate LATER sign-in as a different account on the same
+// page (e.g. after "Back to sign in" -> normal login as someone else, no
+// reload). Scoped by EMAIL rather than uid specifically because
+// doAgencySignup() must set this BEFORE calling
+// createUserWithEmailAndPassword() (it doesn't know the new uid until
+// that call resolves, by which point the listener may already have fired)
+// -- the email is known upfront. Scoping (by either key) also means
+// nothing needs to reset this on sign-out: fbUser is null then, so the
+// `fbUser &&` check below already short-circuits regardless of this
+// value, and a genuinely different future sign-in simply won't match this
+// email. See doAgencySignup()'s own comment for why a set-then-clear
+// window isn't enough on its own.
+var _agencySignupHandledEmail = null;
+
 // Auto-restore session on reload — Firebase Auth persists sign-in across
 // page loads by default, so a returning agency partner doesn't need to
 // log in again every visit.
 firebase.auth().onAuthStateChanged(async function(fbUser){
+  if (fbUser && fbUser.email && fbUser.email.toLowerCase() === _agencySignupHandledEmail) return;
   if (fbUser && !currentAgency) {
     var profile = await fetchAgencyProfile(fbUser.email);
     if (profile && profile.role === 'agency' && profile.accountStatus !== 'SUSPENDED') {
@@ -1445,6 +1464,34 @@ async function doAgencySignup(){
   if(pass!==pass2){ err.textContent='Passwords do not match.'; err.style.display='block'; return; }
   if(!agreed){ err.textContent='Please confirm you agree to the agency access terms.'; err.style.display='block'; return; }
 
+  // Race-condition fix (2026-09-13): createUserWithEmailAndPassword() (and
+  // the email-already-in-use recovery's signInWithEmailAndPassword()) fires
+  // the SAME onAuthStateChanged listener registered above, ASYNCHRONOUSLY
+  // and independently of this function's own await chain -- Firebase does
+  // not guarantee it fires (or finishes its own async work) before this
+  // function's promise chain settles, and may not even fire before the
+  // createUserWithEmailAndPassword() call below itself returns. That
+  // listener's own network round-trip (fetchAgencyProfile +
+  // getMyAgencyApplicationStatus) could resolve AFTER this function has
+  // already shown signup-pending-card, and showAgencyStatusScreen() hides
+  // every .login-card (signup-pending-card included) to show status-card
+  // instead -- silently replacing the signup-confirmation screen (which
+  // specifically reminds the applicant to verify their email) with the
+  // generic "Application pending" screen that does not.
+  //
+  // _agencySignupHandledEmail must therefore be set to the target email
+  // BEFORE calling createUserWithEmailAndPassword -- not after it resolves,
+  // and not as a boolean cleared once this function finishes (proven
+  // insufficient by this fix's own regression test against that exact
+  // first draft: the listener can fire even later, after this function has
+  // already cleared a transient flag). It is cleared only on a genuine
+  // failure (no session for this email actually exists), and deliberately
+  // left set permanently once a session for this email exists -- there is
+  // no legitimate reason for the listener to act again for THIS email
+  // during the rest of this page's lifetime; being scoped to the email
+  // (not a blanket flag) means a later, different sign-in on the same page
+  // is never affected, and nothing needs to reset it on sign-out either.
+  _agencySignupHandledEmail = email;
   try {
     await firebase.auth().createUserWithEmailAndPassword(email, pass);
   } catch(authErr){
@@ -1452,11 +1499,13 @@ async function doAgencySignup(){
       try {
         await firebase.auth().signInWithEmailAndPassword(email, pass);
       } catch(signInErr){
+        _agencySignupHandledEmail = null;
         err.textContent = 'An account with this email already exists.';
         err.style.display='block';
         return;
       }
     } else {
+      _agencySignupHandledEmail = null;
       err.textContent = 'Could not create account: '+(authErr.message||'unknown error');
       err.style.display='block';
       return;
@@ -1469,12 +1518,18 @@ async function doAgencySignup(){
     await fn({ agencyName:agencyName, contactPerson:contactPerson, phone:phone, country:country, website:website, businessRegistrationNumber:regnum, message:message, agreedToTerms:true });
   } catch(e){
     console.error('submitAgencyApplication failed', e);
+    // _agencySignupHandledEmail intentionally stays set here too -- a real
+    // Auth session for this email now exists; if onAuthStateChanged were to
+    // fire for it, getMyAgencyApplicationStatus would correctly find no
+    // application yet and do nothing regardless, so there is nothing to
+    // gain by clearing it, and the applicant may simply retry submission.
     err.textContent = 'Account created, but the application could not be submitted: '+(e.message||'unknown error')+'. Please try again.';
     err.style.display='block';
     return;
   }
   document.getElementById('signup-card').style.display='none';
   document.getElementById('signup-pending-card').style.display='block';
+  // _agencySignupHandledEmail intentionally stays set -- see the comment above.
 }
 
 // Shared status-screen renderer for PENDING/REJECTED/SUSPENDED/no-access,

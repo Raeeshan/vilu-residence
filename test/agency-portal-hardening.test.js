@@ -81,9 +81,12 @@ section('Case B — self-registration exists (2026-09-13) but grants NO immediat
   // new signup can NEVER reach portal data without a server-side approval
   // step (see agency-self-registration-rules.test.js for the emulator
   // proof of the approval side of that boundary).
-  test('createUserWithEmailAndPassword has exactly two call sites: the legacy migration path and the new self-registration signup path -- both intentional, no unexpected third path', () => {
-    const calls = [...AGENCY.matchAll(/createUserWithEmailAndPassword/g)];
-    assert.equal(calls.length, 2, 'expected exactly two createUserWithEmailAndPassword call sites (migrateLegacyAgency + doAgencySignup) — a new one may indicate an unreviewed additional signup path');
+  test('createUserWithEmailAndPassword has exactly two REAL call sites: the legacy migration path and the new self-registration signup path -- both intentional, no unexpected third path (comment-line mentions, e.g. explaining the race-condition fix, are deliberately excluded so this stays a check on actual code, not prose)', () => {
+    const realCallLines = AGENCY.split('\n').filter((line) => {
+      if (!/createUserWithEmailAndPassword/.test(line)) return false;
+      return !/^\s*\/\//.test(line); // exclude // comment lines
+    });
+    assert.equal(realCallLines.length, 2, 'expected exactly two real createUserWithEmailAndPassword call sites (migrateLegacyAgency + doAgencySignup) — a new one may indicate an unreviewed additional signup path. Found:\n' + realCallLines.join('\n'));
   });
   test('the new self-registration call site lives inside doAgencySignup(), which only ever creates the Auth account, sends verification, and submits an application -- it never itself writes users/ or grants agency role/portal access', () => {
     const fn = extractFn(AGENCY, 'async function doAgencySignup');
