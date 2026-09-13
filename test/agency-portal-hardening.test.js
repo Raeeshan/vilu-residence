@@ -20,6 +20,20 @@ function test(name, fn) {
   catch (e) { failed++; console.log(`  FAIL - ${name}`); console.log('        ' + e.message); process.exitCode = 1; }
 }
 function read(p) { return fs.readFileSync(p, 'utf8'); }
+// Brace-counting extraction from a function's own start marker -- immune to
+// CRLF/LF differences and exact whitespace, unlike slicing to a literal
+// multi-newline string.
+function extractFn(src, startMarker) {
+  const i0 = src.indexOf(startMarker);
+  if (i0 === -1) throw new Error('marker not found: ' + startMarker);
+  let i = src.indexOf('{', i0) + 1, depth = 1;
+  while (depth > 0 && i < src.length) {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') depth--;
+    i++;
+  }
+  return src.slice(i0, i);
+}
 
 const AGENCY = read('vilu-agency-portal.html');
 const PMS = read('vilu-unified.html');
@@ -58,23 +72,45 @@ section('Case A — agency data isolation is server-enforced, not client-filter-
   });
 }
 
-section('Case B — no self-registration; account creation/lifecycle is staff-controlled');
+section('Case B — self-registration exists (2026-09-13) but grants NO immediate access; approval remains staff-controlled');
 {
-  test('createUserWithEmailAndPassword is only reachable through the legacy-migration path (requires a pre-existing matching legacy credential), not a public sign-up form', () => {
+  // Superseded finding: this repo used to guarantee "no self-registration
+  // exists at all". Agency Self-Registration + Admin/Manager Approval
+  // (2026-09-13) deliberately adds a public signup path, so that guarantee
+  // is now narrower and stronger instead: self-registration exists, but a
+  // new signup can NEVER reach portal data without a server-side approval
+  // step (see agency-self-registration-rules.test.js for the emulator
+  // proof of the approval side of that boundary).
+  test('createUserWithEmailAndPassword has exactly two call sites: the legacy migration path and the new self-registration signup path -- both intentional, no unexpected third path', () => {
     const calls = [...AGENCY.matchAll(/createUserWithEmailAndPassword/g)];
-    assert.equal(calls.length, 1, 'expected exactly one createUserWithEmailAndPassword call site (migrateLegacyAgency) — a new one may indicate a new signup path was added');
-    const idx = calls[0].index;
-    const fnStart = AGENCY.lastIndexOf('async function migrateLegacyAgency', idx);
-    assert.ok(fnStart !== -1 && fnStart < idx, 'createUserWithEmailAndPassword is no longer inside migrateLegacyAgency() — verify no new self-registration path was introduced');
+    assert.equal(calls.length, 2, 'expected exactly two createUserWithEmailAndPassword call sites (migrateLegacyAgency + doAgencySignup) — a new one may indicate an unreviewed additional signup path');
   });
-  test('login screen states accounts are staff-created, with no visible sign-up affordance', () => {
-    assert.ok(/Your login is created by Vilu Residence/.test(AGENCY), 'staff-creates-your-login messaging removed from login screen');
-    assert.ok(!/Sign\s*up/i.test(AGENCY.slice(AGENCY.indexOf('id="login-screen"'), AGENCY.indexOf('id="login-screen"') + 3000)), 'a "Sign up" affordance appears to have been added to the login screen');
+  test('the new self-registration call site lives inside doAgencySignup(), which only ever creates the Auth account, sends verification, and submits an application -- it never itself writes users/ or grants agency role/portal access', () => {
+    const fn = extractFn(AGENCY, 'async function doAgencySignup');
+    assert.match(fn, /createUserWithEmailAndPassword/);
+    assert.match(fn, /sendEmailVerification/);
+    assert.match(fn, /submitAgencyApplication/);
+    assert.ok(!/collection\('users'\)/.test(fn), 'doAgencySignup() writes users/ directly -- it must only ever reach agency role via the server-side approval callable');
+    assert.ok(!/enterAgencyPortal/.test(fn), 'doAgencySignup() calls enterAgencyPortal() -- self-registration must never grant immediate access');
   });
-  test('doAgencyLogin() rejects an authenticated non-agency account (profile.role !== "agency") rather than granting portal access', () => {
-    const start = AGENCY.indexOf('async function doAgencyLogin');
-    const fn = AGENCY.slice(start, AGENCY.indexOf('\n}', start) + 2);
-    assert.ok(/profile\.role !== 'agency'/.test(fn), 'role check missing from doAgencyLogin()');
+  test('login screen has a subordinate "Apply for Agency Access" link, not an equal-prominence sign-up form on the primary card', () => {
+    const i0 = AGENCY.indexOf('id="login-screen"');
+    const loginScreenHtml = AGENCY.slice(i0, AGENCY.indexOf('id="forgot-card"', i0));
+    assert.match(loginScreenHtml, /Apply for Agency Access/, 'self-registration entry point missing from the login screen');
+    assert.match(loginScreenHtml, /Sign in/);
+  });
+  test('doAgencyLogin() grants portal access only for role==="agency" AND accountStatus!=="SUSPENDED" -- a suspended agency, even with the right role, is refused', () => {
+    const fn = extractFn(AGENCY, 'async function doAgencyLogin');
+    assert.match(fn, /profile\.role === 'agency'/);
+    assert.match(fn, /accountStatus/, 'doAgencyLogin() does not check accountStatus at all -- a suspended agency would be let straight into the portal');
+  });
+  test('a signed-in user who is not an approved agency gets an accurate PENDING/REJECTED status screen via getMyAgencyApplicationStatus() before the generic "not set up" fallback -- never silently signed out', () => {
+    const fn = extractFn(AGENCY, 'async function doAgencyLogin');
+    assert.match(fn, /showStatusScreenIfApplicant/);
+    assert.ok(!/firebase\.auth\(\)\.signOut\(\)/.test(fn), 'doAgencyLogin() signs the user out on a non-agency profile -- a pending/rejected applicant should stay signed in so a return visit shows the same accurate status');
+  });
+  test('getMyAgencyApplicationStatus() is called with no client-supplied identity -- the applicant\'s own uid is implicit in their auth session, never passed as data', () => {
+    assert.match(AGENCY, /httpsCallable\('getMyAgencyApplicationStatus'\)\(\{\}\)/);
   });
   test('account revocation: deleteUser() removes the users/{email} profile doc without deleting the underlying Firebase Auth account (documented, intentional design)', () => {
     const fn = PMS.slice(PMS.indexOf('function deleteUser'), PMS.indexOf('function deleteUser') + 900);

@@ -282,8 +282,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div style="text-align:center;margin-top:12px">
       <button onclick="showForgot()" style="background:none;border:none;cursor:pointer;color:#0096c7;font-size:var(--font-size-sm);font-family:inherit;text-decoration:underline">Forgot password?</button>
     </div>
+    <!-- Agency Self-Registration (2026-09-13): a subordinate link, never
+         equal visual weight to Sign In -- new agencies apply here, but
+         signing in remains the primary, dominant action on this screen. -->
+    <div style="text-align:center;margin-top:8px">
+      <button onclick="showSignup()" style="background:none;border:none;cursor:pointer;color:#0096c7;font-size:var(--font-size-sm);font-family:inherit;text-decoration:underline">Apply for Agency Access</button>
+    </div>
     <div style="margin-top:16px;padding:10px 12px;background:#e0f7fd;border:1px solid #caf0f8;border-radius:8px;font-size:var(--font-size-xs);color:#0096c7;text-align:center">
-      <strong>First time?</strong> Your login is created by Vilu Residence.<br>Contact us at <a href="mailto:Viluresidence@gmail.com" style="color:#0096c7">Viluresidence@gmail.com</a>
+      <strong>First time?</strong> Your login is created by Vilu Residence, or apply above for your own agency access.<br>Questions? <a href="mailto:Viluresidence@gmail.com" style="color:#0096c7">Viluresidence@gmail.com</a>
     </div>
   </div>
   <div id="forgot-card" class="login-card" style="display:none">
@@ -304,6 +310,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <p>If an account exists for <strong id="fp-email-sent"></strong>, a password reset link is on its way. Check your inbox (and spam folder).</p>
       <button class="btn-login" onclick="hideForgot()">Back to sign in</button>
     </div>
+  </div>
+
+  <!-- Agency Self-Registration (2026-09-13) -->
+  <div id="signup-card" class="login-card" style="display:none">
+    <h2>Apply for Agency Access</h2>
+    <p>Tell us about your agency. Vilu Residence will review your application and email you once approved.</p>
+    <div class="err" id="signup-err"></div>
+    <div class="fg"><label>Agency / Company Name *</label><input id="su-agencyname"></div>
+    <div class="fg"><label>Contact Person *</label><input id="su-contact"></div>
+    <div class="fg"><label>Email *</label><input type="email" id="su-email"></div>
+    <div class="fg"><label>Phone / WhatsApp *</label><input id="su-phone"></div>
+    <div class="fg"><label>Country *</label><input id="su-country"></div>
+    <div class="fg"><label>Password *</label><input type="password" id="su-pass"></div>
+    <div class="fg"><label>Confirm Password *</label><input type="password" id="su-pass2"></div>
+    <div class="fg"><label>Website</label><input id="su-website"></div>
+    <div class="fg"><label>Business registration / license number</label><input id="su-regnum"></div>
+    <div class="fg"><label>Notes / introduction</label><textarea id="su-message"></textarea></div>
+    <div class="fg" style="display:flex;gap:8px;align-items:flex-start">
+      <input type="checkbox" id="su-agree" style="margin-top:3px">
+      <label for="su-agree" style="font-weight:400">I confirm that the information provided is correct and I agree to Vilu's agency access terms.</label>
+    </div>
+    <button class="btn-login" onclick="doAgencySignup()">Submit application →</button>
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="hideSignup()" style="background:none;border:none;cursor:pointer;color:#0096c7;font-size:var(--font-size-sm);font-family:inherit">← Back to sign in</button>
+    </div>
+  </div>
+  <div id="signup-pending-card" class="login-card" style="display:none">
+    <div style="font-size:var(--font-size-display);text-align:center;margin-bottom:12px">📨</div>
+    <h2>Application submitted</h2>
+    <p>Your agency application has been submitted and is waiting for approval from Vilu Residence. We've sent a verification link to your email — please verify it; Vilu Residence cannot approve your account until you do.</p>
+    <button class="btn-login" onclick="agencyStatusScreenSignOut()">Back to sign in</button>
+  </div>
+  <div id="status-card" class="login-card" style="display:none">
+    <div id="status-icon" style="font-size:var(--font-size-display);text-align:center;margin-bottom:12px"></div>
+    <h2 id="status-title"></h2>
+    <p id="status-body"></p>
+    <button class="btn-login" onclick="agencyStatusScreenSignOut()">Back to sign in</button>
   </div>
 </div>
 
@@ -1221,13 +1264,23 @@ async function doAgencyLogin(){
 
   var fbUser = firebase.auth().currentUser;
   var profile = await fetchAgencyProfile(fbUser.email);
-  if (!profile || profile.role !== 'agency') {
-    firebase.auth().signOut();
-    err.textContent='This account is not set up for agency access.';
-    err.style.display='block';
+  if (profile && profile.role === 'agency' && profile.accountStatus !== 'SUSPENDED') {
+    await enterAgencyPortal(profile);
     return;
   }
-  await enterAgencyPortal(profile);
+  if (profile && profile.role === 'agency' && profile.accountStatus === 'SUSPENDED') {
+    showAgencyStatusScreen('SUSPENDED');
+    return;
+  }
+  // Not an approved agency (yet) -- check for a pending/rejected
+  // self-registration application before falling back to the generic "not
+  // set up" message, so a genuine applicant sees an accurate status
+  // instead of a confusing dead end. Deliberately never signs out here
+  // (unlike the old behavior) -- staying signed in means a return visit
+  // via onAuthStateChanged below shows the same accurate screen again.
+  if (await showStatusScreenIfApplicant()) return;
+  err.textContent='This account is not set up for agency access.';
+  err.style.display='block';
 }
 
 // Auto-restore session on reload — Firebase Auth persists sign-in across
@@ -1236,7 +1289,15 @@ async function doAgencyLogin(){
 firebase.auth().onAuthStateChanged(async function(fbUser){
   if (fbUser && !currentAgency) {
     var profile = await fetchAgencyProfile(fbUser.email);
-    if (profile && profile.role === 'agency') await enterAgencyPortal(profile);
+    if (profile && profile.role === 'agency' && profile.accountStatus !== 'SUSPENDED') {
+      await enterAgencyPortal(profile);
+      return;
+    }
+    if (profile && profile.role === 'agency' && profile.accountStatus === 'SUSPENDED') {
+      showAgencyStatusScreen('SUSPENDED');
+      return;
+    }
+    await showStatusScreenIfApplicant();
   }
 });
 
@@ -1279,6 +1340,128 @@ async function sendPasswordReset(){
   document.getElementById('fp-email-sent').textContent = email;
   document.getElementById('fp-step1').style.display = 'none';
   document.getElementById('fp-step-done').style.display = 'block';
+}
+
+// ── AGENCY SELF-REGISTRATION (2026-09-13) ──
+function showSignup(){
+  document.querySelector('#login-screen .login-card').style.display = 'none';
+  document.getElementById('signup-card').style.display = 'block';
+}
+function hideSignup(){
+  document.getElementById('signup-card').style.display = 'none';
+  document.querySelector('#login-screen .login-card').style.display = 'block';
+}
+
+// Deliberately separate from the pre-existing doSignout()/header sign-out
+// wiring (which this task does not touch) -- the status screens below need
+// a real firebase.auth().signOut() so onAuthStateChanged doesn't just
+// re-show the same screen, then a clean return to the primary login card.
+function agencyStatusScreenSignOut(){
+  try { firebase.auth().signOut(); } catch(e) {}
+  ['signup-card','signup-pending-card','status-card'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  document.querySelector('#login-screen .login-card').style.display = 'block';
+  var passEl = document.getElementById('ag-pass'); if(passEl) passEl.value = '';
+}
+
+// Resumable by design (2026-09-13 hardening): a network failure between
+// Auth account creation and submitAgencyApplication() must never
+// permanently strand the applicant. On auth/email-already-in-use, this is
+// most likely the SAME person retrying after a prior partial failure, so we
+// attempt to sign in with the password they just entered instead of
+// dead-ending on "account already exists".
+async function doAgencySignup(){
+  var err = document.getElementById('signup-err');
+  err.style.display = 'none';
+  var agencyName = (document.getElementById('su-agencyname').value||'').trim();
+  var contactPerson = (document.getElementById('su-contact').value||'').trim();
+  var email = (document.getElementById('su-email').value||'').trim().toLowerCase();
+  var phone = (document.getElementById('su-phone').value||'').trim();
+  var country = (document.getElementById('su-country').value||'').trim();
+  var pass = document.getElementById('su-pass').value||'';
+  var pass2 = document.getElementById('su-pass2').value||'';
+  var website = (document.getElementById('su-website').value||'').trim();
+  var regnum = (document.getElementById('su-regnum').value||'').trim();
+  var message = (document.getElementById('su-message').value||'').trim();
+  var agreed = document.getElementById('su-agree').checked;
+
+  if(!agencyName||!contactPerson||!email||!phone||!country||!pass||!pass2){ err.textContent='Please fill in all required fields.'; err.style.display='block'; return; }
+  if(pass.length<6){ err.textContent='Password must be at least 6 characters.'; err.style.display='block'; return; }
+  if(pass!==pass2){ err.textContent='Passwords do not match.'; err.style.display='block'; return; }
+  if(!agreed){ err.textContent='Please confirm you agree to the agency access terms.'; err.style.display='block'; return; }
+
+  try {
+    await firebase.auth().createUserWithEmailAndPassword(email, pass);
+  } catch(authErr){
+    if(authErr.code==='auth/email-already-in-use'){
+      try {
+        await firebase.auth().signInWithEmailAndPassword(email, pass);
+      } catch(signInErr){
+        err.textContent = 'An account with this email already exists.';
+        err.style.display='block';
+        return;
+      }
+    } else {
+      err.textContent = 'Could not create account: '+(authErr.message||'unknown error');
+      err.style.display='block';
+      return;
+    }
+  }
+  try { await firebase.auth().currentUser.sendEmailVerification(); } catch(e){ console.error('sendEmailVerification failed', e); }
+
+  try {
+    var fn = fsFunctions.httpsCallable('submitAgencyApplication');
+    await fn({ agencyName:agencyName, contactPerson:contactPerson, phone:phone, country:country, website:website, businessRegistrationNumber:regnum, message:message, agreedToTerms:true });
+  } catch(e){
+    console.error('submitAgencyApplication failed', e);
+    err.textContent = 'Account created, but the application could not be submitted: '+(e.message||'unknown error')+'. Please try again.';
+    err.style.display='block';
+    return;
+  }
+  document.getElementById('signup-card').style.display='none';
+  document.getElementById('signup-pending-card').style.display='block';
+}
+
+// Shared status-screen renderer for PENDING/REJECTED/SUSPENDED/no-access,
+// used both right after signup on a return visit and from
+// onAuthStateChanged/doAgencyLogin when a signed-in user has no (or no
+// longer valid) portal access. Never signs the user out itself (a
+// SUSPENDED or PENDING account is still a real, valid Auth session -- only
+// agencyStatusScreenSignOut()'s own button does that).
+function showAgencyStatusScreen(kind){
+  var icon = document.getElementById('status-icon');
+  var title = document.getElementById('status-title');
+  var body = document.getElementById('status-body');
+  if(kind==='PENDING_APPROVAL'){
+    icon.textContent='⏳'; title.textContent='Application pending';
+    body.textContent="Your agency application is still awaiting approval from Vilu Residence. We'll notify you by email once it's reviewed.";
+  } else if(kind==='REJECTED'){
+    icon.textContent='✖️'; title.textContent='Application not approved';
+    body.textContent='Your agency application was not approved. Please contact Vilu Residence at Viluresidence@gmail.com for more information.';
+  } else if(kind==='SUSPENDED'){
+    icon.textContent='⛔'; title.textContent='Account suspended';
+    body.textContent='Your agency account has been suspended. Please contact Vilu Residence at Viluresidence@gmail.com.';
+  } else {
+    icon.textContent='🚫'; title.textContent='No agency access';
+    body.textContent='This account is not set up for agency access. Please contact Vilu Residence at Viluresidence@gmail.com.';
+  }
+  document.querySelectorAll('#login-screen > .login-card').forEach(function(c){ c.style.display='none'; });
+  document.getElementById('status-card').style.display='block';
+}
+
+// Checks a signed-in-but-not-yet-agency user's application status and shows
+// the matching screen. Returns true if a status screen was shown (caller
+// should stop there), false if there's genuinely no application on file.
+async function showStatusScreenIfApplicant(){
+  try {
+    var res = await fsFunctions.httpsCallable('getMyAgencyApplicationStatus')({});
+    if(res.data && res.data.status && res.data.status!=='NONE'){
+      showAgencyStatusScreen(res.data.status);
+      return true;
+    }
+  } catch(e) { console.error('getMyAgencyApplicationStatus failed', e); }
+  return false;
 }
 
 function doSignout(){

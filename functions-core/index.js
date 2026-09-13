@@ -90,6 +90,7 @@ const logger = require('firebase-functions/logger');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
+const { getAuth } = require('firebase-admin/auth');
 const crypto = require('crypto');
 const { FirestoreStore } = require('./lib/store-firestore');
 const { writeReservationTx } = require('./lib/booking-core');
@@ -436,6 +437,21 @@ async function callerRole(request) {
   const role = userDoc.exists ? userDoc.data().role : null;
   if (role === 'staff') return { email, role: 'staff' };
   if (role === 'manager') return { email, role: 'manager' };
+  // Agency Self-Registration Suspension (2026-09-13): a suspended agency's
+  // users/{email}.role is left as 'agency' (never overwritten -- suspension
+  // must never delete history or force re-approval), only accountStatus
+  // flips to 'SUSPENDED'. Returning a distinct 'suspended' sentinel here
+  // (instead of 'agency') makes every existing `role !== 'agency'`
+  // throw-gate across every agency-only callable in this file automatically
+  // also reject a suspended agency, with zero changes to any of them --
+  // every such call site is a simple equality/inequality check, none
+  // combine role with another OR'd truthy role that 'suspended' could
+  // accidentally satisfy. An account with no accountStatus field at all
+  // (every pre-existing agency created before this feature) is unaffected
+  // and continues to resolve to 'agency' exactly as before.
+  if (role === 'agency' && userDoc.exists && userDoc.data().accountStatus === 'SUSPENDED') {
+    return { email, role: 'suspended' };
+  }
   // Mirrors firestore.rules' isStaff(): a staff_permissions/{uid} doc also
   // grants staff-level access even without users/{email}.role === 'staff'.
   const staffPerm = await db.collection('staff_permissions').doc(request.auth.uid).get();
@@ -1326,6 +1342,394 @@ function requireStaffLike(role) {
     throw new HttpsError('permission-denied', 'Admin/Staff/Manager access only.');
   }
 }
+
+// Manager+Admin-only gate for agency-application lifecycle actions (Agency
+// Self-Registration, 2026-09-13) -- deliberately narrower than
+// requireStaffLike(): ordinary Staff may NOT approve/reject/suspend/
+// reactivate an agency or reassign its packages, per explicit product
+// decision, even though Staff otherwise passes requireStaffLike() everywhere
+// else in this file.
+function requireManagerLike(role) {
+  if (role !== 'admin' && role !== 'manager') {
+    throw new HttpsError('permission-denied', 'Admin/Manager access only.');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Agency Self-Registration + Approval (2026-09-13)
+//
+// An agency applies for access from the Agency Portal (public Firebase Auth
+// signup, done client-side -- there is no admin session to protect there,
+// unlike the PMS's own throwaway-secondary-app account-creation trick).
+// Immediately after signup the client calls submitAgencyApplication(), which
+// creates agency_applications/{uid} with status PENDING_APPROVAL.
+// users/{email} is deliberately NEVER created at this point -- callerRole()
+// already returns role:'none' for any authenticated caller with no
+// users/{email} doc, so every existing agency-only callable in this file
+// already correctly rejects a pending applicant with zero changes to any of
+// them. Only approveAgencyApplication (Admin/Manager only) ever creates that
+// doc, with role:'agency'.
+// ─────────────────────────────────────────────────────────────────────────
+
+const AGENCY_APP_FIELD_LIMITS = { agencyName: 120, contactPerson: 120, phone: 40, country: 60, website: 200, businessRegistrationNumber: 80, message: 2000 };
+
+exports.submitAgencyApplication = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in required.');
+  const uid = request.auth.uid;
+  const emailLower = (request.auth.token.email || '').toLowerCase();
+  if (!emailLower) throw new HttpsError('permission-denied', 'No email on this account.');
+
+  const d = request.data || {};
+  function str(field, max, required) {
+    const v = String(d[field] || '').trim();
+    if (required && !v) throw new HttpsError('invalid-argument', field + ' is required.');
+    if (v.length > max) throw new HttpsError('invalid-argument', field + ' is too long.');
+    return v;
+  }
+  const agencyName = str('agencyName', AGENCY_APP_FIELD_LIMITS.agencyName, true);
+  const contactPerson = str('contactPerson', AGENCY_APP_FIELD_LIMITS.contactPerson, true);
+  const phone = str('phone', AGENCY_APP_FIELD_LIMITS.phone, true);
+  const country = str('country', AGENCY_APP_FIELD_LIMITS.country, true);
+  const website = str('website', AGENCY_APP_FIELD_LIMITS.website, false);
+  const businessRegistrationNumber = str('businessRegistrationNumber', AGENCY_APP_FIELD_LIMITS.businessRegistrationNumber, false);
+  const message = str('message', AGENCY_APP_FIELD_LIMITS.message, false);
+  if (d.agreedToTerms !== true) throw new HttpsError('invalid-argument', 'You must agree to the agency access terms.');
+
+  // Already an approved agency? No application needed.
+  const userDoc = await db.collection('users').doc(emailLower).get();
+  if (userDoc.exists && userDoc.data().role === 'agency') {
+    throw new HttpsError('already-exists', 'This email is already an approved agency account.');
+  }
+
+  const appRef = db.collection('agency_applications').doc(uid);
+  const existing = await appRef.get();
+  if (existing.exists) {
+    const existingStatus = existing.data().status;
+    // Resumability (2026-09-13 hardening): if a prior attempt already wrote
+    // this doc as PENDING_APPROVAL (e.g. the client's first call succeeded
+    // but a network error hid the response), treat a retry as a successful
+    // no-op rather than an error -- a transient failure here must never
+    // permanently strand the applicant.
+    if (existingStatus === 'PENDING_APPROVAL') return { status: 'PENDING_APPROVAL' };
+    if (existingStatus === 'APPROVED') throw new HttpsError('already-exists', 'This account is already an approved agency.');
+    // REJECTED: no self-service re-apply in v1 -- staff must use
+    // resetAgencyApplicationToPending() if they want to reconsider.
+    throw new HttpsError('already-exists', 'An application already exists for this account. Please contact Vilu Residence.');
+  }
+
+  const now = FieldValue.serverTimestamp();
+  await appRef.set({
+    uid, emailLower, agencyName, contactPerson, phone, country, website,
+    businessRegistrationNumber, message, agreedToTerms: true,
+    status: 'PENDING_APPROVAL',
+    submittedAt: now, approvedAt: null, approvedBy: null, approvedPackageIds: null,
+    rejectedAt: null, rejectedBy: null, rejectionReason: null,
+  });
+  await db.collection('agency_application_audit').add({
+    actorUid: uid, actorRole: 'applicant', actorEmail: emailLower,
+    agencyUid: uid, agencyEmail: emailLower, action: 'SUBMITTED',
+    timestamp: now, details: {},
+  });
+  return { status: 'PENDING_APPROVAL' };
+});
+
+// The ONLY path an applicant's own browser can learn its application status
+// through -- agency_applications itself is `allow read: if false` (for
+// anyone but Admin/Manager) in firestore.rules specifically because the raw
+// doc carries rejectionReason/approvedBy, which must never reach the
+// applicant's own browser (same field-leak class getMyAgencyBookings()
+// already closed for agency-owned reservations). Returns an explicit
+// allowlist only.
+exports.getMyAgencyApplicationStatus = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in required.');
+  const snap = await db.collection('agency_applications').doc(request.auth.uid).get();
+  if (!snap.exists) return { status: 'NONE' };
+  const a = snap.data();
+  return {
+    status: a.status,
+    agencyName: a.agencyName || '',
+    submittedAt: a.submittedAt ? a.submittedAt.toDate().toISOString() : null,
+  };
+});
+
+// Admin/Manager-only listing for the PMS's Pending tab. Merges LIVE Firebase
+// Auth state (emailVerified/authUserExists) per row -- never a cached/
+// stored value -- so staff can see accurate verification status before
+// approving. This callable is UI-display-only: approveAgencyApplication
+// independently re-fetches and re-verifies Auth identity/email/emailVerified
+// itself and never trusts this list result for authorization (a row shown
+// as "verified" here could go stale between this call and the approve
+// click).
+exports.listPendingAgencyApplications = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  requireManagerLike(role);
+  const snap = await db.collection('agency_applications').where('status', '==', 'PENDING_APPROVAL').get();
+  const auth = getAuth();
+  const applications = await Promise.all(snap.docs.map(async (doc) => {
+    const a = doc.data();
+    let emailVerified = false;
+    let authUserExists = true;
+    try {
+      const authUser = await auth.getUser(a.uid);
+      emailVerified = !!authUser.emailVerified;
+    } catch (e) {
+      authUserExists = false;
+    }
+    return {
+      applicationId: doc.id, uid: a.uid, agencyName: a.agencyName || '', contactPerson: a.contactPerson || '',
+      emailLower: a.emailLower || '', phone: a.phone || '', country: a.country || '',
+      website: a.website || '', businessRegistrationNumber: a.businessRegistrationNumber || '', message: a.message || '',
+      submittedAt: a.submittedAt ? a.submittedAt.toDate().toISOString() : null,
+      emailVerified, authUserExists,
+    };
+  }));
+  return { applications };
+});
+
+// Admin/Manager-only, narrow, purpose-built projection for the PMS's
+// Approved/Suspended tabs -- deliberately NOT a direct client query against
+// the `users` collection (least-privilege: even though isManagerRole()
+// already has broad read access to `users` in firestore.rules for other
+// reasons, this new UI never exercises that directly, and returns only the
+// fields this specific screen needs). Existing admin User Management
+// (#s-users) is untouched and keeps using its own existing direct reads.
+exports.listAgencyAccounts = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role } = await callerRole(request);
+  requireManagerLike(role);
+  const usersSnap = await db.collection('users').where('role', '==', 'agency').get();
+  const accounts = await Promise.all(usersSnap.docs.map(async (doc) => {
+    const u = doc.data();
+    const pkgSnap = await db.collection('agency_packages').doc(doc.id).get();
+    const packages = (pkgSnap.exists && pkgSnap.data().packages) || [];
+    return {
+      email: doc.id, uid: u.uid || null, agencyName: u.name || u.company || doc.id,
+      accountStatus: u.accountStatus === 'SUSPENDED' ? 'SUSPENDED' : 'ACTIVE',
+      commission: typeof u.commission === 'number' ? u.commission : 0,
+      assignedPackageCount: packages.length, assignedPackageIds: packages.map((p) => p.id),
+    };
+  }));
+  return { accounts };
+});
+
+// Re-fetches canonical agency-channel packages from the `packages`
+// collection (the same collection the PMS Package Manager's Agency Packages
+// tab already syncs to via syncPackagesToFirestore()) and returns the FULL
+// stored objects for the requested ids -- never a hand-picked subset of
+// fields, and never trusting any package content the client might have
+// supplied. Shared by approveAgencyApplication and setAgencyPackages.
+async function resolveCanonicalAgencyPackages(packageIds) {
+  const pkgSnap = await db.collection('packages').get();
+  const masterAgencyPkgs = pkgSnap.docs
+    .map((d) => Object.assign({}, d.data(), { id: d.id }))
+    .filter((p) => p.channel === 'agency');
+  const idSet = new Set(packageIds);
+  return masterAgencyPkgs.filter((p) => idSet.has(p.id));
+}
+
+exports.approveAgencyApplication = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email: approverEmail } = await callerRole(request);
+  requireManagerLike(role);
+  const applicationId = String((request.data || {}).applicationId || '');
+  const requestedPackageIds = Array.isArray((request.data || {}).packageIds) ? (request.data || {}).packageIds.map(String) : [];
+  if (!applicationId) throw new HttpsError('invalid-argument', 'applicationId required.');
+
+  const appRef = db.collection('agency_applications').doc(applicationId);
+  const appSnap = await appRef.get();
+  if (!appSnap.exists) throw new HttpsError('not-found', 'Application not found.');
+  const app = appSnap.data();
+  if (app.status !== 'PENDING_APPROVAL') {
+    throw new HttpsError('failed-precondition', 'Application is not pending (already ' + app.status + ').');
+  }
+
+  // Identity lock (2026-09-13 hardening): never approve based only on the
+  // email stored in the application document. The Auth uid is the
+  // authoritative applicant identity -- re-fetch it live and require the
+  // account to still exist, be verified, and have the SAME email it applied
+  // with. If the applicant has since changed their Auth email, refuse
+  // outright rather than silently approving a different email than the one
+  // that was actually reviewed.
+  let authUser;
+  try {
+    authUser = await getAuth().getUser(app.uid);
+  } catch (e) {
+    throw new HttpsError('not-found', 'The applicant\'s account no longer exists.');
+  }
+  if (!authUser.email) throw new HttpsError('failed-precondition', 'The applicant\'s account has no email on file.');
+  if (!authUser.emailVerified) throw new HttpsError('failed-precondition', 'The applicant has not verified their email yet.');
+  const authEmail = authUser.email.trim().toLowerCase();
+  if (authEmail !== app.emailLower) {
+    throw new HttpsError('failed-precondition', 'The applicant\'s email has changed since they applied (applied as ' + app.emailLower + ', now ' + authEmail + '). Refusing to approve automatically.');
+  }
+
+  const selected = await resolveCanonicalAgencyPackages(requestedPackageIds);
+
+  // Atomicity (2026-09-13 hardening): users/{email} activation,
+  // agency_packages/{email} assignment, agency_applications status, and the
+  // audit record must all succeed together -- never a partial state where
+  // an agency gains access but its package assignment (or vice versa)
+  // silently failed. Re-checks PENDING status inside the transaction to
+  // guard against a double-approve race between two managers.
+  const now = FieldValue.serverTimestamp();
+  const auditRef = db.collection('agency_application_audit').doc();
+  await db.runTransaction(async (tx) => {
+    const freshAppSnap = await tx.get(appRef);
+    if (!freshAppSnap.exists || freshAppSnap.data().status !== 'PENDING_APPROVAL') {
+      throw new HttpsError('failed-precondition', 'Application is no longer pending.');
+    }
+    tx.set(db.collection('users').doc(authEmail), {
+      email: authEmail, name: app.agencyName, company: app.agencyName,
+      role: 'agency', accountStatus: 'ACTIVE', uid: app.uid, commission: 0,
+    }, { merge: true });
+    tx.set(db.collection('agency_packages').doc(authEmail), {
+      email: authEmail, packages: selected,
+    }, { merge: true });
+    tx.set(appRef, {
+      status: 'APPROVED', approvedAt: now, approvedBy: approverEmail,
+      approvedPackageIds: selected.map((p) => p.id),
+    }, { merge: true });
+    tx.set(auditRef, {
+      actorUid: request.auth.uid, actorRole: role, actorEmail: approverEmail,
+      agencyUid: app.uid, agencyEmail: authEmail, action: 'APPROVED',
+      timestamp: now, details: { packageIds: selected.map((p) => p.id) },
+    });
+  });
+  return { status: 'APPROVED', packageCount: selected.length };
+});
+
+exports.rejectAgencyApplication = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email: approverEmail } = await callerRole(request);
+  requireManagerLike(role);
+  const applicationId = String((request.data || {}).applicationId || '');
+  const reason = String((request.data || {}).reason || '').trim().slice(0, 1000);
+  if (!applicationId) throw new HttpsError('invalid-argument', 'applicationId required.');
+
+  const appRef = db.collection('agency_applications').doc(applicationId);
+  const now = FieldValue.serverTimestamp();
+  const auditRef = db.collection('agency_application_audit').doc();
+  let agencyUid = null, agencyEmail = null;
+  await db.runTransaction(async (tx) => {
+    const appSnap = await tx.get(appRef);
+    if (!appSnap.exists) throw new HttpsError('not-found', 'Application not found.');
+    const app = appSnap.data();
+    if (app.status !== 'PENDING_APPROVAL') {
+      throw new HttpsError('failed-precondition', 'Application is not pending (already ' + app.status + ').');
+    }
+    agencyUid = app.uid; agencyEmail = app.emailLower;
+    tx.set(appRef, { status: 'REJECTED', rejectedAt: now, rejectedBy: approverEmail, rejectionReason: reason || null }, { merge: true });
+    tx.set(auditRef, {
+      actorUid: request.auth.uid, actorRole: role, actorEmail: approverEmail,
+      agencyUid: app.uid, agencyEmail: app.emailLower, action: 'REJECTED',
+      timestamp: now, details: { reason: reason || null },
+    });
+  });
+  return { status: 'REJECTED' };
+});
+
+// Reconsideration path: staff may flip a REJECTED application back to
+// PENDING_APPROVAL without any special-cased second precondition on
+// Approve/Reject's own (deliberately simple) PENDING_APPROVAL-only guards.
+// No v1 UI lets an applicant trigger this themselves (see submit's own
+// REJECTED handling above).
+exports.resetAgencyApplicationToPending = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email: actorEmail } = await callerRole(request);
+  requireManagerLike(role);
+  const applicationId = String((request.data || {}).applicationId || '');
+  if (!applicationId) throw new HttpsError('invalid-argument', 'applicationId required.');
+
+  const appRef = db.collection('agency_applications').doc(applicationId);
+  const now = FieldValue.serverTimestamp();
+  const auditRef = db.collection('agency_application_audit').doc();
+  await db.runTransaction(async (tx) => {
+    const appSnap = await tx.get(appRef);
+    if (!appSnap.exists) throw new HttpsError('not-found', 'Application not found.');
+    const app = appSnap.data();
+    if (app.status !== 'REJECTED') throw new HttpsError('failed-precondition', 'Only a rejected application can be reset to pending.');
+    tx.set(appRef, { status: 'PENDING_APPROVAL', rejectedAt: null, rejectedBy: null, rejectionReason: null }, { merge: true });
+    tx.set(auditRef, {
+      actorUid: request.auth.uid, actorRole: role, actorEmail: actorEmail,
+      agencyUid: app.uid, agencyEmail: app.emailLower, action: 'RESET_TO_PENDING',
+      timestamp: now, details: {},
+    });
+  });
+  return { status: 'PENDING_APPROVAL' };
+});
+
+exports.suspendAgencyAccount = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email: actorEmail } = await callerRole(request);
+  requireManagerLike(role);
+  const email = String((request.data || {}).email || '').toLowerCase();
+  if (!email) throw new HttpsError('invalid-argument', 'email required.');
+  const userRef = db.collection('users').doc(email);
+  const now = FieldValue.serverTimestamp();
+  const auditRef = db.collection('agency_application_audit').doc();
+  let agencyUid = null;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(userRef);
+    if (!snap.exists || snap.data().role !== 'agency') throw new HttpsError('not-found', 'Agency account not found.');
+    agencyUid = snap.data().uid || null;
+    tx.set(userRef, { accountStatus: 'SUSPENDED' }, { merge: true });
+    tx.set(auditRef, {
+      actorUid: request.auth.uid, actorRole: role, actorEmail: actorEmail,
+      agencyUid, agencyEmail: email, action: 'SUSPENDED',
+      timestamp: now, details: {},
+    });
+  });
+  return { accountStatus: 'SUSPENDED' };
+});
+
+exports.reactivateAgencyAccount = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email: actorEmail } = await callerRole(request);
+  requireManagerLike(role);
+  const email = String((request.data || {}).email || '').toLowerCase();
+  if (!email) throw new HttpsError('invalid-argument', 'email required.');
+  const userRef = db.collection('users').doc(email);
+  const now = FieldValue.serverTimestamp();
+  const auditRef = db.collection('agency_application_audit').doc();
+  let agencyUid = null;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(userRef);
+    if (!snap.exists || snap.data().role !== 'agency') throw new HttpsError('not-found', 'Agency account not found.');
+    agencyUid = snap.data().uid || null;
+    tx.set(userRef, { accountStatus: 'ACTIVE' }, { merge: true });
+    tx.set(auditRef, {
+      actorUid: request.auth.uid, actorRole: role, actorEmail: actorEmail,
+      agencyUid, agencyEmail: email, action: 'REACTIVATED',
+      timestamp: now, details: {},
+    });
+  });
+  return { accountStatus: 'ACTIVE' };
+});
+
+// Manager-capable write path for agency_packages/{email}, added ALONGSIDE
+// (never replacing) the existing admin-hardcoded #m-agency-pkgs modal in
+// vilu-unified.html, whose client-side write goes straight to Firestore
+// under the isAdmin()-only agency_packages rule and is left completely
+// untouched. This callable exists because that rule doesn't work for a
+// Manager at all today -- same Admin-SDK-bypass pattern
+// bridgeLegacyPartnerHotels already uses for accommodation_properties.
+exports.setAgencyPackages = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email: actorEmail } = await callerRole(request);
+  requireManagerLike(role);
+  const email = String((request.data || {}).email || '').toLowerCase();
+  const packageIds = Array.isArray((request.data || {}).packageIds) ? (request.data || {}).packageIds.map(String) : [];
+  if (!email) throw new HttpsError('invalid-argument', 'email required.');
+
+  const userSnap = await db.collection('users').doc(email).get();
+  if (!userSnap.exists || userSnap.data().role !== 'agency') throw new HttpsError('not-found', 'Agency account not found.');
+  const selected = await resolveCanonicalAgencyPackages(packageIds);
+
+  const now = FieldValue.serverTimestamp();
+  const auditRef = db.collection('agency_application_audit').doc();
+  await db.runTransaction(async (tx) => {
+    tx.set(db.collection('agency_packages').doc(email), { email, packages: selected }, { merge: true });
+    tx.set(auditRef, {
+      actorUid: request.auth.uid, actorRole: role, actorEmail: actorEmail,
+      agencyUid: userSnap.data().uid || null, agencyEmail: email, action: 'PACKAGES_SET',
+      timestamp: now, details: { packageIds: selected.map((p) => p.id) },
+    });
+  });
+  return { packageCount: selected.length };
+});
 
 exports.approveAgencyHoldRequest = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
   const { role, email } = await callerRole(request);

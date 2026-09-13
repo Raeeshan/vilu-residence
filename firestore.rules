@@ -338,17 +338,51 @@ service cloud.firestore {
       // rule entirely (rules-internal get()/exists() always succeed), so
       // tightening this doesn't touch that.
       allow read: if isAdmin() || isStaff() || isManagerRole() || (request.auth != null && request.auth.token.email.lower() == id);
-      // Self-service writes may never change `role` (existing) or
-      // `commission` (added) — both are admin-set fields with no legitimate
-      // self-edit path in the app. `uid` is deliberately left self-writable:
-      // authenticateUser()/restoreSession() backfill it onto a caller's own
-      // doc the first time they log in after an account was created without
-      // one, and that's the only place a non-admin ever writes it.
+      // Self-service writes may never change `role` (existing), `commission`
+      // (added), or `accountStatus` (Agency Self-Registration, 2026-09-13,
+      // for agency suspend/reactivate) — all three are admin/manager-set
+      // fields with no legitimate self-edit path in the app. `uid` is
+      // deliberately left self-writable: authenticateUser()/restoreSession()
+      // backfill it onto a caller's own doc the first time they log in after
+      // an account was created without one, and that's the only place a
+      // non-admin ever writes it.
       allow write: if isAdmin() || (
         request.auth != null && request.auth.token.email.lower() == id &&
         request.resource.data.role == resource.data.role &&
-        request.resource.data.get('commission', null) == resource.data.get('commission', null)
+        request.resource.data.get('commission', null) == resource.data.get('commission', null) &&
+        request.resource.data.get('accountStatus', null) == resource.data.get('accountStatus', null)
       );
+    }
+
+    // Agency Self-Registration + Approval (2026-09-13): an applicant's own
+    // application record. Created ONLY by submitAgencyApplication (Admin
+    // SDK) immediately after the applicant's public Firebase Auth signup;
+    // transitioned ONLY by approveAgencyApplication/rejectAgencyApplication/
+    // resetAgencyApplicationToPending (Admin SDK, Manager/Admin only).
+    // `allow write: if false` mirrors the agency_quotes hardening precedent
+    // below -- no client, however authenticated, has any legitimate direct
+    // write here. `allow read: if false` for anyone but Admin/Manager
+    // (not "own uid may read") is deliberate, not an oversight: this doc
+    // carries rejectionReason/approvedBy, which must never reach the
+    // applicant's own browser -- the same class of field-level-redaction
+    // leak reservations/{id}'s own Phase I fix closed for agency-owned
+    // reservations (see getMyAgencyBookings()). The applicant's own status
+    // is exposed ONLY through getMyAgencyApplicationStatus() (functions-
+    // core/index.js), an explicit safe-field projection with none of those
+    // internal fields.
+    match /agency_applications/{uid} {
+      allow read: if isAdmin() || isManagerRole();
+      allow write: if false;
+    }
+
+    // Append-only audit trail for every agency-application lifecycle action
+    // (submit/approve/reject/reset/suspend/reactivate/packages-set) --
+    // written only by the callables above (Admin SDK). Same shape/intent as
+    // document_access_audit above: never client-writable, never exposed to
+    // the agency itself (internal actors/reasons live here).
+    match /agency_application_audit/{id} {
+      allow read: if isAdmin() || isManagerRole();
+      allow write: if false;
     }
 
     match /staff_permissions/{staffUid} {

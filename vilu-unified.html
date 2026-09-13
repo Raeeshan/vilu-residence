@@ -910,6 +910,7 @@ body.pms-mode { overflow:hidden; }
   <div class="sl" onclick="go('cfg',this)"><i class="ti ti-settings"></i>Settings &amp; taxes</div>
   <div class="sl" id="sl-transport" style="display:none" onclick="go('transport',this)"><i class="ti ti-anchor"></i>Transportation</div>
   <div class="sl" id="sl-htls" style="display:none" onclick="go('htls',this)"><i class="ti ti-building-community"></i>Partner Accommodation</div>
+  <div class="sl" id="sl-agyapps" style="display:none" onclick="go('agyapps',this)"><i class="ti ti-user-check"></i>Agency Applications</div>
   <div class="sl" id="sl-users" style="display:none" onclick="go('users',this)"><i class="ti ti-users"></i>User management</div>
   <div class="sg">Owner</div>
   <div class="sl" id="sl-analytics" style="display:none" onclick="go('analytics',this)"><i class="ti ti-chart-histogram"></i>Owner analytics</div>
@@ -1836,6 +1837,67 @@ body.pms-mode { overflow:hidden; }
       </thead>
       <tbody id="users-tbody"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- Agency Self-Registration + Approval (2026-09-13): Pending applications
+     from the Agency Portal's new self-registration form, plus lifecycle
+     management (suspend/reactivate/manage packages) for every approved
+     agency, old (manually created via User Management) or new alike. All
+     data comes from the new Admin/Manager-only callables
+     (listPendingAgencyApplications/listAgencyAccounts) -- deliberately
+     never a direct client query against `users` or `agency_applications`,
+     even though the read rules would technically allow it for a Manager,
+     per an explicit least-privilege design decision. -->
+<div class="sec" id="s-agyapps">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <h2 style="font-size:var(--font-size-lg);font-weight:700">Agency Applications</h2>
+      <p style="font-size:var(--font-size-sm);color:#6b7280;margin-top:3px">Review self-registered agency applications and manage every agency account's access and package assignments.</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="agyapps-tabs"></div>
+  <div class="card" style="padding:0"><table class="tb"><thead><tr id="agyapps-thead"></tr></thead><tbody id="agyapps-tbody"></tbody></table></div>
+</div>
+
+<!-- View application (read-only) -->
+<div class="mbg" id="m-agyapp-view" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:480px">
+    <div class="mhd"><h3><i class="ti ti-file-text" style="color:#00b4d8;margin-right:6px"></i>Application details</h3><button class="ab" onclick="document.getElementById('m-agyapp-view').classList.remove('on')"><i class="ti ti-x"></i></button></div>
+    <div id="agyapp-view-body" style="font-size:var(--font-size-sm)"></div>
+  </div>
+</div>
+
+<!-- Approve: 3-step (review -> select packages -> confirm) -->
+<div class="mbg" id="m-agyapp-approve" onclick="if(event.target===this)closeAgyappApprove()">
+  <div class="mdl" style="width:520px">
+    <div class="mhd"><h3><i class="ti ti-user-check" style="color:#059669;margin-right:6px"></i>Approve agency</h3><button class="ab" onclick="closeAgyappApprove()"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="agyapp-approve-id">
+    <div id="agyapp-approve-step1">
+      <div id="agyapp-approve-review" style="font-size:var(--font-size-sm);margin-bottom:14px"></div>
+      <button class="btn p" style="width:100%" onclick="agyappApproveGoStep2()">Next: select packages →</button>
+    </div>
+    <div id="agyapp-approve-step2" style="display:none">
+      <label style="font-size:var(--font-size-sm);font-weight:600;display:block;margin-bottom:8px">Assign packages</label>
+      <div id="agyapp-approve-pkglist" style="max-height:280px;overflow:auto;border:1px solid #e6e9ee;border-radius:8px;padding:8px;margin-bottom:10px"></div>
+      <div id="agyapp-approve-zerowarn" class="al warn" style="display:none;margin-bottom:10px">No packages selected — agency will have portal access but will not see any assigned packages.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="agyappApproveBackStep1()">← Back</button>
+        <button class="btn p" style="flex:1" onclick="agyappApproveConfirm()">Approve agency</button>
+      </div>
+    </div>
+    <div id="agyapp-approve-err" class="err" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- Manage Packages (Manager-capable, calls setAgencyPackages -- separate
+     from, and never replacing, the existing admin-only #m-agency-pkgs). -->
+<div class="mbg" id="m-agymgr-pkgs" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="mdl" style="width:480px">
+    <div class="mhd"><h3><i class="ti ti-package" style="color:#00b4d8;margin-right:6px"></i>Manage packages — <span id="agymgr-pkgs-name"></span></h3><button class="ab" onclick="document.getElementById('m-agymgr-pkgs').classList.remove('on')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="agymgr-pkgs-email">
+    <div id="agymgr-pkgs-list" style="max-height:320px;overflow:auto;border:1px solid #e6e9ee;border-radius:8px;padding:8px;margin-bottom:10px"></div>
+    <button class="btn p" style="width:100%" onclick="saveAgymgrPackages()">Save package assignment</button>
   </div>
 </div>
 
@@ -4704,8 +4766,8 @@ function stBx(s){return `<span class="bx ${ST_CLS[s]||'ot'}">${s}</span>`;}
 function phBx(p){if(p==='vilu')return '<span class="bx ok">Vilu Residence</span>';const h=PH.find(x=>x.id===p);return h?`<span class="bx ot">${h.nm}</span>`:'';}
 
 // NAV
-const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',agysettle:'Agency Settlements',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner Accommodation',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
-const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,agybk:drawAgencyBookingRequests,agysettle:drawAgencySettlements,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
+const TITLES={dash:'Dashboard',cal:'Availability calendar',res:'Reservations',price:'Bulk price manager',seasons:'Seasonal rates',ota:'OTA channels',log:'Sync log',inv:'Invoices',newbk:'New booking',agybk:'Agency Booking Requests',agysettle:'Agency Settlements',agyapps:'Agency Applications',blk:'Block rooms',cfg:'Settings & taxes',htls:'Partner Accommodation',users:'User management',folios:'Guest folios',engine:'Booking engine',pkgs:'Package manager',ops:'Daily Operations',transport:'Transportation',reclog:'Reconciliation log',analytics:'Owner analytics'};
+const FMAP={dash:drawDash,cal:drawCal,res:drawRes,price:()=>{drawRT();drawCmp();bpPrev();setTimeout(function(){ if(_svcCatalogLoaded) drawServiceCatalog(); else loadServiceCatalogFromFirestore(); },200);},seasons:drawSn,ota:drawOTA,log:drawLog,inv:drawInv,newbk:initNB,agybk:drawAgencyBookingRequests,agysettle:drawAgencySettlements,agyapps:drawAgyapps,blk:drawBlk,cfg:drawCfg,htls:drawHtls,users:drawUsers,folios:drawFolios,engine:drawEngine,pkgs:drawPkgs,transport:drawTransport,reclog:drawRecLog,analytics:drawAnalytics,ops:function(){
     setTimeout(function(){
       // Reset date picker to tomorrow when opening Daily Operations
       var dp=document.getElementById('ops-date');
@@ -4728,6 +4790,13 @@ function go(id,el){
   // reach it via a direct go('price') call even with the sidebar entry
   // hidden. Actual data writes are separately enforced in firestore.rules.
   if(id==='price' && !canManageCatalog()){
+    toast('⛔ Admin/Manager access only');
+    return;
+  }
+  // Agency Applications (2026-09-13): same Admin/Manager gate as Pricing --
+  // ordinary Staff may not approve/reject/suspend an agency or reassign its
+  // packages.
+  if(id==='agyapps' && !canManageCatalog()){
     toast('⛔ Admin/Manager access only');
     return;
   }
@@ -9455,6 +9524,235 @@ function applyPricingVisibility(){
   if(sl) sl.style.display = canManageCatalog() ? '' : 'none';
 }
 
+// Agency Self-Registration (2026-09-13): Admin/Manager only, same gate as
+// Pricing above -- NOT the admin-only applyUserMgmtVisibility() gate, since
+// Manager must be able to review/approve applications and manage package
+// access, per explicit product decision.
+function applyAgencyAppsVisibility(){
+  const sl = document.getElementById('sl-agyapps');
+  if(sl) sl.style.display = canManageCatalog() ? '' : 'none';
+}
+
+// ══════════════════════════════════════════════
+// AGENCY APPLICATIONS (Self-Registration + Approval, 2026-09-13)
+// ══════════════════════════════════════════════
+var AGYAPPS_TABS = [
+  { key:'PENDING', label:'Pending' }, { key:'APPROVED', label:'Approved' },
+  { key:'REJECTED', label:'Rejected' }, { key:'SUSPENDED', label:'Suspended' },
+];
+var _agyappsTab = 'PENDING';
+var _agyappsPending = [];   // last listPendingAgencyApplications() result
+var _agyappsAccounts = [];  // last listAgencyAccounts() result
+
+function renderAgyappsTabs(){
+  document.getElementById('agyapps-tabs').innerHTML = AGYAPPS_TABS.map(function(t){
+    var on = _agyappsTab===t.key;
+    return '<button class="btn'+(on?' p':'')+'" onclick="setAgyappsTab(\''+t.key+'\')">'+esc(t.label)+'</button>';
+  }).join('');
+}
+function setAgyappsTab(key){ _agyappsTab = key; drawAgyapps(); }
+
+async function drawAgyapps(){
+  renderAgyappsTabs();
+  var thead = document.getElementById('agyapps-thead');
+  var tbody = document.getElementById('agyapps-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#9ca3af">Loading…</td></tr>';
+  try {
+    if(_agyappsTab==='APPROVED' || _agyappsTab==='SUSPENDED'){
+      thead.innerHTML = '<th>Agency</th><th>Email</th><th>Packages</th><th>Status</th><th>Actions</th>';
+      var r = await fsFunctions.httpsCallable('listAgencyAccounts')({});
+      _agyappsAccounts = r.data.accounts || [];
+      var rows = _agyappsAccounts.filter(function(a){ return _agyappsTab==='SUSPENDED' ? a.accountStatus==='SUSPENDED' : a.accountStatus!=='SUSPENDED'; });
+      tbody.innerHTML = rows.length ? rows.map(renderAgyappsAccountRow).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af">No agencies here.</td></tr>';
+    } else {
+      thead.innerHTML = '<th>Agency</th><th>Contact</th><th>Email</th><th>Phone</th><th>Country</th><th>Verified</th><th>Actions</th>';
+      if(_agyappsTab==='PENDING'){
+        var rp = await fsFunctions.httpsCallable('listPendingAgencyApplications')({});
+        _agyappsPending = rp.data.applications || [];
+        tbody.innerHTML = _agyappsPending.length ? _agyappsPending.map(renderAgyappsPendingRow).join('') : '<tr><td colspan="7" style="text-align:center;padding:20px;color:#9ca3af">No pending applications.</td></tr>';
+      } else {
+        // REJECTED: full detail isn't needed for this tab's own actions
+        // (just Reconsider), so a light admin/manager-gated read of
+        // agency_applications directly is fine here -- unlike Approved/
+        // Suspended, this doesn't touch the broader `users` collection.
+        var snap = await fsDb.collection('agency_applications').where('status','==','REJECTED').get();
+        var apps = snap.docs.map(function(d){ return Object.assign({ applicationId:d.id }, d.data()); });
+        tbody.innerHTML = apps.length ? apps.map(renderAgyappsRejectedRow).join('') : '<tr><td colspan="7" style="text-align:center;padding:20px;color:#9ca3af">No rejected applications.</td></tr>';
+      }
+    }
+  } catch(e) {
+    console.error('drawAgyapps failed', e);
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#dc2626">Could not load — '+esc(e.message||'unknown error')+'</td></tr>';
+  }
+}
+
+function renderAgyappsPendingRow(a){
+  var canApprove = a.authUserExists && a.emailVerified;
+  return '<tr>'
+    + '<td>'+esc(a.agencyName)+'</td>'
+    + '<td>'+esc(a.contactPerson)+'</td>'
+    + '<td>'+esc(a.emailLower)+'</td>'
+    + '<td>'+esc(a.phone)+'</td>'
+    + '<td>'+esc(a.country)+'</td>'
+    + '<td>'+(!a.authUserExists ? '<span class="bx er">Account deleted</span>' : a.emailVerified ? '<span class="bx ok">Verified</span>' : '<span class="bx wn">Unverified</span>')+'</td>'
+    + '<td style="display:flex;gap:6px;flex-wrap:wrap">'
+      + '<button class="btn" onclick="viewAgyapp(\''+esc(a.applicationId)+'\')">View</button>'
+      + '<button class="btn p" '+(canApprove?'':'disabled title="Email must be verified before approval"')+' onclick="openAgyappApprove(\''+esc(a.applicationId)+'\')">Approve</button>'
+      + '<button class="btn" style="color:#dc2626;border-color:#dc2626" onclick="rejectAgyapp(\''+esc(a.applicationId)+'\')">Reject</button>'
+    + '</td></tr>';
+}
+function renderAgyappsRejectedRow(a){
+  return '<tr>'
+    + '<td>'+esc(a.agencyName||'')+'</td>'
+    + '<td>'+esc(a.contactPerson||'')+'</td>'
+    + '<td>'+esc(a.emailLower||'')+'</td>'
+    + '<td>'+esc(a.phone||'')+'</td>'
+    + '<td>'+esc(a.country||'')+'</td>'
+    + '<td>—</td>'
+    + '<td><button class="btn" onclick="reconsiderAgyapp(\''+esc(a.applicationId)+'\')">Reconsider</button></td></tr>';
+}
+function renderAgyappsAccountRow(a){
+  var isSuspended = a.accountStatus==='SUSPENDED';
+  return '<tr>'
+    + '<td>'+esc(a.agencyName)+'</td>'
+    + '<td>'+esc(a.email)+'</td>'
+    + '<td>'+a.assignedPackageCount+' assigned</td>'
+    + '<td>'+(isSuspended?'<span class="bx er">Suspended</span>':'<span class="bx ok">Active</span>')+'</td>'
+    + '<td style="display:flex;gap:6px;flex-wrap:wrap">'
+      + '<button class="btn" onclick="openAgymgrPackages(\''+esc(a.email)+'\',\''+esc(a.agencyName).replace(/'/g,"\\'")+'\')">Manage Packages</button>'
+      + (isSuspended
+          ? '<button class="btn p" onclick="reactivateAgyAccount(\''+esc(a.email)+'\')">Reactivate</button>'
+          : '<button class="btn" style="color:#dc2626;border-color:#dc2626" onclick="suspendAgyAccount(\''+esc(a.email)+'\')">Suspend</button>')
+    + '</td></tr>';
+}
+
+function findPendingApp(applicationId){ return _agyappsPending.find(function(a){ return a.applicationId===applicationId; }); }
+
+function viewAgyapp(applicationId){
+  var a = findPendingApp(applicationId);
+  if(!a) return;
+  document.getElementById('agyapp-view-body').innerHTML =
+    '<div class="fg"><label>Agency name</label><div>'+esc(a.agencyName)+'</div></div>'
+    + '<div class="fg"><label>Contact person</label><div>'+esc(a.contactPerson)+'</div></div>'
+    + '<div class="fg"><label>Email</label><div>'+esc(a.emailLower)+'</div></div>'
+    + '<div class="fg"><label>Phone</label><div>'+esc(a.phone)+'</div></div>'
+    + '<div class="fg"><label>Country</label><div>'+esc(a.country)+'</div></div>'
+    + (a.website?'<div class="fg"><label>Website</label><div>'+esc(a.website)+'</div></div>':'')
+    + (a.businessRegistrationNumber?'<div class="fg"><label>Business registration #</label><div>'+esc(a.businessRegistrationNumber)+'</div></div>':'')
+    + (a.message?'<div class="fg"><label>Notes</label><div>'+esc(a.message)+'</div></div>':'')
+    + '<div class="fg"><label>Submitted</label><div>'+(a.submittedAt?esc(new Date(a.submittedAt).toLocaleString()):'—')+'</div></div>';
+  document.getElementById('m-agyapp-view').classList.add('on');
+}
+
+function openAgyappApprove(applicationId){
+  var a = findPendingApp(applicationId);
+  if(!a) return;
+  if(!a.authUserExists || !a.emailVerified){ toast('⛔ This applicant has not verified their email yet'); return; }
+  document.getElementById('agyapp-approve-id').value = applicationId;
+  document.getElementById('agyapp-approve-review').innerHTML =
+    '<div class="fg"><label>Agency name</label><div>'+esc(a.agencyName)+'</div></div>'
+    + '<div class="fg"><label>Contact person</label><div>'+esc(a.contactPerson)+'</div></div>'
+    + '<div class="fg"><label>Email</label><div>'+esc(a.emailLower)+'</div></div>'
+    + '<div class="fg"><label>Phone</label><div>'+esc(a.phone)+'</div></div>'
+    + '<div class="fg"><label>Country</label><div>'+esc(a.country)+'</div></div>';
+  document.getElementById('agyapp-approve-step1').style.display = '';
+  document.getElementById('agyapp-approve-step2').style.display = 'none';
+  document.getElementById('agyapp-approve-err').style.display = 'none';
+  document.getElementById('m-agyapp-approve').classList.add('on');
+}
+function closeAgyappApprove(){ document.getElementById('m-agyapp-approve').classList.remove('on'); }
+function agyappApproveGoStep2(){
+  var master = getMasterAgencyPackages();
+  document.getElementById('agyapp-approve-pkglist').innerHTML = master.length
+    ? master.map(function(p){ return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0"><input type="checkbox" class="agyapp-pkg-cb" value="'+esc(p.id)+'"> '+esc(p.emoji||'📦')+' '+esc(p.name)+'</label>'; }).join('')
+    : '<div style="color:#9ca3af">No agency packages exist yet.</div>';
+  document.querySelectorAll('.agyapp-pkg-cb').forEach(function(cb){ cb.onchange = agyappApproveUpdateZeroWarn; });
+  agyappApproveUpdateZeroWarn();
+  document.getElementById('agyapp-approve-step1').style.display = 'none';
+  document.getElementById('agyapp-approve-step2').style.display = '';
+}
+function agyappApproveBackStep1(){
+  document.getElementById('agyapp-approve-step1').style.display = '';
+  document.getElementById('agyapp-approve-step2').style.display = 'none';
+}
+function agyappApproveUpdateZeroWarn(){
+  var checked = document.querySelectorAll('.agyapp-pkg-cb:checked').length;
+  document.getElementById('agyapp-approve-zerowarn').style.display = checked ? 'none' : '';
+}
+async function agyappApproveConfirm(){
+  var applicationId = document.getElementById('agyapp-approve-id').value;
+  var packageIds = Array.from(document.querySelectorAll('.agyapp-pkg-cb:checked')).map(function(cb){ return cb.value; });
+  var err = document.getElementById('agyapp-approve-err');
+  err.style.display = 'none';
+  try {
+    await fsFunctions.httpsCallable('approveAgencyApplication')({ applicationId: applicationId, packageIds: packageIds });
+    closeAgyappApprove();
+    toast('✓ Agency approved');
+    drawAgyapps();
+  } catch(e) {
+    console.error('approveAgencyApplication failed', e);
+    err.textContent = e.message || 'Could not approve — please try again';
+    err.style.display = '';
+  }
+}
+
+function rejectAgyapp(applicationId){
+  var reason = prompt('Optional internal reason (never shown to the applicant):');
+  if(reason===null) return; // cancelled
+  showConfirm({ title:'Reject this application?', msg:'The applicant will see a generic "not approved, contact Vilu Residence" message.', icon:'✖️', btnLabel:'Reject', btnColor:'#dc2626',
+    onYes: async function(){
+      try {
+        await fsFunctions.httpsCallable('rejectAgencyApplication')({ applicationId: applicationId, reason: reason||'' });
+        toast('Application rejected'); drawAgyapps();
+      } catch(e) { console.error('rejectAgencyApplication failed', e); toast('⚠️ Could not reject — '+(e.message||'unknown error')); }
+    }
+  });
+}
+function reconsiderAgyapp(applicationId){
+  showConfirm({ title:'Move back to pending?', msg:'This application will reappear in the Pending tab for review.', icon:'↺', btnLabel:'Reconsider',
+    onYes: async function(){
+      try {
+        await fsFunctions.httpsCallable('resetAgencyApplicationToPending')({ applicationId: applicationId });
+        toast('✓ Moved back to Pending'); setAgyappsTab('PENDING');
+      } catch(e) { console.error('resetAgencyApplicationToPending failed', e); toast('⚠️ Could not reset — '+(e.message||'unknown error')); }
+    }
+  });
+}
+function suspendAgyAccount(email){
+  showConfirm({ title:'Suspend this agency?', msg:'They will immediately lose all portal access. Their booking/quote/settlement history is preserved and this can be reversed anytime.', icon:'⛔', btnLabel:'Suspend', btnColor:'#dc2626',
+    onYes: async function(){
+      try { await fsFunctions.httpsCallable('suspendAgencyAccount')({ email: email }); toast('Agency suspended'); drawAgyapps(); }
+      catch(e) { console.error('suspendAgencyAccount failed', e); toast('⚠️ Could not suspend — '+(e.message||'unknown error')); }
+    }
+  });
+}
+async function reactivateAgyAccount(email){
+  try { await fsFunctions.httpsCallable('reactivateAgencyAccount')({ email: email }); toast('✓ Agency reactivated'); drawAgyapps(); }
+  catch(e) { console.error('reactivateAgencyAccount failed', e); toast('⚠️ Could not reactivate — '+(e.message||'unknown error')); }
+}
+
+function openAgymgrPackages(email, agencyName){
+  document.getElementById('agymgr-pkgs-email').value = email;
+  document.getElementById('agymgr-pkgs-name').textContent = agencyName;
+  var acc = _agyappsAccounts.find(function(a){ return a.email===email; });
+  var current = (acc && acc.assignedPackageIds) || [];
+  var master = getMasterAgencyPackages();
+  document.getElementById('agymgr-pkgs-list').innerHTML = master.length
+    ? master.map(function(p){ return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0"><input type="checkbox" class="agymgr-pkg-cb" value="'+esc(p.id)+'" '+(current.indexOf(p.id)>-1?'checked':'')+'> '+esc(p.emoji||'📦')+' '+esc(p.name)+'</label>'; }).join('')
+    : '<div style="color:#9ca3af">No agency packages exist yet.</div>';
+  document.getElementById('m-agymgr-pkgs').classList.add('on');
+}
+async function saveAgymgrPackages(){
+  var email = document.getElementById('agymgr-pkgs-email').value;
+  var packageIds = Array.from(document.querySelectorAll('.agymgr-pkg-cb:checked')).map(function(cb){ return cb.value; });
+  try {
+    await fsFunctions.httpsCallable('setAgencyPackages')({ email: email, packageIds: packageIds });
+    document.getElementById('m-agymgr-pkgs').classList.remove('on');
+    toast('✓ Packages updated');
+    drawAgyapps();
+  } catch(e) { console.error('setAgencyPackages failed', e); toast('⚠️ Could not save — '+(e.message||'unknown error')); }
+}
+
 // ── PER-AGENCY PACKAGE EDITOR (opened from a specific agency's row) ──
 var _agyPkgEmail = null;
 var _agyPkgWorking = [];
@@ -13688,6 +13986,7 @@ async function doLogin() {
   applyRoleUI(profile.role, profile.name);
   applyUserMgmtVisibility();
   applyPricingVisibility();
+  applyAgencyAppsVisibility();
   loadServiceCatalogFromFirestore();
   drawDash(); drawCal(); drawLog(); drawPM();
 }
