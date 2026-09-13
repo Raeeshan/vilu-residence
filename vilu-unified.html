@@ -290,6 +290,14 @@ table.ivt{width:100%;border-collapse:collapse;margin-bottom:14px}
 .cb-cell.sel-start,.cb-cell.sel-end{background:#cfe7f8!important;outline:2px solid #1f6fd0;outline-offset:-1px;z-index:2}
 .cb-cell.sel-range{background:#dcedf9!important}
 .cb-cell.drop-target{background:#fef3c7!important;outline:2px solid #d97706;outline-offset:-1px;z-index:3}
+/* Partner-property calendar rows (PMS multi-property restore, 2026-09-13):
+   deliberately NOT .cb-cell -- these rows are never bookable/draggable, so
+   they must stay outside every .cb-cell-scoped selector (drag-select,
+   click-to-book, drop-to-move) used elsewhere in this file. Same look,
+   zero interactivity. */
+.cb-cell-ro{width:var(--cal-col-w);flex-shrink:0;border-right:1px solid #e6e9ee;border-bottom:1px solid #e6e9ee;background:#fff}
+.cb-cell-ro.weekend{background:#fbfbf7}
+.cb-cell-ro.today-cell{background:#e8f3fb}
 /* Reservation bar: 20px, slanted ends (see calBarClip), white bold text.
    left/width stay inline (JS positioning math) — everything else lives here. */
 .cb-bar{position:absolute;top:5px;height:20px;display:flex;align-items:center;padding:0 12px 0 14px;font-size:var(--font-size-xs);font-weight:700;color:#fff;z-index:5;overflow:hidden;white-space:nowrap;cursor:grab;user-select:none;text-shadow:0 1px 1px rgba(0,0,0,.15)}
@@ -5869,8 +5877,25 @@ function updSel(){
   });
 }
 
+// PMS multi-property calendar restore (2026-09-13): accommodation_properties
+// is fetched once and cached here (mirrors ACC_PROPERTIES/ACC_ROOM_TYPES_CACHE,
+// the same globals the Partner Accommodation admin page already uses -- no
+// second partner-hotel config system). drawCal() itself stays synchronous
+// (many callers -- drag/drop move, nav clicks -- expect it to finish
+// immediately); the very first call kicks off the fetch and re-invokes
+// drawCal() once it resolves, so partner sections simply appear a moment
+// after Vilu's own rows do, with zero risk to any synchronous caller.
+var PMS_CAL_ACC_READY=false;
+function pmsCalLoadPartnerProps(){
+  loadAccProperties().then(function(){
+    var partners=ACC_PROPERTIES.filter(function(p){return !p.isVilu;});
+    return Promise.all(partners.map(function(p){return loadAccRoomTypes(p.id);}));
+  }).then(function(){ PMS_CAL_ACC_READY=true; drawCal(); })
+    .catch(function(e){ console.error('PMS calendar: partner-property load failed',e); PMS_CAL_ACC_READY=true; drawCal(); });
+}
 function drawCal(){
   sR=null;sS=null;sE=null;sOn=false;
+  if(!PMS_CAL_ACC_READY){ pmsCalLoadPartnerProps(); }
   var today=tS,dates=[];
   calTimelineSync();
   for(var i=0;i<calTL.count;i++){dates.push(calAddDays(calTL.start,i));}
@@ -5880,6 +5905,26 @@ function drawCal(){
   var occ={};
   dates.forEach(function(d){var ds=lDs(d);occ[ds]=RES.filter(function(r){return r.prop==='vilu'&&r.st!=='Cancelled'&&r.st!=='Checked out'&&r.ci<=ds&&r.co>ds;}).length;});
   var vrGroups=groupByType(VR);
+  // PMS multi-property calendar restore (2026-09-13): canonical, real
+  // accommodation_properties docs (Ranfaru Inn 'ha', White Sand Inn 'hb',
+  // and any future partner property) are what drive these sections now --
+  // never the old hardcoded PH fixture (Part 10 retirement below is
+  // unrelated and stays exactly as it was: PH itself lives on ONLY as a
+  // room-id lookup table via getHR()/getR()/rNm(), see those functions'
+  // own comments). Zero fake rooms/rates are ever fabricated here: a
+  // partner with no configured room_types renders a plain "Availability on
+  // request" placeholder row (Part 4/7), and any historical reservation
+  // referencing a legacy ha-R*/hb-R* room id gets its own read-only
+  // compatibility row purely so it stays visible on its dates -- that row
+  // is never bookable (see the dedicated Cancelled-only bar loop and the
+  // isHistPartner drag-guard further down, both scoped only to these ids).
+  var partnerSections=(typeof ACC_PROPERTIES!=='undefined'?ACC_PROPERTIES:[]).filter(function(p){return !p.isVilu&&p.active!==false;}).map(function(p){
+    var prefix=p.legacyRoomPrefix||(p.id+'-R');
+    var legacyRns=Array.from(new Set(RES.filter(function(r){return r.rn&&r.rn.indexOf(prefix)===0;}).map(function(r){return r.rn;})))
+      .sort(function(a,b){return (parseInt(a.slice(prefix.length),10)||0)-(parseInt(b.slice(prefix.length),10)||0);});
+    var roomTypes=((typeof ACC_ROOM_TYPES_CACHE!=='undefined'&&ACC_ROOM_TYPES_CACHE[p.id])||[]).filter(function(rt){return rt.active!==false;});
+    return {p:p,prefix:prefix,legacyRns:legacyRns,roomTypes:roomTypes};
+  });
   var fH='<div class="cb-section-lbl"><span>Vilu Residence</span></div>';
   vrGroups.forEach(function(grp){
     fH+='<div class="cb-category-lbl"><span class="chev">&#9660;</span><span class="nm">'+grp.type+'</span></div>';
@@ -5899,6 +5944,21 @@ function drawCal(){
   // getR()/rNm() are untouched (Part 26: any pre-existing reservation that
   // references a PH room, if one exists, still renders correctly wherever
   // it's looked up -- only these always-on decorative section rows go).
+  partnerSections.forEach(function(sec){
+    var p=sec.p;
+    fH+='<div class="cb-section-lbl"><span>'+esc(p.propertyName||p.id)+'</span></div>';
+    if(!sec.roomTypes.length){
+      var label=p.availabilityMode==='ON_REQUEST'?'Availability on request':'No room types configured yet';
+      fH+='<div class="cb-room-row-lbl partner-room"><span class="rn" style="color:#8a94a6;font-style:italic">'+esc(label)+'</span></div>';
+    }
+    sec.roomTypes.forEach(function(rt){
+      fH+='<div class="cb-room-row-lbl partner-room"><span class="rn">'+esc(rt.roomTypeName||rt.id)+'</span><span class="rt">'+(typeof rt.agencyRate==='number'?(rt.currency||'USD')+' '+rt.agencyRate:'Rate on request')+'</span></div>';
+    });
+    sec.legacyRns.forEach(function(rn){
+      var rlabel=(getR(rn)||{}).nm||rn;
+      fH+='<div class="cb-room-row-lbl partner-room" title="Historical reservation only — not current bookable inventory"><span class="rn">'+esc(rlabel)+'</span><span class="rt" style="color:#b45309">Historical</span></div>';
+    });
+  });
   document.getElementById('cb-fixed-rows').innerHTML=fH;
   var gH='<div class="cb-date-header-row">';
   var pM=-1;
@@ -5924,6 +5984,22 @@ function drawCal(){
       var ds=lDs(d),dw=d.getDay(),iT=ds===today,iW=dw===5;
       var cl=(iT?'today-cell':iW?'weekend':'')+(d.getMonth()!==rpM&&rpM!==-1?' month-sep':'');
       r2+='<div class="cb-cell '+cl+'" data-rn="'+rn+'" data-d="'+ds+'"></div>';
+      rpM=d.getMonth();
+    });
+    r2+='</div>';
+    return r2;
+  }
+  // Partner-property grid rows: deliberately built from .cb-cell-ro, never
+  // .cb-cell (see that class's own CSS comment) -- these rows must never be
+  // draggable/click-to-book targets, only a surface the dedicated bar loops
+  // below can attach a read-only or normal reservation bar onto by data-rn.
+  function mRStatic(rn){
+    var r2='<div class="cb-booking-row" data-rn="'+rn+'" style="position:relative">';
+    var rpM=-1;
+    dates.forEach(function(d){
+      var ds=lDs(d),dw=d.getDay(),iT=ds===today,iW=dw===5;
+      var cl=(iT?'today-cell':iW?'weekend':'')+(d.getMonth()!==rpM&&rpM!==-1?' month-sep':'');
+      r2+='<div class="cb-cell-ro '+cl+'"></div>';
       rpM=d.getMonth();
     });
     r2+='</div>';
@@ -5956,6 +6032,12 @@ function drawCal(){
   // Calendar-fix follow-up (Part 10): matching fixed-column removal above --
   // the PH decorative grid rows are retired for the same reason (never real
   // data, always-on on the real PMS calendar).
+  partnerSections.forEach(function(sec){
+    gH+='<div class="cb-section-row"><div class="cb-section-cell" style="width:'+(dates.length*CAL_COL_W)+'px"></div></div>';
+    if(!sec.roomTypes.length) gH+=mRStatic('__onreq_'+sec.p.id);
+    sec.roomTypes.forEach(function(rt){ gH+=mRStatic(sec.p.id+'::'+rt.id); });
+    sec.legacyRns.forEach(function(rn){ gH+=mRStatic(rn); });
+  });
   document.getElementById('cb-grid').innerHTML=gH;
   var sa=document.getElementById('cb-scroll-area'),fr=document.getElementById('cb-fixed-rows');
   if(sa)sa.onscroll=function(){fr.scrollTop=sa.scrollTop;calOnScroll(sa);};
@@ -5993,18 +6075,58 @@ function drawCal(){
       if(w<4)return;
       var bar=document.createElement('div');
       var isBlk=res.isBlock||res.src==='Agency Block';
+      // Legacy partner-room compatibility guard (2026-09-13): a reservation
+      // whose rn is a bridged legacy id (ha-R*/hb-R*) must never be
+      // draggable -- its compatibility row has no other bookable rooms to
+      // legitimately move it to, and dragging it elsewhere would silently
+      // rewrite a historical reservation's rn, which is explicitly
+      // forbidden. Everything else about it (color, click-to-view) stays
+      // identical to a normal reservation.
+      var isHistPartner=partnerSections.some(function(sec){return res.rn&&res.rn.indexOf(sec.prefix)===0;});
       bar.className='cb-bar'+(((!isBlk&&res.st==='Pending')||(isBlk&&res.blockSt!=='Confirmed'))?' cb-bar-light':'');
       bar.style.cssText='left:'+left+'px;width:'+w+'px;background:'+(isBlk?(res.blockSt!=='Confirmed'?'#fbbf24':'#f59e0b'):resBarColor(res));
       bar.style.clipPath=calBarClip(w,CAL_BAR_H,sV,cI>=0);
       bar.dataset.resId=res.id;
       bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">'+((res.isBlock||res.src==='Agency Block')&&res.blockSt!=='Confirmed'?'[PENDING] ':(res.isBlock||res.src==='Agency Block')?'[BLOCK] ':'')+esc(res.fn)+' '+esc(res.ln)+'</span>';
       bar.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showDet(res.id);});
-      bar.addEventListener('mousedown',function(e){e.stopPropagation();if(!(res.isBlock||res.src==='Agency Block')){bDrg=true;sOn=false;}});
-      if(!(res.isBlock||res.src==='Agency Block')){
+      bar.addEventListener('mousedown',function(e){e.stopPropagation();if(!(res.isBlock||res.src==='Agency Block'||isHistPartner)){bDrg=true;sOn=false;}});
+      if(!(res.isBlock||res.src==='Agency Block'||isHistPartner)){
         bar.setAttribute('draggable','true');
         bar.addEventListener('dragstart',function(e){bDrg=true;sOn=false;clrSel();e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',res.id+'|'+res.rn);bar.style.opacity='.6';});
         bar.addEventListener('dragend',function(){bar.style.opacity='1';setTimeout(function(){bDrg=false;},80);});
       }
+      row.appendChild(bar);
+    });
+    // Historical legacy-partner reservations (Part 5 of the PMS
+    // multi-property restore): the loop above only draws non-Cancelled
+    // reservations, by design, everywhere in this calendar -- but the two
+    // known real ha-R*/hb-R* reservations are BOTH Cancelled test data, and
+    // the requirement here is purely "stay visible on their dates for
+    // historical reference", not "still occupy the room". Scoped ONLY to
+    // legacy partner-prefixed room ids (never Vilu) so Vilu's own
+    // Cancelled-hides-bar behavior is completely untouched. Read-only:
+    // click to view, never draggable, never a drop target.
+    if(partnerSections.length) RES.filter(function(r){
+      return r.st==='Cancelled'&&partnerSections.some(function(sec){return r.rn&&r.rn.indexOf(sec.prefix)===0;});
+    }).forEach(function(res){
+      var row=document.querySelector('.cb-booking-row[data-rn="'+res.rn+'"]');
+      if(!row)return;
+      var vs=res.ci<dsl[0]?dsl[0]:res.ci,ld=dsl[dsl.length-1];
+      if(vs>ld||res.co<=dsl[0])return;
+      var si=dsl.indexOf(vs),ei=dsl.findIndex(function(d){return d>=res.co;})-1;
+      if(ei<0)ei=dsl.length-1;
+      if(si<0)return;
+      var sV=res.ci>=dsl[0],h2=CAL_COL_W/2,cI=dsl.indexOf(res.co);
+      var left=sV?si*CAL_COL_W+h2:si*CAL_COL_W,rE=cI>=0?cI*CAL_COL_W+h2:(ei+1)*CAL_COL_W,w=rE-left-2;
+      if(w<4)return;
+      var bar=document.createElement('div');
+      bar.className='cb-bar cb-bar-light';
+      bar.style.cssText='left:'+left+'px;width:'+w+'px;cursor:pointer;opacity:.75;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 6px,#b7bec9 6px,#b7bec9 12px)';
+      bar.style.clipPath=calBarClip(w,CAL_BAR_H,sV,cI>=0);
+      bar.dataset.resId=res.id;
+      bar.title='Historical (cancelled) reservation — read-only, not current inventory';
+      bar.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;flex:1">[Cancelled] '+esc(res.fn)+' '+esc(res.ln)+'</span>';
+      bar.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showDet(res.id);});
       row.appendChild(bar);
     });
     // Manual blocks (Block Rooms page and calendar drag-select) live in BLK,
@@ -9103,6 +9225,7 @@ async function saveAccProp(){
     await ref.set(doc, {merge:true});
     document.getElementById('m-ah').classList.remove('on');
     toast('✓ '+nm+' saved');
+    if(typeof PMS_CAL_ACC_READY!=='undefined')PMS_CAL_ACC_READY=false; // PMS calendar re-fetches on next visit (Part 8)
     drawHtls();
   } catch(e) {
     console.error('saveAccProp failed', e);
@@ -9156,6 +9279,7 @@ async function saveAccRoomType(){
     document.getElementById('m-ahrt').classList.remove('on');
     toast('✓ Room type saved');
     delete ACC_ROOM_TYPES_CACHE[propertyId];
+    if(typeof PMS_CAL_ACC_READY!=='undefined')PMS_CAL_ACC_READY=false; // PMS calendar re-fetches on next visit (Part 8)
     drawHtls();
   } catch(e) {
     console.error('saveAccRoomType failed', e);
