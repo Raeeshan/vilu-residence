@@ -223,5 +223,57 @@ section('vilu-agency-portal.html -- resumable signup, no client-side privilege e
   });
 }
 
+section('Unified Admin Login (2026-09-13) -- Agency Portal accepts role===admin only through a separate, inert Preview mode');
+{
+  test('doAgencyLogin() and onAuthStateChanged both dispatch role===\'admin\' to enterAgencyPortalAdminPreview() -- a separate branch, not a change to the real agency check', () => {
+    const loginFn = extractFn(AGENCY, 'async function doAgencyLogin');
+    assert.match(loginFn, /profile\.role === 'admin'/);
+    assert.match(loginFn, /enterAgencyPortalAdminPreview\(profile\)/);
+    const authStateIdx = AGENCY.indexOf("firebase.auth().onAuthStateChanged(async function(fbUser)");
+    assert.ok(authStateIdx > -1, 'onAuthStateChanged handler not found');
+    const authStateFn = extractFn(AGENCY, "firebase.auth().onAuthStateChanged(async function(fbUser)");
+    assert.match(authStateFn, /profile\.role === 'admin'/);
+    assert.match(authStateFn, /enterAgencyPortalAdminPreview\(profile\)/);
+  });
+  test('the existing profile.role===\'agency\' branch is unchanged by this addition -- normal agency login still calls the real enterAgencyPortal()', () => {
+    const loginFn = extractFn(AGENCY, 'async function doAgencyLogin');
+    assert.match(loginFn, /profile\.role === 'agency' && profile\.accountStatus !== 'SUSPENDED'/);
+    assert.match(loginFn, /await enterAgencyPortal\(profile\)/);
+  });
+  test('enterAgencyPortalAdminPreview() sets currentAgency to null (never a real agency identity) and never calls the real enterAgencyPortal()', () => {
+    const fn = extractFn(AGENCY, 'function enterAgencyPortalAdminPreview');
+    assert.match(fn, /currentAgency = null/);
+    assert.ok(!/enterAgencyPortal\(/.test(fn), 'enterAgencyPortalAdminPreview() calls the real agency entry point');
+  });
+  test('the admin preview screen loads no agency data -- neither enterAgencyPortalAdminPreview() nor exitAdminAgencyPreview() calls any real-dashboard data-loading function', () => {
+    const enterFn = extractFn(AGENCY, 'function enterAgencyPortalAdminPreview');
+    const exitFn = extractFn(AGENCY, 'function exitAdminAgencyPreview');
+    const combined = enterFn + exitFn;
+    ['drawPackages(', 'drawQuotations(', 'drawMyBookings(', 'drawMyBlocks(', 'drawMyHolds(', 'searchAgencyGuests', 'fetchPackagesFromFirestore', 'agency_packages'].forEach((forbidden) => {
+      assert.ok(!combined.includes(forbidden), 'admin preview mode references ' + forbidden + ' -- it must load no agency data at all');
+    });
+  });
+  test('the #admin-preview-screen markup is a sibling of #login-screen and #agency-app, never nested inside the real dashboard shell', () => {
+    const previewIdx = AGENCY.indexOf('id="admin-preview-screen"');
+    const appIdx = AGENCY.indexOf('id="agency-app"');
+    assert.ok(previewIdx > -1 && appIdx > -1);
+    assert.ok(previewIdx < appIdx, 'the preview screen markup should appear before the real app shell, confirming it is not nested inside it');
+  });
+}
+
+section('Unified Admin Login (2026-09-13) -- PMS/Staff Portal side, documented as already-working (regression guard, no code changed)');
+{
+  test('PMS doLogin() already grants full access when loginRole===\'admin\' matches the stored profile.role -- no separate Staff Portal identity exists or is needed', () => {
+    const fn = extractFn(PMS, 'async function doLogin');
+    assert.match(fn, /profile\.role !== loginRole/, 'the existing role-matches-selected-tab gate is gone -- verify Admin can still only log in by selecting the Admin tab, intentionally');
+  });
+  test('canManageCatalog() and requireStaffLike() both already include admin -- Admin already has every Staff-level capability with no downgrade and no separate identity', () => {
+    const clientFn = extractFn(PMS, 'function canManageCatalog');
+    assert.match(clientFn, /role.*===.*'admin'|'admin'.*===.*role/);
+    const serverFn = extractFn(FUNCTIONS, 'function requireStaffLike');
+    assert.match(serverFn, /role !== 'admin'/);
+  });
+}
+
 console.log(`\n${passed}/${passed + failed} agency-self-registration-hardening (structural) assertions passed`);
 if (failed) process.exitCode = 1;

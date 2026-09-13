@@ -350,6 +350,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- ADMIN PREVIEW (2026-09-13): a Vilu admin's Agency Portal login lands
+     here, NEVER in #agency-app -- a deliberate sibling of #login-screen so
+     none of the real dashboard's tab-drawing code (drawPackages/
+     drawQuotations/drawMyBookings/drawMyBlocks/drawMyHolds/guest search/
+     settlements) can ever run for an admin session. This is a completely
+     inert placeholder screen; it loads no agency's data at all. A future
+     "Preview Agency" selector (view one real, existing agency read-only)
+     is an explicitly deferred follow-up, not built here. -->
+<div id="admin-preview-screen" style="display:none">
+  <div class="login-bg" style="display:flex;align-items:center;justify-content:center;min-height:100vh">
+    <div class="login-card">
+      <div style="font-size:var(--font-size-display);text-align:center;margin-bottom:8px">🛡️</div>
+      <h2 style="text-align:center">Vilu Admin — Agency Portal Preview</h2>
+      <p style="text-align:center">You're signed in as a Vilu administrator, not as any specific agency. This preview does not show any agency's real packages, quotes, bookings, guest records, holds, or settlements.</p>
+      <p style="text-align:center;color:#6b7280;font-size:var(--font-size-sm)">Signed in as <strong id="admin-preview-email"></strong></p>
+      <button class="btn-login" onclick="exitAdminAgencyPreview()">Sign out</button>
+    </div>
+  </div>
+</div>
+
 <!-- APP -->
 <div class="app" id="agency-app" style="display:none">
   <!-- Header -->
@@ -1272,6 +1292,15 @@ async function doAgencyLogin(){
     showAgencyStatusScreen('SUSPENDED');
     return;
   }
+  // Unified Admin Login (2026-09-13): a Vilu admin's Agency Portal login is
+  // a SEPARATE branch from the real-agency one above, never a change to
+  // it -- distinguishes normal agency access from admin portal-preview
+  // access, per explicit design. Admin never inherits any real agency's
+  // data (see enterAgencyPortalAdminPreview()).
+  if (profile && profile.role === 'admin') {
+    enterAgencyPortalAdminPreview(profile);
+    return;
+  }
   // Not an approved agency (yet) -- check for a pending/rejected
   // self-registration application before falling back to the generic "not
   // set up" message, so a genuine applicant sees an accurate status
@@ -1295,6 +1324,10 @@ firebase.auth().onAuthStateChanged(async function(fbUser){
     }
     if (profile && profile.role === 'agency' && profile.accountStatus === 'SUSPENDED') {
       showAgencyStatusScreen('SUSPENDED');
+      return;
+    }
+    if (profile && profile.role === 'admin') {
+      enterAgencyPortalAdminPreview(profile);
       return;
     }
     await showStatusScreenIfApplicant();
@@ -1363,6 +1396,27 @@ function agencyStatusScreenSignOut(){
   });
   document.querySelector('#login-screen .login-card').style.display = 'block';
   var passEl = document.getElementById('ag-pass'); if(passEl) passEl.value = '';
+}
+
+// ── UNIFIED ADMIN LOGIN: AGENCY PORTAL PREVIEW MODE (2026-09-13) ──
+// A completely inert placeholder -- deliberately never sets currentAgency
+// to anything but null, and never calls any of the real dashboard's data-
+// loading functions (drawPackages/drawQuotations/drawMyBookings/
+// drawMyBlocks/drawMyHolds/searchAgencyGuests/settlements), so an admin
+// session can never inherit or display any real agency's data. A future
+// "Preview Agency" selector (pick one real agency, view its data read-
+// only) is an explicitly deferred follow-up, not built here.
+function enterAgencyPortalAdminPreview(profile){
+  currentAgency = null;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-preview-email').textContent = profile.email;
+  document.getElementById('admin-preview-screen').style.display = 'block';
+}
+function exitAdminAgencyPreview(){
+  try { firebase.auth().signOut(); } catch(e) {}
+  document.getElementById('admin-preview-screen').style.display = 'none';
+  document.querySelector('#login-screen .login-card').style.display = 'block';
+  document.getElementById('login-screen').style.display = 'flex';
 }
 
 // Resumable by design (2026-09-13 hardening): a network failure between
