@@ -5918,9 +5918,21 @@ function drawCal(){
   // compatibility row purely so it stays visible on its dates -- that row
   // is never bookable (see the dedicated Cancelled-only bar loop and the
   // isHistPartner drag-guard further down, both scoped only to these ids).
+  //
+  // Follow-up fix (2026-09-13, PM): a legacy compatibility row must NOT be
+  // permanent -- it exists only to make a historical reservation visible
+  // ON ITS OWN DATES. Gating it on "does any RES doc with this prefix
+  // exist anywhere" (the first version of this fix) made "Room 1 ·
+  // Historical" show up on every current/future view too, which reads as
+  // fake permanent inventory -- exactly what this whole task forbids. The
+  // gate is now the SAME half-open-interval overlap test the rest of this
+  // calendar already uses for occupancy (ci < window end, co > window
+  // start) against the ACTUAL visible date window, so the row appears only
+  // while navigated to dates the legacy reservation actually covers.
+  var winStart=lDs(dates[0]),winEndExcl=lDs(calAddDays(dates[dates.length-1],1));
   var partnerSections=(typeof ACC_PROPERTIES!=='undefined'?ACC_PROPERTIES:[]).filter(function(p){return !p.isVilu&&p.active!==false;}).map(function(p){
     var prefix=p.legacyRoomPrefix||(p.id+'-R');
-    var legacyRns=Array.from(new Set(RES.filter(function(r){return r.rn&&r.rn.indexOf(prefix)===0;}).map(function(r){return r.rn;})))
+    var legacyRns=Array.from(new Set(RES.filter(function(r){return r.rn&&r.rn.indexOf(prefix)===0&&r.ci<winEndExcl&&r.co>winStart;}).map(function(r){return r.rn;})))
       .sort(function(a,b){return (parseInt(a.slice(prefix.length),10)||0)-(parseInt(b.slice(prefix.length),10)||0);});
     var roomTypes=((typeof ACC_ROOM_TYPES_CACHE!=='undefined'&&ACC_ROOM_TYPES_CACHE[p.id])||[]).filter(function(rt){return rt.active!==false;});
     return {p:p,prefix:prefix,legacyRns:legacyRns,roomTypes:roomTypes};

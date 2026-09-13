@@ -91,8 +91,8 @@ section('Legacy ha-R*/hb-R* historical compatibility — visible, never rewritte
   test('the legacy prefix is read from the canonical doc\'s own legacyRoomPrefix field (falling back to id+"-R"), not hardcoded to ha-/hb-', () => {
     assert.match(drawCalSrc, /var prefix\s*=\s*p\.legacyRoomPrefix\|\|\(p\.id\+'-R'\);/);
   });
-  test('legacy reservations are found by matching RES rn against that prefix, deduped and numerically sorted', () => {
-    assert.match(drawCalSrc, /RES\.filter\(function\(r\)\{return r\.rn&&r\.rn\.indexOf\(prefix\)===0;\}\)/);
+  test('legacy reservations are found by matching RES rn against that prefix AND overlapping the visible date window, deduped and numerically sorted', () => {
+    assert.match(drawCalSrc, /RES\.filter\(function\(r\)\{return r\.rn&&r\.rn\.indexOf\(prefix\)===0&&r\.ci<winEndExcl&&r\.co>winStart;\}\)/);
   });
   test('legacy compatibility rows are built with mRStatic (.cb-cell-ro), never mR (.cb-cell) -- so they can never become a drag-select/click-to-book target', () => {
     assert.match(gHBuildSrc, /sec\.legacyRns\.forEach\(function\(rn\)\{\s*gH\+=mRStatic\(rn\);\s*\}\);/);
@@ -130,6 +130,77 @@ section('Legacy ha-R*/hb-R* historical compatibility — visible, never rewritte
     assert.doesNotMatch(histBlock, /setAttribute\('draggable'/);
     assert.doesNotMatch(histBlock, /addEventListener\('mousedown'/);
     assert.doesNotMatch(histBlock, /addEventListener\('dragstart'/);
+  });
+}
+
+section('Date-window gating (2026-09-13 follow-up) — a legacy row appears ONLY while its own dates are visible, never permanently');
+{
+  // Extract the REAL production expression (not a reimplementation) and run
+  // it against synthetic RES fixtures for several visible-window scenarios,
+  // so this proves actual behavior, not just that some regex is present.
+  const filterExprMatch = drawCalSrc.match(/RES\.filter\(function\(r\)\{return r\.rn&&r\.rn\.indexOf\(prefix\)===0&&r\.ci<winEndExcl&&r\.co>winStart;\}\)\.map\(function\(r\)\{return r\.rn;\}\)/);
+  assert.ok(filterExprMatch, 'could not locate the legacy-row window-overlap expression to test it live');
+  const legacyRnsFor = (prefix, winStart, winEndExcl, RES) =>
+    Array.from(new Set(new Function('RES', 'prefix', 'winStart', 'winEndExcl', 'return ' + filterExprMatch[0] + ';')(RES, prefix, winStart, winEndExcl)));
+
+  const RES_FIXTURE = [
+    { id: 'BK007', rn: 'ha-R1', ci: '2026-07-11', co: '2026-07-15', st: 'Cancelled' },
+    { id: 'BK008', rn: 'hb-R2', ci: '2026-07-12', co: '2026-07-16', st: 'Cancelled' },
+  ];
+
+  test('September/current window: ha-R1 does NOT appear under Ranfaru (no overlap)', () => {
+    const rns = legacyRnsFor('ha-R', '2026-09-13', '2026-10-13', RES_FIXTURE);
+    assert.deepEqual(rns, []);
+  });
+  test('September/current window: hb-R2 does NOT appear under White Sand (no overlap)', () => {
+    const rns = legacyRnsFor('hb-R', '2026-09-13', '2026-10-13', RES_FIXTURE);
+    assert.deepEqual(rns, []);
+  });
+  test('July historical window: ha-R1 DOES appear under Ranfaru (overlaps 2026-07-11..07-15)', () => {
+    const rns = legacyRnsFor('ha-R', '2026-07-01', '2026-07-31', RES_FIXTURE);
+    assert.deepEqual(rns, ['ha-R1']);
+  });
+  test('July historical window: hb-R2 DOES appear under White Sand (overlaps 2026-07-12..07-16)', () => {
+    const rns = legacyRnsFor('hb-R', '2026-07-01', '2026-07-31', RES_FIXTURE);
+    assert.deepEqual(rns, ['hb-R2']);
+  });
+  test('window entirely BEFORE the stay: row disappears (half-open interval -- checkout day itself is not occupied)', () => {
+    assert.deepEqual(legacyRnsFor('ha-R', '2026-06-01', '2026-07-01', RES_FIXTURE), []); // ci(07-11) is NOT < winEndExcl(07-01)
+    assert.deepEqual(legacyRnsFor('ha-R', '2026-07-01', '2026-07-11', RES_FIXTURE), []); // window ends exactly at check-in day, no overlap yet
+  });
+  test('window entirely AFTER the stay: row disappears (checkout day boundary, half-open)', () => {
+    assert.deepEqual(legacyRnsFor('ha-R', '2026-07-15', '2026-08-01', RES_FIXTURE), []); // co(07-15) is NOT > winStart(07-15)
+    assert.deepEqual(legacyRnsFor('ha-R', '2026-07-16', '2026-08-01', RES_FIXTURE), []);
+  });
+  test('window overlapping only the check-in day edge still shows the row (arrival day counts)', () => {
+    assert.deepEqual(legacyRnsFor('ha-R', '2026-07-11', '2026-07-12', RES_FIXTURE), ['ha-R1']);
+  });
+  test('window overlapping only the day before checkout still shows the row (last occupied night counts)', () => {
+    assert.deepEqual(legacyRnsFor('ha-R', '2026-07-14', '2026-07-15', RES_FIXTURE), ['ha-R1']);
+  });
+  test('a property with NO historical reservations at all (arbitrary prefix) never shows a row in any window', () => {
+    assert.deepEqual(legacyRnsFor('zz-R', '2026-07-01', '2026-07-31', RES_FIXTURE), []);
+  });
+}
+
+section('Ordering — configured room types before compatibility-only historical rows, in both windows');
+{
+  test('within one property section, roomTypes render before legacyRns in BOTH the fixed column and the grid (never interleaved/reordered)', () => {
+    const fixedForEach = extractByStart(fHBuildSrc, /partnerSections\.forEach\(function\(sec\)\{/);
+    const roomTypesIdxF = fixedForEach.indexOf('sec.roomTypes.forEach(function(rt){');
+    const legacyIdxF = fixedForEach.indexOf('sec.legacyRns.forEach(function(rn){');
+    assert.ok(roomTypesIdxF > -1 && legacyIdxF > -1 && roomTypesIdxF < legacyIdxF, 'fixed column: roomTypes must be emitted before legacyRns');
+    const gridForEach = extractByStart(gHBuildSrc, /partnerSections\.forEach\(function\(sec\)\{/);
+    const roomTypesIdxG = gridForEach.indexOf("sec.roomTypes.forEach(function(rt){ gH+=mRStatic(sec.p.id+'::'+rt.id); });");
+    const legacyIdxG = gridForEach.indexOf('sec.legacyRns.forEach(function(rn){ gH+=mRStatic(rn); });');
+    assert.ok(roomTypesIdxG > -1 && legacyIdxG > -1 && roomTypesIdxG < legacyIdxG, 'grid: roomTypes must be emitted before legacyRns');
+  });
+  test('a configured room type is never gated by the date window -- only the legacy compatibility rows are', () => {
+    const forEachBody = extractByStart(fHBuildSrc, /partnerSections\.forEach\(function\(sec\)\{/);
+    // roomTypes.forEach itself carries no winStart/winEndExcl reference -- only the legacyRns
+    // computation (already proven above) does.
+    const roomTypesBlock = extractByStart(forEachBody, /sec\.roomTypes\.forEach\(function\(rt\)\{/);
+    assert.doesNotMatch(roomTypesBlock, /winStart|winEndExcl/);
   });
 }
 
