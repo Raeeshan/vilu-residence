@@ -1906,7 +1906,15 @@ function agCalToggleCollapse(propertyId){
 // agDrawCal() fetch path -- it deliberately never calls agCalReanchor(), so
 // the current date position is preserved exactly as the task requires
 // ("switching hotels should stay around Jan 2027 unless Today is clicked").
-function agCalPropertyTabClick(v){ AG_CAL_PROPERTY_FILTER = v; agDrawCal(); }
+// Unified-availability follow-up (2026-09-13): switching the property tab
+// now also re-runs the exact-search (searchAvailability()) for whatever
+// dates are already entered -- before the search panel and calendar were
+// merged into one card, a stale Vilu search result (numeric room counts,
+// even a "Request temporary hold" button) could sit on screen while the
+// calendar below switched to a different, ON_REQUEST partner property; now
+// that the property tabs visibly govern both, leaving that stale result up
+// reads as a real bug, not a quirk of two separate sections.
+function agCalPropertyTabClick(v){ AG_CAL_PROPERTY_FILTER = v; agDrawCal(); searchAvailability(); }
 // Date jump (Part 8) IS a re-anchor -- same bounded windowed fetch path as
 // Today/Prev/Next, just an arbitrary anchor instead of ±7 days.
 function agCalJumpToDate(){

@@ -105,6 +105,9 @@ section('Part 1 — unified Availability UI, exactly one module');
     const searchFn = extractByStart(AGENCY, /async function searchAvailability\(propertyIdOverride\)\{/);
     assert.doesNotMatch(searchFn, /manualPmsRoomSlots|calendarRoomSlotCount/);
   });
+  test('switching the property tab re-runs searchAvailability() so a stale OTHER property\'s result (e.g. a leftover Vilu "Request temporary hold" card) never sits on screen once the tabs are visibly shared with the calendar', () => {
+    assert.match(AGENCY, /function agCalPropertyTabClick\(v\)\{ AG_CAL_PROPERTY_FILTER = v; agDrawCal\(\); searchAvailability\(\); \}/);
+  });
 }
 
 section('Part 2 — Agency Calendar renders internal PMS room slots (calendar display only)');
