@@ -80,20 +80,81 @@ React Native Firebase auto-initializes from **native config files**
 - `android/app/google-services.json`
 - `ios/GoogleService-Info.plist`
 
-**These are not in this repo and were deliberately not generated in this
-phase.** Before a real device/simulator build can authenticate, the iOS
-and Android app identities (`com.viluresidence.staff`,
-`com.viluresidence.agency` — four app registrations total, two per
-variant) need to be registered in the Firebase console for the *existing*
-`vilu-residence` project, and their config files downloaded into this
-project (see `.env.example` for where they're expected). That registration
-is additive (new app entries under the same project) and was intentionally
-left as a manual step rather than performed automatically, per this
-project's own "stop and report before touching production backend
-configuration" principle — registering apps isn't a rules/Functions/data
-change, but it's still a real, persistent change to the Firebase project
-that should be a deliberate decision, not an automatic side effect of
-scaffolding.
+### Firebase project setup (done — Phase M1.5)
+
+Four real client apps are now registered under the existing
+`vilu-residence` project (additive only — no new project, no new
+Firestore database, no new Auth users, nothing else in the project was
+touched):
+
+| Platform | Variant | App ID |
+|---|---|---|
+| Android | Vilu Staff  | `1:751046104531:android:b92271da51a999c6c84b26` |
+| Android | Vilu Agency | `1:751046104531:android:9f8c3760bbc58098c84b26` |
+| iOS     | Vilu Staff  | `1:751046104531:ios:972e26bb5f5f50fdc84b26` |
+| iOS     | Vilu Agency | `1:751046104531:ios:2690b7eccd3d224cc84b26` |
+
+Their real config files are fetched into `mobile/native-config/<variant>/`
+(git-ignored — see below) via:
+
+```bash
+firebase apps:sdkconfig ANDROID <appId> --out native-config/<variant>/google-services.json
+firebase apps:sdkconfig IOS     <appId> --out native-config/<variant>/GoogleService-Info.plist
+```
+
+`app.config.ts` defaults `ios.googleServicesFile`/`android.googleServicesFile`
+to `native-config/${APP_VARIANT}/...` automatically — no env var needed for
+local development once these files exist.
+
+**Note on file contents**: Firebase's `google-services.json` format lists
+*every* Android app registered in the project as a separate `client[]`
+entry (confirmed live during this phase) — so the Staff and Agency files
+are not expected to differ entry-for-entry; what matters, and what
+`__tests__/logic/nativeConfig.test.ts` actually verifies, is that each
+file *contains* the entry matching its own package id. The Android Gradle
+`google-services` plugin picks the right entry via `applicationId` at
+build time, exactly like a human downloading the file from the Firebase
+console would get.
+
+**Why these files are git-ignored, not committed**: they're real,
+non-secret public client identifiers (not API secrets), but are kept out
+of git as a matter of convention — they're trivially regenerable via the
+one-line command above (or CI/EAS's own secret store, see "EAS builds"
+below), and keeping them out of git avoids ever needing a diff review on
+a large binary-ish JSON/plist blob. This mirrors how the existing web
+apps' own equivalent (the public `apiKey`/`appId` object in
+`vilu-unified.html`) is committed only because the web SDK requires it
+inline in source — RNFB's native config has no such constraint.
+
+### EAS builds (cloud) — native config strategy
+
+`native-config/` is git-ignored, so an EAS cloud build (which only sees
+what's in git, plus EAS's own secret store) will **not** see these files
+automatically. The correct, EAS-native mechanism — never committing them,
+never baking them into `eas.json` in plaintext — is EAS's **file-type
+environment variables**, uploaded once per variant:
+
+```bash
+# One-time setup, requires an authenticated `eas login` (see "Blockers" below)
+eas env:create --scope project --name GOOGLE_SERVICES_JSON   --type file --value native-config/staff/google-services.json    --environment development --visibility sensitive
+eas env:create --scope project --name GOOGLE_SERVICES_PLIST  --type file --value native-config/staff/GoogleService-Info.plist --environment development --visibility sensitive
+# Repeat with distinct names (e.g. GOOGLE_SERVICES_JSON_AGENCY) or a
+# separate EAS "environment" per variant, then reference the right one
+# from each profile in eas.json's own "env" block.
+```
+
+At build time EAS decrypts the file to a temp path and injects that path
+as the named env var — which `app.config.ts` already reads
+(`process.env.GOOGLE_SERVICES_JSON ?? './native-config/${APP_VARIANT}/...'`)
+with **zero code changes needed**: the same env-var seam that lets a
+developer override the local default is exactly the seam EAS uses. This
+was designed in from Phase M1.1 specifically so this would be a
+config-only step, not a code change, once a real EAS account is
+available.
+
+**This was documented, not executed** — creating EAS environment
+variables requires an authenticated `eas login`, which needs the user's
+own Expo account credentials. No EAS secrets were created in this phase.
 
 ## Session persistence
 
@@ -174,6 +235,53 @@ npm test            # jest — two projects:
                      #   "app" (jest-expo): React Native component tests,
                      #     not yet populated in this phase
 ```
+
+## Native build status (Phase M1.5)
+
+`expo prebuild` has been verified to succeed for **both** variants on this
+machine (Windows), generating a real native `android/` Gradle project each
+time, correctly wired to the real registered Firebase app (confirmed:
+`applicationId`, `rootProject.name`, and the copied `google-services.json`
+all match the variant; see `__tests__/logic/nativeConfig.test.ts`):
+
+```bash
+APP_VARIANT=staff  npx expo prebuild --platform android --no-install
+APP_VARIANT=agency npx expo prebuild --platform android --no-install
+```
+
+`android/`/`ios/` are git-ignored (regenerated on demand by `prebuild` —
+this repo stays managed-workflow-first; there is no hand-edited native
+code to lose by regenerating them).
+
+**Confirmed blocker — no local Android SDK on this machine.** Running the
+generated project's own Gradle wrapper reaches real project configuration
+(Kotlin build-logic modules compile successfully) before failing with:
+
+```
+SDK location not found. Define a valid SDK location with an
+ANDROID_HOME environment variable or by setting the sdk.dir path in your
+project's local properties file at '...\mobile\android\local.properties'.
+```
+
+This machine has a JDK (Eclipse Adoptium 21) but no Android SDK, no `adb`,
+no emulator, and `ANDROID_HOME`/`ANDROID_SDK_ROOT` are unset. This is a
+genuine tooling gap, not a project misconfiguration — installing the full
+Android SDK (several GB, Android Studio or the standalone command-line
+tools + license acceptance) was deliberately not attempted automatically
+in this phase, matching the explicit instruction to prefer EAS over
+"spending hours hacking around Windows SDK configuration."
+
+**EAS cloud build — blocked on account authentication, not tooling.**
+`eas-cli` can be installed as a dev dependency with no login required, and
+`eas.json` (below) is ready with `development-staff`/`development-agency`
+profiles. Actually *triggering* a build (`eas build --profile
+development-staff --platform android`) requires `eas login` — the user's
+own Expo account credentials, which this assistant does not have and will
+not request, exactly like the Firebase Admin password used for the manual
+auth-proof steps. See "Blockers" in the Phase M1.5 report for the two
+ways to unblock this (install Android Studio/SDK locally and hand back
+control, or run `eas login` and either continue this session or trigger
+the build directly).
 
 ## Security model summary
 

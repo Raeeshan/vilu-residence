@@ -4,7 +4,11 @@ dist/
 web-build/
 *.log
 
-# Never commit real Firebase native config or local env overrides.
+# Never commit real Firebase native config or local env overrides. These
+# are regenerated on demand via `firebase apps:sdkconfig` (see
+# mobile/README.md "Firebase project setup") -- not secrets, just kept out
+# of git as a matter of convention/regeneratable build input.
+native-config/
 google-services.json
 GoogleService-Info.plist
 .env.local

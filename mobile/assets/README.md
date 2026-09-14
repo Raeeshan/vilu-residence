@@ -1,7 +1,7 @@
 # Assets placeholder
 
-Real icon/splash images are not yet included in this phase
-(`app.config.ts` references `./assets/icon.png`, `./assets/splash.png`,
-`./assets/adaptive-icon.png` — add the real Vilu Residence brand assets
-here before a production build). No fake/placeholder images were
-generated in their place.
+`icon.png`, `adaptive-icon.png`, and `splash.png` are solid Vilu-lagoon-teal
+(`#0e7c86`) 1024×1024 PNGs — generated so `expo prebuild` has a valid image
+to process, not real artwork. Replace with the real Vilu Residence brand
+icon/splash before a production build (App Store/Play Store submission is
+explicitly out of scope for M1.5 regardless).

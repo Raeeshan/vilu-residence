@@ -31,5 +31,5 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
-  ignorePatterns: ['node_modules/', '.expo/', 'dist/'],
+  ignorePatterns: ['node_modules/', '.expo/', 'dist/', 'android/', 'ios/', 'native-config/'],
 };

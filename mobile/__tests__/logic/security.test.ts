@@ -9,7 +9,7 @@ import { buildResolvedSession } from '../../src/services/profile/profileService'
 
 const SRC_ROOT = path.join(__dirname, '..', '..', 'src');
 
-/** Strips `//` line comments and `/** ... *​/` block comments before a check runs -- explanatory prose (e.g. "never store this in AsyncStorage") must never itself trip a "never references X" assertion. Only real code is checked. */
+/** Strips line comments and block comments before a check runs -- explanatory prose (e.g. "never store this in AsyncStorage") must never itself trip a "never references X" assertion. Only real code is checked. */
 function stripComments(src: string): string {
   return src
     .replace(/\/\*[\s\S]*?\*\//g, '')
