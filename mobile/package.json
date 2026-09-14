@@ -16,7 +16,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "eas-build-pre-install": "node scripts/eas-select-google-services.js"
   },
   "dependencies": {
     "@react-native-firebase/app": "^20.0.0",
