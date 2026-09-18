@@ -58,10 +58,10 @@ section('Case A — every holiday-packages.html Product has a real image (the cr
 
 section('Case B — image URLs are absolute, HTTPS, crawlable-format, and point at real shipped assets');
 {
-  test('every image URL is an absolute https://viluresidence.net/images/... URL (no placeholder, no relative path, no data: URI)', () => {
+  test('every image URL is an absolute https://viluresidence.com/images/... URL (no placeholder, no relative path, no data: URI)', () => {
     const arr = productArray('holiday-packages.html');
     for (const p of arr) {
-      assert.ok(/^https:\/\/viluresidence\.net\/images\/[\w.-]+\.(jpg|jpeg|png|webp)$/.test(p.image), `"${p.name}": image URL is not a well-formed absolute production URL: ${p.image}`);
+      assert.ok(/^https:\/\/viluresidence\.com\/images\/[\w.-]+\.(jpg|jpeg|png|webp)$/.test(p.image), `"${p.name}": image URL is not a well-formed absolute production URL: ${p.image}`);
     }
   });
   test('every referenced image file actually exists in the repository (no dangling reference)', () => {

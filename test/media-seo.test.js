@@ -112,8 +112,8 @@ section('Case C — no Firebase Storage tokenized image URL remains in JSON-LD (
     const lb = nodes.find(n => n['@type'] === 'LodgingBusiness');
     assert.ok(Array.isArray(lb.image) && lb.image.some(i => i.includes('/images/rooms/vilu-residence-deluxe-family-room-interior-vr01')), 'LodgingBusiness.image does not include the stable replacement room photo');
     for (const img of lb.image) {
-      assert.ok(img.startsWith('https://viluresidence.net/'), `LodgingBusiness image not absolute/canonical: ${img}`);
-      const localPath = img.replace('https://viluresidence.net/', '');
+      assert.ok(img.startsWith('https://viluresidence.com/'), `LodgingBusiness image not absolute/canonical: ${img}`);
+      const localPath = img.replace('https://viluresidence.com/', '');
       assert.ok(fs.existsSync(localPath), `LodgingBusiness image file missing locally: ${localPath}`);
     }
   });
@@ -133,9 +133,9 @@ section('Case D — image sitemap is clean');
     const urls = [...new Set([...xml.matchAll(/<image:loc>([^<]*)<\/image:loc>/g)].map(m => m[1]))];
     assert.ok(urls.length > 0, 'no image entries found in sitemap.xml');
     for (const u of urls) {
-      assert.ok(u.startsWith('https://viluresidence.net/'), `sitemap image URL not canonical: ${u}`);
+      assert.ok(u.startsWith('https://viluresidence.com/'), `sitemap image URL not canonical: ${u}`);
       assert.ok(!/firebasestorage/.test(u), `sitemap image URL is a Firebase Storage URL: ${u}`);
-      const localPath = decodeURIComponent(u.replace('https://viluresidence.net/', ''));
+      const localPath = decodeURIComponent(u.replace('https://viluresidence.com/', ''));
       assert.ok(fs.existsSync(localPath), `sitemap image file missing locally: ${localPath}`);
     }
   });
@@ -147,8 +147,8 @@ section('Case E — Merchant/Product images (Phase post-35 fix) remain untouched
     const arr = jsonLdNodes(read('holiday-packages.html')).filter(n => n['@type'] === 'Product');
     assert.equal(arr.length, 9);
     for (const p of arr) {
-      assert.ok(p.image && p.image.startsWith('https://viluresidence.net/images/'), `${p.name}: image not absolute/canonical`);
-      assert.ok(fs.existsSync(p.image.replace('https://viluresidence.net/', '')), `${p.name}: image file missing`);
+      assert.ok(p.image && p.image.startsWith('https://viluresidence.com/images/'), `${p.name}: image not absolute/canonical`);
+      assert.ok(fs.existsSync(p.image.replace('https://viluresidence.com/', '')), `${p.name}: image file missing`);
       assert.deepEqual(p.brand, { '@type': 'Brand', name: 'Vilu Residence' }, `${p.name}: brand regressed`);
     }
   });
@@ -161,8 +161,8 @@ section('Case F — Open Graph images are correct on every representative page')
       const html = read(file);
       const m = html.match(/property="og:image" content="([^"]*)"/);
       assert.ok(m, `${file}: no og:image found`);
-      assert.ok(m[1].startsWith('https://viluresidence.net/'), `${file}: og:image not absolute/canonical: ${m[1]}`);
-      assert.ok(fs.existsSync(m[1].replace('https://viluresidence.net/', '')), `${file}: og:image file missing: ${m[1]}`);
+      assert.ok(m[1].startsWith('https://viluresidence.com/'), `${file}: og:image not absolute/canonical: ${m[1]}`);
+      assert.ok(fs.existsSync(m[1].replace('https://viluresidence.com/', '')), `${file}: og:image file missing: ${m[1]}`);
     });
   }
 }

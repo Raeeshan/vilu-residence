@@ -50,15 +50,15 @@ section('Case A — homepage Organization/LodgingBusiness/WebSite form one coher
     assert.ok(lb && lb['@id'], 'LodgingBusiness missing @id');
     assert.ok(org && org['@id'], 'Organization missing @id');
     assert.equal(lb['@id'], org['@id'], 'LodgingBusiness and Organization @id do not match');
-    assert.equal(lb['@id'], 'https://viluresidence.net/#organization', 'unexpected @id value');
+    assert.equal(lb['@id'], 'https://viluresidence.com/#organization', 'unexpected @id value');
   });
   test('a WebSite node exists, with a stable @id and a publisher reference back to the Organization', () => {
     const nodes = jsonLdNodes(read('vilu-website.html'));
     const site = nodes.find(n => n['@type'] === 'WebSite');
     assert.ok(site, 'no WebSite node found');
-    assert.equal(site['@id'], 'https://viluresidence.net/#website');
-    assert.equal(site.url, 'https://viluresidence.net/');
-    assert.deepEqual(site.publisher, { '@id': 'https://viluresidence.net/#organization' });
+    assert.equal(site['@id'], 'https://viluresidence.com/#website');
+    assert.equal(site.url, 'https://viluresidence.com/');
+    assert.deepEqual(site.publisher, { '@id': 'https://viluresidence.com/#organization' });
   });
   test('WebSite carries no SearchAction (no real site search exists)', () => {
     const nodes = jsonLdNodes(read('vilu-website.html'));
@@ -74,10 +74,10 @@ section('Case B — every Article page has consistent, complete author/publisher
       const nodes = jsonLdNodes(read(file));
       const art = nodes.find(n => n['@type'] === 'Article');
       assert.ok(art, `${file}: no Article node`);
-      assert.deepEqual(art.author, { '@type': 'Organization', name: 'Vilu Residence', url: 'https://viluresidence.net/' }, `${file}: author shape inconsistent`);
-      assert.deepEqual(art.publisher, { '@type': 'Organization', name: 'Vilu Residence', logo: { '@type': 'ImageObject', url: 'https://viluresidence.net/images/vilu-logo.jpg' } }, `${file}: publisher shape inconsistent`);
+      assert.deepEqual(art.author, { '@type': 'Organization', name: 'Vilu Residence', url: 'https://viluresidence.com/' }, `${file}: author shape inconsistent`);
+      assert.deepEqual(art.publisher, { '@type': 'Organization', name: 'Vilu Residence', logo: { '@type': 'ImageObject', url: 'https://viluresidence.com/images/vilu-logo.jpg' } }, `${file}: publisher shape inconsistent`);
       assert.ok(art.mainEntityOfPage && art.mainEntityOfPage['@type'] === 'WebPage' && typeof art.mainEntityOfPage['@id'] === 'string', `${file}: mainEntityOfPage missing or not the WebPage/@id object form`);
-      assert.deepEqual(art.isPartOf, { '@type': 'WebSite', name: 'Vilu Residence', url: 'https://viluresidence.net/' }, `${file}: isPartOf missing or inconsistent`);
+      assert.deepEqual(art.isPartOf, { '@type': 'WebSite', name: 'Vilu Residence', url: 'https://viluresidence.com/' }, `${file}: isPartOf missing or inconsistent`);
     });
   }
   test('mainEntityOfPage.@id is correctly locale-prefixed on every full-locale mirror (not left pointing at the English URL)', () => {
@@ -87,7 +87,7 @@ section('Case B — every Article page has consistent, complete author/publisher
         if (!fs.existsSync(mirror)) continue;
         const art = jsonLdNodes(read(mirror)).find(n => n['@type'] === 'Article');
         assert.ok(art, `${mirror}: no Article node`);
-        assert.ok(art.mainEntityOfPage['@id'].startsWith(`https://viluresidence.net/${loc}/`), `${mirror}: mainEntityOfPage.@id not locale-prefixed: ${art.mainEntityOfPage['@id']}`);
+        assert.ok(art.mainEntityOfPage['@id'].startsWith(`https://viluresidence.com/${loc}/`), `${mirror}: mainEntityOfPage.@id not locale-prefixed: ${art.mainEntityOfPage['@id']}`);
       }
     }
   });

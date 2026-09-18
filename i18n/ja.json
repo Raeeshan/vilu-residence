@@ -1504,13 +1504,13 @@
     },
     "privacyMeta": {
       "title": "プライバシーポリシー — Vilu Residence",
-      "description": "Vilu Residenceが viluresidence.net を通じて、予約、お問い合わせ、アナリティクスを含む情報をどのように収集、利用、保護するかについて説明します。"
+      "description": "Vilu Residenceが Vilu Residenceのウェブサイトを通じて、予約、お問い合わせ、アナリティクスを含む情報をどのように収集、利用、保護するかについて説明します。"
     },
     "privacyPage": {
       "breadcrumb": "プライバシーポリシー",
       "h1Pre": "プライバシー",
       "h1Em": "ポリシー",
-      "sub": "viluresidence.net を通じて情報をどのように収集、利用、保護するか。",
+      "sub": "Vilu Residenceのウェブサイトを通じて情報をどのように収集、利用、保護するか。",
       "lastUpdated": "最終更新日：2026年9月3日",
       "tocTitle": "このページの内容",
       "toc1": "運営者について",
@@ -1527,7 +1527,7 @@
       "toc12": "本ポリシーの変更",
       "toc13": "お問い合わせ",
       "whoTitle": "運営者について",
-      "whoP1": "Vilu Residenceは、モルディブ共和国、南アリ環礁 の Maamigili にあるゲストハウスで、Mexiczoneが運営しています。本ポリシーでは、viluresidence.net を通じて当方が収集する情報の内容、収集する理由、およびお客様が行える選択について説明します。",
+      "whoP1": "Vilu Residenceは、モルディブ共和国、南アリ環礁 の Maamigili にあるゲストハウスで、Mexiczoneが運営しています。本ポリシーでは、Vilu Residenceのウェブサイトを通じて当方が収集する情報の内容、収集する理由、およびお客様が行える選択について説明します。",
       "whoP2": "本ポリシーまたはお客様の情報についてご不明な点がございましたら、<a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a> までお問い合わせください。",
       "infoTitle": "収集する情報",
       "directTitle": "ウェブサイトからの直接予約",

@@ -1504,13 +1504,13 @@
     },
     "privacyMeta": {
       "title": "개인정보처리방침 — Vilu Residence",
-      "description": "Vilu Residence가 viluresidence.net을 통해 예약, 문의, 분석을 포함한 정보를 어떻게 수집, 이용, 보호하는지 안내합니다."
+      "description": "Vilu Residence가 Vilu Residence 웹사이트를 통해 예약, 문의, 분석을 포함한 정보를 어떻게 수집, 이용, 보호하는지 안내합니다."
     },
     "privacyPage": {
       "breadcrumb": "개인정보처리방침",
       "h1Pre": "개인정보",
       "h1Em": "처리방침",
-      "sub": "viluresidence.net을 통해 저희가 정보를 수집, 이용, 보호하는 방법을 안내합니다.",
+      "sub": "Vilu Residence 웹사이트를 통해 저희가 정보를 수집, 이용, 보호하는 방법을 안내합니다.",
       "lastUpdated": "최종 업데이트: 2026년 9월 3일",
       "tocTitle": "이 페이지의 내용",
       "toc1": "저희 소개",
@@ -1527,7 +1527,7 @@
       "toc12": "본 방침의 변경",
       "toc13": "문의하기",
       "whoTitle": "저희 소개",
-      "whoP1": "Vilu Residence는 몰디브 공화국 알리푸 달루 환초(남아리 환초) 마미길리(Maamigili)에 위치한 게스트하우스로, Mexiczone이 운영합니다. 본 방침은 저희가 viluresidence.net을 통해 어떤 정보를 수집하는지, 왜 수집하는지, 그리고 이용자가 어떤 선택을 할 수 있는지를 설명합니다.",
+      "whoP1": "Vilu Residence는 몰디브 공화국 알리푸 달루 환초(남아리 환초) 마미길리(Maamigili)에 위치한 게스트하우스로, Mexiczone이 운영합니다. 본 방침은 저희가 Vilu Residence 웹사이트를 통해 어떤 정보를 수집하는지, 왜 수집하는지, 그리고 이용자가 어떤 선택을 할 수 있는지를 설명합니다.",
       "whoP2": "본 방침이나 귀하의 정보에 관해 궁금한 점이 있으시면 <a href=\"mailto:Viluresidence@gmail.com\">Viluresidence@gmail.com</a>으로 문의해 주세요.",
       "infoTitle": "수집하는 정보",
       "directTitle": "웹사이트 직접 예약",

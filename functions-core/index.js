@@ -150,7 +150,7 @@ exports.blockDoubleBooking = onDocumentWritten('reservations/{reservationId}', a
 // writes room_availability, which the rules (correctly) allow only to
 // admin/staff. This trusted function performs the identical transaction with
 // the Admin SDK. Rules are NOT weakened. The rate is recomputed server-side.
-const ALLOWED_ORIGINS = ['https://viluresidence.net', 'https://www.viluresidence.net', 'https://viluresidence.web.app', 'https://viluresidence.firebaseapp.com', 'http://localhost:5173', 'http://127.0.0.1:5173'];
+const ALLOWED_ORIGINS = ['https://viluresidence.com', 'https://www.viluresidence.com', 'https://viluresidence.net', 'https://www.viluresidence.net', 'https://viluresidence.web.app', 'https://viluresidence.firebaseapp.com', 'http://localhost:5173', 'http://127.0.0.1:5173'];
 function cors(req, res) {
   const o = req.headers.origin || '';
   if (ALLOWED_ORIGINS.includes(o)) { res.set('Access-Control-Allow-Origin', o); res.set('Vary', 'Origin'); }

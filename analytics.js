@@ -125,6 +125,8 @@
   // and the canonical/og:url tags baked into every page at build time).
   // A referrer from any of these is internal navigation, never acquisition.
   var OWN_HOSTNAMES = [
+    'viluresidence.com',
+    'www.viluresidence.com',
     'viluresidence.net',
     'viluresidence.web.app',
     'viluresidence.firebaseapp.com',

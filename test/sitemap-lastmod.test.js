@@ -93,7 +93,7 @@ test('namespacesForPage(holiday-packages.html) matches the real file on disk', (
 
 console.log('Case D — English lastmod stays based on the English source file only, no i18n coupling');
 test('computeSitemapLastmod for the un-prefixed (English) URL equals gitLastCommitDate of the source file alone', () => {
-  const enResult = computeSitemapLastmod('https://viluresidence.net/holiday-packages.html');
+  const enResult = computeSitemapLastmod('https://viluresidence.com/holiday-packages.html');
   const sourceOnly = gitLastCommitDate('holiday-packages.html');
   assert.equal(enResult, sourceOnly, 'English lastmod must be exactly the source file\'s own git history — nothing else can have influenced it');
 });
@@ -103,7 +103,7 @@ test('computeSitemapLastmod for a translated URL does not equal only the source-
   // than earlier states — confirming the lang path actually DOES fold in i18n data, unlike
   // the English path above. This just proves the two code paths are genuinely different,
   // not accidentally both source-only.
-  const frResult = computeSitemapLastmod('https://viluresidence.net/fr/holiday-packages.html');
+  const frResult = computeSitemapLastmod('https://viluresidence.com/fr/holiday-packages.html');
   assert.ok(frResult, 'fr holiday-packages.html should produce a lastmod');
 });
 

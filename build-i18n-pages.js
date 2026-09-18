@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 const vm = require('vm');
 const { execSync } = require('child_process');
 
-const SITE_ROOT = 'https://viluresidence.net';
+const SITE_ORIGIN = 'https://viluresidence.com';
 const IMAGE_SITEMAP_NS = 'http://www.google.com/schemas/sitemap-image/1.1';
 const LANGS = ['zh', 'ru', 'de', 'it', 'fr', 'ar', 'ja', 'ko', 'sk', 'cs', 'es'];
 const RTL_LANGS = { ar: true };
@@ -211,13 +211,13 @@ function rewriteHreflangAndCanonical($, lang, outFile) {
   $('link[rel="alternate"][hreflang]').each(function () {
     const code = $(this).attr('hreflang');
     const suffix = outFile === 'index.html' ? '' : outFile;
-    if (code === 'x-default') { $(this).attr('href', SITE_ROOT + '/' + suffix); return; }
-    $(this).attr('href', code === 'en' ? SITE_ROOT + '/' + suffix : SITE_ROOT + '/' + code + '/' + suffix);
+    if (code === 'x-default') { $(this).attr('href', SITE_ORIGIN + '/' + suffix); return; }
+    $(this).attr('href', code === 'en' ? SITE_ORIGIN + '/' + suffix : SITE_ORIGIN + '/' + code + '/' + suffix);
   });
   const canonical = $('#canonical-link');
   if (canonical.length) {
     const suffix = outFile === 'index.html' ? '' : outFile;
-    canonical.attr('href', SITE_ROOT + '/' + lang + '/' + suffix);
+    canonical.attr('href', SITE_ORIGIN + '/' + lang + '/' + suffix);
   }
 }
 
@@ -246,7 +246,7 @@ function localizeSocialMeta($, dict, metaNs, lang, outFile) {
   }
   const suffix = outFile === 'index.html' ? '' : outFile;
   const ogUrl = $('meta[property="og:url"]');
-  if (ogUrl.length) ogUrl.attr('content', SITE_ROOT + '/' + lang + '/' + suffix);
+  if (ogUrl.length) ogUrl.attr('content', SITE_ORIGIN + '/' + lang + '/' + suffix);
 
   const locale = OG_LOCALE_MAP[lang];
   const ogLocaleEl = $('meta[property="og:locale"]');
@@ -404,30 +404,30 @@ function pageNamespaceFor(metaNs) {
 // the actual translated page rather than forcing the visitor's breadcrumb
 // trail back to an English page mid-language-context.
 function localizeBreadcrumbItem(item, dict, lang) {
-  if (item.item === SITE_ROOT + '/') {
+  if (item.item === SITE_ORIGIN + '/') {
     const home = getPath(dict.static, 'nav.home');
     if (home !== undefined) item.name = home;
-    item.item = SITE_ROOT + '/' + lang + '/';
+    item.item = SITE_ORIGIN + '/' + lang + '/';
     return;
   }
-  if (item.item === SITE_ROOT + '/#holiday-packages') {
+  if (item.item === SITE_ORIGIN + '/#holiday-packages') {
     const v = getPath(dict.static, 'pageNav.hpGuide');
     if (v !== undefined) item.name = v;
-    item.item = SITE_ROOT + '/' + lang + '/#holiday-packages';
+    item.item = SITE_ORIGIN + '/' + lang + '/#holiday-packages';
     return;
   }
-  if (item.item === SITE_ROOT + '/#experiences') {
+  if (item.item === SITE_ORIGIN + '/#experiences') {
     const v = getPath(dict.static, 'navShell.experiences');
     if (v !== undefined) item.name = v;
-    item.item = SITE_ROOT + '/' + lang + '/#experiences';
+    item.item = SITE_ORIGIN + '/' + lang + '/#experiences';
     return;
   }
   for (const p of PAGES) {
     if (p.outFile === 'index.html') continue;
-    if (item.item !== SITE_ROOT + '/' + p.source) continue;
+    if (item.item !== SITE_ORIGIN + '/' + p.source) continue;
     const label = getPath(dict.static, pageNamespaceFor(p.metaNs) + '.breadcrumb');
     if (label !== undefined) item.name = label;
-    item.item = SITE_ROOT + '/' + lang + '/' + p.outFile;
+    item.item = SITE_ORIGIN + '/' + lang + '/' + p.outFile;
     return;
   }
 }
@@ -438,16 +438,16 @@ function localizeBreadcrumbItem(item, dict, lang) {
 // fields were being localized for name/description but left pointing at
 // the English-root URL on every non-English page -- a real hreflang/
 // canonical-adjacent leak into structured data specifically. Mirrors
-// localizeBreadcrumbItem's URL construction (SITE_ROOT + '/' + lang + '/'
+// localizeBreadcrumbItem's URL construction (SITE_ORIGIN + '/' + lang + '/'
 // [+ outFile]) so both stay consistent. Leaves the URL untouched if it
 // doesn't match this page's own English URL prefix (i.e. it points
 // somewhere else entirely) rather than guessing.
 function localizeSelfUrl(url, pageDef, lang) {
   if (typeof url !== 'string' || !lang) return url;
-  const prefix = SITE_ROOT + '/' + pageDef.outFile;
+  const prefix = SITE_ORIGIN + '/' + pageDef.outFile;
   if (!url.startsWith(prefix)) return url;
   const suffix = url.slice(prefix.length); // '' or '#fragment'
-  const base = pageDef.outFile === 'index.html' ? SITE_ROOT + '/' + lang + '/' : SITE_ROOT + '/' + lang + '/' + pageDef.outFile;
+  const base = pageDef.outFile === 'index.html' ? SITE_ORIGIN + '/' + lang + '/' : SITE_ORIGIN + '/' + lang + '/' + pageDef.outFile;
   return base + suffix;
 }
 
@@ -752,7 +752,6 @@ function renderHomepagePackageFallback(packages, dict, i18nEn, dynamicDict) {
 // noise — using it would make lastmod always show "today," which search
 // engines learn to distrust. Source-file history is the only signal that
 // genuinely reflects when a URL's actual content last changed.
-const SITEMAP_ROOT = 'https://viluresidence.net/';
 const SITEMAP_PAGE_SOURCE = {
   '': 'vilu-website.html',
   'whale-shark-snorkeling.html': 'whale-shark-snorkeling.html',
@@ -788,7 +787,7 @@ function maxDateStr(a, b) {
 }
 
 function parseSitemapLoc(loc) {
-  const rest = loc.replace(SITEMAP_ROOT, '');
+  const rest = loc.replace(SITE_ORIGIN + '/', '');
   const langMatch = rest.match(/^([a-z]{2})\/(.*)$/);
   if (langMatch && LANGS.includes(langMatch[1])) {
     return { page: langMatch[2], lang: langMatch[1] };
@@ -988,41 +987,41 @@ function escapeXmlText(str) {
 // every other image list in this file.
 const ROOM_PHOTO_SITEMAP_URLS = [
   // VR01 — Deluxe Family Room
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bed-vr01-cd89b8dd.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-interior-vr01-6b24913b.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-vanity-vr01-4dba6981.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-shower-vr01-5c619110.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-veranda-night-vr01-c17b483d.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-bed-vr01-cd89b8dd.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-interior-vr01-6b24913b.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-bathroom-vanity-vr01-4dba6981.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-bathroom-shower-vr01-5c619110.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-veranda-night-vr01-c17b483d.jpg`,
   // VR02 — Deluxe Family Room
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-interior-vr02-6b24913b.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bed-vr02-cd89b8dd.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-vanity-vr02-4dba6981.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-bathroom-shower-vr02-5c619110.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-room-veranda-night-vr02-c17b483d.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-interior-vr02-6b24913b.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-bed-vr02-cd89b8dd.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-bathroom-vanity-vr02-4dba6981.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-bathroom-shower-vr02-5c619110.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-room-veranda-night-vr02-c17b483d.jpg`,
   // VR03 — Double Room
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bed-vr03-5ddc46c5.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-interior-vr03-a7349edd.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-shower-vr03-cfa7afa3.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr03-e10a9edf.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-veranda-night-vr03-ff126dbb.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bed-vr03-5ddc46c5.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-interior-vr03-a7349edd.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bathroom-shower-vr03-cfa7afa3.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr03-e10a9edf.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-veranda-night-vr03-ff126dbb.jpg`,
   // VR04 — Double Room
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bed-vr04-5ddc46c5.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-interior-vr04-a7349edd.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-shower-vr04-cfa7afa3.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr04-e10a9edf.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-veranda-night-vr04-ff126dbb.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bed-vr04-5ddc46c5.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-interior-vr04-a7349edd.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bathroom-shower-vr04-cfa7afa3.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr04-e10a9edf.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-veranda-night-vr04-ff126dbb.jpg`,
   // VR05 — Double Room
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bed-vr05-5ddc46c5.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-interior-vr05-a7349edd.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-shower-vr05-cfa7afa3.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr05-e10a9edf.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-double-room-veranda-night-vr05-ff126dbb.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bed-vr05-5ddc46c5.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-interior-vr05-a7349edd.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bathroom-shower-vr05-cfa7afa3.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-bathroom-vanity-vr05-e10a9edf.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-double-room-veranda-night-vr05-ff126dbb.jpg`,
   // VR06 — Deluxe Family Room with Open Deck
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-bed-ec7aef94.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-patio-door-8ccfeeaf.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-bathroom-shower-63d57afd.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-bathroom-vanity-ac6dad9a.jpg`,
-  `${SITE_ROOT}/images/rooms/vilu-residence-deluxe-family-open-deck-veranda-night-6023c510.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-open-deck-bed-ec7aef94.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-open-deck-patio-door-8ccfeeaf.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-open-deck-bathroom-shower-63d57afd.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-open-deck-bathroom-vanity-ac6dad9a.jpg`,
+  `${SITE_ORIGIN}/images/rooms/vilu-residence-deluxe-family-open-deck-veranda-night-6023c510.jpg`,
 ];
 
 function extractHeroImages(pageDef, srcHtml) {
@@ -1043,11 +1042,11 @@ function extractHeroImages(pageDef, srcHtml) {
     // are never present in this static srcHtml at all, so they're excluded
     // automatically here regardless of what host they now point to — see
     // ROOM_PHOTO_SITEMAP_URLS below for how those are actually included.
-    const galleryRe = new RegExp(`data-bg-url="${SITE_ROOT}/images/([^"]+\\.jpg)"`, 'g');
+    const galleryRe = new RegExp(`data-bg-url="${SITE_ORIGIN}/images/([^"]+\\.jpg)"`, 'g');
     while ((m = galleryRe.exec(srcHtml))) {
       if (!seen.has(m[1])) { seen.add(m[1]); files.push(m[1]); }
     }
-    const fullUrls = files.map((file) => `${SITE_ROOT}/images/${file}`);
+    const fullUrls = files.map((file) => `${SITE_ORIGIN}/images/${file}`);
     // Room photos are already full URLs (they live under /images/rooms/,
     // not /images/), so they're appended after the map, not before it.
     return fullUrls.concat(ROOM_PHOTO_SITEMAP_URLS);
@@ -1055,7 +1054,7 @@ function extractHeroImages(pageDef, srcHtml) {
   // Standalone pages: exactly one page-header hero background image.
   const m = srcHtml.match(/class="page-header"[^>]*style="[^"]*?background-image:url\('images\/([^']+\.jpg)'\)/);
   if (m) files.push(m[1]);
-  return files.map((file) => `${SITE_ROOT}/images/${file}`);
+  return files.map((file) => `${SITE_ORIGIN}/images/${file}`);
 }
 
 function ensureImageSitemapNamespace(content) {
@@ -1368,5 +1367,5 @@ module.exports = {
   faqKeyMap,
   pageNamespaceFor,
   OG_LOCALE_MAP,
-  SITE_ROOT,
+  SITE_ORIGIN,
 };

@@ -59,10 +59,10 @@ section('Case B — JSON-LD self-referencing URLs point at the locale\'s own pag
     const hp = path.join(loc, 'holiday-packages.html');
     test(`${hp}: every Product.offers.url points at /${loc}/holiday-packages.html, never the English root`, () => {
       const html = read(hp);
-      const urls = [...html.matchAll(/"url":\s*"(https:\/\/viluresidence\.net\/[^"]*holiday-packages\.html[^"]*)"/g)].map(m => m[1]);
+      const urls = [...html.matchAll(/"url":\s*"(https:\/\/viluresidence\.com\/[^"]*holiday-packages\.html[^"]*)"/g)].map(m => m[1]);
       assert.ok(urls.length > 0, 'expected at least one Product.offers.url in the JSON-LD');
       for (const u of urls) {
-        assert.ok(u.startsWith(`https://viluresidence.net/${loc}/`), `offers.url leaked the English root: ${u}`);
+        assert.ok(u.startsWith(`https://viluresidence.com/${loc}/`), `offers.url leaked the English root: ${u}`);
       }
     });
 
@@ -72,7 +72,7 @@ section('Case B — JSON-LD self-referencing URLs point at the locale\'s own pag
         const html = read(maa);
         const m = html.match(/"mainEntityOfPage":\s*{\s*"@type":\s*"WebPage",\s*"@id":\s*"([^"]+)"/);
         assert.ok(m, 'expected a mainEntityOfPage.@id in the JSON-LD');
-        assert.equal(m[1], `https://viluresidence.net/${loc}/maamigili-guide.html`, `mainEntityOfPage.@id leaked the English root: ${m[1]}`);
+        assert.equal(m[1], `https://viluresidence.com/${loc}/maamigili-guide.html`, `mainEntityOfPage.@id leaked the English root: ${m[1]}`);
       });
     }
   }
@@ -115,9 +115,9 @@ section('Case E — sitemap.xml stays clean');
   const sitemap = read('sitemap.xml');
   const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
 
-  test('every <loc> is a production https://viluresidence.net/ URL (no Firebase *.web.app, no query strings)', () => {
+  test('every <loc> is a production https://viluresidence.com/ URL (no Firebase *.web.app, no query strings)', () => {
     for (const u of locs) {
-      assert.ok(u.startsWith('https://viluresidence.net/'), `non-production URL in sitemap: ${u}`);
+      assert.ok(u.startsWith('https://viluresidence.com/'), `non-production URL in sitemap: ${u}`);
       assert.ok(!u.includes('web.app'), `Firebase-hosting URL leaked into sitemap: ${u}`);
       assert.ok(!u.includes('?'), `query-string URL in sitemap: ${u}`);
     }
@@ -146,7 +146,7 @@ section('Case F — robots.txt keeps the protected internal pages blocked');
     assert.match(robots, /Allow:\s*\//);
     assert.match(robots, /Disallow:\s*\/vilu-unified\.html/);
     assert.match(robots, /Disallow:\s*\/vilu-agency-portal\.html/);
-    assert.match(robots, /Sitemap:\s*https:\/\/viluresidence\.net\/sitemap\.xml/);
+    assert.match(robots, /Sitemap:\s*https:\/\/viluresidence\.com\/sitemap\.xml/);
   });
 }
 

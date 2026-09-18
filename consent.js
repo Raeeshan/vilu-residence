@@ -100,7 +100,7 @@
   // Consent handling, the Consent Mode signals and trackEvent() itself are
   // unchanged -- on a non-production host the GA script is simply never
   // requested, so nothing is ever transmitted.
-  var PRODUCTION_HOSTNAMES = ['viluresidence.net', 'www.viluresidence.net'];
+  var PRODUCTION_HOSTNAMES = ['viluresidence.com', 'www.viluresidence.com', 'viluresidence.net', 'www.viluresidence.net'];
   function isProductionHost(){
     try { return PRODUCTION_HOSTNAMES.indexOf(String(location.hostname).toLowerCase()) !== -1; }
     catch(e) { return false; }

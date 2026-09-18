@@ -1254,7 +1254,7 @@ section('Phase 12B-E2B — complete cinematic homepage contracts');
       'vilu-residence-guests-lagoon-maldives.jpg', 'vilu-residence-couple-sunset-beach-maldives.jpg',
       'vilu-residence-maamigili-island-buggy-tour.jpg', 'vilu-residence-sandbank-bbq-beach-dining.jpg'
     ];
-    for (const img of GALLERY_IMAGES) assert.ok(h.includes(`<img class="ga-thumb-img" src="https://viluresidence.net/images/${img}"`), img);
+    for (const img of GALLERY_IMAGES) assert.ok(h.includes(`<img class="ga-thumb-img" src="https://viluresidence.com/images/${img}"`), img);
   });
   test('closing conversion uses the approved line + exactly 2 CTAs to the approved destinations', () => {
     const closing = h.slice(h.indexOf('<section id="closing">'), h.indexOf('</section>', h.indexOf('<section id="closing">')));

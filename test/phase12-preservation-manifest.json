@@ -3,18 +3,60 @@
   "manifest_version": 1,
   "baseline_sha": "87a640351e8b4753987fea0a2c851ffecf725196",
   "baseline_date": "2026-09-04",
-  "site_origin": "https://viluresidence.net",
-
-  "languages": ["ar", "cs", "de", "fr", "it", "ja", "ko", "ru", "sk", "zh"],
-  "rtl_languages": ["ar"],
-  "hreflang_codes": ["en", "zh", "ru", "de", "it", "fr", "ar", "ja", "ko", "sk", "cs", "x-default"],
+  "site_origin": "https://viluresidence.com",
+  "languages": [
+    "ar",
+    "cs",
+    "de",
+    "fr",
+    "it",
+    "ja",
+    "ko",
+    "ru",
+    "sk",
+    "zh"
+  ],
+  "rtl_languages": [
+    "ar"
+  ],
+  "hreflang_codes": [
+    "en",
+    "zh",
+    "ru",
+    "de",
+    "it",
+    "fr",
+    "ar",
+    "ja",
+    "ko",
+    "sk",
+    "cs",
+    "x-default"
+  ],
   "generated_pages_per_language": 14,
   "generated_pages_total": 140,
   "partial_languages": {
     "$comment": "Phase 30: Spanish launched deliberately covering only Holiday Packages, then extended to the homepage too (evidence-driven scope, not a full 12-page mirror -- see VILU_DECISIONS.md). Kept fully separate from the 'languages'/full-parity fields above so the original 10-language, 140-file invariant stays exact and untouched. A page listed here gets its own hreflang_codes/og_locale_alternate_count (13 and 10 respectively: the base 12/9 plus Spanish) on top of every one of its existing generated mirrors too, since hreflang/OG alternates must list ALL real alternates including the new one.",
     "es": {
-      "pages": ["holiday-packages.html", "vilu-website.html"],
-      "hreflang_codes": ["en", "zh", "ru", "de", "it", "fr", "ar", "ja", "ko", "sk", "cs", "es", "x-default"],
+      "pages": [
+        "holiday-packages.html",
+        "vilu-website.html"
+      ],
+      "hreflang_codes": [
+        "en",
+        "zh",
+        "ru",
+        "de",
+        "it",
+        "fr",
+        "ar",
+        "ja",
+        "ko",
+        "sk",
+        "cs",
+        "es",
+        "x-default"
+      ],
       "og_locale_alternate_count": 10
     }
   },
@@ -22,9 +64,12 @@
     "file": "sitemap.xml",
     "expected_url_count": 135,
     "content_pages_in_sitemap": 13,
-    "excluded_pages": ["privacy-policy.html", "cookies.html", "404.html"]
+    "excluded_pages": [
+      "privacy-policy.html",
+      "cookies.html",
+      "404.html"
+    ]
   },
-
   "pages": [
     {
       "file": "vilu-website.html",
@@ -35,14 +80,41 @@
       "page_slug": "home",
       "title": "Vilu Residence — Guesthouse in Maamigili, South Ari Atoll",
       "description": "Boutique guesthouse in Maamigili, South Ari Atoll: snorkel with whale sharks &amp; manta rays, easy beach access, warm local hospitality.",
-      "canonical": "https://viluresidence.net/",
+      "canonical": "https://viluresidence.com/",
       "robots": null,
       "hreflang": true,
       "h1": "ViluResidence",
-      "jsonld_types": ["LodgingBusiness", "Organization", "WebSite", "BreadcrumbList"],
+      "jsonld_types": [
+        "LodgingBusiness",
+        "Organization",
+        "WebSite",
+        "BreadcrumbList"
+      ],
       "faq_count": 0,
-      "required_ids": ["booking", "booking-full-page", "bookingPopupOverlay", "rooms", "hp-grid", "exp-grid", "faq-list", "hamburger", "mobileMenu", "gh-grid"],
-      "required_anchors": ["#what-is-vilu", "#rooms", "#booking", "#gallery", "#travel-info", "#contact", "#holiday-packages", "#experiences", "#faq", "#closing"]
+      "required_ids": [
+        "booking",
+        "booking-full-page",
+        "bookingPopupOverlay",
+        "rooms",
+        "hp-grid",
+        "exp-grid",
+        "faq-list",
+        "hamburger",
+        "mobileMenu",
+        "gh-grid"
+      ],
+      "required_anchors": [
+        "#what-is-vilu",
+        "#rooms",
+        "#booking",
+        "#gallery",
+        "#travel-info",
+        "#contact",
+        "#holiday-packages",
+        "#experiences",
+        "#faq",
+        "#closing"
+      ]
     },
     {
       "file": "holiday-packages.html",
@@ -52,13 +124,29 @@
       "page_slug": "holiday-packages",
       "title": "Maldives Holiday Packages — Whale Sharks & Manta Rays",
       "description": "9 all-in guesthouse holiday packages in South Ari Atoll, Maldives, from $450pp — round-trip transfer, accommodation, breakfast, and whale shark/manta snorkeling included.",
-      "canonical": "https://viluresidence.net/holiday-packages.html",
+      "canonical": "https://viluresidence.com/holiday-packages.html",
       "robots": null,
       "hreflang": true,
       "h1": "Maldives Holiday Packages",
-      "jsonld_types": ["BreadcrumbList", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "Product", "FAQPage"],
+      "jsonld_types": [
+        "BreadcrumbList",
+        "Product",
+        "Product",
+        "Product",
+        "Product",
+        "Product",
+        "Product",
+        "Product",
+        "Product",
+        "Product",
+        "FAQPage"
+      ],
       "faq_count": 9,
-      "required_ids": ["pkg-grid", "hamburger", "mobileMenu"]
+      "required_ids": [
+        "pkg-grid",
+        "hamburger",
+        "mobileMenu"
+      ]
     },
     {
       "file": "maamigili-guide.html",
@@ -68,11 +156,16 @@
       "page_slug": "maamigili-guide",
       "title": "Maamigili Travel Guide — The Island Vilu Residence Calls Home",
       "description": "A traveler's guide to Maamigili, South Ari Atoll: Villa International Airport, year-round whale sharks offshore, local-island life, and why to stay here instead of a resort.",
-      "canonical": "https://viluresidence.net/maamigili-guide.html",
+      "canonical": "https://viluresidence.com/maamigili-guide.html",
       "robots": null,
       "hreflang": true,
       "h1": "Maamigili Travel Guide",
-      "jsonld_types": ["TouristDestination", "BreadcrumbList", "Article", "FAQPage"],
+      "jsonld_types": [
+        "TouristDestination",
+        "BreadcrumbList",
+        "Article",
+        "FAQPage"
+      ],
       "faq_count": 42
     },
     {
@@ -83,11 +176,16 @@
       "page_slug": "south-ari-atoll-guide",
       "title": "South Ari Atoll Travel Guide, Maldives — Whale Sharks, Manta Rays &amp; Local Islands",
       "description": "A practical guide to South Ari Atoll, Maldives — whale sharks and manta rays, the atoll's local islands, getting there, and what to expect from a guesthouse-based trip.",
-      "canonical": "https://viluresidence.net/south-ari-atoll-guide.html",
+      "canonical": "https://viluresidence.com/south-ari-atoll-guide.html",
       "robots": null,
       "hreflang": true,
       "h1": "South Ari Atoll Travel Guide",
-      "jsonld_types": ["TouristDestination", "BreadcrumbList", "Article", "FAQPage"],
+      "jsonld_types": [
+        "TouristDestination",
+        "BreadcrumbList",
+        "Article",
+        "FAQPage"
+      ],
       "faq_count": 11
     },
     {
@@ -98,11 +196,16 @@
       "page_slug": "whale-shark-snorkeling",
       "title": "Whale Shark Snorkeling in Maamigili, South Ari Atoll — What to Expect",
       "description": "What to actually expect on a whale shark snorkeling excursion from Maamigili, South Ari Atoll: trip length, what happens if none are found, who can join, and honest, year-round odds — from Vilu Residence.",
-      "canonical": "https://viluresidence.net/whale-shark-snorkeling.html",
+      "canonical": "https://viluresidence.com/whale-shark-snorkeling.html",
       "robots": null,
       "hreflang": true,
       "h1": "Whale Shark Snorkeling in Maamigili, South Ari Atoll",
-      "jsonld_types": ["Product", "BreadcrumbList", "Article", "FAQPage"],
+      "jsonld_types": [
+        "Product",
+        "BreadcrumbList",
+        "Article",
+        "FAQPage"
+      ],
       "faq_count": 12
     },
     {
@@ -113,11 +216,16 @@
       "page_slug": "manta-ray-snorkeling",
       "title": "Manta Ray Snorkeling in Maamigili, South Ari Atoll — What to Expect",
       "description": "What a manta ray snorkeling trip from Maamigili is really like — where our guides search and why, cleaning-station vs. other behavior, and an honest answer on seasonality.",
-      "canonical": "https://viluresidence.net/manta-ray-snorkeling.html",
+      "canonical": "https://viluresidence.com/manta-ray-snorkeling.html",
       "robots": null,
       "hreflang": true,
       "h1": "Manta Ray Snorkeling in Maamigili, South Ari Atoll",
-      "jsonld_types": ["Product", "BreadcrumbList", "Article", "FAQPage"],
+      "jsonld_types": [
+        "Product",
+        "BreadcrumbList",
+        "Article",
+        "FAQPage"
+      ],
       "faq_count": 12
     },
     {
@@ -128,11 +236,15 @@
       "page_slug": "things-to-do-maamigili",
       "title": "Things to Do in Maamigili — Excursions &amp; Activities Guide",
       "description": "Discover things to do in Maamigili and South Ari Atoll — whale sharks, manta rays, reef snorkeling, fishing, cruises and more, plus Vilu Residence holiday packages.",
-      "canonical": "https://viluresidence.net/things-to-do-maamigili.html",
+      "canonical": "https://viluresidence.com/things-to-do-maamigili.html",
       "robots": null,
       "hreflang": true,
       "h1": "Things to Do in Maamigili",
-      "jsonld_types": ["Article", "BreadcrumbList", "FAQPage"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
       "faq_count": 8
     },
     {
@@ -143,11 +255,14 @@
       "page_slug": "best-time-to-visit",
       "title": "Best Time to Visit the Maldives — A Season-by-Season Guide",
       "description": "When to visit the Maldives: dry season vs wet season, prices, crowds, and why whale sharks and manta rays at Vilu Residence don't have a 'wrong' season.",
-      "canonical": "https://viluresidence.net/best-time-to-visit.html",
+      "canonical": "https://viluresidence.com/best-time-to-visit.html",
       "robots": null,
       "hreflang": true,
       "h1": "Best Time to Visit the Maldives",
-      "jsonld_types": ["Article", "BreadcrumbList"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList"
+      ],
       "faq_count": 0
     },
     {
@@ -158,11 +273,14 @@
       "page_slug": "guesthouse-vs-resort",
       "title": "Maldives Guesthouse vs Resort: Which Is Better?",
       "description": "Guesthouse or resort in the Maldives? A genuinely balanced comparison of price, privacy, alcohol/dress rules, and what each actually gets you.",
-      "canonical": "https://viluresidence.net/guesthouse-vs-resort.html",
+      "canonical": "https://viluresidence.com/guesthouse-vs-resort.html",
       "robots": null,
       "hreflang": true,
       "h1": "Maldives Guesthouse vs Resort",
-      "jsonld_types": ["Article", "BreadcrumbList"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList"
+      ],
       "faq_count": 0
     },
     {
@@ -173,11 +291,14 @@
       "page_slug": "maldives-holiday-cost",
       "title": "How Much Does a Maldives Holiday Cost? — 2026 Price Guide",
       "description": "Real 2026 Maldives cost ranges by accommodation type, from local-island guesthouses to ultra-luxury resorts, plus one real example package price.",
-      "canonical": "https://viluresidence.net/maldives-holiday-cost.html",
+      "canonical": "https://viluresidence.com/maldives-holiday-cost.html",
       "robots": null,
       "hreflang": true,
       "h1": "How Much Does a Maldives Holiday Cost?",
-      "jsonld_types": ["Article", "BreadcrumbList"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList"
+      ],
       "faq_count": 0
     },
     {
@@ -188,11 +309,14 @@
       "page_slug": "best-local-islands-snorkeling",
       "title": "Best Local Islands in the Maldives for Snorkeling",
       "description": "What to actually check before booking a Maldives local island for snorkeling — resident vs seasonal marine life, house reefs, and why South Ari Atoll is built differently.",
-      "canonical": "https://viluresidence.net/best-local-islands-snorkeling.html",
+      "canonical": "https://viluresidence.com/best-local-islands-snorkeling.html",
       "robots": null,
       "hreflang": true,
       "h1": "Best Local Islands in the Maldives for Snorkeling",
-      "jsonld_types": ["Article", "BreadcrumbList"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList"
+      ],
       "faq_count": 0
     },
     {
@@ -203,11 +327,14 @@
       "page_slug": "south-ari-vs-other-regions",
       "title": "South Ari Atoll vs Other Maldives Regions",
       "description": "How South Ari Atoll compares to North Malé Atoll and Baa Atoll — transfer times, wildlife, and how to choose the right Maldives region for your trip.",
-      "canonical": "https://viluresidence.net/south-ari-vs-other-regions.html",
+      "canonical": "https://viluresidence.com/south-ari-vs-other-regions.html",
       "robots": null,
       "hreflang": true,
       "h1": "South Ari Atoll vs Other Maldives Regions",
-      "jsonld_types": ["Article", "BreadcrumbList"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList"
+      ],
       "faq_count": 0
     },
     {
@@ -219,11 +346,15 @@
       "page_slug": "getting-to-maamigili",
       "title": "Getting to Maamigili, South Ari Atoll — Flights &amp; Speedboat Guide",
       "description": "How to get from Velana International Airport to Maamigili, South Ari Atoll: domestic flight vs. direct speedboat, real durations and sources, arrival/departure timing, and trip-preparation essentials.",
-      "canonical": "https://viluresidence.net/getting-to-maamigili.html",
+      "canonical": "https://viluresidence.com/getting-to-maamigili.html",
       "robots": null,
       "hreflang": false,
       "h1": "Getting to Maamigili",
-      "jsonld_types": ["Article", "BreadcrumbList", "FAQPage"],
+      "jsonld_types": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
       "faq_count": 8
     },
     {
@@ -233,8 +364,8 @@
       "page_type": "legal",
       "page_slug": "privacy-policy",
       "title": "Privacy Policy — Vilu Residence",
-      "description": "How Vilu Residence collects, uses, and protects information through viluresidence.net, including bookings, enquiries, and analytics.",
-      "canonical": "https://viluresidence.net/privacy-policy.html",
+      "description": "How Vilu Residence collects, uses, and protects information through the Vilu Residence website, including bookings, enquiries, and analytics.",
+      "canonical": "https://viluresidence.com/privacy-policy.html",
       "robots": "noindex, follow",
       "hreflang": true,
       "h1": "Privacy Policy",
@@ -249,7 +380,7 @@
       "page_slug": "cookies",
       "title": "Cookies &amp; Technology — Vilu Residence",
       "description": "How Vilu Residence uses cookies and similar technology, including Essential, Preferences, Analytics, and Marketing categories, and how to control your choices.",
-      "canonical": "https://viluresidence.net/cookies.html",
+      "canonical": "https://viluresidence.com/cookies.html",
       "robots": "noindex, follow",
       "hreflang": true,
       "h1": "Cookies &amp; Technology",
@@ -273,96 +404,360 @@
       "faq_count": 0
     }
   ],
-
   "internal_tools": {
     "$comment": "Reachable physical files. robots.txt Disallow + meta noindex,nofollow are search-engine directives, NOT access control. P4 security residual — separate future project. Phase 12 must not add public links to these.",
-    "files": ["vilu-unified.html", "vilu-agency-portal.html"],
+    "files": [
+      "vilu-unified.html",
+      "vilu-agency-portal.html"
+    ],
     "robots_meta": "noindex, nofollow",
-    "robots_txt_disallow": ["/vilu-unified.html", "/vilu-agency-portal.html"]
+    "robots_txt_disallow": [
+      "/vilu-unified.html",
+      "/vilu-agency-portal.html"
+    ]
   },
-
   "packages": {
     "$comment": "Locked nine-package commercial contract (owner-approved). Source of truth in code: the PACKAGES array in holiday-packages.html and PACKAGE_NAME_TO_ID in analytics.js. 'essential_activities' must all appear in the package's activities list; 'save_percent_presentation' is NOT locked commercial data (baseline awareness only).",
     "expected_count": 9,
-    "badge_i18n_keys": { "Most Popular": "badgeMostPopular", "Best Value": "badgeBestValue", "Most Complete": "badgeMostComplete", "Honeymoon Special": "badgeHoneymoon" },
-    "common_includes": ["Round-Trip Speedboat Transfer", "Daily Breakfast"],
+    "badge_i18n_keys": {
+      "Most Popular": "badgeMostPopular",
+      "Best Value": "badgeBestValue",
+      "Most Complete": "badgeMostComplete",
+      "Honeymoon Special": "badgeHoneymoon"
+    },
+    "common_includes": [
+      "Round-Trip Speedboat Transfer",
+      "Daily Breakfast"
+    ],
     "items": [
-      { "order": 1, "id": "island-explorer-getaway", "name": "Island Explorer Getaway", "price_usd_pp": 450, "nights": 4, "badge": null,
+      {
+        "order": 1,
+        "id": "island-explorer-getaway",
+        "name": "Island Explorer Getaway",
+        "price_usd_pp": 450,
+        "nights": 4,
+        "badge": null,
         "accommodation_include": "4 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": null },
-      { "order": 2, "id": "reef-sunset-adventure", "name": "Reef & Sunset Adventure", "price_usd_pp": 550, "nights": 5, "badge": null,
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": null
+      },
+      {
+        "order": 2,
+        "id": "reef-sunset-adventure",
+        "name": "Reef & Sunset Adventure",
+        "price_usd_pp": 550,
+        "nights": 5,
+        "badge": null,
         "accommodation_include": "5 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Sunset Cruise", "Turtle Snorkeling"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Private Island Picnic — $51/person"],
-        "save_percent_presentation": 2 },
-      { "order": 3, "id": "island-serenity-escape", "name": "Island Serenity Escape", "price_usd_pp": 650, "nights": 6, "badge": null,
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Sunset Cruise",
+          "Turtle Snorkeling"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Private Island Picnic — $51/person"
+        ],
+        "save_percent_presentation": 2
+      },
+      {
+        "order": 3,
+        "id": "island-serenity-escape",
+        "name": "Island Serenity Escape",
+        "price_usd_pp": 650,
+        "nights": 6,
+        "badge": null,
         "accommodation_include": "6 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Sunset Cruise", "Private Island Picnic"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": 4 },
-      { "order": 4, "id": "maldives-dream-bliss", "name": "Maldives Dream Bliss", "price_usd_pp": 700, "nights": 7, "badge": "Most Popular",
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Sunset Cruise",
+          "Private Island Picnic"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": 4
+      },
+      {
+        "order": 4,
+        "id": "maldives-dream-bliss",
+        "name": "Maldives Dream Bliss",
+        "price_usd_pp": 700,
+        "nights": 7,
+        "badge": "Most Popular",
         "accommodation_include": "7 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Sandbank Trip", "Dolphin Cruise"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": 11 },
-      { "order": 5, "id": "ultimate-island-relaxation", "name": "Ultimate Island Relaxation", "price_usd_pp": 790, "nights": 8, "badge": null,
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Sandbank Trip",
+          "Dolphin Cruise"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": 11
+      },
+      {
+        "order": 5,
+        "id": "ultimate-island-relaxation",
+        "name": "Ultimate Island Relaxation",
+        "price_usd_pp": 790,
+        "nights": 8,
+        "badge": null,
         "accommodation_include": "8 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Sunset Cruise", "Sandbank Trip", "Private Island Picnic"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": 12 },
-      { "order": 6, "id": "grand-maldives-escape", "name": "Grand Maldives Escape", "price_usd_pp": 880, "nights": 9, "badge": null,
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Sunset Cruise",
+          "Sandbank Trip",
+          "Private Island Picnic"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": 12
+      },
+      {
+        "order": 6,
+        "id": "grand-maldives-escape",
+        "name": "Grand Maldives Escape",
+        "price_usd_pp": 880,
+        "nights": 9,
+        "badge": null,
         "accommodation_include": "9 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Dolphin Cruise", "Sunset Cruise", "Sandbank Trip", "Private Island Picnic"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": 13 },
-      { "order": 7, "id": "ultimate-maldives-odyssey", "name": "Ultimate Maldives Odyssey", "price_usd_pp": 940, "nights": 10, "badge": "Best Value",
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Dolphin Cruise",
+          "Sunset Cruise",
+          "Sandbank Trip",
+          "Private Island Picnic"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": 13
+      },
+      {
+        "order": 7,
+        "id": "ultimate-maldives-odyssey",
+        "name": "Ultimate Maldives Odyssey",
+        "price_usd_pp": 940,
+        "nights": 10,
+        "badge": "Best Value",
         "accommodation_include": "10 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Sandbank Trip", "Private Island Picnic", "Sunset Cruise", "Dolphin Cruise"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": 16 },
-      { "order": 8, "id": "ultimate-resort-island-odyssey", "name": "Ultimate Resort & Island Odyssey", "price_usd_pp": 1300, "nights": 11, "badge": "Most Complete",
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Sandbank Trip",
+          "Private Island Picnic",
+          "Sunset Cruise",
+          "Dolphin Cruise"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": 16
+      },
+      {
+        "order": 8,
+        "id": "ultimate-resort-island-odyssey",
+        "name": "Ultimate Resort & Island Odyssey",
+        "price_usd_pp": 1300,
+        "nights": 11,
+        "badge": "Most Complete",
         "accommodation_include": "11 Nights Accommodation (Double Room)",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Sandbank Trip", "Private Island Picnic", "Sunset Cruise", "Dolphin Cruise", "Night Fishing", "Private Dinner at the Beach", "Resort Day Visit"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": null },
-      { "order": 9, "id": "honeymoon-dream-escape", "name": "Honeymoon Dream Escape", "price_usd_pp": 1100, "nights": 10, "badge": "Honeymoon Special",
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Sandbank Trip",
+          "Private Island Picnic",
+          "Sunset Cruise",
+          "Dolphin Cruise",
+          "Night Fishing",
+          "Private Dinner at the Beach",
+          "Resort Day Visit"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": null
+      },
+      {
+        "order": 9,
+        "id": "honeymoon-dream-escape",
+        "name": "Honeymoon Dream Escape",
+        "price_usd_pp": 1100,
+        "nights": 10,
+        "badge": "Honeymoon Special",
         "accommodation_include": "10 Nights Accommodation with Romantic Bed Décor",
-        "essential_activities": ["Whale Shark Snorkeling", "Manta Snorkeling", "Turtle Snorkeling", "Sandbank Trip", "Private Island Picnic", "Sunset Cruise", "Dolphin Cruise", "Night Fishing", "Private Dinner at the Beach"],
-        "addons": ["Half-Board — $25/day", "Full-Board — $40/day", "Photography — $25/hr"],
-        "save_percent_presentation": null }
+        "essential_activities": [
+          "Whale Shark Snorkeling",
+          "Manta Snorkeling",
+          "Turtle Snorkeling",
+          "Sandbank Trip",
+          "Private Island Picnic",
+          "Sunset Cruise",
+          "Dolphin Cruise",
+          "Night Fishing",
+          "Private Dinner at the Beach"
+        ],
+        "addons": [
+          "Half-Board — $25/day",
+          "Full-Board — $40/day",
+          "Photography — $25/hr"
+        ],
+        "save_percent_presentation": null
+      }
     ]
   },
-
   "analytics": {
     "file": "analytics.js",
     "ga_measurement_id": "G-1EPZ71Q331",
-    "canonical_events": ["language_change", "contact_click", "package_view", "package_enquire", "experience_enquire", "availability_click", "faq_expand", "related_content_click", "review_link_click", "page_not_found"],
-    "common_params": ["site_language", "page_type", "page_slug"],
-    "body_attributes": ["data-page-type", "data-page-slug"],
+    "canonical_events": [
+      "language_change",
+      "contact_click",
+      "package_view",
+      "package_enquire",
+      "experience_enquire",
+      "availability_click",
+      "faq_expand",
+      "related_content_click",
+      "review_link_click",
+      "page_not_found"
+    ],
+    "common_params": [
+      "site_language",
+      "page_type",
+      "page_slug"
+    ],
+    "body_attributes": [
+      "data-page-type",
+      "data-page-slug"
+    ],
     "ga4_custom_dimensions": {
       "$comment": "Exactly the 11 approved, configured GA4 Admin event-scoped custom dimensions. page_type and page_slug are P0 code/body contracts but are NOT GA4 custom dimensions.",
       "count": 11,
-      "params": ["package_id", "experience_id", "guide_slug", "contact_method", "source_context", "first_touch_source", "first_touch_medium", "first_touch_campaign", "landing_page_slug", "landing_language", "site_language"],
-      "not_registered_as_dimensions": ["page_type", "page_slug"]
+      "params": [
+        "package_id",
+        "experience_id",
+        "guide_slug",
+        "contact_method",
+        "source_context",
+        "first_touch_source",
+        "first_touch_medium",
+        "first_touch_campaign",
+        "landing_page_slug",
+        "landing_language",
+        "site_language"
+      ],
+      "not_registered_as_dimensions": [
+        "page_type",
+        "page_slug"
+      ]
     },
     "ga4_key_events": {
-      "on": ["package_enquire", "experience_enquire"],
-      "off": ["availability_click"],
-      "legacy_off": ["package_enquire_click", "experience_enquire_click"],
-      "auto_suggested_removed": ["close_convert_lead", "qualify_lead"],
-      "untouched": ["purchase"]
+      "on": [
+        "package_enquire",
+        "experience_enquire"
+      ],
+      "off": [
+        "availability_click"
+      ],
+      "legacy_off": [
+        "package_enquire_click",
+        "experience_enquire_click"
+      ],
+      "auto_suggested_removed": [
+        "close_convert_lead",
+        "qualify_lead"
+      ],
+      "untouched": [
+        "purchase"
+      ]
     },
     "attribution": {
       "storage_key": "vilu_attribution",
       "version": 1,
       "max_age_days": 30,
-      "commercial_events": ["package_enquire", "experience_enquire", "availability_click"],
-      "augmented_params": ["first_touch_source", "first_touch_medium", "first_touch_campaign", "landing_page_slug", "landing_language"],
-      "landing_slugs": ["home", "holiday-packages", "best-local-islands-snorkeling", "best-time-to-visit", "getting-to-maamigili", "guesthouse-vs-resort", "maamigili-guide", "maldives-holiday-cost", "manta-ray-snorkeling", "south-ari-atoll-guide", "south-ari-vs-other-regions", "things-to-do-maamigili", "whale-shark-snorkeling"],
-      "own_hostnames": ["viluresidence.net", "viluresidence.web.app", "viluresidence.firebaseapp.com", "vilu-residence.web.app", "vilu-residence.firebaseapp.com"],
-      "site_lang_codes": ["ar", "cs", "de", "fr", "it", "ja", "ko", "ru", "sk", "zh"]
+      "commercial_events": [
+        "package_enquire",
+        "experience_enquire",
+        "availability_click"
+      ],
+      "augmented_params": [
+        "first_touch_source",
+        "first_touch_medium",
+        "first_touch_campaign",
+        "landing_page_slug",
+        "landing_language"
+      ],
+      "landing_slugs": [
+        "home",
+        "holiday-packages",
+        "best-local-islands-snorkeling",
+        "best-time-to-visit",
+        "getting-to-maamigili",
+        "guesthouse-vs-resort",
+        "maamigili-guide",
+        "maldives-holiday-cost",
+        "manta-ray-snorkeling",
+        "south-ari-atoll-guide",
+        "south-ari-vs-other-regions",
+        "things-to-do-maamigili",
+        "whale-shark-snorkeling"
+      ],
+      "own_hostnames": [
+        "viluresidence.com",
+        "www.viluresidence.com",
+        "viluresidence.net",
+        "viluresidence.web.app",
+        "viluresidence.firebaseapp.com",
+        "vilu-residence.web.app",
+        "vilu-residence.firebaseapp.com"
+      ],
+      "site_lang_codes": [
+        "ar",
+        "cs",
+        "de",
+        "fr",
+        "it",
+        "ja",
+        "ko",
+        "ru",
+        "sk",
+        "zh"
+      ]
     },
     "package_name_to_id": {
       "Island Explorer Getaway": "island-explorer-getaway",
@@ -377,48 +772,124 @@
     },
     "guide_handoff_session_key": "vilu_guide_handoff"
   },
-
   "consent": {
     "file": "consent.js",
     "storage_key": "vilu_consent",
     "version": 1,
-    "categories": ["essential", "preferences", "analytics", "marketing"],
+    "categories": [
+      "essential",
+      "preferences",
+      "analytics",
+      "marketing"
+    ],
     "public_api": "window.viluConsent",
-    "required_dom_ids": ["consentBar", "consentAccept", "consentReject", "consentCustomizeOpen", "consentSave", "consentPanelOverlay", "consentPanel", "consentPanelClose", "consentPanelTitle", "consentTogglePreferences", "consentToggleAnalytics", "consentToggleMarketing", "footerPrivacyChoices"],
-    "dom_ids_consumed_by_consent_js": ["consentBar", "consentAccept", "consentReject", "consentCustomizeOpen", "consentSave", "consentPanelOverlay", "consentPanel", "consentPanelClose", "consentTogglePreferences", "consentToggleAnalytics", "consentToggleMarketing", "footerPrivacyChoices"],
+    "required_dom_ids": [
+      "consentBar",
+      "consentAccept",
+      "consentReject",
+      "consentCustomizeOpen",
+      "consentSave",
+      "consentPanelOverlay",
+      "consentPanel",
+      "consentPanelClose",
+      "consentPanelTitle",
+      "consentTogglePreferences",
+      "consentToggleAnalytics",
+      "consentToggleMarketing",
+      "footerPrivacyChoices"
+    ],
+    "dom_ids_consumed_by_consent_js": [
+      "consentBar",
+      "consentAccept",
+      "consentReject",
+      "consentCustomizeOpen",
+      "consentSave",
+      "consentPanelOverlay",
+      "consentPanel",
+      "consentPanelClose",
+      "consentTogglePreferences",
+      "consentToggleAnalytics",
+      "consentToggleMarketing",
+      "footerPrivacyChoices"
+    ],
     "dialog_labelledby_id": "consentPanelTitle",
-    "pages_without_footer_privacy_choices": ["404.html"],
+    "pages_without_footer_privacy_choices": [
+      "404.html"
+    ],
     "ga_loader_host": "www.googletagmanager.com",
     "$comment": "GA (gtag.js) must only be injected by consent.js loadGA() after analytics consent. No page may contain a static googletagmanager.com script tag."
   },
-
   "file_fingerprints": {
     "$comment": "Baseline fingerprints (sha256) — NOT a permanent hash lock. An approved change to either file is acceptable if the owner approves, the semantic tests stay green, and consent/analytics behaviour is re-verified; update these values in the same commit.",
-    "consent.js": "cf1e14e02df6b06cfe25252cab1cb3203f6c0f01c2fd3b140e336a5f624540ec",
-    "analytics.js": "dfa7c13332a77feaa5d54fcae80b01bfb4459bce003aeb64360c391f3847ebca"
+    "consent.js": "07c25fb7a539c9fd3f5e14278f608d3faaddd0faf45004853eb123544b886a46",
+    "analytics.js": "3f52718903587e0d0ae87e258b929914054a547576cef50060f447d13c5d20c2"
   },
-
   "storage_keys": {
-    "localStorage": ["vilu_consent", "vilu_attribution", "vilu_lang", "hp_seen_cards", "vilu_rooms", "vilu_website", "vilu_theme"],
-    "sessionStorage": ["vilu_guide_handoff", "vilu_theme"],
+    "localStorage": [
+      "vilu_consent",
+      "vilu_attribution",
+      "vilu_lang",
+      "hp_seen_cards",
+      "vilu_rooms",
+      "vilu_website",
+      "vilu_theme"
+    ],
+    "sessionStorage": [
+      "vilu_guide_handoff",
+      "vilu_theme"
+    ],
     "broadcast_channel": "vilu_pms",
-    "code_files_referencing_keys": ["vilu-website.html", "analytics.js", "consent.js", "nav-shell.js", "shared-page-i18n.js", "theme.js"]
+    "code_files_referencing_keys": [
+      "vilu-website.html",
+      "analytics.js",
+      "consent.js",
+      "nav-shell.js",
+      "shared-page-i18n.js",
+      "theme.js"
+    ]
   },
-
   "theme": {
     "$comment": "Phase 12B-C dual-theme foundation (approved 12B-B). Owner: theme system. Purpose: manual Cinematic Dark / Island Luxury Light preference. Persistence: Preferences-consent gated (localStorage vilu_theme) with a sessionStorage-only fallback; first-ever visit is Cinematic Dark and prefers-color-scheme is never consulted. Theme selection must never load GA or emit analytics.",
     "css_file": "theme.css",
     "js_file": "theme.js",
     "root_attribute": "data-theme",
-    "valid_values": ["dark", "light"],
+    "valid_values": [
+      "dark",
+      "light"
+    ],
     "default_theme": "dark",
     "storage_key": "vilu_theme",
     "owner": "theme system",
     "public_api": "window.viluTheme",
     "switch_selector": "[data-theme-switch]",
-    "brand_reference": { "--vilu-amber": "#c29147" },
-    "dark_tokens": { "--bg": "#06101c", "--bg-secondary": "#0a1628", "--surface": "#0f2140", "--surface-secondary": "#14294a", "--text": "#f3f7fb", "--text-muted": "#9db4c6", "--accent": "#e0a752", "--accent-ink": "#1a0f04", "--accent-text": "#e0a752", "--border": "rgba(243,247,251,.12)" },
-    "light_tokens": { "--bg": "#f6f1e8", "--bg-secondary": "#efe8dc", "--surface": "#fffdf9", "--surface-secondary": "#f1ebe0", "--text": "#1d2430", "--text-muted": "#5c6674", "--accent": "#ad701f", "--accent-ink": "#1a0f04", "--accent-text": "#925f1c", "--border": "rgba(29,36,48,.14)", "--teal": "#0e7490" },
+    "brand_reference": {
+      "--vilu-amber": "#c29147"
+    },
+    "dark_tokens": {
+      "--bg": "#06101c",
+      "--bg-secondary": "#0a1628",
+      "--surface": "#0f2140",
+      "--surface-secondary": "#14294a",
+      "--text": "#f3f7fb",
+      "--text-muted": "#9db4c6",
+      "--accent": "#e0a752",
+      "--accent-ink": "#1a0f04",
+      "--accent-text": "#e0a752",
+      "--border": "rgba(243,247,251,.12)"
+    },
+    "light_tokens": {
+      "--bg": "#f6f1e8",
+      "--bg-secondary": "#efe8dc",
+      "--surface": "#fffdf9",
+      "--surface-secondary": "#f1ebe0",
+      "--text": "#1d2430",
+      "--text-muted": "#5c6674",
+      "--accent": "#ad701f",
+      "--accent-ink": "#1a0f04",
+      "--accent-text": "#925f1c",
+      "--border": "rgba(29,36,48,.14)",
+      "--teal": "#0e7490"
+    },
     "contrast_minimums": {
       "$comment": "WCAG 2.x ratios computed by the harness from the token values above. accent-ink sits ON the accent fill (button text, normal size => 4.5:1); accent-text sits on --bg/--surface (links => 4.5:1); the fill itself vs --bg is a UI component edge (3:1).",
       "accent_ink_on_accent": 4.5,
@@ -426,15 +897,57 @@
       "accent_text_on_surface": 4.5,
       "text_on_bg": 4.5,
       "text_muted_on_bg": 4.5,
-      "accent_fill_vs_bg": 3.0
+      "accent_fill_vs_bg": 3
     },
-    "filled_amber_selectors": [".btn-primary", ".btn-primary[style]", ".btn-plan-holiday", ".consent-btn-accept", ".bb-btn", ".bwf-btn", ".tc-check-btn", ".pkg-badge", ".hp-badge", ".room-book-btn:hover", ".hp-enquire-btn:hover", ".exp-cta:hover", ".cf-btn:hover", ".bfp-search-btn:hover", ".bfp-book-btn:hover", ".vilu-cal-day.range-start", ".ti-tab.on", ".gh-tab.on", ".floating-whatsapp", ".footer-social a:hover"],
-    "forbidden_foreground_on_accent": ["#fff8ef", "#ffffff", "#fff", "var(--white)", "var(--on-media)", "var(--navy)", "var(--bg)", "var(--text)"],
-    "legacy_aliases_retired_semantic": { "--gold": "var(--accent)", "--teal-light": "var(--accent)", "--ocean": "var(--accent)" },
-    "forbidden_in_theme_js": ["prefers-color-scheme", "googletagmanager", "gtag(", "trackEvent("],
-    "forbidden_in_theme_css": ["prefers-color-scheme", "fonts.googleapis.com", "@import"]
+    "filled_amber_selectors": [
+      ".btn-primary",
+      ".btn-primary[style]",
+      ".btn-plan-holiday",
+      ".consent-btn-accept",
+      ".bb-btn",
+      ".bwf-btn",
+      ".tc-check-btn",
+      ".pkg-badge",
+      ".hp-badge",
+      ".room-book-btn:hover",
+      ".hp-enquire-btn:hover",
+      ".exp-cta:hover",
+      ".cf-btn:hover",
+      ".bfp-search-btn:hover",
+      ".bfp-book-btn:hover",
+      ".vilu-cal-day.range-start",
+      ".ti-tab.on",
+      ".gh-tab.on",
+      ".floating-whatsapp",
+      ".footer-social a:hover"
+    ],
+    "forbidden_foreground_on_accent": [
+      "#fff8ef",
+      "#ffffff",
+      "#fff",
+      "var(--white)",
+      "var(--on-media)",
+      "var(--navy)",
+      "var(--bg)",
+      "var(--text)"
+    ],
+    "legacy_aliases_retired_semantic": {
+      "--gold": "var(--accent)",
+      "--teal-light": "var(--accent)",
+      "--ocean": "var(--accent)"
+    },
+    "forbidden_in_theme_js": [
+      "prefers-color-scheme",
+      "googletagmanager",
+      "gtag(",
+      "trackEvent("
+    ],
+    "forbidden_in_theme_css": [
+      "prefers-color-scheme",
+      "fonts.googleapis.com",
+      "@import"
+    ]
   },
-
   "booking_pms": {
     "$comment": "P0 production dependency. The public website is connected to the Vilu PMS through Firestore. Structural checks only — the test never writes to Firestore and never creates a reservation.",
     "firebase_sdk_version": "10.13.0",
@@ -442,19 +955,61 @@
     "firebase_auth_domain": "vilu-residence.firebaseapp.com",
     "firebase_storage_bucket": "vilu-residence.appspot.com",
     "only_page_loading_firebase": "vilu-website.html",
-    "public_collections_referenced": ["blocks", "packages", "reservations", "room_availability", "room_details", "room_prices", "website_content"],
-    "pms_side_collections_not_referenced_by_public_site": ["rooms"],
-    "write_collections": ["reservations", "room_availability"],
-    "write_mechanism": ["runTransaction", "{ merge: true }", "ROOM_CONFLICT"],
-    "functions_in_vilu_website": ["hasBlockConflict", "writeReservation", "submitDirectBooking", "loadBookedRangesFromSupabase", "openBookingPopup", "openBookingPage", "bfpSearch", "confirmGuestBooking"],
-    "functions_in_nav_shell": ["initBookingHashHandoff"],
-    "entry_point_ids": ["booking", "booking-full-page", "bookingPopupOverlay"],
-    "entry_point_classes": ["js-check-availability", "js-live-availability", "bb-btn"],
-    "nav_shell_hooks": ["js-check-availability", "js-live-availability", "openBookingPopup", "openBookingPage", "initBookingHashHandoff", "availability_click"],
+    "public_collections_referenced": [
+      "blocks",
+      "packages",
+      "reservations",
+      "room_availability",
+      "room_details",
+      "room_prices",
+      "website_content"
+    ],
+    "pms_side_collections_not_referenced_by_public_site": [
+      "rooms"
+    ],
+    "write_collections": [
+      "reservations",
+      "room_availability"
+    ],
+    "write_mechanism": [
+      "runTransaction",
+      "{ merge: true }",
+      "ROOM_CONFLICT"
+    ],
+    "functions_in_vilu_website": [
+      "hasBlockConflict",
+      "writeReservation",
+      "submitDirectBooking",
+      "loadBookedRangesFromSupabase",
+      "openBookingPopup",
+      "openBookingPage",
+      "bfpSearch",
+      "confirmGuestBooking"
+    ],
+    "functions_in_nav_shell": [
+      "initBookingHashHandoff"
+    ],
+    "entry_point_ids": [
+      "booking",
+      "booking-full-page",
+      "bookingPopupOverlay"
+    ],
+    "entry_point_classes": [
+      "js-check-availability",
+      "js-live-availability",
+      "bb-btn"
+    ],
+    "nav_shell_hooks": [
+      "js-check-availability",
+      "js-live-availability",
+      "openBookingPopup",
+      "openBookingPage",
+      "initBookingHashHandoff",
+      "availability_click"
+    ],
     "reservation_source_value": "Website",
     "reservation_status_value": "Pending"
   },
-
   "contact": {
     "phone_display": "+960 9903339",
     "whatsapp_number": "9609903339",
@@ -462,48 +1017,167 @@
     "email": "Viluresidence@gmail.com",
     "mailto_prefix": "mailto:Viluresidence@gmail.com",
     "pages_requiring_whatsapp_link": "all",
-    "pages_requiring_email": ["vilu-website.html", "holiday-packages.html", "maamigili-guide.html", "south-ari-atoll-guide.html", "whale-shark-snorkeling.html", "manta-ray-snorkeling.html", "things-to-do-maamigili.html", "best-time-to-visit.html", "guesthouse-vs-resort.html", "maldives-holiday-cost.html", "best-local-islands-snorkeling.html", "south-ari-vs-other-regions.html", "privacy-policy.html", "cookies.html"]
+    "pages_requiring_email": [
+      "vilu-website.html",
+      "holiday-packages.html",
+      "maamigili-guide.html",
+      "south-ari-atoll-guide.html",
+      "whale-shark-snorkeling.html",
+      "manta-ray-snorkeling.html",
+      "things-to-do-maamigili.html",
+      "best-time-to-visit.html",
+      "guesthouse-vs-resort.html",
+      "maldives-holiday-cost.html",
+      "best-local-islands-snorkeling.html",
+      "south-ari-vs-other-regions.html",
+      "privacy-policy.html",
+      "cookies.html"
+    ]
   },
-
   "navigation": {
     "$comment": "Required destinations reachable from the shared header on every content page (holiday-packages.html used as reference markup).",
     "reference_page": "holiday-packages.html",
     "$comment_about": "Phase 12B-E2B replaced the homepage's #about section with #what-is-vilu (old About content absorbed into it / Homecoming); the other 13 content pages' shared nav copy is untouched this stage and still legitimately points at /#about -- see the two dedicated 'about-link' tests below rather than the generic required_hrefs loop, which can't express a homepage-only exception.",
-    "required_hrefs": ["/", "holiday-packages.html", "whale-shark-snorkeling.html", "manta-ray-snorkeling.html", "things-to-do-maamigili.html", "maamigili-guide.html", "south-ari-atoll-guide.html", "best-local-islands-snorkeling.html", "south-ari-vs-other-regions.html", "best-time-to-visit.html", "maldives-holiday-cost.html", "guesthouse-vs-resort.html", "/#rooms", "/#booking", "/#gallery", "/#travel-info", "/#contact"],
-    "home_href_alternatives": ["/", "#home", "/#home"],
-    "required_classes": ["nav-drop", "nav-drop-trigger", "nav-drop-panel", "js-check-availability", "js-live-availability", "btn-plan-holiday", "lang-switcher", "nav-hamburger"],
+    "required_hrefs": [
+      "/",
+      "holiday-packages.html",
+      "whale-shark-snorkeling.html",
+      "manta-ray-snorkeling.html",
+      "things-to-do-maamigili.html",
+      "maamigili-guide.html",
+      "south-ari-atoll-guide.html",
+      "best-local-islands-snorkeling.html",
+      "south-ari-vs-other-regions.html",
+      "best-time-to-visit.html",
+      "maldives-holiday-cost.html",
+      "guesthouse-vs-resort.html",
+      "/#rooms",
+      "/#booking",
+      "/#gallery",
+      "/#travel-info",
+      "/#contact"
+    ],
+    "home_href_alternatives": [
+      "/",
+      "#home",
+      "/#home"
+    ],
+    "required_classes": [
+      "nav-drop",
+      "nav-drop-trigger",
+      "nav-drop-panel",
+      "js-check-availability",
+      "js-live-availability",
+      "btn-plan-holiday",
+      "lang-switcher",
+      "nav-hamburger"
+    ],
     "hamburger_id": "hamburger",
     "mobile_menu_id": "mobileMenu",
-    "footer_legal_hrefs": ["/privacy-policy.html", "/cookies.html"],
+    "footer_legal_hrefs": [
+      "/privacy-policy.html",
+      "/cookies.html"
+    ],
     "language_select_aria_label": "Language",
     "language_select_source": "shared-page-i18n.js",
     "shell": {
       "$comment": "Phase 12B-D global shell contracts: disclosure navigation (no ARIA menu roles), accessible drawer hooks, localized theme labels, footer destinations, exact social set, no framework/external UI, no internal-tool exposure. Decorative CSS values are deliberately not asserted.",
       "nav_landmark_i18n_key": "navShell.mainNav",
-      "dropdown_panel_ids": ["navPanelExperiences", "navPanelSouthAri", "navPanelStay"],
-      "mobile_panel_ids": ["mmPanelExperiences", "mmPanelSouthAri", "mmPanelStay"],
-      "forbidden_in_nav": ["role=\"menu\"", "role=\"menuitem\""],
-      "drawer_required_markers": ["role=\"dialog\"", "aria-modal=\"true\"", "class=\"mm-close\"", "data-mm-close", "lang-switcher-mobile", "class=\"mm-lang\""],
-      "theme_i18n_keys": ["navShell.theme", "navShell.themeDark", "navShell.themeLight", "navShell.switchToDark", "navShell.switchToLight"],
-      "shell_i18n_keys": ["navShell.mainNav", "navShell.destination", "navShell.planning", "footer.brandLine", "footer.positioning"],
-      "social_hrefs": ["https://www.instagram.com/vilu_residence/", "https://www.facebook.com/ViluResidence/", "https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html"],
-      "footer_required_markers": ["footer-brandline", "footer-contact", "id=\"footerPrivacyChoices\"", "tel:+9609903339", "mailto:Viluresidence@gmail.com"],
-      "forbidden_shell_hrefs": ["href=\"#\"", "vilu-unified.html", "vilu-agency-portal.html", "/docs/", "/test/", "firestore"],
+      "dropdown_panel_ids": [
+        "navPanelExperiences",
+        "navPanelSouthAri",
+        "navPanelStay"
+      ],
+      "mobile_panel_ids": [
+        "mmPanelExperiences",
+        "mmPanelSouthAri",
+        "mmPanelStay"
+      ],
+      "forbidden_in_nav": [
+        "role=\"menu\"",
+        "role=\"menuitem\""
+      ],
+      "drawer_required_markers": [
+        "role=\"dialog\"",
+        "aria-modal=\"true\"",
+        "class=\"mm-close\"",
+        "data-mm-close",
+        "lang-switcher-mobile",
+        "class=\"mm-lang\""
+      ],
+      "theme_i18n_keys": [
+        "navShell.theme",
+        "navShell.themeDark",
+        "navShell.themeLight",
+        "navShell.switchToDark",
+        "navShell.switchToLight"
+      ],
+      "shell_i18n_keys": [
+        "navShell.mainNav",
+        "navShell.destination",
+        "navShell.planning",
+        "footer.brandLine",
+        "footer.positioning"
+      ],
+      "social_hrefs": [
+        "https://www.instagram.com/vilu_residence/",
+        "https://www.facebook.com/ViluResidence/",
+        "https://www.tripadvisor.com/Hotel_Review-g9712403-d26836968-Reviews-Vilu_Residence-Maamigili.html"
+      ],
+      "footer_required_markers": [
+        "footer-brandline",
+        "footer-contact",
+        "id=\"footerPrivacyChoices\"",
+        "tel:+9609903339",
+        "mailto:Viluresidence@gmail.com"
+      ],
+      "forbidden_shell_hrefs": [
+        "href=\"#\"",
+        "vilu-unified.html",
+        "vilu-agency-portal.html",
+        "/docs/",
+        "/test/",
+        "firestore"
+      ],
       "public_exposure_principle": "Maximum public discoverability for traveler-facing content; minimum unnecessary public exposure of internal technical architecture. The public shell (header, drawer, footer) must not advertise PMS/internal-system names, the Agency Portal, admin routes, development tooling, build or test infrastructure, or Firestore/business implementation details. Functional PMS contracts (booking_pms section) stay fully protected — this governs public display only.",
-      "forbidden_public_shell_phrases": ["Managed by Vilu PMS", "Vilu PMS", "Powered by", "Built with", "Firebase", "Firestore", "Agency Portal", "vilu-unified", "PMS"],
-      "forbidden_frameworks": ["bootstrap", "tailwind", "cdn.jsdelivr", "unpkg.com", "cdnjs.cloudflare", "fontawesome", "fonts.googleapis.com", "react-dom", "vue.global"],
-      "forbidden_event_names": ["package_enquire_click", "experience_enquire_click"]
+      "forbidden_public_shell_phrases": [
+        "Managed by Vilu PMS",
+        "Vilu PMS",
+        "Powered by",
+        "Built with",
+        "Firebase",
+        "Firestore",
+        "Agency Portal",
+        "vilu-unified",
+        "PMS"
+      ],
+      "forbidden_frameworks": [
+        "bootstrap",
+        "tailwind",
+        "cdn.jsdelivr",
+        "unpkg.com",
+        "cdnjs.cloudflare",
+        "fontawesome",
+        "fonts.googleapis.com",
+        "react-dom",
+        "vue.global"
+      ],
+      "forbidden_event_names": [
+        "package_enquire_click",
+        "experience_enquire_click"
+      ]
     }
   },
-
   "performance": {
-    "forbidden_hosts": ["fonts.googleapis.com", "fonts.gstatic.com"],
+    "forbidden_hosts": [
+      "fonts.googleapis.com",
+      "fonts.gstatic.com"
+    ],
     "self_hosted_font_css": "shared-page.css",
     "self_hosted_font_path_prefix": "/fonts/webfonts/",
     "icon_font_css": "fonts/tabler-icons-subset.css",
     "font_display_required": "swap"
   },
-
   "hero_video_master": {
     "$comment": "Document only. Not transcoded, not committed. Phase 12B derives desktop 16:9, mobile 9:16 and a poster from this master without ever stretching the portrait source.",
     "path": "C:\\Users\\hp\\Downloads\\dji_fly_20240503_104338_0027_1715070270010_video.mp4",
