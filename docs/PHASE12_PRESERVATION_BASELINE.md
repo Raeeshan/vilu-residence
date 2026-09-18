@@ -1,5 +1,8 @@
 # Phase 12 Preservation Baseline — Vilu Residence public website
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 **Baseline commit:** `87a640351e8b4753987fea0a2c851ffecf725196` (production / `origin/main`)
 **Baseline date:** 2026-09-04
 **Status:** human-readable preservation contract for the Phase 12 cinematic redesign. Machine-checkable invariants live in `test/phase12-preservation-manifest.json` and are enforced by `node test/phase12-preservation.test.js`. Anything in this document that the harness cannot check is marked **manual**.

@@ -1,5 +1,8 @@
 # Google Search Console — Baseline
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 Living record of the site's real, verified Google Search Console / production-search state. Update this file whenever new real data is captured — never fill in a section with an estimate or a plausible-looking number. If data isn't available yet, write "not yet available," not a guess.
 
 ---

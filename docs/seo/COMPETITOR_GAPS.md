@@ -1,5 +1,8 @@
 # Vilu Residence — Competitor Gap Analysis (Phase 23)
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 Real evidence only. See `SEARCH_INTELLIGENCE.md` §17 for full data-limitation notes (no backlink/authority tool was used; competitor strength here is assessed only from what's directly visible in real SERPs and Google Trends).
 
 ---

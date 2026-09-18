@@ -1,5 +1,8 @@
 # Phase 34 — Expanded Local SEO / Google Business Profile / Maps (private, strategy + audit)
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 **PRIVATE STRATEGIC INTELLIGENCE — internal use only, never published, never exposed on the public site.** Excluded from hosting via `firebase.json`'s `docs/**` ignore rule. Matrix Phase 34 (not to be confused with `VILU_ROADMAP.md`'s own 1–36 numbering, which has no "Phase 34" of its own in this scope).
 
 **Access limitation, stated up front**: Claude-in-Chrome (the owner's authenticated Google session) was unavailable throughout this task — checked directly, confirmed not connected, not assumed. Every GBP field that can only be read from the authenticated dashboard (exact rating/review count, Posts, Q&A, photo inventory, verification state, attributes) is marked **UNKNOWN / REQUIRES OWNER** below, per Task 1's explicit instruction not to guess. Everything else is from live, cited public research (search engines, OTA listings, competitor sites, and this repository's own source code) — three parallel research passes plus a direct read of the site's own schema/NAP signals.

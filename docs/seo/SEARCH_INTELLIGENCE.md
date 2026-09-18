@@ -1,5 +1,8 @@
 # Vilu Residence — Search Intelligence (Phase 23)
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 Master research document. Real evidence only — every claim below is tagged **FACT** (directly observed in a real tool), **OBSERVATION** (a pattern noticed across multiple facts), **INFERENCE** (a reasoned conclusion not directly measurable), or **RECOMMENDATION** (an action, not a finding). Where volume/statistics could not be verified, this is stated explicitly rather than estimated.
 
 Companion documents: `COMPETITOR_GAPS.md`, `INDEXING_ANALYSIS.md`, `MARKET_INTELLIGENCE.md`. GSC baseline (raw numbers) lives in `GSC_BASELINE.md` and is not repeated in full here.

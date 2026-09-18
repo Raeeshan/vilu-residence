@@ -1,5 +1,8 @@
 # Vilu Residence — Indexing Analysis (Phase 23, Part 6)
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 Investigation of why Search Console shows 1 indexed / 131 not indexed out of 132 known pages. Real evidence only; no cause is claimed without it.
 
 ---

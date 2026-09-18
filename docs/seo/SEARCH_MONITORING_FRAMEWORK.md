@@ -1,5 +1,8 @@
 # Vilu — Search & Conversion Monitoring Framework
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 A documented operating model for tracking search performance and booking-path conversion across **every market the site reaches, evaluated dynamically** — not a fixed priority list of named countries. Russia, China, Spain, Germany, etc. are current examples surfaced by real data, not hardcoded categories this framework depends on. Any market can rise or fall in priority as the data changes.
 
 This is a documentation deliverable only — no automation, dashboard, or scheduled job was built as part of writing this. It defines what to look at, how often, and how to decide what matters next.

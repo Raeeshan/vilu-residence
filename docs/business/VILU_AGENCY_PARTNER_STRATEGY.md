@@ -1,5 +1,8 @@
 # VILU — Agency / Partner Growth Strategy (Phase 44)
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 **Status: Phase 44 foundation, established 2026-09-07.** This is a strategy and governance document — B2B growth is primarily an operational/process workstream, not a website-code workstream. It does not replace `VILU_COMPLETION_MATRIX.md` (phase status) or `VILU_DECISIONS.md` (binding rules); the governance rules in §8 are also mirrored there as the permanently-binding version. Treat this document as the working reference for actually running agency growth once outreach is owner-authorized.
 
 **Standing principle:** direct demand remains the priority channel. Agencies are an *additional* distribution channel, not a replacement for it — see §12 (Direct vs. Agency Guardrails).

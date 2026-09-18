@@ -1,5 +1,8 @@
 # Phase 42 — Reputation SEO (private, audit + strategy)
 
+> **Current authoritative domain state (2026-09-18):** Primary canonical domain is `https://viluresidence.com`; legacy `https://viluresidence.net` now 301-redirects to it; Search Console Change of Address is active. Domain references below reflect this document's own point in time and are preserved as historical record — see `docs/ai/VILU_CURRENT_STATE.md` for current state.
+
+
 **PRIVATE — internal use only, never published.** Excluded from hosting via `firebase.json`'s `docs/**` ignore rule. Matrix Phase 42 ("Reputation SEO").
 
 **Google Business Profile state, confirmed unchanged from Phase 34 (do not undo)**: name = "Vilu Residence," primary category = Hotel, website = `https://viluresidence.net/`, rating = 5.0, 81 reviews.
