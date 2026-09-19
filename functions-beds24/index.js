@@ -29,6 +29,20 @@ const { Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
 const { BEDS24_ROOM_MAP, buildDifferentialPayload } = require('./lib/beds24-bridge');
 const { CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES } = require('./lib/ota-room-types');
+const { otaFeatureEnabled, OUTBOUND_JOB_INTENT_FLAG } = require('./lib/ota-feature-flags');
+
+// job_intent -> buildDifferentialPayload's `mode` (Phase B24-2A.1, Section
+// D/E): now a strict 1:1 identity mapping across the 3 final intents
+// (availability/rate/restriction), each authorizing exactly one payload
+// mode that can only ever emit that category's fields (see beds24-bridge.js
+// buildDatePayload's mode allowlists). Kept as its own explicit map, not a
+// direct `job.job_intent` passthrough, so a FUTURE new intent value that
+// doesn't map 1:1 to an existing payload mode still has one deliberate place
+// to encode that -- and, same as OUTBOUND_JOB_INTENT_FLAG, an intent absent
+// from this map must never silently resolve to any mode (see the fail-closed
+// check below, which already returns before this map is ever consulted for
+// an unrecognized intent).
+const JOB_INTENT_TO_PAYLOAD_MODE = Object.freeze({ availability: 'availability', rate: 'rate', restriction: 'restriction' });
 
 initializeApp();
 const db = getFirestore();
@@ -100,12 +114,28 @@ exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', 
   const job = snap.data();
   if (!job || job.type !== 'beds24_calendar_push' || job.status !== 'pending') return; // not our job (e.g. an 'availability' audit doc, or already processed)
 
-  const cfg = (await store.get('ota_config', 'channel_manager')) || {};
-  if (!cfg.enabled || cfg.provider !== 'beds24') {
-    await jobRef.set({ status: 'skipped', last_error: { message: 'Beds24 channel manager not enabled in ota_config -- job left for a future controlled run', http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+  // Phase B24-2A, Section D: FAIL CLOSED on a missing/unrecognized
+  // job_intent. This is what makes it impossible for a job to be queued
+  // under one feature and accidentally executed under another -- an old
+  // pre-B24-2A job (no job_intent field at all) is treated exactly like an
+  // unknown one, never processed just because it happens to be well-formed
+  // otherwise.
+  const requiredFlag = OUTBOUND_JOB_INTENT_FLAG[job.job_intent];
+  if (!requiredFlag) {
+    await jobRef.set({ status: 'skipped', last_error: { message: 'missing or unrecognized job_intent "' + job.job_intent + '" -- fail closed, job left for manual review', http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
     return;
   }
 
+  const cfg = (await store.get('ota_config', 'channel_manager')) || {};
+  // otaFeatureEnabled() already folds in the master `enabled` check (Section
+  // B): cfg.enabled !== true alone is enough to disable every intent,
+  // regardless of the specific granular flag's own value.
+  if (cfg.provider !== 'beds24' || !otaFeatureEnabled(cfg, requiredFlag)) {
+    await jobRef.set({ status: 'skipped', last_error: { message: 'Beds24 ' + requiredFlag + ' not enabled in ota_config for job_intent "' + job.job_intent + '" -- job left for a future controlled run', http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+    return;
+  }
+
+  const payloadMode = JOB_INTENT_TO_PAYLOAD_MODE[job.job_intent];
   const roomTypeCode = job.room_type_code;
   const affectedDates = (job.window && job.window.affected_dates) || [];
   if (!roomTypeCode || !BEDS24_ROOM_MAP[roomTypeCode] || !affectedDates.length) {
@@ -131,6 +161,7 @@ exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', 
     affectedDates: { [roomTypeCode]: affectedDates },
     configs: { [roomTypeCode]: config },
     dateOverrides: { [roomTypeCode]: overridesForCode },
+    mode: payloadMode,
   });
   if (built.invalid.length) {
     await jobRef.set({ status: 'failed', last_error: { message: 'differential payload invalid: ' + JSON.stringify(built.invalid.slice(0, 5)), http_status: null }, updated_at: new Date().toISOString() }, { merge: true });

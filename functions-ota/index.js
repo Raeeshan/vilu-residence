@@ -27,6 +27,7 @@ const { ingestEvent } = require('./lib/ingest');
 const { MockAdapter, Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
 const { shouldAutoIngest } = require('./lib/beds24-inbound');
+const { otaFeatureEnabled } = require('./lib/ota-feature-flags');
 
 initializeApp();
 const db = getFirestore();
@@ -45,11 +46,17 @@ async function roomsDocs() {
   } catch (e) { return PHYSICAL_ROOMS; }
 }
 
+// Returns `cfg` alongside `{name, adapter}` so callers can make their own
+// granular-flag decisions (Phase B24-2A, Section C/I) without a second
+// Firestore read. The master `enabled` gate here is intentionally kept as-is
+// (an adapter is never constructed at all when disabled) -- it is the
+// "master disabled => everything disabled regardless of granular flags"
+// backstop underneath every more specific check below.
 async function channelAdapter() {
   const cfg = (await store.get('ota_config', 'channel_manager')) || {};
-  if (cfg.enabled && cfg.provider === 'beds24') return { name: 'beds24', adapter: new Beds24Adapter({ enabled: true, token: BEDS24_TOKEN.value() }) };
-  if (cfg.enabled && cfg.provider === 'mock') { const m = new MockAdapter(); const s = await db.collection('ota_mock_bookings').get(); s.forEach((d) => m.put(d.data())); return { name: 'mock', adapter: m }; }
-  return { name: cfg.provider || 'none', adapter: null };
+  if (cfg.enabled && cfg.provider === 'beds24') return { name: 'beds24', adapter: new Beds24Adapter({ enabled: true, token: BEDS24_TOKEN.value() }), cfg };
+  if (cfg.enabled && cfg.provider === 'mock') { const m = new MockAdapter(); const s = await db.collection('ota_mock_bookings').get(); s.forEach((d) => m.put(d.data())); return { name: 'mock', adapter: m, cfg }; }
+  return { name: cfg.provider || 'none', adapter: null, cfg };
 }
 
 // ── OTA ingestion (Stages 3/4/9/10/11) ───────────────────────────────────────
@@ -62,8 +69,13 @@ exports.otaWebhook = onRequest({ region: 'us-central1', secrets: [OTA_WEBHOOK_SE
   const provided = String(req.headers['x-vilu-webhook-secret'] || '');
   const expected = OTA_WEBHOOK_SECRET.value() || '';
   if (!expected || provided.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected))) return res.status(401).send('');
+  // Security validation (the secret check above) always runs regardless of
+  // any flag -- only AFTER it passes do we decide whether this webhook is
+  // currently authorized to enqueue anything (Phase B24-2A, Section I:
+  // "Webhook disabled: validate request security as appropriate, do not
+  // enqueue/process real bookings").
   const cfg = (await store.get('ota_config', 'channel_manager')) || {};
-  if (!cfg.enabled) return res.status(503).json({ error: 'OTA_DISABLED' });
+  if (!otaFeatureEnabled(cfg, 'inbound_webhook_enabled')) return res.status(503).json({ error: 'OTA_DISABLED' });
   const body = req.body || {};
   const externalId = String((body.booking && body.booking.id) || body.external_id || body.booking_id || '');
   if (!externalId) return res.status(400).json({ error: 'NO_ID' });
@@ -95,10 +107,17 @@ async function raiseChannelReviewRecord(data, peeked) {
   });
 }
 
+// Phase B24-2A, Section I: this is the ONE choke point both processOtaEvent
+// (Firestore trigger) and otaCatchUp's retry loop funnel through, so gating
+// `inbound_processing_enabled` here -- rather than separately in each
+// caller -- is what guarantees a queued item can never be turned into a PMS
+// reservation create/modify/cancel while processing is disabled, no matter
+// which path enqueued or re-triggered it.
 async function processQueued(queueId, data) {
-  const { name, adapter } = await channelAdapter();
+  const { name, adapter, cfg } = await channelAdapter();
   const ref = db.collection('ota_queue').doc(queueId);
   if (!adapter) { await ref.set({ state: 'skipped', error_reason: 'no channel manager adapter configured (' + name + ')' }, { merge: true }); return; }
+  if (!otaFeatureEnabled(cfg, 'inbound_processing_enabled')) { await ref.set({ state: 'skipped', error_reason: 'inbound_processing_enabled is false -- item left queued for a future controlled run' }, { merge: true }); return; }
   if (name === 'beds24') {
     // Peek the booking's channel before deciding whether to ingest at all.
     // Beds24Adapter caches this fetch per invocation, so ingestEvent()'s own
@@ -133,14 +152,28 @@ exports.processOtaEvent = onDocumentCreated({ document: 'ota_queue/{queueId}', s
 });
 
 // ── catch-up + retries (Stage 10) ────────────────────────────────────────────
+// Phase B24-2A, Section I: "Polling disabled: otaCatchUp returns without
+// remote fetch." Polling (the remote adapter.listModifiedSince() call) and
+// processing (retrying queued 'retry' items) are gated INDEPENDENTLY --
+// either can be on while the other is off. The cursor doc is only advanced
+// when polling actually ran; leaving it untouched while disabled avoids
+// silently skipping a real window of bookings once polling is re-enabled
+// later (advancing `modified_since` past a period nothing actually checked
+// would be a real missed-booking risk).
 exports.otaCatchUp = onSchedule({ schedule: 'every 30 minutes', secrets: [BEDS24_TOKEN] }, async () => {
-  const { name, adapter } = await channelAdapter();
-  if (!adapter) return;
-  const cursorDoc = (await store.get('ota_config', 'cursor')) || {};
-  const since = cursorDoc.modified_since || new Date(Date.now() - 6 * 3600e3).toISOString();
-  const ids = await adapter.listModifiedSince(since);
-  for (const id of ids) await db.collection('ota_queue').add({ channel_manager: name, external_id: String(id), revision: '', type: 'unknown', received_at: new Date().toISOString(), state: 'queued', retry_count: 0, origin: 'catch_up' });
-  const retries = await db.collection('ota_queue').where('state', '==', 'retry').get();
-  for (const d of retries.docs) { const x = d.data(); if (!x.next_retry_at || x.next_retry_at <= new Date().toISOString()) await processQueued(d.id, x); }
-  await store.set('ota_config', 'cursor', { modified_since: new Date().toISOString(), last_catch_up: new Date().toISOString(), queued: ids.length }, { merge: true });
+  const { name, adapter, cfg } = await channelAdapter();
+  if (!adapter) return; // master disabled (or no provider) -- nothing below can run
+
+  if (otaFeatureEnabled(cfg, 'inbound_polling_enabled')) {
+    const cursorDoc = (await store.get('ota_config', 'cursor')) || {};
+    const since = cursorDoc.modified_since || new Date(Date.now() - 6 * 3600e3).toISOString();
+    const ids = await adapter.listModifiedSince(since);
+    for (const id of ids) await db.collection('ota_queue').add({ channel_manager: name, external_id: String(id), revision: '', type: 'unknown', received_at: new Date().toISOString(), state: 'queued', retry_count: 0, origin: 'catch_up' });
+    await store.set('ota_config', 'cursor', { modified_since: new Date().toISOString(), last_catch_up: new Date().toISOString(), queued: ids.length }, { merge: true });
+  }
+
+  if (otaFeatureEnabled(cfg, 'inbound_processing_enabled')) {
+    const retries = await db.collection('ota_queue').where('state', '==', 'retry').get();
+    for (const d of retries.docs) { const x = d.data(); if (!x.next_retry_at || x.next_retry_at <= new Date().toISOString()) await processQueued(d.id, x); }
+  }
 });

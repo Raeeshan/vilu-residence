@@ -13,6 +13,7 @@
 // never touched: every Beds24-specific field name is translated here and
 // in beds24-inbound.js only.
 const { normalizeBeds24Booking } = require('./beds24-inbound');
+const { assertKnownBeds24Property, assertKnownBeds24RoomId } = require('./beds24-bridge');
 class MockAdapter {
   constructor() { this.bookings = new Map(); this.offline = false; this.fetches = 0; }
   put(booking) { this.bookings.set(String(booking.external_id), JSON.parse(JSON.stringify(booking))); }
@@ -91,6 +92,112 @@ class Beds24Adapter {
       throw err;
     }
     return data.data.map((b) => String(b.id));
+  }
+
+  // ---------------------------------------------------------------------
+  // Phase B24-2A, Section F: READ-ONLY verification methods. GET semantics
+  // only -- none of these ever call pushAvailability() or any write
+  // endpoint. Every method validates property/room identity via
+  // assertKnownBeds24Property/assertKnownBeds24RoomId (Section G) BEFORE
+  // trusting a response or, where applicable, before ever sending a
+  // request -- an unexpected property or room id throws rather than being
+  // silently included. Pagination follows the documented page-number
+  // scheme (`page` param in, `pages.nextPageExists`/`nextPageLink` out --
+  // confirmed against the official OpenAPI v2 spec). Never logs a
+  // credential; callers are responsible for sanitizing what they log from
+  // the returned data (e.g. never log raw guest PII unnecessarily).
+
+  // Property metadata. GET /properties -- Beds24 has no separate rooms
+  // endpoint (confirmed against the spec), so `includeAllRooms` is how room
+  // metadata is obtained too (see listRooms() below, which wraps this).
+  async getProperty(propertyId, opts) {
+    this._guard();
+    const id = assertKnownBeds24Property(propertyId);
+    const accessToken = await this._getAccessToken();
+    const params = new URLSearchParams();
+    params.append('id', String(id));
+    params.set('includeAllRooms', 'true');
+    params.set('includeUnitDetails', String((opts && opts.includeUnitDetails) !== false));
+    const resp = await this._fetch('https://beds24.com/api/v2/properties?' + params.toString(), { headers: { token: accessToken } });
+    let data = null;
+    try { data = await resp.json(); } catch (e) { /* handled by the ok/data check below */ }
+    if (!resp.ok || !data || !Array.isArray(data.data)) {
+      const err = new Error('BEDS24_GET_PROPERTY_FAILED: HTTP ' + resp.status);
+      err.httpStatus = resp.status;
+      err.retryable = resp.status === 429 || resp.status >= 500;
+      throw err;
+    }
+    // Deliberately NOT data.data.find(p => p.id === id) -- searching for a
+    // match would make a Beds24-side mismatch invisible (it would just look
+    // like "not found" instead of surfacing as a real property-identity
+    // problem). Taking the returned slot directly and re-validating its id
+    // is what actually catches an unexpected cross-property response.
+    const property = data.data[0] || null;
+    if (!property) { const err = new Error('BEDS24_PROPERTY_NOT_FOUND: ' + id); err.retryable = false; throw err; }
+    assertKnownBeds24Property(property.id); // re-validate the response itself, never just the request param
+    return property;
+  }
+
+  // Room/unit metadata for the property -- a validated extraction over
+  // getProperty()'s own `roomTypes` array (no separate endpoint exists).
+  // Phase B24-2A.1, Section H: the field is `roomTypes`, not `rooms` --
+  // corrected after live API validation showed the real Beds24 v2
+  // /properties response nests room-type metadata under `roomTypes`
+  // (each entry's own `.id` is the same Beds24 room id BEDS24_ROOM_MAP
+  // maps to; `.units` holds the physical unit names, e.g. VR01/VR02,
+  // which this adapter does not need). FAIL CLOSED (Section G): a room
+  // type in the response whose id is not one of the 3 known mapped
+  // Beds24 room ids is excluded from `rooms` and reported in
+  // `unknownRoomIds`, never silently included as if it were ours.
+  async listRooms(propertyId) {
+    const property = await this.getProperty(propertyId);
+    const rawRooms = Array.isArray(property.roomTypes) ? property.roomTypes : [];
+    const rooms = [];
+    const unknownRoomIds = [];
+    for (const r of rawRooms) {
+      try { assertKnownBeds24RoomId(r.id); rooms.push(r); }
+      catch (e) { unknownRoomIds.push(r.id); }
+    }
+    return { rooms, unknownRoomIds };
+  }
+
+  // Read-only calendar (availability + price) for one or more known room
+  // ids. GET /inventory/rooms/calendar -- the docs state no data is
+  // returned unless at least one includeX flag is set, so this method
+  // defaults to requesting numAvail+prices+override for a complete
+  // comparison snapshot unless the caller opts out. FAIL CLOSED (Section
+  // G): every roomId is validated against BEDS24_ROOM_MAP BEFORE the
+  // request is ever sent -- an unknown room id throws immediately, never
+  // silently dropped or sent to Beds24. This method NEVER calls
+  // pushAvailability() or any write endpoint -- read-only by construction.
+  async getInventory({ roomIds, startDate, endDate, includeNumAvail, includePrices, includeMinStay, includeMaxStay, includeOverride, page } = {}) {
+    this._guard();
+    if (!Array.isArray(roomIds) || !roomIds.length) throw new Error('beds24-adapter: getInventory requires at least one roomId');
+    roomIds.forEach(assertKnownBeds24RoomId);
+    if (!startDate || !endDate) throw new Error('beds24-adapter: getInventory requires startDate and endDate');
+    const accessToken = await this._getAccessToken();
+    const params = new URLSearchParams();
+    roomIds.forEach((id) => params.append('roomId', String(id)));
+    params.set('startDate', startDate);
+    params.set('endDate', endDate);
+    if (includeNumAvail !== false) params.set('includeNumAvail', 'true');
+    if (includePrices !== false) params.set('includePrices', 'true');
+    if (includeMinStay) params.set('includeMinStay', 'true');
+    if (includeMaxStay) params.set('includeMaxStay', 'true');
+    if (includeOverride !== false) params.set('includeOverride', 'true');
+    if (page) params.set('page', String(page));
+    const resp = await this._fetch('https://beds24.com/api/v2/inventory/rooms/calendar?' + params.toString(), { headers: { token: accessToken } });
+    let data = null;
+    try { data = await resp.json(); } catch (e) { /* handled by the ok/data check below */ }
+    if (!resp.ok || !data || !Array.isArray(data.data)) {
+      const err = new Error('BEDS24_GET_INVENTORY_FAILED: HTTP ' + resp.status);
+      err.httpStatus = resp.status;
+      err.retryable = resp.status === 429 || resp.status >= 500;
+      throw err;
+    }
+    data.data.forEach((room) => assertKnownBeds24RoomId(room.roomId));
+    const nextPageExists = !!(data.pages && data.pages.nextPageExists);
+    return { rooms: data.data, nextPageExists, nextPage: nextPageExists ? (page || 1) + 1 : null };
   }
 
   // Exchanges the refresh token for a short-lived access token. The access

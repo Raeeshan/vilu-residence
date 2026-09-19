@@ -4,15 +4,31 @@
 // Outbound availability engine (Stage 6): derives sellable inventory per room
 // type per date from the physical truth and writes the canonical internal
 // payload to availability_outbound/{room_type_code} + an ota_pushes log
-// entry. NOT connected to any channel manager: `pushAdapter` is optional and
-// absent in this stage (result recorded as 'not_connected').
+// entry. NOT connected to any channel manager -- this function NEVER calls
+// Beds24 or any other channel-manager API itself (result is always recorded
+// as 'not_connected'). The real Beds24 push path is exclusively
+// enqueueBeds24Sync() (in this codebase's own index.js) -> the ota_pushes
+// beds24_calendar_push job -> beds24OutboundWorker (functions-beds24/
+// index.js), the ONLY place that checks ota_config's granular flags and
+// job_intent before ever calling the Beds24 API.
+//
+// Phase B24-2A.1, Section F: this function previously accepted an optional
+// `pushAdapter` parameter that, if ever supplied, would call
+// pushAdapter.pushAvailability(payload) DIRECTLY -- bypassing
+// enqueueBeds24Sync/job_intent/otaFeatureEnabled/the property-room guards
+// entirely, with zero test coverage. No caller in this codebase (the only
+// real caller of syncAvailability in production) ever supplied it, and this
+// codebase is architecturally secret-free (cannot construct a working
+// Beds24Adapter at all -- see this codebase's own index.js header comment),
+// but an unused, untested bypass capability is still removed entirely
+// rather than left dormant.
 const crypto = require('crypto');
 const { buildRoomTypes, computeSellable, toOutboundPayload, addDays } = require('./inventory');
 
 const HORIZON_DAYS = 365; // event-driven window
 const FULL_HORIZON_DAYS = 730; // nightly reconciliation window
 
-async function syncAvailability({ store, roomsDocs, from, days, trigger, pushAdapter, now }) {
+async function syncAvailability({ store, roomsDocs, from, days, trigger, now }) {
   const nowIso = now || new Date().toISOString();
   const start = from || nowIso.slice(0, 10);
   const to = addDays(start, days || HORIZON_DAYS);
@@ -31,10 +47,7 @@ async function syncAvailability({ store, roomsDocs, from, days, trigger, pushAda
       changed.push({ code, dates: diffDates.length });
     }
   }
-  let pushResult = 'not_connected';
-  if (pushAdapter && changed.length) {
-    try { await pushAdapter.pushAvailability(payload); pushResult = 'pushed'; } catch (e) { pushResult = 'push_failed: ' + e.message; }
-  }
+  const pushResult = 'not_connected'; // this function never calls Beds24 itself -- see the file header comment
   // Doc ID must be unique per attempt even when two calls share the same
   // millisecond (concurrent triggers, retries, or fast-clock test loops) --
   // a timestamp-only ID silently overwrote the earlier audit entry instead of

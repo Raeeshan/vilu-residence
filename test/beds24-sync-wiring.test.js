@@ -99,10 +99,16 @@ test('beds24RateChangeSync exists as its own onDocumentWritten trigger on ota_ro
   assert.ok(CORE.includes("exports.beds24RateChangeSync = onDocumentWritten('ota_room_types/{roomTypeId}'"));
 });
 test('beds24RateChangeSync returns early when no watched field actually changed (a no-op write enqueues nothing)', () => {
+  // Phase B24-2A.1, Section B: the single `watchedFields` list was split
+  // into RATE_FIELDS/RESTRICTION_FIELDS (see beds24-granular-sync-wiring
+  // .test.js, Case A, for the full split/intent coverage) -- the no-op
+  // early-return behavior this test guards is unchanged, only the field
+  // grouping's variable names changed.
   const m = CORE.match(/exports\.beds24RateChangeSync[\s\S]*?\n\}\);/);
   assert.ok(m);
-  assert.ok(m[0].includes('watchedFields'));
-  assert.ok(m[0].includes('if (!changed) return'));
+  assert.ok(m[0].includes('RATE_FIELDS'));
+  assert.ok(m[0].includes('RESTRICTION_FIELDS'));
+  assert.ok(m[0].includes('if (!rateChanged && !restrictionChanged) return'));
 });
 test('beds24RateChangeSync only enqueues its OWN room type, never all mapped types', () => {
   const m = CORE.match(/exports\.beds24RateChangeSync[\s\S]*?\n\}\);/);

@@ -3,6 +3,8 @@
 //   node test/ota-core.test.js
 const assert = require('assert');
 const path = require('path');
+const fs = require('fs');
+const fsReadFile = (p) => fs.readFileSync(p, 'utf8');
 const F = (p) => require(path.join(__dirname, '..', 'functions', 'lib', p));
 const { MemoryStore } = F('store-memory');
 const { MockAdapter } = F('adapters');
@@ -147,6 +149,23 @@ async function assertNoOversell(store) { // physical invariant: no two active re
     s = await syncAvailability({ store: c.store, from: '2026-11-01', days: 3, trigger: 'block_removed' });
     assert.strictEqual(s.payload.room_types.DOUBLE.dates['2026-11-01'].available, 2); // VR05 back, VR03 now booked
     assert.strictEqual(s.pushResult, 'not_connected'); assert.strictEqual((await c.store.list('ota_pushes')).length, 3);
+  });
+  // Phase B24-2A.1, Section F regression: syncAvailability's `pushAdapter`
+  // parameter (and its direct pushAvailability() bypass of
+  // enqueueBeds24Sync/job_intent/otaFeatureEnabled/the property-room guards)
+  // was removed entirely -- this proves the removal held and can never
+  // silently regress back in.
+  await test('regression: syncAvailability no longer accepts/uses a pushAdapter -- a supplied fake adapter\'s pushAvailability is never called, and pushResult is always "not_connected"', async () => {
+    const c = await fresh();
+    let pushAvailabilityCalls = 0;
+    const fakePushAdapter = { pushAvailability: async () => { pushAvailabilityCalls++; return { httpStatus: 200 }; } };
+    const s = await syncAvailability({ store: c.store, from: '2026-11-01', days: 3, trigger: 'test', pushAdapter: fakePushAdapter });
+    assert.strictEqual(pushAvailabilityCalls, 0, 'pushAvailability must never be called -- syncAvailability itself never talks to Beds24');
+    assert.strictEqual(s.pushResult, 'not_connected');
+    const src = fsReadFile(path.join(__dirname, '..', 'functions', 'lib', 'availability.js'));
+    const sigMatch = src.match(/async function syncAvailability\(\{([^}]*)\}\)/);
+    assert.ok(sigMatch, 'syncAvailability signature not found');
+    assert.equal(/pushAdapter/.test(sigMatch[1]), false, 'the pushAdapter parameter must not exist in the function signature (a header comment MAY still explain why it was removed -- that is documentation, not a live parameter)');
   });
   // 12 integration offline + 13 retry recovery
   await test('12. channel manager offline → event logged as retryable error, nothing written; 13. retry after recovery succeeds once', async () => {

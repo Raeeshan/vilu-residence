@@ -255,13 +255,25 @@ async function runAvailability(trigger, roomsDocsList) {
 // Beds24 (BEDS24_ROOM_MAP has no entry) is silently skipped -- there is
 // nothing to sync for it. An empty affectedDates map enqueues nothing at
 // all, matching "do not rewrite the whole calendar after every reservation."
-async function enqueueBeds24Sync(trigger, affectedDates) {
+// `jobIntent` (Phase B24-2A, Sections C/D; corrected in B24-2A.1): REQUIRED
+// -- 'availability' | 'rate' | 'restriction'. Every call site below passes
+// it explicitly (never defaulted here) so beds24OutboundWorker can fail
+// closed on a missing/
+// unrecognized intent rather than ever guess which granular flag
+// authorizes a job. This function still enqueues unconditionally
+// (regardless of ota_config.enabled/granular flags) -- enqueueing writes
+// only an internal Firestore audit/queue doc, never calls Beds24, so the
+// ONE place that needs to check authorization is beds24OutboundWorker
+// itself, not here. This is deliberate: it avoids a job ever being queued
+// under one feature and executed under another, since intent is stamped
+// once at creation and never reinterpreted later.
+async function enqueueBeds24Sync(trigger, affectedDates, jobIntent) {
   const codes = Object.keys(affectedDates || {});
   for (const code of codes) {
     if (!BEDS24_ROOM_MAP[code]) continue;
     const dates = affectedDates[code];
     if (!dates || !dates.length) continue;
-    const { id, record } = buildBeds24PushRecord({ roomTypeCode: code, dateRange: { affected_dates: dates }, payload: null, status: 'pending', trigger });
+    const { id, record } = buildBeds24PushRecord({ roomTypeCode: code, dateRange: { affected_dates: dates }, payload: null, status: 'pending', trigger, jobIntent });
     await db.collection('ota_pushes').doc(id).set(record);
   }
 }
@@ -277,7 +289,7 @@ exports.availabilityOnReservation = onDocumentWritten('reservations/{id}', async
     before: b && isActiveStatus(b.status) ? { room_id: b.room_id, check_in: b.check_in, check_out: b.check_out } : null,
     after: a && isActiveStatus(a.status) ? { room_id: a.room_id, check_in: a.check_in, check_out: a.check_out } : null,
   });
-  await enqueueBeds24Sync('reservation:' + event.params.id, affectedDates);
+  await enqueueBeds24Sync('reservation:' + event.params.id, affectedDates, 'availability');
 });
 exports.availabilityOnBlock = onDocumentWritten('blocks/{id}', async (event) => {
   const rooms = await roomsDocs();
@@ -288,34 +300,43 @@ exports.availabilityOnBlock = onDocumentWritten('blocks/{id}', async (event) => 
     before: b ? { room_id: b.room_id, check_in: b.from_date, check_out: b.to_date } : null,
     after: a ? { room_id: a.room_id, check_in: a.from_date, check_out: a.to_date } : null,
   });
-  await enqueueBeds24Sync('block:' + event.params.id, affectedDates);
+  await enqueueBeds24Sync('block:' + event.params.id, affectedDates, 'availability');
 });
 
 // ── Beds24 rate/restriction-change sync (continuous-sync pass) ──────────────
-// Reacts to an actual field change on ota_room_types/{roomTypeId} (base_rate,
-// min_stay, max_stay, closed_to_arrival, closed_to_departure,
-// manual_stop_sell) -- a no-op write (unrelated field, or identical values)
-// enqueues nothing. A base-rate/restriction change has no natural "affected
-// dates" of its own (unlike a reservation/block), so per the owner's own
-// guidance it resyncs that ONE room type's entire future booking window --
-// never any other room type. ota_room_type_overrides is intentionally NOT
-// wired here yet: no per-date override schema is defined or used anywhere
-// in this codebase (confirmed empty in production), so triggering off an
-// undefined shape would mean inventing behavior -- deferred until the
-// override schema itself is decided.
+// Reacts to an actual field change on ota_room_types/{roomTypeId} -- a no-op
+// write (unrelated field, or identical values) enqueues nothing. A
+// base-rate/restriction change has no natural "affected dates" of its own
+// (unlike a reservation/block), so per the owner's own guidance it resyncs
+// that ONE room type's entire future booking window -- never any other room
+// type.
+//
+// Phase B24-2A.1: this trigger watches TWO genuinely different field
+// categories, classified against Beds24's own calendar schema (Section B
+// audit) -- base_rate is a RATE concern (Beds24 price1); min_stay/max_stay/
+// closed_to_arrival/closed_to_departure/manual_stop_sell are all RESTRICTION
+// concerns (Beds24 minStay/maxStay/override). They are now enqueued as up to
+// TWO SEPARATE, intent-specific jobs -- never one combined job that would let
+// a rate-only authorization accidentally also carry a restriction change (or
+// vice versa). A single Firestore write can change fields in both
+// categories at once (e.g. an admin edits base_rate and min_stay together);
+// both jobs are enqueued independently in that case.
 exports.beds24RateChangeSync = onDocumentWritten('ota_room_types/{roomTypeId}', async (event) => {
   const a = event.data.after.exists ? event.data.after.data() : null;
   if (!a) return; // deletion: not this pass's concern
   const b = event.data.before.exists ? event.data.before.data() : null;
-  const watchedFields = ['base_rate', 'min_stay', 'max_stay', 'closed_to_arrival', 'closed_to_departure', 'manual_stop_sell'];
-  const changed = watchedFields.some((f) => !b || b[f] !== a[f]);
-  if (!changed) return;
+  const RATE_FIELDS = ['base_rate'];
+  const RESTRICTION_FIELDS = ['min_stay', 'max_stay', 'closed_to_arrival', 'closed_to_departure', 'manual_stop_sell'];
+  const rateChanged = RATE_FIELDS.some((f) => !b || b[f] !== a[f]);
+  const restrictionChanged = RESTRICTION_FIELDS.some((f) => !b || b[f] !== a[f]);
+  if (!rateChanged && !restrictionChanged) return;
   const code = ROOM_TYPE_ID_TO_CODE[event.params.roomTypeId];
   if (!code || !BEDS24_ROOM_MAP[code]) return;
   const today = maldivesNow().date;
   const windowDays = a.booking_window_days || 365;
   const dates = dateRange(today, addDays(today, windowDays));
-  await enqueueBeds24Sync('ota_room_types:' + event.params.roomTypeId, { [code]: dates });
+  if (rateChanged) await enqueueBeds24Sync('ota_room_types:' + event.params.roomTypeId, { [code]: dates }, 'rate');
+  if (restrictionChanged) await enqueueBeds24Sync('ota_room_types:' + event.params.roomTypeId, { [code]: dates }, 'restriction');
 });
 
 // ── Beds24 date-specific rate-override sync (Bulk Price Manager rebuild,
@@ -332,6 +353,15 @@ exports.beds24RateChangeSync = onDocumentWritten('ota_room_types/{roomTypeId}', 
 // roomTypeOverrides()), so it doesn't matter whether THIS trigger, a
 // reservation/block change, or the nightly safety net enqueued the job --
 // the override is always applied fresh, never trusted from enqueue time.
+//
+// Phase B24-2A.1 naming note: despite the function/collection name
+// "override", the actual field this trigger watches --
+// ota_room_type_overrides.overrides[date] -- is a per-date PRICE value
+// (confirmed via beds24-bridge.js's own resolveRate(), which reads
+// dateOverrides[date] purely as a rate override, never as a restriction
+// flag). This is therefore a RATE-intent job, not a restriction-intent job,
+// despite the collection's name -- verified from source, not assumed from
+// the naming.
 exports.beds24OverrideChangeSync = onDocumentWritten('ota_room_type_overrides/{roomTypeId}', async (event) => {
   const code = ROOM_TYPE_ID_TO_CODE[event.params.roomTypeId];
   if (!code || !BEDS24_ROOM_MAP[code]) return;
@@ -347,7 +377,7 @@ exports.beds24OverrideChangeSync = onDocumentWritten('ota_room_type_overrides/{r
     if (!(date in beforeOverrides) || afterOverrides[date] !== beforeOverrides[date]) changedDates.add(date);
   }
   if (!changedDates.size) return; // e.g. a metadata-only write, or before===after
-  await enqueueBeds24Sync('ota_room_type_overrides:' + event.params.roomTypeId, { [code]: Array.from(changedDates).sort() });
+  await enqueueBeds24Sync('ota_room_type_overrides:' + event.params.roomTypeId, { [code]: Array.from(changedDates).sort() }, 'rate');
 });
 
 // ── nightly reconciliation (Stage 10) ───────────────────────────────────────
@@ -380,7 +410,7 @@ exports.nightlyReconcile = onSchedule({ schedule: '30 3 * * *', timeZone: 'India
     const today = maldivesNow().date;
     const affectedDates = {};
     for (const code of Object.keys(BEDS24_ROOM_MAP)) affectedDates[code] = dateRange(today, addDays(today, 365));
-    await enqueueBeds24Sync('nightly', affectedDates);
+    await enqueueBeds24Sync('nightly', affectedDates, 'availability');
     const roomTypesChecked = Object.keys((result.payload && result.payload.room_types) || {}).length;
     const differencesFound = (result.changed || []).reduce((sum, c) => sum + (c.dates || 0), 0);
     logger.info('nightlyReconcile.complete', {

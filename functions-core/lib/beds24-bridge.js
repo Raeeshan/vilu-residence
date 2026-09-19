@@ -62,6 +62,42 @@ function beds24RoomIdentity(roomTypeCode) {
 }
 
 // ---------------------------------------------------------------------------
+// Property/room safety guards (Phase B24-2A, Section G). Every Beds24 API
+// operation -- read or write, today or once writes are authorized -- must
+// stay constrained to property 352964 and the 6 known VR01-VR06 rooms.
+// FAIL CLOSED: an unexpected property or an unrecognized Beds24/PMS room id
+// throws rather than silently proceeding or defaulting to "allow". Never
+// catch-and-ignore these at a call site -- let them propagate so a mapping
+// bug surfaces immediately instead of silently reading/writing the wrong
+// property or room.
+function assertKnownBeds24Property(propertyId) {
+  const id = Number(propertyId);
+  if (!Number.isFinite(id) || id !== BEDS24_PROPERTY_ID) {
+    throw new Error('beds24-bridge: unexpected Beds24 property id ' + propertyId + ' (expected ' + BEDS24_PROPERTY_ID + ')');
+  }
+  return id;
+}
+
+const BEDS24_ROOM_ID_TO_CODE = Object.freeze(
+  Object.fromEntries(Object.entries(BEDS24_ROOM_MAP).map(([code, identity]) => [identity.beds24_room_id, code]))
+);
+function assertKnownBeds24RoomId(beds24RoomId) {
+  const id = Number(beds24RoomId);
+  const code = BEDS24_ROOM_ID_TO_CODE[id];
+  if (!code) throw new Error('beds24-bridge: unknown Beds24 room id ' + beds24RoomId + ' -- not in BEDS24_ROOM_MAP');
+  return code;
+}
+
+const VILU_ROOM_TO_CODE = Object.freeze(
+  Object.fromEntries(Object.entries(BEDS24_ROOM_MAP).flatMap(([code, identity]) => identity.vilu_rooms.map((r) => [r, code])))
+);
+function assertKnownPmsRoom(viluRoomId) {
+  const code = VILU_ROOM_TO_CODE[viluRoomId];
+  if (!code) throw new Error('beds24-bridge: unknown Vilu PMS room id ' + viluRoomId + ' -- not in BEDS24_ROOM_MAP');
+  return code;
+}
+
+// ---------------------------------------------------------------------------
 // Step 4: override precedence. Confirmed exact enum 2026-09-10 from Beds24's
 // own live OpenAPI v2 schema (https://beds24.com/api/v2/apiV2.yaml -- this
 // spec file is publicly readable without a token, re-checked via a plain
@@ -95,7 +131,16 @@ function computeOverride({ stopSell, cta, ctd }) {
 // silently clamping if availability is out of the physical 0..quantity
 // range, since that would indicate a bug upstream in Vilu's own sellable
 // calculation, not something this transport layer should paper over.
-function buildBeds24CalendarPayload({ roomTypeCode, from, to, rate, availability, minStay, maxStay, cta, ctd, stopSell }) {
+// Partial-update confirmed (Phase B24-2A, verified against Beds24's own
+// OpenAPI v2 spec at https://beds24.com/api/v2/apiV2.yaml): "To remove any
+// property, set the value to null" -- an OMITTED field is left completely
+// untouched server-side, never reset/zeroed. `includeOverride` defaults to
+// true (full backward-compatible payload) -- pass false to omit the
+// `override` key entirely for a rate-only push, since Beds24 documents a
+// real cross-field side effect ("If you change override from blackout to
+// none without setting numAvail, numAvail will change to the maximum
+// possible") that a rate-only push must never risk triggering.
+function buildBeds24CalendarPayload({ roomTypeCode, from, to, rate, availability, minStay, maxStay, cta, ctd, stopSell, includeOverride }) {
   const identity = beds24RoomIdentity(roomTypeCode);
   if (availability != null && (availability < 0 || availability > identity.quantity)) {
     throw new Error('beds24-bridge: availability ' + availability + ' out of range 0..' + identity.quantity + ' for ' + roomTypeCode + ' on ' + from);
@@ -105,7 +150,7 @@ function buildBeds24CalendarPayload({ roomTypeCode, from, to, rate, availability
   if (availability != null) entry.numAvail = availability;
   if (minStay != null) entry.minStay = minStay;
   if (maxStay != null) entry.maxStay = maxStay;
-  entry.override = computeOverride({ stopSell: !!stopSell, cta: !!cta, ctd: !!ctd });
+  if (includeOverride !== false) entry.override = computeOverride({ stopSell: !!stopSell, cta: !!cta, ctd: !!ctd });
   return { roomId: identity.beds24_room_id, calendar: [entry] };
 }
 
@@ -187,7 +232,22 @@ function resolveRate({ config, date, dateOverrides }) {
 // -- this function's only job is translating that canonical, channel-
 // agnostic shape into Beds24's specific wire field names via
 // buildBeds24CalendarPayload. It never recomputes pricing or availability.
-function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sellableTotal, dateOverrides, now }) {
+// `mode`: 'full' (default, backward compatible) | 'availability' (numAvail +
+// override only) | 'rate' (price1/minStay/maxStay only, never numAvail or
+// override). See Phase B24-2A's control matrix.
+// Phase B24-2A.1: strict 3-way field allowlist per mode.
+//   'availability' -> numAvail ONLY. No price1, no override, no minStay/maxStay.
+//   'rate'         -> price1 ONLY. No numAvail, no override, no minStay/maxStay.
+//   'restriction'  -> override/minStay/maxStay ONLY. No price1, no numAvail.
+// 'full' (default) still emits every field -- kept ONLY for
+// generateInventorySeed()'s dry-run seed and for tests; the production
+// worker must never select 'full' as a fallback for a missing/unknown job
+// intent.
+function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sellableTotal, dateOverrides, now, mode }) {
+  const effectiveMode = mode || 'full';
+  const includeAvailability = effectiveMode === 'full' || effectiveMode === 'availability';
+  const includeRate = effectiveMode === 'full' || effectiveMode === 'rate';
+  const includeRestriction = effectiveMode === 'full' || effectiveMode === 'restriction';
   const { rate, overridden } = resolveRate({ config, date, dateOverrides });
   const generic = computeOtaTypePayload({
     config,
@@ -225,15 +285,16 @@ function buildDatePayload({ roomTypeCode, date, config, sellableAvailable, sella
     roomTypeCode,
     from: date,
     to: date,
-    rate: generic.rate,
-    availability: generic.numAvail,
-    minStay: generic.minStay,
-    maxStay: generic.maxStay,
+    rate: includeRate ? generic.rate : null,
+    availability: includeAvailability ? generic.numAvail : null,
+    minStay: includeRestriction ? generic.minStay : null,
+    maxStay: includeRestriction ? generic.maxStay : null,
     cta,
     ctd,
     stopSell: manualStopSell,
+    includeOverride: includeRestriction,
   });
-  return { roomTypeCode, date, rate: generic.rate, rateOverridden: overridden, numAvail: generic.numAvail, stopSell: manualStopSell, cta, ctd, cutoffActive, payload };
+  return { roomTypeCode, date, rate: generic.rate, rateOverridden: overridden, numAvail: generic.numAvail, stopSell: manualStopSell, cta, ctd, cutoffActive, mode: effectiveMode, payload };
 }
 
 // ---------------------------------------------------------------------------
@@ -396,7 +457,7 @@ function groupEntriesByRoom(entries) {
 // `configs` shape: { [roomTypeCode]: otaRoomTypeConfig } -- the caller's own
 // current ota_room_types read, never the bundled INITIAL_OTA_ROOM_TYPES
 // constant, so a live rate/restriction edit is always reflected.
-function buildDifferentialPayload({ roomsDocs, reservations, blocks, affectedDates, configs, dateOverrides, now }) {
+function buildDifferentialPayload({ roomsDocs, reservations, blocks, affectedDates, configs, dateOverrides, now, mode }) {
   const codes = Object.keys(affectedDates || {});
   if (!codes.length) return { entries: [], invalid: [], grouped: [] };
   let minDate = null, maxDate = null;
@@ -419,7 +480,7 @@ function buildDifferentialPayload({ roomsDocs, reservations, blocks, affectedDat
       const sellDay = (byCodeDate[code] || {})[date];
       if (!sellDay) { invalid.push({ code, date, reason: 'missing sellable data' }); continue; }
       try {
-        const built = buildDatePayload({ roomTypeCode: code, date, config, sellableAvailable: sellDay.available, sellableTotal: sellDay.total, dateOverrides: overridesForCode, now });
+        const built = buildDatePayload({ roomTypeCode: code, date, config, sellableAvailable: sellDay.available, sellableTotal: sellDay.total, dateOverrides: overridesForCode, now, mode });
         entries.push(built);
       } catch (e) {
         invalid.push({ code, date, reason: e.message });
@@ -465,7 +526,17 @@ function computeAffectedDates({ roomsDocs, before, after }) {
 // attempt_count, last_error, updated_at) that the current audit-only
 // records don't carry, without changing anything about the existing
 // records' shape (every existing field is still present).
-function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, now }) {
+// `jobIntent` (Phase B24-2A, corrected in B24-2A.1): one of 'availability' |
+// 'rate' | 'restriction' -- REQUIRED by every caller in this codebase
+// (availabilityOnReservation/availabilityOnBlock/nightlyReconcile pass
+// 'availability'; beds24RateChangeSync passes 'rate' and/or 'restriction'
+// depending on which watched field(s) changed; beds24OverrideChangeSync
+// passes 'rate' -- despite its name, it watches a per-date PRICE override,
+// confirmed via resolveRate(), not a restriction). Not defaulted here on
+// purpose -- a caller that forgets produces a record with
+// `job_intent` simply absent, and beds24OutboundWorker treats a missing/
+// unrecognized job_intent as FAIL CLOSED (skipped, never processed).
+function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, jobIntent, now }) {
   const nowIso = now || new Date().toISOString();
   const operationId = 'beds24_' + nowIso.replace(/[^0-9]/g, '') + '_' + crypto.randomBytes(9).toString('base64url');
   // Audit-safe payload hash (Step 8, continuous-sync pass): lets a caller or
@@ -478,6 +549,7 @@ function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status
     id: operationId,
     record: {
       type: 'beds24_calendar_push',
+      job_intent: jobIntent || null,
       provider: 'beds24',
       operation_id: operationId,
       trigger: trigger || 'manual',
@@ -507,6 +579,9 @@ module.exports = {
   BEDS24_OVERRIDE,
   MALDIVES_TZ,
   beds24RoomIdentity,
+  assertKnownBeds24Property,
+  assertKnownBeds24RoomId,
+  assertKnownPmsRoom,
   computeOverride,
   buildBeds24CalendarPayload,
   deriveSellableByRoomTypeCode,
