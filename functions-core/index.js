@@ -3,6 +3,13 @@
 //   blockDoubleBooking  server-side overlap backstop (create AND update)
 //   publicBooking       trusted write path for the unauthenticated website (Stage 0 fix)
 //   availabilityOnReservation / availabilityOnBlock  event-driven sellable-inventory derivation
+//   mergeBlockRoom  the ONE backend path for creating/extending a block on a
+//     physical room from either the Calendar or the Block Rooms tab -- an
+//     overlapping/touching EXISTING BLOCK merges into one final interval
+//     inside a single transaction (never a separate delete-then-create); an
+//     overlapping ACTIVE RESERVATION still hard-rejects. See the comment
+//     above that export for why the rare 3+ block merge case can emit more
+//     than one (still-correct) availability push.
 //   nightlyReconcile    03:30 Indian/Maldives: full 730-day availability recompute
 //   getReservationDocument / uploadReservationDocument  authenticated,
 //     role-checked read/write for the Reservation Document Vault (passports,
@@ -301,6 +308,139 @@ exports.availabilityOnBlock = onDocumentWritten('blocks/{id}', async (event) => 
     after: a ? { room_id: a.room_id, check_in: a.from_date, check_out: a.to_date } : null,
   });
   await enqueueBeds24Sync('block:' + event.params.id, affectedDates, 'availability');
+});
+
+// ── mergeBlockRoom: Calendar/Block Rooms "block-over-block should merge, not
+// hard-reject" fix ───────────────────────────────────────────────────────────
+// Root cause of the reported bug: neither the Calendar nor the Block Rooms tab
+// ever wrote a `blocks` document through a backend handler at all -- both
+// wrote directly to Firestore from the client, and both treated ANY existing
+// document on that physical room (reservation OR block) as an identical hard
+// conflict. A block is not a guest -- it is the PMS's own placeholder for
+// "unavailable for some operational reason", so a second block over the same
+// nights should extend/merge, never bounce.
+//
+// This is now the ONE backend path for creating/extending a block on a
+// physical room; both the Calendar and the Block Rooms tab call it (no
+// second, divergent implementation). It runs entirely inside a single
+// Firestore transaction -- read the room's existing blocks AND its
+// room_availability reservation lock, validate, then write the final merged
+// state -- so there is never a moment where the old block is gone and the new
+// one doesn't exist yet (the "temporarily open inventory" failure mode this
+// fix was explicitly asked to avoid). The existing availabilityOnBlock
+// trigger above fires on the resulting document write(s) exactly as it does
+// for any other block change -- this function does not duplicate that
+// enqueue. For the common case this handles (zero or one pre-existing block
+// touching the requested range -- which covers the reported bug's own
+// regression case exactly), that is a single document write, so exactly one
+// availability push results, satisfying "one recalculation for the final
+// range" with no extra machinery. Only the rare case of collapsing THREE OR
+// MORE pre-existing blocks in one call involves more than one document write
+// (one update + N deletes), and therefore more than one trigger firing --
+// each of those still recomputes and pushes the correct, fully-committed
+// final state (Cloud Functions triggers only ever fire after a transaction
+// commits, so none of them can observe the transient "block deleted, not yet
+// replaced" state this fix exists to prevent); they are merely redundant,
+// not incorrect. Fully deduplicating that rare case would mean teaching the
+// shared availabilityOnBlock trigger to recognize "this delete was part of a
+// merge, skip its own push" -- which needs a marker on the doc BEFORE it's
+// deleted, i.e. a second write outside this transaction, reintroducing the
+// exact non-atomic multi-step risk this fix is required to avoid. Left alone
+// as a documented, low-risk tradeoff rather than expanding this fix's blast
+// radius into the shared trigger.
+function isDateStr(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s); }
+const DEFAULT_BLOCK_REASON = 'Cloudbeds Blocked Dates — migrated inventory';
+exports.mergeBlockRoom = onCall({ region: 'us-central1', maxInstances: 10 }, async (request) => {
+  const { role, email } = await callerRole(request);
+  requireStaffLike(role);
+  const data = request.data || {};
+  const room_id = String(data.room_id || '');
+  const from_date = String(data.from_date || '');
+  const to_date = String(data.to_date || '');
+  const reason = data.reason != null && String(data.reason).trim() ? String(data.reason).trim().slice(0, 300) : null;
+  const notes = data.notes != null && String(data.notes).trim() ? String(data.notes).trim().slice(0, 2000) : null;
+  if (!/^VR0[1-6]$/.test(room_id)) throw new HttpsError('invalid-argument', 'Invalid room_id.');
+  if (!isDateStr(from_date) || !isDateStr(to_date) || from_date >= to_date) throw new HttpsError('invalid-argument', 'from_date must be a valid date before to_date.');
+
+  const result = await db.runTransaction(async (tx) => {
+    // 1. Reservation conflict source: room_availability.bookings, the exact
+    //    same active-reservation lock list writeReservationTx()/
+    //    agencyHoldAvailable() already use -- never a second status filter.
+    const availSnap = await tx.get(db.collection('room_availability').doc(room_id));
+    const bookings = (availSnap.exists && availSnap.data().bookings) || [];
+
+    // 2. Existing blocks on this physical room.
+    const blocksSnap = await tx.get(db.collection('blocks').where('room_id', '==', room_id));
+    const allBlocks = blocksSnap.docs.map((d) => ({ id: d.id, ref: d.ref, data: d.data() }));
+
+    // 3. Which existing blocks does the requested range overlap OR touch
+    //    (checkout-exclusive adjacency counts as contiguous -- Case 3).
+    //    This is a transitive closure, not a single pass: two pre-existing
+    //    blocks that only touch EACH OTHER (never previously merged) must
+    //    both be pulled in once either one touches the growing final range,
+    //    otherwise a chain of 3+ blocks collapses only partially and leaves
+    //    an orphan (Case 9).
+    const touches = (aFrom, aTo, bFrom, bTo) => aFrom <= bTo && bFrom <= aTo;
+    let finalFrom = from_date, finalTo = to_date;
+    const matched = [];
+    const remaining = allBlocks.slice();
+    let grew = true;
+    while (grew) {
+      grew = false;
+      for (let i = remaining.length - 1; i >= 0; i--) {
+        const b = remaining[i];
+        if (touches(b.data.from_date, b.data.to_date, finalFrom, finalTo)) {
+          matched.push(b);
+          if (b.data.from_date < finalFrom) finalFrom = b.data.from_date;
+          if (b.data.to_date > finalTo) finalTo = b.data.to_date;
+          remaining.splice(i, 1);
+          grew = true;
+        }
+      }
+    }
+
+    // 5. Reservation conflict check happens against the FULL final range, not
+    //    just the caller's requested range -- an existing block being
+    //    extended could in principle pull the merged range across a
+    //    reservation the caller's own smaller request never touched. Strict:
+    //    any active reservation overlap rejects the whole operation, no
+    //    partial block is written (Case 1).
+    const conflict = bookings.find((b) => overlaps(b.from, b.to, finalFrom, finalTo));
+    if (conflict) {
+      throw new HttpsError('failed-precondition', 'RESERVATION_CONFLICT: room ' + room_id + ' has an active reservation ' + conflict.id + ' (' + conflict.from + ' to ' + conflict.to + ') inside ' + finalFrom + ' to ' + finalTo + '.');
+    }
+
+    // 6. Reason: an explicit caller-selected reason always wins. Otherwise,
+    //    if every matched block already agrees on one reason, keep it
+    //    (never silently discard a real Cloudbeds/agency reason for a
+    //    generic default); if they disagree, keep the earliest matched
+    //    block's reason (deterministic, not arbitrary); a genuinely fresh
+    //    block with no reason supplied falls back to the standard label.
+    const matchedReasons = matched.map((b) => b.data.reason).filter(Boolean);
+    const uniqueReasons = Array.from(new Set(matchedReasons));
+    const finalReason = reason || (uniqueReasons.length === 1 ? uniqueReasons[0] : matchedReasons[0]) || DEFAULT_BLOCK_REASON;
+
+    // 7. Notes: preserve every distinct existing note plus any new one --
+    //    never silently drop history when multiple blocks merge.
+    const noteSet = new Set(matched.map((b) => b.data.notes).filter(Boolean));
+    if (notes) noteSet.add(notes);
+    const finalNotes = noteSet.size ? Array.from(noteSet).join(' | ') : null;
+
+    // 8. Survivor doc: the earliest-id matched block (deterministic) is
+    //    updated in place to the final range; any other matched blocks are
+    //    deleted in the SAME transaction. Zero matched blocks -> a fresh doc.
+    matched.sort((a, b) => (a.id < b.id ? -1 : 1));
+    const survivor = matched[0] || null;
+    const survivorId = survivor ? survivor.id : 'BL' + Date.now() + '-' + room_id;
+    const survivorRef = survivor ? survivor.ref : db.collection('blocks').doc(survivorId);
+    const payload = { id: survivorId, room_id, from_date: finalFrom, to_date: finalTo, reason: finalReason };
+    if (finalNotes) payload.notes = finalNotes;
+    tx.set(survivorRef, payload);
+    for (const b of matched) { if (b.id !== survivorId) tx.delete(b.ref); }
+
+    return { room_id, from_date: finalFrom, to_date: finalTo, reason: finalReason, notes: finalNotes, blockId: survivorId, mergedBlockIds: matched.map((b) => b.id), wasMerge: matched.length > 0 };
+  });
+  return result;
 });
 
 // ── Beds24 rate/restriction-change sync (continuous-sync pass) ──────────────

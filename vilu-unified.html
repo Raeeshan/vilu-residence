@@ -3014,8 +3014,9 @@ Full-Board | 40 | /day"></textarea></div>
     <div class="fg"><label>Notes</label>
       <textarea id="qb-block-notes" placeholder="Additional detail (optional)"></textarea>
     </div>
+    <div id="qb-preview" style="display:none;padding:10px 14px;background:#eff6ff;color:#1e40af;border-radius:6px;font-size:var(--font-size-sm);margin-bottom:8px;border:1px solid #bfdbfe"></div>
     <div id="qb-cf" style="display:none;padding:10px 14px;background:#fef3c7;color:#92400e;border-radius:6px;font-size:var(--font-size-sm);margin-bottom:8px;border:1px solid #fde68a"></div>
-    <button class="btn p" style="width:100%" onclick="submitQuickBlock()"><i class="ti ti-check"></i> Confirm block</button>
+    <button class="btn p" id="qb-confirm-btn" style="width:100%" onclick="submitQuickBlock()"><i class="ti ti-check"></i> Confirm block</button>
   </div>
 </div>
 
@@ -4768,6 +4769,31 @@ function isOcc(rn,from,to,excl){
   for(const r of RES){if(r.id===excl||r.st==='Cancelled'||r.st==='Checked out'||r.rn!==rn)continue;if(r.ci<to&&r.co>from)return r;}
   for(const b of BLK){if(b.id===excl||b.rn!==rn)continue;if(b.from<to&&b.to>from)return b;}
   return null;
+}
+
+// Client-side RESERVATION-only conflict check — used to decide whether the
+// Calendar/Block Rooms confirm button should be a hard stop (a real guest is
+// in the way) BEFORE calling the server. This intentionally does NOT check
+// BLK at all: an existing block is not a conflict from this function's point
+// of view, it's something callMergeBlockRoom()/mergeBlockRoom will merge
+// into. The backend re-checks the identical reservation condition inside its
+// own transaction regardless — this is UX-only, never the source of truth.
+function isResConflict(rn,from,to,excl){
+  for(const r of RES){if(r.id===excl||r.st==='Cancelled'||r.st==='Checked out'||r.rn!==rn)continue;if(r.ci<to&&r.co>from)return r;}
+  return null;
+}
+
+// The ONE call site both the Calendar's quick-block modal and the Block
+// Rooms tab use to actually create/extend a block — see mergeBlockRoom in
+// functions-core/index.js for why this replaced two separate direct
+// fsDb.collection('blocks')... writes. Returns the callable's result data on
+// success; throws on failure (RESERVATION_CONFLICT-prefixed message for a
+// real hard conflict, anything else for a generic failure) — callers decide
+// how to present that, this helper doesn't touch the DOM.
+async function callMergeBlockRoom(room_id, from_date, to_date, reason, notes){
+  var callable = fsFunctions.httpsCallable('mergeBlockRoom');
+  var result = await callable({ room_id:room_id, from_date:from_date, to_date:to_date, reason:reason||null, notes:notes||null });
+  return result.data;
 }
 
 function sBx(s){return `<span class="bx ${SRC_CLS[s]||'ot'}">${s}</span>`;}
@@ -8084,6 +8110,19 @@ function cellMenuBlock(){
 // they're exactly what was selected on the calendar; the full Block Rooms
 // page still handles picking an arbitrary room/range.
 let _qbSel=null;
+// Client-side preview of what mergeBlockRoom would actually do — same
+// touching/overlap union math as the server (see the comment above the
+// mergeBlockRoom export), computed here purely so the modal can show the
+// owner the real outcome ("existing block extended to X – Y") instead of
+// treating any pre-existing block as a rejection. This is a preview only;
+// the backend transaction is still the sole source of truth at Confirm time.
+function previewBlockMerge(rn,ci,co){
+  const touches=(aFrom,aTo,bFrom,bTo)=>aFrom<=bTo&&bFrom<=aTo;
+  const matched=BLK.filter(b=>b.rn===rn&&touches(b.from,b.to,ci,co));
+  let finalFrom=ci,finalTo=co;
+  for(const b of matched){ if(b.from<finalFrom)finalFrom=b.from; if(b.to>finalTo)finalTo=b.to; }
+  return {matched,finalFrom,finalTo,wasMerge:matched.length>0};
+}
 function openQuickBlock(rn,ci,co){
   _qbSel={rn,ci,co};
   document.getElementById('qb-summary').textContent=rNm(rn)+' · '+fd(ci)+' – '+fd(co);
@@ -8091,7 +8130,23 @@ function openQuickBlock(rn,ci,co){
   document.getElementById('qb-other-wrap').style.display='none';
   document.getElementById('qb-other').value='';
   document.getElementById('qb-block-notes').value='';
-  document.getElementById('qb-cf').style.display='none';
+  const cf=document.getElementById('qb-cf'),pv=document.getElementById('qb-preview'),btn=document.getElementById('qb-confirm-btn');
+  cf.style.display='none'; pv.style.display='none'; btn.disabled=false;
+  const rc=isResConflict(rn,ci,co);
+  if(rc){
+    // Case 1 — a real reservation is in the way: hard stop, Confirm disabled.
+    cf.style.display='block';
+    cf.textContent='⚠️ Conflict: '+rNm(rn)+' already booked '+fd(rc.ci)+'–'+fd(rc.co)+'. Choose different dates.';
+    btn.disabled=true;
+  }else{
+    const pm=previewBlockMerge(rn,ci,co);
+    if(pm.wasMerge){
+      // Case 2/3/4 — overlaps or touches an existing block only: never shown
+      // as "already booked/blocked" — Confirm stays enabled.
+      pv.style.display='block';
+      pv.textContent='ℹ️ Existing block will be extended to '+fd(pm.finalFrom)+' – '+fd(pm.finalTo)+'.';
+    }
+  }
   document.getElementById('m-quickblock').classList.add('on');
 }
 function closeQuickBlock(){
@@ -8104,40 +8159,46 @@ async function submitQuickBlock(){
   if(!_qbSel)return;
   const {rn,ci,co}=_qbSel;
   const cf=document.getElementById('qb-cf');cf.style.display='none';
-  const c=isOcc(rn,ci,co);
-  if(c){cf.style.display='block';cf.textContent='⚠️ Conflict: '+rNm(rn)+' already booked/blocked '+fd(c.ci||c.from)+'–'+fd(c.co||c.to);return;}
+  // Hard stop ONLY for a real reservation in the way — an existing BLOCK on
+  // these dates is not shown as a conflict here at all; it will be reported
+  // (and merged) by the server below.
+  const rc=isResConflict(rn,ci,co);
+  if(rc){cf.style.display='block';cf.textContent='⚠️ Conflict: '+rNm(rn)+' already booked '+fd(rc.ci)+'–'+fd(rc.co);return;}
   const reasonSel=document.getElementById('qb-reason').value;
   const type=reasonSel==='Other'?(document.getElementById('qb-other').value.trim()||'Other'):reasonSel;
   const note=document.getElementById('qb-block-notes').value.trim();
-  const blk={id:'BL'+Date.now(),type,rn,from:ci,to:co,note};
 
-  // Wait for the actual Firestore write before showing success — this used
+  // Wait for the actual backend commit before showing success — this used
   // to call the fire-and-forget saveBLK()/syncBlksToSupabase() pipeline and
   // show "✓ Room blocked" unconditionally, regardless of whether the write
-  // actually reached Firestore.
+  // actually reached Firestore. Now goes through the same mergeBlockRoom
+  // callable as the Block Rooms tab (see comment above that export) — a
+  // single atomic transaction, never a separate delete-then-create.
   const btn=document.querySelector('#m-quickblock button[onclick="submitQuickBlock()"]');
   if(btn){btn.disabled=true;btn.innerHTML='Blocking…';}
-  let ok=false;
+  let result=null, errMsg=null;
   try{
-    await fsDb.collection('blocks').doc(blk.id).set({id:blk.id, room_id:blk.rn, from_date:blk.from, to_date:blk.to, reason:blk.note||blk.type||'Blocked'}, {merge:true});
-    ok=true;
-  }catch(e){ console.error('submitQuickBlock Firestore write failed', e); }
+    result=await callMergeBlockRoom(rn,ci,co,type,note);
+  }catch(e){
+    console.error('submitQuickBlock mergeBlockRoom failed', e);
+    var msg=(e&&e.message)||'';
+    errMsg = msg.indexOf('RESERVATION_CONFLICT')===0 ? msg.replace(/^RESERVATION_CONFLICT:\s*/,'') : 'Could not save the block — please check your connection and try again.';
+  }
   if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Confirm block';}
 
-  if(!ok){
+  if(!result){
     cf.style.display='block';
-    cf.textContent='⚠️ Could not save the block — please check your connection and try again.';
+    cf.textContent='⚠️ '+errMsg;
     return;
   }
 
-  // Firestore write confirmed — now update local state. Still goes through
-  // saveBLK() (localStorage + a full re-sync) same as addBlk(), but that's
-  // just keeping things consistent now, not the thing success depended on.
-  BLK.push(blk);
-  saveBLK();
-  aLog('warn','Block: '+rNm(rn)+' '+fd(ci)+'–'+fd(co)+' ('+type+')');
+  // Backend commit confirmed — refresh BLK[] from Firestore rather than
+  // pushing a synthetic local entry: a merge can extend, or even remove,
+  // OTHER existing block docs (Case 4), not just add one.
+  await loadBlksFromFirestore();
+  aLog('warn','Block: '+rNm(rn)+' '+fd(result.from_date)+'–'+fd(result.to_date)+' ('+(result.reason||type)+')'+(result.wasMerge?' — merged with existing block(s)':''));
   closeQuickBlock();
-  toast('✓ Room blocked');
+  toast(result.wasMerge ? ('✓ Existing block extended to '+fd(result.from_date)+' – '+fd(result.to_date)) : '✓ Room blocked');
   drawBlkLst();
   drawCal();
 }
@@ -8903,13 +8964,34 @@ async function previewReconcileAgencySettlements(){
   }
 }
 
-function addBlk(){
+async function addBlk(){
   const rn=document.getElementById('bl-r').value,from=document.getElementById('bl-f').value,to=document.getElementById('bl-to2').value;
   const cf=document.getElementById('bl-cf');cf.style.display='none';
   if(!from||!to||to<=from){toast('Invalid dates');return;}
-  const c=isOcc(rn,from,to);if(c){cf.style.display='block';cf.textContent='Conflict: '+rNm(rn)+' booked/blocked '+fd(c.ci||c.from)+'–'+fd(c.co||c.to);return;}
-  BLK.push({id:'BL'+Date.now(),type:document.getElementById('bl-t').value,rn,from,to,note:document.getElementById('bl-n').value});
-  saveBLK();aLog('warn','Block: '+rNm(rn)+' '+fd(from)+'–'+fd(to)+' → pushed to OTAs');toast('Room blocked & pushed to OTAs');drawBlkLst();
+  // Hard stop ONLY for a real reservation — an existing BLOCK on these dates
+  // is reported (and merged) by the server, not rejected here. Goes through
+  // the same mergeBlockRoom callable the Calendar's quick-block modal uses
+  // (see comment above that export) — never a separate delete-then-create.
+  const rc=isResConflict(rn,from,to);
+  if(rc){cf.style.display='block';cf.textContent='Conflict: '+rNm(rn)+' booked '+fd(rc.ci)+'–'+fd(rc.co);return;}
+  const type=document.getElementById('bl-t').value,note=document.getElementById('bl-n').value;
+  const btn=document.querySelector('button[onclick="addBlk()"]');
+  if(btn){btn.disabled=true;btn.innerHTML='Blocking…';}
+  let result=null, errMsg=null;
+  try{
+    result=await callMergeBlockRoom(rn,from,to,type,note);
+  }catch(e){
+    console.error('addBlk mergeBlockRoom failed', e);
+    var msg=(e&&e.message)||'';
+    errMsg = msg.indexOf('RESERVATION_CONFLICT')===0 ? msg.replace(/^RESERVATION_CONFLICT:\s*/,'') : 'Could not save the block — please check your connection and try again.';
+  }
+  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-lock"></i>Block &amp; push to OTAs';}
+  if(!result){cf.style.display='block';cf.textContent=errMsg;return;}
+  await loadBlksFromFirestore();
+  aLog('warn','Block: '+rNm(rn)+' '+fd(result.from_date)+'–'+fd(result.to_date)+' → pushed to OTAs'+(result.wasMerge?' (merged with existing block(s))':''));
+  toast(result.wasMerge ? ('Existing block extended to '+fd(result.from_date)+' – '+fd(result.to_date)+' & pushed to OTAs') : 'Room blocked & pushed to OTAs');
+  drawBlkLst();
+  drawCal();
 }
 function drawBlkLst(){
   document.getElementById('bl-lst').innerHTML=BLK.length?BLK.map(b=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3f4f6">
