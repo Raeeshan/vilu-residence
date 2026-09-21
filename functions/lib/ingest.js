@@ -22,6 +22,14 @@ function docIdFor(cm, externalId, unitIndex) {
 function revisionOf(v) { return v === undefined || v === null ? '' : String(v); }
 function newerOrEqual(stored, incoming) { return revisionOf(stored) >= revisionOf(incoming); } // ISO timestamps / numeric strings compare lexically
 
+// A channel manager is untrusted input for date fields too -- freeRoomsForStay
+// and every overlap check downstream compare check_in/check_out as plain
+// strings, so anything other than a real YYYY-MM-DD (with check_in strictly
+// before check_out) would silently corrupt an overlap comparison rather than
+// throw. Caught here, once, before any room-assignment logic ever sees it.
+function isValidDateStr(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s + 'T00:00:00Z')); }
+function hasMalformedDates(unit) { return !isValidDateStr(unit.check_in) || !isValidDateStr(unit.check_out) || unit.check_in >= unit.check_out; }
+
 // Guest-note preservation (Post-completion hardening, item 2): buildFields()
 // used to reconstruct `notes` wholesale from channel data on every event,
 // silently discarding any staff-typed Guest Note in between syncs -- the
@@ -224,6 +232,10 @@ async function ingestEvent({ store, adapter, roomsDocs, event, now }) {
   for (let i = 0; i < units.length; i++) {
     const unit = units[i];
     const ex = outcome.existing[i];
+    if (hasMalformedDates(unit)) {
+      const cid = await raiseConflict(store, Object.assign({}, base, { unit_index: i, reason: 'malformed_dates', detail: 'invalid check_in/check_out: ' + JSON.stringify({ check_in: unit.check_in, check_out: unit.check_out }), at: nowIso, vilu_reservation_id: ex ? docIds[i] : null }));
+      conflicts.push(cid); continue;
+    }
     if (!roomTypes.types[unit.room_type]) {
       const cid = await raiseConflict(store, Object.assign({}, base, { unit_index: i, reason: 'unknown_room_type', detail: 'room type "' + unit.room_type + '" is not mapped to any physical room', at: nowIso, vilu_reservation_id: ex ? docIds[i] : null }));
       conflicts.push(cid); continue;

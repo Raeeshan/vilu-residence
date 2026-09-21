@@ -102,6 +102,30 @@ test('an unrecognized-channel booking is routed to ota_conflicts (reused, no sec
   assert.ok(fn.includes("reason: 'unrecognized_channel'"));
 });
 
+section('Case D2 — property-id gate: a booking from an unexpected Beds24 property must never reach ingestEvent()');
+test('processQueued imports BEDS24_PROPERTY_ID from beds24-bridge (the same constant already used by the outbound property/room guards), not a re-declared literal', () => {
+  assert.ok(OTA.includes("require('./lib/beds24-bridge')"));
+  assert.ok(/const\s*\{[^}]*BEDS24_PROPERTY_ID[^}]*\}\s*=\s*require\('\.\/lib\/beds24-bridge'\)/.test(OTA));
+});
+test('processQueued checks the peeked booking\'s property_id against BEDS24_PROPERTY_ID BEFORE the channel-recognition check and BEFORE calling ingestEvent()', () => {
+  const fn = OTA.match(/async function processQueued[\s\S]*?\n\}/)[0];
+  const propertyCheckIndex = fn.indexOf('peeked.property_id');
+  const channelCheckIndex = fn.indexOf('shouldAutoIngest(peeked)');
+  const ingestEventIndex = fn.indexOf('await ingestEvent('); // the real call site, not the earlier prose comment mentioning "ingestEvent(),"
+  assert.ok(propertyCheckIndex > -1, 'expected a peeked.property_id check inside processQueued');
+  assert.ok(propertyCheckIndex < channelCheckIndex, 'property-id must be checked before the channel gate');
+  assert.ok(ingestEventIndex > -1 && channelCheckIndex < ingestEventIndex, 'both gates must run before ingestEvent() is ever called');
+});
+test('an unexpected-property booking is routed to ota_conflicts (reused collection) with reason unexpected_property_id, and processQueued returns without calling ingestEvent', () => {
+  const fn = OTA.match(/async function raisePropertyReviewRecord[\s\S]*?\n\}/)[0];
+  assert.ok(fn.includes("collection('ota_conflicts')"));
+  assert.ok(fn.includes("reason: 'unexpected_property_id'"));
+  const processQueuedFn = OTA.match(/async function processQueued[\s\S]*?\n\}/)[0];
+  const gateBlock = processQueuedFn.match(/if \(peeked && peeked\.property_id != null[\s\S]*?\n {4}\}/)[0];
+  assert.ok(gateBlock.includes('raisePropertyReviewRecord'));
+  assert.ok(gateBlock.includes('return;'), 'the property-id gate must return immediately, never fall through to ingestEvent()');
+});
+
 section('Case E — webhook + catch-up convergence (Step 16): one idempotent ingestion path, not two');
 test('processOtaEvent (webhook-triggered) calls processQueued', () => {
   const fn = extractFn(OTA, 'processOtaEvent');

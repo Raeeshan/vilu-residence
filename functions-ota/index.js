@@ -28,6 +28,7 @@ const { MockAdapter, Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
 const { shouldAutoIngest } = require('./lib/beds24-inbound');
 const { otaFeatureEnabled } = require('./lib/ota-feature-flags');
+const { BEDS24_PROPERTY_ID } = require('./lib/beds24-bridge');
 
 initializeApp();
 const db = getFirestore();
@@ -107,6 +108,24 @@ async function raiseChannelReviewRecord(data, peeked) {
   });
 }
 
+// A Beds24 booking whose propertyId isn't Vilu's own (352964) must never be
+// treated as one of Vilu's reservations -- GET /bookings?id=... is never
+// itself scoped to a property, so this is the only place that catches it.
+// Reuses the EXISTING ota_conflicts collection, same shape as
+// raiseChannelReviewRecord above, with reason: 'unexpected_property_id'.
+async function raisePropertyReviewRecord(data, peeked) {
+  const id = data.channel_manager + '_' + data.external_id + '_property_' + Date.now();
+  await db.collection('ota_conflicts').doc(id).set({
+    open: true,
+    channel_manager: data.channel_manager,
+    external_id: data.external_id,
+    event_type: data.type,
+    reason: 'unexpected_property_id',
+    detail: 'Beds24 booking belongs to property ' + (peeked && peeked.property_id) + ', expected ' + BEDS24_PROPERTY_ID,
+    at: new Date().toISOString(),
+  });
+}
+
 // Phase B24-2A, Section I: this is the ONE choke point both processOtaEvent
 // (Firestore trigger) and otaCatchUp's retry loop funnel through, so gating
 // `inbound_processing_enabled` here -- rather than separately in each
@@ -129,6 +148,11 @@ async function processQueued(queueId, data) {
     } catch (e) {
       const retry = !!e.retryable && (data.retry_count || 0) < 6;
       await ref.set({ state: retry ? 'retry' : 'done', result: 'error', error_reason: e.message, processed_at: new Date().toISOString(), retry_count: (data.retry_count || 0) + (retry ? 1 : 0), next_retry_at: retry ? new Date(Date.now() + Math.min(60, 2 ** (data.retry_count || 0)) * 60000).toISOString() : null }, { merge: true });
+      return;
+    }
+    if (peeked && peeked.property_id != null && peeked.property_id !== BEDS24_PROPERTY_ID) {
+      await raisePropertyReviewRecord(data, peeked);
+      await ref.set({ state: 'done', result: 'unexpected_property_id_review', property_id: peeked.property_id, processed_at: new Date().toISOString() }, { merge: true });
       return;
     }
     if (peeked && !shouldAutoIngest(peeked)) {

@@ -249,6 +249,41 @@ async function assertNoOversell(store) { // physical invariant: no two active re
     for (const p of pushes) { assert.strictEqual(p.at, fixedNow); assert.strictEqual(typeof p.trigger, 'string'); assert.strictEqual(p.result, 'not_connected'); assert.strictEqual(p.retry_count, 0); }
   });
 
+  await test('malformed dates (check_in/check_out) → conflict record, nothing written, no crash', async () => {
+    const c = await fresh();
+    c.adapter.put(booking({ units: [{ room_type: 'Double Room', check_in: 'not-a-date', check_out: '2026-09-14', adults: 2, children: 0, nightly_rate: 37.5 }] }));
+    const r = await ingestEvent({ store: c.store, adapter: c.adapter, event: ev() });
+    assert.strictEqual(r.result, 'conflict');
+    assert.strictEqual(await c.store.get('reservations', 'OTA-mock-B1'), null);
+    const conflicts = await c.store.list('ota_conflicts');
+    assert.strictEqual(conflicts.length, 1); assert.strictEqual(conflicts[0].reason, 'malformed_dates');
+    await assertNoOversell(c.store);
+  });
+  await test('malformed dates: check_in on/after check_out (zero or negative nights) → conflict, nothing written', async () => {
+    const c = await fresh();
+    c.adapter.put(booking({ units: [{ room_type: 'Double Room', check_in: '2026-09-14', check_out: '2026-09-10', adults: 2, children: 0, nightly_rate: 37.5 }] }));
+    const r = await ingestEvent({ store: c.store, adapter: c.adapter, event: ev() });
+    assert.strictEqual(r.result, 'conflict');
+    const conflicts = await c.store.list('ota_conflicts');
+    assert.strictEqual(conflicts.length, 1); assert.strictEqual(conflicts[0].reason, 'malformed_dates');
+  });
+  await test('malformed dates on ONE unit of a multi-room booking does not block the other, valid unit', async () => {
+    const c = await fresh();
+    c.adapter.put(booking({
+      units: [
+        { room_type: 'Double Room', check_in: '2026-09-10', check_out: '2026-09-14', adults: 2, children: 0, nightly_rate: 37.5 },
+        { room_type: 'Double Room', check_in: '2026-09-99', check_out: '2026-09-14', adults: 1, children: 0, nightly_rate: 37.5 },
+      ],
+    }));
+    const r = await ingestEvent({ store: c.store, adapter: c.adapter, event: ev() });
+    assert.strictEqual(r.result, 'conflict'); // conflicts.length > 0 forces overall result to 'conflict'
+    assert.deepStrictEqual(r.docs, ['OTA-mock-B1']); // the valid unit was still created
+    assert.strictEqual(await c.store.get('reservations', 'OTA-mock-B1-2'), null); // the malformed unit was never written
+    const conflicts = await c.store.list('ota_conflicts');
+    assert.strictEqual(conflicts.length, 1); assert.strictEqual(conflicts[0].reason, 'malformed_dates'); assert.strictEqual(conflicts[0].unit_index, 1);
+    await assertNoOversell(c.store);
+  });
+
   console.log('\n' + passed + '/' + (passed + failed) + ' ota-core assertions passed');
   process.exit(failed ? 1 : 0);
 })();

@@ -52,6 +52,13 @@ function normalizeBeds24Booking(raw) {
 
   return {
     external_id: String(raw.id),
+    // Beds24's own account could in principle hold more than one property,
+    // and GET /bookings?id=... is never itself scoped to a property -- this
+    // is the only signal available to catch a booking that doesn't actually
+    // belong to Vilu before it's ever treated as one of Vilu's own
+    // reservations (see functions-ota/index.js's processQueued(), which
+    // checks this against BEDS24_PROPERTY_ID before calling ingestEvent()).
+    property_id: raw.propertyId != null ? Number(raw.propertyId) : null,
     revision: raw.modifiedTime || raw.bookingTime || null,
     status: raw.status || 'confirmed',
     channel: canonicalChannel || raw.channel || 'unknown',

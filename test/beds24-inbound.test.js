@@ -168,6 +168,20 @@ function rawBooking(overrides) {
     assert.strictEqual(normalizeBeds24Booking(undefined), null);
   });
 
+  await test('normalizeBeds24Booking: property_id is captured (numeric) from raw.propertyId, so processQueued() can reject a booking from an unexpected property', () => {
+    const n = normalizeBeds24Booking(rawBooking());
+    assert.strictEqual(n.property_id, 352964);
+    assert.strictEqual(typeof n.property_id, 'number');
+  });
+  await test('normalizeBeds24Booking: a booking from a DIFFERENT property is passed through as-is (never coerced to Vilu\'s own id) -- the caller, not this pure function, decides what to do with a mismatch', () => {
+    const n = normalizeBeds24Booking(rawBooking({ propertyId: 999999 }));
+    assert.strictEqual(n.property_id, 999999);
+  });
+  await test('normalizeBeds24Booking: property_id is null (never 0/undefined-coerced) when Beds24 omits propertyId entirely', () => {
+    const n = normalizeBeds24Booking(rawBooking({ propertyId: undefined }));
+    assert.strictEqual(n.property_id, null);
+  });
+
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
   if (failed) process.exit(1);
 })();
