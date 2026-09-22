@@ -13,6 +13,7 @@
 const { buildRoomTypes, freeRoomsForStay, isActiveStatus } = require('./inventory');
 const { writeReservationTx, RoomConflictError } = require('./booking-core');
 const { normalizeOtaPayment } = require('./ota-payment');
+const { resolveBookingIdentity } = require('./ota-booking-identity');
 
 const OTA_EVENT_TYPES = ['new', 'modify', 'cancel', 'unknown'];
 
@@ -97,7 +98,7 @@ function describeOtaPayment(cm, payment) {
 // normalizeOtaPayment() for how they resolve into the canonical channel-
 // aware payment structure below. Omitting them is always safe: it simply
 // yields payment_model:'unknown', never a guessed amount.
-function buildFields(booking, unit, unitIndex, cm, roomId, nowIso, ex) {
+function buildFields(booking, unit, unitIndex, cm, roomId, nowIso, ex, docId) {
   const g = booking.guest || {};
   const c = booking.commercial || {};
   const payment = normalizeOtaPayment({ commercial: c });
@@ -112,7 +113,13 @@ function buildFields(booking, unit, unitIndex, cm, roomId, nowIso, ex) {
   const staffNote = extractStaffNote(ex && ex.notes, cm);
   if (staffNote) noteParts.push('[' + STAFF_NOTE_LABEL + '] ' + staffNote);
   return {
-    id: docIdFor(cm, booking.external_id, unitIndex),
+    // docId is passed explicitly rather than recomputed via docIdFor() here
+    // -- when the OTA identity layer (ota-booking-identity.js) has linked
+    // this booking to a PRE-EXISTING PMS reservation (a different id space
+    // entirely, e.g. a Cloudbeds-migrated doc id), the `id` field written
+    // into the document must match the doc it is actually being merged
+    // into, never the freshly-computed OTA-<cm>-<external_id> id.
+    id: docId,
     room_id: roomId,
     room_type_requested: unit.room_type,
     guest_name: ((g.first || '') + ' ' + (g.last || '')).trim(),
@@ -192,9 +199,36 @@ async function ingestEvent({ store, adapter, roomsDocs, event, now }) {
 
   const roomTypes = buildRoomTypes(roomsDocs);
   const units = booking.units || [];
-  const docIds = units.map((_, i) => docIdFor(cm, externalId, i));
+  let docIds = units.map((_, i) => docIdFor(cm, externalId, i));
   const status = mapStatus(booking.status);
   const conflicts = [];
+
+  // 1b. OTA cross-provider identity resolution (D1 -- see
+  // ota-booking-identity.js's header for the full audit/design). Only
+  // meaningful for a single-unit booking: every real Beds24 booking is
+  // exactly one unit (Beds24 never supplies a multi-room payload -- a
+  // multi-room stay is several independent Beds24 booking ids, each its
+  // own ingestEvent() call), so this is the ONLY shape a doc id computed
+  // above could ever need to be redirected to a pre-existing PMS
+  // reservation this same real-world stay already has under a different
+  // identity (e.g. a Cloudbeds-migrated doc). Resolved BEFORE the
+  // revision-compare transaction below -- once redirected, every existing
+  // mechanism (revision compare, room-reassignment, note preservation,
+  // cancellation) applies completely unchanged, reading/writing through
+  // the real pre-existing doc id instead of a freshly-computed one.
+  // Alias lookup (Tier 2) always runs first inside resolveBookingIdentity,
+  // so an already-linked booking's every later event -- including a
+  // cancellation -- goes straight to its canonical reservation without
+  // ever re-running candidate matching.
+  if (units.length === 1) {
+    const identity = await resolveBookingIdentity({ store, provider: cm, channel: booking.channel, externalId, reference: booking.channel_reservation_id, unit: units[0], now: nowIso });
+    if (identity.method === 'ambiguous') {
+      const cid = await raiseConflict(store, Object.assign({}, base, { unit_index: 0, reason: identity.reason, detail: identity.detail, at: nowIso, vilu_reservation_id: null }));
+      const eventId = await logEvent(store, Object.assign(base, { result: 'conflict', conflict_ids: [cid] }));
+      return { result: 'conflict', event_id: eventId, docs: [], conflicts: [cid] };
+    }
+    if (identity.pmsReservationId) docIds = [identity.pmsReservationId];
+  }
 
   // 2. everything else inside ONE transaction per unit family: read existing docs, compare revision
   const outcome = await store.runTransaction(async (tx) => {
@@ -249,7 +283,7 @@ async function ingestEvent({ store, adapter, roomsDocs, event, now }) {
     const candidates = unchanged ? [ex.room_id] : freeRoomsForStay({ roomTypes, type: unit.room_type, checkIn: unit.check_in, checkOut: unit.check_out, reservations, blocks, excludeReservationIds: [docIds[i]], preferred: ex && ex.room_id });
     let done = false, lastErr = null;
     for (const room of candidates) {
-      const fields = buildFields(booking, unit, i, cm, room, nowIso, ex);
+      const fields = buildFields(booking, unit, i, cm, room, nowIso, ex, docIds[i]);
       if (ex && ex.created_at) fields.created_at = ex.created_at;
       try {
         await writeReservationTx(store, docIds[i], fields, { oldRoomId: ex && ex.room_id });
