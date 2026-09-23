@@ -1485,18 +1485,28 @@ body.pms-mode { overflow:hidden; }
 </div>
 
 <div class="sec" id="s-seasons">
-  <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-lg);flex-shrink:0"></i><div>Seasonal rates override base rates and push to all OTAs when saved.</div></div>
+  <div class="al am"><i class="ti ti-alert-triangle" style="font-size:var(--font-size-lg);flex-shrink:0"></i><div>Set the seasonal base rate once — <b>Booking.com</b> is calculated from it automatically (currently +10%, live). This is separate from the day-to-day Price Manager, which keeps controlling Direct/Agent pricing; Agoda still uses its own rule inside Beds24 for now.</div></div>
   <div class="g2">
     <div class="card">
-      <h3>Add seasonal rate</h3>
-      <div class="fg"><label>Season name</label><input type="text" id="sn-nm" placeholder="Peak Season, Eid, New Year..."></div>
-      <div class="fg"><label>Method</label><select id="sn-mt"><option value="pu">Increase by %</option><option value="pd">Decrease by %</option><option value="flat">Set flat rate</option></select></div>
-      <div class="fg"><label>Value</label><input type="number" id="sn-vl" value="25" min="1"></div>
-      <div class="fg"><label>From</label><input type="date" id="sn-fr"></div>
-      <div class="fg"><label>To</label><input type="date" id="sn-to"></div>
-      <button class="btn p" style="width:100%" onclick="addSn()"><i class="ti ti-cloud-upload"></i>Save &amp; push to OTAs</button>
+      <h3>Seasonal Base Rate</h3>
+      <div class="fg"><label>Room type</label><select id="sr-room-type" onchange="srSelectRoomType()">
+        <option value="deluxe_family">Deluxe Family</option>
+        <option value="double">Double</option>
+        <option value="open_deck">Deluxe Family Open Deck</option>
+      </select></div>
+      <div id="sr-periods-list"></div>
+      <button class="btn sm" onclick="srAddPeriod()" style="margin-top:8px"><i class="ti ti-plus"></i>Add rate period</button>
+      <div id="sr-validation" style="margin-top:10px;font-size:var(--font-size-xs);color:#dc2626"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+        <button class="btn p" id="sr-save-btn" onclick="srSave()"><i class="ti ti-device-floppy"></i>Save seasonal rates</button>
+        <span id="sr-sync-status" class="pm-sync-status"></span>
+      </div>
     </div>
-    <div class="card"><h3>Saved seasons</h3><div id="sn-lst"><p style="font-size:var(--font-size-sm);color:#9ca3af">No seasonal rates yet.</p></div></div>
+    <div class="card">
+      <h3>Channel Preview</h3>
+      <div style="font-size:var(--font-size-xs);color:#6b7280;margin-bottom:6px">How each rate period translates per channel, right now.</div>
+      <div id="sr-preview"></div>
+    </div>
   </div>
 </div>
 
@@ -4542,7 +4552,7 @@ function syncAvailability(){
   }catch(e){}
 }
 
-let BLK=(function(){try{var s=localStorage.getItem('vilu_blk');return s?JSON.parse(s):[];}catch(e){return [];}})(),INV=[],SNS=[];
+let BLK=(function(){try{var s=localStorage.getItem('vilu_blk');return s?JSON.parse(s):[];}catch(e){return [];}})(),INV=[];
 let SL=[
   {t:'09:42',d:'ok',m:'Rate push: all 6 Vilu rooms → Booking.com, Airbnb, Agoda, Expedia, Google Hotels'},
   {t:'09:40',d:'info',m:'Booking.com → BK001: James Wilson, Room 1'},
@@ -7199,18 +7209,218 @@ function bpPrev(){}
 function applyBP(){}
 
 
-// SEASONS
-function addSn(){
-  const nm=document.getElementById('sn-nm').value.trim(),from=document.getElementById('sn-fr').value,to=document.getElementById('sn-to').value,v=Number(document.getElementById('sn-vl').value);
-  if(!nm||!from||!to||!v){toast('Fill all fields');return;}if(to<=from){toast('End must be after start');return;}
-  SNS.push({id:'SN'+Date.now(),nm,mt:document.getElementById('sn-mt').value,v,from,to});
-  aLog('ok','Season "'+nm+'" saved → pushed to all OTAs');drawSn();toast('Season saved & pushed');
+// ── Seasonal Rates (PMS-driven multi-slot OTA rates, Phase R6/R11) ─────────
+// Replaces the old fake seasons stub (an addSn()/drawSn() pair backed by a
+// page-local array), which was never wired to Firestore or Beds24 at all --
+// addSn() only ever pushed into that in-memory array, which reset on every
+// reload, and unconditionally faked both the
+// activity-log line ("pushed to all OTAs") and the "✓ Synced" badge
+// regardless of whether anything real happened. Confirmed dead by
+// inspection before writing this replacement, not assumed.
+//
+// This is the real thing: canonical_room_rates/{roomTypeId} is the single
+// seasonal base-rate calendar functions-core/index.js's beds24ChannelRateSync
+// trigger watches. Today only Booking.com (price3, +10%) is PMS-managed --
+// Agoda and Direct/Agent are shown for transparency (Gate 2/3 of the final
+// review pass) but are NOT editable here and are NOT affected by saving
+// here; the preview below says so explicitly rather than implying a
+// control this rollout doesn't have yet.
+const SR_ROOM_TYPES = [
+  { id: 'deluxe_family', label: 'Deluxe Family' },
+  { id: 'double', label: 'Double' },
+  { id: 'open_deck', label: 'Deluxe Family Open Deck' },
+];
+const SR_ID_TO_CODE = { deluxe_family: 'DELUXE_FAMILY', double: 'DOUBLE', open_deck: 'DELUXE_FAMILY_OPEN_DECK' };
+// Client-side mirror of functions/lib/channel-pricing.js's
+// INITIAL_CANONICAL_RATES (Cloudbeds-verified 2026-09-22, identical across
+// all 3 room types) -- shown when canonical_room_rates/{roomTypeId} does
+// not exist in Firestore yet, so the panel displays the SAME schedule the
+// server would fall back to (roomTypeConfig()'s established convention),
+// never a misleading blank screen. Saving simply persists this same
+// schedule as the real doc -- no separate "initialize" action needed.
+function srBundledFallbackIntervals(){
+  return [
+    { from: '2026-09-23', to: '2026-12-01', rate: 60 },
+    { from: '2026-12-02', to: '2026-12-20', rate: 130 },
+    { from: '2026-12-21', to: '2026-12-31', rate: 75 },
+    { from: '2027-01-01', to: '2027-04-30', rate: 130 },
+    { from: '2027-05-01', to: '2028-08-31', rate: 120 },
+  ];
 }
+// Client-side mirror of functions/lib/channel-pricing.js's
+// CHANNEL_PRICING_RULES -- PREVIEW TEXT ONLY. The actual push always
+// happens server-side (beds24OutboundWorker), recomputed fresh from live
+// Firestore at execution time; this constant never drives a write.
+const SR_CHANNEL_PREVIEW = {
+  booking: { label: 'Booking.com', pct: 10 },
+  agoda: { label: 'Agoda', note: 'Not PMS-managed yet — set directly in Beds24' },
+  direct: { label: 'Direct / Agent', note: 'Not PMS-managed yet — set via Price Manager' },
+};
+let srAllRates = {}; // {[roomTypeId]: [{from,to,rate}, ...]}
+let srCurrentRoomType = 'deluxe_family';
+let srLoaded = false;
+let srWatchStops = [];
+
+async function srLoadFromFirestore(){
+  await Promise.all(SR_ROOM_TYPES.map(async (rt) => {
+    try {
+      const doc = await fsDb.collection('canonical_room_rates').doc(rt.id).get();
+      srAllRates[rt.id] = (doc.exists && Array.isArray(doc.data().intervals) && doc.data().intervals.length)
+        ? doc.data().intervals.map(p=>Object.assign({},p))
+        : srBundledFallbackIntervals().map(p=>Object.assign({},p));
+    } catch(e) { console.error('srLoadFromFirestore failed for', rt.id, e); srAllRates[rt.id] = srAllRates[rt.id] || srBundledFallbackIntervals().map(p=>Object.assign({},p)); }
+  }));
+  srLoaded = true;
+}
+
+// FMAP('seasons') entry point -- kept as drawSn so go('seasons',...) needs
+// no change elsewhere.
 function drawSn(){
-  document.getElementById('sn-lst').innerHTML=SNS.length?SNS.map(s=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3f4f6">
-    <div><div style="font-size:var(--font-size-sm);font-weight:600">${s.nm}</div><div style="font-size:var(--font-size-xs);color:#6b7280;margin-top:2px">${fd(s.from)}–${fd(s.to)} · ${s.mt} ${s.v}</div><div style="font-size:var(--font-size-xs);color:#0096c7">✓ Synced</div></div>
-    <button class="ab" onclick="SNS=SNS.filter(x=>x.id!=='${s.id}');drawSn();toast('Season removed')"><i class="ti ti-trash"></i></button>
-  </div>`).join(''):'<p style="font-size:var(--font-size-sm);color:#9ca3af">No seasonal rates yet.</p>';
+  const sel=document.getElementById('sr-room-type'); if(sel) sel.value=srCurrentRoomType;
+  if (!srLoaded) srLoadFromFirestore().then(srDrawPeriods);
+  else srDrawPeriods();
+}
+
+function srSelectRoomType(){
+  srCurrentRoomType = document.getElementById('sr-room-type').value;
+  srDrawPeriods();
+}
+function srAddPeriod(){
+  const list = srAllRates[srCurrentRoomType] = srAllRates[srCurrentRoomType]||[];
+  list.push({from:'',to:'',rate:0});
+  srDrawPeriods();
+}
+function srRemovePeriod(i){
+  srAllRates[srCurrentRoomType].splice(i,1);
+  srDrawPeriods();
+}
+function srUpdatePeriod(i, field, value){
+  const list = srAllRates[srCurrentRoomType];
+  if (!list || !list[i]) return;
+  list[i][field] = field==='rate' ? Number(value) : value;
+  srDrawPeriods();
+}
+
+// Client-side mirror of channel-pricing.js's validateIntervalCoverage() --
+// immediate feedback before Save; the server-side worker independently
+// re-validates (fails closed on any uncovered date) so this is a UX
+// convenience, never the only guard.
+function srValidateIntervals(list){
+  const problems=[];
+  const all = list||[];
+  const complete = all.filter(p=>p.from&&p.to&&Number(p.rate)>0);
+  if (complete.length < all.length) problems.push((all.length-complete.length)+' period(s) missing a start date, end date, or rate above $0.');
+  const sorted = complete.slice().sort((a,b)=>a.from<b.from?-1:a.from>b.from?1:0);
+  for (let i=0;i<sorted.length;i++){
+    if (sorted[i].from > sorted[i].to) problems.push('A period ends before it starts: '+fd(sorted[i].from)+'–'+fd(sorted[i].to)+'.');
+  }
+  for (let i=1;i<sorted.length;i++){
+    const prevTo=new Date(sorted[i-1].to+'T00:00:00'), curFrom=new Date(sorted[i].from+'T00:00:00');
+    const expectedNext=new Date(prevTo.getTime()+86400000);
+    if (curFrom < expectedNext) problems.push('Overlap between '+fd(sorted[i-1].to)+' and '+fd(sorted[i].from)+'.');
+    else if (curFrom > expectedNext) problems.push('Gap between '+fd(sorted[i-1].to)+' and '+fd(sorted[i].from)+'.');
+  }
+  return problems;
+}
+
+function srDrawPeriods(){
+  const list = srAllRates[srCurrentRoomType]||[];
+  const html = list.map((p,i)=>`
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+      <input type="date" value="${p.from||''}" onchange="srUpdatePeriod(${i},'from',this.value)" style="flex:1;min-width:130px">
+      <span style="color:#9ca3af">–</span>
+      <input type="date" value="${p.to||''}" onchange="srUpdatePeriod(${i},'to',this.value)" style="flex:1;min-width:130px">
+      <span>$</span><input type="number" step="0.5" min="0" value="${p.rate||''}" style="width:80px" onchange="srUpdatePeriod(${i},'rate',this.value)">
+      <button class="ab" onclick="srRemovePeriod(${i})" title="Remove period"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+  document.getElementById('sr-periods-list').innerHTML = html || '<p style="font-size:var(--font-size-sm);color:#9ca3af;margin-top:8px">No rate periods yet — add one below.</p>';
+  const problems = srValidateIntervals(list);
+  document.getElementById('sr-validation').innerHTML = problems.length ? problems.map(p=>'⚠ '+p).join('<br>') : '';
+  const saveBtn=document.getElementById('sr-save-btn'); if(saveBtn) saveBtn.disabled = (list.length===0) || (problems.length>0);
+  srDrawPreview(list);
+}
+
+function srDrawPreview(list){
+  const rows = (list||[]).filter(p=>p.from&&p.to&&Number(p.rate)>0).map(p=>{
+    const baseCents=Math.round(Number(p.rate)*100);
+    const bookingPrice = Math.round(baseCents*(100+SR_CHANNEL_PREVIEW.booking.pct)/100)/100;
+    return `<div style="padding:10px 0;border-bottom:1px solid #f3f4f6">
+      <div style="font-size:var(--font-size-xs);color:#6b7280">${fd(p.from)} – ${fd(p.to)}</div>
+      <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap">
+        <div><div style="font-size:var(--font-size-xs);color:#9ca3af">Base Rate</div><div style="font-weight:700">$${p.rate}</div></div>
+        <div><div style="font-size:var(--font-size-xs);color:#9ca3af">${SR_CHANNEL_PREVIEW.booking.label} <span style="color:#00b4d8">+${SR_CHANNEL_PREVIEW.booking.pct}%</span></div><div style="font-weight:700;color:#00b4d8">$${bookingPrice}</div></div>
+        <div><div style="font-size:var(--font-size-xs);color:#9ca3af">${SR_CHANNEL_PREVIEW.agoda.label}</div><div style="font-size:var(--font-size-xs);color:#9ca3af;max-width:170px">${SR_CHANNEL_PREVIEW.agoda.note}</div></div>
+        <div><div style="font-size:var(--font-size-xs);color:#9ca3af">${SR_CHANNEL_PREVIEW.direct.label}</div><div style="font-size:var(--font-size-xs);color:#9ca3af;max-width:170px">${SR_CHANNEL_PREVIEW.direct.note}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('sr-preview').innerHTML = rows || '<p style="font-size:var(--font-size-sm);color:#9ca3af">Add a rate period to see the channel preview.</p>';
+}
+
+function srSetStatus(state){
+  const el=document.getElementById('sr-sync-status');
+  if(!el) return;
+  const map={saving:'Saving…',saved:'✓ Saved',syncing:'Syncing Booking.com…',synced:'✓ Synced',error:'✗ Save failed',issue:'⚠ Sync issue — see Reconciliation log'};
+  el.textContent=map[state]||'';
+  el.className='pm-sync-status pm-sync-'+state;
+}
+
+// Watches THIS save's own ota_pushes channel_rate job(s) so the status
+// line only ever claims "Synced" once Beds24 itself has confirmed --
+// mirrors watchOtaPushStatus()'s exact convention used by the Price
+// Manager save flow above. Filtered on job_intent:'channel_rate' AND this
+// exact trigger string so an unrelated availability/rate job for the same
+// room type is never mistaken for this save's own job.
+function srWatchPushStatus(roomTypeId){
+  srWatchStops.forEach(function(u){ try{u();}catch(e){} });
+  srWatchStops=[];
+  const since=new Date(Date.now()-15000).toISOString();
+  let sawJob=false, allDone=false, anyIssue=false;
+  const unsub = fsDb.collection('ota_pushes').where('room_type_code','==', SR_ID_TO_CODE[roomTypeId]).limit(20)
+    .onSnapshot(function(snap){
+      const jobs=snap.docs.map(function(d){return d.data();})
+        .filter(function(j){return j.job_intent==='channel_rate' && j.trigger==='canonical_room_rates:'+roomTypeId && j.created_at>=since;});
+      if(!jobs.length) return; // job not written yet, or no PMS-managed channel enabled -- keep waiting
+      sawJob=true;
+      anyIssue = jobs.some(function(j){return j.status==='failed'||j.status==='review_required';});
+      allDone = jobs.every(function(j){return j.status==='succeeded';});
+      if (anyIssue) srSetStatus('issue');
+      else if (allDone) srSetStatus('synced');
+    }, function(){ /* listener error -- leave status as-is, never claim synced */ });
+  srWatchStops.push(unsub);
+  setTimeout(function(){
+    srWatchStops.forEach(function(u){ try{u();}catch(e){} });
+    srWatchStops=[];
+    // No job ever appeared: either no PMS-managed channel is enabled right
+    // now (outbound_channel_rates_enabled is still false while this stays
+    // pre-deployment), or the trigger hasn't fired yet -- either way this
+    // is expected pre-deployment, so it stays "Saved", never a false "issue".
+    if (sawJob && !allDone) srSetStatus('issue');
+  }, 25000);
+}
+
+async function srSave(){
+  if(!canEditTaxSettings()){ toast('⛔ Admin/Manager access only'); return; }
+  const roomTypeId = srCurrentRoomType;
+  const rawList = srAllRates[roomTypeId]||[];
+  const problems = srValidateIntervals(rawList);
+  if (problems.length){ toast('Fix the validation errors before saving'); return; }
+  const list = rawList.filter(p=>p.from&&p.to&&Number(p.rate)>0);
+  if (!list.length){ toast('Add at least one rate period'); return; }
+  srSetStatus('saving');
+  try {
+    await fsDb.collection('canonical_room_rates').doc(roomTypeId).set({
+      intervals: list.map(function(p){ return { from: p.from, to: p.to, rate: Number(p.rate) }; }),
+      updated_at: new Date().toISOString(),
+      updated_by: (currentUser && currentUser.email) || null,
+    });
+    toast('✓ Seasonal rates saved');
+    srSetStatus('saved');
+    srWatchPushStatus(roomTypeId);
+  } catch(e) {
+    console.error('srSave failed', e);
+    toast('✗ Save failed'); srSetStatus('error');
+  }
 }
 
 // OTA
