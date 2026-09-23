@@ -22,6 +22,7 @@
 const crypto = require('crypto');
 const { buildRoomTypes, computeSellable, addDays, dateRange } = require('./inventory');
 const { INITIAL_OTA_ROOM_TYPES, CODE_TO_ROOM_TYPE_ID, computeOtaTypePayload } = require('./ota-room-types');
+const { computeChannelRateForDate } = require('./channel-pricing');
 
 // ---------------------------------------------------------------------------
 // Canonical Vilu room-type <-> Beds24 identity map (Step 2). One immutable
@@ -138,18 +139,94 @@ function computeOverride({ stopSell, cta, ctd }) {
 // real cross-field side effect ("If you change override from blackout to
 // none without setting numAvail, numAvail will change to the maximum
 // possible") that a rate-only push must never risk triggering.
-function buildBeds24CalendarPayload({ roomTypeCode, from, to, rate, availability, minStay, maxStay, cta, ctd, stopSell, includeOverride }) {
+// `priceSlot` (PMS-driven multi-slot OTA rates pass): defaults to 1, so
+// every EXISTING caller (none of which pass this param) is byte-for-byte
+// unaffected -- `rate` still lands on `price1` exactly as before. A caller
+// that DOES pass e.g. `priceSlot: 3` gets `price3` instead. Never accepts a
+// slot outside Beds24's documented 1..16 range.
+function buildBeds24CalendarPayload({ roomTypeCode, from, to, rate, priceSlot, availability, minStay, maxStay, cta, ctd, stopSell, includeOverride }) {
   const identity = beds24RoomIdentity(roomTypeCode);
   if (availability != null && (availability < 0 || availability > identity.quantity)) {
     throw new Error('beds24-bridge: availability ' + availability + ' out of range 0..' + identity.quantity + ' for ' + roomTypeCode + ' on ' + from);
   }
   const entry = { from, to };
-  if (rate != null) entry.price1 = rate;
+  const slot = priceSlot == null ? 1 : priceSlot;
+  if (slot < 1 || slot > 16) throw new Error('beds24-bridge: priceSlot must be 1..16, got ' + slot);
+  if (rate != null) entry['price' + slot] = rate;
   if (availability != null) entry.numAvail = availability;
   if (minStay != null) entry.minStay = minStay;
   if (maxStay != null) entry.maxStay = maxStay;
   if (includeOverride !== false) entry.override = computeOverride({ stopSell: !!stopSell, cta: !!cta, ctd: !!ctd });
   return { roomId: identity.beds24_room_id, calendar: [entry] };
+}
+
+// Channel-rate-only payload builder (PMS-driven multi-slot OTA rates pass,
+// Phase R4). Deliberately a SEPARATE, narrower function from
+// buildBeds24CalendarPayload rather than that function called with every
+// other param omitted -- this one is structurally incapable of ever emitting
+// numAvail/minStay/maxStay/override, which is what makes "writing price3
+// leaves price1, availability, minStay untouched" true by construction
+// rather than by every caller remembering to omit the right params. Live-
+// proven against production Beds24 (2026-09-22, authenticated GET
+// /inventory/rooms/calendar read): writing only price3 for room 727992 left
+// price1=80/price2=60 exactly as they were on every date checked.
+function buildChannelRatePayload({ roomTypeCode, from, to, priceSlot, rate }) {
+  const identity = beds24RoomIdentity(roomTypeCode);
+  if (rate == null || !Number.isFinite(rate)) throw new Error('beds24-bridge: buildChannelRatePayload requires a finite rate, got ' + rate);
+  if (!priceSlot || priceSlot < 1 || priceSlot > 16) throw new Error('beds24-bridge: priceSlot must be 1..16, got ' + priceSlot);
+  const entry = { from, to };
+  entry['price' + priceSlot] = rate;
+  return { roomId: identity.beds24_room_id, calendar: [entry] };
+}
+
+// Range-compresses a chronologically-ordered list of {date, rate} entries
+// for ONE room+channel -- same adjacency/merge rule as the availability/
+// rate/restriction calendar compression, but keyed on `rate` alone (a
+// channel-rate entry has exactly one relevant field).
+function compressChannelRateRanges(entries) {
+  if (!entries || !entries.length) return [];
+  const out = [];
+  let cur = null;
+  for (const e of entries) {
+    if (cur && cur.rate === e.rate && e.date === addDays(cur.to, 1)) {
+      cur.to = e.date;
+    } else {
+      if (cur) out.push(cur);
+      cur = { from: e.date, to: e.date, rate: e.rate };
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+// Steps R4-R5: builds the full outbound payload for one channel's price
+// slot across a set of dates, recomputing every date's rate fresh from the
+// canonical interval calendar (never trusting a precomputed/enqueue-time
+// value -- same "absolute state every time" discipline the differential
+// availability/rate payload builder already uses). A date not covered by
+// any canonical interval is collected into `invalid` rather than silently
+// skipped or defaulted. Returns `grouped` in the exact `[{roomId,
+// calendar:[...]}]` shape the adapter/worker already expect, so
+// beds24OutboundWorker needs no new wire-shape handling, only a new call
+// site. Fails closed: ANY invalid date means zero `grouped` output for this
+// whole job, never a partial push.
+function buildChannelRateDifferentialPayload({ roomTypeCode, dates, canonicalIntervals, rule }) {
+  const identity = beds24RoomIdentity(roomTypeCode);
+  const invalid = [];
+  const resolved = [];
+  for (const date of dates || []) {
+    const computed = computeChannelRateForDate({ intervals: canonicalIntervals, date, rule });
+    if (!computed) { invalid.push({ roomTypeCode, date, reason: 'no canonical rate interval covers this date for channel ' + (rule && rule.channel) }); continue; }
+    resolved.push({ date, rate: computed.rate });
+  }
+  if (invalid.length) return { entries: resolved, invalid, grouped: [] };
+  const ranges = compressChannelRateRanges(resolved);
+  const calendar = ranges.map((r) => {
+    const entry = { from: r.from, to: r.to };
+    entry['price' + rule.beds24_price_slot] = r.rate;
+    return entry;
+  });
+  return { entries: resolved, invalid, grouped: calendar.length ? [{ roomId: identity.beds24_room_id, calendar }] : [] };
 }
 
 // ---------------------------------------------------------------------------
@@ -529,7 +606,7 @@ function computeAffectedDates({ roomsDocs, before, after }) {
 // (functions-core). Not defaulted here on purpose -- a missing/unknown
 // job_intent must fail closed downstream in beds24OutboundWorker (skipped,
 // never processed).
-function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, jobIntent, now }) {
+function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, jobIntent, channel, now }) {
   const nowIso = now || new Date().toISOString();
   const operationId = 'beds24_' + nowIso.replace(/[^0-9]/g, '') + '_' + crypto.randomBytes(9).toString('base64url');
   // Audit-safe payload hash (Step 8, continuous-sync pass): lets a caller or
@@ -542,7 +619,8 @@ function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status
     id: operationId,
     record: {
       type: 'beds24_calendar_push',
-      job_intent: jobIntent || null,
+      job_intent: jobIntent || null, // 'availability' | 'rate' | 'restriction' | 'channel_rate' -- null/unknown = fail closed downstream
+      channel: channel || null, // only meaningful for job_intent 'channel_rate' (e.g. 'booking'); null for every other intent, never guessed
       provider: 'beds24',
       operation_id: operationId,
       trigger: trigger || 'manual',
@@ -577,6 +655,9 @@ module.exports = {
   assertKnownPmsRoom,
   computeOverride,
   buildBeds24CalendarPayload,
+  buildChannelRatePayload,
+  compressChannelRateRanges,
+  buildChannelRateDifferentialPayload,
   deriveSellableByRoomTypeCode,
   resolveRate,
   maldivesNow,

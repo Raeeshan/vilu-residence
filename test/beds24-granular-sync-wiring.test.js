@@ -39,10 +39,10 @@ const BEDS24_BRIDGE = read('functions-beds24/lib/beds24-bridge.js');
 
 section('Case A — every enqueueBeds24Sync call site stamps the correct job_intent');
 
-test('enqueueBeds24Sync itself accepts and forwards a jobIntent third argument into buildBeds24PushRecord', () => {
-  const m = CORE.match(/async function enqueueBeds24Sync\(trigger, affectedDates, jobIntent\)[\s\S]*?\n\}/);
-  assert.ok(m, 'enqueueBeds24Sync must declare a jobIntent parameter');
-  assert.ok(m[0].includes('jobIntent }'), 'jobIntent must be forwarded into buildBeds24PushRecord');
+test('enqueueBeds24Sync itself accepts and forwards a jobIntent third argument into buildBeds24PushRecord (Phase R6: a 4th, optional channel argument was added after this test was first written -- for the 3 pre-existing intents it is simply omitted/undefined, so this assertion still holds unchanged for those)', () => {
+  const m = CORE.match(/async function enqueueBeds24Sync\(trigger, affectedDates, jobIntent, channel\)[\s\S]*?\n\}/);
+  assert.ok(m, 'enqueueBeds24Sync must declare a jobIntent parameter (plus the newer optional channel parameter)');
+  assert.ok(m[0].includes('jobIntent, channel }'), 'jobIntent and channel must both be forwarded into buildBeds24PushRecord');
 });
 test("availabilityOnReservation enqueues with job intent 'availability'", () => {
   const m = CORE.match(/exports\.availabilityOnReservation[\s\S]*?\n\}\);/)[0];

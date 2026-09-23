@@ -536,7 +536,7 @@ function computeAffectedDates({ roomsDocs, before, after }) {
 // purpose -- a caller that forgets produces a record with
 // `job_intent` simply absent, and beds24OutboundWorker treats a missing/
 // unrecognized job_intent as FAIL CLOSED (skipped, never processed).
-function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, jobIntent, now }) {
+function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status, attemptCount, lastError, trigger, jobIntent, channel, now }) {
   const nowIso = now || new Date().toISOString();
   const operationId = 'beds24_' + nowIso.replace(/[^0-9]/g, '') + '_' + crypto.randomBytes(9).toString('base64url');
   // Audit-safe payload hash (Step 8, continuous-sync pass): lets a caller or
@@ -549,7 +549,8 @@ function buildBeds24PushRecord({ roomTypeCode, dateRange: range, payload, status
     id: operationId,
     record: {
       type: 'beds24_calendar_push',
-      job_intent: jobIntent || null,
+      job_intent: jobIntent || null, // 'availability' | 'rate' | 'restriction' | 'channel_rate' -- null/unknown = fail closed downstream
+      channel: channel || null, // only meaningful for job_intent 'channel_rate' (e.g. 'booking'); null for every other intent, never guessed
       provider: 'beds24',
       operation_id: operationId,
       trigger: trigger || 'manual',

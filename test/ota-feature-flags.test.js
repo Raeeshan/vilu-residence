@@ -89,7 +89,7 @@ test('the correct positive case: enabled:true AND the specific flag:true authori
   assert.equal(otaFeatureEnabled(cfg, 'inbound_webhook_enabled'), false);
 });
 
-section('OUTBOUND JOB INTENT MAPPING (Phase B24-2A.1: corrected 3-intent model)');
+section('OUTBOUND JOB INTENT MAPPING (Phase B24-2A.1\'s 3-intent model, extended by the PMS-driven multi-slot OTA rates pass to a 4th: channel_rate)');
 
 test('availability intent maps to outbound_availability_enabled', () => {
   assert.equal(OUTBOUND_JOB_INTENT_FLAG.availability, 'outbound_availability_enabled');
@@ -108,8 +108,19 @@ test('an unrecognized intent has no entry in the map (undefined, not a fallback)
   assert.equal(OUTBOUND_JOB_INTENT_FLAG[undefined], undefined);
   assert.equal(OUTBOUND_JOB_INTENT_FLAG[''], undefined);
 });
-test('the map has exactly 3 keys -- availability/rate/restriction, no silent catch-all/default entry, no leftover override key', () => {
-  assert.deepEqual(Object.keys(OUTBOUND_JOB_INTENT_FLAG).sort(), ['availability', 'rate', 'restriction']);
+test('the map has exactly 4 keys -- availability/rate/restriction/channel_rate, no silent catch-all/default entry, no leftover override key', () => {
+  assert.deepEqual(Object.keys(OUTBOUND_JOB_INTENT_FLAG).sort(), ['availability', 'channel_rate', 'rate', 'restriction']);
+});
+test('channel_rate intent maps to its OWN flag (outbound_channel_rates_enabled), never shared with rate\'s outbound_rates_enabled -- Booking.com price3 must never be authorized by the Direct/Agent price1 flag or vice versa', () => {
+  assert.equal(OUTBOUND_JOB_INTENT_FLAG.channel_rate, 'outbound_channel_rates_enabled');
+  assert.notEqual(OUTBOUND_JOB_INTENT_FLAG.channel_rate, OUTBOUND_JOB_INTENT_FLAG.rate);
+});
+test('outbound_channel_rates_enabled defaults to false in OTA_CONFIG_DEFAULTS (fail closed, same as every other granular flag)', () => {
+  assert.equal(OTA_CONFIG_DEFAULTS.outbound_channel_rates_enabled, false);
+});
+test('the exact current production doc still leaves outbound_channel_rates_enabled disabled (re-run of the production-doc test above, now covering the new flag)', () => {
+  assert.equal(otaFeatureEnabled({ enabled: false, provider: 'beds24' }, 'outbound_channel_rates_enabled'), false);
+  assert.equal(otaFeatureEnabled({ enabled: true, provider: 'beds24' }, 'outbound_channel_rates_enabled'), false);
 });
 
 console.log(`\n${passed}/${passed + failed} ota-feature-flags assertions passed`);

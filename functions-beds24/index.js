@@ -27,9 +27,10 @@ const crypto = require('crypto');
 const { FirestoreStore } = require('./lib/store-firestore');
 const { Beds24Adapter } = require('./lib/adapters');
 const { PHYSICAL_ROOMS } = require('./lib/inventory');
-const { BEDS24_ROOM_MAP, buildDifferentialPayload } = require('./lib/beds24-bridge');
+const { BEDS24_ROOM_MAP, buildDifferentialPayload, buildChannelRateDifferentialPayload } = require('./lib/beds24-bridge');
 const { CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES } = require('./lib/ota-room-types');
 const { otaFeatureEnabled, OUTBOUND_JOB_INTENT_FLAG } = require('./lib/ota-feature-flags');
+const { CHANNEL_PRICING_RULES, INITIAL_CANONICAL_RATES } = require('./lib/channel-pricing');
 
 // job_intent -> buildDifferentialPayload's `mode` (Phase B24-2A.1, Section
 // D/E): now a strict 1:1 identity mapping across the 3 final intents
@@ -74,6 +75,24 @@ async function roomTypeConfig(roomTypeCode) {
     if (doc) return doc;
   } catch (e) { /* fall through to bundled default */ }
   return INITIAL_OTA_ROOM_TYPES[roomTypeId] || null;
+}
+
+// Canonical seasonal base-rate calendar for one room type (PMS-driven
+// multi-slot OTA rates pass) -- canonical_room_rates/{roomTypeId} = {
+// intervals: [{from,to,rate}, ...] }. Same "Firestore-live overrides the
+// bundled default" fallback pattern as roomTypeConfig() above: an admin's
+// edit through the future PMS UI (Phase R11) is the live source once it
+// exists; INITIAL_CANONICAL_RATES is the safety net so a first deploy,
+// before any doc is ever written, still resolves the Cloudbeds-verified
+// schedule instead of failing every channel-rate push.
+async function canonicalRates(roomTypeCode) {
+  const roomTypeId = CODE_TO_ROOM_TYPE_ID[roomTypeCode];
+  if (!roomTypeId) return null;
+  try {
+    const doc = await store.get('canonical_room_rates', roomTypeId);
+    if (doc && doc.intervals) return doc;
+  } catch (e) { /* fall through to bundled default */ }
+  return INITIAL_CANONICAL_RATES[roomTypeId] || null;
 }
 
 // Per-date rate overrides for one OTA room type (Bulk Price Manager's
@@ -135,7 +154,6 @@ exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', 
     return;
   }
 
-  const payloadMode = JOB_INTENT_TO_PAYLOAD_MODE[job.job_intent];
   const roomTypeCode = job.room_type_code;
   const affectedDates = (job.window && job.window.affected_dates) || [];
   if (!roomTypeCode || !BEDS24_ROOM_MAP[roomTypeCode] || !affectedDates.length) {
@@ -143,31 +161,62 @@ exports.beds24OutboundWorker = onDocumentCreated({ document: 'ota_pushes/{id}', 
     return;
   }
 
-  const config = await roomTypeConfig(roomTypeCode);
-  if (!config) {
-    await jobRef.set({ status: 'failed', last_error: { message: 'no ota_room_types config found for ' + roomTypeCode, http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
-    return;
-  }
+  let payload; // [{roomId, calendar:[...]}] -- exactly one room here, either branch below
+  if (job.job_intent === 'channel_rate') {
+    // Phase R6: a SEPARATE payload path from the 3 pre-existing intents --
+    // never routed through buildDifferentialPayload/JOB_INTENT_TO_PAYLOAD_MODE,
+    // since a channel-rate job's rate comes from the NEW canonical seasonal
+    // calendar + a per-channel rule, not from ota_room_types.base_rate. Fails
+    // closed on an unknown/disabled/not-PMS-managed channel even though
+    // job_intent itself already passed the OUTBOUND_JOB_INTENT_FLAG check
+    // above -- that check only proves the INTENT is known, never that this
+    // job's specific `channel` value is currently authorized (e.g. a stale
+    // 'agoda' channel_rate job enqueued before Agoda's migration was reverted
+    // must still be refused here, not just at enqueue time).
+    const rule = CHANNEL_PRICING_RULES[job.channel];
+    if (!rule || !rule.enabled || !rule.managed_by_pms) {
+      await jobRef.set({ status: 'failed', last_error: { message: 'channel "' + job.channel + '" is not a currently enabled, PMS-managed channel -- fail closed', http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+      return;
+    }
+    const canonical = await canonicalRates(roomTypeCode);
+    if (!canonical) {
+      await jobRef.set({ status: 'failed', last_error: { message: 'no canonical_room_rates config found for ' + roomTypeCode, http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+      return;
+    }
+    const built = buildChannelRateDifferentialPayload({ roomTypeCode, dates: affectedDates, canonicalIntervals: canonical.intervals, rule });
+    if (built.invalid.length) {
+      await jobRef.set({ status: 'failed', last_error: { message: 'channel-rate differential payload invalid: ' + JSON.stringify(built.invalid.slice(0, 5)), http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+      return;
+    }
+    payload = built.grouped;
+  } else {
+    const payloadMode = JOB_INTENT_TO_PAYLOAD_MODE[job.job_intent];
+    const config = await roomTypeConfig(roomTypeCode);
+    if (!config) {
+      await jobRef.set({ status: 'failed', last_error: { message: 'no ota_room_types config found for ' + roomTypeCode, http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+      return;
+    }
 
-  const rooms = await roomsDocs();
-  const reservations = (await store.list('reservations')).map((d) => Object.assign({ id: d._id || d.id }, d));
-  const blocks = (await store.list('blocks')).map((d) => Object.assign({ id: d._id || d.id }, d));
-  const overridesForCode = await roomTypeOverrides(roomTypeCode);
+    const rooms = await roomsDocs();
+    const reservations = (await store.list('reservations')).map((d) => Object.assign({ id: d._id || d.id }, d));
+    const blocks = (await store.list('blocks')).map((d) => Object.assign({ id: d._id || d.id }, d));
+    const overridesForCode = await roomTypeOverrides(roomTypeCode);
 
-  const built = buildDifferentialPayload({
-    roomsDocs: rooms,
-    reservations,
-    blocks,
-    affectedDates: { [roomTypeCode]: affectedDates },
-    configs: { [roomTypeCode]: config },
-    dateOverrides: { [roomTypeCode]: overridesForCode },
-    mode: payloadMode,
-  });
-  if (built.invalid.length) {
-    await jobRef.set({ status: 'failed', last_error: { message: 'differential payload invalid: ' + JSON.stringify(built.invalid.slice(0, 5)), http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
-    return;
+    const built = buildDifferentialPayload({
+      roomsDocs: rooms,
+      reservations,
+      blocks,
+      affectedDates: { [roomTypeCode]: affectedDates },
+      configs: { [roomTypeCode]: config },
+      dateOverrides: { [roomTypeCode]: overridesForCode },
+      mode: payloadMode,
+    });
+    if (built.invalid.length) {
+      await jobRef.set({ status: 'failed', last_error: { message: 'differential payload invalid: ' + JSON.stringify(built.invalid.slice(0, 5)), http_status: null }, updated_at: new Date().toISOString() }, { merge: true });
+      return;
+    }
+    payload = built.grouped;
   }
-  const payload = built.grouped; // [{roomId, calendar:[...]}] -- exactly one room here
   const payloadHash = crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
   await jobRef.set({ status: 'in_flight', payload, payload_hash: payloadHash, updated_at: new Date().toISOString() }, { merge: true });
 

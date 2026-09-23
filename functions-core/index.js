@@ -111,6 +111,13 @@ const { PHYSICAL_ROOMS, addDays, dateRange, isActiveStatus, overlaps } = require
 // codebase's beds24OutboundWorker, triggered by the ota_pushes doc creation.
 const { computeAffectedDates, buildBeds24PushRecord, BEDS24_ROOM_MAP, maldivesNow } = require('./lib/beds24-bridge');
 const { ROOM_TYPE_ID_TO_CODE, CODE_TO_ROOM_TYPE_ID, INITIAL_OTA_ROOM_TYPES } = require('./lib/ota-room-types');
+// PMS-driven multi-slot OTA rates pass (Phase R6): pmsManagedChannels() is
+// the ONLY thing this codebase needs from channel-pricing.js -- it never
+// computes an actual rate value itself (that happens in functions-beds24's
+// worker, re-reading live canonical-rate state at push time, exactly like
+// every other job intent here); this trigger only needs to know WHICH
+// channels to enqueue a job for.
+const { pmsManagedChannels } = require('./lib/channel-pricing');
 
 initializeApp();
 const db = getFirestore();
@@ -274,13 +281,17 @@ async function runAvailability(trigger, roomsDocsList) {
 // itself, not here. This is deliberate: it avoids a job ever being queued
 // under one feature and executed under another, since intent is stamped
 // once at creation and never reinterpreted later.
-async function enqueueBeds24Sync(trigger, affectedDates, jobIntent) {
+// `channel` (Phase R6, PMS-driven multi-slot OTA rates): only ever passed
+// for jobIntent 'channel_rate' -- undefined/omitted for every other intent,
+// so buildBeds24PushRecord stamps `channel: null` on those exactly as before
+// this parameter existed.
+async function enqueueBeds24Sync(trigger, affectedDates, jobIntent, channel) {
   const codes = Object.keys(affectedDates || {});
   for (const code of codes) {
     if (!BEDS24_ROOM_MAP[code]) continue;
     const dates = affectedDates[code];
     if (!dates || !dates.length) continue;
-    const { id, record } = buildBeds24PushRecord({ roomTypeCode: code, dateRange: { affected_dates: dates }, payload: null, status: 'pending', trigger, jobIntent });
+    const { id, record } = buildBeds24PushRecord({ roomTypeCode: code, dateRange: { affected_dates: dates }, payload: null, status: 'pending', trigger, jobIntent, channel });
     await db.collection('ota_pushes').doc(id).set(record);
   }
 }
@@ -518,6 +529,50 @@ exports.beds24OverrideChangeSync = onDocumentWritten('ota_room_type_overrides/{r
   }
   if (!changedDates.size) return; // e.g. a metadata-only write, or before===after
   await enqueueBeds24Sync('ota_room_type_overrides:' + event.params.roomTypeId, { [code]: Array.from(changedDates).sort() }, 'rate');
+});
+
+// ── Beds24 per-channel rate sync (Phase R6, PMS-driven multi-slot OTA
+// rates) ─────────────────────────────────────────────────────────────────
+// Reacts to canonical_room_rates/{roomTypeId} writes -- the NEW seasonal
+// base-rate calendar this pass introduces (see channel-pricing.js's header
+// for why this is a genuinely different rate concept from
+// ota_room_types.base_rate, which beds24RateChangeSync above already owns
+// and this trigger never touches). Like beds24RateChangeSync, a canonical-
+// rate change has no natural "affected dates" of its own (an interval
+// change can move a boundary anywhere in the schedule), so this enqueues a
+// full booking-window resync -- never a full-calendar push without a
+// triggering write, matching the existing rate-sync convention exactly.
+//
+// One job is enqueued PER PMS-MANAGED CHANNEL (currently just 'booking'),
+// never one shared job for all channels -- each carries its own `channel`
+// field so beds24OutboundWorker can look up that channel's own
+// CHANNEL_PRICING_RULES entry and price slot independently. Agoda/Direct
+// are NOT enqueued here at all (pmsManagedChannels() excludes them by
+// construction -- see channel-pricing.js) -- this is the enforcement point
+// for Phase R8's "Agoda/Direct stay completely untouched" requirement, not
+// just a worker-side check.
+exports.beds24ChannelRateSync = onDocumentWritten('canonical_room_rates/{roomTypeId}', async (event) => {
+  const a = event.data.after.exists ? event.data.after.data() : null;
+  if (!a) return; // deletion: not this pass's concern, same as beds24RateChangeSync
+  const b = event.data.before.exists ? event.data.before.data() : null;
+  if (b && JSON.stringify(b.intervals) === JSON.stringify(a.intervals)) return; // metadata-only write
+  const code = ROOM_TYPE_ID_TO_CODE[event.params.roomTypeId];
+  if (!code || !BEDS24_ROOM_MAP[code]) return;
+  const channels = pmsManagedChannels();
+  // Minimal observability (Phase R12): one structured log line per trigger
+  // firing, mirroring nightlyReconcile's own logger.info convention --
+  // enough to confirm in Cloud Logging that an interval edit was actually
+  // observed and how many channel jobs it produced, without logging any
+  // rate value itself (never PII/pricing-sensitive data in logs beyond
+  // what's already public on Beds24's own calendar).
+  logger.info('beds24ChannelRateSync.triggered', { roomTypeId: event.params.roomTypeId, code, channelsEnqueued: channels });
+  if (!channels.length) return; // no channel currently enabled+managed_by_pms -- nothing to enqueue
+  const today = maldivesNow().date;
+  const windowDays = a.booking_window_days || 365;
+  const dates = dateRange(today, addDays(today, windowDays));
+  for (const channel of channels) {
+    await enqueueBeds24Sync('canonical_room_rates:' + event.params.roomTypeId, { [code]: dates }, 'channel_rate', channel);
+  }
 });
 
 // ── nightly reconciliation (Stage 10) ───────────────────────────────────────

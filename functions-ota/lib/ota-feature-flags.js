@@ -20,6 +20,22 @@
 //                                               feature's own value
 //   outbound_availability_enabled: boolean  -- may push numAvail ONLY
 //   outbound_rates_enabled: boolean         -- may push price1 ONLY
+//   outbound_channel_rates_enabled: boolean -- may push a per-channel price
+//                                               slot (price2/price3/...)
+//                                               ONLY, via job_intent
+//                                               'channel_rate' (PMS-driven
+//                                               multi-slot OTA rates pass).
+//                                               Deliberately SEPARATE from
+//                                               outbound_rates_enabled
+//                                               (which governs price1 only)
+//                                               so Booking.com's price3 push
+//                                               can never be silently
+//                                               authorized by the existing
+//                                               Direct/Agent rate flag, or
+//                                               vice versa -- true channel
+//                                               isolation at the flag level,
+//                                               not just at the payload
+//                                               level.
 //   outbound_restrictions_enabled: boolean  -- may push override/minStay/
 //                                               maxStay ONLY (Phase B24-2A.1:
 //                                               split out of outbound_rates_
@@ -71,10 +87,18 @@ function otaFeatureEnabled(cfg, feature) {
 // for the genuinely restriction-shaped fields (min_stay/max_stay/
 // closed_to_arrival/closed_to_departure/manual_stop_sell), which
 // beds24RateChangeSync now enqueues separately from its own 'rate' jobs.
+// Phase R6 (PMS-driven multi-slot OTA rates): 'channel_rate' added as a
+// FOURTH, independent intent -- never folded into 'rate' (which stays
+// exactly what it always was: price1 only, driven by
+// ota_room_types.base_rate). A job with job_intent 'channel_rate' also
+// always carries a `channel` field (see buildBeds24PushRecord); which price
+// slot that channel targets is CHANNEL_PRICING_RULES' concern
+// (channel-pricing.js), never this map's.
 const OUTBOUND_JOB_INTENT_FLAG = Object.freeze({
   availability: 'outbound_availability_enabled',
   rate: 'outbound_rates_enabled',
   restriction: 'outbound_restrictions_enabled',
+  channel_rate: 'outbound_channel_rates_enabled',
 });
 
 const OTA_CONFIG_DEFAULTS = Object.freeze({
@@ -82,6 +106,7 @@ const OTA_CONFIG_DEFAULTS = Object.freeze({
   outbound_availability_enabled: false,
   outbound_rates_enabled: false,
   outbound_restrictions_enabled: false,
+  outbound_channel_rates_enabled: false,
   inbound_webhook_enabled: false,
   inbound_polling_enabled: false,
   inbound_processing_enabled: false,
